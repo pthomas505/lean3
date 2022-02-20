@@ -127,44 +127,14 @@ theorem thm_2_3
   eval (sub (function.update atom_id x q) p) v =
     eval p (function.update v x (eval q v)) :=
 begin
-  induction p,
-  case bottom { reflexivity },
-  case top { reflexivity },
-  case atom : y {
-    by_cases y = x,
-    {
-      have s1 : function.update atom_id x q y = q, rewrite h, simp,
-      have s2 : function.update v x (eval q v) y = eval q v, rewrite h, simp,
-      unfold sub, unfold eval, rewrite s1, rewrite s2
-		},
-    {
-      have s1 : function.update atom_id x q y = atom y, finish,
-      have s2 : function.update v x (eval q v) y = eval (atom y) v, finish,
-      unfold sub, unfold eval, rewrite s1, rewrite s2
-		},
-	},
-  case not : p ih_p { unfold sub, unfold eval, exact ih_p },
-  case and : p q ih_p ih_q { unfold sub, unfold eval, rewrite ih_p, rewrite ih_q },
-  case or : p q ih_p ih_q { unfold sub, unfold eval, rewrite ih_p, rewrite ih_q },
-  case imp : p q ih_p ih_q { unfold sub, unfold eval, rewrite ih_p, rewrite ih_q },
-  case iff : p q ih_p ih_q { unfold sub, unfold eval, rewrite ih_p, rewrite ih_q }
-end
-
-theorem thm_2_3'
-  (x : string)
-  (p q : formula)
-  (v : string → bool) :
-  eval (sub (function.update atom_id x q) p) v =
-    eval p (function.update v x (eval q v)) :=
-begin
-have s1 : (fun i, eval (((function.update atom_id x q)) i) v) =
-  (function.update v x (eval q v)),
+  have s1 : (fun i, eval (((function.update atom_id x q)) i) v) =
+    (function.update v x (eval q v)),
     ext, unfold function.update, split_ifs,
     simp, unfold atom_id, unfold eval,
-have s2 : eval (sub (function.update atom_id x q) p) v =
-  eval p (fun i, eval ((function.update atom_id x q) i) v),
+  have s2 : eval (sub (function.update atom_id x q) p) v =
+    eval p (fun i, eval ((function.update atom_id x q) i) v),
     exact thm_2_3_gen p (function.update atom_id x q) v,
-rewrite s2, rewrite s1
+  rewrite s2, rewrite s1
 end
 
 
