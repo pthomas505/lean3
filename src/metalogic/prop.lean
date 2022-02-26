@@ -27,7 +27,7 @@ def eval : formula → (string → bool) → bool
 | bottom _ := ff
 | top _ := tt
 | (atom x) m := m x
-| (not p) m := eval p m
+| (not p) m := !(eval p m)
 | (and p q) m := (eval p m) && (eval q m)
 | (or p q) m := (eval p m) || (eval q m)
 | (imp p q) m := (!(eval p m)) || (eval q m)
@@ -68,7 +68,9 @@ begin
   case bottom : { reflexivity },
   case top : { reflexivity },
   case atom : x {unfold eval, apply h1 x, unfold atoms, simp only [set.mem_singleton]},
-  case not : p ih { unfold eval, exact ih h1 },
+  case not : p ih { unfold eval, unfold atoms at h1,
+    have s1 : eval p v = eval p v', apply ih, exact h1,
+    rewrite s1 },
   case and : p q ih_p ih_q {
     unfold eval, unfold atoms at h1, simp only [set.mem_union_eq] at h1,
     have s1 : eval p v = eval p v', apply ih_p, intros x h2, apply h1, left, exact h2,
