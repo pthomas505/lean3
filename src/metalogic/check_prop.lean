@@ -61,7 +61,7 @@ meta instance : has_repr global_context_t := ⟨global_context_t.repr⟩
 
 /-
 glb_ctx.append_proof p = Appends the proof scheme p to the end of the list of
-proof schemes in the local context glb_ctx.
+proof schemes in the global context glb_ctx.
 -/
 def global_context_t.append_proof :
   global_context_t → proof → global_context_t
