@@ -9,9 +9,13 @@ Cambridge: Cambridge University Press.
 doi:10.1017/CBO9780511576430
 -/
 
-import tactic
+import tactic init.data.list.basic
 
-inductive formula : Type
+/-
+Formula schemes.
+atom "P" : A formula scheme variable named "P".
+-/
+@[derive decidable_eq] inductive formula : Type
 | bottom : formula
 | top : formula
 | atom : string → formula
@@ -20,6 +24,17 @@ inductive formula : Type
 | or : formula → formula → formula
 | imp : formula → formula → formula
 | iff : formula → formula → formula
+
+meta def formula.repr : formula → string
+| formula.bottom := sformat!"F"
+| formula.top := sformat!"T"
+| (formula.atom x) := x.quote
+| (formula.not p) := sformat!"(¬ {p.repr})"
+| (formula.and p q) := sformat!"({p.repr} ∧ {q.repr})"
+| (formula.or p q) := sformat!"({p.repr} ∨ {q.repr})"
+| (formula.imp p q) := sformat!"({p.repr} → {q.repr})"
+| (formula.iff p q) := sformat!"({p.repr} ↔ {q.repr})"
+meta instance : has_repr formula := ⟨formula.repr⟩
 
 open formula
 
@@ -68,7 +83,8 @@ begin
   case bottom : { reflexivity },
   case top : { reflexivity },
   case atom : x {unfold eval, apply h1 x, unfold atoms, simp only [set.mem_singleton]},
-  case not : p ih { unfold eval, unfold atoms at h1,
+  case not : p ih {
+    unfold eval, unfold atoms at h1,
     have s1 : eval p v = eval p v', apply ih, exact h1,
     rewrite s1 },
   case and : p q ih_p ih_q {
@@ -103,8 +119,6 @@ def sub : (string → formula) → formula → formula
 | f (imp p q) := imp (sub f p) (sub f q)
 | f (iff p q) := iff (sub f p) (sub f q)
 
-def atom_id : string -> formula := fun (x : string), atom x
-
 theorem thm_2_3_gen
   (p : formula)
   (f : string → formula)
@@ -126,32 +140,25 @@ theorem thm_2_3
   (x : string)
   (p q : formula)
   (v : string → bool) :
-  eval (sub (function.update atom_id x q) p) v =
+  eval (sub (function.update atom x q) p) v =
     eval p (function.update v x (eval q v)) :=
 begin
-  have s1 : (fun i, eval (((function.update atom_id x q)) i) v) =
-    (function.update v x (eval q v)),
-    ext, unfold function.update, split_ifs,
-    simp, unfold atom_id, unfold eval,
-  have s2 : eval (sub (function.update atom_id x q) p) v =
-    eval p (fun i, eval ((function.update atom_id x q) i) v),
-    exact thm_2_3_gen p (function.update atom_id x q) v,
-  rewrite s2, rewrite s1
+  rewrite thm_2_3_gen,
+  congr, ext p,
+  simp [function.update]; split_ifs; simp [eval]
 end
-
 
 def is_tauto (p : formula) : Prop := ∀ v : string → bool, eval p v = tt
 
 theorem thm_2_4_gen
   (p : formula)
   (h1 : is_tauto p)
-  (f : string -> formula) :
+  (f : string → formula) :
   is_tauto (sub f p) :=
 begin
   unfold is_tauto at *,
   intros v,
-  rewrite thm_2_3_gen p f v,
-  exact h1 (fun (i : string), eval (f i) v)
+  rewrite thm_2_3_gen, apply h1
 end
 
 theorem thm_2_4
@@ -159,12 +166,9 @@ theorem thm_2_4
   (h1 : is_tauto p)
   (x : string)
   (q : formula) :
-  is_tauto (sub (function.update atom_id x q) p) :=
+  is_tauto (sub (function.update atom x q) p) :=
 begin
-  unfold is_tauto at *,
-  intros v,
-  rewrite thm_2_3 x p q v,
-  exact h1 (function.update v x (eval q v))
+  apply thm_2_4_gen _ h1
 end
 
 theorem thm_2_5
@@ -173,12 +177,69 @@ theorem thm_2_5
   (h1 : eval p v = eval q v)
   (x : string)
   (r : formula) :
-  eval (sub (function.update atom_id x p) r) v =
-    eval (sub (function.update atom_id x q) r) v :=
+  eval (sub (function.update atom x p) r) v =
+    eval (sub (function.update atom x q) r) v :=
 begin
-  have s1 : eval (sub (function.update atom_id x p) r) v =
-    eval r (function.update v x (eval p v)), apply thm_2_3,
-  have s2 : eval (sub (function.update atom_id x q) r) v =
-    eval r (function.update v x (eval q v)), apply thm_2_3,
-  rewrite s1, rewrite s2, rewrite h1
+  rewrite [thm_2_3, thm_2_3, h1]
+end
+
+theorem eval_not
+  (p : formula)
+  (v : string → bool) :
+  eval (not p) v = tt ↔ ¬ (eval p v = tt) :=
+begin
+  unfold eval, cases eval p v; exact dec_trivial
+end
+
+theorem eval_imp
+  (p q : formula)
+  (v : string → bool) :
+  eval (imp p q) v = tt ↔ ((eval p v = tt) → (eval q v = tt )) :=
+begin
+  unfold eval, cases eval p v; cases eval q v; exact dec_trivial
+end
+
+theorem is_tauto_mp
+  (p q : formula)
+  (h1 : is_tauto p)
+  (h2 : is_tauto (p.imp q)) :
+  is_tauto q :=
+begin
+  unfold is_tauto at *,
+  intro v,
+  simp only [eval_imp] at h2,
+  apply h2, apply h1
+end
+
+theorem is_tauto_prop_1
+(p q : formula) :
+is_tauto (p.imp (q.imp p)) :=
+begin
+  unfold is_tauto,
+  intro v,
+  simp only [eval_imp],
+  intros h1 h2,
+  exact h1
+end
+
+theorem is_tauto_prop_2
+  (p q r : formula) :
+  is_tauto ((p.imp (q.imp r)).imp ((p.imp q).imp (p.imp r))) :=
+begin
+  unfold is_tauto,
+  intro v,
+  simp only [eval_imp],
+  intros h1 h2 h3,
+  apply h1, exact h3, apply h2, exact h3
+end
+
+theorem is_tauto_prop_3
+(p q : formula) :
+is_tauto (((not p).imp (not q)).imp (q.imp p)) :=
+begin
+  unfold is_tauto,
+  intro v,
+  simp only [eval_not, eval_imp],
+  intros h1 h2,
+  by_contradiction, apply h1, exact h, exact h2
 end
