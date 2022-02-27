@@ -177,8 +177,7 @@ syntactically valid formula scheme.
 -- |- p & |- (p -> q) => |- q
 /-
 If p and q are syntactically valid formula schemes and p and p -> q are
-semantically valid formula schemes then q is a semantically valid formula
-scheme.
+proof schemes then q is a proof scheme.
 -/
 | _ loc_ctx (mp p_idx q_idx h1_idx h2_idx) := do
   p <- loc_ctx.get_formula p_idx,
@@ -199,7 +198,7 @@ scheme.
 -- |- (p -> (q -> p))
 /-
 If p and q are syntactically valid formula schemes then (p -> (q -> p)) 
-is a semantically valid formula scheme.
+is a proof scheme.
 -/
 | _ loc_ctx (prop_1 p_idx q_idx) := do
   p <- loc_ctx.get_formula p_idx,
@@ -211,8 +210,7 @@ is a semantically valid formula scheme.
 -- |- ((p -> (q -> r)) -> ((p -> q) -> (p -> r)))
 /-
 If p and q and r are syntactically valid formula schemes then
-((p -> (q -> r)) -> ((p -> q) -> (p -> r))) is a semantically valid formula
-scheme.
+((p -> (q -> r)) -> ((p -> q) -> (p -> r))) is a proof scheme.
 -/
 | _ loc_ctx (prop_2 p_idx q_idx r_idx) := do
   p <- loc_ctx.get_formula p_idx,
@@ -225,7 +223,7 @@ scheme.
 -- |- ((~p -> ~q) -> (q -> p))
 /-
 If p and q are syntactically valid formula schemes then
-((~p -> ~q) -> (q -> p)) is a semantically valid formula scheme.
+((~p -> ~q) -> (q -> p)) is a proof scheme.
 -/
 | _ loc_ctx (prop_3 p_idx q_idx) := do
   p <- loc_ctx.get_formula p_idx,
@@ -235,9 +233,9 @@ If p and q are syntactically valid formula schemes then
   return (loc_ctx.append_proof (proof.mk f t1))
 
 /-
-If p is a semantically valid formula scheme in the global context then
-any consistent substitution of formula schemes for the atomic propositions
-in p is a semantically valid formula scheme.
+If p is a proof scheme in the global context then
+any consistent substitution of formula schemes for
+the atomic propositions in p is a proof scheme.
 -/
 | glb_ctx loc_ctx (apply_proof idx m) := do
   (proof.mk p h1) <- glb_ctx.get_proof idx,
