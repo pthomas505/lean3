@@ -82,7 +82,7 @@ begin
   induction p,
   case bottom : { reflexivity },
   case top : { reflexivity },
-  case atom : x {unfold eval, apply h1 x, unfold atoms, simp only [set.mem_singleton]},
+  case atom : x { unfold eval, apply h1 x, unfold atoms, simp only [set.mem_singleton] },
   case not : p ih {
     unfold eval, unfold atoms at h1,
     have s1 : eval p v = eval p v', apply ih, exact h1,
