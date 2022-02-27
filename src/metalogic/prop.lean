@@ -194,7 +194,7 @@ end
 theorem eval_imp
   (p q : formula)
   (v : string → bool) :
-  eval (imp p q) v = tt ↔ ((eval p v = tt) → (eval q v = tt )) :=
+  eval (imp p q) v = tt ↔ ((eval p v = tt) → (eval q v = tt)) :=
 begin
   unfold eval, cases eval p v; cases eval q v; exact dec_trivial
 end
