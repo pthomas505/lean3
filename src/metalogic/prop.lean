@@ -9,7 +9,7 @@ Cambridge: Cambridge University Press.
 doi:10.1017/CBO9780511576430
 -/
 
-import tactic
+import data.set
 
 /-
 Formula schemes.
@@ -25,18 +25,18 @@ atom "P" : A formula scheme variable named "P".
 | imp : formula → formula → formula
 | iff : formula → formula → formula
 
-meta def formula.repr : formula → string
-| formula.bottom := sformat!"F"
-| formula.top := sformat!"T"
-| (formula.atom x) := x.quote
-| (formula.not p) := sformat!"(¬ {p.repr})"
-| (formula.and p q) := sformat!"({p.repr} ∧ {q.repr})"
-| (formula.or p q) := sformat!"({p.repr} ∨ {q.repr})"
-| (formula.imp p q) := sformat!"({p.repr} → {q.repr})"
-| (formula.iff p q) := sformat!"({p.repr} ↔ {q.repr})"
-meta instance : has_repr formula := has_repr.mk formula.repr
-
 open formula
+
+meta def formula.repr : formula → string
+| bottom := sformat!"F"
+| top := sformat!"T"
+| (atom x) := x.quote
+| (not p) := sformat!"(¬ {p.repr})"
+| (and p q) := sformat!"({p.repr} ∧ {q.repr})"
+| (or p q) := sformat!"({p.repr} ∨ {q.repr})"
+| (imp p q) := sformat!"({p.repr} → {q.repr})"
+| (iff p q) := sformat!"({p.repr} ↔ {q.repr})"
+meta instance : has_repr formula := has_repr.mk formula.repr
 
 def valuation := string → bool
 
