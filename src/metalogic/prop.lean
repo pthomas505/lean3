@@ -38,7 +38,9 @@ meta instance : has_repr formula := ⟨formula.repr⟩
 
 open formula
 
-def eval : formula → (string → bool) → bool
+def valuation := string → bool
+
+def eval : formula → valuation → bool
 | bottom _ := ff
 | top _ := tt
 | (atom x) m := m x
@@ -75,7 +77,7 @@ end
 
 theorem thm_2_2
   (p : formula)
-  (v v' : string → bool)
+  (v v' : valuation)
   (h1 : ∀ x ∈ (atoms p), v x = v' x) :
   eval p v = eval p v' :=
 begin
@@ -122,7 +124,7 @@ def sub : (string → formula) → formula → formula
 theorem thm_2_3_gen
   (p : formula)
   (f : string → formula)
-  (v : string -> bool) :
+  (v : valuation) :
   eval (sub f p) v = eval p (fun i, eval (f i) v) :=
 begin
   induction p,
@@ -139,7 +141,7 @@ end
 theorem thm_2_3
   (x : string)
   (p q : formula)
-  (v : string → bool) :
+  (v : valuation) :
   eval (sub (function.update atom x q) p) v =
     eval p (function.update v x (eval q v)) :=
 begin
@@ -148,7 +150,7 @@ begin
   simp [function.update]; split_ifs; simp [eval]
 end
 
-def is_tauto (p : formula) : Prop := ∀ v : string → bool, eval p v = tt
+def is_tauto (p : formula) : Prop := ∀ v : valuation, eval p v = tt
 
 theorem thm_2_4_gen
   (p : formula)
@@ -172,7 +174,7 @@ begin
 end
 
 theorem thm_2_5
-  (v : string → bool)
+  (v : valuation)
   (p q : formula)
   (h1 : eval p v = eval q v)
   (x : string)
@@ -185,7 +187,7 @@ end
 
 theorem eval_not
   (p : formula)
-  (v : string → bool) :
+  (v : valuation) :
   eval (not p) v = tt ↔ ¬ (eval p v = tt) :=
 begin
   unfold eval, cases eval p v; exact dec_trivial
@@ -193,7 +195,7 @@ end
 
 theorem eval_imp
   (p q : formula)
-  (v : string → bool) :
+  (v : valuation) :
   eval (imp p q) v = tt ↔ ((eval p v = tt) → (eval q v = tt)) :=
 begin
   unfold eval, cases eval p v; cases eval q v; exact dec_trivial
