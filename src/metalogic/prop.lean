@@ -34,7 +34,7 @@ meta def formula.repr : formula → string
 | (formula.or p q) := sformat!"({p.repr} ∨ {q.repr})"
 | (formula.imp p q) := sformat!"({p.repr} → {q.repr})"
 | (formula.iff p q) := sformat!"({p.repr} ↔ {q.repr})"
-meta instance : has_repr formula := ⟨formula.repr⟩
+meta instance : has_repr formula := has_repr.mk formula.repr
 
 open formula
 
