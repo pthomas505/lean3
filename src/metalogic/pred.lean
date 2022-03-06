@@ -123,12 +123,12 @@ begin
     unfold eval_term,
     simp only [set.mem_singleton_iff, forall_eq] at h1,
     exact h1 },
-  case term.func : n f arg ih {
+  case term.func : n f args ih {
     unfold all_var_set at *,
-    simp at *,
-    sorry
+    have s1 : forall i : fin n, forall x : string, x ∈ all_var_set (args i) → v x = v' x,
+    intros i x h, apply h1, exact set.mem_Union_of_mem i h,
+    unfold eval_term at *, congr, ext, apply ih, apply s1
 	}
-
 end
 
 #eval (forall_ "x" (mk_atom "P" [mk_func "f" [(var "x")], var "y"]))
