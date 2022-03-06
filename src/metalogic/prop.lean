@@ -50,7 +50,7 @@ def eval : formula → valuation → bool
 | (imp p q) m := (!(eval p m)) || (eval q m)
 | (iff p q) m := (eval p m) = (eval q m)
 
-def atoms : formula → (set string)
+def atoms : formula → set string
 | bottom := {}
 | top := {}
 | (atom x) := {x}
