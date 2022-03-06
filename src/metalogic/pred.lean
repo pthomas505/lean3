@@ -105,27 +105,27 @@ def holds (T : Type) (m : interpretation T) : valuation T → formula → Prop
 | v (forall_ x p) := forall a ∈ m.domain, holds (function.update v x a) p
 | v (exists_ x p) := exists a ∈ m.domain, holds (function.update v x a) p
 
-def all_var_set : term → set string
+def term.all_var_set : term → set string
 | (var x) := {x}
-| (func f args) := ⋃ i, all_var_set (args i)
+| (func f args) := ⋃ i, term.all_var_set (args i)
 
 theorem thm_3_1
   (T : Type)
   (m : interpretation T)
   (t : term)
   (v v' : valuation T)
-  (h1 : ∀ x ∈ (all_var_set t), v x = v' x) :
+  (h1 : ∀ x ∈ (term.all_var_set t), v x = v' x) :
   eval_term T m v t = eval_term T m v' t :=
 begin
   induction t,
   case term.var {
-    unfold all_var_set at h1,
+    unfold term.all_var_set at h1,
     unfold eval_term,
     simp only [set.mem_singleton_iff, forall_eq] at h1,
     exact h1 },
   case term.func : n f args ih {
-    unfold all_var_set at *,
-    have s1 : forall i : fin n, forall x : string, x ∈ all_var_set (args i) → v x = v' x,
+    unfold term.all_var_set at *,
+    have s1 : forall i : fin n, forall x : string, x ∈ term.all_var_set (args i) → v x = v' x,
     intros i x h, apply h1, exact set.mem_Union_of_mem i h,
     unfold eval_term at *, congr, ext, apply ih, apply s1
 	}
