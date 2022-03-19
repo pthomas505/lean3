@@ -12,11 +12,11 @@ doi:10.1017/CBO9780511576430
 import data.set
 
 
-def list_to_fin_list {T : Type} (l : list T) : fin l.length → T :=
+def list_to_fin_fun {T : Type} (l : list T) : fin l.length → T :=
 fun i : fin l.length, list.nth_le l i.val i.property
 
 
-meta def fin_list.to_string {α} [has_to_string α] {n} (as : fin n → α) : string :=
+meta def fin_fun.to_string {α} [has_to_string α] {n} (as : fin n → α) : string :=
 list.to_string (list.of_fn as)
 
 
@@ -34,12 +34,12 @@ open term
 
 meta def term.repr : term → string
 | (var x) := x.quote
-| (func f args) := f.quote ++ fin_list.to_string (fun i, (args i).repr)
+| (func f args) := f.quote ++ fin_fun.to_string (fun i, (args i).repr)
 
 meta instance : has_repr term := has_repr.mk term.repr
 
 def mk_func (name : string) (terms : list term)
-:= func name (list_to_fin_list terms)
+:= func name (list_to_fin_fun terms)
 
 
 /-
@@ -64,7 +64,7 @@ open formula
 meta def formula.repr : formula → string
 | bottom := sformat!"F"
 | top := sformat!"T"
-| (atom x terms) := x.quote ++ fin_list.to_string (fun i, (terms i).repr)
+| (atom x terms) := x.quote ++ fin_fun.to_string (fun i, (terms i).repr)
 | (not p) := sformat!"(¬ {p.repr})"
 | (and p q) := sformat!"({p.repr} ∧ {q.repr})"
 | (or p q) := sformat!"({p.repr} ∨ {q.repr})"
@@ -76,7 +76,7 @@ meta def formula.repr : formula → string
 meta instance : has_repr formula := has_repr.mk formula.repr
 
 def mk_atom (name : string) (terms : list term) :=
-atom name (list_to_fin_list terms)
+atom name (list_to_fin_fun terms)
 
 
 structure interpretation (T : Type) : Type :=
