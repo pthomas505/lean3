@@ -132,3 +132,103 @@ begin
 end
 
 #eval (forall_ "x" (mk_atom "P" [mk_func "f" [(var "x")], var "y"]))
+
+def formula.all_var_set : formula → set string
+| bottom := {}
+| top := {}
+| (atom x terms) := ⋃ i, term.all_var_set (terms i)
+| (not p) := p.all_var_set
+| (and p q) := set.union p.all_var_set q.all_var_set
+| (or p q) := set.union p.all_var_set q.all_var_set
+| (imp p q) := set.union p.all_var_set q.all_var_set
+| (iff p q) := set.union p.all_var_set q.all_var_set
+| (forall_ x p) := set.insert x p.all_var_set
+| (exists_ x p) := set.insert x p.all_var_set
+
+def formula.free_var_set : formula → set string
+| bottom := {}
+| top := {}
+| (atom x terms) := ⋃ i, term.all_var_set (terms i)
+| (not p) := p.free_var_set
+| (and p q) := p.free_var_set ∪ q.free_var_set
+| (or p q) := p.free_var_set ∪ q.free_var_set
+| (imp p q) := p.free_var_set ∪ q.free_var_set
+| (iff p q) := p.free_var_set ∪ q.free_var_set
+| (forall_ x p) := p.free_var_set \ {x}
+| (exists_ x p) := p.free_var_set \ {x}
+
+theorem thm_3_2
+  (T : Type)
+  (m : interpretation T)
+  (p : formula)
+  (v v' : valuation T)
+  (h1 : ∀ x ∈ (formula.free_var_set p), v x = v' x) :
+  holds T m v p ↔ holds T m v' p :=
+begin
+  induction p generalizing v v',
+  case formula.bottom {
+    unfold holds
+  },
+  case formula.top {
+    unfold holds
+  },
+  case formula.atom : n f terms {
+    unfold formula.free_var_set at h1,
+    have s1 : forall i, eval_term T m v (terms i) = eval_term T m v' (terms i),
+      intros i, apply thm_3_1, intros x h, apply h1, exact set.mem_Union_of_mem i h,
+    unfold holds, finish
+  },
+  case formula.not : p ih {
+    have s1 : holds T m v p ↔ holds T m v' p, apply ih, unfold formula.free_var_set at h1,
+      exact h1,
+    unfold holds, rewrite s1
+  },
+  case formula.and : p q ih_p ih_q {
+    have s1 : holds T m v p ↔ holds T m v' p, apply ih_p, intros x h, apply h1,
+      unfold formula.free_var_set, left, exact h,
+    have s2 : holds T m v q ↔ holds T m v' q, apply ih_q, intros x h, apply h1,
+      unfold formula.free_var_set, right, exact h,
+    unfold holds, rewrite s1, rewrite s2
+  },
+  case formula.or : p q ih_p ih_q {
+    have s1 : holds T m v p ↔ holds T m v' p, apply ih_p, intros x h, apply h1,
+      unfold formula.free_var_set, left, exact h,
+    have s2 : holds T m v q ↔ holds T m v' q, apply ih_q, intros x h, apply h1,
+      unfold formula.free_var_set, right, exact h,
+    unfold holds, rewrite s1, rewrite s2
+  },
+  case formula.imp : p q ih_p ih_q {
+    have s1 : holds T m v p ↔ holds T m v' p, apply ih_p, intros x h, apply h1,
+      unfold formula.free_var_set, left, exact h,
+    have s2 : holds T m v q ↔ holds T m v' q, apply ih_q, intros x h, apply h1,
+      unfold formula.free_var_set, right, exact h,
+    unfold holds, rewrite s1, rewrite s2
+  },
+  case formula.iff : p q ih_p ih_q {
+    have s1 : holds T m v p ↔ holds T m v' p, apply ih_p, intros x h, apply h1,
+      unfold formula.free_var_set, left, exact h,
+    have s2 : holds T m v q ↔ holds T m v' q, apply ih_q, intros x h, apply h1,
+      unfold formula.free_var_set, right, exact h,
+    unfold holds, rewrite s1, rewrite s2
+  },
+  case formula.forall_ : x p ih {
+    unfold formula.free_var_set at h1,
+    unfold holds,
+    have s1 : ∀ (a : T), a ∈ m.domain →
+      (holds T m (function.update v x a) p ↔ holds T m (function.update v' x a) p),
+        intros a h, apply ih, intros y h',
+        unfold function.update, simp, split_ifs, refl,
+        apply h1, simp only [set.mem_diff, set.mem_singleton_iff], exact and.intro h' h_1,
+    exact ball_congr s1
+  },
+  case formula.exists_ : x p ih {
+    unfold formula.free_var_set at h1,
+    unfold holds,
+    have s1 : ∀ (a : T), a ∈ m.domain →
+      (holds T m (function.update v x a) p ↔ holds T m (function.update v' x a) p),
+        intros a h, apply ih, intros y h',
+        unfold function.update, simp, split_ifs, refl,
+        apply h1, simp only [set.mem_diff, set.mem_singleton_iff], exact and.intro h' h_1,
+    exact bex_congr s1
+  }
+end
