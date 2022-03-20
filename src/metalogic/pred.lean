@@ -146,8 +146,8 @@ def formula.all_var_set : formula → set string
 | (exists_ x p) := set.insert x p.all_var_set
 
 def formula.free_var_set : formula → set string
-| bottom := {}
-| top := {}
+| bottom := ∅
+| top := ∅
 | (atom x terms) := ⋃ i, term.all_var_set (terms i)
 | (not p) := p.free_var_set
 | (and p q) := p.free_var_set ∪ q.free_var_set
@@ -232,3 +232,6 @@ begin
     exact bex_congr s1
   }
 end
+
+def is_sentence (p : formula) : Prop := p.free_var_set = ∅
+
