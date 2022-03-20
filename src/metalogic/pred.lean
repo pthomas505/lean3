@@ -134,8 +134,8 @@ end
 #eval (forall_ "x" (mk_atom "P" [mk_func "f" [(var "x")], var "y"]))
 
 def formula.all_var_set : formula → set string
-| bottom := {}
-| top := {}
+| bottom := ∅
+| top := ∅
 | (atom x terms) := ⋃ i, term.all_var_set (terms i)
 | (not p) := p.all_var_set
 | (and p q) := set.union p.all_var_set q.all_var_set
