@@ -235,3 +235,15 @@ end
 
 def is_sentence (p : formula) : Prop := p.free_var_set = ∅
 
+theorem cor_3_3
+  (p : formula)
+  (h1 : is_sentence p) :
+  ∀ T : Type, ∀ m : interpretation T, forall v : valuation T, forall v' : valuation T,
+    holds T m v p ↔ holds T m v' p :=
+begin
+  intros T m v v',
+  unfold is_sentence at h1,
+  have s1 : ∀ x ∈ (formula.free_var_set p), v x = v' x,
+    rewrite h1, simp only [set.mem_empty_eq, forall_false_left, forall_const],
+  exact thm_3_2 T m p v v' s1
+end
