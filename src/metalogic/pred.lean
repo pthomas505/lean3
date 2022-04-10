@@ -22,7 +22,7 @@ list.to_string (list.of_fn as)
 
 /-
 Term schemes.
-var "x" : An object variable named "x".
+var "x" : An object variable named "x". Ranges over the domain of each interpretation.
 func "c" [] : A constant named "c".
 func "f" [x1 .. xn] : A function named "f" of n terms.
 -/
@@ -79,12 +79,24 @@ def mk_atom (name : string) (terms : list term) :=
 atom name (list_to_fin_fun terms)
 
 
+/-
+domain: A nonempty set D called the domain of the interpretation. The intention is that all terms have values in D.
+
+func: (n : nat, string) → ((fin n → T) → T)
+A mapping of each n-ary function symbol f to a function f_{M} : D^{n} → D.
+
+pred: (n : nat, string) → ((fin n → T) → bool)
+A mapping of each n-ary predicate symbol P to a Boolean function P_{M} : D^{n} → {false, true}.
+-/
 structure interpretation (T : Type) : Type :=
 (domain : set T)
 (nonempty : domain.nonempty)
 (func {n} : string → (fin n → T) → T)
 (pred {n} : string → (fin n → T) → bool)
 
+/-
+Assigns an element of the domain to each variable.
+-/
 def valuation (T : Type) := string → T
 
 def eval_term
@@ -92,6 +104,7 @@ def eval_term
 | (var x) := v x
 | (func f args) := m.func f (fun i, eval_term (args i))
 
+notation  x `↦` a := fun v, function.update v x a
 
 def holds (T : Type) (m : interpretation T) : valuation T → formula → Prop
 | _ bottom := false
@@ -102,8 +115,8 @@ def holds (T : Type) (m : interpretation T) : valuation T → formula → Prop
 | v (or p q) := holds v p ∨ holds v q
 | v (imp p q) := holds v p → holds v q
 | v (iff p q) := holds v p ↔ holds v q
-| v (forall_ x p) := forall a ∈ m.domain, holds (function.update v x a) p
-| v (exists_ x p) := exists a ∈ m.domain, holds (function.update v x a) p
+| v (forall_ x p) := forall a ∈ m.domain, holds ((x ↦ a) v) p
+| v (exists_ x p) := exists a ∈ m.domain, holds ((x ↦ a) v) p
 
 def term.all_var_set : term → set string
 | (var x) := {x}
@@ -215,7 +228,7 @@ begin
     unfold formula.free_var_set at h1,
     unfold holds,
     have s1 : ∀ (a : T), a ∈ m.domain →
-      (holds T m (function.update v x a) p ↔ holds T m (function.update v' x a) p),
+      (holds T m ((x ↦ a) v) p ↔ holds T m ((x ↦ a) v') p),
         intros a h, apply ih, intros y h',
         unfold function.update, simp, split_ifs, refl,
         apply h1, simp only [set.mem_diff, set.mem_singleton_iff], exact and.intro h' h_1,
@@ -225,7 +238,7 @@ begin
     unfold formula.free_var_set at h1,
     unfold holds,
     have s1 : ∀ (a : T), a ∈ m.domain →
-      (holds T m (function.update v x a) p ↔ holds T m (function.update v' x a) p),
+      (holds T m ((x ↦ a) v) p ↔ holds T m ((x ↦ a) v') p),
         intros a h, apply ih, intros y h',
         unfold function.update, simp, split_ifs, refl,
         apply h1, simp only [set.mem_diff, set.mem_singleton_iff], exact and.intro h' h_1,
@@ -246,4 +259,103 @@ begin
   have s1 : ∀ x ∈ (formula.free_var_set p), v x = v' x,
     rewrite h1, simp only [set.mem_empty_eq, forall_false_left, forall_const],
   exact thm_3_2 T m p v v' s1
+end
+
+def is_valid (P : formula) : Prop :=
+∀ T : Type, ∀ m : interpretation T, ∀ v : valuation T, holds T m v P
+
+
+/-
+satisfies T m P = m satisfies P.
+-/
+def satisfies (T : Type) (m : interpretation T) (P : formula) : Prop :=
+∀ v : valuation T, holds T m v P
+
+/-
+satisfies_set T m S = m satisfies S.
+-/
+def satisfies_set (T : Type) (m : interpretation T) (S : set formula) : Prop :=
+∀ P ∈ S, satisfies T m P
+
+
+def is_satisfiable (P : formula) : Prop := ∃ T : Type, ∃ m : interpretation T, satisfies T m P
+
+def is_satisfiable_set (S : set formula) : Prop := ∃ T : Type, ∃ m : interpretation T, ∀ P ∈ S, satisfies T m P
+
+
+/-
+holds_in P T m = P holds in m.
+-/
+def holds_in (P : formula) (T : Type) (m : interpretation T) : Prop := satisfies T m P
+
+/-
+set_holds_in S T m = S holds in m.
+-/
+def set_holds_in (S : set formula) (T : Type) (m : interpretation T) : Prop := satisfies_set T m S
+
+
+example
+	(P : formula)
+	(h : is_sentence P) :
+	is_valid P ↔ ¬ is_satisfiable (not P) :=
+begin
+	sorry
+end
+
+
+/-
+is_model_of T m Γ = m is a model of Γ
+-/
+def is_model_of (T : Type) (m : interpretation T) (Γ : set formula) := satisfies_set T m Γ
+
+
+/-
+Γ ⊨ P = P holds in all models of Γ.
+-/
+notation Γ `⊨` P := ∀ T : Type, ∀ m : interpretation T, (is_model_of T m Γ) → (holds_in P T m)
+
+
+example
+	(P : formula) :
+	(is_valid P) ↔ (∅ ⊨ P) :=
+begin
+	sorry
+end
+
+
+example
+	(Γ : set formula) :
+	¬ (is_satisfiable_set Γ) ↔ (Γ ⊨ bottom) :=
+begin
+	sorry
+end
+
+
+example
+	(T : Type)
+	(m : interpretation T)
+	(P : formula) :
+	(∀ x : string, ∀ v : valuation T, ∀ a ∈ m.domain, holds T m ((x ↦ a) v) P) ↔ (∀ v : valuation T, holds T m v P) :=
+begin
+	sorry
+end
+
+
+def term_sub (instantiation : string → term) : term → term
+| (var x) := instantiation x
+| (func name args) := func name (fun i, term_sub (args i))
+
+
+lemma lem_3_4
+  (t : term)
+  (i : string → term) :
+  term.all_var_set (term_sub i t) = ⋃ y ∈ (term.all_var_set t), term.all_var_set (i y) :=
+begin
+  induction t,
+  case term.var : x {
+    unfold term_sub, unfold term.all_var_set, simp only [set.mem_singleton_iff, set.Union_Union_eq_left]
+  },
+  case term.func : n name args ih {
+    sorry
+  }
 end
