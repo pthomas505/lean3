@@ -138,12 +138,14 @@ begin
   case iff : p q ih_p ih_q { unfold sub, unfold eval, rewrite ih_p, rewrite ih_q }
 end
 
+notation  x `↦` a := fun v, function.update v x a
+
 theorem thm_2_3
   (x : string)
   (p q : formula)
   (v : valuation) :
-  eval (sub (function.update atom x q) p) v =
-    eval p (function.update v x (eval q v)) :=
+  eval (sub ((x ↦ q) atom) p) v =
+    eval p ((x ↦ (eval q v)) v) :=
 begin
   rewrite thm_2_3_gen,
   congr, ext p,
@@ -168,7 +170,7 @@ theorem thm_2_4
   (h1 : is_tauto p)
   (x : string)
   (q : formula) :
-  is_tauto (sub (function.update atom x q) p) :=
+  is_tauto (sub ((x ↦ q) atom) p) :=
 begin
   apply thm_2_4_gen _ h1
 end
@@ -179,8 +181,8 @@ theorem thm_2_5
   (h1 : eval p v = eval q v)
   (x : string)
   (r : formula) :
-  eval (sub (function.update atom x p) r) v =
-    eval (sub (function.update atom x q) r) v :=
+  eval (sub ((x ↦ p) atom) r) v =
+    eval (sub ((x ↦ q) atom) r) v :=
 begin
   rewrite [thm_2_3, thm_2_3, h1]
 end
