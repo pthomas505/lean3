@@ -341,14 +341,19 @@ begin
 end
 
 
-def term_sub (instantiation : string → term) : term → term
-| (var x) := instantiation x
-| (func name args) := func name (fun i, term_sub (args i))
+/-
+A finite partial function from variable names to terms.
+-/
+def instantiation := string → term
+
+def term_sub (i : instantiation) : term → term
+| (var x) := i x
+| (func name args) := func name (fun n, term_sub (args n))
 
 
 lemma lem_3_4
   (t : term)
-  (i : string → term) :
+  (i : instantiation) :
   term.all_var_set (term_sub i t) = ⋃ y ∈ (term.all_var_set t), term.all_var_set (i y) :=
 begin
   induction t,
@@ -358,4 +363,16 @@ begin
   case term.func : n name args ih {
     sorry
   }
+end
+
+
+lemma lem_3_5
+  (T : Type)
+  (t : term)
+  (i : instantiation)
+  (m : interpretation T)
+  (v : valuation T) :
+  eval_term T m v (term_sub i t) = eval_term T m ((eval_term T m v) ∘ i) t :=
+begin
+  sorry
 end
