@@ -295,11 +295,13 @@ def set_holds_in (S : set formula) (T : Type) (m : interpretation T) : Prop := s
 
 
 example
-	(P : formula)
-	(h : is_sentence P) :
-	is_valid P ↔ ¬ is_satisfiable (not P) :=
+	(p : formula)
+	(h1 : is_sentence p) :
+	is_valid p ↔ ¬ (is_satisfiable (not p)) :=
 begin
-	sorry
+  unfold is_valid, unfold is_satisfiable, unfold satisfies, unfold holds, push_neg, split,
+  intros h2 T m, fconstructor, exact fun s, m.nonempty.some, apply h2,
+  intros h2 T m v, cases h2 T m, rewrite <- cor_3_3 p h1 T m w, exact h
 end
 
 
@@ -316,10 +318,14 @@ notation Γ `⊨` P := ∀ T : Type, ∀ m : interpretation T, (is_model_of T m 
 
 
 example
-	(P : formula) :
-	(is_valid P) ↔ (∅ ⊨ P) :=
+	(p : formula) :
+	(is_valid p) ↔ (∅ ⊨ p) :=
 begin
-	sorry
+  split,
+  intros h1 T m h2,
+  unfold holds_in, unfold satisfies, intros v, unfold is_valid at h1, exact h1 T m v,
+  unfold is_model_of, unfold satisfies_set,
+  intros h1 T m v, unfold holds_in at h1, unfold satisfies at h1, apply h1, intros p h1, simp at h1, contradiction
 end
 
 
@@ -327,7 +333,11 @@ example
 	(Γ : set formula) :
 	¬ (is_satisfiable_set Γ) ↔ (Γ ⊨ bottom) :=
 begin
-	sorry
+  unfold is_model_of, unfold holds_in, unfold is_satisfiable_set, unfold satisfies_set,
+  split,
+  intros h1 T m h2 v, push_neg at h1, cases h1 T m, cases h, exfalso, apply h_right, apply h2, exact h_left,
+  unfold satisfies, intros h1 h2, unfold holds at h1, cases h2, cases h2_h,
+  apply h1 h2_w h2_h_w h2_h_h, exact fun x, h2_h_w.nonempty.some
 end
 
 
