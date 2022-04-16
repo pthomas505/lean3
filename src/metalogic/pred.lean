@@ -376,3 +376,51 @@ lemma lem_3_5
 begin
   sorry
 end
+
+
+/-
+def variant : string → finset string → string
+| x vars := if x ∈ vars then variant (string.push x '\'') vars else x
+-/
+
+
+def formula_sub (i : instantiation) : formula → formula
+| bottom := bottom
+| top := top
+| (atom x terms) := atom x (fun n, term_sub i (terms n))
+| (not p) := not (formula_sub p)
+| (and p q) := and (formula_sub p) (formula_sub q)
+| (or p q) := or (formula_sub p) (formula_sub q)
+| (imp p q) := imp (formula_sub p) (formula_sub q)
+| (iff p q) := iff (formula_sub p) (formula_sub q)
+| (forall_ x p) := sorry
+| (exists_ x p) := sorry
+
+
+lemma lem_3_6
+  (p : formula)
+  (i : instantiation) :
+  formula.free_var_set (formula_sub i p) = ⋃ y ∈ (formula.free_var_set p), term.all_var_set (i y) :=
+begin
+  sorry
+end
+
+theorem thm_3_7
+  (p : formula)
+  (i : instantiation)
+  (T : Type)
+  (m : interpretation T)
+  (v : valuation T) :
+  holds T m v (formula_sub i p) = holds T m ((eval_term T m v) ∘ i) p :=
+begin
+  sorry
+end
+
+theorem cor_3_8
+  (p : formula)
+  (i : instantiation)
+  (h1 : is_valid p) :
+  is_valid (formula_sub i p) :=
+begin
+  sorry
+end
