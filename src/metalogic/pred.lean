@@ -95,7 +95,7 @@ structure interpretation (T : Type) : Type :=
 (pred {n} : string → (fin n → T) → bool)
 
 /-
-Assigns an element of the domain to each variable.
+A mapping of each variable name to an element of the domain.
 -/
 def valuation (T : Type) := string → T
 
@@ -352,7 +352,8 @@ end
 
 
 /-
-A finite partial function from variable names to terms.
+A substitution mapping.
+A mapping of each variable name to a term.
 -/
 def instantiation := string → term
 
