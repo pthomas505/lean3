@@ -261,32 +261,32 @@ begin
   exact thm_3_2 T m p v v' s1
 end
 
-def is_valid (P : formula) : Prop :=
-∀ T : Type, ∀ m : interpretation T, ∀ v : valuation T, holds T m v P
+def is_valid (p : formula) : Prop :=
+∀ T : Type, ∀ m : interpretation T, ∀ v : valuation T, holds T m v p
 
 
 /-
-satisfies T m P = m satisfies P.
+satisfies T m p = m satisfies p.
 -/
-def satisfies (T : Type) (m : interpretation T) (P : formula) : Prop :=
-∀ v : valuation T, holds T m v P
+def satisfies (T : Type) (m : interpretation T) (p : formula) : Prop :=
+∀ v : valuation T, holds T m v p
 
 /-
 satisfies_set T m S = m satisfies S.
 -/
 def satisfies_set (T : Type) (m : interpretation T) (S : set formula) : Prop :=
-∀ P ∈ S, satisfies T m P
+∀ p ∈ S, satisfies T m p
 
 
-def is_satisfiable (P : formula) : Prop := ∃ T : Type, ∃ m : interpretation T, satisfies T m P
+def is_satisfiable (p : formula) : Prop := ∃ T : Type, ∃ m : interpretation T, satisfies T m p
 
-def is_satisfiable_set (S : set formula) : Prop := ∃ T : Type, ∃ m : interpretation T, ∀ P ∈ S, satisfies T m P
+def is_satisfiable_set (S : set formula) : Prop := ∃ T : Type, ∃ m : interpretation T, ∀ p ∈ S, satisfies T m p
 
 
 /-
-holds_in P T m = P holds in m.
+holds_in p T m = p holds in m.
 -/
-def holds_in (P : formula) (T : Type) (m : interpretation T) : Prop := satisfies T m P
+def holds_in (p : formula) (T : Type) (m : interpretation T) : Prop := satisfies T m p
 
 /-
 set_holds_in S T m = S holds in m.
@@ -312,9 +312,9 @@ def is_model_of (T : Type) (m : interpretation T) (Γ : set formula) := satisfie
 
 
 /-
-Γ ⊨ P = P holds in all models of Γ.
+Γ ⊨ p = p holds in all models of Γ.
 -/
-notation Γ `⊨` P := ∀ T : Type, ∀ m : interpretation T, (is_model_of T m Γ) → (holds_in P T m)
+notation Γ `⊨` p := ∀ T : Type, ∀ m : interpretation T, (is_model_of T m Γ) → (holds_in p T m)
 
 
 example
