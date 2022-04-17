@@ -395,7 +395,13 @@ begin
     ...                                  = eval_term T m ((eval_term T m v) ∘ i) (var x) : by unfold eval_term
   },
   case term.func : n f args ih {
-    sorry
+    have ih' : ∀ (j : fin n), eval_term T m v (term_sub i (args j)) =
+      eval_term T m ((eval_term T m v) ∘ i) (args j), exact ih,
+    calc
+    eval_term T m v (term_sub i (func f args)) = eval_term T m v (func f (fun j, term_sub i (args j))) : by unfold term_sub
+    ... = m.func f (fun j, eval_term T m v (term_sub i (args j))) : by unfold eval_term
+    ... = m.func f (fun j, eval_term T m ((eval_term T m v) ∘ i) (args j)) : begin congr, apply funext, intros j, exact ih' j end
+    ... = eval_term T m ((eval_term T m v) ∘ i) (func f args) : by unfold eval_term
   }
 end
 
