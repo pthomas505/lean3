@@ -344,10 +344,12 @@ end
 example
 	(T : Type)
 	(m : interpretation T)
-	(P : formula) :
-	(∀ x : string, ∀ v : valuation T, ∀ a ∈ m.domain, holds T m ((x ↦ a) v) P) ↔ (∀ v : valuation T, holds T m v P) :=
+	(p : formula) :
+	(∀ x : string, ∀ v : valuation T, ∀ a ∈ m.domain, holds T m ((x ↦ a) v) p) ↔ (∀ v : valuation T, holds T m v p) :=
 begin
-	sorry
+  dsimp, split,
+  intros h1 v, sorry,
+  intros h1 x v a h2, exact h1 (function.update v x a)
 end
 
 
@@ -385,7 +387,16 @@ lemma lem_3_5
   (v : valuation T) :
   eval_term T m v (term_sub i t) = eval_term T m ((eval_term T m v) ∘ i) t :=
 begin
-  sorry
+  induction t,
+  case term.var : x {
+    calc
+    eval_term T m v (term_sub i (var x)) = eval_term T m v (i x) : by unfold term_sub
+    ...                                  = ((eval_term T m v) ∘ i) x : by unfold function.comp
+    ...                                  = eval_term T m ((eval_term T m v) ∘ i) (var x) : by unfold eval_term
+  },
+  case term.func : n f args ih {
+    sorry
+  }
 end
 
 
@@ -393,6 +404,13 @@ end
 def variant : string → finset string → string
 | x vars := if x ∈ vars then variant (string.push x '\'') vars else x
 -/
+
+def variant : string → finset string → string
+| x vars := if x ∈ vars then
+  have vars.sup (λ i, i.length) + 1 - (string.push x '\'').length < vars.sup (λ i, i.length)  + 1 - x.length, from sorry,
+  variant (string.push x '\'') vars else x
+using_well_founded { rel_tac := λ _ _,
+  `[exact ⟨_, measure_wf (λ ⟨x, vars⟩, vars.sup (λ i, i.length) + 1 - x.length)⟩] }
 
 
 def formula_sub (i : instantiation) : formula → formula
