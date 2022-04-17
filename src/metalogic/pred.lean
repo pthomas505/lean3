@@ -373,7 +373,7 @@ begin
   case term.var : x {
     unfold term_sub, unfold term.all_var_set, simp only [set.mem_singleton_iff, set.Union_Union_eq_left]
   },
-  case term.func : n name args ih {
+  case term.func : n f args ih {
     sorry
   }
 end
