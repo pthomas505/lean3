@@ -210,30 +210,30 @@ begin
   },
   case formula.and : p q ih_p ih_q {
     have s1 : holds T m v p ↔ holds T m v' p, apply ih_p, intros x h, apply h1,
-      unfold formula.free_var_set, left, exact h,
+      unfold formula.free_var_set, finish,
     have s2 : holds T m v q ↔ holds T m v' q, apply ih_q, intros x h, apply h1,
-      unfold formula.free_var_set, right, exact h,
+      unfold formula.free_var_set, finish,
     unfold holds, rewrite s1, rewrite s2
   },
   case formula.or : p q ih_p ih_q {
     have s1 : holds T m v p ↔ holds T m v' p, apply ih_p, intros x h, apply h1,
-      unfold formula.free_var_set, left, exact h,
+      unfold formula.free_var_set, finish,
     have s2 : holds T m v q ↔ holds T m v' q, apply ih_q, intros x h, apply h1,
-      unfold formula.free_var_set, right, exact h,
+      unfold formula.free_var_set, finish,
     unfold holds, rewrite s1, rewrite s2
   },
   case formula.imp : p q ih_p ih_q {
     have s1 : holds T m v p ↔ holds T m v' p, apply ih_p, intros x h, apply h1,
-      unfold formula.free_var_set, left, exact h,
+      unfold formula.free_var_set, finish,
     have s2 : holds T m v q ↔ holds T m v' q, apply ih_q, intros x h, apply h1,
-      unfold formula.free_var_set, right, exact h,
+      unfold formula.free_var_set, finish,
     unfold holds, rewrite s1, rewrite s2
   },
   case formula.iff : p q ih_p ih_q {
     have s1 : holds T m v p ↔ holds T m v' p, apply ih_p, intros x h, apply h1,
-      unfold formula.free_var_set, left, exact h,
+      unfold formula.free_var_set, finish,
     have s2 : holds T m v q ↔ holds T m v' q, apply ih_q, intros x h, apply h1,
-      unfold formula.free_var_set, right, exact h,
+      unfold formula.free_var_set, finish,
     unfold holds, rewrite s1, rewrite s2
   },
   case formula.forall_ : x p ih {
@@ -243,7 +243,7 @@ begin
       (holds T m ((x ↦ a) v) p ↔ holds T m ((x ↦ a) v') p),
         intros a h, apply ih, intros y h',
         unfold function.update, simp, split_ifs, refl,
-        apply h1, simp only [set.mem_diff, set.mem_singleton_iff], exact and.intro h' h_1,
+        apply h1, simp only [finset.mem_sdiff, finset.mem_singleton], exact and.intro h' h_1,
     exact ball_congr s1
   },
   case formula.exists_ : x p ih {
@@ -253,7 +253,7 @@ begin
       (holds T m ((x ↦ a) v) p ↔ holds T m ((x ↦ a) v') p),
         intros a h, apply ih, intros y h',
         unfold function.update, simp, split_ifs, refl,
-        apply h1, simp only [set.mem_diff, set.mem_singleton_iff], exact and.intro h' h_1,
+        apply h1, simp only [finset.mem_sdiff, finset.mem_singleton], exact and.intro h' h_1,
     exact bex_congr s1
   }
 end
@@ -269,7 +269,7 @@ begin
   intros T m v v',
   unfold is_sentence at h1,
   have s1 : ∀ x ∈ (formula.free_var_set p), v x = v' x,
-    rewrite h1, simp only [set.mem_empty_eq, forall_false_left, forall_const],
+    rewrite h1, simp only [finset.not_mem_empty, forall_false_left, forall_const],
   exact thm_3_2 T m p v v' s1
 end
 
@@ -373,17 +373,17 @@ def instantiation := string → term
 
 def term_sub (i : instantiation) : term → term
 | (var x) := i x
-| (func name args) := func name (fun n, term_sub (args n))
+| (func n name args) := func n name (fun n, term_sub (args n))
 
 
 lemma lem_3_4
   (t : term)
   (i : instantiation) :
-  term.all_var_set (term_sub i t) = ⋃ y ∈ (term.all_var_set t), term.all_var_set (i y) :=
+  term.all_var_set (term_sub i t) = finset.bUnion (term.all_var_set t) (fun y, term.all_var_set (i y)) :=
 begin
   induction t,
   case term.var : x {
-    unfold term_sub, unfold term.all_var_set, simp only [set.mem_singleton_iff, set.Union_Union_eq_left]
+    unfold term_sub, unfold term.all_var_set, simp only [finset.singleton_bUnion],
   },
   case term.func : n f args ih {
     sorry
@@ -410,10 +410,10 @@ begin
     have ih' : ∀ (j : fin n), term.eval T m v (term_sub i (args j)) =
       term.eval T m ((term.eval T m v) ∘ i) (args j), exact ih,
     calc
-    term.eval T m v (term_sub i (func f args)) = term.eval T m v (func f (fun j, term_sub i (args j))) : by unfold term_sub
-    ... = m.func f (fun j, term.eval T m v (term_sub i (args j))) : by unfold term.eval
-    ... = m.func f (fun j, term.eval T m ((term.eval T m v) ∘ i) (args j)) : begin congr, apply funext, intros j, exact ih' j end
-    ... = term.eval T m ((term.eval T m v) ∘ i) (func f args) : by unfold term.eval
+    term.eval T m v (term_sub i (func n f args)) = term.eval T m v (func n f (fun j, term_sub i (args j))) : by unfold term_sub
+    ... = m.func n f (fun j, term.eval T m v (term_sub i (args j))) : by unfold term.eval
+    ... = m.func n f (fun j, term.eval T m ((term.eval T m v) ∘ i) (args j)) : begin congr, apply funext, intros j, exact ih' j end
+    ... = term.eval T m ((term.eval T m v) ∘ i) (func n f args) : by unfold term.eval
   }
 end
 
@@ -434,7 +434,7 @@ using_well_founded { rel_tac := λ _ _,
 def formula_sub : instantiation → formula → formula
 | _ bottom := bottom
 | _ top := top
-| i (atom x terms) := atom x (fun n, term_sub i (terms n))
+| i (atom n x terms) := atom n x (fun n, term_sub i (terms n))
 | i (not p) := not (formula_sub i p)
 | i (and p q) := and (formula_sub i p) (formula_sub i q)
 | i (or p q) := or (formula_sub i p) (formula_sub i q)
@@ -453,7 +453,7 @@ def formula_sub : instantiation → formula → formula
 lemma lem_3_6
   (p : formula)
   (i : instantiation) :
-  formula.free_var_set (formula_sub i p) = ⋃ y ∈ (formula.free_var_set p), term.all_var_set (i y) :=
+  formula.free_var_set (formula_sub i p) = finset.bUnion (formula.free_var_set p) (fun y, term.all_var_set (i y)) :=
 begin
   sorry
 end
