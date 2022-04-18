@@ -12,11 +12,11 @@ doi:10.1017/CBO9780511576430
 import data.set
 
 
-def list_to_fin_fun {T : Type} (l : list T) : fin l.length → T :=
+def list.to_fin_fun {T : Type} (l : list T) : fin l.length → T :=
 fun i : fin l.length, list.nth_le l i.val i.property
 
 
-meta def fin_fun.to_string {α} [has_to_string α] {n} (as : fin n → α) : string :=
+meta def fin_fun_to_string {α : Type} [has_to_string α] {n : ℕ} (as : fin n → α) : string :=
 list.to_string (list.of_fn as)
 
 
@@ -28,18 +28,18 @@ func "f" [x1 .. xn] : A function named "f" of n terms.
 -/
 inductive term : Type
 | var : string → term
-| func {n} : string → (fin n → term) → term
+| func (n : ℕ) : string → (fin n → term) → term
 
 open term
 
 meta def term.repr : term → string
 | (var x) := x.quote
-| (func f args) := f.quote ++ fin_fun.to_string (fun i, (args i).repr)
+| (func n f args) := f.quote ++ fin_fun_to_string (fun i : fin n, (args i).repr)
 
 meta instance : has_repr term := has_repr.mk term.repr
 
 def mk_func (name : string) (terms : list term)
-:= func name (list_to_fin_fun terms)
+:= func terms.length name terms.to_fin_fun
 
 
 /-
@@ -50,7 +50,7 @@ atom "P" [x1 .. xn] : A predicate variable named "P" of n terms.
 inductive formula : Type
 | bottom : formula
 | top : formula
-| atom {n} : string → (fin n → term) → formula
+| atom (n : ℕ) : string → (fin n → term) → formula
 | not : formula → formula
 | and : formula → formula → formula
 | or : formula → formula → formula
@@ -64,7 +64,7 @@ open formula
 meta def formula.repr : formula → string
 | bottom := sformat!"F"
 | top := sformat!"T"
-| (atom x terms) := x.quote ++ fin_fun.to_string (fun i, (terms i).repr)
+| (atom n x terms) := x.quote ++ fin_fun_to_string (fun i : fin n, (terms i).repr)
 | (not p) := sformat!"(¬ {p.repr})"
 | (and p q) := sformat!"({p.repr} ∧ {q.repr})"
 | (or p q) := sformat!"({p.repr} ∨ {q.repr})"
@@ -76,7 +76,7 @@ meta def formula.repr : formula → string
 meta instance : has_repr formula := has_repr.mk formula.repr
 
 def mk_atom (name : string) (terms : list term) :=
-atom name (list_to_fin_fun terms)
+atom terms.length name terms.to_fin_fun
 
 
 /-
@@ -91,25 +91,25 @@ A mapping of each n-ary predicate symbol P to a Boolean function P_{M} : D^{n} �
 structure interpretation (T : Type) : Type :=
 (domain : set T)
 (nonempty : domain.nonempty)
-(func {n} : string → (fin n → T) → T)
-(pred {n} : string → (fin n → T) → bool)
+(func (n : ℕ) : string → (fin n → T) → T)
+(pred (n : ℕ) : string → (fin n → T) → bool)
 
 /-
 A mapping of each variable name to an element of the domain.
 -/
 def valuation (T : Type) := string → T
 
-def eval_term
+def term.eval
 (T : Type) (m : interpretation T) (v : valuation T) : term → T
 | (var x) := v x
-| (func f args) := m.func f (fun i, eval_term (args i))
+| (func n f args) := m.func n f (fun i : fin n, term.eval (args i))
 
 notation  x `↦` a := fun v, function.update v x a
 
 def holds (T : Type) (m : interpretation T) : valuation T → formula → Prop
 | _ bottom := false
 | _ top := true
-| v (atom x args) := m.pred x (fun i, eval_term T m v (args i))
+| v (atom n x args) := m.pred n x (fun i : fin n, term.eval T m v (args i))
 | v (not p) := ¬ holds v p
 | v (and p q) := holds v p ∧ holds v q
 | v (or p q) := holds v p ∨ holds v q
@@ -118,9 +118,9 @@ def holds (T : Type) (m : interpretation T) : valuation T → formula → Prop
 | v (forall_ x p) := forall a ∈ m.domain, holds ((x ↦ a) v) p
 | v (exists_ x p) := exists a ∈ m.domain, holds ((x ↦ a) v) p
 
-def term.all_var_set : term → set string
+def term.all_var_set : term → finset string
 | (var x) := {x}
-| (func f args) := ⋃ i, term.all_var_set (args i)
+| (func n f args) := finset.bUnion finset.univ (fun i : fin n, (args i).all_var_set)
 
 theorem thm_3_1
   (T : Type)
@@ -128,40 +128,51 @@ theorem thm_3_1
   (t : term)
   (v v' : valuation T)
   (h1 : ∀ x ∈ (term.all_var_set t), v x = v' x) :
-  eval_term T m v t = eval_term T m v' t :=
+  term.eval T m v t = term.eval T m v' t :=
 begin
   induction t,
-  case term.var {
-    unfold term.all_var_set at h1,
-    unfold eval_term,
-    simp only [set.mem_singleton_iff, forall_eq] at h1,
-    exact h1 },
+  case term.var : x {
+    have s1 : x ∈ (var x).all_var_set, unfold term.all_var_set, simp only [finset.mem_singleton],
+    calc
+    term.eval T m v (var x) = v x : by unfold term.eval
+    ... = v' x : h1 x s1
+    ... = term.eval T m v' (var x) : by unfold term.eval
+  },
   case term.func : n f args ih {
-    unfold term.all_var_set at *,
-    have s1 : forall i : fin n, forall x : string, x ∈ term.all_var_set (args i) → v x = v' x,
-    intros i x h, apply h1, exact set.mem_Union_of_mem i h,
-    unfold eval_term at *, congr, ext, apply ih, apply s1
+    calc
+    term.eval T m v (func n f args)
+      = m.func n f (fun i : fin n, term.eval T m v (args i)) : by unfold term.eval
+    ... = 
+      m.func n f (fun i : fin n, term.eval T m v' (args i)) :
+        begin
+          congr, funext, apply ih,
+          intros x h2, apply h1, unfold term.all_var_set,
+          simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left],
+          exact exists.intro i h2
+        end
+    ... =
+      term.eval T m v' (func n f args) : by unfold term.eval
 	}
 end
 
 #eval (forall_ "x" (mk_atom "P" [mk_func "f" [(var "x")], var "y"]))
 
-def formula.all_var_set : formula → set string
+def formula.all_var_set : formula → finset string
 | bottom := ∅
 | top := ∅
-| (atom x terms) := ⋃ i, term.all_var_set (terms i)
+| (atom n x terms) := finset.bUnion finset.univ (fun i : fin n, (terms i).all_var_set)
 | (not p) := p.all_var_set
-| (and p q) := set.union p.all_var_set q.all_var_set
-| (or p q) := set.union p.all_var_set q.all_var_set
-| (imp p q) := set.union p.all_var_set q.all_var_set
-| (iff p q) := set.union p.all_var_set q.all_var_set
-| (forall_ x p) := set.insert x p.all_var_set
-| (exists_ x p) := set.insert x p.all_var_set
+| (and p q) := p.all_var_set ∪ q.all_var_set
+| (or p q) := p.all_var_set ∪ q.all_var_set
+| (imp p q) := p.all_var_set ∪ q.all_var_set
+| (iff p q) := p.all_var_set ∪ q.all_var_set
+| (forall_ x p) := {x} ∪ p.all_var_set
+| (exists_ x p) := {x} ∪ p.all_var_set
 
-def formula.free_var_set : formula → set string
+def formula.free_var_set : formula → finset string
 | bottom := ∅
 | top := ∅
-| (atom x terms) := ⋃ i, term.all_var_set (terms i)
+| (atom n x terms) := finset.bUnion finset.univ (fun i : fin n, (terms i).all_var_set)
 | (not p) := p.free_var_set
 | (and p q) := p.free_var_set ∪ q.free_var_set
 | (or p q) := p.free_var_set ∪ q.free_var_set
@@ -187,8 +198,9 @@ begin
   },
   case formula.atom : n f terms {
     unfold formula.free_var_set at h1,
-    have s1 : forall i, eval_term T m v (terms i) = eval_term T m v' (terms i),
-      intros i, apply thm_3_1, intros x h, apply h1, exact set.mem_Union_of_mem i h,
+    have s1 : forall i, term.eval T m v (terms i) = term.eval T m v' (terms i),
+      intros i, apply thm_3_1, intros x h, apply h1, simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left],
+      exact exists.intro i h,
     unfold holds, finish
   },
   case formula.not : p ih {
@@ -385,23 +397,23 @@ lemma lem_3_5
   (i : instantiation)
   (m : interpretation T)
   (v : valuation T) :
-  eval_term T m v (term_sub i t) = eval_term T m ((eval_term T m v) ∘ i) t :=
+  term.eval T m v (term_sub i t) = term.eval T m ((term.eval T m v) ∘ i) t :=
 begin
   induction t,
   case term.var : x {
     calc
-    eval_term T m v (term_sub i (var x)) = eval_term T m v (i x) : by unfold term_sub
-    ...                                  = ((eval_term T m v) ∘ i) x : by unfold function.comp
-    ...                                  = eval_term T m ((eval_term T m v) ∘ i) (var x) : by unfold eval_term
+    term.eval T m v (term_sub i (var x)) = term.eval T m v (i x) : by unfold term_sub
+    ...                                  = ((term.eval T m v) ∘ i) x : by unfold function.comp
+    ...                                  = term.eval T m ((term.eval T m v) ∘ i) (var x) : by unfold term.eval
   },
   case term.func : n f args ih {
-    have ih' : ∀ (j : fin n), eval_term T m v (term_sub i (args j)) =
-      eval_term T m ((eval_term T m v) ∘ i) (args j), exact ih,
+    have ih' : ∀ (j : fin n), term.eval T m v (term_sub i (args j)) =
+      term.eval T m ((term.eval T m v) ∘ i) (args j), exact ih,
     calc
-    eval_term T m v (term_sub i (func f args)) = eval_term T m v (func f (fun j, term_sub i (args j))) : by unfold term_sub
-    ... = m.func f (fun j, eval_term T m v (term_sub i (args j))) : by unfold eval_term
-    ... = m.func f (fun j, eval_term T m ((eval_term T m v) ∘ i) (args j)) : begin congr, apply funext, intros j, exact ih' j end
-    ... = eval_term T m ((eval_term T m v) ∘ i) (func f args) : by unfold eval_term
+    term.eval T m v (term_sub i (func f args)) = term.eval T m v (func f (fun j, term_sub i (args j))) : by unfold term_sub
+    ... = m.func f (fun j, term.eval T m v (term_sub i (args j))) : by unfold term.eval
+    ... = m.func f (fun j, term.eval T m ((term.eval T m v) ∘ i) (args j)) : begin congr, apply funext, intros j, exact ih' j end
+    ... = term.eval T m ((term.eval T m v) ∘ i) (func f args) : by unfold term.eval
   }
 end
 
@@ -419,17 +431,23 @@ using_well_founded { rel_tac := λ _ _,
   `[exact ⟨_, measure_wf (λ ⟨x, vars⟩, vars.sup (λ i, i.length) + 1 - x.length)⟩] }
 
 
-def formula_sub (i : instantiation) : formula → formula
-| bottom := bottom
-| top := top
-| (atom x terms) := atom x (fun n, term_sub i (terms n))
-| (not p) := not (formula_sub p)
-| (and p q) := and (formula_sub p) (formula_sub q)
-| (or p q) := or (formula_sub p) (formula_sub q)
-| (imp p q) := imp (formula_sub p) (formula_sub q)
-| (iff p q) := iff (formula_sub p) (formula_sub q)
-| (forall_ x p) := sorry
-| (exists_ x p) := sorry
+def formula_sub : instantiation → formula → formula
+| _ bottom := bottom
+| _ top := top
+| i (atom x terms) := atom x (fun n, term_sub i (terms n))
+| i (not p) := not (formula_sub i p)
+| i (and p q) := and (formula_sub i p) (formula_sub i q)
+| i (or p q) := or (formula_sub i p) (formula_sub i q)
+| i (imp p q) := imp (formula_sub i p) (formula_sub i q)
+| i (iff p q) := iff (formula_sub i p) (formula_sub i q)
+| i (forall_ x p) :=
+  let x' :=
+    if ∃ y ∈ formula.free_var_set p \ {x}, x ∈ term.all_var_set (i y)
+    then (variant x (formula.free_var_set (formula_sub ((x ↦ var x) i) p)))
+    else x
+  in forall_ x' (formula_sub ((x ↦ var x') i) p)
+
+| i (exists_ x p) := sorry
 
 
 lemma lem_3_6
@@ -446,7 +464,7 @@ theorem thm_3_7
   (T : Type)
   (m : interpretation T)
   (v : valuation T) :
-  holds T m v (formula_sub i p) = holds T m ((eval_term T m v) ∘ i) p :=
+  holds T m v (formula_sub i p) = holds T m ((term.eval T m v) ∘ i) p :=
 begin
   sorry
 end
