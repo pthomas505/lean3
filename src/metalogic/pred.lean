@@ -460,8 +460,12 @@ def formula_sub : instantiation → formula → formula
     then (variant x (formula.free_var_set (formula_sub ((x ↦ var x) s) p)))
     else x
   in forall_ x' (formula_sub ((x ↦ var x') s) p)
-
-| s (exists_ x p) := sorry
+| s (exists_ x p) :=
+  let x' :=
+    if ∃ y ∈ formula.free_var_set p \ {x}, x ∈ term.all_var_set (s y)
+    then (variant x (formula.free_var_set (formula_sub ((x ↦ var x) s) p)))
+    else x
+  in exists_ x' (formula_sub ((x ↦ var x') s) p)
 
 
 lemma lem_3_6
