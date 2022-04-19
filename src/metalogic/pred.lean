@@ -379,11 +379,14 @@ def sub_term (i : instantiation) : term → term
 lemma lem_3_4
   (t : term)
   (i : instantiation) :
-  term.all_var_set (sub_term i t) = finset.bUnion (term.all_var_set t) (fun y, term.all_var_set (i y)) :=
+  (sub_term i t).all_var_set = finset.bUnion t.all_var_set (fun y, (i y).all_var_set) :=
 begin
   induction t,
   case term.var : x {
-    unfold sub_term, unfold term.all_var_set, simp only [finset.singleton_bUnion],
+    calc
+    (sub_term i (var x)).all_var_set = (i x).all_var_set : by unfold sub_term
+    ... = finset.bUnion {x} (fun (y : string), (i y).all_var_set) : by simp only [finset.singleton_bUnion]
+    ... = finset.bUnion (var x).all_var_set (fun y, (i y).all_var_set) : by unfold term.all_var_set
   },
   case term.func : n f args ih {
     sorry
