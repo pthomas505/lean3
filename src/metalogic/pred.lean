@@ -371,24 +371,35 @@ A mapping of each variable name to a term.
 -/
 def instantiation := string → term
 
-def sub_term (i : instantiation) : term → term
-| (var x) := i x
-| (func n name args) := func n name (fun n, sub_term (args n))
+def sub_term (s : instantiation) : term → term
+| (var x) := s x
+| (func n name args) := func n name (fun i : fin n, sub_term (args i))
 
 
 lemma lem_3_4
   (t : term)
-  (i : instantiation) :
-  (sub_term i t).all_var_set = finset.bUnion t.all_var_set (fun y, (i y).all_var_set) :=
+  (s : instantiation) :
+  (sub_term s t).all_var_set = finset.bUnion t.all_var_set (fun y : string, (s y).all_var_set) :=
 begin
   induction t,
   case term.var : x {
     calc
-    (sub_term i (var x)).all_var_set = (i x).all_var_set : by unfold sub_term
-    ... = finset.bUnion {x} (fun (y : string), (i y).all_var_set) : by simp only [finset.singleton_bUnion]
-    ... = finset.bUnion (var x).all_var_set (fun y, (i y).all_var_set) : by unfold term.all_var_set
+    (sub_term s (var x)).all_var_set = (s x).all_var_set : by unfold sub_term
+    ... = finset.bUnion {x} (fun y : string, (s y).all_var_set) : by simp only [finset.singleton_bUnion]
+    ... = finset.bUnion (var x).all_var_set (fun y : string, (s y).all_var_set) : by unfold term.all_var_set
   },
   case term.func : n f args ih {
+    simp at ih,
+    have s1 : (sub_term s (func n f args)).all_var_set =
+      (func n f (fun i : fin n, sub_term s (args i))).all_var_set, unfold sub_term,
+    have s2 : (func n f (fun i : fin n, sub_term s (args i))).all_var_set =
+      finset.bUnion finset.univ (fun i : fin n, (sub_term s (args i)).all_var_set), unfold term.all_var_set,
+    have s3 : finset.bUnion finset.univ (fun i : fin n, (sub_term s (args i)).all_var_set) =
+      finset.bUnion finset.univ (fun i : fin n, finset.bUnion (args i).all_var_set (fun y : string, (s y).all_var_set)), simp only [ih],
+    have s4 : finset.bUnion finset.univ (fun i : fin n, finset.bUnion (args i).all_var_set (fun y : string, (s y).all_var_set)) =
+      finset.bUnion (finset.bUnion finset.univ (fun i : fin n, (args i).all_var_set)) (fun y : string, (s y).all_var_set), sorry,
+    have s5 : finset.bUnion (finset.bUnion finset.univ (fun i : fin n, (args i).all_var_set)) (fun y : string, (s y).all_var_set) = 
+      finset.bUnion (func n f args).all_var_set (fun y : string, (s y).all_var_set), refl,
     sorry
   }
 end
@@ -397,26 +408,26 @@ end
 lemma lem_3_5
   (T : Type)
   (t : term)
-  (i : instantiation)
+  (s : instantiation)
   (m : interpretation T)
   (v : valuation T) :
-  eval_term T m v (sub_term i t) = eval_term T m ((eval_term T m v) ∘ i) t :=
+  eval_term T m v (sub_term s t) = eval_term T m ((eval_term T m v) ∘ s) t :=
 begin
   induction t,
   case term.var : x {
     calc
-    eval_term T m v (sub_term i (var x)) = eval_term T m v (i x) : by unfold sub_term
-    ...                                  = ((eval_term T m v) ∘ i) x : by unfold function.comp
-    ...                                  = eval_term T m ((eval_term T m v) ∘ i) (var x) : by unfold eval_term
+    eval_term T m v (sub_term s (var x)) = eval_term T m v (s x) : by unfold sub_term
+    ... = ((eval_term T m v) ∘ s) x : by unfold function.comp
+    ... = eval_term T m ((eval_term T m v) ∘ s) (var x) : by unfold eval_term
   },
   case term.func : n f args ih {
-    have ih' : ∀ (j : fin n), eval_term T m v (sub_term i (args j)) =
-      eval_term T m ((eval_term T m v) ∘ i) (args j), exact ih,
+    have ih' : ∀ (i : fin n), eval_term T m v (sub_term s (args i)) =
+      eval_term T m ((eval_term T m v) ∘ s) (args i), exact ih,
     calc
-    eval_term T m v (sub_term i (func n f args)) = eval_term T m v (func n f (fun j, sub_term i (args j))) : by unfold sub_term
-    ... = m.func n f (fun j, eval_term T m v (sub_term i (args j))) : by unfold eval_term
-    ... = m.func n f (fun j, eval_term T m ((eval_term T m v) ∘ i) (args j)) : begin congr, apply funext, intros j, exact ih' j end
-    ... = eval_term T m ((eval_term T m v) ∘ i) (func n f args) : by unfold eval_term
+    eval_term T m v (sub_term s (func n f args)) = eval_term T m v (func n f (fun i, sub_term s (args i))) : by unfold sub_term
+    ... = m.func n f (fun i, eval_term T m v (sub_term s (args i))) : by unfold eval_term
+    ... = m.func n f (fun i, eval_term T m ((eval_term T m v) ∘ s) (args i)) : begin congr, apply funext, intros j, exact ih' j end
+    ... = eval_term T m ((eval_term T m v) ∘ s) (func n f args) : by unfold eval_term
   }
 end
 
@@ -437,46 +448,46 @@ using_well_founded { rel_tac := λ _ _,
 def formula_sub : instantiation → formula → formula
 | _ bottom := bottom
 | _ top := top
-| i (atom n x terms) := atom n x (fun n, sub_term i (terms n))
-| i (not p) := not (formula_sub i p)
-| i (and p q) := and (formula_sub i p) (formula_sub i q)
-| i (or p q) := or (formula_sub i p) (formula_sub i q)
-| i (imp p q) := imp (formula_sub i p) (formula_sub i q)
-| i (iff p q) := iff (formula_sub i p) (formula_sub i q)
-| i (forall_ x p) :=
+| s (atom n x terms) := atom n x (fun n, sub_term s (terms n))
+| s (not p) := not (formula_sub s p)
+| s (and p q) := and (formula_sub s p) (formula_sub s q)
+| s (or p q) := or (formula_sub s p) (formula_sub s q)
+| s (imp p q) := imp (formula_sub s p) (formula_sub s q)
+| s (iff p q) := iff (formula_sub s p) (formula_sub s q)
+| s (forall_ x p) :=
   let x' :=
-    if ∃ y ∈ formula.free_var_set p \ {x}, x ∈ term.all_var_set (i y)
-    then (variant x (formula.free_var_set (formula_sub ((x ↦ var x) i) p)))
+    if ∃ y ∈ formula.free_var_set p \ {x}, x ∈ term.all_var_set (s y)
+    then (variant x (formula.free_var_set (formula_sub ((x ↦ var x) s) p)))
     else x
-  in forall_ x' (formula_sub ((x ↦ var x') i) p)
+  in forall_ x' (formula_sub ((x ↦ var x') s) p)
 
-| i (exists_ x p) := sorry
+| s (exists_ x p) := sorry
 
 
 lemma lem_3_6
   (p : formula)
-  (i : instantiation) :
-  formula.free_var_set (formula_sub i p) = finset.bUnion (formula.free_var_set p) (fun y, term.all_var_set (i y)) :=
+  (s : instantiation) :
+  formula.free_var_set (formula_sub s p) = finset.bUnion (formula.free_var_set p) (fun y, term.all_var_set (s y)) :=
 begin
   sorry
 end
 
 theorem thm_3_7
   (p : formula)
-  (i : instantiation)
+  (s : instantiation)
   (T : Type)
   (m : interpretation T)
   (v : valuation T) :
-  holds T m v (formula_sub i p) = holds T m ((eval_term T m v) ∘ i) p :=
+  holds T m v (formula_sub s p) = holds T m ((eval_term T m v) ∘ s) p :=
 begin
   sorry
 end
 
 theorem cor_3_8
   (p : formula)
-  (i : instantiation)
+  (s : instantiation)
   (h1 : is_valid p) :
-  is_valid (formula_sub i p) :=
+  is_valid (formula_sub s p) :=
 begin
   sorry
 end
