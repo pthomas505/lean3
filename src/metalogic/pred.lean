@@ -38,6 +38,9 @@ meta def term.repr : term → string
 
 meta instance : has_repr term := has_repr.mk term.repr
 
+def mk_const (name : string)
+:= func 0 name list.nil.to_fin_fun
+
 def mk_func (name : string) (terms : list term)
 := func terms.length name terms.to_fin_fun
 
@@ -75,7 +78,10 @@ meta def formula.repr : formula → string
 
 meta instance : has_repr formula := has_repr.mk formula.repr
 
-def mk_atom (name : string) (terms : list term) :=
+def mk_prop (name : string) :=
+atom 0 name list.nil.to_fin_fun
+
+def mk_pred (name : string) (terms : list term) :=
 atom terms.length name terms.to_fin_fun
 
 
@@ -155,7 +161,7 @@ begin
 	}
 end
 
-#eval (forall_ "x" (mk_atom "P" [mk_func "f" [(var "x")], var "y"]))
+#eval (forall_ "x" (mk_pred "P" [mk_func "f" [(var "x")], var "y"]))
 
 def formula.all_var_set : formula → finset string
 | bottom := ∅
