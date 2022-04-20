@@ -448,33 +448,33 @@ using_well_founded { rel_tac := λ _ _,
   `[exact ⟨_, measure_wf (λ ⟨x, vars⟩, vars.sup (λ i, i.length) + 1 - x.length)⟩] }
 
 
-def formula_sub : instantiation → formula → formula
+def sub_formula : instantiation → formula → formula
 | _ bottom := bottom
 | _ top := top
-| s (atom n x terms) := atom n x (fun n, sub_term s (terms n))
-| s (not p) := not (formula_sub s p)
-| s (and p q) := and (formula_sub s p) (formula_sub s q)
-| s (or p q) := or (formula_sub s p) (formula_sub s q)
-| s (imp p q) := imp (formula_sub s p) (formula_sub s q)
-| s (iff p q) := iff (formula_sub s p) (formula_sub s q)
+| s (atom n x terms) := atom n x (fun i : fin n, sub_term s (terms i))
+| s (not p) := not (sub_formula s p)
+| s (and p q) := and (sub_formula s p) (sub_formula s q)
+| s (or p q) := or (sub_formula s p) (sub_formula s q)
+| s (imp p q) := imp (sub_formula s p) (sub_formula s q)
+| s (iff p q) := iff (sub_formula s p) (sub_formula s q)
 | s (forall_ x p) :=
   let x' :=
     if ∃ y ∈ formula.free_var_set p \ {x}, x ∈ term.all_var_set (s y)
-    then (variant x (formula.free_var_set (formula_sub ((x ↦ var x) s) p)))
+    then (variant x (formula.free_var_set (sub_formula ((x ↦ var x) s) p)))
     else x
-  in forall_ x' (formula_sub ((x ↦ var x') s) p)
+  in forall_ x' (sub_formula ((x ↦ var x') s) p)
 | s (exists_ x p) :=
   let x' :=
     if ∃ y ∈ formula.free_var_set p \ {x}, x ∈ term.all_var_set (s y)
-    then (variant x (formula.free_var_set (formula_sub ((x ↦ var x) s) p)))
+    then (variant x (formula.free_var_set (sub_formula ((x ↦ var x) s) p)))
     else x
-  in exists_ x' (formula_sub ((x ↦ var x') s) p)
+  in exists_ x' (sub_formula ((x ↦ var x') s) p)
 
 
 lemma lem_3_6
   (p : formula)
   (s : instantiation) :
-  formula.free_var_set (formula_sub s p) = finset.bUnion (formula.free_var_set p) (fun y, term.all_var_set (s y)) :=
+  formula.free_var_set (sub_formula s p) = finset.bUnion (formula.free_var_set p) (fun y, term.all_var_set (s y)) :=
 begin
   sorry
 end
@@ -485,7 +485,7 @@ theorem thm_3_7
   (T : Type)
   (m : interpretation T)
   (v : valuation T) :
-  holds T m v (formula_sub s p) = holds T m ((eval_term T m v) ∘ s) p :=
+  holds T m v (sub_formula s p) = holds T m ((eval_term T m v) ∘ s) p :=
 begin
   sorry
 end
@@ -494,7 +494,7 @@ theorem cor_3_8
   (p : formula)
   (s : instantiation)
   (h1 : is_valid p) :
-  is_valid (formula_sub s p) :=
+  is_valid (sub_formula s p) :=
 begin
   sorry
 end
