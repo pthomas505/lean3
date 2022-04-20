@@ -146,18 +146,15 @@ begin
   },
   case term.func : n f args ih {
     calc
-    eval_term T m v (func n f args)
-      = m.func n f (fun i : fin n, eval_term T m v (args i)) : by unfold eval_term
-    ... = 
-      m.func n f (fun i : fin n, eval_term T m v' (args i)) :
-        begin
-          congr, funext, apply ih,
-          intros x h2, apply h1, unfold term.all_var_set,
-          simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left],
-          exact exists.intro i h2
-        end
-    ... =
-      eval_term T m v' (func n f args) : by unfold eval_term
+    eval_term T m v (func n f args) = m.func n f (fun i : fin n, eval_term T m v (args i)) : by unfold eval_term
+    ... = m.func n f (fun i : fin n, eval_term T m v' (args i)) :
+      begin
+        congr, funext, apply ih,
+        intros x h2, apply h1, unfold term.all_var_set,
+        simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left],
+        exact exists.intro i h2
+      end
+    ... = eval_term T m v' (func n f args) : by unfold eval_term
 	}
 end
 
