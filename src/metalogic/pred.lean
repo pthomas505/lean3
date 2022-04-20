@@ -202,7 +202,7 @@ begin
   case formula.top {
     unfold holds
   },
-  case formula.atom : n f terms {
+  case formula.atom : n x terms {
     unfold formula.free_var_set at h1,
     have s1 : forall i : fin n, eval_term T m v (terms i) = eval_term T m v' (terms i),
       intros i, apply thm_3_1, intros x h, apply h1, simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left],
