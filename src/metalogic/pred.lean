@@ -65,8 +65,8 @@ inductive formula : Type
 open formula
 
 meta def formula.repr : formula → string
-| bottom := sformat!"F"
-| top := sformat!"T"
+| bottom := sformat!"⊥"
+| top := sformat!"⊤"
 | (atom n x terms) := x.quote ++ fin_fun_to_string (fun i : fin n, (terms i).repr)
 | (not p) := sformat!"(¬ {p.repr})"
 | (and p q) := sformat!"({p.repr} ∧ {q.repr})"
