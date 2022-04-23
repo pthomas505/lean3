@@ -515,7 +515,13 @@ begin
     ... = finset.bUnion (not p).free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
   },
   case formula.and : p q ih_p ih_q {
-    sorry
+    calc
+    (sub_formula s (and p q)).free_var_set = (and (sub_formula s p) (sub_formula s q)).free_var_set : by unfold sub_formula
+    ... = (sub_formula s p).free_var_set ∪ (sub_formula s q).free_var_set : by unfold formula.free_var_set
+    ... = finset.bUnion p.free_var_set (fun y : string, (s y).all_var_set) ∪
+            finset.bUnion q.free_var_set (fun y : string, (s y).all_var_set) : by simp only [ih_p, ih_q]
+    ... = finset.bUnion (p.free_var_set ∪ q.free_var_set) (fun y : string, (s y).all_var_set) : sorry
+    ... = finset.bUnion (and p q).free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
   },
   case formula.or : p q ih_p ih_q {
     sorry
