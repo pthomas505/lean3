@@ -39,11 +39,11 @@ meta def term.repr : term → string
 
 meta instance : has_repr term := has_repr.mk term.repr
 
-def mk_const (name : string)
-:= func 0 name list.nil.to_fin_fun
+def mk_const (name : string) :=
+func 0 name list.nil.to_fin_fun
 
-def mk_func (name : string) (terms : list term)
-:= func terms.length name terms.to_fin_fun
+def mk_func (name : string) (terms : list term) :=
+func terms.length name terms.to_fin_fun
 
 
 /-
@@ -86,6 +86,9 @@ def mk_pred (name : string) (terms : list term) :=
 atom terms.length name terms.to_fin_fun
 
 
+#eval (forall_ "x" (mk_pred "P" [mk_func "f" [(var "x")], var "y"]))
+
+
 /-
 domain: A nonempty set D called the domain of the interpretation. The intention is that all terms have values in D.
 
@@ -101,6 +104,7 @@ structure interpretation (T : Type) : Type :=
 (func (n : ℕ) : string → (fin n → T) → T)
 (pred (n : ℕ) : string → (fin n → T) → bool)
 
+
 /-
 A mapping of each variable name to an element of the domain.
 -/
@@ -109,6 +113,7 @@ def valuation (T : Type) := string → T
 def eval_term (T : Type) (m : interpretation T) (v : valuation T) : term → T
 | (var x) := v x
 | (func n f args) := m.func n f (fun i : fin n, eval_term (args i))
+
 
 notation  x `↦` a := fun v, function.update v x a
 
@@ -124,9 +129,11 @@ def holds (T : Type) (m : interpretation T) : valuation T → formula → Prop
 | v (forall_ x p) := forall a ∈ m.domain, holds ((x ↦ a) v) p
 | v (exists_ x p) := exists a ∈ m.domain, holds ((x ↦ a) v) p
 
+
 def term.all_var_set : term → finset string
 | (var x) := {x}
 | (func n f args) := finset.bUnion finset.univ (fun i : fin n, (args i).all_var_set)
+
 
 theorem thm_3_1
   (T : Type)
@@ -158,7 +165,6 @@ begin
 	}
 end
 
-#eval (forall_ "x" (mk_pred "P" [mk_func "f" [(var "x")], var "y"]))
 
 def formula.all_var_set : formula → finset string
 | bottom := ∅
@@ -183,6 +189,7 @@ def formula.free_var_set : formula → finset string
 | (iff p q) := p.free_var_set ∪ q.free_var_set
 | (forall_ x p) := p.free_var_set \ {x}
 | (exists_ x p) := p.free_var_set \ {x}
+
 
 theorem thm_3_2
   (T : Type)
@@ -261,7 +268,10 @@ begin
   }
 end
 
-def is_sentence (p : formula) : Prop := p.free_var_set = ∅
+
+def is_sentence (p : formula) : Prop :=
+p.free_var_set = ∅
+
 
 theorem cor_3_3
   (p : formula)
@@ -275,6 +285,7 @@ begin
     rewrite h1, simp only [finset.not_mem_empty, forall_false_left, forall_const],
   exact thm_3_2 T m p v v' s1
 end
+
 
 def is_valid (p : formula) : Prop :=
 ∀ T : Type, ∀ m : interpretation T, ∀ v : valuation T, holds T m v p
@@ -293,20 +304,24 @@ def satisfies_set (T : Type) (m : interpretation T) (S : set formula) : Prop :=
 ∀ p ∈ S, satisfies T m p
 
 
-def is_satisfiable (p : formula) : Prop := ∃ T : Type, ∃ m : interpretation T, satisfies T m p
+def is_satisfiable (p : formula) : Prop :=
+∃ T : Type, ∃ m : interpretation T, satisfies T m p
 
-def is_satisfiable_set (S : set formula) : Prop := ∃ T : Type, ∃ m : interpretation T, ∀ p ∈ S, satisfies T m p
+def is_satisfiable_set (S : set formula) : Prop :=
+∃ T : Type, ∃ m : interpretation T, ∀ p ∈ S, satisfies T m p
 
 
 /-
 holds_in p T m = p holds in m.
 -/
-def holds_in (p : formula) (T : Type) (m : interpretation T) : Prop := satisfies T m p
+def holds_in (p : formula) (T : Type) (m : interpretation T) : Prop :=
+satisfies T m p
 
 /-
 set_holds_in S T m = S holds in m.
 -/
-def set_holds_in (S : set formula) (T : Type) (m : interpretation T) : Prop := satisfies_set T m S
+def set_holds_in (S : set formula) (T : Type) (m : interpretation T) : Prop :=
+satisfies_set T m S
 
 
 example
@@ -323,7 +338,8 @@ end
 /-
 is_model_of T m Γ = m is a model of Γ
 -/
-def is_model_of (T : Type) (m : interpretation T) (Γ : set formula) := satisfies_set T m Γ
+def is_model_of (T : Type) (m : interpretation T) (Γ : set formula) :=
+satisfies_set T m Γ
 
 
 /-
@@ -446,7 +462,6 @@ def variant : string → finset string → string
   variant (string.push x '\'') vars else x
 using_well_founded { rel_tac := λ _ _,
   `[exact ⟨_, measure_wf (λ ⟨x, vars⟩, vars.sup (λ i, i.length) + 1 - x.length)⟩] }
-
 
 def sub_formula : instantiation → formula → formula
 | _ bottom := bottom
