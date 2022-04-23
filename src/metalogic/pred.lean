@@ -543,6 +543,8 @@ begin
       (sub_formula ((x ↦ var x') s) p).free_var_set \ {x'}, unfold formula.free_var_set,
     have s3 : (sub_formula ((x ↦ var x') s) p).free_var_set \ {x'} =
       (finset.bUnion p.free_var_set (fun (y : string), (((x ↦ var x') s) y).all_var_set)) \ {x'}, simp only [ih ((x ↦ var x') s)],
+    have s4 : (((x ↦ var x') s) x).all_var_set =
+      {x'}, unfold function.update, simp only [eq_self_iff_true, dite_eq_ite, if_true], unfold term.all_var_set,
     sorry
   },
   case formula.exists_ : x p ih {
