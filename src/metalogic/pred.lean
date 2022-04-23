@@ -140,7 +140,7 @@ theorem thm_3_1
   (m : interpretation T)
   (t : term)
   (v v' : valuation T)
-  (h1 : ∀ x ∈ (term.all_var_set t), v x = v' x) :
+  (h1 : ∀ x ∈ t.all_var_set, v x = v' x) :
   eval_term T m v t = eval_term T m v' t :=
 begin
   induction t,
@@ -196,7 +196,7 @@ theorem thm_3_2
   (m : interpretation T)
   (p : formula)
   (v v' : valuation T)
-  (h1 : ∀ x ∈ (formula.free_var_set p), v x = v' x) :
+  (h1 : ∀ x ∈ p.free_var_set, v x = v' x) :
   holds T m v p ↔ holds T m v' p :=
 begin
   induction p generalizing v v',
@@ -281,7 +281,7 @@ theorem cor_3_3
 begin
   intros T m v v',
   unfold is_sentence at h1,
-  have s1 : ∀ x ∈ (formula.free_var_set p), v x = v' x,
+  have s1 : ∀ x ∈ p.free_var_set, v x = v' x,
     rewrite h1, simp only [finset.not_mem_empty, forall_false_left, forall_const],
   exact thm_3_2 T m p v v' s1
 end
@@ -489,9 +489,49 @@ def sub_formula : instantiation → formula → formula
 lemma lem_3_6
   (p : formula)
   (s : instantiation) :
-  formula.free_var_set (sub_formula s p) = finset.bUnion (formula.free_var_set p) (fun y, term.all_var_set (s y)) :=
+  (sub_formula s p).free_var_set = finset.bUnion p.free_var_set (fun y : string, (s y).all_var_set) :=
 begin
-  sorry
+  induction p generalizing s,
+  case formula.bottom {
+    unfold sub_formula, unfold formula.free_var_set, simp only [finset.bUnion_empty]
+  },
+  case formula.top {
+    unfold sub_formula, unfold formula.free_var_set, simp only [finset.bUnion_empty]
+  },
+  case formula.atom : n x terms {
+    calc
+    (sub_formula s (atom n x terms)).free_var_set = (atom n x (fun i : fin n, sub_term s (terms i))).free_var_set : by unfold sub_formula
+    ... = finset.bUnion finset.univ (fun i : fin n, (sub_term s (terms i)).all_var_set) : by unfold formula.free_var_set
+    ... = finset.bUnion finset.univ (fun i : fin n, (finset.bUnion (terms i).all_var_set (fun y : string, (s y).all_var_set))) :
+        by simp only [lem_3_4]
+    ... = finset.bUnion (finset.bUnion finset.univ (fun i : fin n, (terms i).all_var_set)) (fun y : string, (s y).all_var_set) : sorry
+    ... = finset.bUnion (atom n x terms).free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
+  },
+  case formula.not : p ih {
+    calc
+    (sub_formula s (not p)).free_var_set = (not (sub_formula s p)).free_var_set : by unfold sub_formula
+    ... = (sub_formula s p).free_var_set : by unfold formula.free_var_set
+    ... = finset.bUnion p.free_var_set (fun y : string, (s y).all_var_set) : ih s
+    ... = finset.bUnion (not p).free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
+  },
+  case formula.and : p q ih_p ih_q {
+    sorry
+  },
+  case formula.or : p q ih_p ih_q {
+    sorry
+  },
+  case formula.imp : p q ih_p ih_q {
+    sorry
+  },
+  case formula.iff : p q ih_p ih_q {
+    sorry
+  },
+  case formula.forall_ : x p ih {
+    sorry
+  },
+  case formula.exists_ : x p ih {
+    sorry
+  }
 end
 
 theorem thm_3_7
