@@ -9,6 +9,7 @@ Cambridge: Cambridge University Press.
 doi:10.1017/CBO9780511576430
 -/
 
+
 import data.set
 
 
@@ -105,8 +106,7 @@ A mapping of each variable name to an element of the domain.
 -/
 def valuation (T : Type) := string → T
 
-def eval_term
-(T : Type) (m : interpretation T) (v : valuation T) : term → T
+def eval_term (T : Type) (m : interpretation T) (v : valuation T) : term → T
 | (var x) := v x
 | (func n f args) := m.func n f (fun i : fin n, eval_term (args i))
 
