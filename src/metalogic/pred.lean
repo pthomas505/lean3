@@ -533,6 +533,16 @@ begin
     sorry
   },
   case formula.forall_ : x p ih {
+    let x' :=
+      if ∃ y ∈ formula.free_var_set p \ {x}, x ∈ term.all_var_set (s y)
+      then (variant x (formula.free_var_set (sub_formula ((x ↦ var x) s) p)))
+      else x,
+    have s1 : (sub_formula s (forall_ x p)).free_var_set =
+      (forall_ x' (sub_formula ((x ↦ var x') s) p)).free_var_set, unfold sub_formula,
+    have s2 : (forall_ x' (sub_formula ((x ↦ var x') s) p)).free_var_set =
+      (sub_formula ((x ↦ var x') s) p).free_var_set \ {x'}, unfold formula.free_var_set,
+    have s3 : (sub_formula ((x ↦ var x') s) p).free_var_set \ {x'} =
+      (finset.bUnion p.free_var_set (fun (y : string), (((x ↦ var x') s) y).all_var_set)) \ {x'}, simp only [ih ((x ↦ var x') s)],
     sorry
   },
   case formula.exists_ : x p ih {
