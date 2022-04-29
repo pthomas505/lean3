@@ -463,6 +463,11 @@ def variant : string → finset string → string
 using_well_founded { rel_tac := λ _ _,
   `[exact ⟨_, measure_wf (λ ⟨x, vars⟩, vars.sup (λ i, i.length) + 1 - x.length)⟩] }
 
+lemma variant_not_mem (x : string) (s : finset string) : variant x s ∉ s :=
+begin
+  sorry
+end
+
 def sub_formula : instantiation → formula → formula
 | _ bottom := bottom
 | _ top := top
@@ -552,7 +557,13 @@ begin
                   simp only [finset.mem_sdiff, finset.mem_singleton] at h1, cases h1, exact h1_right end,
     have s2 : (((x ↦ var x') s) x).all_var_set = {x'}, unfold function.update, simp only [eq_self_iff_true, dite_eq_ite, if_true], unfold term.all_var_set,
     have s3 : x' ∉ (finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (s y).all_var_set)),
-      by_cases ∃ y ∈ p.free_var_set \ {x}, x ∈ (s y).all_var_set, sorry, sorry,
+      by_cases ∃ y ∈ p.free_var_set \ {x}, x ∈ (s y).all_var_set,
+        have s4 : x' = variant x (sub_formula ((x ↦ var x) s) p).free_var_set, exact if_pos h,
+        have s5 : x' ∉ (sub_formula ((x ↦ var x) s) p).free_var_set, rewrite s4, apply variant_not_mem,
+        have s6 : (sub_formula ((x ↦ var x) s) p).free_var_set = finset.bUnion p.free_var_set (fun y : string, (((x ↦ var x) s) y).all_var_set),
+          apply ih,
+    sorry,
+    sorry,
     sorry
   },
   case formula.exists_ : x p ih {
