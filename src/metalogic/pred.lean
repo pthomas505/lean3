@@ -474,14 +474,14 @@ def sub_formula : instantiation → formula → formula
 | s (iff p q) := iff (sub_formula s p) (sub_formula s q)
 | s (forall_ x p) :=
   let x' :=
-    if ∃ y ∈ formula.free_var_set p \ {x}, x ∈ term.all_var_set (s y)
-    then (variant x (formula.free_var_set (sub_formula ((x ↦ var x) s) p)))
+    if ∃ y ∈ p.free_var_set \ {x}, x ∈ (s y).all_var_set
+    then variant x (sub_formula ((x ↦ var x) s) p).free_var_set
     else x
   in forall_ x' (sub_formula ((x ↦ var x') s) p)
 | s (exists_ x p) :=
   let x' :=
-    if ∃ y ∈ formula.free_var_set p \ {x}, x ∈ term.all_var_set (s y)
-    then (variant x (formula.free_var_set (sub_formula ((x ↦ var x) s) p)))
+    if ∃ y ∈ p.free_var_set \ {x}, x ∈ (s y).all_var_set
+    then variant x (sub_formula ((x ↦ var x) s) p).free_var_set
     else x
   in exists_ x' (sub_formula ((x ↦ var x') s) p)
 
@@ -537,10 +537,10 @@ begin
     sorry
   },
   case formula.forall_ : x p ih {
-    let x' :=
-      if ∃ y ∈ formula.free_var_set p \ {x}, x ∈ term.all_var_set (s y)
-      then (variant x (formula.free_var_set (sub_formula ((x ↦ var x) s) p)))
-      else x,
+  let x' :=
+    if ∃ y ∈ p.free_var_set \ {x}, x ∈ (s y).all_var_set
+    then variant x (sub_formula ((x ↦ var x) s) p).free_var_set
+    else x,
     have s1 : (sub_formula s (forall_ x p)).free_var_set =
       (forall_ x' (sub_formula ((x ↦ var x') s) p)).free_var_set, unfold sub_formula,
     have s2 : (forall_ x' (sub_formula ((x ↦ var x') s) p)).free_var_set =
@@ -555,6 +555,7 @@ begin
       (finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (s y).all_var_set)) \ {x'},
         congr' 1, apply finset.bUnion_congr, refl, intros a h1, congr, simp only, apply function.update_noteq,
         simp only [finset.mem_sdiff, finset.mem_singleton] at h1, cases h1, exact h1_right,
+    have s7 : x' ∉ (finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (s y).all_var_set)), sorry,
     sorry
   },
   case formula.exists_ : x p ih {
