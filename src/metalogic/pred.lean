@@ -486,6 +486,10 @@ def sub_formula : instantiation → formula → formula
   in exists_ x' (sub_formula ((x ↦ var x') s) p)
 
 
+example (α : Type) (β : Type) [decidable_eq α] [decidable_eq β] (s : finset α) (t : α → finset β) (x : α) :
+(finset.bUnion s (fun y : α, t y)) \ (t x) = (finset.bUnion (s \ {x}) (fun y : α, t y)) \ (t x) := sorry
+
+
 lemma lem_3_6
   (p : formula)
   (s : instantiation) :
@@ -545,6 +549,12 @@ begin
       (finset.bUnion p.free_var_set (fun (y : string), (((x ↦ var x') s) y).all_var_set)) \ {x'}, simp only [ih ((x ↦ var x') s)],
     have s4 : (((x ↦ var x') s) x).all_var_set =
       {x'}, unfold function.update, simp only [eq_self_iff_true, dite_eq_ite, if_true], unfold term.all_var_set,
+    have s5 : (finset.bUnion p.free_var_set (fun (y : string), (((x ↦ var x') s) y).all_var_set)) \ {x'} =
+      (finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (((x ↦ var x') s) y).all_var_set)) \ {x'}, sorry,
+    have s6 : (finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (((x ↦ var x') s) y).all_var_set)) \ {x'} =
+      (finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (s y).all_var_set)) \ {x'},
+        congr' 1, apply finset.bUnion_congr, refl, intros a h1, congr, simp only, apply function.update_noteq,
+        simp only [finset.mem_sdiff, finset.mem_singleton] at h1, cases h1, exact h1_right,
     sorry
   },
   case formula.exists_ : x p ih {
