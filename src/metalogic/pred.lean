@@ -638,7 +638,7 @@ begin
       then variant x (sub_formula ([x ↦ var x] s) p).free_var_set
       else x,
     have s1 : ∀ z ∈ p.free_var_set, ∀ a ∈ m.domain,
-      (eval_term T m ([x' ↦ a] v) ∘ ([x ↦ (var x')] s)) z = ([x ↦ a] ((eval_term T m v) ∘ s)) z, sorry,
+      ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) z = ([x ↦ a] ((eval_term T m v) ∘ s)) z, sorry,
     sorry
   },
   case formula.exists_ : x p ih {
