@@ -495,6 +495,45 @@ example (α : Type) (β : Type) [decidable_eq α] [decidable_eq β] (s : finset 
 (finset.bUnion s (fun y : α, t y)) \ (t x) = (finset.bUnion (s \ {x}) (fun y : α, t y)) \ (t x) := sorry
 
 
+lemma lem_3_6_1
+  (x : string)
+  (p : formula)
+  (s : instantiation)
+  (h1 : ∀ (s : instantiation), (sub_formula s p).free_var_set =
+    p.free_var_set.bUnion (fun y : string, (s y).all_var_set)) :
+  let x' :=
+      if ∃ y ∈ p.free_var_set \ {x}, x ∈ (s y).all_var_set
+      then variant x (sub_formula ([x ↦ var x] s) p).free_var_set
+      else x
+  in
+  x' ∉ (p.free_var_set \ {x}).bUnion (λ (y : string), (s y).all_var_set) :=
+begin
+  intro x',
+  by_cases x ∈ (finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (s y).all_var_set)), {
+    simp only [finset.mem_bUnion] at h,
+    have s1 : x' = variant x (sub_formula ([x ↦ var x] s) p).free_var_set, exact if_pos h,
+    have s2 : x' ∉ (sub_formula ([x ↦ var x] s) p).free_var_set, rewrite s1, apply variant_not_mem,
+    have s3 : finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (s y).all_var_set) ⊆
+      (sub_formula ([x ↦ var x] s) p).free_var_set,
+      calc
+      finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (s y).all_var_set) =
+        finset.bUnion (p.free_var_set \ {x}) (fun y : string, (([x ↦ var x] s) y).all_var_set) :
+          begin symmetry, apply finset.bUnion_congr, refl, intros a h1, congr,
+            simp only [finset.mem_sdiff, finset.mem_singleton] at h1, cases h1,
+            exact function.update_noteq h1_right (var x) s end
+      ... ⊆ finset.bUnion p.free_var_set (fun y : string, (([x ↦ var x] s) y).all_var_set) : 
+          begin apply finset.bUnion_subset_bUnion_of_subset_left, apply finset.sdiff_subset end
+      ... = (sub_formula ([x ↦ var x] s) p).free_var_set :
+          begin symmetry, exact h1 (function.update s x (var x)) end,
+    exact finset.not_mem_mono s3 s2,
+  },
+  {
+    have s1 : x' = x, simp only [finset.mem_bUnion] at h, exact if_neg h,
+    rewrite s1, exact h
+  }
+end
+
+
 lemma lem_3_6
   (p : formula)
   (s : instantiation) :
@@ -547,38 +586,22 @@ begin
       then variant x (sub_formula ([x ↦ var x] s) p).free_var_set
       else x,
     have s1 : x' ∉ (finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (s y).all_var_set)),
-      by_cases x ∈ (finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (s y).all_var_set)), {
-        simp only [finset.mem_bUnion] at h,
-        have s2 : x' = variant x (sub_formula ([x ↦ var x] s) p).free_var_set, exact if_pos h,
-        have s3 : x' ∉ (sub_formula ([x ↦ var x] s) p).free_var_set, rewrite s2, apply variant_not_mem,
-        have s4 : finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (s y).all_var_set) ⊆
-          (sub_formula ([x ↦ var x] s) p).free_var_set,
-          calc
-          finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (s y).all_var_set) =
-            finset.bUnion (p.free_var_set \ {x}) (fun y : string, (([x ↦ var x] s) y).all_var_set) :
-              begin symmetry, apply finset.bUnion_congr, refl, intros a h1, congr,
-                simp only [finset.mem_sdiff, finset.mem_singleton] at h1, cases h1,
-                exact function.update_noteq h1_right (var x) s end
-          ... ⊆ finset.bUnion p.free_var_set (fun y : string, (([x ↦ var x] s) y).all_var_set) : 
-              begin apply finset.bUnion_subset_bUnion_of_subset_left, apply finset.sdiff_subset end
-          ... = (sub_formula ([x ↦ var x] s) p).free_var_set :
-              begin symmetry, exact ih (function.update s x (var x)) end,
-        exact finset.not_mem_mono s4 s3,
-      },
-      {
-        have s2 : x' = x, simp only [finset.mem_bUnion] at h, exact if_neg h,
-        rewrite s2, exact h
-      },
+      exact lem_3_6_1 x p s ih,
     calc
-    (sub_formula s (forall_ x p)).free_var_set = (forall_ x' (sub_formula ([x ↦ var x'] s) p)).free_var_set : by unfold sub_formula
-    ... = (sub_formula ([x ↦ var x'] s) p).free_var_set \ {x'} : by unfold formula.free_var_set
-    ... = (finset.bUnion p.free_var_set (fun (y : string), (([x ↦ var x'] s) y).all_var_set)) \ {x'} : by simp only [ih ([x ↦ var x'] s)]
-    ... = (finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (([x ↦ var x'] s) y).all_var_set)) \ {x'} : sorry
+    (sub_formula s (forall_ x p)).free_var_set =
+          (forall_ x' (sub_formula ([x ↦ var x'] s) p)).free_var_set :
+            by unfold sub_formula
+    ... = (sub_formula ([x ↦ var x'] s) p).free_var_set \ {x'} :
+            by unfold formula.free_var_set
+    ... = (finset.bUnion p.free_var_set (fun (y : string), (([x ↦ var x'] s) y).all_var_set)) \ {x'} :
+            by simp only [ih ([x ↦ var x'] s)]
+    ... = (finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (([x ↦ var x'] s) y).all_var_set)) \ {x'} :
+            sorry
     ... = (finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (s y).all_var_set)) \ {x'} :
-        begin congr' 1, apply finset.bUnion_congr, refl, intros a h1, congr, apply function.update_noteq,
-          simp only [finset.mem_sdiff, finset.mem_singleton] at h1, cases h1, exact h1_right end
+            begin congr' 1, apply finset.bUnion_congr, refl, intros a h1, congr, apply function.update_noteq,
+            simp only [finset.mem_sdiff, finset.mem_singleton] at h1, cases h1, exact h1_right end
     ... = finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (s y).all_var_set) :
-        begin apply finset.sdiff_singleton_not_mem_eq_self, exact s1 end
+            begin apply finset.sdiff_singleton_not_mem_eq_self, exact s1 end
   },
   case formula.exists_ : x p ih {
     sorry
@@ -638,7 +661,36 @@ begin
       then variant x (sub_formula ([x ↦ var x] s) p).free_var_set
       else x,
     have s1 : ∀ z ∈ p.free_var_set, ∀ a ∈ m.domain,
-      ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) z = ([x ↦ a] ((eval_term T m v) ∘ s)) z, sorry,
+      ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) z = ([x ↦ a] ((eval_term T m v) ∘ s)) z,
+      intros z h1 a h2,
+      by_cases z = x, {
+        calc
+        ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) z =
+              ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) x : by rewrite h
+        ... = (eval_term T m ([x' ↦ a] v)) (([x ↦ (var x')] s) x) : by simp only [function.comp_app]
+        ... = (eval_term T m ([x' ↦ a] v)) (var x') : by simp only [function.update_same]
+        ... = ([x' ↦ a] v) x' : by unfold eval_term
+        ... = a : by simp only [function.update_same]
+        ... = ([x ↦ a] ((eval_term T m v) ∘ s)) x : by simp only [function.update_same]
+        ... = ([x ↦ a] ((eval_term T m v) ∘ s)) z : by rewrite h
+      },
+      {
+        have s2 : z ∈ p.free_var_set \ {x}, simp only [finset.mem_sdiff, finset.mem_singleton], exact and.intro h1 h,
+        have s3 : x' ∉ finset.bUnion (p.free_var_set \ {x}) (fun y : string, (s y).all_var_set),
+          exact lem_3_6_1 x p s (lem_3_6 p),
+        have s4 : (s z).all_var_set ⊆ finset.bUnion (p.free_var_set \ {x}) (fun y : string, (s y).all_var_set),
+          exact finset.subset_bUnion_of_mem (fun y : string, (s y).all_var_set) s2,
+        have s5 : x' ∉ (s z).all_var_set, exact finset.not_mem_mono s4 s3,
+        have s6 : ∀ (x : string), x ∈ (s z).all_var_set → x ≠ x', intros y h3, by_contradiction, apply s5, rewrite <- h, exact h3,
+        calc
+        ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) z =
+              (eval_term T m ([x' ↦ a] v)) (([x ↦ (var x')] s) z) : by simp only [function.comp_app]
+        ... = (eval_term T m ([x' ↦ a] v)) (s z) : by simp only [function.update_noteq h]
+        ... = eval_term T m v (s z) : begin apply thm_3_1 T m (s z) ([x' ↦ a] v) v, intros x h3,
+                                      apply function.update_noteq, exact s6 x h3 end
+        ... = ((eval_term T m v) ∘ s) z : by simp only [eq_self_iff_true]
+        ... = ([x ↦ a] ((eval_term T m v) ∘ s)) z : begin symmetry, apply function.update_noteq h end
+      },
     sorry
   },
   case formula.exists_ : x p ih {
