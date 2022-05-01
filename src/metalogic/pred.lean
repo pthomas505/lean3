@@ -102,7 +102,7 @@ structure interpretation (T : Type) : Type :=
 (domain : set T)
 (nonempty : domain.nonempty)
 (func (n : ℕ) : string → (fin n → T) → T)
-(pred (n : ℕ) : string → (fin n → T) → bool)
+(pred (n : ℕ) : string → (fin n → T) → Prop)
 
 
 /-
@@ -208,10 +208,10 @@ begin
   },
   case formula.atom : n x terms {
     unfold formula.free_var_set at h1,
-    have s1 : forall i : fin n, eval_term T m v (terms i) = eval_term T m v' (terms i),
-      intros i, apply thm_3_1, intros x h, apply h1, simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left],
+    have s1 : (fun i : fin n, eval_term T m v (terms i)) = (fun i : fin n, eval_term T m v' (terms i)),
+      funext, apply thm_3_1, intros x h, apply h1, simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left],
       exact exists.intro i h,
-    unfold holds, finish
+    unfold holds, rewrite s1
   },
   case formula.not : p ih {
     have s1 : holds T m v p ↔ holds T m v' p, apply ih, unfold formula.free_var_set at h1,
@@ -591,9 +591,53 @@ theorem thm_3_7
   (T : Type)
   (m : interpretation T)
   (v : valuation T) :
-  holds T m v (sub_formula s p) = holds T m ((eval_term T m v) ∘ s) p :=
+  holds T m v (sub_formula s p) ↔ holds T m ((eval_term T m v) ∘ s) p :=
 begin
-  sorry
+  induction p generalizing s v,
+  case formula.bottom {
+    unfold sub_formula, unfold holds
+  },
+  case formula.top {
+    unfold sub_formula, unfold holds
+  },
+  case formula.atom : n x terms {
+    calc
+    holds T m v (sub_formula s (atom n x terms)) ↔
+      holds T m v (atom n x (fun i : fin n, sub_term s (terms i))) : by unfold sub_formula
+    ... ↔ m.pred n x (fun i : fin n, eval_term T m v (sub_term s (terms i))) : by unfold holds
+    ... ↔ m.pred n x (fun i : fin n, eval_term T m ((eval_term T m v) ∘ s) (terms i)) : by simp only [lem_3_5]
+    ... ↔ holds T m ((eval_term T m v) ∘ s) (atom n x terms) : by unfold holds
+  },
+  case formula.not : p ih {
+    calc
+    holds T m v (sub_formula s (not p)) ↔ holds T m v (not (sub_formula s p)) : by unfold sub_formula
+    ... ↔ ¬ holds T m v (sub_formula s p) : by unfold holds
+    ... ↔ ¬ holds T m ((eval_term T m v) ∘ s) p : by rewrite ih s v
+    ... ↔ holds T m ((eval_term T m v) ∘ s) (not p) : by unfold holds
+  },
+  case formula.and : p q ih_p ih_q {
+    calc
+    holds T m v (sub_formula s (and p q)) ↔ holds T m v (and (sub_formula s p) (sub_formula s q)) : by unfold sub_formula
+    ... ↔ (holds T m v (sub_formula s p)) ∧ (holds T m v (sub_formula s q)) : by unfold holds
+    ... ↔ (holds T m ((eval_term T m v) ∘ s) p) ∧ (holds T m ((eval_term T m v) ∘ s) q) :
+        begin rewrite ih_p s v, rewrite ih_q s v end
+    ... ↔ holds T m ((eval_term T m v) ∘ s) (and p q) : by unfold holds
+  },
+  case formula.or : p q ih_p ih_q {
+    sorry
+  },
+  case formula.imp : p q ih_p ih_q {
+    sorry
+  },
+  case formula.iff : p q ih_p ih_q {
+    sorry
+  },
+  case formula.forall_ : x p ih {
+    sorry
+  },
+  case formula.exists_ : x p ih {
+    sorry
+  }
 end
 
 theorem cor_3_8
