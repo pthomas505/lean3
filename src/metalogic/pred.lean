@@ -660,9 +660,9 @@ begin
       if ∃ y ∈ p.free_var_set \ {x}, x ∈ (s y).all_var_set
       then variant x (sub_formula ([x ↦ var x] s) p).free_var_set
       else x,
-    have s1 : ∀ z ∈ p.free_var_set, ∀ a ∈ m.domain,
+    have s1 : ∀ a ∈ m.domain, ∀ z ∈ p.free_var_set,
       ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) z = ([x ↦ a] ((eval_term T m v) ∘ s)) z,
-      intros z h1 a h2,
+      intros a h2 z h1,
       by_cases z = x, {
         calc
         ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) z =
@@ -691,7 +691,17 @@ begin
         ... = ((eval_term T m v) ∘ s) z : by simp only [eq_self_iff_true]
         ... = ([x ↦ a] ((eval_term T m v) ∘ s)) z : begin symmetry, apply function.update_noteq h end
       },
-    sorry
+    calc
+    holds T m v (sub_formula s (forall_ x p))
+      ↔ holds T m v (forall_ x' (sub_formula ([x ↦ (var x')] s) p)) : by unfold sub_formula
+    ... ↔ ∀ a ∈ m.domain, holds T m ([x' ↦ a] v) (sub_formula ([x ↦ (var x')] s) p) : by unfold holds
+    ... ↔ (∀ a ∈ m.domain, (holds T m ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) p)) : by finish
+    ... ↔ (∀ a ∈ m.domain, holds T m ([x ↦ a] ((eval_term T m v) ∘ s)) p) :
+      begin split,
+      intros h10 a h11, rewrite <- (thm_3_2 T m p ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) ([x ↦ a] ((eval_term T m v) ∘ s)) (s1 a h11)), exact h10 a h11,
+      intros h10 a h11, rewrite (thm_3_2 T m p ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) ([x ↦ a] ((eval_term T m v) ∘ s)) (s1 a h11)), exact h10 a h11
+      end
+    ... ↔ holds T m (eval_term T m v ∘ s) (forall_ x p) : by unfold holds
   },
   case formula.exists_ : x p ih {
     sorry
