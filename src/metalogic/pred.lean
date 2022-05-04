@@ -10,7 +10,7 @@ doi:10.1017/CBO9780511576430
 -/
 
 
-import data.finset
+import data.set
 
 
 def list.to_fin_fun {T : Type} (l : list T) : fin l.length → T :=
