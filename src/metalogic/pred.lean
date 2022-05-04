@@ -17,15 +17,15 @@ def list.to_fin_fun {T : Type} (l : list T) : fin l.length → T :=
 fun i : fin l.length, list.nth_le l i.val i.property
 
 
-meta def fin_fun_to_string {α : Type} [has_to_string α] {n : ℕ} (as : fin n → α) : string :=
-list.to_string (list.of_fn as)
+meta def fin_fun_to_string {T : Type} [has_to_string T] {n : ℕ} (f : fin n → T) : string :=
+list.to_string (list.of_fn f)
 
 
 /-
 Term schemes.
 var "x" : An object variable named "x". Ranges over the domain of each interpretation.
 func 0 "c" [] : A constant named "c".
-func n "f" [x1 .. xn] : A function named "f" of n arguments.
+func n "f" [x1 ... xn] : A function named "f" of n arguments.
 -/
 inductive term : Type
 | var : string → term
@@ -49,7 +49,7 @@ func terms.length name terms.to_fin_fun
 /-
 Formula schemes.
 atom 0 "P" [] : A propositional variable named "P".
-atom n "P" [x1 .. xn] : A predicate variable named "P" of n terms.
+atom n "P" [x1 ... xn] : A predicate variable named "P" of n terms.
 -/
 inductive formula : Type
 | bottom : formula
