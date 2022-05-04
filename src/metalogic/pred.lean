@@ -95,7 +95,7 @@ domain: A nonempty set D called the domain of the interpretation. The intention 
 func: (n : nat, string) → ((fin n → T) → T)
 A mapping of each n-ary function symbol f to a function f_{M} : D^{n} → D.
 
-pred: (n : nat, string) → ((fin n → T) → bool)
+pred: (n : nat, string) → ((fin n → T) → Prop)
 A mapping of each n-ary predicate symbol P to a predicate P_{M} : D^{n} → Prop.
 -/
 structure interpretation (T : Type) : Type :=
