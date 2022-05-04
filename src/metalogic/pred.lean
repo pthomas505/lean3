@@ -35,7 +35,7 @@ open term
 
 meta def term.repr : term → string
 | (var x) := x.quote
-| (func n f args) := f.quote ++ fin_fun_to_string (fun i : fin n, (args i).repr)
+| (func n f terms) := f.quote ++ fin_fun_to_string (fun i : fin n, (terms i).repr)
 
 meta instance : has_repr term := has_repr.mk term.repr
 
@@ -112,7 +112,7 @@ def valuation (T : Type) := string → T
 
 def eval_term (T : Type) (m : interpretation T) (v : valuation T) : term → T
 | (var x) := v x
-| (func n f args) := m.func n f (fun i : fin n, eval_term (args i))
+| (func n f terms) := m.func n f (fun i : fin n, eval_term (terms i))
 
 
 notation  `[` x `↦` a `]` v := function.update v x a
@@ -132,7 +132,7 @@ def holds (T : Type) (m : interpretation T) : valuation T → formula → Prop
 
 def term.all_var_set : term → finset string
 | (var x) := {x}
-| (func n f args) := finset.bUnion finset.univ (fun i : fin n, (args i).all_var_set)
+| (func n f terms) := finset.bUnion finset.univ (fun i : fin n, (terms i).all_var_set)
 
 
 theorem thm_3_1
@@ -151,17 +151,17 @@ begin
     ... = v' x : h1 x s1
     ... = eval_term T m v' (var x) : by unfold eval_term
   },
-  case term.func : n f args ih {
+  case term.func : n f terms ih {
     calc
-    eval_term T m v (func n f args) = m.func n f (fun i : fin n, eval_term T m v (args i)) : by unfold eval_term
-    ... = m.func n f (fun i : fin n, eval_term T m v' (args i)) :
+    eval_term T m v (func n f terms) = m.func n f (fun i : fin n, eval_term T m v (terms i)) : by unfold eval_term
+    ... = m.func n f (fun i : fin n, eval_term T m v' (terms i)) :
       begin
         congr, funext, apply ih,
         intros x h2, apply h1, unfold term.all_var_set,
         simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left],
         exact exists.intro i h2
       end
-    ... = eval_term T m v' (func n f args) : by unfold eval_term
+    ... = eval_term T m v' (func n f terms) : by unfold eval_term
 	}
 end
 
@@ -392,7 +392,7 @@ def instantiation := string → term
 
 def sub_term (s : instantiation) : term → term
 | (var x) := s x
-| (func n name args) := func n name (fun i : fin n, sub_term (args i))
+| (func n name terms) := func n name (fun i : fin n, sub_term (terms i))
 
 
 lemma lem_3_4
@@ -407,18 +407,18 @@ begin
     ... = finset.bUnion {x} (fun y : string, (s y).all_var_set) : by simp only [finset.singleton_bUnion]
     ... = finset.bUnion (var x).all_var_set (fun y : string, (s y).all_var_set) : by unfold term.all_var_set
   },
-  case term.func : n f args ih {
+  case term.func : n f terms ih {
     simp at ih,
-    have s1 : (sub_term s (func n f args)).all_var_set =
-      (func n f (fun i : fin n, sub_term s (args i))).all_var_set, unfold sub_term,
-    have s2 : (func n f (fun i : fin n, sub_term s (args i))).all_var_set =
-      finset.bUnion finset.univ (fun i : fin n, (sub_term s (args i)).all_var_set), unfold term.all_var_set,
-    have s3 : finset.bUnion finset.univ (fun i : fin n, (sub_term s (args i)).all_var_set) =
-      finset.bUnion finset.univ (fun i : fin n, finset.bUnion (args i).all_var_set (fun y : string, (s y).all_var_set)), simp only [ih],
-    have s4 : finset.bUnion finset.univ (fun i : fin n, finset.bUnion (args i).all_var_set (fun y : string, (s y).all_var_set)) =
-      finset.bUnion (finset.bUnion finset.univ (fun i : fin n, (args i).all_var_set)) (fun y : string, (s y).all_var_set), sorry,
-    have s5 : finset.bUnion (finset.bUnion finset.univ (fun i : fin n, (args i).all_var_set)) (fun y : string, (s y).all_var_set) = 
-      finset.bUnion (func n f args).all_var_set (fun y : string, (s y).all_var_set), refl,
+    have s1 : (sub_term s (func n f terms)).all_var_set =
+      (func n f (fun i : fin n, sub_term s (terms i))).all_var_set, unfold sub_term,
+    have s2 : (func n f (fun i : fin n, sub_term s (terms i))).all_var_set =
+      finset.bUnion finset.univ (fun i : fin n, (sub_term s (terms i)).all_var_set), unfold term.all_var_set,
+    have s3 : finset.bUnion finset.univ (fun i : fin n, (sub_term s (terms i)).all_var_set) =
+      finset.bUnion finset.univ (fun i : fin n, finset.bUnion (terms i).all_var_set (fun y : string, (s y).all_var_set)), simp only [ih],
+    have s4 : finset.bUnion finset.univ (fun i : fin n, finset.bUnion (terms i).all_var_set (fun y : string, (s y).all_var_set)) =
+      finset.bUnion (finset.bUnion finset.univ (fun i : fin n, (terms i).all_var_set)) (fun y : string, (s y).all_var_set), sorry,
+    have s5 : finset.bUnion (finset.bUnion finset.univ (fun i : fin n, (terms i).all_var_set)) (fun y : string, (s y).all_var_set) = 
+      finset.bUnion (func n f terms).all_var_set (fun y : string, (s y).all_var_set), refl,
     sorry
   }
 end
@@ -439,14 +439,14 @@ begin
     ... = ((eval_term T m v) ∘ s) x : by unfold function.comp
     ... = eval_term T m ((eval_term T m v) ∘ s) (var x) : by unfold eval_term
   },
-  case term.func : n f args ih {
-    have ih' : ∀ (i : fin n), eval_term T m v (sub_term s (args i)) =
-      eval_term T m ((eval_term T m v) ∘ s) (args i), exact ih,
+  case term.func : n f terms ih {
+    have ih' : ∀ (i : fin n), eval_term T m v (sub_term s (terms i)) =
+      eval_term T m ((eval_term T m v) ∘ s) (terms i), exact ih,
     calc
-    eval_term T m v (sub_term s (func n f args)) = eval_term T m v (func n f (fun i, sub_term s (args i))) : by unfold sub_term
-    ... = m.func n f (fun i, eval_term T m v (sub_term s (args i))) : by unfold eval_term
-    ... = m.func n f (fun i, eval_term T m ((eval_term T m v) ∘ s) (args i)) : begin congr, apply funext, intros j, exact ih' j end
-    ... = eval_term T m ((eval_term T m v) ∘ s) (func n f args) : by unfold eval_term
+    eval_term T m v (sub_term s (func n f terms)) = eval_term T m v (func n f (fun i, sub_term s (terms i))) : by unfold sub_term
+    ... = m.func n f (fun i, eval_term T m v (sub_term s (terms i))) : by unfold eval_term
+    ... = m.func n f (fun i, eval_term T m ((eval_term T m v) ∘ s) (terms i)) : begin congr, apply funext, intros j, exact ih' j end
+    ... = eval_term T m ((eval_term T m v) ∘ s) (func n f terms) : by unfold eval_term
   }
 end
 
