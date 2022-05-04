@@ -66,8 +66,8 @@ inductive formula : Type
 open formula
 
 meta def formula.repr : formula → string
-| bottom := sformat!"⊥"
-| top := sformat!"⊤"
+| bottom := "⊥"
+| top := "⊤"
 | (atom n x terms) := x.quote ++ fin_fun_to_string (fun i : fin n, (terms i).repr)
 | (not p) := sformat!"(¬ {p.repr})"
 | (and p q) := sformat!"({p.repr} ∧ {q.repr})"
@@ -86,7 +86,7 @@ def mk_pred (name : string) (terms : list term) :=
 atom terms.length name terms.to_fin_fun
 
 
-#eval (forall_ "x" (mk_pred "P" [mk_func "f" [(var "x")], var "y"]))
+#eval not (forall_ "x" (mk_pred "P" [mk_func "f" [(var "x")], var "y"]))
 
 
 /-
