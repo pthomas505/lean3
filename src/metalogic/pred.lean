@@ -135,6 +135,21 @@ def term.all_var_set : term → finset string
 | (func n f terms) := finset.bUnion finset.univ (fun i : fin n, (terms i).all_var_set)
 
 
+lemma finset.mem_bUnion_univ
+  {T : Type}
+  [decidable_eq T]
+  {x : T}
+  {n : ℕ}
+  {f : fin n → finset T}
+  {i : fin n}
+  (h : x ∈ f i) :
+  x ∈ finset.bUnion finset.univ (fun i : fin n, f i) :=
+begin
+  simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left],
+  exact exists.intro i h
+end
+
+
 theorem thm_3_1
   (T : Type)
   (m : interpretation T)
@@ -158,8 +173,7 @@ begin
       begin
         congr, funext, apply ih,
         intros x h2, apply h1, unfold term.all_var_set,
-        simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left],
-        exact exists.intro i h2
+        exact finset.mem_bUnion_univ h2,
       end
     ... = eval_term T m v' (func n f terms) : by unfold eval_term
 	}
@@ -207,10 +221,8 @@ begin
     unfold holds
   },
   case formula.atom : n x terms {
-    unfold formula.free_var_set at h1,
     have s1 : (fun i : fin n, eval_term T m v (terms i)) = (fun i : fin n, eval_term T m v' (terms i)),
-      funext, apply thm_3_1, intros x h, apply h1, simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left],
-      exact exists.intro i h,
+      funext, apply thm_3_1, intros x h, apply h1, unfold formula.free_var_set, exact finset.mem_bUnion_univ h,
     unfold holds, rewrite s1
   },
   case formula.not : p ih {
