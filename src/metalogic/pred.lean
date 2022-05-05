@@ -92,10 +92,10 @@ atom terms.length name terms.to_fin_fun
 /-
 domain: A nonempty set D called the domain of the interpretation. The intention is that all terms have values in D.
 
-func: (n : nat, string) → ((fin n → T) → T)
+func: (n : ℕ, string) → ((fin n → T) → T)
 A mapping of each n-ary function symbol f to a function f_{M} : D^{n} → D.
 
-pred: (n : nat, string) → ((fin n → T) → Prop)
+pred: (n : ℕ, string) → ((fin n → T) → Prop)
 A mapping of each n-ary predicate symbol P to a predicate P_{M} : D^{n} → Prop.
 -/
 structure interpretation (T : Type) : Type :=
