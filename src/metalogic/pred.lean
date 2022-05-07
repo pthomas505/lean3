@@ -230,8 +230,8 @@ begin
     holds T m v (atom n x terms) ↔ m.pred n x (fun i : fin n, eval_term T m v (terms i)) : by unfold holds
     ... ↔ m.pred n x (fun i : fin n, eval_term T m v' (terms i)) :
       begin
-      apply iff_of_eq, congr, funext,
-      apply thm_3_1, intros x h, apply h1, exact finset.mem_bUnion_univ h,
+        apply iff_of_eq, congr, funext,
+        apply thm_3_1, intros x h, apply h1, exact finset.mem_bUnion_univ h,
       end
     ... ↔ holds T m v' (atom n x terms) : by unfold holds
   },
