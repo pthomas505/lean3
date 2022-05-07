@@ -225,12 +225,13 @@ begin
     ... ↔ holds T m v' top : by unfold holds
   },
   case formula.atom : n x terms {
+    unfold formula.free_var_set at h1,
     calc
     holds T m v (atom n x terms) ↔ m.pred n x (fun i : fin n, eval_term T m v (terms i)) : by unfold holds
     ... ↔ m.pred n x (fun i : fin n, eval_term T m v' (terms i)) :
       begin
       apply iff_of_eq, congr, funext,
-      apply thm_3_1, intros x h, apply h1, unfold formula.free_var_set, exact finset.mem_bUnion_univ h,
+      apply thm_3_1, intros x h, apply h1, exact finset.mem_bUnion_univ h,
       end
     ... ↔ holds T m v' (atom n x terms) : by unfold holds
   },
@@ -243,7 +244,7 @@ begin
     ... ↔ holds T m v' (not p) : by unfold holds
   },
   case formula.and : p q ih_p ih_q {
-    simp only [formula.free_var_set, finset.mem_union, or_imp_distrib, forall_and_distrib] at h1, cases h1,
+    unfold formula.free_var_set at h1, simp only [finset.mem_union, or_imp_distrib, forall_and_distrib] at h1, cases h1,
     have s1 : holds T m v p ↔ holds T m v' p, exact ih_p v v' h1_left,
     have s2 : holds T m v q ↔ holds T m v' q, exact ih_q v v' h1_right,
     calc
@@ -252,30 +253,27 @@ begin
     ... ↔ holds T m v' (and p q) : by unfold holds
   },
   case formula.or : p q ih_p ih_q {
-    have s1 : holds T m v p ↔ holds T m v' p, apply ih_p, intros x h, apply h1,
-      unfold formula.free_var_set, simp only [finset.mem_union], apply or.intro_left, exact h,
-    have s2 : holds T m v q ↔ holds T m v' q, apply ih_q, intros x h, apply h1,
-      unfold formula.free_var_set, simp only [finset.mem_union], apply or.intro_right, exact h,
+    unfold formula.free_var_set at h1, simp only [finset.mem_union, or_imp_distrib, forall_and_distrib] at h1, cases h1,
+    have s1 : holds T m v p ↔ holds T m v' p, exact ih_p v v' h1_left,
+    have s2 : holds T m v q ↔ holds T m v' q, exact ih_q v v' h1_right,
     calc
     holds T m v (or p q) ↔ (holds T m v p ∨ holds T m v q) : by unfold holds
     ... ↔ (holds T m v' p ∨ holds T m v' q) : by simp only [s1, s2]
     ... ↔ holds T m v' (or p q) : by unfold holds
   },
   case formula.imp : p q ih_p ih_q {
-    have s1 : holds T m v p ↔ holds T m v' p, apply ih_p, intros x h, apply h1,
-      unfold formula.free_var_set, simp only [finset.mem_union], apply or.intro_left, exact h,
-    have s2 : holds T m v q ↔ holds T m v' q, apply ih_q, intros x h, apply h1,
-      unfold formula.free_var_set, simp only [finset.mem_union], apply or.intro_right, exact h,
+    unfold formula.free_var_set at h1, simp only [finset.mem_union, or_imp_distrib, forall_and_distrib] at h1, cases h1,
+    have s1 : holds T m v p ↔ holds T m v' p, exact ih_p v v' h1_left,
+    have s2 : holds T m v q ↔ holds T m v' q, exact ih_q v v' h1_right,
     calc
     holds T m v (imp p q) ↔ (holds T m v p → holds T m v q) : by unfold holds
     ... ↔ (holds T m v' p → holds T m v' q) : by simp only [s1, s2]
     ... ↔ holds T m v' (imp p q) : by unfold holds
   },
   case formula.iff : p q ih_p ih_q {
-    have s1 : holds T m v p ↔ holds T m v' p, apply ih_p, intros x h, apply h1,
-      unfold formula.free_var_set, simp only [finset.mem_union], apply or.intro_left, exact h,
-    have s2 : holds T m v q ↔ holds T m v' q, apply ih_q, intros x h, apply h1,
-      unfold formula.free_var_set, simp only [finset.mem_union], apply or.intro_right, exact h,
+    unfold formula.free_var_set at h1, simp only [finset.mem_union, or_imp_distrib, forall_and_distrib] at h1, cases h1,
+    have s1 : holds T m v p ↔ holds T m v' p, exact ih_p v v' h1_left,
+    have s2 : holds T m v q ↔ holds T m v' q, exact ih_q v v' h1_right,
     calc
     holds T m v (iff p q) ↔ (holds T m v p ↔ holds T m v q) : by unfold holds
     ... ↔ (holds T m v' p ↔ holds T m v' q) : by simp only [s1, s2]
