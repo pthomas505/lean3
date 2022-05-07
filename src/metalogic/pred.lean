@@ -280,14 +280,27 @@ begin
     ... ↔ holds T m v' (iff p q) : by unfold holds
   },
   case formula.forall_ : x p ih {
-    unfold formula.free_var_set at h1,
-    unfold holds,
-    have s1 : ∀ (a : T), a ∈ m.domain →
-      (holds T m ([x ↦ a] v) p ↔ holds T m ([x ↦ a] v') p),
-        intros a h, apply ih, intros y h',
-        unfold function.update, simp, split_ifs, refl,
-        apply h1, simp only [finset.mem_sdiff, finset.mem_singleton], exact and.intro h' h_1,
-    exact ball_congr s1
+    unfold formula.free_var_set at h1, simp only [finset.mem_sdiff, finset.mem_singleton] at h1,
+    calc
+    holds T m v (forall_ x p) ↔ ∀ a ∈ m.domain, holds T m ([x ↦ a] v) p : by unfold holds
+    ... ↔ ∀ a ∈ m.domain, holds T m ([x ↦ a] v') p :
+      begin
+        apply ball_congr, intros a h, apply ih, intros y h',
+        by_cases y = x, {
+        calc
+        ([x ↦ a] v) y = ([x ↦ a] v) x : by rewrite h
+        ... = a : dif_pos rfl
+        ... = ([x ↦ a] v') x : begin symmetry, exact dif_pos rfl end
+        ... = ([x ↦ a] v') y : by rewrite <- h
+        },
+        {
+        calc
+        ([x ↦ a] v) y = v y : dif_neg h
+        ... = v' y : begin apply h1, exact and.intro h' h end
+        ... = ([x ↦ a] v') y : begin symmetry, exact dif_neg h end
+        }
+      end
+    ... ↔ holds T m v' (forall_ x p) : by unfold holds
   },
   case formula.exists_ : x p ih {
     unfold formula.free_var_set at h1,
