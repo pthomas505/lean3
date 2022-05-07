@@ -239,7 +239,7 @@ begin
     have s1 : holds T m v p ↔ holds T m v' p, exact ih v v' h1,
     calc
     holds T m v (not p) ↔ ¬ holds T m v p : by unfold holds
-    ... ↔ ¬ holds T m v' p : iff.not s1
+    ... ↔ ¬ holds T m v' p : by simp only [s1]
     ... ↔ holds T m v' (not p) : by unfold holds
   },
   case formula.and : p q ih_p ih_q {
@@ -248,8 +248,8 @@ begin
     have s2 : holds T m v q ↔ holds T m v' q, apply ih_q, intros x h, apply h1,
       unfold formula.free_var_set, simp only [finset.mem_union], apply or.intro_right, exact h,
     calc
-    holds T m v (and p q) ↔ holds T m v p ∧ holds T m v q : by unfold holds
-    ... ↔ holds T m v' p ∧ holds T m v' q : iff.and s1 s2
+    holds T m v (and p q) ↔ (holds T m v p ∧ holds T m v q) : by unfold holds
+    ... ↔ (holds T m v' p ∧ holds T m v' q) : by simp only [s1, s2]
     ... ↔ holds T m v' (and p q) : by unfold holds
   },
   case formula.or : p q ih_p ih_q {
@@ -257,21 +257,30 @@ begin
       unfold formula.free_var_set, simp only [finset.mem_union], apply or.intro_left, exact h,
     have s2 : holds T m v q ↔ holds T m v' q, apply ih_q, intros x h, apply h1,
       unfold formula.free_var_set, simp only [finset.mem_union], apply or.intro_right, exact h,
-    unfold holds, rewrite s1, rewrite s2
+    calc
+    holds T m v (or p q) ↔ (holds T m v p ∨ holds T m v q) : by unfold holds
+    ... ↔ (holds T m v' p ∨ holds T m v' q) : by simp only [s1, s2]
+    ... ↔ holds T m v' (or p q) : by unfold holds
   },
   case formula.imp : p q ih_p ih_q {
     have s1 : holds T m v p ↔ holds T m v' p, apply ih_p, intros x h, apply h1,
       unfold formula.free_var_set, simp only [finset.mem_union], apply or.intro_left, exact h,
     have s2 : holds T m v q ↔ holds T m v' q, apply ih_q, intros x h, apply h1,
       unfold formula.free_var_set, simp only [finset.mem_union], apply or.intro_right, exact h,
-    unfold holds, rewrite s1, rewrite s2
+    calc
+    holds T m v (imp p q) ↔ (holds T m v p → holds T m v q) : by unfold holds
+    ... ↔ (holds T m v' p → holds T m v' q) : by simp only [s1, s2]
+    ... ↔ holds T m v' (imp p q) : by unfold holds
   },
   case formula.iff : p q ih_p ih_q {
     have s1 : holds T m v p ↔ holds T m v' p, apply ih_p, intros x h, apply h1,
       unfold formula.free_var_set, simp only [finset.mem_union], apply or.intro_left, exact h,
     have s2 : holds T m v q ↔ holds T m v' q, apply ih_q, intros x h, apply h1,
       unfold formula.free_var_set, simp only [finset.mem_union], apply or.intro_right, exact h,
-    unfold holds, rewrite s1, rewrite s2
+    calc
+    holds T m v (iff p q) ↔ (holds T m v p ↔ holds T m v q) : by unfold holds
+    ... ↔ (holds T m v' p ↔ holds T m v' q) : by simp only [s1, s2]
+    ... ↔ holds T m v' (iff p q) : by unfold holds
   },
   case formula.forall_ : x p ih {
     unfold formula.free_var_set at h1,
