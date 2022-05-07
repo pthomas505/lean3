@@ -215,20 +215,31 @@ theorem thm_3_2
 begin
   induction p generalizing v v',
   case formula.bottom {
-    unfold holds
+    calc
+    holds T m v bottom ↔ false : by unfold holds
+    ... ↔ holds T m v' bottom : by unfold holds
   },
   case formula.top {
-    unfold holds
+    calc
+    holds T m v top ↔ true : by unfold holds
+    ... ↔ holds T m v' top : by unfold holds
   },
   case formula.atom : n x terms {
-    have s1 : (fun i : fin n, eval_term T m v (terms i)) = (fun i : fin n, eval_term T m v' (terms i)),
-      funext, apply thm_3_1, intros x h, apply h1, unfold formula.free_var_set, exact finset.mem_bUnion_univ h,
-    unfold holds, rewrite s1
+    calc
+    holds T m v (atom n x terms) ↔ m.pred n x (fun i : fin n, eval_term T m v (terms i)) : by unfold holds
+    ... ↔ m.pred n x (fun i : fin n, eval_term T m v' (terms i)) :
+      begin
+      apply iff_of_eq, congr, funext,
+      apply thm_3_1, intros x h, apply h1, unfold formula.free_var_set, exact finset.mem_bUnion_univ h,
+      end
+    ... ↔ holds T m v' (atom n x terms) : by unfold holds
   },
   case formula.not : p ih {
-    have s1 : holds T m v p ↔ holds T m v' p, apply ih, unfold formula.free_var_set at h1,
-      exact h1,
-    unfold holds, rewrite s1
+    unfold formula.free_var_set at h1,
+    calc
+    holds T m v p.not ↔ ¬ holds T m v p : by unfold holds
+    ... ↔ ¬ holds T m v' p : begin apply iff.not, exact ih v v' h1 end
+    ... ↔ holds T m v' p.not : by unfold holds
   },
   case formula.and : p q ih_p ih_q {
     have s1 : holds T m v p ↔ holds T m v' p, apply ih_p, intros x h, apply h1,
