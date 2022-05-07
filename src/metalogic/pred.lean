@@ -244,8 +244,8 @@ begin
   },
   case formula.and : p q ih_p ih_q {
     simp only [formula.free_var_set, finset.mem_union, or_imp_distrib, forall_and_distrib] at h1, cases h1,
-    have s1 : holds T m v p ↔ holds T m v' p, apply ih_p v v' h1_left,
-    have s2 : holds T m v q ↔ holds T m v' q, apply ih_q v v' h1_right,
+    have s1 : holds T m v p ↔ holds T m v' p, exact ih_p v v' h1_left,
+    have s2 : holds T m v q ↔ holds T m v' q, exact ih_q v v' h1_right,
     calc
     holds T m v (and p q) ↔ (holds T m v p ∧ holds T m v q) : by unfold holds
     ... ↔ (holds T m v' p ∧ holds T m v' q) : by simp only [s1, s2]
