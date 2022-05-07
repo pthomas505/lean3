@@ -285,7 +285,7 @@ begin
     holds T m v (forall_ x p) ↔ ∀ a ∈ m.domain, holds T m ([x ↦ a] v) p : by unfold holds
     ... ↔ ∀ a ∈ m.domain, holds T m ([x ↦ a] v') p :
       begin
-        apply ball_congr, intros a h, apply ih, intros y h',
+        apply ball_congr, intros a h2, apply ih, intros y h3,
         by_cases y = x, {
         calc
         ([x ↦ a] v) y = ([x ↦ a] v) x : by rewrite h
@@ -296,7 +296,7 @@ begin
         {
         calc
         ([x ↦ a] v) y = v y : dif_neg h
-        ... = v' y : begin apply h1, exact and.intro h' h end
+        ... = v' y : begin apply h1, exact and.intro h3 h end
         ... = ([x ↦ a] v') y : begin symmetry, exact dif_neg h end
         }
       end
