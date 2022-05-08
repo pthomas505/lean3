@@ -539,7 +539,8 @@ begin
   induction t,
   case term.var : x {
     calc
-    eval_term T m v (sub_term s (var x)) = eval_term T m v (s x) : by unfold sub_term
+          eval_term T m v (sub_term s (var x))
+        = eval_term T m v (s x) : by unfold sub_term
     ... = ((eval_term T m v) ∘ s) x : by unfold function.comp
     ... = eval_term T m ((eval_term T m v) ∘ s) (var x) : by unfold eval_term
   },
@@ -547,7 +548,8 @@ begin
     have ih' : ∀ (i : fin n), eval_term T m v (sub_term s (terms i)) =
       eval_term T m ((eval_term T m v) ∘ s) (terms i), exact ih,
     calc
-    eval_term T m v (sub_term s (func n f terms)) = eval_term T m v (func n f (fun i, sub_term s (terms i))) : by unfold sub_term
+          eval_term T m v (sub_term s (func n f terms))
+        = eval_term T m v (func n f (fun i, sub_term s (terms i))) : by unfold sub_term
     ... = m.func n f (fun i, eval_term T m v (sub_term s (terms i))) : by unfold eval_term
     ... = m.func n f (fun i, eval_term T m ((eval_term T m v) ∘ s) (terms i)) : begin congr, apply funext, intros j, exact ih' j end
     ... = eval_term T m ((eval_term T m v) ∘ s) (func n f terms) : by unfold eval_term
