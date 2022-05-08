@@ -118,10 +118,13 @@ structure interpretation (T : Type) : Type :=
 
 
 /-
-A mapping of each variable name to an element of the domain.
+The type of mappings of object variable names to elements of a domain.
 -/
 def valuation (T : Type) := string → T
 
+/-
+The function mapping terms to elements of a domain by a given interpretation and valuation.
+-/
 def eval_term (T : Type) (m : interpretation T) (v : valuation T) : term → T
 | (var x) := v x
 | (func n f terms) := m.func n f (fun i : fin n, eval_term (terms i))
