@@ -423,9 +423,20 @@ example
 	(h1 : is_sentence p) :
 	is_valid p ↔ ¬ (is_satisfiable (not p)) :=
 begin
-  unfold is_valid, unfold is_satisfiable, unfold satisfies, unfold holds, push_neg, split,
-  intros h2 T m, let v := fun _ : string, m.nonempty.some, exact exists.intro v (h2 T m v),
-  intros h2 T m v, cases h2 T m, rewrite <- cor_3_3 p h1 T m w, exact h
+  have s1 : (∀ (T : Type) (m : interpretation T) (v : valuation T), holds T m v p) →
+    ∀ (T : Type) (m : interpretation T), ∃ (v : valuation T), holds T m v p,
+      intros h2 T m, let v := fun _ : string, m.nonempty.some, exact exists.intro v (h2 T m v),
+  have s2 : (∀ (T : Type) (m : interpretation T), ∃ (v : valuation T), holds T m v p) →
+    ∀ (T : Type) (m : interpretation T) (v : valuation T), holds T m v p,
+      intros h2 T m v, cases h2 T m, rewrite <- cor_3_3 p h1 T m w, exact h,
+  calc
+        is_valid p
+      ↔ ∀ (T : Type) (m : interpretation T) (v : valuation T), holds T m v p : by unfold is_valid
+  ... ↔ ∀ (T : Type) (m : interpretation T), ∃ (v : valuation T), holds T m v p : iff.intro s1 s2
+  ... ↔ ¬∃ (T : Type) (m : interpretation T), ∀ (v : valuation T), ¬holds T m v p : begin push_neg, refl end
+  ... ↔ ¬∃ (T : Type) (m : interpretation T), ∀ (v : valuation T), holds T m v (not p) : by unfold holds
+  ... ↔ ¬∃ (T : Type) (m : interpretation T), satisfies T m (not p) : by unfold satisfies
+  ... ↔ ¬is_satisfiable (not p) : by unfold is_satisfiable
 end
 
 
