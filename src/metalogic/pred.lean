@@ -94,21 +94,21 @@ domain: A nonempty set D called the domain of the interpretation. The intention 
 
 nonempty: A proof that there is at least one element in the domain.
 
-func: (n : ℕ, f : string) → (f_{M} : (fin n → T) → T)
+func: (n : ℕ, f : string) → (f_{M} : (terms : fin n → T) → v : T)
 A mapping of each n-ary function symbol f to a function f_{M}.
 n : The arity of the function symbol.
 f : The function symbol.
 f_{M} : The function that the function symbol is mapped to.
-fin n → T : The type of the list of the n terms (arguments) of the function.
-T : The type of the result of the function.
+terms : fin n → T : The n terms (arguments) of the function expressed as a finite function.
+v : T : The result of the function. An element in the domain.
 
-pred: (n : ℕ, P : string) → (P_{M} : (fin n → T) → Prop)
+pred: (n : ℕ, P : string) → (P_{M} : (terms : fin n → T) → v : Prop)
 A mapping of each n-ary predicate symbol P to a predicate P_{M}.
 n : The arity of the predicate symbol.
 P : The predicate symbol.
 P_{M} : The predicate that the predicate symbol is mapped to.
-fin n → T : The type of the list of the n terms (arguments) of the predicate.
-Prop : The type of the result of the predicate.
+terms : fin n → T : The n terms (arguments) of the predicate expressed as a finite function.
+v : Prop : The result of the predicate. True or false.
 -/
 structure interpretation (T : Type) : Type :=
 (domain : set T)
