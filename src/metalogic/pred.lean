@@ -510,23 +510,20 @@ begin
   induction t,
   case term.var : x {
     calc
-    (sub_term s (var x)).all_var_set = (s x).all_var_set : by unfold sub_term
+          (sub_term s (var x)).all_var_set
+        = (s x).all_var_set : by unfold sub_term
     ... = finset.bUnion {x} (fun y : string, (s y).all_var_set) : by simp only [finset.singleton_bUnion]
     ... = finset.bUnion (var x).all_var_set (fun y : string, (s y).all_var_set) : by unfold term.all_var_set
   },
   case term.func : n f terms ih {
     simp at ih,
-    have s1 : (sub_term s (func n f terms)).all_var_set =
-      (func n f (fun i : fin n, sub_term s (terms i))).all_var_set, unfold sub_term,
-    have s2 : (func n f (fun i : fin n, sub_term s (terms i))).all_var_set =
-      finset.bUnion finset.univ (fun i : fin n, (sub_term s (terms i)).all_var_set), unfold term.all_var_set,
-    have s3 : finset.bUnion finset.univ (fun i : fin n, (sub_term s (terms i)).all_var_set) =
-      finset.bUnion finset.univ (fun i : fin n, finset.bUnion (terms i).all_var_set (fun y : string, (s y).all_var_set)), simp only [ih],
-    have s4 : finset.bUnion finset.univ (fun i : fin n, finset.bUnion (terms i).all_var_set (fun y : string, (s y).all_var_set)) =
-      finset.bUnion (finset.bUnion finset.univ (fun i : fin n, (terms i).all_var_set)) (fun y : string, (s y).all_var_set), sorry,
-    have s5 : finset.bUnion (finset.bUnion finset.univ (fun i : fin n, (terms i).all_var_set)) (fun y : string, (s y).all_var_set) = 
-      finset.bUnion (func n f terms).all_var_set (fun y : string, (s y).all_var_set), refl,
-    sorry
+    calc
+          (sub_term s (func n f terms)).all_var_set
+        = (func n f (fun i : fin n, sub_term s (terms i))).all_var_set : by unfold sub_term
+    ... = finset.bUnion finset.univ (fun i : fin n, (sub_term s (terms i)).all_var_set) : by unfold term.all_var_set
+    ... = finset.bUnion finset.univ (fun i : fin n, finset.bUnion (terms i).all_var_set (fun y : string, (s y).all_var_set)) : by simp only [ih]
+    ... = finset.bUnion (finset.bUnion finset.univ (fun i : fin n, (terms i).all_var_set)) (fun y : string, (s y).all_var_set) : sorry
+    ... = finset.bUnion (func n f terms).all_var_set (fun y : string, (s y).all_var_set) : by unfold term.all_var_set
   }
 end
 
