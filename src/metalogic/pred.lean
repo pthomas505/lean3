@@ -181,18 +181,20 @@ begin
   case term.var : x {
     have s1 : x ∈ (var x).all_var_set, unfold term.all_var_set, simp only [finset.mem_singleton],
     calc
-    eval_term T m v (var x) = v x : by unfold eval_term
+          eval_term T m v (var x)
+        = v x : by unfold eval_term
     ... = v' x : h1 x s1
     ... = eval_term T m v' (var x) : by unfold eval_term
   },
   case term.func : n f terms ih {
     calc
-    eval_term T m v (func n f terms) = m.func n f (fun i : fin n, eval_term T m v (terms i)) : by unfold eval_term
+          eval_term T m v (func n f terms)
+        = m.func n f (fun i : fin n, eval_term T m v (terms i)) : by unfold eval_term
     ... = m.func n f (fun i : fin n, eval_term T m v' (terms i)) :
       begin
         congr, funext, apply ih,
         intros x h2, apply h1, unfold term.all_var_set,
-        exact finset.mem_bUnion_univ h2,
+        exact finset.mem_bUnion_univ h2
       end
     ... = eval_term T m v' (func n f terms) : by unfold eval_term
 	}
