@@ -428,7 +428,7 @@ begin
       intros h2 T m, let v := fun _ : string, m.nonempty.some, exact exists.intro v (h2 T m v),
   have s2 : (∀ (T : Type) (m : interpretation T), ∃ (v : valuation T), holds T m v p) →
     ∀ (T : Type) (m : interpretation T) (v : valuation T), holds T m v p,
-      intros h2 T m v, cases h2 T m, rewrite <- cor_3_3 p h1 T m w, exact h,
+      intros h2 T m v, apply exists.elim, exact h2 T m, intros v', rewrite cor_3_3 p h1 T m v v', simp only [imp_self],
   calc
         is_valid p
       ↔ ∀ (T : Type) (m : interpretation T) (v : valuation T), holds T m v p : by unfold is_valid
