@@ -49,7 +49,7 @@ func terms.length name terms.to_fin_fun
 /-
 Formula schemes.
 atom 0 "P" [] : A propositional variable named "P".
-atom n "P" [x1 ... xn] : A predicate variable named "P" of n terms.
+atom n "P" [x1 ... xn] : A predicate variable named "P" of n terms (arguments).
 -/
 inductive formula : Type
 | bottom : formula
