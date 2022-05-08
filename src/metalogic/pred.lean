@@ -106,8 +106,8 @@ pred: (n : ℕ, P : string) → (P_{M} : (fin n → T) → Prop)
 A mapping of each n-ary predicate symbol P to a predicate P_{M}.
 n : The arity of the predicate symbol.
 P : The predicate symbol.
-P_{M} : (fin n → T) -> Prop : The predicate that the predicate symbol is mapped to.
-(fin n → T) : The type of the list of the n terms (arguments) of the predicate.
+P_{M} : The predicate that the predicate symbol is mapped to.
+fin n → T : The type of the list of the n terms (arguments) of the predicate.
 Prop : The type of the result of the predicate.
 -/
 structure interpretation (T : Type) : Type :=
