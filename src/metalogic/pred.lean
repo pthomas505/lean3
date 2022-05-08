@@ -129,7 +129,11 @@ def eval_term (T : Type) (m : interpretation T) (v : valuation T) : term → T
 | (var x) := v x
 | (func n f terms) := m.func n f (fun i : fin n, eval_term (terms i))
 
-
+/-
+v is a function. x is an element of the domain of v. a is an element of the range of v.
+if y = x then (`[` x `↦` a `]` v) y = a
+if y ≠ x then (`[` x `↦` a `]` v) y = v y
+-/
 notation  `[` x `↦` a `]` v := function.update v x a
 
 def holds (T : Type) (m : interpretation T) : valuation T → formula → Prop
