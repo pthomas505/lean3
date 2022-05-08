@@ -463,7 +463,7 @@ begin
   },
   {
     unfold is_valid, unfold is_model_of, unfold satisfies_set, unfold holds_in, unfold satisfies, simp only [set.mem_empty_eq],
-    intros h1 T m v, apply h1, intros p h1, contradiction
+    intros h1 T m v, apply h1, intros p h2, contradiction
   }
 end
 
