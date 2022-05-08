@@ -92,11 +92,23 @@ atom terms.length name terms.to_fin_fun
 /-
 domain: A nonempty set D called the domain of the interpretation. The intention is that all terms have values in D.
 
-func: (n : ℕ, string) → ((fin n → T) → T)
-A mapping of each n-ary function symbol f to a function f_{M} : D^{n} → D.
+nonempty: A proof that there is at least one element in the domain.
 
-pred: (n : ℕ, string) → ((fin n → T) → Prop)
-A mapping of each n-ary predicate symbol P to a predicate P_{M} : D^{n} → Prop.
+func: (n : ℕ, f : string) → (f_{M} : (fin n → T) → T)
+A mapping of each n-ary function symbol f to a function f_{M}.
+n : The arity of the function symbol.
+f : The function symbol.
+f_{M} : The function that the function symbol is mapped to.
+fin n → T : The type of the list of the n terms (arguments) of the function.
+T : The type of the result of the function.
+
+pred: (n : ℕ, P : string) → (P_{M} : (fin n → T) → Prop)
+A mapping of each n-ary predicate symbol P to a predicate P_{M}.
+n : The arity of the predicate symbol.
+P : The predicate symbol.
+P_{M} : (fin n → T) -> Prop : The predicate that the predicate symbol is mapped to.
+(fin n → T) : The type of the list of the n terms (arguments) of the predicate.
+Prop : The type of the result of the predicate.
 -/
 structure interpretation (T : Type) : Type :=
 (domain : set T)
