@@ -424,7 +424,7 @@ example
 	is_valid p ↔ ¬ (is_satisfiable (not p)) :=
 begin
   unfold is_valid, unfold is_satisfiable, unfold satisfies, unfold holds, push_neg, split,
-  intros h2 T m, fconstructor, exact fun s, m.nonempty.some, apply h2,
+  intros h2 T m, let v := fun _ : string, m.nonempty.some, exact exists.intro v (h2 T m v),
   intros h2 T m v, cases h2 T m, rewrite <- cor_3_3 p h1 T m w, exact h
 end
 
