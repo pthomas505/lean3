@@ -25,7 +25,7 @@ list.to_string (list.of_fn f)
 Term schemes.
 var "x" : An object variable named "x". Ranges over the domain of each interpretation.
 func 0 "c" [] : A constant named "c".
-func n "f" [x1 ... xn] : A function named "f" of n terms.
+func n "f" [x1 ... xn] : A function named "f" of n terms (arguments).
 -/
 inductive term : Type
 | var : string → term
