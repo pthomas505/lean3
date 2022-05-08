@@ -123,7 +123,7 @@ The type of mappings of object variable names to elements of a domain.
 def valuation (T : Type) := string → T
 
 /-
-The function mapping terms to elements of a domain by a given interpretation and valuation.
+The function mapping each term to an element of a domain by a given interpretation and valuation.
 -/
 def eval_term (T : Type) (m : interpretation T) (v : valuation T) : term → T
 | (var x) := v x
