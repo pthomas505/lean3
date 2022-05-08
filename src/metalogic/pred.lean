@@ -472,11 +472,10 @@ example
 	(Γ : set formula) :
 	¬ (is_satisfiable_set Γ) ↔ (Γ ⊨ bottom) :=
 begin
-  unfold is_model_of, unfold holds_in, unfold is_satisfiable_set, unfold satisfies_set,
+  unfold is_model_of, unfold is_satisfiable_set, unfold satisfies_set, unfold holds_in, unfold satisfies,
   split,
-  intros h1 T m h2 v, push_neg at h1, cases h1 T m, cases h, exfalso, apply h_right, apply h2, exact h_left,
-  unfold satisfies, intros h1 h2, unfold holds at h1, cases h2, cases h2_h,
-  apply h1 h2_w h2_h_w h2_h_h, exact fun x, h2_h_w.nonempty.some
+  intros h1 T m h2 v, unfold holds, apply h1, apply exists.intro T, exact exists.intro m h2,
+  intros h1, push_neg, intros T m, by_contradiction, push_neg at h, exact h1 T m h (fun _ : string, m.nonempty.some),
 end
 
 
