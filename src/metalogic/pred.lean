@@ -237,18 +237,21 @@ begin
   induction p generalizing v v',
   case formula.bottom {
     calc
-    holds T m v bottom ↔ false : by unfold holds
+          holds T m v bottom
+        ↔ false : by unfold holds
     ... ↔ holds T m v' bottom : by unfold holds
   },
   case formula.top {
     calc
-    holds T m v top ↔ true : by unfold holds
+          holds T m v top
+        ↔ true : by unfold holds
     ... ↔ holds T m v' top : by unfold holds
   },
   case formula.atom : n x terms {
     unfold formula.free_var_set at h1,
     calc
-    holds T m v (atom n x terms) ↔ m.pred n x (fun i : fin n, eval_term T m v (terms i)) : by unfold holds
+        holds T m v (atom n x terms)
+        ↔ m.pred n x (fun i : fin n, eval_term T m v (terms i)) : by unfold holds
     ... ↔ m.pred n x (fun i : fin n, eval_term T m v' (terms i)) :
       begin
         apply iff_of_eq, congr, funext,
@@ -260,7 +263,8 @@ begin
     unfold formula.free_var_set at h1,
     have s1 : holds T m v p ↔ holds T m v' p, exact ih v v' h1,
     calc
-    holds T m v (not p) ↔ ¬ holds T m v p : by unfold holds
+          holds T m v (not p)
+        ↔ ¬ holds T m v p : by unfold holds
     ... ↔ ¬ holds T m v' p : by simp only [s1]
     ... ↔ holds T m v' (not p) : by unfold holds
   },
@@ -269,7 +273,8 @@ begin
     have s1 : holds T m v p ↔ holds T m v' p, exact ih_p v v' h1_left,
     have s2 : holds T m v q ↔ holds T m v' q, exact ih_q v v' h1_right,
     calc
-    holds T m v (and p q) ↔ (holds T m v p ∧ holds T m v q) : by unfold holds
+          holds T m v (and p q)
+        ↔ (holds T m v p ∧ holds T m v q) : by unfold holds
     ... ↔ (holds T m v' p ∧ holds T m v' q) : by simp only [s1, s2]
     ... ↔ holds T m v' (and p q) : by unfold holds
   },
@@ -278,7 +283,8 @@ begin
     have s1 : holds T m v p ↔ holds T m v' p, exact ih_p v v' h1_left,
     have s2 : holds T m v q ↔ holds T m v' q, exact ih_q v v' h1_right,
     calc
-    holds T m v (or p q) ↔ (holds T m v p ∨ holds T m v q) : by unfold holds
+          holds T m v (or p q)
+        ↔ (holds T m v p ∨ holds T m v q) : by unfold holds
     ... ↔ (holds T m v' p ∨ holds T m v' q) : by simp only [s1, s2]
     ... ↔ holds T m v' (or p q) : by unfold holds
   },
@@ -287,7 +293,8 @@ begin
     have s1 : holds T m v p ↔ holds T m v' p, exact ih_p v v' h1_left,
     have s2 : holds T m v q ↔ holds T m v' q, exact ih_q v v' h1_right,
     calc
-    holds T m v (imp p q) ↔ (holds T m v p → holds T m v q) : by unfold holds
+          holds T m v (imp p q)
+        ↔ (holds T m v p → holds T m v q) : by unfold holds
     ... ↔ (holds T m v' p → holds T m v' q) : by simp only [s1, s2]
     ... ↔ holds T m v' (imp p q) : by unfold holds
   },
@@ -296,27 +303,31 @@ begin
     have s1 : holds T m v p ↔ holds T m v' p, exact ih_p v v' h1_left,
     have s2 : holds T m v q ↔ holds T m v' q, exact ih_q v v' h1_right,
     calc
-    holds T m v (iff p q) ↔ (holds T m v p ↔ holds T m v q) : by unfold holds
+          holds T m v (iff p q)
+        ↔ (holds T m v p ↔ holds T m v q) : by unfold holds
     ... ↔ (holds T m v' p ↔ holds T m v' q) : by simp only [s1, s2]
     ... ↔ holds T m v' (iff p q) : by unfold holds
   },
   case formula.forall_ : x p ih {
     unfold formula.free_var_set at h1, simp only [finset.mem_sdiff, finset.mem_singleton] at h1,
     calc
-    holds T m v (forall_ x p) ↔ ∀ a ∈ m.domain, holds T m ([x ↦ a] v) p : by unfold holds
+          holds T m v (forall_ x p)
+        ↔ ∀ a ∈ m.domain, holds T m ([x ↦ a] v) p : by unfold holds
     ... ↔ ∀ a ∈ m.domain, holds T m ([x ↦ a] v') p :
       begin
         apply ball_congr, intros a h2, apply ih, intros y h3,
         by_cases y = x, {
         calc
-        ([x ↦ a] v) y = ([x ↦ a] v) x : by rewrite h
+              ([x ↦ a] v) y
+            = ([x ↦ a] v) x : by rewrite h
         ... = a : dif_pos rfl
         ... = ([x ↦ a] v') x : begin symmetry, exact dif_pos rfl end
         ... = ([x ↦ a] v') y : by rewrite <- h
         },
         {
         calc
-        ([x ↦ a] v) y = v y : dif_neg h
+              ([x ↦ a] v) y
+            = v y : dif_neg h
         ... = v' y : begin apply h1, exact and.intro h3 h end
         ... = ([x ↦ a] v') y : begin symmetry, exact dif_neg h end
         }
@@ -326,20 +337,23 @@ begin
   case formula.exists_ : x p ih {
     unfold formula.free_var_set at h1, simp only [finset.mem_sdiff, finset.mem_singleton] at h1,
     calc
-    holds T m v (exists_ x p) ↔ ∃ a ∈ m.domain, holds T m ([x ↦ a] v) p : by unfold holds
+          holds T m v (exists_ x p)
+        ↔ ∃ a ∈ m.domain, holds T m ([x ↦ a] v) p : by unfold holds
     ... ↔ ∃ a ∈ m.domain, holds T m ([x ↦ a] v') p :
       begin
         apply bex_congr, intros a h2, apply ih, intros y h3,
         by_cases y = x, {
         calc
-        ([x ↦ a] v) y = ([x ↦ a] v) x : by rewrite h
+              ([x ↦ a] v) y
+            = ([x ↦ a] v) x : by rewrite h
         ... = a : dif_pos rfl
         ... = ([x ↦ a] v') x : begin symmetry, exact dif_pos rfl end
         ... = ([x ↦ a] v') y : by rewrite <- h
         },
         {
         calc
-        ([x ↦ a] v) y = v y : dif_neg h
+              ([x ↦ a] v) y
+            = v y : dif_neg h
         ... = v' y : begin apply h1, exact and.intro h3 h end
         ... = ([x ↦ a] v') y : begin symmetry, exact dif_neg h end
         }
