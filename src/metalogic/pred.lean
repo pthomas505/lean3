@@ -458,10 +458,13 @@ example
 	(is_valid p) ↔ (∅ ⊨ p) :=
 begin
   split,
-  intros h1 T m h2,
-  unfold holds_in, unfold satisfies, intros v, unfold is_valid at h1, exact h1 T m v,
-  unfold is_model_of, unfold satisfies_set,
-  intros h1 T m v, unfold holds_in at h1, unfold satisfies at h1, apply h1, intros p h1, simp at h1, contradiction
+  {
+    unfold is_valid, unfold holds_in, unfold satisfies, intros h1 T m h2, exact h1 T m
+  },
+  {
+    unfold is_valid, unfold is_model_of, unfold satisfies_set, unfold holds_in, unfold satisfies, simp only [set.mem_empty_eq],
+    intros h1 T m v, apply h1, intros p h1, contradiction
+  }
 end
 
 
