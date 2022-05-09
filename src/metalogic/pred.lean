@@ -368,12 +368,13 @@ p.free_var_set = ∅
 
 
 theorem cor_3_3
-  (p : formula)
+  {p : formula}
+  {T : Type}
+  {m : interpretation T}
+  (v v' : valuation T)
   (h1 : is_sentence p) :
-  ∀ T : Type, ∀ m : interpretation T, forall v : valuation T, forall v' : valuation T,
-    holds T m v p ↔ holds T m v' p :=
+  holds T m v p ↔ holds T m v' p :=
 begin
-  intros T m v v',
   unfold is_sentence at h1,
   have s1 : ∀ x ∈ p.free_var_set, v x = v' x,
     rewrite h1, simp only [finset.not_mem_empty, forall_false_left, forall_const],
@@ -428,7 +429,7 @@ begin
       intros h2 T m, let v := fun _ : string, m.nonempty.some, exact exists.intro v (h2 T m v),
   have s2 : (∀ (T : Type) (m : interpretation T), ∃ (v : valuation T), holds T m v p) →
     ∀ (T : Type) (m : interpretation T) (v : valuation T), holds T m v p,
-      intros h2 T m v, apply exists.elim, exact h2 T m, intros v', rewrite cor_3_3 p h1 T m v v', simp only [imp_self],
+      intros h2 T m v, apply exists.elim, exact h2 T m, intros v', exact iff.elim_right (cor_3_3 v v' h1),
   calc
         is_valid p
       ↔ ∀ (T : Type) (m : interpretation T) (v : valuation T), holds T m v p : by unfold is_valid
