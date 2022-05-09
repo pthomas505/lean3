@@ -602,10 +602,6 @@ def sub_formula : instantiation → formula → formula
   in exists_ x' (sub_formula ([x ↦ var x'] s) p)
 
 
-example (α : Type) (β : Type) [decidable_eq α] [decidable_eq β] (s : finset α) (t : α → finset β) (x : α) :
-(finset.bUnion s (fun y : α, t y)) \ (t x) = (finset.bUnion (s \ {x}) (fun y : α, t y)) \ (t x) := sorry
-
-
 lemma lem_3_6_1
   (x : string)
   (p : formula)
@@ -663,7 +659,8 @@ begin
     ... = finset.bUnion finset.univ (fun i : fin n, (sub_term s (terms i)).all_var_set) : by unfold formula.free_var_set
     ... = finset.bUnion finset.univ (fun i : fin n, (finset.bUnion (terms i).all_var_set (fun y : string, (s y).all_var_set))) :
         by simp only [lem_3_4]
-    ... = finset.bUnion (finset.bUnion finset.univ (fun i : fin n, (terms i).all_var_set)) (fun y : string, (s y).all_var_set) : sorry
+    ... = finset.bUnion (finset.bUnion finset.univ (fun i : fin n, (terms i).all_var_set)) (fun y : string, (s y).all_var_set) :
+        begin ext1, simp only [finset.mem_bUnion, finset.mem_univ, exists_prop, exists_true_left], tauto end
     ... = finset.bUnion (atom n x terms).free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
   },
   case formula.not : p ih {
@@ -679,7 +676,8 @@ begin
     ... = (sub_formula s p).free_var_set ∪ (sub_formula s q).free_var_set : by unfold formula.free_var_set
     ... = finset.bUnion p.free_var_set (fun y : string, (s y).all_var_set) ∪
             finset.bUnion q.free_var_set (fun y : string, (s y).all_var_set) : by simp only [ih_p, ih_q]
-    ... = finset.bUnion (p.free_var_set ∪ q.free_var_set) (fun y : string, (s y).all_var_set) : sorry
+    ... = finset.bUnion (p.free_var_set ∪ q.free_var_set) (fun y : string, (s y).all_var_set) :
+          begin ext1, simp only [finset.mem_union, finset.mem_bUnion, exists_prop], split, finish, finish, end
     ... = finset.bUnion (and p q).free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
   },
   case formula.or : p q ih_p ih_q {
@@ -706,8 +704,7 @@ begin
             by unfold formula.free_var_set
     ... = (finset.bUnion p.free_var_set (fun (y : string), (([x ↦ var x'] s) y).all_var_set)) \ {x'} :
             by simp only [ih ([x ↦ var x'] s)]
-    ... = (finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (([x ↦ var x'] s) y).all_var_set)) \ {x'} :
-            sorry
+    ... = (finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (([x ↦ var x'] s) y).all_var_set)) \ {x'} : sorry
     ... = (finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (s y).all_var_set)) \ {x'} :
             begin congr' 1, apply finset.bUnion_congr, refl, intros a h1, congr, apply function.update_noteq,
             simp only [finset.mem_sdiff, finset.mem_singleton] at h1, cases h1, exact h1_right end
