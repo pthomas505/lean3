@@ -490,7 +490,7 @@ example
 	(p : formula) :
 	(∀ x : string, ∀ v : valuation T, ∀ a ∈ m.domain, holds T m ([x ↦ a] v) p) ↔ (∀ v : valuation T, holds T m v p) :=
 begin
-  dsimp, split,
+  split,
   intros h1 v, sorry,
   intros h1 x v a h2, exact h1 (function.update v x a)
 end
