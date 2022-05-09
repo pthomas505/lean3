@@ -556,7 +556,7 @@ begin
           eval_term T m v (sub_term s (func n f terms))
         = eval_term T m v (func n f (fun i, sub_term s (terms i))) : by unfold sub_term
     ... = m.func n f (fun i, eval_term T m v (sub_term s (terms i))) : by unfold eval_term
-    ... = m.func n f (fun i, eval_term T m ((eval_term T m v) ∘ s) (terms i)) : begin congr, apply funext, intros j, exact ih' j end
+    ... = m.func n f (fun i, eval_term T m ((eval_term T m v) ∘ s) (terms i)) : begin congr, apply funext, exact ih' end
     ... = eval_term T m ((eval_term T m v) ∘ s) (func n f terms) : by unfold eval_term
   }
 end
