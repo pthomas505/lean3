@@ -475,8 +475,12 @@ example
 begin
   unfold is_model_of, unfold is_satisfiable_set, unfold satisfies_set, unfold holds_in, unfold satisfies,
   split,
-  intros h1 T m h2 v, unfold holds, apply h1, apply exists.intro T, exact exists.intro m h2,
-  intros h1, push_neg, intros T m, by_contradiction, push_neg at h, exact h1 T m h (fun _ : string, m.nonempty.some),
+  {
+    intros h1 T m h2 v, unfold holds, apply h1, apply exists.intro T, exact exists.intro m h2,
+  },
+  {
+    intros h1, push_neg, intros T m, by_contradiction, push_neg at h, exact h1 T m h (fun _ : string, m.nonempty.some),
+  }
 end
 
 
