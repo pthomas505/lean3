@@ -463,7 +463,8 @@ begin
     unfold is_valid, unfold holds_in, unfold satisfies, intros h1 T m h2, exact h1 T m
   },
   {
-    unfold is_valid, unfold is_model_of, unfold satisfies_set, unfold holds_in, unfold satisfies, simp only [set.mem_empty_eq],
+    unfold is_valid, unfold is_model_of, unfold satisfies_set, unfold holds_in,
+    unfold satisfies, simp only [set.mem_empty_eq],
     intros h1 T m v, apply h1, intros p h2, contradiction
   }
 end
@@ -479,7 +480,8 @@ begin
     intros h1 T m h2 v, unfold holds, apply h1, apply exists.intro T, exact exists.intro m h2,
   },
   {
-    intros h1, push_neg, intros T m, by_contradiction, push_neg at h, exact h1 T m h (fun _ : string, m.nonempty.some),
+    intros h1, push_neg, intros T m, by_contradiction, push_neg at h,
+    exact h1 T m h (fun _ : string, m.nonempty.some),
   }
 end
 
@@ -641,6 +643,22 @@ begin
   }
 end
 
+lemma finset_bUnion_sdiff
+  {T : Type} [decidable_eq T]
+  (x x' : T)
+  (S : finset T)
+  (f : T → finset T)
+  (h1 : f x = {x'}) :
+  (finset.bUnion S f) \ {x'} = (finset.bUnion (S \ {x}) f) \ {x'} :=
+begin
+  by_cases x ∈ S,
+  {
+    sorry
+  },
+  {
+    congr, symmetry, exact finset.sdiff_singleton_not_mem_eq_self S h,
+  }
+end
 
 lemma lem_3_6
   (p : formula)
@@ -705,7 +723,8 @@ begin
             by unfold formula.free_var_set
     ... = (finset.bUnion p.free_var_set (fun (y : string), (([x ↦ var x'] s) y).all_var_set)) \ {x'} :
             by simp only [ih ([x ↦ var x'] s)]
-    ... = (finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (([x ↦ var x'] s) y).all_var_set)) \ {x'} : sorry
+    ... = (finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (([x ↦ var x'] s) y).all_var_set)) \ {x'} :
+            begin apply finset_bUnion_sdiff, finish end
     ... = (finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (s y).all_var_set)) \ {x'} :
             begin congr' 1, apply finset.bUnion_congr, refl, intros a h1, congr, apply function.update_noteq,
             simp only [finset.mem_sdiff, finset.mem_singleton] at h1, cases h1, exact h1_right end
