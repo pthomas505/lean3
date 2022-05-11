@@ -842,13 +842,28 @@ begin
     ... ↔ holds T m ((eval_term T m v) ∘ s) (and p q) : by unfold holds
   },
   case formula.or : p q ih_p ih_q {
-    sorry
+    calc
+    holds T m v (sub_formula s (or p q)) ↔ holds T m v (or (sub_formula s p) (sub_formula s q)) : by unfold sub_formula
+    ... ↔ (holds T m v (sub_formula s p)) ∨ (holds T m v (sub_formula s q)) : by unfold holds
+    ... ↔ (holds T m ((eval_term T m v) ∘ s) p) ∨ (holds T m ((eval_term T m v) ∘ s) q) :
+        begin rewrite ih_p s v, rewrite ih_q s v end
+    ... ↔ holds T m ((eval_term T m v) ∘ s) (or p q) : by unfold holds
   },
   case formula.imp : p q ih_p ih_q {
-    sorry
+    calc
+    holds T m v (sub_formula s (imp p q)) ↔ holds T m v (imp (sub_formula s p) (sub_formula s q)) : by unfold sub_formula
+    ... ↔ (holds T m v (sub_formula s p)) → (holds T m v (sub_formula s q)) : by unfold holds
+    ... ↔ (holds T m ((eval_term T m v) ∘ s) p) → (holds T m ((eval_term T m v) ∘ s) q) :
+        begin rewrite ih_p s v, rewrite ih_q s v end
+    ... ↔ holds T m ((eval_term T m v) ∘ s) (imp p q) : by unfold holds
   },
   case formula.iff : p q ih_p ih_q {
-    sorry
+    calc
+    holds T m v (sub_formula s (iff p q)) ↔ holds T m v (iff (sub_formula s p) (sub_formula s q)) : by unfold sub_formula
+    ... ↔ ((holds T m v (sub_formula s p)) ↔ (holds T m v (sub_formula s q))) : by unfold holds
+    ... ↔ ((holds T m ((eval_term T m v) ∘ s) p) ↔ (holds T m ((eval_term T m v) ∘ s) q)) :
+        begin rewrite ih_p s v, rewrite ih_q s v end
+    ... ↔ holds T m ((eval_term T m v) ∘ s) (iff p q) : by unfold holds
   },
   case formula.forall_ : x p ih {
     let x' :=
