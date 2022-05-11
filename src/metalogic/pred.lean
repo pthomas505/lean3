@@ -908,13 +908,65 @@ begin
     ... ↔ (∀ a ∈ m.domain, (holds T m ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) p)) : by finish
     ... ↔ (∀ a ∈ m.domain, holds T m ([x ↦ a] ((eval_term T m v) ∘ s)) p) :
       begin split,
-      intros h10 a h11, rewrite <- (thm_3_2 T m p ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) ([x ↦ a] ((eval_term T m v) ∘ s)) (s1 a h11)), exact h10 a h11,
-      intros h10 a h11, rewrite (thm_3_2 T m p ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) ([x ↦ a] ((eval_term T m v) ∘ s)) (s1 a h11)), exact h10 a h11
+      intros h1 a h2,
+      rewrite <- (thm_3_2 T m p ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) ([x ↦ a] ((eval_term T m v) ∘ s)) (s1 a h2)), exact h1 a h2,
+      intros h1 a h2,
+      rewrite (thm_3_2 T m p ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) ([x ↦ a] ((eval_term T m v) ∘ s)) (s1 a h2)), exact h1 a h2
       end
     ... ↔ holds T m (eval_term T m v ∘ s) (forall_ x p) : by unfold holds
   },
   case formula.exists_ : x p ih {
-    sorry
+    let x' :=
+      if ∃ y ∈ p.free_var_set \ {x}, x ∈ (s y).all_var_set
+      then variant x (sub_formula ([x ↦ var x] s) p).free_var_set
+      else x,
+    have s1 : ∀ a ∈ m.domain, ∀ z ∈ p.free_var_set,
+      ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) z = ([x ↦ a] ((eval_term T m v) ∘ s)) z,
+      intros a h2 z h1,
+      by_cases z = x, {
+        calc
+        ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) z =
+              ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) x : by rewrite h
+        ... = (eval_term T m ([x' ↦ a] v)) (([x ↦ (var x')] s) x) : by simp only [function.comp_app]
+        ... = (eval_term T m ([x' ↦ a] v)) (var x') : by simp only [function.update_same]
+        ... = ([x' ↦ a] v) x' : by unfold eval_term
+        ... = a : by simp only [function.update_same]
+        ... = ([x ↦ a] ((eval_term T m v) ∘ s)) x : by simp only [function.update_same]
+        ... = ([x ↦ a] ((eval_term T m v) ∘ s)) z : by rewrite h
+      },
+      {
+        have s2 : z ∈ p.free_var_set \ {x}, simp only [finset.mem_sdiff, finset.mem_singleton], exact and.intro h1 h,
+        have s3 : x' ∉ finset.bUnion (p.free_var_set \ {x}) (fun y : string, (s y).all_var_set),
+          exact lem_3_6_1 x p s (lem_3_6 p),
+        have s4 : (s z).all_var_set ⊆ finset.bUnion (p.free_var_set \ {x}) (fun y : string, (s y).all_var_set),
+          exact finset.subset_bUnion_of_mem (fun y : string, (s y).all_var_set) s2,
+        have s5 : x' ∉ (s z).all_var_set, exact finset.not_mem_mono s4 s3,
+        have s6 : ∀ (x : string), x ∈ (s z).all_var_set → x ≠ x', intros y h3, by_contradiction, apply s5, rewrite <- h, exact h3,
+        calc
+        ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) z =
+              (eval_term T m ([x' ↦ a] v)) (([x ↦ (var x')] s) z) : by simp only [function.comp_app]
+        ... = (eval_term T m ([x' ↦ a] v)) (s z) : by simp only [function.update_noteq h]
+        ... = eval_term T m v (s z) : begin apply thm_3_1 T m (s z) ([x' ↦ a] v) v, intros x h3,
+                                      apply function.update_noteq, exact s6 x h3 end
+        ... = ((eval_term T m v) ∘ s) z : by simp only [eq_self_iff_true]
+        ... = ([x ↦ a] ((eval_term T m v) ∘ s)) z : begin symmetry, apply function.update_noteq h end
+      },
+    calc
+    holds T m v (sub_formula s (exists_ x p))
+      ↔ holds T m v (exists_ x' (sub_formula ([x ↦ (var x')] s) p)) : by unfold sub_formula
+    ... ↔ ∃ a ∈ m.domain, holds T m ([x' ↦ a] v) (sub_formula ([x ↦ (var x')] s) p) : by unfold holds
+    ... ↔ (∃ a ∈ m.domain, (holds T m ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) p)) : by finish
+    ... ↔ (∃ a ∈ m.domain, holds T m ([x ↦ a] ((eval_term T m v) ∘ s)) p) :
+    begin
+      split,
+      intros h1, cases h1 with a h2, cases h2 with h3 h4, apply exists.intro a, apply exists.intro h3,
+      rewrite <- thm_3_2 T m p ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) ([x ↦ a] ((eval_term T m v) ∘ s)) (s1 a h3),
+      exact h4,
+      intros h1, cases h1 with a h2, cases h2 with h3 h4, apply exists.intro a, apply exists.intro h3,
+      rewrite thm_3_2 T m p ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) ([x ↦ a] ((eval_term T m v) ∘ s)) (s1 a h3),
+      exact h4
+    end
+    ... ↔ holds T m (eval_term T m v ∘ s) (exists_ x p) : by unfold holds
   }
 end
 
