@@ -730,13 +730,34 @@ begin
     ... = finset.bUnion (and p q).free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
   },
   case formula.or : p q ih_p ih_q {
-    sorry
+    calc
+    (sub_formula s (or p q)).free_var_set = (or (sub_formula s p) (sub_formula s q)).free_var_set : by unfold sub_formula
+    ... = (sub_formula s p).free_var_set ∪ (sub_formula s q).free_var_set : by unfold formula.free_var_set
+    ... = finset.bUnion p.free_var_set (fun y : string, (s y).all_var_set) ∪
+            finset.bUnion q.free_var_set (fun y : string, (s y).all_var_set) : by simp only [ih_p, ih_q]
+    ... = finset.bUnion (p.free_var_set ∪ q.free_var_set) (fun y : string, (s y).all_var_set) :
+          begin ext1, simp only [finset.mem_union, finset.mem_bUnion, exists_prop], split, finish, finish end
+    ... = finset.bUnion (or p q).free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
   },
   case formula.imp : p q ih_p ih_q {
-    sorry
+    calc
+    (sub_formula s (imp p q)).free_var_set = (imp (sub_formula s p) (sub_formula s q)).free_var_set : by unfold sub_formula
+    ... = (sub_formula s p).free_var_set ∪ (sub_formula s q).free_var_set : by unfold formula.free_var_set
+    ... = finset.bUnion p.free_var_set (fun y : string, (s y).all_var_set) ∪
+            finset.bUnion q.free_var_set (fun y : string, (s y).all_var_set) : by simp only [ih_p, ih_q]
+    ... = finset.bUnion (p.free_var_set ∪ q.free_var_set) (fun y : string, (s y).all_var_set) :
+          begin ext1, simp only [finset.mem_union, finset.mem_bUnion, exists_prop], split, finish, finish end
+    ... = finset.bUnion (imp p q).free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
   },
   case formula.iff : p q ih_p ih_q {
-    sorry
+    calc
+    (sub_formula s (iff p q)).free_var_set = (iff (sub_formula s p) (sub_formula s q)).free_var_set : by unfold sub_formula
+    ... = (sub_formula s p).free_var_set ∪ (sub_formula s q).free_var_set : by unfold formula.free_var_set
+    ... = finset.bUnion p.free_var_set (fun y : string, (s y).all_var_set) ∪
+            finset.bUnion q.free_var_set (fun y : string, (s y).all_var_set) : by simp only [ih_p, ih_q]
+    ... = finset.bUnion (p.free_var_set ∪ q.free_var_set) (fun y : string, (s y).all_var_set) :
+          begin ext1, simp only [finset.mem_union, finset.mem_bUnion, exists_prop], split, finish, finish end
+    ... = finset.bUnion (iff p q).free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
   },
   case formula.forall_ : x p ih {
     let x' :=
@@ -760,7 +781,25 @@ begin
             begin apply finset.sdiff_singleton_not_mem_eq_self, exact lem_3_6_1 x p s ih end
   },
   case formula.exists_ : x p ih {
-    sorry
+    let x' :=
+      if ∃ y ∈ p.free_var_set \ {x}, x ∈ (s y).all_var_set
+      then variant x (sub_formula ([x ↦ var x] s) p).free_var_set
+      else x,
+    calc
+          (sub_formula s (exists_ x p)).free_var_set
+        = (exists_ x' (sub_formula ([x ↦ var x'] s) p)).free_var_set :
+            by unfold sub_formula
+    ... = (sub_formula ([x ↦ var x'] s) p).free_var_set \ {x'} :
+            by unfold formula.free_var_set
+    ... = (finset.bUnion p.free_var_set (fun (y : string), (([x ↦ var x'] s) y).all_var_set)) \ {x'} :
+            by simp only [ih ([x ↦ var x'] s)]
+    ... = (finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (([x ↦ var x'] s) y).all_var_set)) \ {x'} :
+            begin apply finset_bUnion_sdiff, finish end
+    ... = (finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (s y).all_var_set)) \ {x'} :
+            begin congr' 1, apply finset.bUnion_congr, refl, intros a h1, congr, apply function.update_noteq,
+            simp only [finset.mem_sdiff, finset.mem_singleton] at h1, cases h1, exact h1_right end
+    ... = finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (s y).all_var_set) :
+            begin apply finset.sdiff_singleton_not_mem_eq_self, exact lem_3_6_1 x p s ih end
   }
 end
 
