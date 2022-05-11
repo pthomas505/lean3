@@ -643,6 +643,17 @@ begin
   }
 end
 
+lemma finset_bUnion_singleton_union
+  {T : Type} [decidable_eq T]
+  (x : T)
+  (S : finset T)
+  (f : T → finset T) :
+  finset.bUnion ({x} ∪ S) f = (finset.bUnion S f) ∪ f x :=
+begin
+  ext, simp only [finset.mem_bUnion, finset.mem_union, finset.mem_singleton, exists_prop],
+  split, finish, finish,
+end
+
 lemma finset_bUnion_sdiff
   {T : Type} [decidable_eq T]
   (x x' : T)
@@ -653,7 +664,24 @@ lemma finset_bUnion_sdiff
 begin
   by_cases x ∈ S,
   {
-    sorry
+    calc
+          (finset.bUnion S f) \ {x'}
+        = finset.bUnion S (fun i : T, f i \ {x'}) :
+          by simp only [finset.sdiff_singleton_eq_erase, finset.erase_bUnion]
+    ... = finset.bUnion ({x} ∪ (S \ {x})) (fun i : T, f i \ {x'}) :
+          begin
+            congr, symmetry, apply finset.union_sdiff_of_subset,
+            simp only [finset.singleton_subset_iff], exact h
+          end
+    ... = (finset.bUnion (S \ {x}) (fun i : T, f i \ {x'})) ∪ (fun i : T, f i \ {x'}) x :
+          by simp only [finset_bUnion_singleton_union]
+    ...  = (finset.bUnion (S \ {x}) (fun i : T, f i \ {x'})) :
+          begin
+            simp only, rewrite h1, rewrite sdiff_self, apply finset.union_empty
+          end
+    ... = (finset.bUnion (S \ {x}) (fun i : T, f i)) \ {x'} :
+          by simp only [finset.sdiff_singleton_eq_erase, finset.erase_bUnion]
+    ... = (finset.bUnion (S \ {x}) f) \ {x'} : by simp only
   },
   {
     congr, symmetry, exact finset.sdiff_singleton_not_mem_eq_self S h,
