@@ -978,3 +978,102 @@ theorem cor_3_8
 begin
   sorry
 end
+
+
+def sub_formula_simp (s : instantiation) : formula → formula
+| bottom := bottom
+| top := top
+| (atom n x terms) := atom n x (fun i : fin n, sub_term s (terms i))
+| (not p) := not (sub_formula_simp p)
+| (and p q) := and (sub_formula_simp p) (sub_formula_simp q)
+| (or p q) := or (sub_formula_simp p) (sub_formula_simp q)
+| (imp p q) := imp (sub_formula_simp p) (sub_formula_simp q)
+| (iff p q) := iff (sub_formula_simp p) (sub_formula_simp q)
+| (forall_ x p) := forall_ x (sub_formula_simp p)
+| (exists_ x p) := exists_ x (sub_formula_simp p)
+
+def sub_admits (s : instantiation) : formula → Prop
+| bottom := true
+| top := true
+| (atom _ _ _) := true
+| (not p) := sub_admits p
+| (and p q) := sub_admits p ∧ sub_admits q
+| (or p q) := sub_admits p ∧ sub_admits q
+| (imp p q) := sub_admits p ∧ sub_admits q
+| (iff p q) := sub_admits p ∧ sub_admits q
+| (forall_ x p) := s x = var x ∧ sub_admits p ∧ ∀ y ∈ p.free_var_set \ {x}, x ∉ (s y).all_var_set
+| (exists_ x p) := s x = var x ∧ sub_admits p ∧ ∀ y ∈ p.free_var_set \ {x}, x ∉ (s y).all_var_set
+
+
+lemma lem_3_6_simp
+  (p : formula)
+  (s : instantiation)
+  (h1 : sub_admits s p) :
+  (sub_formula_simp s p).free_var_set = finset.bUnion p.free_var_set (fun y : string, (s y).all_var_set) :=
+begin
+  induction p generalizing s,
+  case formula.bottom {
+    unfold sub_formula_simp, unfold formula.free_var_set, simp only [finset.bUnion_empty],
+  },
+  case formula.top {
+    unfold sub_formula_simp, unfold formula.free_var_set, simp only [finset.bUnion_empty]
+  },
+  case formula.atom : n x terms {
+    calc
+          (sub_formula_simp s (atom n x terms)).free_var_set
+        = (atom n x (fun i : fin n, sub_term s (terms i))).free_var_set : by unfold sub_formula_simp
+    ... = finset.bUnion finset.univ (fun i : fin n, (sub_term s (terms i)).all_var_set) : by unfold formula.free_var_set
+    ... = finset.bUnion finset.univ (fun i : fin n, (finset.bUnion (terms i).all_var_set (fun y : string, (s y).all_var_set))) :
+          by simp only [lem_3_4]
+    ... = finset.bUnion (finset.bUnion finset.univ (fun i : fin n, (terms i).all_var_set)) (fun y : string, (s y).all_var_set) :
+          begin ext1, simp only [finset.mem_bUnion, finset.mem_univ, exists_prop, exists_true_left], tauto end
+    ... = finset.bUnion (atom n x terms).free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
+  },
+  case formula.not : p ih {
+    calc
+          (sub_formula_simp s (not p)).free_var_set
+        = (not (sub_formula_simp s p)).free_var_set : by unfold sub_formula_simp
+    ... = (sub_formula_simp s p).free_var_set : by unfold formula.free_var_set
+    ... = finset.bUnion p.free_var_set (fun y : string, (s y).all_var_set) : begin unfold sub_admits at h1, apply ih, exact h1 end
+    ... = finset.bUnion (not p).free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
+  },
+  case formula.and : p q ih_p ih_q {
+    calc
+          (sub_formula_simp s (and p q)).free_var_set
+        = (and (sub_formula_simp s p) (sub_formula_simp s q)).free_var_set : by unfold sub_formula_simp
+    ... = (sub_formula_simp s p).free_var_set ∪ (sub_formula_simp s q).free_var_set : by unfold formula.free_var_set
+    ... = finset.bUnion p.free_var_set (fun y : string, (s y).all_var_set) ∪
+            finset.bUnion q.free_var_set (fun y : string, (s y).all_var_set) :
+          begin unfold sub_admits at h1, simp only [ih_p s h1.left, ih_q s h1.right] end
+    ... = finset.bUnion (p.free_var_set ∪ q.free_var_set) (fun y : string, (s y).all_var_set) :
+          begin ext1, simp only [finset.mem_union, finset.mem_bUnion, exists_prop], split, finish, finish end
+    ... = finset.bUnion (and p q).free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
+  },
+  case formula.or : p q ih_p ih_q {
+    sorry
+  },
+  case formula.imp : p q ih_p ih_q {
+    sorry
+  },
+  case formula.iff : p q ih_p ih_q {
+    sorry
+  },
+  case formula.forall_ : x p ih {
+    unfold sub_admits at h1, cases h1, cases h1_right,
+    calc
+          (sub_formula_simp s (forall_ x p)).free_var_set
+        = (forall_ x (sub_formula_simp s p)).free_var_set :
+            by unfold sub_formula_simp
+    ... = (sub_formula_simp s p).free_var_set \ {x} :
+            by unfold formula.free_var_set
+    ... = (finset.bUnion p.free_var_set (fun y : string, (s y).all_var_set)) \ {x} : by rewrite ih s h1_right_left
+    ... = (finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (s y).all_var_set)) \ {x} :
+            begin apply finset_bUnion_sdiff, finish end
+    ... = finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (s y).all_var_set) :
+            begin apply finset.sdiff_singleton_not_mem_eq_self, finish end
+    ... = finset.bUnion (forall_ x p).free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
+  },
+  case formula.exists_ : x p ih {
+    sorry
+  }
+end
