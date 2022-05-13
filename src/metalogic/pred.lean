@@ -1077,3 +1077,32 @@ begin
     sorry
   }
 end
+
+
+def alpha_convert_term (s: string → string) : term → term
+| (var x) := var (s x)
+| (func n f terms) := func n f (fun i : fin n, alpha_convert_term (terms i))
+
+def alpha_convert_formula (s : string → string) : formula → formula
+| bottom := bottom
+| top := top
+| (atom n x terms) := atom n x (fun i : fin n, alpha_convert_term s (terms i))
+| (not p) := not (alpha_convert_formula p)
+| (and p q) := and (alpha_convert_formula p) (alpha_convert_formula q)
+| (or p q) := or (alpha_convert_formula p) (alpha_convert_formula q)
+| (imp p q) := imp (alpha_convert_formula p) (alpha_convert_formula q)
+| (iff p q) := iff (alpha_convert_formula p) (alpha_convert_formula q)
+| (forall_ x p) := forall_ (s x) (alpha_convert_formula p)
+| (exists_ x p) := exists_ (s x) (alpha_convert_formula p)
+
+def alpha_convert_valid (s : string → string) : formula → Prop
+| bottom := true
+| top := true
+| (atom _ _ _) := true
+| (not p) := alpha_convert_valid p
+| (and p q) := alpha_convert_valid p ∧ alpha_convert_valid q
+| (or p q) := alpha_convert_valid p ∧ alpha_convert_valid q
+| (imp p q) := alpha_convert_valid p ∧ alpha_convert_valid q
+| (iff p q) := alpha_convert_valid p ∧ alpha_convert_valid q
+| (forall_ x p) := alpha_convert_valid p ∧ s x ∉ p.free_var_set \ {x}
+| (exists_ x p) := alpha_convert_valid p ∧ s x ∉ p.free_var_set \ {x}
