@@ -1005,6 +1005,16 @@ def sub_admits (s : instantiation) : formula → Prop
 | (exists_ x p) := s x = var x ∧ sub_admits p ∧ ∀ y ∈ p.free_var_set \ {x}, x ∉ (s y).all_var_set
 
 
+lemma finset.bUnion_union
+  {T : Type}
+  [decidable_eq T]
+  (s t : finset T)
+  (f : T → finset T) :
+  (finset.bUnion s f) ∪ (finset.bUnion t f) = finset.bUnion (s ∪ t) f :=
+begin
+  ext1, simp only [finset.mem_union, finset.mem_bUnion, exists_prop], split, finish, finish
+end
+
 lemma lem_3_6_simp
   (p : formula)
   (s : instantiation)
@@ -1024,7 +1034,7 @@ begin
         = (atom n x (fun i : fin n, sub_term s (terms i))).free_var_set : by unfold sub_formula_simp
     ... = finset.bUnion finset.univ (fun i : fin n, (sub_term s (terms i)).all_var_set) : by unfold formula.free_var_set
     ... = finset.bUnion finset.univ (fun i : fin n, (finset.bUnion (terms i).all_var_set (fun y : string, (s y).all_var_set))) :
-          by simp only [lem_3_4]
+          begin congr, funext, apply lem_3_4, end
     ... = finset.bUnion (finset.bUnion finset.univ (fun i : fin n, (terms i).all_var_set)) (fun y : string, (s y).all_var_set) :
           begin ext1, simp only [finset.mem_bUnion, finset.mem_univ, exists_prop, exists_true_left], tauto end
     ... = finset.bUnion (atom n x terms).free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
@@ -1034,7 +1044,7 @@ begin
           (sub_formula_simp s (not p)).free_var_set
         = (not (sub_formula_simp s p)).free_var_set : by unfold sub_formula_simp
     ... = (sub_formula_simp s p).free_var_set : by unfold formula.free_var_set
-    ... = finset.bUnion p.free_var_set (fun y : string, (s y).all_var_set) : begin unfold sub_admits at h1, apply ih, exact h1 end
+    ... = finset.bUnion p.free_var_set (fun y : string, (s y).all_var_set) : begin unfold sub_admits at h1, exact ih s h1 end
     ... = finset.bUnion (not p).free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
   },
   case formula.and : p q ih_p ih_q {
@@ -1044,9 +1054,11 @@ begin
     ... = (sub_formula_simp s p).free_var_set ∪ (sub_formula_simp s q).free_var_set : by unfold formula.free_var_set
     ... = finset.bUnion p.free_var_set (fun y : string, (s y).all_var_set) ∪
             finset.bUnion q.free_var_set (fun y : string, (s y).all_var_set) :
-          begin unfold sub_admits at h1, simp only [ih_p s h1.left, ih_q s h1.right] end
-    ... = finset.bUnion (p.free_var_set ∪ q.free_var_set) (fun y : string, (s y).all_var_set) :
-          begin ext1, simp only [finset.mem_union, finset.mem_bUnion, exists_prop], split, finish, finish end
+          begin
+            unfold sub_admits at h1, cases h1,
+            congr, exact ih_p s h1_left, exact ih_q s h1_right,
+          end
+    ... = finset.bUnion (p.free_var_set ∪ q.free_var_set) (fun y : string, (s y).all_var_set) : by apply finset.bUnion_union
     ... = finset.bUnion (and p q).free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
   },
   case formula.or : p q ih_p ih_q {
