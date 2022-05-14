@@ -1141,19 +1141,26 @@ begin
               apply thm_3_2, intros z h2,
               by_cases z = x,
               {
-                rewrite h, unfold function.comp, rewrite h1_left, unfold eval_term,
-                simp only [function.update_same]
+                calc
+                      (eval_term T m ([x ↦ a] v) ∘ s) z
+                    = (eval_term T m ([x ↦ a] v) ∘ s) x : by rewrite h
+                ... = eval_term T m ([x ↦ a] v) (s x) : by unfold function.comp
+                ... = eval_term T m ([x ↦ a] v) (var x) : by rewrite h1_left
+                ... = ([x ↦ a] v) x : by unfold eval_term
+                ... = a : by simp only [function.update_same]
+                ... = ([x ↦ a] eval_term T m v ∘ s) x : by simp only [function.update_same]
+                ... = ([x ↦ a] eval_term T m v ∘ s) z : by rewrite h
               },
               {
                 calc
                       (eval_term T m ([x ↦ a] v) ∘ s) z
-                    = eval_term T m ([x ↦ a] v) (s z) : by simp only [eq_self_iff_true]
+                    = eval_term T m ([x ↦ a] v) (s z) : by unfold function.comp
                 ... = eval_term T m v (s z) :
                       begin
                         apply thm_3_1, intro y, intro h3,
                         apply function.update_noteq, finish
                       end
-                ... = (eval_term T m v ∘ s) z : by simp only [function.comp_app]
+                ... = (eval_term T m v ∘ s) z : by unfold function.comp
                 ... = ([x ↦ a] eval_term T m v ∘ s) z : by simp only [function.update_noteq h]
               }
             end
