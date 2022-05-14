@@ -1157,7 +1157,7 @@ begin
                     = eval_term T m ([x ↦ a] v) (s z) : by unfold function.comp
                 ... = eval_term T m v (s z) :
                       begin
-                        apply thm_3_1, intro y, intro h3,
+                        apply thm_3_1, intros y h3,
                         apply function.update_noteq, finish
                       end
                 ... = (eval_term T m v ∘ s) z : by unfold function.comp
