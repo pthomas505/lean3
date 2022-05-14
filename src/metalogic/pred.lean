@@ -664,7 +664,7 @@ lemma lem_3_6_simp
 begin
   induction p generalizing s,
   case formula.bottom {
-    unfold sub_formula_simp, unfold formula.free_var_set, simp only [finset.bUnion_empty],
+    unfold sub_formula_simp, unfold formula.free_var_set, simp only [finset.bUnion_empty]
   },
   case formula.top {
     unfold sub_formula_simp, unfold formula.free_var_set, simp only [finset.bUnion_empty]
@@ -815,7 +815,9 @@ begin
                 ... = eval_term T m v (s z) :
                       begin
                         apply thm_3_1, intros y h3,
-                        apply function.update_noteq, finish
+                        apply function.update_noteq, intros h4, apply h1_right_right z,
+                        simp only [finset.mem_sdiff, finset.mem_singleton], exact and.intro h2 h,
+                        rewrite h4 at h3, exact h3
                       end
                 ... = (eval_term T m v ∘ s) z : by unfold function.comp
                 ... = ([x ↦ a] eval_term T m v ∘ s) z : by simp only [function.update_noteq h]
