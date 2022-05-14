@@ -1141,16 +1141,21 @@ begin
 -/
       have s4 : (∀ a : T, a ∈ m.domain → holds T m (eval_term T m ([x ↦ a] v) ∘ s) p)
         ↔ (∀ a : T, a ∈ m.domain → holds T m ([x ↦ a] eval_term T m v ∘ s) p),
-        simp at *, apply forall_congr, intro, apply imp_congr, refl, apply thm_3_2, intros z h2, simp,
-        dsimp at *, by_cases z = x, rewrite h, simp, rewrite h1_left, unfold eval_term, simp,
-        have s5 : x ∉ (s z).all_var_set, exact h1_right_right z h2 h,
-        have s6 : (([x↦var x]s) z) = s z, finish,
-        rewrite <- s6, simp at *,
-        rewrite s6,
-        have s7 : ([x↦a]eval_term T m v ∘ s) z = (eval_term T m v ∘ s) z, finish,
-        rewrite s7, simp, apply thm_3_1, intros,
-        have s8 : x ≠ x_1, finish,
-        simp at *, apply function.update_noteq, tauto,
+        apply forall_congr, intro a, apply imp_congr, refl,
+        apply thm_3_2, intros z h2,
+        by_cases z = x,
+        {
+          rewrite h, unfold function.comp, rewrite h1_left, unfold eval_term, simp only [function.update_same]
+        },
+        {
+          calc
+          (eval_term T m ([x ↦ a] v) ∘ s) z
+          = eval_term T m ([x ↦ a] v) (s z) : by simp only [eq_self_iff_true]
+          ... = eval_term T m v (s z) : begin apply thm_3_1, intro y, intro h3,
+          apply function.update_noteq, finish end
+          ... = (eval_term T m v ∘ s) z : by simp only [function.comp_app]
+          ... = ([x ↦ a] eval_term T m v ∘ s) z : by simp only [function.update_noteq h]
+        },
 
 /-
       have s5 : (∀ a : T, a ∈ m.domain → holds T m ([x ↦ a] eval_term T m v ∘ s) p)
