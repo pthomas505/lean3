@@ -1134,7 +1134,11 @@ begin
             holds T m v (sub_formula_simp s (forall_ x p))
           ↔ holds T m v (forall_ x (sub_formula_simp s p)) : by unfold sub_formula_simp
       ... ↔ (∀ a : T, a ∈ m.domain → holds T m ([x ↦ a] v) (sub_formula_simp s p)) : by unfold holds
-      ... ↔ (∀ a : T, a ∈ m.domain → holds T m (eval_term T m ([x ↦ a] v) ∘ s) p) : by finish
+      ... ↔ (∀ a : T, a ∈ m.domain → holds T m (eval_term T m ([x ↦ a] v) ∘ s) p) :
+            begin
+              apply forall_congr, intros a, apply imp_congr, refl,
+              exact ih s ([x↦a]v) h1_right_left
+            end
       ... ↔ (∀ a : T, a ∈ m.domain → holds T m ([x ↦ a] eval_term T m v ∘ s) p) :
             begin
               apply forall_congr, intro a, apply imp_congr, refl,
