@@ -1130,38 +1130,34 @@ begin
   case formula.forall_ : x p ih {
     begin
       unfold sub_admits at h1, cases h1, cases h1_right,
-
-/-
-      have s1 : holds T m v (sub_formula_simp s (forall_ x p))
-        ↔ holds T m v (forall_ x (sub_formula_simp s p)), unfold sub_formula_simp,
-      have s2 : holds T m v (forall_ x (sub_formula_simp s p))
-        ↔ (∀ a : T, a ∈ m.domain → holds T m ([x ↦ a] v) (sub_formula_simp s p)), unfold holds,
-      have s3 : (∀ a : T, a ∈ m.domain → holds T m ([x ↦ a] v) (sub_formula_simp s p))
-        ↔ (∀ a : T, a ∈ m.domain → holds T m (eval_term T m ([x ↦ a] v) ∘ s) p), finish,
--/
-      have s4 : (∀ a : T, a ∈ m.domain → holds T m (eval_term T m ([x ↦ a] v) ∘ s) p)
-        ↔ (∀ a : T, a ∈ m.domain → holds T m ([x ↦ a] eval_term T m v ∘ s) p),
-        apply forall_congr, intro a, apply imp_congr, refl,
-        apply thm_3_2, intros z h2,
-        by_cases z = x,
-        {
-          rewrite h, unfold function.comp, rewrite h1_left, unfold eval_term, simp only [function.update_same]
-        },
-        {
-          calc
-          (eval_term T m ([x ↦ a] v) ∘ s) z
-          = eval_term T m ([x ↦ a] v) (s z) : by simp only [eq_self_iff_true]
-          ... = eval_term T m v (s z) : begin apply thm_3_1, intro y, intro h3,
-          apply function.update_noteq, finish end
-          ... = (eval_term T m v ∘ s) z : by simp only [function.comp_app]
-          ... = ([x ↦ a] eval_term T m v ∘ s) z : by simp only [function.update_noteq h]
-        },
-
-/-
-      have s5 : (∀ a : T, a ∈ m.domain → holds T m ([x ↦ a] eval_term T m v ∘ s) p)
-        ↔ holds T m (eval_term T m v ∘ s) (forall_ x p), unfold holds,
--/
-      sorry
+      calc
+            holds T m v (sub_formula_simp s (forall_ x p))
+          ↔ holds T m v (forall_ x (sub_formula_simp s p)) : by unfold sub_formula_simp
+      ... ↔ (∀ a : T, a ∈ m.domain → holds T m ([x ↦ a] v) (sub_formula_simp s p)) : by unfold holds
+      ... ↔ (∀ a : T, a ∈ m.domain → holds T m (eval_term T m ([x ↦ a] v) ∘ s) p) : by finish
+      ... ↔ (∀ a : T, a ∈ m.domain → holds T m ([x ↦ a] eval_term T m v ∘ s) p) :
+            begin
+              apply forall_congr, intro a, apply imp_congr, refl,
+              apply thm_3_2, intros z h2,
+              by_cases z = x,
+              {
+                rewrite h, unfold function.comp, rewrite h1_left, unfold eval_term,
+                simp only [function.update_same]
+              },
+              {
+                calc
+                      (eval_term T m ([x ↦ a] v) ∘ s) z
+                    = eval_term T m ([x ↦ a] v) (s z) : by simp only [eq_self_iff_true]
+                ... = eval_term T m v (s z) :
+                      begin
+                        apply thm_3_1, intro y, intro h3,
+                        apply function.update_noteq, finish
+                      end
+                ... = (eval_term T m v ∘ s) z : by simp only [function.comp_app]
+                ... = ([x ↦ a] eval_term T m v ∘ s) z : by simp only [function.update_noteq h]
+              }
+            end
+      ... ↔ holds T m (eval_term T m v ∘ s) (forall_ x p) : by unfold holds
     end
   },
   case formula.exists_ : x p ih {
