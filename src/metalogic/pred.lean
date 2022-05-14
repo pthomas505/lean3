@@ -1189,6 +1189,17 @@ begin
 end
 
 
+theorem cor_3_8_simp
+  (p : formula)
+  (s : instantiation)
+  (h1 : sub_admits s p)
+  (h2 : is_valid p) :
+  is_valid (sub_formula s p) :=
+begin
+  sorry
+end
+
+
 def alpha_convert_term (s: string → string) : term → term
 | (var x) := var (s x)
 | (func n f terms) := func n f (fun i : fin n, alpha_convert_term (terms i))
