@@ -13,6 +13,40 @@ doi:10.1017/CBO9780511576430
 import data.set
 
 
+lemma finset.sdiff_bUnion
+  {T : Type}
+  [decidable_eq T]
+  (x : T)
+  (s : finset T)
+  (f : T → finset T)
+  (h1 : ∀ y : T, y ∈ s → x ∉ (f y)) :
+  (finset.bUnion s f) \ {x} = finset.bUnion s f :=
+begin
+  ext1, finish
+end
+
+lemma finset.bUnion_union
+  {T : Type}
+  [decidable_eq T]
+  (s t : finset T)
+  (f : T → finset T) :
+  (finset.bUnion s f) ∪ (finset.bUnion t f) = finset.bUnion (s ∪ t) f :=
+begin
+  ext1, simp only [finset.mem_union, finset.mem_bUnion, exists_prop], split, finish, finish
+end
+
+lemma finset.bUnion_univ_bUnion
+  {T : Type}
+  [decidable_eq T]
+  {n : ℕ}
+  (g : T → finset T)
+  (f : fin n → finset T) :
+  finset.bUnion finset.univ (fun i : fin n, finset.bUnion (f i) g) =
+    finset.bUnion (finset.bUnion finset.univ (fun i : fin n, (f i))) g :=
+begin
+  ext1, simp only [finset.mem_bUnion, finset.mem_univ, exists_prop, exists_true_left], tauto
+end
+
 lemma finset_bUnion_singleton_union
   {T : Type}
   [decidable_eq T]
@@ -58,28 +92,6 @@ begin
   {
     congr, symmetry, exact finset.sdiff_singleton_not_mem_eq_self S h
   }
-end
-
-lemma finset.bUnion_union
-  {T : Type}
-  [decidable_eq T]
-  (s t : finset T)
-  (f : T → finset T) :
-  (finset.bUnion s f) ∪ (finset.bUnion t f) = finset.bUnion (s ∪ t) f :=
-begin
-  ext1, simp only [finset.mem_union, finset.mem_bUnion, exists_prop], split, finish, finish
-end
-
-lemma finset.bUnion_univ_bUnion
-  {T : Type}
-  [decidable_eq T]
-  {n : ℕ}
-  (g : T → finset T)
-  (f : fin n → finset T) :
-  finset.bUnion finset.univ (fun i : fin n, finset.bUnion (f i) g) =
-    finset.bUnion (finset.bUnion finset.univ (fun i : fin n, (f i))) g :=
-begin
-  ext1, simp only [finset.mem_bUnion, finset.mem_univ, exists_prop, exists_true_left], tauto
 end
 
 
@@ -709,9 +721,9 @@ begin
             by unfold formula.free_var_set
     ... = (finset.bUnion p.free_var_set (fun y : string, (s y).all_var_set)) \ {x} : by rewrite ih s h1_right_left
     ... = (finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (s y).all_var_set)) \ {x} :
-            begin apply finset_bUnion_sdiff, finish end
+            begin apply finset_bUnion_sdiff, rewrite h1_left, unfold term.all_var_set end
     ... = finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (s y).all_var_set) :
-            begin apply finset.sdiff_singleton_not_mem_eq_self, finish end
+            begin apply finset.sdiff_bUnion, exact h1_right_right end
     ... = finset.bUnion (forall_ x p).free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
   },
   case formula.exists_ : x p ih {
