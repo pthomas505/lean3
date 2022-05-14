@@ -477,11 +477,11 @@ begin
   unfold is_model_of, unfold is_satisfiable_set, unfold satisfies_set, unfold holds_in, unfold satisfies,
   split,
   {
-    intros h1 T m h2 v, unfold holds, apply h1, apply exists.intro T, exact exists.intro m h2,
+    intros h1 T m h2 v, unfold holds, apply h1, apply exists.intro T, exact exists.intro m h2
   },
   {
     intros h1, push_neg, intros T m, by_contradiction, push_neg at h,
-    exact h1 T m h (fun _ : string, m.nonempty.some),
+    exact h1 T m h (fun _ : string, m.nonempty.some)
   }
 end
 
@@ -494,7 +494,7 @@ example
 begin
   split,
   intros h1 v, sorry,
-  intros h1 x v a h2, exact h1 (function.update v x a)
+  intros h1 x v a h2, exact h1 ([x ↦ a] v)
 end
 
 
@@ -565,8 +565,6 @@ begin
 end
 
 
-
-
 def sub_formula_simp (s : instantiation) : formula → formula
 | bottom := bottom
 | top := top
@@ -633,7 +631,7 @@ begin
     ... = (finset.bUnion (S \ {x}) f) \ {x'} : by simp only
   },
   {
-    congr, symmetry, exact finset.sdiff_singleton_not_mem_eq_self S h,
+    congr, symmetry, exact finset.sdiff_singleton_not_mem_eq_self S h
   }
 end
 
@@ -666,7 +664,7 @@ begin
         = (atom n x (fun i : fin n, sub_term s (terms i))).free_var_set : by unfold sub_formula_simp
     ... = finset.bUnion finset.univ (fun i : fin n, (sub_term s (terms i)).all_var_set) : by unfold formula.free_var_set
     ... = finset.bUnion finset.univ (fun i : fin n, (finset.bUnion (terms i).all_var_set (fun y : string, (s y).all_var_set))) :
-          begin congr, funext, apply lem_3_4, end
+          begin congr, funext, apply lem_3_4 end
     ... = finset.bUnion (finset.bUnion finset.univ (fun i : fin n, (terms i).all_var_set)) (fun y : string, (s y).all_var_set) :
           begin ext1, simp only [finset.mem_bUnion, finset.mem_univ, exists_prop, exists_true_left], tauto end
     ... = finset.bUnion (atom n x terms).free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
@@ -785,7 +783,7 @@ begin
             end
       ... ↔ (∀ a ∈ m.domain, holds T m ([x ↦ a] eval_term T m v ∘ s) p) :
             begin
-              apply forall_congr, intro a, apply imp_congr, refl,
+              apply forall_congr, intros a, apply imp_congr, refl,
               apply thm_3_2, intros z h2,
               by_cases z = x,
               {
