@@ -13,20 +13,6 @@ doi:10.1017/CBO9780511576430
 import data.set
 
 
-lemma finset.mem_bUnion_univ
-  {T : Type}
-  [decidable_eq T]
-  {x : T}
-  {n : ℕ}
-  {f : fin n → finset T}
-  {i : fin n}
-  (h : x ∈ f i) :
-  x ∈ finset.bUnion finset.univ (fun i : fin n, f i) :=
-begin
-  simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left],
-  exact exists.intro i h
-end
-
 lemma finset_bUnion_singleton_union
   {T : Type}
   [decidable_eq T]
@@ -263,7 +249,7 @@ begin
       begin
         congr, funext, apply ih,
         intros x h2, apply h1, unfold term.all_var_set,
-        exact finset.mem_bUnion_univ h2
+        simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left], exact exists.intro i h2
       end
     ... = eval_term T m v' (func n f terms) : by unfold eval_term
 	}
@@ -324,7 +310,7 @@ begin
     ... ↔ m.pred n x (fun i : fin n, eval_term T m v' (terms i)) :
       begin
         apply iff_of_eq, congr, funext,
-        apply thm_3_1, intros x h, apply h1, exact finset.mem_bUnion_univ h,
+        apply thm_3_1, intros x h, apply h1, simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left], exact exists.intro i h
       end
     ... ↔ holds T m v' (atom n x terms) : by unfold holds
   },
