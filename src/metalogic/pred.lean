@@ -1137,7 +1137,7 @@ begin
       ... ↔ (∀ a : T, a ∈ m.domain → holds T m (eval_term T m ([x ↦ a] v) ∘ s) p) :
             begin
               apply forall_congr, intros a, apply imp_congr, refl,
-              exact ih s ([x↦a]v) h1_right_left
+              exact ih s ([x ↦ a] v) h1_right_left
             end
       ... ↔ (∀ a : T, a ∈ m.domain → holds T m ([x ↦ a] eval_term T m v ∘ s) p) :
             begin
