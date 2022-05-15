@@ -868,6 +868,45 @@ def alpha_convert_valid (s : string → string) : formula → Prop
 | (exists_ x p) := alpha_convert_valid p ∧ s x ∉ p.free_var_set \ {x}
 
 
+theorem is_valid_mp
+  (p q : formula)
+  (h1 : is_valid p)
+  (h2 : is_valid (p.imp q)) :
+  is_valid q :=
+begin
+  unfold is_valid at *,
+  intros T m v,
+  unfold holds at h2, apply h2, apply h1
+end
+
+theorem is_valid_prop_1
+  (p q : formula) :
+  is_valid (p.imp (q.imp p)) :=
+begin
+  unfold is_valid, unfold holds,
+  intros T m v h1 h2, exact h1
+end
+
+theorem is_valid_prop_2
+  (p q r : formula) :
+  is_valid ((p.imp (q.imp r)).imp ((p.imp q).imp (p.imp r))) :=
+begin
+  unfold is_valid, unfold holds,
+  intros T m v h1 h2 h3,
+  apply h1, exact h3, apply h2, exact h3
+end
+
+theorem is_valid_prop_3
+  (p q : formula) :
+  is_valid (((not p).imp (not q)).imp (q.imp p)) :=
+begin
+  unfold is_valid, unfold holds,
+  intros T m v,
+  intros h1 h2,
+  by_contradiction, apply h1, exact h, exact h2
+end
+
+
 /-
 /-
 def variant : string → finset string → string
