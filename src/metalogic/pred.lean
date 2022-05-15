@@ -211,6 +211,28 @@ if y ≠ x then (`[` x `↦` a `]` v) y = v y
 -/
 notation  `[` a' `↦` v `]` f := function.update f a' v
 
+example
+  {T U : Type}
+  [decidable_eq T]
+  (f : T → U)
+  (a' a : T)
+  (v : U)
+  (h1 : a = a') :
+  ([a' ↦ v] f) a = v :=
+begin
+  rewrite <- h1, exact function.update_same a v f,
+end
+
+example
+  {T U : Type}
+  [decidable_eq T]
+  (f : T → U)
+  (a' a : T)
+  (v : U)
+  (h1 : a ≠ a') :
+  ([a' ↦ v] f) a = f a := function.update_noteq h1 v f
+
+
 def holds (T : Type) (m : interpretation T) : valuation T → formula → Prop
 | _ bottom := false
 | _ top := true
@@ -954,9 +976,10 @@ begin
   unfold is_valid, unfold holds,
   intros T m v h2 a h3,
   have s1 : ∀ x' ∈ p.free_var_set, ([x ↦ a] v) x' = v x',
-  intros x' h2,
-    have s2 : x ≠ x', by_contradiction, apply h1, rewrite h, exact h2,
-  sorry,
+    intros x' h2,
+    have s2 : x' ≠ x,
+      by_contradiction, apply h1, rewrite <- h, exact h2,
+    apply function.update_noteq s2,
   rewrite thm_3_2 ([x ↦ a] v) v s1, exact h2
 end
 
