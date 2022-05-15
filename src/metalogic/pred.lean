@@ -954,7 +954,9 @@ begin
   unfold is_valid, unfold holds,
   intros T m v h2 a h3,
   have s1 : ∀ x' ∈ p.free_var_set, ([x ↦ a] v) x' = v x',
-  intros x' h2, sorry,
+  intros x' h2,
+    have s2 : x ≠ x', by_contradiction, apply h1, rewrite h, exact h2,
+  sorry,
   rewrite thm_3_2 ([x ↦ a] v) v s1, exact h2
 end
 
