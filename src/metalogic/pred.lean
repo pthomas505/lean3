@@ -209,7 +209,7 @@ v is a function. x is an element in the domain of v. a is an element in the rang
 if y = x then (`[` x `↦` a `]` v) y = a
 if y ≠ x then (`[` x `↦` a `]` v) y = v y
 -/
-notation  `[` x `↦` a `]` v := function.update v x a
+notation  `[` a' `↦` v `]` f := function.update f a' v
 
 def holds (T : Type) (m : interpretation T) : valuation T → formula → Prop
 | _ bottom := false
