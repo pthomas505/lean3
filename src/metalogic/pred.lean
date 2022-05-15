@@ -906,6 +906,58 @@ begin
   by_contradiction, apply h1, exact h, exact h2
 end
 
+/-
+-- |- p => |- (forall v. p)
+gen :: Theorem s -> String -> Theorem s
+gen (Theorem p) v = Theorem (Forall v p)
+
+-- |- ((forall v. (p -> q)) -> ((forall v. p) -> (forall v. q)))
+pred_1 :: String -> Formula s -> Formula s -> Theorem s
+pred_1 v p q = Theorem ((Forall v (p `Imp` q)) `Imp` ((Forall v p) `Imp` (Forall v q)))
+
+-- |- (p -> (forall v. p)) provided v is not free in p
+pred_2 :: String -> Formula s -> Theorem s
+pred_2 v p = if not (varOccursFree v p) then Theorem (p `Imp` (Forall v p)) else error "pred_2"
+
+-- |- (exists v. (v = t)) provided v does not occur in t
+pred_3 :: String -> Term s -> Theorem s
+pred_3 v t = if not (varOccurs v t) then Theorem (Exists v (Pred "Eq" [Var v, t])) else error "pred_3"
+-/
+
+theorem is_valid_gen
+  (p : formula)
+  (x : string)
+  (h1 : is_valid p) :
+  is_valid (forall_ x p) :=
+begin
+  unfold is_valid at *, unfold holds at *,
+  intros T m v a h2,
+  apply h1
+end
+
+theorem is_valid_pred_1
+  (p q : formula)
+  (x : string):
+  is_valid ((forall_ x (p.imp q)).imp ((forall_ x p).imp (forall_ x q))) :=
+begin
+  unfold is_valid, unfold holds,
+  intros T m v h1 h2 a h3,
+  apply h1 a h3, exact h2 a h3
+end
+
+theorem is_valid_pred_2
+  (p : formula)
+  (x : string)
+  (h1 : x ∉ p.free_var_set) :
+  is_valid (p.imp (forall_ x p)) :=
+begin
+  unfold is_valid, unfold holds,
+  intros T m v h2 a h3,
+  have s1 : ∀ x' ∈ p.free_var_set, ([x ↦ a] v) x' = v x',
+  intros x' h2, sorry,
+  rewrite thm_3_2 ([x ↦ a] v) v s1, exact h2
+end
+
 
 /-
 /-
