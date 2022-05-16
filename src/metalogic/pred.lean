@@ -950,7 +950,23 @@ begin
   apply h1 a h3, exact h2 a h3
 end
 
+def sub_single_var (x : string) (t : term) : instantiation := [x ↦ t] (fun v : string, var v)
+
 theorem is_valid_pred_2
+  (p : formula)
+  (x : string)
+  (t : term)
+  (h1 : sub_admits (sub_single_var x t) p) :
+  is_valid ((forall_ x p).imp (sub_formula_simp (sub_single_var x t) p)) :=
+begin
+  unfold is_valid, unfold holds,
+  intros T m v h2,
+  apply cor_3_8_simp, exact h1,
+  unfold is_valid,
+  intros T' m' v', sorry
+end
+
+theorem is_valid_pred_3
   (p : formula)
   (x : string)
   (h1 : x ∉ p.free_var_set) :
