@@ -192,6 +192,12 @@ structure interpretation (T : Type) : Type :=
 (pred (n : ℕ) : string → (fin n → T) → Prop)
 
 
+structure interpretation' (domain : Type) : Type :=
+(nonempty : nonempty domain)
+(func (n : ℕ) : string → (fin n → domain) → domain)
+(pred (n : ℕ) : string → (fin n → domain) → Prop)
+
+
 /-
 The type of mappings of object variable names to elements of a domain.
 -/
@@ -751,11 +757,11 @@ end
 
 
 theorem thm_3_7_simp
-  (p : formula)
-  (s : instantiation)
-  (T : Type)
-  (m : interpretation T)
+  {T : Type}
+  {m : interpretation T}
   (v : valuation T)
+  (s : instantiation)
+  (p : formula)
   (h1 : sub_admits s p) :
   holds T m v (sub_formula_simp s p) ↔ holds T m ((eval_term T m v) ∘ s) p :=
 begin
@@ -961,9 +967,13 @@ theorem is_valid_pred_2
 begin
   unfold is_valid, unfold holds,
   intros T m v h2,
-  apply cor_3_8_simp, exact h1,
-  unfold is_valid,
-  intros T' m' v', sorry
+  have s1 : holds T m ([x ↦ (eval_term T m v t)] v) p, apply h2 (eval_term T m v t), sorry,
+  have s2 : ((eval_term T m v) ∘ (sub_single_var x t)) = ([x ↦ (eval_term T m v t)] v), unfold sub_single_var, unfold function.comp, ext1,
+    by_cases x_1 = x,
+    rewrite h, simp only [function.update_same],
+    simp only [function.update_noteq h], unfold eval_term,
+  rewrite <- s2 at s1,
+  simp only [thm_3_7_simp v (sub_single_var x t) p h1], exact s1
 end
 
 theorem is_valid_pred_3
