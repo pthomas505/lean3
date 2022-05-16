@@ -896,9 +896,9 @@ theorem is_valid_mp
   (h2 : is_valid (p.imp q)) :
   is_valid q :=
 begin
-  unfold is_valid at *,
+  unfold is_valid at *, unfold holds at h2,
   intros T m v,
-  unfold holds at h2, apply h2, apply h1
+  apply h2, apply h1
 end
 
 theorem is_valid_prop_1
@@ -906,7 +906,8 @@ theorem is_valid_prop_1
   is_valid (p.imp (q.imp p)) :=
 begin
   unfold is_valid, unfold holds,
-  intros T m v h1 h2, exact h1
+  intros T m v h1 h2,
+  exact h1
 end
 
 theorem is_valid_prop_2
@@ -923,8 +924,7 @@ theorem is_valid_prop_3
   is_valid (((not p).imp (not q)).imp (q.imp p)) :=
 begin
   unfold is_valid, unfold holds,
-  intros T m v,
-  intros h1 h2,
+  intros T m v h1 h2,
   by_contradiction, apply h1, exact h, exact h2
 end
 
