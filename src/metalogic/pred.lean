@@ -694,13 +694,46 @@ begin
     ... = finset.bUnion (and p q).free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
   },
   case formula.or : p q ih_p ih_q {
-    sorry
+    calc
+          (sub_formula_simp s (or p q)).free_var_set
+        = (or (sub_formula_simp s p) (sub_formula_simp s q)).free_var_set : by unfold sub_formula_simp
+    ... = (sub_formula_simp s p).free_var_set ∪ (sub_formula_simp s q).free_var_set : by unfold formula.free_var_set
+    ... = finset.bUnion p.free_var_set (fun y : string, (s y).all_var_set) ∪
+            finset.bUnion q.free_var_set (fun y : string, (s y).all_var_set) :
+          begin
+            unfold sub_admits at h1, cases h1,
+            congr, exact ih_p s h1_left, exact ih_q s h1_right,
+          end
+    ... = finset.bUnion (p.free_var_set ∪ q.free_var_set) (fun y : string, (s y).all_var_set) : by simp [finset.bUnion_union, finset.union_comm]
+    ... = finset.bUnion (or p q).free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
   },
   case formula.imp : p q ih_p ih_q {
-    sorry
+    calc
+          (sub_formula_simp s (imp p q)).free_var_set
+        = (imp (sub_formula_simp s p) (sub_formula_simp s q)).free_var_set : by unfold sub_formula_simp
+    ... = (sub_formula_simp s p).free_var_set ∪ (sub_formula_simp s q).free_var_set : by unfold formula.free_var_set
+    ... = finset.bUnion p.free_var_set (fun y : string, (s y).all_var_set) ∪
+            finset.bUnion q.free_var_set (fun y : string, (s y).all_var_set) :
+          begin
+            unfold sub_admits at h1, cases h1,
+            congr, exact ih_p s h1_left, exact ih_q s h1_right,
+          end
+    ... = finset.bUnion (p.free_var_set ∪ q.free_var_set) (fun y : string, (s y).all_var_set) : by simp [finset.bUnion_union, finset.union_comm]
+    ... = finset.bUnion (imp p q).free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
   },
   case formula.iff : p q ih_p ih_q {
-    sorry
+    calc
+          (sub_formula_simp s (iff p q)).free_var_set
+        = (iff (sub_formula_simp s p) (sub_formula_simp s q)).free_var_set : by unfold sub_formula_simp
+    ... = (sub_formula_simp s p).free_var_set ∪ (sub_formula_simp s q).free_var_set : by unfold formula.free_var_set
+    ... = finset.bUnion p.free_var_set (fun y : string, (s y).all_var_set) ∪
+            finset.bUnion q.free_var_set (fun y : string, (s y).all_var_set) :
+          begin
+            unfold sub_admits at h1, cases h1,
+            congr, exact ih_p s h1_left, exact ih_q s h1_right,
+          end
+    ... = finset.bUnion (p.free_var_set ∪ q.free_var_set) (fun y : string, (s y).all_var_set) : by simp [finset.bUnion_union, finset.union_comm]
+    ... = finset.bUnion (iff p q).free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
   },
   case formula.forall_ : x p ih {
     unfold sub_admits at h1, cases h1, cases h1_right,
@@ -721,7 +754,22 @@ begin
     ... = finset.bUnion (forall_ x p).free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
   },
   case formula.exists_ : x p ih {
-    sorry
+    unfold sub_admits at h1, cases h1, cases h1_right,
+    calc
+          (sub_formula_simp s (exists_ x p)).free_var_set
+        = (exists_ x (sub_formula_simp s p)).free_var_set :
+            by unfold sub_formula_simp
+    ... = (sub_formula_simp s p).free_var_set \ {x} :
+            by unfold formula.free_var_set
+    ... = (finset.bUnion p.free_var_set (fun y : string, (s y).all_var_set)) \ {x} : by rewrite ih s h1_right_left
+    ... = (finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (s y).all_var_set)) \ {x} :
+            begin symmetry, apply finset.sdiff_singleton_bUnion, rewrite h1_left, unfold term.all_var_set end
+    ... = finset.bUnion (p.free_var_set \ {x}) (fun (y : string), (s y).all_var_set) :
+            begin
+              apply finset.bUnion_sdiff_of_forall_disjoint,
+              simp only [finset.disjoint_singleton_right], apply h1_right_right
+            end
+    ... = finset.bUnion (exists_ x p).free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
   }
 end
 
