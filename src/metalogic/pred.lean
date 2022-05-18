@@ -814,13 +814,28 @@ begin
     ... ↔ holds D m ((eval_term D m v) ∘ s) (and p q) : by unfold holds
   },
   case formula.or : p q ih_p ih_q {
-    sorry
+    calc
+    holds D m v (sub_formula_simp s (or p q)) ↔ holds D m v (or (sub_formula_simp s p) (sub_formula_simp s q)) : by unfold sub_formula_simp
+    ... ↔ (holds D m v (sub_formula_simp s p)) ∨ (holds D m v (sub_formula_simp s q)) : by unfold holds
+    ... ↔ (holds D m ((eval_term D m v) ∘ s) p) ∨ (holds D m ((eval_term D m v) ∘ s) q) :
+        begin unfold sub_admits at h1, cases h1, rewrite ih_p s v h1_left, rewrite ih_q s v h1_right end
+    ... ↔ holds D m ((eval_term D m v) ∘ s) (or p q) : by unfold holds
   },
   case formula.imp : p q ih_p ih_q {
-    sorry
+    calc
+    holds D m v (sub_formula_simp s (imp p q)) ↔ holds D m v (imp (sub_formula_simp s p) (sub_formula_simp s q)) : by unfold sub_formula_simp
+    ... ↔ (holds D m v (sub_formula_simp s p)) → (holds D m v (sub_formula_simp s q)) : by unfold holds
+    ... ↔ (holds D m ((eval_term D m v) ∘ s) p) → (holds D m ((eval_term D m v) ∘ s) q) :
+        begin unfold sub_admits at h1, cases h1, rewrite ih_p s v h1_left, rewrite ih_q s v h1_right end
+    ... ↔ holds D m ((eval_term D m v) ∘ s) (imp p q) : by unfold holds
   },
   case formula.iff : p q ih_p ih_q {
-    sorry
+    calc
+    holds D m v (sub_formula_simp s (iff p q)) ↔ holds D m v (iff (sub_formula_simp s p) (sub_formula_simp s q)) : by unfold sub_formula_simp
+    ... ↔ ((holds D m v (sub_formula_simp s p)) ↔ (holds D m v (sub_formula_simp s q))) : by unfold holds
+    ... ↔ ((holds D m ((eval_term D m v) ∘ s) p) ↔ (holds D m ((eval_term D m v) ∘ s) q)) :
+        begin unfold sub_admits at h1, cases h1, rewrite ih_p s v h1_left, rewrite ih_q s v h1_right end
+    ... ↔ holds D m ((eval_term D m v) ∘ s) (iff p q) : by unfold holds
   },
   case formula.forall_ : x p ih {
     begin
@@ -869,7 +884,50 @@ begin
     end
   },
   case formula.exists_ : x p ih {
-    sorry
+    begin
+      unfold sub_admits at h1, cases h1, cases h1_right,
+      calc
+            holds D m v (sub_formula_simp s (exists_ x p))
+          ↔ holds D m v (exists_ x (sub_formula_simp s p)) : by unfold sub_formula_simp
+      ... ↔ (∃ a : D, holds D m ([x ↦ a] v) (sub_formula_simp s p)) : by unfold holds
+      ... ↔ (∃ a : D, holds D m (eval_term D m ([x ↦ a] v) ∘ s) p) :
+            begin
+              apply exists_congr, intros a,
+              exact ih s ([x ↦ a] v) h1_right_left
+            end
+      ... ↔ (∃ a : D, holds D m ([x ↦ a] eval_term D m v ∘ s) p) :
+            begin
+              apply exists_congr, intros a,
+              apply thm_3_2, intros z h2,
+              by_cases z = x,
+              {
+                calc
+                      (eval_term D m ([x ↦ a] v) ∘ s) z
+                    = (eval_term D m ([x ↦ a] v) ∘ s) x : by rewrite h
+                ... = eval_term D m ([x ↦ a] v) (s x) : by unfold function.comp
+                ... = eval_term D m ([x ↦ a] v) (var x) : by rewrite h1_left
+                ... = ([x ↦ a] v) x : by unfold eval_term
+                ... = a : by simp only [function.update_same]
+                ... = ([x ↦ a] eval_term D m v ∘ s) x : by simp only [function.update_same]
+                ... = ([x ↦ a] eval_term D m v ∘ s) z : by rewrite h
+              },
+              {
+                calc
+                      (eval_term D m ([x ↦ a] v) ∘ s) z
+                    = eval_term D m ([x ↦ a] v) (s z) : by unfold function.comp
+                ... = eval_term D m v (s z) :
+                      begin
+                        apply thm_3_1, intros y h3,
+                        apply function.update_noteq, intros h4, apply h1_right_right z,
+                        simp only [finset.mem_sdiff, finset.mem_singleton], exact and.intro h2 h,
+                        rewrite h4 at h3, exact h3
+                      end
+                ... = (eval_term D m v ∘ s) z : by unfold function.comp
+                ... = ([x ↦ a] eval_term D m v ∘ s) z : by simp only [function.update_noteq h]
+              }
+            end
+      ... ↔ holds D m (eval_term D m v ∘ s) (exists_ x p) : by unfold holds
+    end
   }
 end
 
