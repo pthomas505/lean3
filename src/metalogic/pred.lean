@@ -169,30 +169,23 @@ domain: A nonempty set D called the domain of the interpretation. The intention 
 
 nonempty: A proof that there is at least one element in the domain.
 
-func: (n : ℕ, f : string) → (f_{M} : (terms : fin n → T) → v : T)
+func: (n : ℕ, f : string) → (f_{M} : (terms : fin n → domain) → v : domain)
 A mapping of each n-ary function symbol f to a function f_{M}.
 n : The arity of the function symbol.
 f : The function symbol.
 f_{M} : The function that the function symbol is mapped to.
-terms : fin n → T : The n terms (arguments) of the function expressed as a finite function.
-v : T : The result of the function. An element in the domain.
+terms : fin n → domain : The n terms (arguments) of the function expressed as a finite function.
+v : domain : The result of the function. An element in the domain.
 
-pred: (n : ℕ, P : string) → (P_{M} : (terms : fin n → T) → v : Prop)
+pred: (n : ℕ, P : string) → (P_{M} : (terms : fin n → domain) → v : Prop)
 A mapping of each n-ary predicate symbol P to a predicate P_{M}.
 n : The arity of the predicate symbol.
 P : The predicate symbol.
 P_{M} : The predicate that the predicate symbol is mapped to.
-terms : fin n → T : The n terms (arguments) of the predicate expressed as a finite function.
+terms : fin n → domain : The n terms (arguments) of the predicate expressed as a finite function.
 v : Prop : The result of the predicate. True or false.
 -/
-structure interpretation (T : Type) : Type :=
-(domain : set T)
-(nonempty : domain.nonempty)
-(func (n : ℕ) : string → (fin n → T) → T)
-(pred (n : ℕ) : string → (fin n → T) → Prop)
-
-
-structure interpretation' (domain : Type) : Type :=
+structure interpretation (domain : Type) : Type :=
 (nonempty : nonempty domain)
 (func (n : ℕ) : string → (fin n → domain) → domain)
 (pred (n : ℕ) : string → (fin n → domain) → Prop)
@@ -201,19 +194,19 @@ structure interpretation' (domain : Type) : Type :=
 /-
 The type of mappings of object variable names to elements of a domain.
 -/
-def valuation (T : Type) := string → T
+def valuation (D : Type) := string → D
 
 /-
 The function mapping each term to an element of a domain by a given interpretation and valuation.
 -/
-def eval_term (T : Type) (m : interpretation T) (v : valuation T) : term → T
+def eval_term (D : Type) (m : interpretation D) (v : valuation D) : term → D
 | (var x) := v x
 | (func n f terms) := m.func n f (fun i : fin n, eval_term (terms i))
 
 /-
-v is a function. x is an element in the domain of v. a is an element in the range of v.
-if y = x then (`[` x `↦` a `]` v) y = a
-if y ≠ x then (`[` x `↦` a `]` v) y = v y
+f is a function. a' is an element in the domain of f. v is an element in the range of f.
+if y = a' then (`[` a' `↦` v `]` f) y = v
+if y ≠ a' then (`[` a' `↦` v `]` f) y = f y
 -/
 notation  `[` a' `↦` v `]` f := function.update f a' v
 
@@ -239,17 +232,17 @@ example
   ([a' ↦ v] f) a = f a := function.update_noteq h1 v f
 
 
-def holds (T : Type) (m : interpretation T) : valuation T → formula → Prop
+def holds (D : Type) (m : interpretation D) : valuation D → formula → Prop
 | _ bottom := false
 | _ top := true
-| v (atom n x terms) := m.pred n x (fun i : fin n, eval_term T m v (terms i))
+| v (atom n x terms) := m.pred n x (fun i : fin n, eval_term D m v (terms i))
 | v (not p) := ¬ holds v p
 | v (and p q) := holds v p ∧ holds v q
 | v (or p q) := holds v p ∨ holds v q
 | v (imp p q) := holds v p → holds v q
 | v (iff p q) := holds v p ↔ holds v q
-| v (forall_ x p) := ∀ a ∈ m.domain, holds ([x ↦ a] v) p
-| v (exists_ x p) := ∃ a ∈ m.domain, holds ([x ↦ a] v) p
+| v (forall_ x p) := ∀ a : D, holds ([x ↦ a] v) p
+| v (exists_ x p) := ∃ a : D, holds ([x ↦ a] v) p
 
 
 def term.all_var_set : term → finset string
@@ -258,33 +251,33 @@ def term.all_var_set : term → finset string
 
 
 theorem thm_3_1
-  {T : Type}
-  {m : interpretation T}
+  {D : Type}
+  {m : interpretation D}
   {t : term}
-  (v v' : valuation T)
+  (v v' : valuation D)
   (h1 : ∀ x ∈ t.all_var_set, v x = v' x) :
-  eval_term T m v t = eval_term T m v' t :=
+  eval_term D m v t = eval_term D m v' t :=
 begin
   induction t,
   case term.var : x {
     have s1 : x ∈ (var x).all_var_set, unfold term.all_var_set, simp only [finset.mem_singleton],
     calc
-          eval_term T m v (var x)
+          eval_term D m v (var x)
         = v x : by unfold eval_term
     ... = v' x : h1 x s1
-    ... = eval_term T m v' (var x) : by unfold eval_term
+    ... = eval_term D m v' (var x) : by unfold eval_term
   },
   case term.func : n f terms ih {
     calc
-          eval_term T m v (func n f terms)
-        = m.func n f (fun i : fin n, eval_term T m v (terms i)) : by unfold eval_term
-    ... = m.func n f (fun i : fin n, eval_term T m v' (terms i)) :
+          eval_term D m v (func n f terms)
+        = m.func n f (fun i : fin n, eval_term D m v (terms i)) : by unfold eval_term
+    ... = m.func n f (fun i : fin n, eval_term D m v' (terms i)) :
       begin
         congr, funext, apply ih,
         intros x h2, apply h1, unfold term.all_var_set,
         simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left], exact exists.intro i h2
       end
-    ... = eval_term T m v' (func n f terms) : by unfold eval_term
+    ... = eval_term D m v' (func n f terms) : by unfold eval_term
 	}
 end
 
@@ -315,138 +308,114 @@ def formula.free_var_set : formula → finset string
 
 
 theorem thm_3_2
-  {T : Type}
-  {m : interpretation T}
+  {D : Type}
+  {m : interpretation D}
   {p : formula}
-  (v v' : valuation T)
+  (v v' : valuation D)
   (h1 : ∀ x ∈ p.free_var_set, v x = v' x) :
-  holds T m v p ↔ holds T m v' p :=
+  holds D m v p ↔ holds D m v' p :=
 begin
   induction p generalizing v v',
   case formula.bottom {
     calc
-          holds T m v bottom
+          holds D m v bottom
         ↔ false : by unfold holds
-    ... ↔ holds T m v' bottom : by unfold holds
+    ... ↔ holds D m v' bottom : by unfold holds
   },
   case formula.top {
     calc
-          holds T m v top
+          holds D m v top
         ↔ true : by unfold holds
-    ... ↔ holds T m v' top : by unfold holds
+    ... ↔ holds D m v' top : by unfold holds
   },
   case formula.atom : n x terms {
     unfold formula.free_var_set at h1,
     calc
-        holds T m v (atom n x terms)
-        ↔ m.pred n x (fun i : fin n, eval_term T m v (terms i)) : by unfold holds
-    ... ↔ m.pred n x (fun i : fin n, eval_term T m v' (terms i)) :
+        holds D m v (atom n x terms)
+        ↔ m.pred n x (fun i : fin n, eval_term D m v (terms i)) : by unfold holds
+    ... ↔ m.pred n x (fun i : fin n, eval_term D m v' (terms i)) :
       begin
         apply iff_of_eq, congr, funext,
         apply thm_3_1, intros x h, apply h1, simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left], exact exists.intro i h
       end
-    ... ↔ holds T m v' (atom n x terms) : by unfold holds
+    ... ↔ holds D m v' (atom n x terms) : by unfold holds
   },
   case formula.not : p ih {
     unfold formula.free_var_set at h1,
-    have s1 : holds T m v p ↔ holds T m v' p, exact ih v v' h1,
+    have s1 : holds D m v p ↔ holds D m v' p, exact ih v v' h1,
     calc
-          holds T m v (not p)
-        ↔ ¬ holds T m v p : by unfold holds
-    ... ↔ ¬ holds T m v' p : by simp only [s1]
-    ... ↔ holds T m v' (not p) : by unfold holds
+          holds D m v (not p)
+        ↔ ¬ holds D m v p : by unfold holds
+    ... ↔ ¬ holds D m v' p : by simp only [s1]
+    ... ↔ holds D m v' (not p) : by unfold holds
   },
   case formula.and : p q ih_p ih_q {
     unfold formula.free_var_set at h1, simp only [finset.mem_union, or_imp_distrib, forall_and_distrib] at h1, cases h1,
-    have s1 : holds T m v p ↔ holds T m v' p, exact ih_p v v' h1_left,
-    have s2 : holds T m v q ↔ holds T m v' q, exact ih_q v v' h1_right,
+    have s1 : holds D m v p ↔ holds D m v' p, exact ih_p v v' h1_left,
+    have s2 : holds D m v q ↔ holds D m v' q, exact ih_q v v' h1_right,
     calc
-          holds T m v (and p q)
-        ↔ (holds T m v p ∧ holds T m v q) : by unfold holds
-    ... ↔ (holds T m v' p ∧ holds T m v' q) : by simp only [s1, s2]
-    ... ↔ holds T m v' (and p q) : by unfold holds
+          holds D m v (and p q)
+        ↔ (holds D m v p ∧ holds D m v q) : by unfold holds
+    ... ↔ (holds D m v' p ∧ holds D m v' q) : by simp only [s1, s2]
+    ... ↔ holds D m v' (and p q) : by unfold holds
   },
   case formula.or : p q ih_p ih_q {
     unfold formula.free_var_set at h1, simp only [finset.mem_union, or_imp_distrib, forall_and_distrib] at h1, cases h1,
-    have s1 : holds T m v p ↔ holds T m v' p, exact ih_p v v' h1_left,
-    have s2 : holds T m v q ↔ holds T m v' q, exact ih_q v v' h1_right,
+    have s1 : holds D m v p ↔ holds D m v' p, exact ih_p v v' h1_left,
+    have s2 : holds D m v q ↔ holds D m v' q, exact ih_q v v' h1_right,
     calc
-          holds T m v (or p q)
-        ↔ (holds T m v p ∨ holds T m v q) : by unfold holds
-    ... ↔ (holds T m v' p ∨ holds T m v' q) : by simp only [s1, s2]
-    ... ↔ holds T m v' (or p q) : by unfold holds
+          holds D m v (or p q)
+        ↔ (holds D m v p ∨ holds D m v q) : by unfold holds
+    ... ↔ (holds D m v' p ∨ holds D m v' q) : by simp only [s1, s2]
+    ... ↔ holds D m v' (or p q) : by unfold holds
   },
   case formula.imp : p q ih_p ih_q {
     unfold formula.free_var_set at h1, simp only [finset.mem_union, or_imp_distrib, forall_and_distrib] at h1, cases h1,
-    have s1 : holds T m v p ↔ holds T m v' p, exact ih_p v v' h1_left,
-    have s2 : holds T m v q ↔ holds T m v' q, exact ih_q v v' h1_right,
+    have s1 : holds D m v p ↔ holds D m v' p, exact ih_p v v' h1_left,
+    have s2 : holds D m v q ↔ holds D m v' q, exact ih_q v v' h1_right,
     calc
-          holds T m v (imp p q)
-        ↔ (holds T m v p → holds T m v q) : by unfold holds
-    ... ↔ (holds T m v' p → holds T m v' q) : by simp only [s1, s2]
-    ... ↔ holds T m v' (imp p q) : by unfold holds
+          holds D m v (imp p q)
+        ↔ (holds D m v p → holds D m v q) : by unfold holds
+    ... ↔ (holds D m v' p → holds D m v' q) : by simp only [s1, s2]
+    ... ↔ holds D m v' (imp p q) : by unfold holds
   },
   case formula.iff : p q ih_p ih_q {
     unfold formula.free_var_set at h1, simp only [finset.mem_union, or_imp_distrib, forall_and_distrib] at h1, cases h1,
-    have s1 : holds T m v p ↔ holds T m v' p, exact ih_p v v' h1_left,
-    have s2 : holds T m v q ↔ holds T m v' q, exact ih_q v v' h1_right,
+    have s1 : holds D m v p ↔ holds D m v' p, exact ih_p v v' h1_left,
+    have s2 : holds D m v q ↔ holds D m v' q, exact ih_q v v' h1_right,
     calc
-          holds T m v (iff p q)
-        ↔ (holds T m v p ↔ holds T m v q) : by unfold holds
-    ... ↔ (holds T m v' p ↔ holds T m v' q) : by simp only [s1, s2]
-    ... ↔ holds T m v' (iff p q) : by unfold holds
+          holds D m v (iff p q)
+        ↔ (holds D m v p ↔ holds D m v q) : by unfold holds
+    ... ↔ (holds D m v' p ↔ holds D m v' q) : by simp only [s1, s2]
+    ... ↔ holds D m v' (iff p q) : by unfold holds
   },
   case formula.forall_ : x p ih {
     unfold formula.free_var_set at h1, simp only [finset.mem_sdiff, finset.mem_singleton] at h1,
     calc
-          holds T m v (forall_ x p)
-        ↔ ∀ a ∈ m.domain, holds T m ([x ↦ a] v) p : by unfold holds
-    ... ↔ ∀ a ∈ m.domain, holds T m ([x ↦ a] v') p :
+          holds D m v (forall_ x p)
+        ↔ ∀ a : D, holds D m ([x ↦ a] v) p : by unfold holds
+    ... ↔ ∀ a : D, holds D m ([x ↦ a] v') p :
       begin
-        apply ball_congr, intros a h2, apply ih, intros y h3,
-        by_cases y = x, {
-        calc
-              ([x ↦ a] v) y
-            = ([x ↦ a] v) x : by rewrite h
-        ... = a : dif_pos rfl
-        ... = ([x ↦ a] v') x : begin symmetry, exact dif_pos rfl end
-        ... = ([x ↦ a] v') y : by rewrite <- h
-        },
-        {
-        calc
-              ([x ↦ a] v) y
-            = v y : dif_neg h
-        ... = v' y : begin apply h1, exact and.intro h3 h end
-        ... = ([x ↦ a] v') y : begin symmetry, exact dif_neg h end
-        }
+        apply forall_congr, intros a, apply ih, intros y h3,
+        by_cases y = x,
+        rewrite h, simp only [function.update_same],
+        simp only [function.update_noteq h], apply h1, exact and.intro h3 h
       end
-    ... ↔ holds T m v' (forall_ x p) : by unfold holds
+    ... ↔ holds D m v' (forall_ x p) : by unfold holds
   },
   case formula.exists_ : x p ih {
     unfold formula.free_var_set at h1, simp only [finset.mem_sdiff, finset.mem_singleton] at h1,
     calc
-          holds T m v (exists_ x p)
-        ↔ ∃ a ∈ m.domain, holds T m ([x ↦ a] v) p : by unfold holds
-    ... ↔ ∃ a ∈ m.domain, holds T m ([x ↦ a] v') p :
+          holds D m v (exists_ x p)
+        ↔ ∃ a : D, holds D m ([x ↦ a] v) p : by unfold holds
+    ... ↔ ∃ a : D, holds D m ([x ↦ a] v') p :
       begin
-        apply bex_congr, intros a h2, apply ih, intros y h3,
-        by_cases y = x, {
-        calc
-              ([x ↦ a] v) y
-            = ([x ↦ a] v) x : by rewrite h
-        ... = a : dif_pos rfl
-        ... = ([x ↦ a] v') x : begin symmetry, exact dif_pos rfl end
-        ... = ([x ↦ a] v') y : by rewrite <- h
-        },
-        {
-        calc
-              ([x ↦ a] v) y
-            = v y : dif_neg h
-        ... = v' y : begin apply h1, exact and.intro h3 h end
-        ... = ([x ↦ a] v') y : begin symmetry, exact dif_neg h end
-        }
+        apply exists_congr, intros a, apply ih, intros y h3,
+        by_cases y = x,
+        rewrite h, simp only [function.update_same],
+        simp only [function.update_noteq h], apply h1, exact and.intro h3 h
       end
-    ... ↔ holds T m v' (exists_ x p) : by unfold holds
+    ... ↔ holds D m v' (exists_ x p) : by unfold holds
   }
 end
 
@@ -457,11 +426,11 @@ p.free_var_set = ∅
 
 theorem cor_3_3
   {p : formula}
-  {T : Type}
-  {m : interpretation T}
-  (v v' : valuation T)
+  {D : Type}
+  {m : interpretation D}
+  (v v' : valuation D)
   (h1 : is_sentence p) :
-  holds T m v p ↔ holds T m v' p :=
+  holds D m v p ↔ holds D m v' p :=
 begin
   unfold is_sentence at h1,
   have s1 : ∀ x ∈ p.free_var_set, v x = v' x,
@@ -471,40 +440,40 @@ end
 
 
 def is_valid (p : formula) : Prop :=
-∀ T : Type, ∀ m : interpretation T, ∀ v : valuation T, holds T m v p
+∀ D : Type, ∀ m : interpretation D, ∀ v : valuation D, holds D m v p
 
 
 /-
-satisfies T m p = m satisfies p.
+satisfies D m p = m satisfies p.
 -/
-def satisfies (T : Type) (m : interpretation T) (p : formula) : Prop :=
-∀ v : valuation T, holds T m v p
+def satisfies (D : Type) (m : interpretation D) (p : formula) : Prop :=
+∀ v : valuation D, holds D m v p
 
 /-
-satisfies_set T m S = m satisfies S.
+satisfies_set D m S = m satisfies S.
 -/
-def satisfies_set (T : Type) (m : interpretation T) (S : set formula) : Prop :=
-∀ p ∈ S, satisfies T m p
+def satisfies_set (D : Type) (m : interpretation D) (S : set formula) : Prop :=
+∀ p ∈ S, satisfies D m p
 
 
 def is_satisfiable (p : formula) : Prop :=
-∃ T : Type, ∃ m : interpretation T, satisfies T m p
+∃ D : Type, ∃ m : interpretation D, satisfies D m p
 
 def is_satisfiable_set (S : set formula) : Prop :=
-∃ T : Type, ∃ m : interpretation T, ∀ p ∈ S, satisfies T m p
+∃ D : Type, ∃ m : interpretation D, ∀ p ∈ S, satisfies D m p
 
 
 /-
-holds_in p T m = p holds in m.
+holds_in p D m = p holds in m.
 -/
-def holds_in (p : formula) (T : Type) (m : interpretation T) : Prop :=
-satisfies T m p
+def holds_in (p : formula) (D : Type) (m : interpretation D) : Prop :=
+satisfies D m p
 
 /-
-set_holds_in S T m = S holds in m.
+set_holds_in S D m = S holds in m.
 -/
-def set_holds_in (S : set formula) (T : Type) (m : interpretation T) : Prop :=
-satisfies_set T m S
+def set_holds_in (S : set formula) (D : Type) (m : interpretation D) : Prop :=
+satisfies_set D m S
 
 
 example
@@ -512,34 +481,34 @@ example
 	(h1 : is_sentence p) :
 	is_valid p ↔ ¬ (is_satisfiable (not p)) :=
 begin
-  have s1 : (∀ (T : Type) (m : interpretation T) (v : valuation T), holds T m v p) →
-    ∀ (T : Type) (m : interpretation T), ∃ (v : valuation T), holds T m v p,
-      intros h2 T m, let v := fun _ : string, m.nonempty.some, exact exists.intro v (h2 T m v),
-  have s2 : (∀ (T : Type) (m : interpretation T), ∃ (v : valuation T), holds T m v p) →
-    ∀ (T : Type) (m : interpretation T) (v : valuation T), holds T m v p,
-      intros h2 T m v, apply exists.elim, exact h2 T m, intros v', exact iff.elim_right (cor_3_3 v v' h1),
+  have s1 : (∀ (D : Type) (m : interpretation D) (v : valuation D), holds D m v p) →
+    ∀ (D : Type) (m : interpretation D), ∃ (v : valuation D), holds D m v p,
+      intros h2 D m, let v := fun _ : string, m.nonempty.some, exact exists.intro v (h2 D m v),
+  have s2 : (∀ (D : Type) (m : interpretation D), ∃ (v : valuation D), holds D m v p) →
+    ∀ (D : Type) (m : interpretation D) (v : valuation D), holds D m v p,
+      intros h2 D m v, apply exists.elim, exact h2 D m, intros v', exact iff.elim_right (cor_3_3 v v' h1),
   calc
         is_valid p
-      ↔ ∀ (T : Type) (m : interpretation T) (v : valuation T), holds T m v p : by unfold is_valid
-  ... ↔ ∀ (T : Type) (m : interpretation T), ∃ (v : valuation T), holds T m v p : iff.intro s1 s2
-  ... ↔ ¬∃ (T : Type) (m : interpretation T), ∀ (v : valuation T), ¬holds T m v p : begin push_neg, refl end
-  ... ↔ ¬∃ (T : Type) (m : interpretation T), ∀ (v : valuation T), holds T m v (not p) : by unfold holds
-  ... ↔ ¬∃ (T : Type) (m : interpretation T), satisfies T m (not p) : by unfold satisfies
+      ↔ ∀ (D : Type) (m : interpretation D) (v : valuation D), holds D m v p : by unfold is_valid
+  ... ↔ ∀ (D : Type) (m : interpretation D), ∃ (v : valuation D), holds D m v p : iff.intro s1 s2
+  ... ↔ ¬∃ (D : Type) (m : interpretation D), ∀ (v : valuation D), ¬holds D m v p : begin push_neg, refl end
+  ... ↔ ¬∃ (D : Type) (m : interpretation D), ∀ (v : valuation D), holds D m v (not p) : by unfold holds
+  ... ↔ ¬∃ (D : Type) (m : interpretation D), satisfies D m (not p) : by unfold satisfies
   ... ↔ ¬is_satisfiable (not p) : by unfold is_satisfiable
 end
 
 
 /-
-is_model_of T m Γ = m is a model of Γ
+is_model_of D m Γ = m is a model of Γ
 -/
-def is_model_of (T : Type) (m : interpretation T) (Γ : set formula) :=
-satisfies_set T m Γ
+def is_model_of (D : Type) (m : interpretation D) (Γ : set formula) :=
+satisfies_set D m Γ
 
 
 /-
 Γ ⊨ p = p holds in all models of Γ.
 -/
-notation Γ `⊨` p := ∀ T : Type, ∀ m : interpretation T, (is_model_of T m Γ) → (holds_in p T m)
+notation Γ `⊨` p := ∀ D : Type, ∀ m : interpretation D, (is_model_of D m Γ) → (holds_in p D m)
 
 
 example
@@ -548,12 +517,12 @@ example
 begin
   split,
   {
-    unfold is_valid, unfold holds_in, unfold satisfies, intros h1 T m h2, exact h1 T m
+    unfold is_valid, unfold holds_in, unfold satisfies, intros h1 D m h2, exact h1 D m
   },
   {
     unfold is_valid, unfold is_model_of, unfold satisfies_set, unfold holds_in,
     unfold satisfies, simp only [set.mem_empty_eq],
-    intros h1 T m v, apply h1, intros p h2, contradiction
+    intros h1 D m v, apply h1, intros p h2, contradiction
   }
 end
 
@@ -565,24 +534,25 @@ begin
   unfold is_model_of, unfold is_satisfiable_set, unfold satisfies_set, unfold holds_in, unfold satisfies,
   split,
   {
-    intros h1 T m h2 v, unfold holds, apply h1, apply exists.intro T, exact exists.intro m h2
+    intros h1 D m h2 v, unfold holds, apply h1, apply exists.intro D, exact exists.intro m h2
   },
   {
-    intros h1, push_neg, intros T m, by_contradiction, push_neg at h,
-    exact h1 T m h (fun _ : string, m.nonempty.some)
+    intros h1, push_neg, intros D m, by_contradiction, push_neg at h,
+    exact h1 D m h (fun _ : string, m.nonempty.some)
   }
 end
 
 
 example
-	(T : Type)
-	(m : interpretation T)
+	(D : Type)
+	(m : interpretation D)
 	(p : formula) :
-	(∀ x : string, ∀ v : valuation T, ∀ a ∈ m.domain, holds T m ([x ↦ a] v) p) ↔ (∀ v : valuation T, holds T m v p) :=
+	(∀ x : string, ∀ v : valuation D, ∀ a : D, holds D m ([x ↦ a] v) p) ↔ (∀ v : valuation D, holds D m v p) :=
 begin
   split,
-  intros h1 v, sorry,
-  intros h1 x v a h2, exact h1 ([x ↦ a] v)
+  intros h1 v,
+  rewrite <- function.update_eq_self default v, exact h1 default v (v default),
+  intros h1 x v a, exact h1 ([x ↦ a] v)
 end
 
 
@@ -624,30 +594,30 @@ end
 
 
 lemma lem_3_5
-  (T : Type)
+  (D : Type)
   (t : term)
   (s : instantiation)
-  (m : interpretation T)
-  (v : valuation T) :
-  eval_term T m v (sub_term s t) = eval_term T m ((eval_term T m v) ∘ s) t :=
+  (m : interpretation D)
+  (v : valuation D) :
+  eval_term D m v (sub_term s t) = eval_term D m ((eval_term D m v) ∘ s) t :=
 begin
   induction t,
   case term.var : x {
     calc
-          eval_term T m v (sub_term s (var x))
-        = eval_term T m v (s x) : by unfold sub_term
-    ... = ((eval_term T m v) ∘ s) x : by unfold function.comp
-    ... = eval_term T m ((eval_term T m v) ∘ s) (var x) : by unfold eval_term
+          eval_term D m v (sub_term s (var x))
+        = eval_term D m v (s x) : by unfold sub_term
+    ... = ((eval_term D m v) ∘ s) x : by unfold function.comp
+    ... = eval_term D m ((eval_term D m v) ∘ s) (var x) : by unfold eval_term
   },
   case term.func : n f terms ih {
-    have ih' : ∀ (i : fin n), eval_term T m v (sub_term s (terms i)) =
-      eval_term T m ((eval_term T m v) ∘ s) (terms i), exact ih,
+    have ih' : ∀ (i : fin n), eval_term D m v (sub_term s (terms i)) =
+      eval_term D m ((eval_term D m v) ∘ s) (terms i), exact ih,
     calc
-          eval_term T m v (sub_term s (func n f terms))
-        = eval_term T m v (func n f (fun i, sub_term s (terms i))) : by unfold sub_term
-    ... = m.func n f (fun i, eval_term T m v (sub_term s (terms i))) : by unfold eval_term
-    ... = m.func n f (fun i, eval_term T m ((eval_term T m v) ∘ s) (terms i)) : begin congr, apply funext, exact ih' end
-    ... = eval_term T m ((eval_term T m v) ∘ s) (func n f terms) : by unfold eval_term
+          eval_term D m v (sub_term s (func n f terms))
+        = eval_term D m v (func n f (fun i, sub_term s (terms i))) : by unfold sub_term
+    ... = m.func n f (fun i, eval_term D m v (sub_term s (terms i))) : by unfold eval_term
+    ... = m.func n f (fun i, eval_term D m ((eval_term D m v) ∘ s) (terms i)) : begin congr, apply funext, exact ih' end
+    ... = eval_term D m ((eval_term D m v) ∘ s) (func n f terms) : by unfold eval_term
   }
 end
 
@@ -757,13 +727,13 @@ end
 
 
 theorem thm_3_7_simp
-  {T : Type}
-  {m : interpretation T}
-  (v : valuation T)
+  {D : Type}
+  {m : interpretation D}
+  (v : valuation D)
   (s : instantiation)
   (p : formula)
   (h1 : sub_admits s p) :
-  holds T m v (sub_formula_simp s p) ↔ holds T m ((eval_term T m v) ∘ s) p :=
+  holds D m v (sub_formula_simp s p) ↔ holds D m ((eval_term D m v) ∘ s) p :=
 begin
   induction p generalizing s v,
   case formula.bottom {
@@ -774,26 +744,26 @@ begin
   },
   case formula.atom : n x terms {
     calc
-    holds T m v (sub_formula_simp s (atom n x terms)) ↔
-      holds T m v (atom n x (fun i : fin n, sub_term s (terms i))) : by unfold sub_formula_simp
-    ... ↔ m.pred n x (fun i : fin n, eval_term T m v (sub_term s (terms i))) : by unfold holds
-    ... ↔ m.pred n x (fun i : fin n, eval_term T m ((eval_term T m v) ∘ s) (terms i)) : by simp only [lem_3_5]
-    ... ↔ holds T m ((eval_term T m v) ∘ s) (atom n x terms) : by unfold holds
+    holds D m v (sub_formula_simp s (atom n x terms)) ↔
+      holds D m v (atom n x (fun i : fin n, sub_term s (terms i))) : by unfold sub_formula_simp
+    ... ↔ m.pred n x (fun i : fin n, eval_term D m v (sub_term s (terms i))) : by unfold holds
+    ... ↔ m.pred n x (fun i : fin n, eval_term D m ((eval_term D m v) ∘ s) (terms i)) : by simp only [lem_3_5]
+    ... ↔ holds D m ((eval_term D m v) ∘ s) (atom n x terms) : by unfold holds
   },
   case formula.not : p ih {
     calc
-    holds T m v (sub_formula_simp s (not p)) ↔ holds T m v (not (sub_formula_simp s p)) : by unfold sub_formula_simp
-    ... ↔ ¬ holds T m v (sub_formula_simp s p) : by unfold holds
-    ... ↔ ¬ holds T m ((eval_term T m v) ∘ s) p : begin unfold sub_admits at h1, rewrite ih s v h1 end
-    ... ↔ holds T m ((eval_term T m v) ∘ s) (not p) : by unfold holds
+    holds D m v (sub_formula_simp s (not p)) ↔ holds D m v (not (sub_formula_simp s p)) : by unfold sub_formula_simp
+    ... ↔ ¬ holds D m v (sub_formula_simp s p) : by unfold holds
+    ... ↔ ¬ holds D m ((eval_term D m v) ∘ s) p : begin unfold sub_admits at h1, rewrite ih s v h1 end
+    ... ↔ holds D m ((eval_term D m v) ∘ s) (not p) : by unfold holds
   },
   case formula.and : p q ih_p ih_q {
     calc
-    holds T m v (sub_formula_simp s (and p q)) ↔ holds T m v (and (sub_formula_simp s p) (sub_formula_simp s q)) : by unfold sub_formula_simp
-    ... ↔ (holds T m v (sub_formula_simp s p)) ∧ (holds T m v (sub_formula_simp s q)) : by unfold holds
-    ... ↔ (holds T m ((eval_term T m v) ∘ s) p) ∧ (holds T m ((eval_term T m v) ∘ s) q) :
+    holds D m v (sub_formula_simp s (and p q)) ↔ holds D m v (and (sub_formula_simp s p) (sub_formula_simp s q)) : by unfold sub_formula_simp
+    ... ↔ (holds D m v (sub_formula_simp s p)) ∧ (holds D m v (sub_formula_simp s q)) : by unfold holds
+    ... ↔ (holds D m ((eval_term D m v) ∘ s) p) ∧ (holds D m ((eval_term D m v) ∘ s) q) :
         begin unfold sub_admits at h1, cases h1, rewrite ih_p s v h1_left, rewrite ih_q s v h1_right end
-    ... ↔ holds T m ((eval_term T m v) ∘ s) (and p q) : by unfold holds
+    ... ↔ holds D m ((eval_term D m v) ∘ s) (and p q) : by unfold holds
   },
   case formula.or : p q ih_p ih_q {
     sorry
@@ -808,46 +778,46 @@ begin
     begin
       unfold sub_admits at h1, cases h1, cases h1_right,
       calc
-            holds T m v (sub_formula_simp s (forall_ x p))
-          ↔ holds T m v (forall_ x (sub_formula_simp s p)) : by unfold sub_formula_simp
-      ... ↔ (∀ a ∈ m.domain, holds T m ([x ↦ a] v) (sub_formula_simp s p)) : by unfold holds
-      ... ↔ (∀ a ∈ m.domain, holds T m (eval_term T m ([x ↦ a] v) ∘ s) p) :
+            holds D m v (sub_formula_simp s (forall_ x p))
+          ↔ holds D m v (forall_ x (sub_formula_simp s p)) : by unfold sub_formula_simp
+      ... ↔ (∀ a : D, holds D m ([x ↦ a] v) (sub_formula_simp s p)) : by unfold holds
+      ... ↔ (∀ a : D, holds D m (eval_term D m ([x ↦ a] v) ∘ s) p) :
             begin
-              apply forall_congr, intros a, apply imp_congr, refl,
+              apply forall_congr, intros a,
               exact ih s ([x ↦ a] v) h1_right_left
             end
-      ... ↔ (∀ a ∈ m.domain, holds T m ([x ↦ a] eval_term T m v ∘ s) p) :
+      ... ↔ (∀ a : D, holds D m ([x ↦ a] eval_term D m v ∘ s) p) :
             begin
-              apply forall_congr, intros a, apply imp_congr, refl,
+              apply forall_congr, intros a,
               apply thm_3_2, intros z h2,
               by_cases z = x,
               {
                 calc
-                      (eval_term T m ([x ↦ a] v) ∘ s) z
-                    = (eval_term T m ([x ↦ a] v) ∘ s) x : by rewrite h
-                ... = eval_term T m ([x ↦ a] v) (s x) : by unfold function.comp
-                ... = eval_term T m ([x ↦ a] v) (var x) : by rewrite h1_left
+                      (eval_term D m ([x ↦ a] v) ∘ s) z
+                    = (eval_term D m ([x ↦ a] v) ∘ s) x : by rewrite h
+                ... = eval_term D m ([x ↦ a] v) (s x) : by unfold function.comp
+                ... = eval_term D m ([x ↦ a] v) (var x) : by rewrite h1_left
                 ... = ([x ↦ a] v) x : by unfold eval_term
                 ... = a : by simp only [function.update_same]
-                ... = ([x ↦ a] eval_term T m v ∘ s) x : by simp only [function.update_same]
-                ... = ([x ↦ a] eval_term T m v ∘ s) z : by rewrite h
+                ... = ([x ↦ a] eval_term D m v ∘ s) x : by simp only [function.update_same]
+                ... = ([x ↦ a] eval_term D m v ∘ s) z : by rewrite h
               },
               {
                 calc
-                      (eval_term T m ([x ↦ a] v) ∘ s) z
-                    = eval_term T m ([x ↦ a] v) (s z) : by unfold function.comp
-                ... = eval_term T m v (s z) :
+                      (eval_term D m ([x ↦ a] v) ∘ s) z
+                    = eval_term D m ([x ↦ a] v) (s z) : by unfold function.comp
+                ... = eval_term D m v (s z) :
                       begin
                         apply thm_3_1, intros y h3,
                         apply function.update_noteq, intros h4, apply h1_right_right z,
                         simp only [finset.mem_sdiff, finset.mem_singleton], exact and.intro h2 h,
                         rewrite h4 at h3, exact h3
                       end
-                ... = (eval_term T m v ∘ s) z : by unfold function.comp
-                ... = ([x ↦ a] eval_term T m v ∘ s) z : by simp only [function.update_noteq h]
+                ... = (eval_term D m v ∘ s) z : by unfold function.comp
+                ... = ([x ↦ a] eval_term D m v ∘ s) z : by simp only [function.update_noteq h]
               }
             end
-      ... ↔ holds T m (eval_term T m v ∘ s) (forall_ x p) : by unfold holds
+      ... ↔ holds D m (eval_term D m v ∘ s) (forall_ x p) : by unfold holds
     end
   },
   case formula.exists_ : x p ih {
@@ -903,7 +873,7 @@ theorem is_valid_mp
   is_valid q :=
 begin
   unfold is_valid at *, unfold holds at h2,
-  intros T m v,
+  intros D m v,
   apply h2, apply h1
 end
 
@@ -912,7 +882,7 @@ theorem is_valid_prop_1
   is_valid (p.imp (q.imp p)) :=
 begin
   unfold is_valid, unfold holds,
-  intros T m v h1 h2,
+  intros D m v h1 h2,
   exact h1
 end
 
@@ -921,7 +891,7 @@ theorem is_valid_prop_2
   is_valid ((p.imp (q.imp r)).imp ((p.imp q).imp (p.imp r))) :=
 begin
   unfold is_valid, unfold holds,
-  intros T m v h1 h2 h3,
+  intros D m v h1 h2 h3,
   apply h1, exact h3, apply h2, exact h3
 end
 
@@ -930,7 +900,7 @@ theorem is_valid_prop_3
   is_valid (((not p).imp (not q)).imp (q.imp p)) :=
 begin
   unfold is_valid, unfold holds,
-  intros T m v h1 h2,
+  intros D m v h1 h2,
   by_contradiction, apply h1, exact h, exact h2
 end
 
@@ -942,7 +912,7 @@ theorem is_valid_gen
   is_valid (forall_ x p) :=
 begin
   unfold is_valid at *, unfold holds at *,
-  intros T m v a h2,
+  intros D m v a,
   apply h1
 end
 
@@ -952,8 +922,8 @@ theorem is_valid_pred_1
   is_valid ((forall_ x (p.imp q)).imp ((forall_ x p).imp (forall_ x q))) :=
 begin
   unfold is_valid, unfold holds,
-  intros T m v h1 h2 a h3,
-  apply h1 a h3, exact h2 a h3
+  intros D m v h1 h2 a,
+  apply h1 a, exact h2 a
 end
 
 def sub_single_var (x : string) (t : term) : instantiation := [x ↦ t] (fun v : string, var v)
@@ -966,9 +936,10 @@ theorem is_valid_pred_2
   is_valid ((forall_ x p).imp (sub_formula_simp (sub_single_var x t) p)) :=
 begin
   unfold is_valid, unfold holds,
-  intros T m v h2,
-  have s1 : holds T m ([x ↦ (eval_term T m v t)] v) p, apply h2 (eval_term T m v t), sorry,
-  have s2 : ((eval_term T m v) ∘ (sub_single_var x t)) = ([x ↦ (eval_term T m v t)] v), unfold sub_single_var, unfold function.comp, ext1,
+  intros D m v h2,
+  have s1 : holds D m ([x ↦ (eval_term D m v t)] v) p, apply h2 (eval_term D m v t),
+  have s2 : ((eval_term D m v) ∘ (sub_single_var x t)) = ([x ↦ (eval_term D m v t)] v),
+    unfold sub_single_var, unfold function.comp, ext1,
     by_cases x_1 = x,
     rewrite h, simp only [function.update_same],
     simp only [function.update_noteq h], unfold eval_term,
@@ -983,7 +954,7 @@ theorem is_valid_pred_3
   is_valid (p.imp (forall_ x p)) :=
 begin
   unfold is_valid, unfold holds,
-  intros T m v h2 a h3,
+  intros D m v h2 a,
   have s1 : ∀ x' ∈ p.free_var_set, ([x ↦ a] v) x' = v x', intros x' h4, apply function.update_noteq,
     by_contradiction, apply h1, rewrite <- h, exact h4,
   rewrite thm_3_2 ([x ↦ a] v) v s1, exact h2
@@ -1188,10 +1159,10 @@ end
 theorem thm_3_7
   (p : formula)
   (s : instantiation)
-  (T : Type)
-  (m : interpretation T)
-  (v : valuation T) :
-  holds T m v (sub_formula s p) ↔ holds T m ((eval_term T m v) ∘ s) p :=
+  (D : Type)
+  (m : interpretation D)
+  (v : valuation D) :
+  holds D m v (sub_formula s p) ↔ holds D m ((eval_term D m v) ∘ s) p :=
 begin
   induction p generalizing s v,
   case formula.bottom {
@@ -1202,50 +1173,50 @@ begin
   },
   case formula.atom : n x terms {
     calc
-    holds T m v (sub_formula s (atom n x terms)) ↔
-      holds T m v (atom n x (fun i : fin n, sub_term s (terms i))) : by unfold sub_formula
-    ... ↔ m.pred n x (fun i : fin n, eval_term T m v (sub_term s (terms i))) : by unfold holds
-    ... ↔ m.pred n x (fun i : fin n, eval_term T m ((eval_term T m v) ∘ s) (terms i)) : by simp only [lem_3_5]
-    ... ↔ holds T m ((eval_term T m v) ∘ s) (atom n x terms) : by unfold holds
+    holds D m v (sub_formula s (atom n x terms)) ↔
+      holds D m v (atom n x (fun i : fin n, sub_term s (terms i))) : by unfold sub_formula
+    ... ↔ m.pred n x (fun i : fin n, eval_term D m v (sub_term s (terms i))) : by unfold holds
+    ... ↔ m.pred n x (fun i : fin n, eval_term D m ((eval_term D m v) ∘ s) (terms i)) : by simp only [lem_3_5]
+    ... ↔ holds D m ((eval_term D m v) ∘ s) (atom n x terms) : by unfold holds
   },
   case formula.not : p ih {
     calc
-    holds T m v (sub_formula s (not p)) ↔ holds T m v (not (sub_formula s p)) : by unfold sub_formula
-    ... ↔ ¬ holds T m v (sub_formula s p) : by unfold holds
-    ... ↔ ¬ holds T m ((eval_term T m v) ∘ s) p : by rewrite ih s v
-    ... ↔ holds T m ((eval_term T m v) ∘ s) (not p) : by unfold holds
+    holds D m v (sub_formula s (not p)) ↔ holds D m v (not (sub_formula s p)) : by unfold sub_formula
+    ... ↔ ¬ holds D m v (sub_formula s p) : by unfold holds
+    ... ↔ ¬ holds D m ((eval_term D m v) ∘ s) p : by rewrite ih s v
+    ... ↔ holds D m ((eval_term D m v) ∘ s) (not p) : by unfold holds
   },
   case formula.and : p q ih_p ih_q {
     calc
-    holds T m v (sub_formula s (and p q)) ↔ holds T m v (and (sub_formula s p) (sub_formula s q)) : by unfold sub_formula
-    ... ↔ (holds T m v (sub_formula s p)) ∧ (holds T m v (sub_formula s q)) : by unfold holds
-    ... ↔ (holds T m ((eval_term T m v) ∘ s) p) ∧ (holds T m ((eval_term T m v) ∘ s) q) :
+    holds D m v (sub_formula s (and p q)) ↔ holds D m v (and (sub_formula s p) (sub_formula s q)) : by unfold sub_formula
+    ... ↔ (holds D m v (sub_formula s p)) ∧ (holds D m v (sub_formula s q)) : by unfold holds
+    ... ↔ (holds D m ((eval_term D m v) ∘ s) p) ∧ (holds D m ((eval_term D m v) ∘ s) q) :
         begin rewrite ih_p s v, rewrite ih_q s v end
-    ... ↔ holds T m ((eval_term T m v) ∘ s) (and p q) : by unfold holds
+    ... ↔ holds D m ((eval_term D m v) ∘ s) (and p q) : by unfold holds
   },
   case formula.or : p q ih_p ih_q {
     calc
-    holds T m v (sub_formula s (or p q)) ↔ holds T m v (or (sub_formula s p) (sub_formula s q)) : by unfold sub_formula
-    ... ↔ (holds T m v (sub_formula s p)) ∨ (holds T m v (sub_formula s q)) : by unfold holds
-    ... ↔ (holds T m ((eval_term T m v) ∘ s) p) ∨ (holds T m ((eval_term T m v) ∘ s) q) :
+    holds D m v (sub_formula s (or p q)) ↔ holds D m v (or (sub_formula s p) (sub_formula s q)) : by unfold sub_formula
+    ... ↔ (holds D m v (sub_formula s p)) ∨ (holds D m v (sub_formula s q)) : by unfold holds
+    ... ↔ (holds D m ((eval_term D m v) ∘ s) p) ∨ (holds D m ((eval_term D m v) ∘ s) q) :
         begin rewrite ih_p s v, rewrite ih_q s v end
-    ... ↔ holds T m ((eval_term T m v) ∘ s) (or p q) : by unfold holds
+    ... ↔ holds D m ((eval_term D m v) ∘ s) (or p q) : by unfold holds
   },
   case formula.imp : p q ih_p ih_q {
     calc
-    holds T m v (sub_formula s (imp p q)) ↔ holds T m v (imp (sub_formula s p) (sub_formula s q)) : by unfold sub_formula
-    ... ↔ (holds T m v (sub_formula s p)) → (holds T m v (sub_formula s q)) : by unfold holds
-    ... ↔ (holds T m ((eval_term T m v) ∘ s) p) → (holds T m ((eval_term T m v) ∘ s) q) :
+    holds D m v (sub_formula s (imp p q)) ↔ holds D m v (imp (sub_formula s p) (sub_formula s q)) : by unfold sub_formula
+    ... ↔ (holds D m v (sub_formula s p)) → (holds D m v (sub_formula s q)) : by unfold holds
+    ... ↔ (holds D m ((eval_term D m v) ∘ s) p) → (holds D m ((eval_term D m v) ∘ s) q) :
         begin rewrite ih_p s v, rewrite ih_q s v end
-    ... ↔ holds T m ((eval_term T m v) ∘ s) (imp p q) : by unfold holds
+    ... ↔ holds D m ((eval_term D m v) ∘ s) (imp p q) : by unfold holds
   },
   case formula.iff : p q ih_p ih_q {
     calc
-    holds T m v (sub_formula s (iff p q)) ↔ holds T m v (iff (sub_formula s p) (sub_formula s q)) : by unfold sub_formula
-    ... ↔ ((holds T m v (sub_formula s p)) ↔ (holds T m v (sub_formula s q))) : by unfold holds
-    ... ↔ ((holds T m ((eval_term T m v) ∘ s) p) ↔ (holds T m ((eval_term T m v) ∘ s) q)) :
+    holds D m v (sub_formula s (iff p q)) ↔ holds D m v (iff (sub_formula s p) (sub_formula s q)) : by unfold sub_formula
+    ... ↔ ((holds D m v (sub_formula s p)) ↔ (holds D m v (sub_formula s q))) : by unfold holds
+    ... ↔ ((holds D m ((eval_term D m v) ∘ s) p) ↔ (holds D m ((eval_term D m v) ∘ s) q)) :
         begin rewrite ih_p s v, rewrite ih_q s v end
-    ... ↔ holds T m ((eval_term T m v) ∘ s) (iff p q) : by unfold holds
+    ... ↔ holds D m ((eval_term D m v) ∘ s) (iff p q) : by unfold holds
   },
   case formula.forall_ : x p ih {
     let x' :=
@@ -1253,18 +1224,18 @@ begin
       then variant x (sub_formula ([x ↦ var x] s) p).free_var_set
       else x,
     have s1 : ∀ a ∈ m.domain, ∀ z ∈ p.free_var_set,
-      ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) z = ([x ↦ a] ((eval_term T m v) ∘ s)) z,
+      ((eval_term D m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) z = ([x ↦ a] ((eval_term D m v) ∘ s)) z,
       intros a h2 z h1,
       by_cases z = x, {
         calc
-        ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) z =
-              ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) x : by rewrite h
-        ... = (eval_term T m ([x' ↦ a] v)) (([x ↦ (var x')] s) x) : by simp only [function.comp_app]
-        ... = (eval_term T m ([x' ↦ a] v)) (var x') : by simp only [function.update_same]
+        ((eval_term D m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) z =
+              ((eval_term D m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) x : by rewrite h
+        ... = (eval_term D m ([x' ↦ a] v)) (([x ↦ (var x')] s) x) : by simp only [function.comp_app]
+        ... = (eval_term D m ([x' ↦ a] v)) (var x') : by simp only [function.update_same]
         ... = ([x' ↦ a] v) x' : by unfold eval_term
         ... = a : by simp only [function.update_same]
-        ... = ([x ↦ a] ((eval_term T m v) ∘ s)) x : by simp only [function.update_same]
-        ... = ([x ↦ a] ((eval_term T m v) ∘ s)) z : by rewrite h
+        ... = ([x ↦ a] ((eval_term D m v) ∘ s)) x : by simp only [function.update_same]
+        ... = ([x ↦ a] ((eval_term D m v) ∘ s)) z : by rewrite h
       },
       {
         have s2 : z ∈ p.free_var_set \ {x}, simp only [finset.mem_sdiff, finset.mem_singleton], exact and.intro h1 h,
@@ -1275,27 +1246,27 @@ begin
         have s5 : x' ∉ (s z).all_var_set, exact finset.not_mem_mono s4 s3,
         have s6 : ∀ (x : string), x ∈ (s z).all_var_set → x ≠ x', intros y h3, by_contradiction, apply s5, rewrite <- h, exact h3,
         calc
-        ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) z =
-              (eval_term T m ([x' ↦ a] v)) (([x ↦ (var x')] s) z) : by simp only [function.comp_app]
-        ... = (eval_term T m ([x' ↦ a] v)) (s z) : by simp only [function.update_noteq h]
-        ... = eval_term T m v (s z) : begin apply thm_3_1 ([x' ↦ a] v) v, intros x h3,
+        ((eval_term D m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) z =
+              (eval_term D m ([x' ↦ a] v)) (([x ↦ (var x')] s) z) : by simp only [function.comp_app]
+        ... = (eval_term D m ([x' ↦ a] v)) (s z) : by simp only [function.update_noteq h]
+        ... = eval_term D m v (s z) : begin apply thm_3_1 ([x' ↦ a] v) v, intros x h3,
                                       apply function.update_noteq, exact s6 x h3 end
-        ... = ((eval_term T m v) ∘ s) z : by simp only [eq_self_iff_true]
-        ... = ([x ↦ a] ((eval_term T m v) ∘ s)) z : begin symmetry, apply function.update_noteq h end
+        ... = ((eval_term D m v) ∘ s) z : by simp only [eq_self_iff_true]
+        ... = ([x ↦ a] ((eval_term D m v) ∘ s)) z : begin symmetry, apply function.update_noteq h end
       },
     calc
-    holds T m v (sub_formula s (forall_ x p))
-      ↔ holds T m v (forall_ x' (sub_formula ([x ↦ (var x')] s) p)) : by unfold sub_formula
-    ... ↔ ∀ a ∈ m.domain, holds T m ([x' ↦ a] v) (sub_formula ([x ↦ (var x')] s) p) : by unfold holds
-    ... ↔ (∀ a ∈ m.domain, (holds T m ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) p)) : by finish
-    ... ↔ (∀ a ∈ m.domain, holds T m ([x ↦ a] ((eval_term T m v) ∘ s)) p) :
+    holds D m v (sub_formula s (forall_ x p))
+      ↔ holds D m v (forall_ x' (sub_formula ([x ↦ (var x')] s) p)) : by unfold sub_formula
+    ... ↔ ∀ a ∈ m.domain, holds D m ([x' ↦ a] v) (sub_formula ([x ↦ (var x')] s) p) : by unfold holds
+    ... ↔ (∀ a ∈ m.domain, (holds D m ((eval_term D m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) p)) : by finish
+    ... ↔ (∀ a ∈ m.domain, holds D m ([x ↦ a] ((eval_term D m v) ∘ s)) p) :
       begin split,
       intros h1 a h2,
-      rewrite <- (thm_3_2 ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) ([x ↦ a] ((eval_term T m v) ∘ s)) (s1 a h2)), exact h1 a h2,
+      rewrite <- (thm_3_2 ((eval_term D m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) ([x ↦ a] ((eval_term D m v) ∘ s)) (s1 a h2)), exact h1 a h2,
       intros h1 a h2,
-      rewrite (thm_3_2 ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) ([x ↦ a] ((eval_term T m v) ∘ s)) (s1 a h2)), exact h1 a h2
+      rewrite (thm_3_2 ((eval_term D m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) ([x ↦ a] ((eval_term D m v) ∘ s)) (s1 a h2)), exact h1 a h2
       end
-    ... ↔ holds T m (eval_term T m v ∘ s) (forall_ x p) : by unfold holds
+    ... ↔ holds D m (eval_term D m v ∘ s) (forall_ x p) : by unfold holds
   },
   case formula.exists_ : x p ih {
     let x' :=
@@ -1303,18 +1274,18 @@ begin
       then variant x (sub_formula ([x ↦ var x] s) p).free_var_set
       else x,
     have s1 : ∀ a ∈ m.domain, ∀ z ∈ p.free_var_set,
-      ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) z = ([x ↦ a] ((eval_term T m v) ∘ s)) z,
+      ((eval_term D m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) z = ([x ↦ a] ((eval_term D m v) ∘ s)) z,
       intros a h2 z h1,
       by_cases z = x, {
         calc
-        ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) z =
-              ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) x : by rewrite h
-        ... = (eval_term T m ([x' ↦ a] v)) (([x ↦ (var x')] s) x) : by simp only [function.comp_app]
-        ... = (eval_term T m ([x' ↦ a] v)) (var x') : by simp only [function.update_same]
+        ((eval_term D m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) z =
+              ((eval_term D m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) x : by rewrite h
+        ... = (eval_term D m ([x' ↦ a] v)) (([x ↦ (var x')] s) x) : by simp only [function.comp_app]
+        ... = (eval_term D m ([x' ↦ a] v)) (var x') : by simp only [function.update_same]
         ... = ([x' ↦ a] v) x' : by unfold eval_term
         ... = a : by simp only [function.update_same]
-        ... = ([x ↦ a] ((eval_term T m v) ∘ s)) x : by simp only [function.update_same]
-        ... = ([x ↦ a] ((eval_term T m v) ∘ s)) z : by rewrite h
+        ... = ([x ↦ a] ((eval_term D m v) ∘ s)) x : by simp only [function.update_same]
+        ... = ([x ↦ a] ((eval_term D m v) ∘ s)) z : by rewrite h
       },
       {
         have s2 : z ∈ p.free_var_set \ {x}, simp only [finset.mem_sdiff, finset.mem_singleton], exact and.intro h1 h,
@@ -1325,30 +1296,30 @@ begin
         have s5 : x' ∉ (s z).all_var_set, exact finset.not_mem_mono s4 s3,
         have s6 : ∀ (x : string), x ∈ (s z).all_var_set → x ≠ x', intros y h3, by_contradiction, apply s5, rewrite <- h, exact h3,
         calc
-        ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) z =
-              (eval_term T m ([x' ↦ a] v)) (([x ↦ (var x')] s) z) : by simp only [function.comp_app]
-        ... = (eval_term T m ([x' ↦ a] v)) (s z) : by simp only [function.update_noteq h]
-        ... = eval_term T m v (s z) : begin apply thm_3_1 ([x' ↦ a] v) v, intros x h3,
+        ((eval_term D m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) z =
+              (eval_term D m ([x' ↦ a] v)) (([x ↦ (var x')] s) z) : by simp only [function.comp_app]
+        ... = (eval_term D m ([x' ↦ a] v)) (s z) : by simp only [function.update_noteq h]
+        ... = eval_term D m v (s z) : begin apply thm_3_1 ([x' ↦ a] v) v, intros x h3,
                                       apply function.update_noteq, exact s6 x h3 end
-        ... = ((eval_term T m v) ∘ s) z : by simp only [eq_self_iff_true]
-        ... = ([x ↦ a] ((eval_term T m v) ∘ s)) z : begin symmetry, apply function.update_noteq h end
+        ... = ((eval_term D m v) ∘ s) z : by simp only [eq_self_iff_true]
+        ... = ([x ↦ a] ((eval_term D m v) ∘ s)) z : begin symmetry, apply function.update_noteq h end
       },
     calc
-    holds T m v (sub_formula s (exists_ x p))
-      ↔ holds T m v (exists_ x' (sub_formula ([x ↦ (var x')] s) p)) : by unfold sub_formula
-    ... ↔ ∃ a ∈ m.domain, holds T m ([x' ↦ a] v) (sub_formula ([x ↦ (var x')] s) p) : by unfold holds
-    ... ↔ (∃ a ∈ m.domain, (holds T m ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) p)) : by finish
-    ... ↔ (∃ a ∈ m.domain, holds T m ([x ↦ a] ((eval_term T m v) ∘ s)) p) :
+    holds D m v (sub_formula s (exists_ x p))
+      ↔ holds D m v (exists_ x' (sub_formula ([x ↦ (var x')] s) p)) : by unfold sub_formula
+    ... ↔ ∃ a ∈ m.domain, holds D m ([x' ↦ a] v) (sub_formula ([x ↦ (var x')] s) p) : by unfold holds
+    ... ↔ (∃ a ∈ m.domain, (holds D m ((eval_term D m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) p)) : by finish
+    ... ↔ (∃ a ∈ m.domain, holds D m ([x ↦ a] ((eval_term D m v) ∘ s)) p) :
     begin
       split,
       intros h1, cases h1 with a h2, cases h2 with h3 h4, apply exists.intro a, apply exists.intro h3,
-      rewrite <- thm_3_2 ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) ([x ↦ a] ((eval_term T m v) ∘ s)) (s1 a h3),
+      rewrite <- thm_3_2 ((eval_term D m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) ([x ↦ a] ((eval_term D m v) ∘ s)) (s1 a h3),
       exact h4,
       intros h1, cases h1 with a h2, cases h2 with h3 h4, apply exists.intro a, apply exists.intro h3,
-      rewrite thm_3_2 ((eval_term T m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) ([x ↦ a] ((eval_term T m v) ∘ s)) (s1 a h3),
+      rewrite thm_3_2 ((eval_term D m ([x' ↦ a] v)) ∘ ([x ↦ (var x')] s)) ([x ↦ a] ((eval_term D m v) ∘ s)) (s1 a h3),
       exact h4
     end
-    ... ↔ holds T m (eval_term T m v ∘ s) (exists_ x p) : by unfold holds
+    ... ↔ holds D m (eval_term D m v ∘ s) (exists_ x p) : by unfold holds
   }
 end
 
