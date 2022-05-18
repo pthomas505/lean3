@@ -937,14 +937,17 @@ theorem is_valid_pred_2
 begin
   unfold is_valid, unfold holds,
   intros D m v h2,
-  have s1 : holds D m ([x ↦ (eval_term D m v t)] v) p, apply h2 (eval_term D m v t),
-  have s2 : ((eval_term D m v) ∘ (sub_single_var x t)) = ([x ↦ (eval_term D m v t)] v),
-    unfold sub_single_var, unfold function.comp, ext1,
-    by_cases x_1 = x,
-    rewrite h, simp only [function.update_same],
-    simp only [function.update_noteq h], unfold eval_term,
-  rewrite <- s2 at s1,
-  simp only [thm_3_7_simp v (sub_single_var x t) p h1], exact s1
+  simp only [thm_3_7_simp v (sub_single_var x t) p h1],
+  have s1 : ((eval_term D m v) ∘ (sub_single_var x t)) = ([x ↦ (eval_term D m v t)] v),
+    apply funext, intros y, unfold function.comp, unfold sub_single_var,
+    by_cases y = x,
+    {
+      rewrite h, simp only [function.update_same]
+    },
+    {
+      simp only [function.update_noteq h], unfold eval_term
+    },
+  rewrite s1, apply h2
 end
 
 theorem is_valid_pred_3
