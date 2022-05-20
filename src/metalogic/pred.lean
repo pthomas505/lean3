@@ -973,6 +973,12 @@ def alpha_convert_valid (s : string → string) : formula → Prop
 | (forall_ x p) := alpha_convert_valid p ∧ s x ∉ p.free_var_set \ {x}
 | (exists_ x p) := alpha_convert_valid p ∧ s x ∉ p.free_var_set \ {x}
 
+example
+  (s : string → string)
+  (p : formula)
+  (h1 : alpha_convert_valid s p) :
+  is_valid p ↔ is_valid (alpha_convert_formula s p) := sorry
+
 
 theorem is_valid_mp
   (p q : formula)
