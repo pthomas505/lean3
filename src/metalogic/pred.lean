@@ -991,14 +991,79 @@ def alpha_conv (m : string → string) : formula → formula
 | (forall_ x p) := forall_ (m x) (alpha_conv p)
 | (exists_ x p) := exists_ (m x) (alpha_conv p)
 
-def alpha_conv_cond (s : string → string) (p : formula) : Prop :=
-function.injective s ∧ ∀ x ∈ p.free_var_set, s x = x
+def alpha_conv_cond (m : string → string) (p : formula) : Prop :=
+function.injective m ∧ ∀ x ∈ p.free_var_set, m x = x
+
+
+lemma lem_1
+  (m : string → string)
+  (t : term)
+  (h1 : ∀ x ∈ t.all_var_set, m x = x) :
+  alpha_eqv_term id t (alpha_conv_term m t) :=
+begin
+  induction t,
+  case term.var : x {
+    unfold term.all_var_set at h1, simp only [finset.mem_singleton, forall_eq] at h1,
+    unfold alpha_conv_term, rewrite h1, apply alpha_eqv_term.var
+  },
+  case term.func : n f terms ih {
+    simp only at ih,
+    unfold term.all_var_set at h1, simp only [finset.mem_bUnion] at h1,
+    apply alpha_eqv_term.func,
+    intros i,
+    apply ih, intros x h2, apply h1, apply exists.intro i, simp only [finset.mem_univ, exists_true_left], exact h2
+  }
+end
+
 
 example
   (m : string → string)
   (p : formula)
   (h1 : alpha_conv_cond m p) :
-  alpha_eqv id p (alpha_conv m p) := sorry
+  alpha_eqv id p (alpha_conv m p) :=
+begin
+  induction p,
+  case formula.bottom
+  { unfold alpha_conv, apply alpha_eqv.bottom },
+  case formula.top
+  { unfold alpha_conv, apply alpha_eqv.top },
+  case formula.atom : n p terms
+  {
+    unfold alpha_conv_cond at h1, cases h1, unfold formula.free_var_set at h1_right,
+    simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left, forall_exists_index] at h1_right,
+    apply alpha_eqv.atom,
+    intros i,
+    apply lem_1, intros x, apply h1_right
+  },
+  case formula.not : p p_ih
+  {
+    unfold alpha_conv_cond at h1, unfold formula.free_var_set at h1,
+    unfold alpha_conv, apply alpha_eqv.not, apply p_ih,
+    unfold alpha_conv_cond, assumption
+  },
+  case formula.and : p q p_ih q_ih
+  {
+    unfold alpha_conv_cond at h1, unfold formula.free_var_set at h1,
+    simp only [finset.mem_union] at h1, cases h1,
+    unfold alpha_conv, apply alpha_eqv.and,
+    apply p_ih, unfold alpha_conv_cond, split, assumption, intros x h2,
+    apply h1_right, apply or.intro_left, assumption,
+    apply q_ih, unfold alpha_conv_cond, split, assumption, intros x h2,
+    apply h1_right, apply or.intro_right, assumption
+  },
+  case formula.or : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
+  { admit },
+  case formula.imp : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
+  { admit },
+  case formula.iff : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
+  { admit },
+  case formula.forall_ : x p ih
+  {
+    admit
+  },
+  case formula.exists_ : p_ᾰ p_ᾰ_1 p_ih
+  { admit },
+end
 
 example
   (p q : formula)
@@ -1105,10 +1170,8 @@ end
 
 
 /-
-/-
 def variant : string → finset string → string
 | x vars := if x ∈ vars then variant (string.push x '\'') vars else x
--/
 
 def variant : string → finset string → string
 | x vars := if x ∈ vars then
