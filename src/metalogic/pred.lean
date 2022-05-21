@@ -952,28 +952,28 @@ inductive alpha_eqv_term (m : string → string) : term → term → Prop
   (∀ i : fin n, alpha_eqv_term (terms i) (terms' i)) →
     alpha_eqv_term (func n f terms) (func n f terms')
 
-inductive alpha_eqv (m : string → string) : formula → formula → Prop
-| bottom :
-  alpha_eqv bottom bottom
-| top :
-  alpha_eqv top top
-| atom (n : ℕ) (p : string) (terms terms' : fin n → term) :
+inductive alpha_eqv : (string → string) -> formula → formula → Prop
+| bottom (m : string → string) :
+  alpha_eqv m bottom bottom
+| top (m : string → string) :
+  alpha_eqv m top top
+| atom (m : string → string) (n : ℕ) (p : string) (terms terms' : fin n → term) :
   (∀ i : fin n, alpha_eqv_term m (terms i) (terms' i)) →
-    alpha_eqv (atom n p terms) (atom n p terms')
-| not (p p' : formula) :
-  alpha_eqv p p' → alpha_eqv (not p) (not p')
-| and (p p' q q' : formula) :
-  alpha_eqv p p' → alpha_eqv q q' → alpha_eqv (and p q) (and p' q')
-| or (p p' q q' : formula) :
-  alpha_eqv p p' → alpha_eqv q q' → alpha_eqv (or p q) (or p' q')
-| imp (p p' q q' : formula) :
-  alpha_eqv p p' → alpha_eqv q q' → alpha_eqv (imp p q) (imp p' q')
-| iff (p p' q q' : formula) :
-  alpha_eqv p p' → alpha_eqv q q' → alpha_eqv (iff p q) (iff p' q')
-| forall_ (x : string) (p p' : formula) :
-  alpha_eqv p p' → alpha_eqv (forall_ x p) (forall_ (m x) p')
-| exists_ (x : string) (p p' : formula) :
-  alpha_eqv p p' → alpha_eqv (exists_ x p) (exists_ (m x) p')
+    alpha_eqv m (atom n p terms) (atom n p terms')
+| not (m : string → string) (p p' : formula) :
+  alpha_eqv m p p' → alpha_eqv m (not p) (not p')
+| and (m : string → string) (p p' q q' : formula) :
+  alpha_eqv m p p' → alpha_eqv m q q' → alpha_eqv m (and p q) (and p' q')
+| or (m : string → string) (p p' q q' : formula) :
+  alpha_eqv m p p' → alpha_eqv m q q' → alpha_eqv m (or p q) (or p' q')
+| imp (m : string → string) (p p' q q' : formula) :
+  alpha_eqv m p p' → alpha_eqv m q q' → alpha_eqv m (imp p q) (imp p' q')
+| iff (m : string → string) (p p' q q' : formula) :
+  alpha_eqv m p p' → alpha_eqv m q q' → alpha_eqv m (iff p q) (iff p' q')
+| forall_ (m : string → string) (x y : string) (p p' : formula) :
+  alpha_eqv ([x ↦ y] m) p p' → alpha_eqv m (forall_ x p) (forall_ y p')
+| exists_ (m : string → string) (x y : string) (p p' : formula) :
+  alpha_eqv ([x ↦ y] m) p p' → alpha_eqv m (exists_ x p) (exists_ y p')
 
 def alpha_conv_term (m : string → string) : term → term
 | (var x) := var (m x)
@@ -998,14 +998,12 @@ example
   (m : string → string)
   (p : formula)
   (h1 : alpha_conv_cond m p) :
-  alpha_eqv m p (alpha_conv m p) := sorry
+  alpha_eqv id p (alpha_conv m p) := sorry
 
 example
-  (m : string → string)
   (p q : formula)
-  (h1 : alpha_eqv m p q)
-  (h2 : is_valid p) :
-  is_valid q := sorry
+  (h1 : alpha_eqv id p q) :
+  is_valid p ↔ is_valid q := sorry
 
 
 theorem is_valid_mp
