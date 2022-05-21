@@ -1015,16 +1015,6 @@ begin
   }
 end
 
-example
-  {T : Type}
-  [decidable_eq T]
-  (f : T → T)
-  (a : T) :
-  ([a ↦ id a] id) = id :=
-begin
-  simp only [function.id_def], funext a',
-  by_cases a' = a,
-end
 
 example
   (p : formula) :
@@ -1032,32 +1022,37 @@ example
 begin
   induction p,
   case formula.bottom
-  { unfold alpha_conv, apply alpha_eqv.bottom },
+  { apply alpha_eqv.bottom },
   case formula.top
-  { admit },
+  { apply alpha_eqv.top },
   case formula.atom : n p terms
   { apply alpha_eqv.atom, intros i, apply lem_1, intros x h1, refl },
-  case formula.not : p_ᾰ p_ih
-  { admit },
-  case formula.and : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
-  { admit },
-  case formula.or : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
-  { admit },
-  case formula.imp : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
-  { admit },
-  case formula.iff : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
-  { admit },
+  case formula.not : p ih
+  { apply alpha_eqv.not, exact ih },
+  case formula.and : p q p_ih q_ih
+  { apply alpha_eqv.and, exact p_ih, exact q_ih },
+  case formula.or : p q p_ih q_ih
+  { apply alpha_eqv.or, exact p_ih, exact q_ih },
+  case formula.imp : p q p_ih q_ih
+  { apply alpha_eqv.imp, exact p_ih, exact q_ih },
+  case formula.iff : p q p_ih q_ih
+  { apply alpha_eqv.iff, exact p_ih, exact q_ih },
   case formula.forall_ : x p ih
-  { unfold alpha_conv, apply alpha_eqv.forall_,
-    simp only [id.def, function.id_def], dsimp at *, },
-  case formula.exists_ : p_ᾰ p_ᾰ_1 p_ih
-  { admit }
+  {
+    unfold alpha_conv, apply alpha_eqv.forall_,
+    simp only [function.update_eq_self], exact ih
+  },
+  case formula.exists_ : x p ih
+  {
+    unfold alpha_conv, apply alpha_eqv.exists_,
+    simp only [function.update_eq_self], exact ih
+  }
 end
 
 example
   (m : string → string)
   (p : formula)
-  (h1 : alpha_conv_cond m p) :
+  (h1 : ∀ x ∈ p.free_var_set, m x = x) :
   alpha_eqv id p (alpha_conv m p) :=
 begin
   induction p,
@@ -1067,27 +1062,27 @@ begin
   { unfold alpha_conv, apply alpha_eqv.top },
   case formula.atom : n p terms
   {
-    unfold alpha_conv_cond at h1, cases h1, unfold formula.free_var_set at h1_right,
-    simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left, forall_exists_index] at h1_right,
+    unfold formula.free_var_set at h1,
+    simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left, forall_exists_index] at h1,
     apply alpha_eqv.atom,
     intros i,
-    apply lem_1, intros x, apply h1_right
+    apply lem_1, intros x, apply h1
   },
   case formula.not : p p_ih
   {
-    unfold alpha_conv_cond at h1, unfold formula.free_var_set at h1,
+    unfold formula.free_var_set at h1,
     unfold alpha_conv, apply alpha_eqv.not, apply p_ih,
-    unfold alpha_conv_cond, assumption
+    assumption
   },
   case formula.and : p q p_ih q_ih
   {
-    unfold alpha_conv_cond at h1, unfold formula.free_var_set at h1,
-    simp only [finset.mem_union] at h1, cases h1,
+    unfold formula.free_var_set at h1,
+    simp only [finset.mem_union] at h1,
     unfold alpha_conv, apply alpha_eqv.and,
-    apply p_ih, unfold alpha_conv_cond, split, assumption, intros x h2,
-    apply h1_right, apply or.intro_left, assumption,
-    apply q_ih, unfold alpha_conv_cond, split, assumption, intros x h2,
-    apply h1_right, apply or.intro_right, assumption
+    apply p_ih, intros x h2,
+    apply h1, apply or.intro_left, assumption,
+    apply q_ih, intros x h2,
+    apply h1, apply or.intro_right, assumption
   },
   case formula.or : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
   { admit },
@@ -1097,11 +1092,9 @@ begin
   { admit },
   case formula.forall_ : x p ih
   {
-    unfold alpha_conv_cond at h1, cases h1, unfold formula.free_var_set at h1_right,
-    simp only [finset.mem_sdiff, finset.mem_singleton, and_imp] at h1_right,
-    unfold alpha_conv_cond at ih, 
-    unfold alpha_conv, apply alpha_eqv.forall_,
-    have s1 : ([x↦m x]id) = fun x : string, x,
+    unfold formula.free_var_set at h1,
+    simp only [finset.mem_sdiff, finset.mem_singleton, and_imp] at h1,
+    unfold alpha_conv, apply alpha_eqv.forall_, sorry,
   },
   case formula.exists_ : p_ᾰ p_ᾰ_1 p_ih
   { admit },
