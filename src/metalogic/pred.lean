@@ -1015,6 +1015,44 @@ begin
   }
 end
 
+example
+  {T : Type}
+  [decidable_eq T]
+  (f : T → T)
+  (a : T) :
+  ([a ↦ id a] id) = id :=
+begin
+  simp only [function.id_def], funext a',
+  by_cases a' = a,
+end
+
+example
+  (p : formula) :
+  alpha_eqv id p (alpha_conv id p) :=
+begin
+  induction p,
+  case formula.bottom
+  { unfold alpha_conv, apply alpha_eqv.bottom },
+  case formula.top
+  { admit },
+  case formula.atom : n p terms
+  { apply alpha_eqv.atom, intros i, apply lem_1, intros x h1, refl },
+  case formula.not : p_ᾰ p_ih
+  { admit },
+  case formula.and : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
+  { admit },
+  case formula.or : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
+  { admit },
+  case formula.imp : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
+  { admit },
+  case formula.iff : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
+  { admit },
+  case formula.forall_ : x p ih
+  { unfold alpha_conv, apply alpha_eqv.forall_,
+    simp only [id.def, function.id_def], dsimp at *, },
+  case formula.exists_ : p_ᾰ p_ᾰ_1 p_ih
+  { admit }
+end
 
 example
   (m : string → string)
@@ -1059,7 +1097,11 @@ begin
   { admit },
   case formula.forall_ : x p ih
   {
-    admit
+    unfold alpha_conv_cond at h1, cases h1, unfold formula.free_var_set at h1_right,
+    simp only [finset.mem_sdiff, finset.mem_singleton, and_imp] at h1_right,
+    unfold alpha_conv_cond at ih, 
+    unfold alpha_conv, apply alpha_eqv.forall_,
+    have s1 : ([x↦m x]id) = fun x : string, x,
   },
   case formula.exists_ : p_ᾰ p_ᾰ_1 p_ih
   { admit },
