@@ -35,22 +35,6 @@ begin
   tauto,
 end
 
-lemma and_self_imp {p q : Prop} : p ∧ (p → q) ↔ p ∧ q := by tauto
-
-lemma finset.sdiff_bUnion_sdiff [decidable_eq α] [decidable_eq β]
-  (s s' : finset α) (t : α → finset β) :
-  (s \ s').bUnion t \ s'.bUnion t = s.bUnion t \ s'.bUnion t :=
-begin
-  simp only [sdiff_eq_filter, bUnion_filter, filter_bUnion, ite_not, mem_bUnion,
-    exists_prop, not_exists, not_and],
-  congr',
-  ext,
-  simp only [mem_ite, imp_false, and_self_imp, imp_not_comm, mem_filter, not_mem_empty,
-    and.congr_left_iff, and_iff_right_iff_imp],
-  intro h,
-  exact h x,
-end
-
 lemma sdiff_singleton_bUnion [decidable_eq α] [decidable_eq β]
   (s : finset α) (t : α → finset β)
   (x : α) (s' : finset β)
@@ -77,13 +61,6 @@ lemma bUnion_sdiff_of_forall_disjoint [decidable_eq β]
   (h : ∀ y : α, y ∈ s → disjoint (t y) s') :
   (s.bUnion t) \ s' = s.bUnion t :=
 by simpa [sdiff_eq_self_iff_disjoint, disjoint_bUnion_left]
-
--- Maybe this might be somewhat too specialized?
-lemma bUnion_sdiff_singleton_of_forall_not_mem [decidable_eq β]
-  (s : finset α) (x : β) (t : α → finset β)
-  (h : ∀ y : α, y ∈ s → x ∉ t y) :
-  (s.bUnion t) \ {x} = s.bUnion t :=
-bUnion_sdiff_of_forall_disjoint s t _ (by simpa [disjoint_singleton_right])
 
 end finset
 
