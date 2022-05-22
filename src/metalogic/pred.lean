@@ -933,7 +933,7 @@ inductive alpha_eqv_term (m : list (string × string)) : term → term → Prop
   (∀ i : fin n, alpha_eqv_term (terms i) (terms' i)) →
     alpha_eqv_term (func n f terms) (func n f terms')
 
-inductive alpha_eqv : list (string × string) -> formula → formula → Prop
+inductive alpha_eqv : list (string × string) → formula → formula → Prop
 | bottom (m : list (string × string)) :
   alpha_eqv m bottom bottom
 | top (m : list (string × string)) :
