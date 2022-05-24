@@ -1037,7 +1037,7 @@ end
 
 
 def alpha_eqv_var : list (string × string) → string → string → Prop
-| list.nil x y := x = y
+| [] x y := x = y
 | ((a, b) :: m) x y := if x = a then b = y else b ≠ y ∧ alpha_eqv_var m x y
 
 inductive alpha_eqv_term (m : list (string × string)) : term → term → Prop
