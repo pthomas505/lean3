@@ -182,10 +182,11 @@ def eval_term (D : Type) (m : interpretation D) (v : valuation D) : term → D
 
 /-
 f is a function. a' is an element in the domain of f. v is an element in the range of f.
-if y = a' then (`[` a' `↦` v `]` f) y = v
-if y ≠ a' then (`[` a' `↦` v `]` f) y = f y
+if y = a' then ((a' `↦` v) f) y = v
+if y ≠ a' then ((a' `↦` v) f) y = f y
 -/
-notation  `[` a' `↦` v `]` f := function.update f a' v
+-- notation  `[` a' `↦` v `]` f := function.update f a' v
+notation a' ` ↦ `:25 v := fun f, function.update f a' v
 
 example
   {T U : Type}
@@ -194,7 +195,7 @@ example
   (a' a : T)
   (v : U)
   (h1 : a = a') :
-  ([a' ↦ v] f) a = v :=
+  ((a' ↦ v) f) a = v :=
 begin
   rewrite <- h1, exact function.update_same a v f,
 end
@@ -206,7 +207,7 @@ example
   (a' a : T)
   (v : U)
   (h1 : a ≠ a') :
-  ([a' ↦ v] f) a = f a := function.update_noteq h1 v f
+  ((a' ↦ v) f) a = f a := function.update_noteq h1 v f
 
 
 def holds (D : Type) (m : interpretation D) : valuation D → formula → Prop
@@ -218,8 +219,8 @@ def holds (D : Type) (m : interpretation D) : valuation D → formula → Prop
 | v (or p q) := holds v p ∨ holds v q
 | v (imp p q) := holds v p → holds v q
 | v (iff p q) := holds v p ↔ holds v q
-| v (forall_ x p) := ∀ a : D, holds ([x ↦ a] v) p
-| v (exists_ x p) := ∃ a : D, holds ([x ↦ a] v) p
+| v (forall_ x p) := ∀ a : D, holds ((x ↦ a) v) p
+| v (exists_ x p) := ∃ a : D, holds ((x ↦ a) v) p
 
 
 def term.all_var_set : term → finset string
@@ -370,8 +371,8 @@ begin
     unfold formula.free_var_set at h1, simp only [finset.mem_sdiff, finset.mem_singleton] at h1,
     calc
           holds D m v (forall_ x p)
-        ↔ ∀ a : D, holds D m ([x ↦ a] v) p : by unfold holds
-    ... ↔ ∀ a : D, holds D m ([x ↦ a] v') p :
+        ↔ ∀ a : D, holds D m ((x ↦ a) v) p : by unfold holds
+    ... ↔ ∀ a : D, holds D m ((x ↦ a) v') p :
       begin
         apply forall_congr, intros a, apply ih, intros y h3,
         by_cases y = x,
@@ -384,8 +385,8 @@ begin
     unfold formula.free_var_set at h1, simp only [finset.mem_sdiff, finset.mem_singleton] at h1,
     calc
           holds D m v (exists_ x p)
-        ↔ ∃ a : D, holds D m ([x ↦ a] v) p : by unfold holds
-    ... ↔ ∃ a : D, holds D m ([x ↦ a] v') p :
+        ↔ ∃ a : D, holds D m ((x ↦ a) v) p : by unfold holds
+    ... ↔ ∃ a : D, holds D m ((x ↦ a) v') p :
       begin
         apply exists_congr, intros a, apply ih, intros y h3,
         by_cases y = x,
@@ -524,12 +525,12 @@ example
 	(D : Type)
 	(m : interpretation D)
 	(p : formula) :
-	(∀ x : string, ∀ v : valuation D, ∀ a : D, holds D m ([x ↦ a] v) p) ↔ (∀ v : valuation D, holds D m v p) :=
+	(∀ x : string, ∀ v : valuation D, ∀ a : D, holds D m ((x ↦ a) v) p) ↔ (∀ v : valuation D, holds D m v p) :=
 begin
   split,
   intros h1 v,
   rewrite <- function.update_eq_self default v, exact h1 default v (v default),
-  intros h1 x v a, exact h1 ([x ↦ a] v)
+  intros h1 x v a, exact h1 ((x ↦ a) v)
 end
 
 
@@ -820,32 +821,32 @@ begin
       calc
             holds D m v (sub s (forall_ x p))
           ↔ holds D m v (forall_ x (sub s p)) : by unfold sub
-      ... ↔ (∀ a : D, holds D m ([x ↦ a] v) (sub s p)) : by unfold holds
-      ... ↔ (∀ a : D, holds D m (eval_term D m ([x ↦ a] v) ∘ s) p) :
+      ... ↔ (∀ a : D, holds D m ((x ↦ a) v) (sub s p)) : by unfold holds
+      ... ↔ (∀ a : D, holds D m (eval_term D m ((x ↦ a) v) ∘ s) p) :
             begin
               apply forall_congr, intros a,
-              exact ih s ([x ↦ a] v) h1_right_left
+              exact ih s ((x ↦ a) v) h1_right_left
             end
-      ... ↔ (∀ a : D, holds D m ([x ↦ a] eval_term D m v ∘ s) p) :
+      ... ↔ (∀ a : D, holds D m ((x ↦ a) (eval_term D m v ∘ s)) p) :
             begin
               apply forall_congr, intros a,
               apply thm_3_2, intros z h2,
               by_cases z = x,
               {
                 calc
-                      (eval_term D m ([x ↦ a] v) ∘ s) z
-                    = (eval_term D m ([x ↦ a] v) ∘ s) x : by rewrite h
-                ... = eval_term D m ([x ↦ a] v) (s x) : by unfold function.comp
-                ... = eval_term D m ([x ↦ a] v) (var x) : by rewrite h1_left
-                ... = ([x ↦ a] v) x : by unfold eval_term
+                      (eval_term D m ((x ↦ a) v) ∘ s) z
+                    = (eval_term D m ((x ↦ a) v) ∘ s) x : by rewrite h
+                ... = eval_term D m ((x ↦ a) v) (s x) : by unfold function.comp
+                ... = eval_term D m ((x ↦ a) v) (var x) : by rewrite h1_left
+                ... = ((x ↦ a) v) x : by unfold eval_term
                 ... = a : by simp only [function.update_same]
-                ... = ([x ↦ a] eval_term D m v ∘ s) x : by simp only [function.update_same]
-                ... = ([x ↦ a] eval_term D m v ∘ s) z : by rewrite h
+                ... = ((x ↦ a) (eval_term D m v ∘ s)) x : by simp only [function.update_same]
+                ... = ((x ↦ a) (eval_term D m v ∘ s)) z : by rewrite h
               },
               {
                 calc
-                      (eval_term D m ([x ↦ a] v) ∘ s) z
-                    = eval_term D m ([x ↦ a] v) (s z) : by unfold function.comp
+                      (eval_term D m ((x ↦ a) v) ∘ s) z
+                    = eval_term D m ((x ↦ a) v) (s z) : by unfold function.comp
                 ... = eval_term D m v (s z) :
                       begin
                         apply thm_3_1, intros y h3,
@@ -854,7 +855,7 @@ begin
                         rewrite h4 at h3, exact h3
                       end
                 ... = (eval_term D m v ∘ s) z : by unfold function.comp
-                ... = ([x ↦ a] eval_term D m v ∘ s) z : by simp only [function.update_noteq h]
+                ... = ((x ↦ a) (eval_term D m v ∘ s)) z : by simp only [function.update_noteq h]
               }
             end
       ... ↔ holds D m (eval_term D m v ∘ s) (forall_ x p) : by unfold holds
@@ -866,32 +867,32 @@ begin
       calc
             holds D m v (sub s (exists_ x p))
           ↔ holds D m v (exists_ x (sub s p)) : by unfold sub
-      ... ↔ (∃ a : D, holds D m ([x ↦ a] v) (sub s p)) : by unfold holds
-      ... ↔ (∃ a : D, holds D m (eval_term D m ([x ↦ a] v) ∘ s) p) :
+      ... ↔ (∃ a : D, holds D m ((x ↦ a) v) (sub s p)) : by unfold holds
+      ... ↔ (∃ a : D, holds D m (eval_term D m ((x ↦ a) v) ∘ s) p) :
             begin
               apply exists_congr, intros a,
-              exact ih s ([x ↦ a] v) h1_right_left
+              exact ih s ((x ↦ a) v) h1_right_left
             end
-      ... ↔ (∃ a : D, holds D m ([x ↦ a] eval_term D m v ∘ s) p) :
+      ... ↔ (∃ a : D, holds D m ((x ↦ a) (eval_term D m v ∘ s)) p) :
             begin
               apply exists_congr, intros a,
               apply thm_3_2, intros z h2,
               by_cases z = x,
               {
                 calc
-                      (eval_term D m ([x ↦ a] v) ∘ s) z
-                    = (eval_term D m ([x ↦ a] v) ∘ s) x : by rewrite h
-                ... = eval_term D m ([x ↦ a] v) (s x) : by unfold function.comp
-                ... = eval_term D m ([x ↦ a] v) (var x) : by rewrite h1_left
-                ... = ([x ↦ a] v) x : by unfold eval_term
+                      (eval_term D m ((x ↦ a) v) ∘ s) z
+                    = (eval_term D m ((x ↦ a) v) ∘ s) x : by rewrite h
+                ... = eval_term D m ((x ↦ a) v) (s x) : by unfold function.comp
+                ... = eval_term D m ((x ↦ a) v) (var x) : by rewrite h1_left
+                ... = ((x ↦ a) v) x : by unfold eval_term
                 ... = a : by simp only [function.update_same]
-                ... = ([x ↦ a] eval_term D m v ∘ s) x : by simp only [function.update_same]
-                ... = ([x ↦ a] eval_term D m v ∘ s) z : by rewrite h
+                ... = ((x ↦ a) (eval_term D m v ∘ s)) x : by simp only [function.update_same]
+                ... = ((x ↦ a) (eval_term D m v ∘ s)) z : by rewrite h
               },
               {
                 calc
-                      (eval_term D m ([x ↦ a] v) ∘ s) z
-                    = eval_term D m ([x ↦ a] v) (s z) : by unfold function.comp
+                      (eval_term D m ((x ↦ a) v) ∘ s) z
+                    = eval_term D m ((x ↦ a) v) (s z) : by unfold function.comp
                 ... = eval_term D m v (s z) :
                       begin
                         apply thm_3_1, intros y h3,
@@ -900,7 +901,7 @@ begin
                         rewrite h4 at h3, exact h3
                       end
                 ... = (eval_term D m v ∘ s) z : by unfold function.comp
-                ... = ([x ↦ a] eval_term D m v ∘ s) z : by simp only [function.update_noteq h]
+                ... = ((x ↦ a) (eval_term D m v ∘ s)) z : by simp only [function.update_noteq h]
               }
             end
       ... ↔ holds D m (eval_term D m v ∘ s) (exists_ x p) : by unfold holds
@@ -919,6 +920,119 @@ begin
   unfold is_valid at *,
   intros D m v,
   simp only [thm_3_7 v s p h1], apply h2
+end
+
+
+inductive term_ln : Type
+| var_f : string → term_ln
+| var_b : ℕ → term_ln
+| func (n : ℕ) : string → (fin n → term_ln) → term_ln
+
+inductive formula_ln : Type
+| bottom : formula_ln
+| top : formula_ln
+| atom (n : ℕ) : string → (fin n → term_ln) → formula_ln
+| not : formula_ln → formula_ln
+| and : formula_ln → formula_ln → formula_ln
+| or : formula_ln → formula_ln → formula_ln
+| imp : formula_ln → formula_ln → formula_ln
+| iff : formula_ln → formula_ln → formula_ln
+| forall_ : formula_ln → formula_ln
+| exists_ : formula_ln → formula_ln
+
+def to_term_ln (bs : list string) : term → term_ln
+| (var x) := if list.mem x bs then term_ln.var_b (list.index_of x bs) else term_ln.var_f x
+| (func n f terms) := term_ln.func n f (fun i : fin n, to_term_ln (terms i))
+
+def to_ln : list string → formula → formula_ln
+| bs bottom := formula_ln.bottom
+| bs top := formula_ln.top
+| bs (atom n p terms) := formula_ln.atom n p (fun i : fin n, to_term_ln bs (terms i))
+| bs (not p) := formula_ln.not (to_ln bs p)
+| bs (and p q) := formula_ln.and (to_ln bs p) (to_ln bs q)
+| bs (or p q) := formula_ln.or (to_ln bs p) (to_ln bs q)
+| bs (imp p q) := formula_ln.imp (to_ln bs p) (to_ln bs q)
+| bs (iff p q) := formula_ln.iff (to_ln bs p) (to_ln bs q)
+| bs (forall_ x p) := formula_ln.forall_ (to_ln (x :: bs) p)
+| bs (exists_ x p) := formula_ln.exists_ (to_ln (x :: bs) p)
+
+
+def replace_term (x y : string) (xs : list string) : term → term
+| (var x') := if x' ∉ xs ∧ x = x' then var y else var x'
+| (func n f terms) := func n f (fun i : fin n, replace_term(terms i))
+
+def replace (x y : string) : list string → formula → formula
+| xs bottom := bottom
+| xs top := top
+| xs (atom n p terms) := atom n p (fun i : fin n, replace_term x y xs (terms i))
+| xs (not p) := not (replace xs p)
+| xs (and p q) := and (replace xs p) (replace xs q)
+| xs (or p q) := or (replace xs p) (replace xs q)
+| xs (imp p q) := imp (replace xs p) (replace xs q)
+| xs (iff p q) := iff (replace xs p) (replace xs q)
+| xs (forall_ x p) := forall_ x (replace (x :: xs) p)
+| xs (exists_ x p) := exists_ x (replace (x :: xs) p)
+
+def formula.bind_var_set : formula → finset string
+| bottom := ∅
+| top := ∅
+| (atom n x terms) := ∅
+| (not p) := p.bind_var_set
+| (and p q) := p.bind_var_set ∪ q.bind_var_set
+| (or p q) := p.bind_var_set ∪ q.bind_var_set
+| (imp p q) := p.bind_var_set ∪ q.bind_var_set
+| (iff p q) := p.bind_var_set ∪ q.bind_var_set
+| (forall_ x p) := p.bind_var_set ∪ {x}
+| (exists_ x p) := p.bind_var_set ∪ {x}
+
+inductive alpha_eqv' : formula → formula → Prop
+| rename_forall (m : formula) (x y : string) (l : list string) :
+  y ∉ m.free_var_set → y ∉ m.bind_var_set → alpha_eqv' (forall_ x m) (forall_ y (replace x y l m))
+| rename_exists (m : formula) (x y : string) (l : list string) :
+  y ∉ m.free_var_set → y ∉ m.bind_var_set → alpha_eqv' (exists_ x m) (exists_ y (replace x y l m))
+| compat_not (m m' : formula) :
+  alpha_eqv' m m' → alpha_eqv' (not m) (not m')
+| compat_and (m m' n n' : formula) :
+  alpha_eqv' m m' → alpha_eqv' n n' → alpha_eqv' (and m n) (and m' n')
+| compat_or (m m' n n' : formula) :
+  alpha_eqv' m m' → alpha_eqv' n n' → alpha_eqv' (or m n) (or m' n')
+| compat_imp (m m' n n' : formula) :
+  alpha_eqv' m m' → alpha_eqv' n n' → alpha_eqv' (imp m n) (imp m' n')
+| compat_iff (m m' n n' : formula) :
+  alpha_eqv' m m' → alpha_eqv' n n' → alpha_eqv' (iff m n) (iff m' n')
+| compat_forall (m n : formula) (z : string) :
+  alpha_eqv' m n → alpha_eqv' (forall_ z m) (forall_ z n)
+| compat_exists (m n : formula) (z : string) :
+  alpha_eqv' m n → alpha_eqv' (exists_ z m) (exists_ z n)
+| reflex (m : formula) :
+  alpha_eqv' m m
+| symm (m m' : formula) :
+  alpha_eqv' m m' → alpha_eqv' m' m
+| trans (m m' m'' : formula) :
+  alpha_eqv' m m' → alpha_eqv' m' m'' → alpha_eqv' m m''
+
+example
+  (D : Type)
+  (t : term)
+  (x y : string)
+  (xs : list string)
+  (m : interpretation D)
+  (v : valuation D)
+  (a : D)
+  (h1 : x ∉ xs)
+  (h2 : y ∉ t.all_var_set \ {x}) :
+  eval_term D m v t = eval_term D m ((y ↦ v x) v) (replace_term x y xs t) :=
+begin
+  induction t,
+  case term.var : z
+  { simp, unfold replace_term, unfold eval_term, by_cases x = z, subst h, simp, simp only [if_neg h1],
+    unfold eval_term, simp,
+    have s1 : ¬ (z ∉ xs ∧ x = z), push_neg, intros, exact h, simp only [if_neg s1], unfold eval_term, 
+    unfold term.all_var_set at h2, simp at h2, by_cases z = y, subst h, simp at h2, simp, rewrite h2,
+    simp only [function.update_noteq h] },
+  case term.func : n f terms ih
+  { simp at *, unfold replace_term, unfold term.all_var_set at h2, simp at h2,
+    unfold eval_term, congr, funext, apply ih, apply h2 },
 end
 
 
@@ -1009,7 +1123,7 @@ end
 
 theorem is_valid_pred_1
   (p q : formula)
-  (x : string):
+  (x : string) :
   is_valid ((forall_ x (p.imp q)).imp ((forall_ x p).imp (forall_ x q))) :=
 begin
   unfold is_valid, unfold holds,
@@ -1017,7 +1131,7 @@ begin
   apply h1 a, exact h2 a
 end
 
-def sub_single_var (x : string) (t : term) : instantiation := [x ↦ t] (fun v : string, var v)
+def sub_single_var (x : string) (t : term) : instantiation := (x ↦ t) (fun v : string, var v)
 
 theorem is_valid_pred_2
   (p : formula)
@@ -1029,7 +1143,7 @@ begin
   unfold is_valid, unfold holds,
   intros D m v h2,
   simp only [thm_3_7 v (sub_single_var x t) p h1],
-  have s1 : ((eval_term D m v) ∘ (sub_single_var x t)) = ([x ↦ (eval_term D m v t)] v),
+  have s1 : ((eval_term D m v) ∘ (sub_single_var x t)) = ((x ↦ (eval_term D m v t)) v),
     apply funext, intros y, unfold function.comp, unfold sub_single_var,
     by_cases y = x,
     {
@@ -1049,7 +1163,13 @@ theorem is_valid_pred_3
 begin
   unfold is_valid, unfold holds,
   intros D m v h2 a,
-  have s1 : ∀ x' ∈ p.free_var_set, ([x ↦ a] v) x' = v x', intros x' h4, apply function.update_noteq,
+  have s1 : ∀ x' ∈ p.free_var_set, ((x ↦ a) v) x' = v x', intros x' h4, apply function.update_noteq,
     by_contradiction, apply h1, rewrite <- h, exact h4,
-  rewrite thm_3_2 ([x ↦ a] v) v s1, exact h2
+  rewrite @thm_3_2 D m p ((x ↦ a) v) v s1, exact h2
 end
+
+example
+  (x : string)
+  (t : term)
+  (h1 : x ∉ t.all_var_set) :
+  is_valid (exists_ x (mk_pred "eq" [var x, t])) := sorry
