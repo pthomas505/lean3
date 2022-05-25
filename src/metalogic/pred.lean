@@ -951,31 +951,31 @@ def replace (x y : string) : list string → formula → formula
 | xs (forall_ x p) := forall_ x (replace (x :: xs) p)
 | xs (exists_ x p) := exists_ x (replace (x :: xs) p)
 
-inductive alpha_eqv' : formula → formula → Prop
+inductive alpha_eqv : formula → formula → Prop
 | rename_forall (m : formula) (x y : string) (l : list string) :
-  y ∉ m.free_var_set → y ∉ m.bind_var_set → alpha_eqv' (forall_ x m) (forall_ y (replace x y l m))
+  y ∉ m.free_var_set → y ∉ m.bind_var_set → alpha_eqv (forall_ x m) (forall_ y (replace x y l m))
 | rename_exists (m : formula) (x y : string) (l : list string) :
-  y ∉ m.free_var_set → y ∉ m.bind_var_set → alpha_eqv' (exists_ x m) (exists_ y (replace x y l m))
+  y ∉ m.free_var_set → y ∉ m.bind_var_set → alpha_eqv (exists_ x m) (exists_ y (replace x y l m))
 | compat_not (m m' : formula) :
-  alpha_eqv' m m' → alpha_eqv' (not m) (not m')
+  alpha_eqv m m' → alpha_eqv (not m) (not m')
 | compat_and (m m' n n' : formula) :
-  alpha_eqv' m m' → alpha_eqv' n n' → alpha_eqv' (and m n) (and m' n')
+  alpha_eqv m m' → alpha_eqv n n' → alpha_eqv (and m n) (and m' n')
 | compat_or (m m' n n' : formula) :
-  alpha_eqv' m m' → alpha_eqv' n n' → alpha_eqv' (or m n) (or m' n')
+  alpha_eqv m m' → alpha_eqv n n' → alpha_eqv (or m n) (or m' n')
 | compat_imp (m m' n n' : formula) :
-  alpha_eqv' m m' → alpha_eqv' n n' → alpha_eqv' (imp m n) (imp m' n')
+  alpha_eqv m m' → alpha_eqv n n' → alpha_eqv (imp m n) (imp m' n')
 | compat_iff (m m' n n' : formula) :
-  alpha_eqv' m m' → alpha_eqv' n n' → alpha_eqv' (iff m n) (iff m' n')
+  alpha_eqv m m' → alpha_eqv n n' → alpha_eqv (iff m n) (iff m' n')
 | compat_forall (m n : formula) (z : string) :
-  alpha_eqv' m n → alpha_eqv' (forall_ z m) (forall_ z n)
+  alpha_eqv m n → alpha_eqv (forall_ z m) (forall_ z n)
 | compat_exists (m n : formula) (z : string) :
-  alpha_eqv' m n → alpha_eqv' (exists_ z m) (exists_ z n)
+  alpha_eqv m n → alpha_eqv (exists_ z m) (exists_ z n)
 | reflex (m : formula) :
-  alpha_eqv' m m
+  alpha_eqv m m
 | symm (m m' : formula) :
-  alpha_eqv' m m' → alpha_eqv' m' m
+  alpha_eqv m m' → alpha_eqv m' m
 | trans (m m' m'' : formula) :
-  alpha_eqv' m m' → alpha_eqv' m' m'' → alpha_eqv' m m''
+  alpha_eqv m m' → alpha_eqv m' m'' → alpha_eqv m m''
 
 example
   (D : Type)
@@ -1011,6 +1011,14 @@ begin
     unfold replace_term, unfold eval_term, congr, funext, apply ih, apply h2
   },
 end
+
+example
+  (D : Type)
+  (m : interpretation D)
+  (v : valuation D)
+  (p p' : formula)
+  (h1 : alpha_eqv p p') :
+  holds D m v p ↔ holds D m v p' := sorry
 
 
 theorem is_valid_mp
