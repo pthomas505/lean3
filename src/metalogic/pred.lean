@@ -935,40 +935,6 @@ begin
 end
 
 
-inductive term_ln : Type
-| var_f : string → term_ln
-| var_b : ℕ → term_ln
-| func (n : ℕ) : string → (fin n → term_ln) → term_ln
-
-inductive formula_ln : Type
-| bottom : formula_ln
-| top : formula_ln
-| atom (n : ℕ) : string → (fin n → term_ln) → formula_ln
-| not : formula_ln → formula_ln
-| and : formula_ln → formula_ln → formula_ln
-| or : formula_ln → formula_ln → formula_ln
-| imp : formula_ln → formula_ln → formula_ln
-| iff : formula_ln → formula_ln → formula_ln
-| forall_ : formula_ln → formula_ln
-| exists_ : formula_ln → formula_ln
-
-def to_term_ln (bs : list string) : term → term_ln
-| (var x) := if list.mem x bs then term_ln.var_b (list.index_of x bs) else term_ln.var_f x
-| (func n f terms) := term_ln.func n f (fun i : fin n, to_term_ln (terms i))
-
-def to_ln : list string → formula → formula_ln
-| bs bottom := formula_ln.bottom
-| bs top := formula_ln.top
-| bs (atom n p terms) := formula_ln.atom n p (fun i : fin n, to_term_ln bs (terms i))
-| bs (not p) := formula_ln.not (to_ln bs p)
-| bs (and p q) := formula_ln.and (to_ln bs p) (to_ln bs q)
-| bs (or p q) := formula_ln.or (to_ln bs p) (to_ln bs q)
-| bs (imp p q) := formula_ln.imp (to_ln bs p) (to_ln bs q)
-| bs (iff p q) := formula_ln.iff (to_ln bs p) (to_ln bs q)
-| bs (forall_ x p) := formula_ln.forall_ (to_ln (x :: bs) p)
-| bs (exists_ x p) := formula_ln.exists_ (to_ln (x :: bs) p)
-
-
 def replace_term (x y : string) (xs : list string) : term → term
 | (var x') := if x' ∉ xs ∧ x = x' then var y else var x'
 | (func n f terms) := func n f (fun i : fin n, replace_term(terms i))
@@ -1045,41 +1011,6 @@ begin
     unfold replace_term, unfold eval_term, congr, funext, apply ih, apply h2
   },
 end
-
-
-def alpha_eqv_var : list (string × string) → string → string → Prop
-| [] x y := x = y
-| ((a, b) :: m) x y := if x = a then b = y else b ≠ y ∧ alpha_eqv_var m x y
-
-inductive alpha_eqv_term (m : list (string × string)) : term → term → Prop
-| var (x : string) (y : string) :
-  alpha_eqv_var m x y → alpha_eqv_term (var x) (var y)
-| func (n : ℕ) (f : string) (terms terms' : fin n → term) :
-  (∀ i : fin n, alpha_eqv_term (terms i) (terms' i)) →
-    alpha_eqv_term (func n f terms) (func n f terms')
-
-inductive alpha_eqv : list (string × string) → formula → formula → Prop
-| bottom (m : list (string × string)) :
-  alpha_eqv m bottom bottom
-| top (m : list (string × string)) :
-  alpha_eqv m top top
-| atom (m : list (string × string)) (n : ℕ) (p : string) (terms terms' : fin n → term) :
-  (∀ i : fin n, alpha_eqv_term m (terms i) (terms' i)) →
-    alpha_eqv m (atom n p terms) (atom n p terms')
-| not (m : list (string × string)) (p p' : formula) :
-  alpha_eqv m p p' → alpha_eqv m (not p) (not p')
-| and (m : list (string × string)) (p p' q q' : formula) :
-  alpha_eqv m p p' → alpha_eqv m q q' → alpha_eqv m (and p q) (and p' q')
-| or (m : list (string × string)) (p p' q q' : formula) :
-  alpha_eqv m p p' → alpha_eqv m q q' → alpha_eqv m (or p q) (or p' q')
-| imp (m : list (string × string)) (p p' q q' : formula) :
-  alpha_eqv m p p' → alpha_eqv m q q' → alpha_eqv m (imp p q) (imp p' q')
-| iff (m : list (string × string)) (p p' q q' : formula) :
-  alpha_eqv m p p' → alpha_eqv m q q' → alpha_eqv m (iff p q) (iff p' q')
-| forall_ (m : list (string × string)) (x y : string) (p p' : formula) :
-  alpha_eqv ((x, y) :: m) p p' → alpha_eqv m (forall_ x p) (forall_ y p')
-| exists_ (m : list (string × string)) (x y : string) (p p' : formula) :
-  alpha_eqv ((x, y) :: m) p p' → alpha_eqv m (exists_ x p) (exists_ y p')
 
 
 theorem is_valid_mp
