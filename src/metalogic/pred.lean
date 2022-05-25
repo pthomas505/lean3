@@ -1013,26 +1013,37 @@ inductive alpha_eqv' : formula → formula → Prop
 
 example
   (D : Type)
-  (t : term)
-  (x y : string)
-  (xs : list string)
   (m : interpretation D)
   (v : valuation D)
-  (a : D)
+  (xs : list string)
+  (x y : string)
+  (t : term)
   (h1 : x ∉ xs)
   (h2 : y ∉ t.all_var_set \ {x}) :
   eval_term D m v t = eval_term D m ((y ↦ v x) v) (replace_term x y xs t) :=
 begin
   induction t,
   case term.var : z
-  { simp, unfold replace_term, unfold eval_term, by_cases x = z, subst h, simp, simp only [if_neg h1],
-    unfold eval_term, simp,
-    have s1 : ¬ (z ∉ xs ∧ x = z), push_neg, intros, exact h, simp only [if_neg s1], unfold eval_term, 
-    unfold term.all_var_set at h2, simp at h2, by_cases z = y, subst h, simp at h2, simp, rewrite h2,
-    simp only [function.update_noteq h] },
+  {
+    unfold term.all_var_set at h2, simp only [finset.mem_sdiff, finset.mem_singleton, not_and, not_not] at h2,
+    by_cases h : x = z,
+    {
+      unfold replace_term, subst h, simp only [eq_self_iff_true, and_true, ite_not, if_neg h1],
+      unfold eval_term, simp only [function.update_same]
+    },
+    {
+      have s1 : z ≠ y, finish,
+      unfold replace_term, simp only [ite_and, if_neg h, if_t_t], unfold eval_term,
+        simp only [function.update_noteq s1],
+    }
+  },
   case term.func : n f terms ih
-  { simp at *, unfold replace_term, unfold term.all_var_set at h2, simp at h2,
-    unfold eval_term, congr, funext, apply ih, apply h2 },
+  {
+    unfold term.all_var_set at h2, simp only [finset.mem_sdiff, finset.mem_bUnion, finset.mem_univ,
+      exists_true_left, finset.mem_singleton, not_and, not_not, forall_exists_index] at h2,
+    simp only [finset.mem_sdiff, finset.mem_singleton, not_and, not_not] at ih,
+    unfold replace_term, unfold eval_term, congr, funext, apply ih, apply h2
+  },
 end
 
 
