@@ -952,37 +952,37 @@ def replace (x y : string) : list string → formula → formula
 | xs (exists_ x p) := exists_ x (replace (x :: xs) p)
 
 inductive alpha_eqv : formula → formula → Prop
-| rename_forall (m : formula) (x y : string) (l : list string) :
-  y ∉ m.free_var_set → y ∉ m.bind_var_set → alpha_eqv (forall_ x m) (forall_ y (replace x y l m))
-| rename_exists (m : formula) (x y : string) (l : list string) :
-  y ∉ m.free_var_set → y ∉ m.bind_var_set → alpha_eqv (exists_ x m) (exists_ y (replace x y l m))
-| compat_not (m m' : formula) :
-  alpha_eqv m m' → alpha_eqv (not m) (not m')
-| compat_and (m m' n n' : formula) :
-  alpha_eqv m m' → alpha_eqv n n' → alpha_eqv (and m n) (and m' n')
-| compat_or (m m' n n' : formula) :
-  alpha_eqv m m' → alpha_eqv n n' → alpha_eqv (or m n) (or m' n')
-| compat_imp (m m' n n' : formula) :
-  alpha_eqv m m' → alpha_eqv n n' → alpha_eqv (imp m n) (imp m' n')
-| compat_iff (m m' n n' : formula) :
-  alpha_eqv m m' → alpha_eqv n n' → alpha_eqv (iff m n) (iff m' n')
-| compat_forall (m n : formula) (z : string) :
-  alpha_eqv m n → alpha_eqv (forall_ z m) (forall_ z n)
-| compat_exists (m n : formula) (z : string) :
-  alpha_eqv m n → alpha_eqv (exists_ z m) (exists_ z n)
-| reflex (m : formula) :
-  alpha_eqv m m
-| symm (m m' : formula) :
-  alpha_eqv m m' → alpha_eqv m' m
-| trans (m m' m'' : formula) :
-  alpha_eqv m m' → alpha_eqv m' m'' → alpha_eqv m m''
+| rename_forall (p : formula) (x y : string) (xs : list string) :
+  y ∉ p.free_var_set → y ∉ p.bind_var_set → alpha_eqv (forall_ x p) (forall_ y (replace x y xs p))
+| rename_exists (p : formula) (x y : string) (xs : list string) :
+  y ∉ p.free_var_set → y ∉ p.bind_var_set → alpha_eqv (exists_ x p) (exists_ y (replace x y xs p))
+| compat_not (p p' : formula) :
+  alpha_eqv p p' → alpha_eqv (not p) (not p')
+| compat_and (p p' q q' : formula) :
+  alpha_eqv p p' → alpha_eqv q q' → alpha_eqv (and p q) (and p' q')
+| compat_or (p p' q q' : formula) :
+  alpha_eqv p p' → alpha_eqv q q' → alpha_eqv (or p q) (or p' q')
+| compat_imp (p p' q q' : formula) :
+  alpha_eqv p p' → alpha_eqv q q' → alpha_eqv (imp p q) (imp p' q')
+| compat_iff (p p' q q' : formula) :
+  alpha_eqv p p' → alpha_eqv q q' → alpha_eqv (iff p q) (iff p' q')
+| compat_forall (p q : formula) (z : string) :
+  alpha_eqv p q → alpha_eqv (forall_ z p) (forall_ z q)
+| compat_exists (p q : formula) (z : string) :
+  alpha_eqv p q → alpha_eqv (exists_ z p) (exists_ z q)
+| reflex (p : formula) :
+  alpha_eqv p p
+| symm (p p' : formula) :
+  alpha_eqv p p' → alpha_eqv p' p
+| trans (p p' p'' : formula) :
+  alpha_eqv p p' → alpha_eqv p' p'' → alpha_eqv p p''
 
 example
   (D : Type)
   (m : interpretation D)
   (v : valuation D)
-  (xs : list string)
   (x y : string)
+  (xs : list string)
   (t : term)
   (h1 : x ∉ xs)
   (h2 : y ∉ t.all_var_set \ {x}) :
@@ -1018,7 +1018,10 @@ example
   (v : valuation D)
   (p p' : formula)
   (h1 : alpha_eqv p p') :
-  holds D m v p ↔ holds D m v p' := sorry
+  holds D m v p ↔ holds D m v p' :=
+begin
+  sorry
+end
 
 
 theorem is_valid_mp
