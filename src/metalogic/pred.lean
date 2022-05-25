@@ -284,6 +284,18 @@ def formula.free_var_set : formula → finset string
 | (forall_ x p) := p.free_var_set \ {x}
 | (exists_ x p) := p.free_var_set \ {x}
 
+def formula.bind_var_set : formula → finset string
+| bottom := ∅
+| top := ∅
+| (atom n x terms) := ∅
+| (not p) := p.bind_var_set
+| (and p q) := p.bind_var_set ∪ q.bind_var_set
+| (or p q) := p.bind_var_set ∪ q.bind_var_set
+| (imp p q) := p.bind_var_set ∪ q.bind_var_set
+| (iff p q) := p.bind_var_set ∪ q.bind_var_set
+| (forall_ x p) := p.bind_var_set ∪ {x}
+| (exists_ x p) := p.bind_var_set ∪ {x}
+
 
 theorem thm_3_2
   {D : Type}
@@ -972,18 +984,6 @@ def replace (x y : string) : list string → formula → formula
 | xs (iff p q) := iff (replace xs p) (replace xs q)
 | xs (forall_ x p) := forall_ x (replace (x :: xs) p)
 | xs (exists_ x p) := exists_ x (replace (x :: xs) p)
-
-def formula.bind_var_set : formula → finset string
-| bottom := ∅
-| top := ∅
-| (atom n x terms) := ∅
-| (not p) := p.bind_var_set
-| (and p q) := p.bind_var_set ∪ q.bind_var_set
-| (or p q) := p.bind_var_set ∪ q.bind_var_set
-| (imp p q) := p.bind_var_set ∪ q.bind_var_set
-| (iff p q) := p.bind_var_set ∪ q.bind_var_set
-| (forall_ x p) := p.bind_var_set ∪ {x}
-| (exists_ x p) := p.bind_var_set ∪ {x}
 
 inductive alpha_eqv' : formula → formula → Prop
 | rename_forall (m : formula) (x y : string) (l : list string) :
