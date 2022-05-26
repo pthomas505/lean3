@@ -1089,7 +1089,7 @@ begin
 end
 
 
-example
+lemma lem_1
   (D : Type)
   (m : interpretation D)
   (v : valuation D)
@@ -1097,8 +1097,7 @@ example
   (x y : string)
   (t : term)
   (h1 : y ∉ t.all_var_set) :
-  eval_term D m ((x ↦ a) v) t =
-    eval_term D m ((y ↦ a) v) (replace_term x y [] t) :=
+  eval_term D m ((x ↦ a) v) t = eval_term D m ((y ↦ a) v) (replace_term x y [] t) :=
 begin
   induction t,
   case term.var : z
@@ -1145,7 +1144,7 @@ begin
     unfold replace, unfold holds,
     unfold formula.free_var_set at h1, simp at h1,
     unfold formula.bind_var_set at h2, simp at h2,
-    apply iff_of_eq, congr, funext, admit
+    apply iff_of_eq, congr, funext, apply lem_1, exact h1 i
   },
   case formula.not : p_ᾰ p_ih
   { admit },
