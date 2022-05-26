@@ -64,14 +64,6 @@ by simpa [sdiff_eq_self_iff_disjoint, disjoint_bUnion_left]
 
 end finset
 
-lemma noteq_comm
-  {T : Type}
-  (x y : T) :
-  ¬x = y ↔ ¬y = x :=
-begin
-  tauto
-end
-
 
 def list.to_fin_fun {T : Type} (l : list T) : fin l.length → T :=
 fun i : fin l.length, list.nth_le l i.val i.property
