@@ -1105,10 +1105,15 @@ begin
   {
     unfold term.all_var_set at h1, simp only [finset.mem_singleton] at h1,
     unfold replace_term,
-    by_cases x = z, simp, simp only [if_pos h], unfold eval_term, simp, rewrite h, simp,
-    simp, simp only [if_neg h], unfold eval_term,
-    have s1 : z ≠ y, tauto, have s2 : z ≠ x, tauto,
-    simp only [function.update_noteq s1, function.update_noteq s2]
+    simp only [list.not_mem_nil, not_false_iff, true_and],
+    by_cases x = z,
+    {
+      simp only [if_pos h], unfold eval_term, rewrite h, simp only [function.update_same]
+    },
+    {
+      simp only [if_neg h], unfold eval_term,
+      rewrite function.update_noteq, rewrite function.update_noteq, tauto, tauto,
+    }
   },
   case term.func : n f terms ih
   {
