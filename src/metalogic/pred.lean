@@ -64,6 +64,14 @@ by simpa [sdiff_eq_self_iff_disjoint, disjoint_bUnion_left]
 
 end finset
 
+lemma noteq_comm
+  {T : Type}
+  (x y : T) :
+  ¬x = y ↔ ¬y = x :=
+begin
+  tauto
+end
+
 
 def list.to_fin_fun {T : Type} (l : list T) : fin l.length → T :=
 fun i : fin l.length, list.nth_le l i.val i.property
@@ -1087,20 +1095,20 @@ example
   (v : valuation D)
   (a : D)
   (x y : string)
-  (xs : list string)
   (t : term)
   (h1 : y ∉ t.all_var_set) :
   eval_term D m ((x ↦ a) v) t =
-    eval_term D m ((y ↦ a) v) (replace_term x y xs t) :=
+    eval_term D m ((y ↦ a) v) (replace_term x y [] t) :=
 begin
   induction t,
   case term.var : z
   {
     unfold term.all_var_set at h1, simp only [finset.mem_singleton] at h1,
     unfold replace_term,
-    by_cases z ∉ xs ∧ x = z,
-    simp only [if_pos h], unfold eval_term, cases h, rewrite h_right, simp only [function.update_same],
-    simp only [if_neg h], unfold eval_term, push_neg at h, admit
+    by_cases x = z, simp, simp only [if_pos h], unfold eval_term, simp, rewrite h, simp,
+    simp, simp only [if_neg h], unfold eval_term,
+    have s1 : z ≠ y, tauto, have s2 : z ≠ x, tauto,
+    simp only [function.update_noteq s1, function.update_noteq s2]
   },
   case term.func : n f terms ih
   {
@@ -1113,12 +1121,11 @@ example
   (m : interpretation D)
   (v : valuation D)
   (x y : string)
-  (xs : list string)
   (p : formula)
   (a : D)
   (h1 : y ∉ p.free_var_set)
   (h2 : y ∉ p.bind_var_set) :
-  holds D m ((x ↦ a) v) p ↔ holds D m ((y ↦ a) v) (replace x y xs p) :=
+  holds D m ((x ↦ a) v) p ↔ holds D m ((y ↦ a) v) (replace x y [] p) :=
 begin
   induction p,
   case formula.bottom
@@ -1157,11 +1164,11 @@ example
   holds D m v p ↔ holds D m v p' :=
 begin
   induction h1,
-  case alpha_eqv.rename_forall : h1_p h1_x h1_y h1_xs h1_1 h1_2
+  case alpha_eqv.rename_forall : h1_p h1_x h1_y h1_1 h1_2
   {
     unfold holds, apply forall_congr, intros a, admit
   },
-  case alpha_eqv.rename_exists : h1_p h1_x h1_y h1_xs h1_ᾰ h1_ᾰ_1
+  case alpha_eqv.rename_exists : h1_p h1_x h1_y h1_ᾰ h1_ᾰ_1
   { admit },
   case alpha_eqv.compat_not : h1_p h1_p' h1_ᾰ h1_ih
   { admit },
@@ -1182,7 +1189,7 @@ begin
   case alpha_eqv.symm : h1_p h1_p' h1_ᾰ h1_ih
   { admit },
   case alpha_eqv.trans : h1_p h1_p' h1_p'' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
-  { admit },
+  { admit }
 end
 
 
