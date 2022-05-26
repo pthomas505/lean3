@@ -952,10 +952,10 @@ def replace (x y : string) : list string → formula → formula
 | xs (exists_ x p) := exists_ x (replace (x :: xs) p)
 
 inductive alpha_eqv : formula → formula → Prop
-| rename_forall (p : formula) (x y : string) (xs : list string) :
-  y ∉ p.free_var_set → y ∉ p.bind_var_set → alpha_eqv (forall_ x p) (forall_ y (replace x y xs p))
-| rename_exists (p : formula) (x y : string) (xs : list string) :
-  y ∉ p.free_var_set → y ∉ p.bind_var_set → alpha_eqv (exists_ x p) (exists_ y (replace x y xs p))
+| rename_forall (p : formula) (x y : string) :
+  y ∉ p.free_var_set → y ∉ p.bind_var_set → alpha_eqv (forall_ x p) (forall_ y (replace x y [] p))
+| rename_exists (p : formula) (x y : string) :
+  y ∉ p.free_var_set → y ∉ p.bind_var_set → alpha_eqv (exists_ x p) (exists_ y (replace x y [] p))
 | compat_not (p p' : formula) :
   alpha_eqv p p' → alpha_eqv (not p) (not p')
 | compat_and (p p' q q' : formula) :
