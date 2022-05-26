@@ -1153,7 +1153,7 @@ example
   (v v' : valuation D)
   (p p' : formula)
   (h1 : alpha_eqv p p') :
-  holds D m v p ↔ holds D m v' p' :=
+  holds D m v p ↔ holds D m v p' :=
 begin
   induction h1,
   case alpha_eqv.rename_forall : h1_p h1_x h1_y h1_xs h1_1 h1_2
