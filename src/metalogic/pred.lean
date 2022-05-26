@@ -1020,6 +1020,41 @@ example
   (x y : string)
   (xs : list string)
   (t : term)
+  (h1 : x ∈ xs) :
+  replace_term x y xs t = t :=
+begin
+  induction t,
+  case term.var : z
+  {
+    unfold replace_term,
+    by_cases x = z,
+    {
+      subst h,
+      simp only [eq_self_iff_true, and_true, ite_not, ite_eq_left_iff],
+      contradiction
+    },
+    {
+      simp only [ite_eq_right_iff, and_imp],
+      intros h2 h3,
+      contradiction
+    }
+  },
+  case term.func : n f terms ih
+  {
+    unfold replace_term,
+    simp only at ih,
+    congr, funext, exact ih i
+  },
+end
+
+example
+  (D : Type)
+  (m : interpretation D)
+  (v : valuation D)
+  (a : D)
+  (x y : string)
+  (xs : list string)
+  (t : term)
   (h1 : y ∉ t.all_var_set) :
   eval_term D m ((x ↦ a) v) t =
     eval_term D m ((y ↦ a) v) (replace_term x y xs t) :=
