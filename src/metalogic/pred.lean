@@ -1016,11 +1016,103 @@ example
   (D : Type)
   (m : interpretation D)
   (v : valuation D)
+  (a : D)
+  (x y : string)
+  (xs : list string)
+  (t : term)
+  (h1 : y ∉ t.all_var_set) :
+  eval_term D m ((x ↦ a) v) t =
+    eval_term D m ((y ↦ a) v) (replace_term x y xs t) :=
+begin
+  induction t,
+  case term.var : z
+  {
+    unfold term.all_var_set at h1, simp only [finset.mem_singleton] at h1,
+    unfold replace_term,
+    by_cases z ∉ xs ∧ x = z,
+    simp only [if_pos h], unfold eval_term, cases h, rewrite h_right, simp only [function.update_same],
+    simp only [if_neg h], unfold eval_term, push_neg at h, admit
+  },
+  case term.func : n f terms ih
+  {
+    admit
+  },
+end
+
+example
+  (D : Type)
+  (m : interpretation D)
+  (v : valuation D)
+  (x y : string)
+  (xs : list string)
+  (p : formula)
+  (h1 : y ∉ p.free_var_set)
+  (h2 : y ∉ p.bind_var_set) :
+  ∀ a : D, holds D m ((x ↦ a) v) p ↔ ∀ a : D, holds D m ((y ↦ a) v) (replace x y xs p) :=
+begin
+  induction p,
+  case formula.bottom
+  { unfold replace, unfold holds, tauto, },
+  case formula.top
+  { admit },
+  case formula.atom : n p terms
+  {
+    unfold replace, unfold holds,
+    unfold formula.free_var_set at h1, simp at h1,
+    unfold formula.bind_var_set at h2, simp at h2,
+    admit
+  },
+  case formula.not : p_ᾰ p_ih
+  { admit },
+  case formula.and : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
+  { admit },
+  case formula.or : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
+  { admit },
+  case formula.imp : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
+  { admit },
+  case formula.iff : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
+  { admit },
+  case formula.forall_ : p_ᾰ p_ᾰ_1 p_ih
+  { admit },
+  case formula.exists_ : p_ᾰ p_ᾰ_1 p_ih
+  { admit },
+end
+
+example
+  (D : Type)
+  (m : interpretation D)
+  (v v' : valuation D)
   (p p' : formula)
   (h1 : alpha_eqv p p') :
-  holds D m v p ↔ holds D m v p' :=
+  holds D m v p ↔ holds D m v' p' :=
 begin
-  sorry
+  induction h1,
+  case alpha_eqv.rename_forall : h1_p h1_x h1_y h1_xs h1_1 h1_2
+  {
+    unfold holds, apply forall_congr, intros a, admit
+  },
+  case alpha_eqv.rename_exists : h1_p h1_x h1_y h1_xs h1_ᾰ h1_ᾰ_1
+  { admit },
+  case alpha_eqv.compat_not : h1_p h1_p' h1_ᾰ h1_ih
+  { admit },
+  case alpha_eqv.compat_and : h1_p h1_p' h1_q h1_q' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  { admit },
+  case alpha_eqv.compat_or : h1_p h1_p' h1_q h1_q' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  { admit },
+  case alpha_eqv.compat_imp : h1_p h1_p' h1_q h1_q' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  { admit },
+  case alpha_eqv.compat_iff : h1_p h1_p' h1_q h1_q' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  { admit },
+  case alpha_eqv.compat_forall : h1_p h1_q h1_z h1_ᾰ h1_ih
+  { admit },
+  case alpha_eqv.compat_exists : h1_p h1_q h1_z h1_ᾰ h1_ih
+  { admit },
+  case alpha_eqv.reflex : h1
+  { admit },
+  case alpha_eqv.symm : h1_p h1_p' h1_ᾰ h1_ih
+  { admit },
+  case alpha_eqv.trans : h1_p h1_p' h1_p'' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  { admit },
 end
 
 
