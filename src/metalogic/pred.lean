@@ -1117,7 +1117,10 @@ begin
   },
   case term.func : n f terms ih
   {
-    admit
+    unfold term.all_var_set at h1,
+    simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left, not_exists] at h1,
+    unfold replace_term, unfold eval_term, congr, funext,
+    simp only at ih, apply ih, exact h1 i
   },
 end
 
