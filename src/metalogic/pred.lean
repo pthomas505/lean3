@@ -1005,18 +1005,15 @@ begin
   },
   case term.func : n f terms ih
   {
-    unfold term.all_var_set at h2, simp only [finset.mem_sdiff, finset.mem_bUnion, finset.mem_univ,
+    unfold term.all_var_set at h2,
+    simp only [finset.mem_sdiff, finset.mem_bUnion, finset.mem_univ,
       exists_true_left, finset.mem_singleton, not_and, not_not, forall_exists_index] at h2,
     simp only [finset.mem_sdiff, finset.mem_singleton, not_and, not_not] at ih,
     unfold replace_term, unfold eval_term, congr, funext, apply ih, apply h2
   },
 end
 
-example
-  (D : Type)
-  (m : interpretation D)
-  (v : valuation D)
-  (a : D)
+lemma replace_term_id
   (x y : string)
   (xs : list string)
   (t : term)
@@ -1046,6 +1043,43 @@ begin
     congr, funext, exact ih i
   },
 end
+
+lemma replace_id
+  (x y : string)
+  (xs : list string)
+  (p : formula)
+  (h1 : x ∈ xs) :
+  replace x y xs p = p :=
+begin
+  induction p generalizing xs,
+  case formula.bottom
+  { unfold replace },
+  case formula.top
+  { unfold replace },
+  case formula.atom : n p terms
+  { unfold replace, congr, funext, apply replace_term_id, exact h1 },
+  case formula.not : p p_ih
+  { unfold replace, rewrite p_ih xs h1 },
+  case formula.and : p q p_ih q_ih
+  { unfold replace, rewrite p_ih xs h1, rewrite q_ih xs h1 },
+  case formula.or : p q p_ih q_ih
+  { unfold replace, rewrite p_ih xs h1, rewrite q_ih xs h1 },
+  case formula.imp : p q p_ih q_ih
+  { unfold replace, rewrite p_ih xs h1, rewrite q_ih xs h1 },
+  case formula.iff : p q p_ih q_ih
+  { unfold replace, rewrite p_ih xs h1, rewrite q_ih xs h1 },
+  case formula.forall_ : z p p_ih
+  {
+    unfold replace, rewrite p_ih, simp only [list.mem_cons_iff],
+    apply or.intro_right, exact h1
+  },
+  case formula.exists_ : x p p_ih
+  {
+    unfold replace, rewrite p_ih, simp only [list.mem_cons_iff],
+    apply or.intro_right, exact h1
+  },
+end
+
 
 example
   (D : Type)
