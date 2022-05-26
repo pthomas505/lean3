@@ -1115,13 +1115,14 @@ example
   (x y : string)
   (xs : list string)
   (p : formula)
+  (a : D)
   (h1 : y ∉ p.free_var_set)
   (h2 : y ∉ p.bind_var_set) :
-  ∀ a : D, holds D m ((x ↦ a) v) p ↔ ∀ a : D, holds D m ((y ↦ a) v) (replace x y xs p) :=
+  holds D m ((x ↦ a) v) p ↔ holds D m ((y ↦ a) v) (replace x y xs p) :=
 begin
   induction p,
   case formula.bottom
-  { unfold replace, unfold holds, tauto, },
+  { unfold replace, unfold holds },
   case formula.top
   { admit },
   case formula.atom : n p terms
@@ -1129,7 +1130,7 @@ begin
     unfold replace, unfold holds,
     unfold formula.free_var_set at h1, simp at h1,
     unfold formula.bind_var_set at h2, simp at h2,
-    admit
+    apply iff_of_eq, congr, funext, admit
   },
   case formula.not : p_ᾰ p_ih
   { admit },
@@ -1150,7 +1151,7 @@ end
 example
   (D : Type)
   (m : interpretation D)
-  (v v' : valuation D)
+  (v : valuation D)
   (p p' : formula)
   (h1 : alpha_eqv p p') :
   holds D m v p ↔ holds D m v p' :=
