@@ -1078,7 +1078,6 @@ begin
   },
 end
 
-
 lemma lem_1
   (D : Type)
   (m : interpretation D)
@@ -1114,24 +1113,8 @@ begin
 end
 
 lemma lem_2
-  (x y : string)
-  (p : formula) :
-  replace x y {x} p = p :=
-begin
-  apply replace_id, simp,
-end
-
-lemma lem_5
-  (x y : string)
-  (xs : finset string)
+  (x y z : string)
   (p : formula)
-  (h1 : x ∉ xs) :
-  (replace x y xs p) = replace x y (xs \ {x}) p :=
-begin
-  have s1 : xs \ {x} = xs, finish, rewrite s1,
-end
-
-lemma lem_6 (x y z : string) (p : formula)
   (xs : finset string)
   (h1 : y ∉ p.free_var_set \ {z})
   (h2_left : y ∉ p.bind_var_set)
@@ -1176,8 +1159,7 @@ begin
   { admit },
 end
 
-
-lemma lem_8
+lemma lem_3
   (D : Type)
   (m : interpretation D)
   (v : valuation D)
@@ -1266,7 +1248,7 @@ begin
       apply function.update_comm s2,
       have s4 : function.update (function.update v y a) z a' = function.update (function.update v z a') y a,
       apply function.update_comm h2_right,
-      rewrite s3, rewrite s4, rewrite lem_6 x y z p {z} h1 h2_left h2_right s1, simp,
+      rewrite s3, rewrite s4, rewrite lem_2 x y z p {z} h1 h2_left h2_right s1, simp,
       apply p_ih s1 h2_left, finish,
     }
   },
@@ -1285,7 +1267,7 @@ begin
   induction h1,
   case alpha_eqv.rename_forall : h1_p h1_x h1_y h1_1 h1_2
   {
-    unfold holds, apply forall_congr, intros a, apply lem_8, exact h1_1, exact h1_2,
+    unfold holds, apply forall_congr, intros a, apply lem_3, exact h1_1, exact h1_2,
   },
   case alpha_eqv.rename_exists : h1_p h1_x h1_y h1_ᾰ h1_ᾰ_1
   { admit },
