@@ -1151,7 +1151,7 @@ begin
     },
     {
     have s3 : z ≠ u, admit,
-    unfold formula.free_var_set at s1, --unfold formula.free_var_set at h1,
+    unfold formula.free_var_set at s1,
     unfold formula.bind_var_set at h2_left, have s4 : y ≠ u, finish,
     have s5 : ((xs \ {z}) ∪ {u}) = (xs ∪ {u}) \ {z}, admit,
     rewrite s5, apply p_ih, finish, finish, finish, finish,
