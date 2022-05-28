@@ -1126,31 +1126,62 @@ example
   (h2 : y ∉ p.bind_var_set) :
   holds D m ((x ↦ a) v) p ↔ holds D m ((y ↦ a) v) (replace x y [] p) :=
 begin
-  induction p,
+  induction p generalizing v a,
   case formula.bottom
   { unfold replace, unfold holds },
   case formula.top
-  { admit },
+  { unfold replace, unfold holds },
   case formula.atom : n p terms
   {
     unfold replace, unfold holds,
     unfold formula.free_var_set at h1, simp at h1,
-    unfold formula.bind_var_set at h2, simp at h2,
     apply iff_of_eq, congr, funext, apply lem_1, exact h1 i
   },
-  case formula.not : p_ᾰ p_ih
-  { admit },
-  case formula.and : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
-  { admit },
-  case formula.or : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
-  { admit },
-  case formula.imp : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
-  { admit },
-  case formula.iff : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
-  { admit },
-  case formula.forall_ : p_ᾰ p_ᾰ_1 p_ih
-  { admit },
-  case formula.exists_ : p_ᾰ p_ᾰ_1 p_ih
+  case formula.not : p p_ih
+  { unfold replace, unfold holds, simp only at p_ih, rewrite p_ih h1 h2  },
+  case formula.and : p q p_ih q_ih
+  {
+    unfold formula.free_var_set at h1, simp only [finset.mem_union] at h1, push_neg at h1, cases h1,
+    unfold formula.bind_var_set at h2, simp only [finset.mem_union] at h2, push_neg at h2, cases h2,
+    unfold replace, unfold holds,
+    simp only at p_ih, rewrite p_ih h1_left h2_left,
+    simp only at q_ih, rewrite q_ih h1_right h2_right
+  },
+  case formula.or : p q p_ih q_ih
+  {
+    unfold formula.free_var_set at h1, simp only [finset.mem_union] at h1, push_neg at h1, cases h1,
+    unfold formula.bind_var_set at h2, simp only [finset.mem_union] at h2, push_neg at h2, cases h2,
+    unfold replace, unfold holds,
+    simp only at p_ih, rewrite p_ih h1_left h2_left,
+    simp only at q_ih, rewrite q_ih h1_right h2_right
+  },
+  case formula.imp : p q p_ih q_ih
+  {
+    unfold formula.free_var_set at h1, simp only [finset.mem_union] at h1, push_neg at h1, cases h1,
+    unfold formula.bind_var_set at h2, simp only [finset.mem_union] at h2, push_neg at h2, cases h2,
+    unfold replace, unfold holds,
+    simp only at p_ih, rewrite p_ih h1_left h2_left,
+    simp only at q_ih, rewrite q_ih h1_right h2_right
+  },
+  case formula.iff : p q p_ih q_ih
+  {
+    unfold formula.free_var_set at h1, simp only [finset.mem_union] at h1, push_neg at h1, cases h1,
+    unfold formula.bind_var_set at h2, simp only [finset.mem_union] at h2, push_neg at h2, cases h2,
+    unfold replace, unfold holds,
+    simp only at p_ih, rewrite p_ih h1_left h2_left,
+    simp only at q_ih, rewrite q_ih h1_right h2_right
+  },
+  case formula.forall_ : z p p_ih
+  {
+    unfold formula.free_var_set at h1, simp only [finset.mem_sdiff, finset.mem_singleton, not_and, not_not] at h1,
+    unfold formula.bind_var_set at h2, simp only [finset.mem_union, finset.mem_singleton] at h2, push_neg at h2,
+    cases h2,
+    have s1 : y ∉ p.free_var_set, by_contradiction, apply h2_right, apply h1, exact h,
+    unfold replace, unfold holds,
+    simp only at p_ih,
+    apply forall_congr, intros a', admit
+  },
+  case formula.exists_ : x p p_ih
   { admit },
 end
 
