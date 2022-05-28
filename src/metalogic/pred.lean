@@ -935,11 +935,11 @@ begin
 end
 
 
-def replace_term (x y : string) (xs : list string) : term → term
+def replace_term (x y : string) (xs : finset string) : term → term
 | (var x') := if x' ∉ xs ∧ x = x' then var y else var x'
 | (func n f terms) := func n f (fun i : fin n, replace_term(terms i))
 
-def replace (x y : string) : list string → formula → formula
+def replace (x y : string) : finset string → formula → formula
 | xs bottom := bottom
 | xs top := top
 | xs (atom n p terms) := atom n p (fun i : fin n, replace_term x y xs (terms i))
@@ -948,14 +948,14 @@ def replace (x y : string) : list string → formula → formula
 | xs (or p q) := or (replace xs p) (replace xs q)
 | xs (imp p q) := imp (replace xs p) (replace xs q)
 | xs (iff p q) := iff (replace xs p) (replace xs q)
-| xs (forall_ x p) := forall_ x (replace (x :: xs) p)
-| xs (exists_ x p) := exists_ x (replace (x :: xs) p)
+| xs (forall_ x p) := forall_ x (replace (xs ∪ {x}) p)
+| xs (exists_ x p) := exists_ x (replace (xs ∪ {x}) p)
 
 inductive alpha_eqv : formula → formula → Prop
 | rename_forall (p : formula) (x y : string) :
-  y ∉ p.free_var_set → y ∉ p.bind_var_set → alpha_eqv (forall_ x p) (forall_ y (replace x y [] p))
+  y ∉ p.free_var_set → y ∉ p.bind_var_set → alpha_eqv (forall_ x p) (forall_ y (replace x y ∅ p))
 | rename_exists (p : formula) (x y : string) :
-  y ∉ p.free_var_set → y ∉ p.bind_var_set → alpha_eqv (exists_ x p) (exists_ y (replace x y [] p))
+  y ∉ p.free_var_set → y ∉ p.bind_var_set → alpha_eqv (exists_ x p) (exists_ y (replace x y ∅ p))
 | compat_not (p p' : formula) :
   alpha_eqv p p' → alpha_eqv (not p) (not p')
 | compat_and (p p' q q' : formula) :
@@ -982,7 +982,7 @@ example
   (m : interpretation D)
   (v : valuation D)
   (x y : string)
-  (xs : list string)
+  (xs : finset string)
   (t : term)
   (h1 : x ∉ xs)
   (h2 : y ∉ t.all_var_set \ {x}) :
@@ -1015,7 +1015,7 @@ end
 
 lemma replace_term_id
   (x y : string)
-  (xs : list string)
+  (xs : finset string)
   (t : term)
   (h1 : x ∈ xs) :
   replace_term x y xs t = t :=
@@ -1046,7 +1046,7 @@ end
 
 lemma replace_id
   (x y : string)
-  (xs : list string)
+  (xs : finset string)
   (p : formula)
   (h1 : x ∈ xs) :
   replace x y xs p = p :=
@@ -1070,13 +1070,11 @@ begin
   { unfold replace, rewrite p_ih xs h1, rewrite q_ih xs h1 },
   case formula.forall_ : z p p_ih
   {
-    unfold replace, rewrite p_ih, simp only [list.mem_cons_iff],
-    apply or.intro_right, exact h1
+    unfold replace, rewrite p_ih, finish,
   },
   case formula.exists_ : x p p_ih
   {
-    unfold replace, rewrite p_ih, simp only [list.mem_cons_iff],
-    apply or.intro_right, exact h1
+    unfold replace, rewrite p_ih, finish
   },
 end
 
@@ -1089,14 +1087,14 @@ lemma lem_1
   (x y : string)
   (t : term)
   (h1 : y ∉ t.all_var_set) :
-  eval_term D m ((x ↦ a) v) t = eval_term D m ((y ↦ a) v) (replace_term x y [] t) :=
+  eval_term D m ((x ↦ a) v) t = eval_term D m ((y ↦ a) v) (replace_term x y ∅ t) :=
 begin
   induction t,
   case term.var : z
   {
     unfold term.all_var_set at h1, simp only [finset.mem_singleton] at h1,
     unfold replace_term,
-    simp only [list.not_mem_nil, not_false_iff, true_and],
+    simp only [finset.not_mem_empty, not_false_iff, true_and],
     by_cases x = z,
     {
       simp only [if_pos h], unfold eval_term, rewrite h, simp only [function.update_same]
@@ -1115,7 +1113,71 @@ begin
   },
 end
 
-example
+lemma lem_2
+  (x y : string)
+  (p : formula) :
+  replace x y {x} p = p :=
+begin
+  apply replace_id, simp,
+end
+
+lemma lem_5
+  (x y : string)
+  (xs : finset string)
+  (p : formula)
+  (h1 : x ∉ xs) :
+  (replace x y xs p) = replace x y (xs \ {x}) p :=
+begin
+  have s1 : xs \ {x} = xs, finish, rewrite s1,
+end
+
+lemma lem_6 (x y z : string) (p : formula)
+  (xs : finset string)
+  (h1 : y ∉ p.free_var_set \ {z})
+  (h2_left : y ∉ p.bind_var_set)
+  (h2_right : y ≠ z)
+  (s1 : y ∉ p.free_var_set)
+  (s2 : x ∉ xs) :
+  replace x y xs p = replace x y (xs \ {z}) p :=
+begin
+  induction p generalizing xs,
+  case formula.bottom
+  { admit },
+  case formula.top
+  { admit },
+  case formula.atom : p_n p_ᾰ p_ᾰ_1
+  { admit },
+  case formula.not : p_ᾰ p_ih
+  { admit },
+  case formula.and : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
+  { admit },
+  case formula.or : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
+  { admit },
+  case formula.imp : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
+  { admit },
+  case formula.iff : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
+  { admit },
+  case formula.forall_ : u p p_ih
+  {
+
+    unfold replace, simp only [finset.empty_union, eq_self_iff_true, true_and],
+    by_cases x = u, {
+      rewrite replace_id, rewrite replace_id, finish, finish,
+    },
+    {
+    have s3 : z ≠ u, admit,
+    unfold formula.free_var_set at s1, --unfold formula.free_var_set at h1,
+    unfold formula.bind_var_set at h2_left, have s4 : y ≠ u, finish,
+    have s5 : ((xs \ {z}) ∪ {u}) = (xs ∪ {u}) \ {z}, admit,
+    rewrite s5, apply p_ih, finish, finish, finish, finish,
+    }
+  },
+  case formula.exists_ : p_ᾰ p_ᾰ_1 p_ih
+  { admit },
+end
+
+
+lemma lem_8
   (D : Type)
   (m : interpretation D)
   (v : valuation D)
@@ -1124,9 +1186,9 @@ example
   (a : D)
   (h1 : y ∉ p.free_var_set)
   (h2 : y ∉ p.bind_var_set) :
-  holds D m ((x ↦ a) v) p ↔ holds D m ((y ↦ a) v) (replace x y [] p) :=
+  holds D m ((x ↦ a) v) p ↔ holds D m ((y ↦ a) v) (replace x y ∅ p) :=
 begin
-  induction p generalizing v a,
+  induction p generalizing v,
   case formula.bottom
   { unfold replace, unfold holds },
   case formula.top
@@ -1173,13 +1235,40 @@ begin
   },
   case formula.forall_ : z p p_ih
   {
-    unfold formula.free_var_set at h1, simp only [finset.mem_sdiff, finset.mem_singleton, not_and, not_not] at h1,
+    unfold formula.free_var_set at h1,
     unfold formula.bind_var_set at h2, simp only [finset.mem_union, finset.mem_singleton] at h2, push_neg at h2,
     cases h2,
-    have s1 : y ∉ p.free_var_set, by_contradiction, apply h2_right, apply h1, exact h,
-    unfold replace, unfold holds,
+    have s1 : y ∉ p.free_var_set, finish,
     simp only at p_ih,
-    apply forall_congr, intros a', admit
+    unfold replace, unfold holds,
+    simp only [finset.empty_union],
+    apply forall_congr, intros a',
+    by_cases h : z = x,
+    {
+      have s2 : x ∈ {z}, finish,
+      rewrite replace_id x y {z} p s2,
+      apply thm_3_2, intros u h3,
+      have s3 : u ≠ y, finish,
+      by_cases h' : u = x,
+      {
+        rewrite <- h at h', rewrite h', simp only [function.update_same],
+      },
+      {
+        have s4 : u ≠ z, finish,
+        simp only [function.update_noteq s4],
+        simp only [function.update_noteq h'],
+        simp only [function.update_noteq s3]
+      },
+    },
+    {
+      have s2 : x ≠ z, finish,
+      have s3 : function.update (function.update v x a) z a' = function.update (function.update v z a') x a,
+      apply function.update_comm s2,
+      have s4 : function.update (function.update v y a) z a' = function.update (function.update v z a') y a,
+      apply function.update_comm h2_right,
+      rewrite s3, rewrite s4, rewrite lem_6 x y z p {z} h1 h2_left h2_right s1, simp,
+      apply p_ih s1 h2_left, finish,
+    }
   },
   case formula.exists_ : x p p_ih
   { admit },
@@ -1196,7 +1285,7 @@ begin
   induction h1,
   case alpha_eqv.rename_forall : h1_p h1_x h1_y h1_1 h1_2
   {
-    unfold holds, apply forall_congr, intros a, admit
+    unfold holds, apply forall_congr, intros a, apply lem_8, exact h1_1, exact h1_2,
   },
   case alpha_eqv.rename_exists : h1_p h1_x h1_y h1_ᾰ h1_ᾰ_1
   { admit },
