@@ -1116,6 +1116,36 @@ begin
   },
 end
 
+lemma lem_1_5
+  (x y z : string)
+  (xs : finset string)
+  (t : term)
+  (h1 : x ∉ xs) :
+  replace_term x y xs t = replace_term x y (xs \ {z}) t :=
+begin
+  induction t,
+  case term.var : u
+  {
+    unfold replace_term,
+    by_cases x = u,
+    {
+      have s1 : u ∉ xs ∧ x = u, rewrite <- h, split, exact h1, refl,
+      have s2 : u ∉ xs \ {z} ∧ x = u, finish,
+      simp only [if_pos s1, if_pos s2]
+    },
+    {
+      have s1 : ¬ (u ∉ xs ∧ x = u), push_neg, intro h3, exact h,
+      have s2 : ¬ (u ∉ xs \ {z} ∧ x = u), push_neg, intro h3, exact h,
+      simp only [if_neg s1, if_neg s2]
+    }
+  },
+  case term.func : n f terms ih
+  {
+    unfold replace_term, congr, funext, simp only at ih, apply ih
+  },
+end
+
+
 lemma lem_2
   (x y z : string)
   (p : formula)
@@ -1129,11 +1159,15 @@ lemma lem_2
 begin
   induction p generalizing xs,
   case formula.bottom
-  { admit },
+  { unfold replace },
   case formula.top
-  { admit },
-  case formula.atom : p_n p_ᾰ p_ᾰ_1
-  { admit },
+  { unfold replace },
+  case formula.atom : n p terms
+  {
+    unfold formula.free_var_set at s1, simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left, not_exists] at s1,
+    unfold replace, congr, funext,
+    apply lem_1_5, exact s2
+  },
   case formula.not : p_ᾰ p_ih
   { admit },
   case formula.and : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
