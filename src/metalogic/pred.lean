@@ -998,7 +998,7 @@ begin
       unfold eval_term, simp only [function.update_same]
     },
     {
-      have s1 : z ≠ y, finish,
+      have s1 : z ≠ y, intro h3, apply h, rewrite h3, symmetry, apply h2, symmetry, rewrite h3,
       unfold replace_term, simp only [ite_and, if_neg h, if_t_t], unfold eval_term,
         simp only [function.update_noteq s1],
     }
@@ -1070,11 +1070,13 @@ begin
   { unfold replace, rewrite p_ih xs h1, rewrite q_ih xs h1 },
   case formula.forall_ : z p p_ih
   {
-    unfold replace, rewrite p_ih, finish,
+    unfold replace, rewrite p_ih, simp only [finset.mem_union, finset.mem_singleton],
+    apply or.intro_left, exact h1,
   },
   case formula.exists_ : x p p_ih
   {
-    unfold replace, rewrite p_ih, finish
+    unfold replace, rewrite p_ih, simp only [finset.mem_union, finset.mem_singleton],
+    apply or.intro_left, exact h1
   },
 end
 
@@ -1144,7 +1146,6 @@ begin
   { admit },
   case formula.forall_ : u p p_ih
   {
-
     unfold replace, simp only [finset.empty_union, eq_self_iff_true, true_and],
     by_cases x = u, {
       rewrite replace_id, rewrite replace_id, finish, finish,
