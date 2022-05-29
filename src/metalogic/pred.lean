@@ -1080,6 +1080,45 @@ begin
   },
 end
 
+lemma lem_0_5
+  (D : Type)
+  (m : interpretation D)
+  (v : valuation D)
+  (a : D)
+  (x y : string)
+  (xs : finset string)
+  (t : term)
+  (h1 : x ∉ xs)
+  (h2 : y ∉ t.all_var_set) :
+  eval_term D m ((x ↦ a) v) t = eval_term D m ((y ↦ a) v) (replace_term x y xs t) :=
+begin
+  induction t,
+  case term.var : z
+  {
+    unfold term.all_var_set at h2, simp only [finset.mem_singleton] at h2,
+    unfold replace_term,
+    by_cases h3 : x = z,
+    {
+      rewrite <- h3, simp only [eq_self_iff_true, and_true, ite_not],
+      simp only [if_neg h1], unfold eval_term, simp only [function.update_same]
+    },
+    {
+      have s1 : ¬ (z ∉ xs ∧ x = z), push_neg, intro h4, exact h3,
+      simp only [if_neg s1], unfold eval_term,
+      have s2 : z ≠ y, intro h4, apply h2, symmetry, exact h4,
+      have s3 : z ≠ x, intro h4, apply h3, symmetry, exact h4,
+      simp only [function.update_noteq s2, function.update_noteq s3]
+    }
+  },
+  case term.func : n f terms ih
+  {
+    unfold term.all_var_set at h2,
+    simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left, not_exists] at h2,
+    unfold replace_term, unfold eval_term, congr, funext,
+    simp only at ih, apply ih, apply h2
+  },
+end
+
 lemma lem_1
   (D : Type)
   (m : interpretation D)
