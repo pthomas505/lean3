@@ -1154,11 +1154,10 @@ lemma lem_2
   (x y z : string)
   (p : formula)
   (xs : finset string)
-  (h1 : y ∉ p.free_var_set \ {z})
-  (h2_left : y ∉ p.bind_var_set)
-  (h2_right : y ≠ z)
-  (s1 : y ∉ p.free_var_set)
-  (s2 : x ∉ xs) :
+  (h1 : x ∉ xs)
+  (h2 : y ∉ p.free_var_set \ {z})
+  (h3 : y ≠ z)
+  (h4 : y ∉ p.bind_var_set) :
   replace x y xs p = replace x y (xs \ {z}) p :=
 begin
   induction p generalizing xs,
@@ -1168,34 +1167,66 @@ begin
   { unfold replace },
   case formula.atom : n p terms
   {
-    unfold formula.free_var_set at s1, simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left, not_exists] at s1,
+    unfold formula.free_var_set at h2,
     unfold replace, congr, funext,
-    apply lem_1_5, exact s2
+    apply lem_1_5, exact h1
   },
-  case formula.not : p_ᾰ p_ih
-  { admit },
-  case formula.and : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
-  { admit },
-  case formula.or : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
-  { admit },
-  case formula.imp : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
-  { admit },
-  case formula.iff : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
-  { admit },
+  case formula.not : p p_ih
+  {
+    unfold formula.free_var_set at h2,
+    unfold replace, rewrite p_ih h2 h4 xs h1,
+  },
+  case formula.and : p q p_ih q_ih
+  {
+    unfold formula.free_var_set at h2,
+    simp only [finset.union_sdiff_distrib, finset.not_mem_union] at h2, cases h2,
+    unfold formula.bind_var_set at h4,
+    simp only [finset.union_sdiff_distrib, finset.not_mem_union] at h4, cases h4,
+    unfold replace,
+    rewrite p_ih h2_left h4_left xs h1, rewrite q_ih h2_right h4_right xs h1,
+  },
+  case formula.or : p q p_ih q_ih
+  {
+    unfold formula.free_var_set at h2,
+    simp only [finset.union_sdiff_distrib, finset.not_mem_union] at h2, cases h2,
+    unfold formula.bind_var_set at h4,
+    simp only [finset.union_sdiff_distrib, finset.not_mem_union] at h4, cases h4,
+    unfold replace,
+    rewrite p_ih h2_left h4_left xs h1, rewrite q_ih h2_right h4_right xs h1,
+  },
+  case formula.imp : p q p_ih q_ih
+  {
+    unfold formula.free_var_set at h2,
+    simp only [finset.union_sdiff_distrib, finset.not_mem_union] at h2, cases h2,
+    unfold formula.bind_var_set at h4,
+    simp only [finset.union_sdiff_distrib, finset.not_mem_union] at h4, cases h4,
+    unfold replace,
+    rewrite p_ih h2_left h4_left xs h1, rewrite q_ih h2_right h4_right xs h1,
+  },
+  case formula.iff : p q p_ih q_ih
+  {
+    unfold formula.free_var_set at h2,
+    simp only [finset.union_sdiff_distrib, finset.not_mem_union] at h2, cases h2,
+    unfold formula.bind_var_set at h4,
+    simp only [finset.union_sdiff_distrib, finset.not_mem_union] at h4, cases h4,
+    unfold replace,
+    rewrite p_ih h2_left h4_left xs h1, rewrite q_ih h2_right h4_right xs h1,
+  },
   case formula.forall_ : u p p_ih
   {
     unfold replace, simp only [finset.empty_union, eq_self_iff_true, true_and],
-    by_cases x = u, {
-      rewrite replace_id, rewrite replace_id, finish, finish,
+    by_cases x = u,
+    {
+      rewrite replace_id, rewrite replace_id,
+      simp only [finset.mem_union], apply or.intro_right, rewrite h, simp only [finset.mem_singleton],
+      simp only [finset.mem_union], apply or.intro_right, rewrite h, simp only [finset.mem_singleton],
     },
     {
-    have s3 : z ≠ u, admit,
-    unfold formula.free_var_set at s1,
-    unfold formula.bind_var_set at h2_left, have s4 : y ≠ u, finish,
-    have s5 : ((xs \ {z}) ∪ {u}) = (xs ∪ {u}) \ {z}, ext1, simp, split, intros h10,
-    simp only [or_and_distrib_right], finish, intros h11, cases h11, cases h11_left, apply or.intro_left,
-    exact and.intro h11_left h11_right, apply or.intro_right, exact h11_left, rewrite s5, apply p_ih,
-    admit, admit, admit, admit,
+      unfold formula.free_var_set at h2,
+      unfold formula.bind_var_set at h4,
+      have s4 : y ≠ u, simp at h4, push_neg at h4, cases h4, exact h4_right,
+      have s5 : ((xs \ {z}) ∪ {u}) = (xs ∪ {u}) \ {z}, admit, rewrite s5,
+      apply p_ih,
     }
   },
   case formula.exists_ : u p p_ih
@@ -1204,6 +1235,7 @@ begin
   },
 end
 
+/-
 lemma lem_3
   (D : Type)
   (m : interpretation D)
@@ -1442,3 +1474,4 @@ example
   (t : term)
   (h1 : x ∉ t.all_var_set) :
   is_valid (exists_ x (mk_pred "eq" [var x, t])) := sorry
+-/
