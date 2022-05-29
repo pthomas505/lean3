@@ -1133,7 +1133,8 @@ begin
     by_cases x = u,
     {
       have s1 : u ∉ xs ∧ x = u, rewrite <- h, split, exact h1, refl,
-      have s2 : u ∉ xs \ {z} ∧ x = u, finish,
+      have s2 : u ∉ xs \ {z} ∧ x = u, subst h, split,
+      apply finset.not_mem_sdiff_of_not_mem_left,
       simp only [if_pos s1, if_pos s2]
     },
     {
