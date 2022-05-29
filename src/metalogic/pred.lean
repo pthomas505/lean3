@@ -1119,42 +1119,6 @@ begin
   },
 end
 
-lemma lem_1
-  (D : Type)
-  (m : interpretation D)
-  (v : valuation D)
-  (a : D)
-  (x y : string)
-  (t : term)
-  (h1 : y ∉ t.all_var_set) :
-  eval_term D m ((x ↦ a) v) t = eval_term D m ((y ↦ a) v) (replace_term x y ∅ t) :=
-begin
-  induction t,
-  case term.var : z
-  {
-    unfold term.all_var_set at h1, simp only [finset.mem_singleton] at h1,
-    unfold replace_term,
-    simp only [finset.not_mem_empty, not_false_iff, true_and],
-    by_cases h2 : x = z,
-    {
-      simp only [if_pos h2], unfold eval_term, rewrite h2, simp only [function.update_same]
-    },
-    {
-      simp only [if_neg h2], unfold eval_term,
-      have s1 : z ≠ y, exact ne.symm h1,
-      have s2 : z ≠ x, exact ne.symm h2,
-      rewrite function.update_noteq s1, rewrite function.update_noteq s2
-    }
-  },
-  case term.func : n f terms ih
-  {
-    unfold term.all_var_set at h1,
-    simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left, not_exists] at h1,
-    unfold replace_term, unfold eval_term, congr, funext,
-    simp only at ih, apply ih, exact h1 i
-  },
-end
-
 lemma lem_1_5
   (x y z : string)
   (xs : finset string)
@@ -1259,7 +1223,8 @@ begin
   {
     unfold replace, unfold holds,
     unfold formula.free_var_set at h1, simp at h1,
-    apply iff_of_eq, congr, funext, apply lem_1, exact h1 i
+    apply iff_of_eq, congr, funext, apply lem_0_5,
+    simp only [finset.not_mem_empty, not_false_iff], exact h1 i
   },
   case formula.not : p p_ih
   { unfold replace, unfold holds, simp only at p_ih, rewrite p_ih h1 h2  },
