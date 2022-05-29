@@ -1190,8 +1190,8 @@ begin
     unfold formula.bind_var_set at h2_left, have s4 : y ≠ u, finish,
     have s5 : ((xs \ {z}) ∪ {u}) = (xs ∪ {u}) \ {z}, ext1, simp, split, intros h10,
     simp only [or_and_distrib_right], finish, intros h11, cases h11, cases h11_left, apply or.intro_left,
-    exact and.intro h11_left h11_right, apply or.intro_right, exact h11_left,
-    rewrite s5, apply p_ih, finish, finish, finish, finish,
+    exact and.intro h11_left h11_right, apply or.intro_right, exact h11_left, rewrite s5, apply p_ih,
+    admit, admit, admit, admit,
     }
   },
   case formula.exists_ : u p p_ih
