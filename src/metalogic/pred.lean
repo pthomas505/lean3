@@ -98,6 +98,17 @@ lemma bUnion_sdiff_of_forall_disjoint
   (s.bUnion t) \ s' = s.bUnion t :=
 by simpa [sdiff_eq_self_iff_disjoint, disjoint_bUnion_left]
 
+lemma mem_bUnion_univ
+  {α β : Type}
+  [decidable_eq β]
+  (n : ℕ)
+  (x : β)
+  (s : finset β) :
+  x ∈ finset.bUnion finset.univ (fun i : fin n, s) ↔ ∃ i : fin n, x ∈ s :=
+begin
+  simp only [mem_bUnion, mem_univ, exists_true_left]
+end
+
 
 lemma mem_ne_imp_mem_sdiff
   {α : Type}
@@ -456,7 +467,9 @@ begin
     ... ↔ m.pred n x (fun i : fin n, eval_term D m v' (terms i)) :
       begin
         apply iff_of_eq, congr, funext,
-        apply thm_3_1, intros x h, apply h1, simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left], exact exists.intro i h
+        apply thm_3_1, intros x h, apply h1,
+        simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left],
+        exact exists.intro i h
       end
     ... ↔ holds D m v' (atom n x terms) : by unfold holds
   },
@@ -470,7 +483,8 @@ begin
     ... ↔ holds D m v' (not p) : by unfold holds
   },
   case formula.and : p q ih_p ih_q {
-    unfold formula.free_var_set at h1, simp only [finset.mem_union, or_imp_distrib, forall_and_distrib] at h1, cases h1,
+    unfold formula.free_var_set at h1,
+    simp only [finset.mem_union, or_imp_distrib, forall_and_distrib] at h1, cases h1,
     have s1 : holds D m v p ↔ holds D m v' p, exact ih_p v v' h1_left,
     have s2 : holds D m v q ↔ holds D m v' q, exact ih_q v v' h1_right,
     calc
@@ -480,7 +494,8 @@ begin
     ... ↔ holds D m v' (and p q) : by unfold holds
   },
   case formula.or : p q ih_p ih_q {
-    unfold formula.free_var_set at h1, simp only [finset.mem_union, or_imp_distrib, forall_and_distrib] at h1, cases h1,
+    unfold formula.free_var_set at h1,
+    simp only [finset.mem_union, or_imp_distrib, forall_and_distrib] at h1, cases h1,
     have s1 : holds D m v p ↔ holds D m v' p, exact ih_p v v' h1_left,
     have s2 : holds D m v q ↔ holds D m v' q, exact ih_q v v' h1_right,
     calc
@@ -490,7 +505,8 @@ begin
     ... ↔ holds D m v' (or p q) : by unfold holds
   },
   case formula.imp : p q ih_p ih_q {
-    unfold formula.free_var_set at h1, simp only [finset.mem_union, or_imp_distrib, forall_and_distrib] at h1, cases h1,
+    unfold formula.free_var_set at h1,
+    simp only [finset.mem_union, or_imp_distrib, forall_and_distrib] at h1, cases h1,
     have s1 : holds D m v p ↔ holds D m v' p, exact ih_p v v' h1_left,
     have s2 : holds D m v q ↔ holds D m v' q, exact ih_q v v' h1_right,
     calc
@@ -500,7 +516,8 @@ begin
     ... ↔ holds D m v' (imp p q) : by unfold holds
   },
   case formula.iff : p q ih_p ih_q {
-    unfold formula.free_var_set at h1, simp only [finset.mem_union, or_imp_distrib, forall_and_distrib] at h1, cases h1,
+    unfold formula.free_var_set at h1,
+    simp only [finset.mem_union, or_imp_distrib, forall_and_distrib] at h1, cases h1,
     have s1 : holds D m v p ↔ holds D m v' p, exact ih_p v v' h1_left,
     have s2 : holds D m v q ↔ holds D m v' q, exact ih_q v v' h1_right,
     calc
@@ -510,7 +527,8 @@ begin
     ... ↔ holds D m v' (iff p q) : by unfold holds
   },
   case formula.forall_ : x p ih {
-    unfold formula.free_var_set at h1, simp only [finset.mem_sdiff, finset.mem_singleton] at h1,
+    unfold formula.free_var_set at h1,
+    simp only [finset.mem_sdiff, finset.mem_singleton] at h1,
     calc
           holds D m v (forall_ x p)
         ↔ ∀ a : D, holds D m ((x ↦ a) v) p : by unfold holds
@@ -524,7 +542,8 @@ begin
     ... ↔ holds D m v' (forall_ x p) : by unfold holds
   },
   case formula.exists_ : x p ih {
-    unfold formula.free_var_set at h1, simp only [finset.mem_sdiff, finset.mem_singleton] at h1,
+    unfold formula.free_var_set at h1,
+    simp only [finset.mem_sdiff, finset.mem_singleton] at h1,
     calc
           holds D m v (exists_ x p)
         ↔ ∃ a : D, holds D m ((x ↦ a) v) p : by unfold holds
@@ -554,7 +573,8 @@ theorem cor_3_3
 begin
   unfold is_sentence at h1,
   have s1 : ∀ x ∈ p.free_var_set, v x = v' x,
-    rewrite h1, simp only [finset.not_mem_empty, forall_false_left, forall_const],
+    rewrite h1,
+    simp only [finset.not_mem_empty, forall_false_left, forall_const],
   exact thm_3_2 v v' s1
 end
 
