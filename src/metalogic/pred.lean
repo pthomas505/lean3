@@ -98,17 +98,6 @@ lemma bUnion_sdiff_of_forall_disjoint
   (s.bUnion t) \ s' = s.bUnion t :=
 by simpa [sdiff_eq_self_iff_disjoint, disjoint_bUnion_left]
 
-lemma mem_bUnion_univ
-  {α β : Type}
-  [decidable_eq β]
-  (n : ℕ)
-  (x : β)
-  (s : finset β) :
-  x ∈ finset.bUnion finset.univ (fun i : fin n, s) ↔ ∃ i : fin n, x ∈ s :=
-begin
-  simp only [mem_bUnion, mem_univ, exists_true_left]
-end
-
 
 lemma mem_ne_imp_mem_sdiff
   {α : Type}
