@@ -14,34 +14,63 @@ import data.set
 
 
 namespace finset
-variables {α : Type*} {β : Type*} {γ : Type*}
 
-lemma mem_ite (x : α) (p : Prop) [decidable p] (s s' : finset α) :
+lemma mem_ite
+  {α : Type}
+  (x : α)
+  (p : Prop)
+  [decidable p]
+  (s s' : finset α) :
   x ∈ (if p then s else s') ↔ (p → x ∈ s) ∧ (¬ p → x ∈ s') :=
-by split_ifs with h; simp [h]
-
-lemma bUnion_sdiff [decidable_eq α] [decidable_eq β]
-  (s : finset α) (t : α → finset β) (s' : finset β) :
-  s.bUnion t \ s' = s.bUnion (λ x, t x \ s') :=
-by { ext, simp only [mem_sdiff, mem_bUnion, exists_prop], tauto }
-
-lemma bUnion_filter [decidable_eq α] [decidable_eq β]
-  (s : finset α) (t : α → finset β) (p : α → Prop) [decidable_pred p] :
-  (s.filter p).bUnion t = s.bUnion (λ x, if p x then t x else ∅) :=
 begin
-  ext,
+  split,
+  intro h, split,
+    intro h1, simp only [if_pos h1] at h, exact h,
+    intro h1, simp only [if_neg h1] at h, exact h,
+  intro h1, cases h1, split_ifs,
+    apply h1_left, exact h,
+    apply h1_right, exact h
+end
+
+lemma bUnion_sdiff
+  {α β : Type}
+  [decidable_eq α] [decidable_eq β]
+  (s : finset α)
+  (t : α → finset β)
+  (s' : finset β) :
+  s.bUnion t \ s' = s.bUnion (fun x : α, t x \ s') :=
+begin
+  apply finset.ext, intros a,
+  simp only [mem_sdiff, mem_bUnion, exists_prop],
+  tauto
+end
+
+lemma bUnion_filter
+  {α β : Type}
+  [decidable_eq α] [decidable_eq β]
+  (s : finset α)
+  (t : α → finset β)
+  (p : α → Prop)
+  [decidable_pred p] :
+  (s.filter p).bUnion t = s.bUnion (fun x, if p x then t x else ∅) :=
+begin
+  apply finset.ext, intros a,
   simp only [mem_ite, imp_iff_not_or, or_and_distrib_right, mem_bUnion, mem_filter, exists_prop,
     not_mem_empty, not_not, or_false, not_and_self, false_or],
   tauto,
 end
 
-lemma sdiff_singleton_bUnion [decidable_eq α] [decidable_eq β]
-  (s : finset α) (t : α → finset β)
-  (x : α) (s' : finset β)
-  (h : t x = s') :
+lemma sdiff_singleton_bUnion
+  {α β : Type}
+  [decidable_eq α] [decidable_eq β]
+  (s : finset α)
+  (t : α → finset β)
+  (x : α)
+  (s' : finset β)
+  (h1 : t x = s') :
   (s \ {x}).bUnion t \ s' = s.bUnion t \ s' :=
 begin
-  rw [← h, bUnion_sdiff, bUnion_sdiff, sdiff_eq_filter s, bUnion_filter],
+  rw [← h1, bUnion_sdiff, bUnion_sdiff, sdiff_eq_filter s, bUnion_filter],
   congr',
   ext y,
   suffices : (a ∉ t y ∨ a ∈ t x) ∨ ¬y = x,
@@ -51,16 +80,117 @@ begin
   apply em',
 end
 
-lemma bUnion_union [decidable_eq α] [decidable_eq β]
-  (s s' : finset α) (t : α → finset β) :
+lemma bUnion_union
+  {α β : Type}
+  [decidable_eq α] [decidable_eq β]
+  (s s' : finset α)
+  (t : α → finset β) :
   (s ∪ s').bUnion t = s.bUnion t ∪ s'.bUnion t :=
 by { ext, simp [or_and_distrib_right, exists_or_distrib] }
 
-lemma bUnion_sdiff_of_forall_disjoint [decidable_eq β]
-  (s : finset α) (t : α → finset β) (s' : finset β)
-  (h : ∀ y : α, y ∈ s → disjoint (t y) s') :
+lemma bUnion_sdiff_of_forall_disjoint
+  {α β : Type}
+  [decidable_eq β]
+  (s : finset α)
+  (t : α → finset β)
+  (s' : finset β)
+  (h1 : ∀ y : α, y ∈ s → disjoint (t y) s') :
   (s.bUnion t) \ s' = s.bUnion t :=
 by simpa [sdiff_eq_self_iff_disjoint, disjoint_bUnion_left]
+
+
+lemma mem_ne_imp_mem_sdiff
+  {α : Type}
+  [decidable_eq α]
+  {x y : α}
+  {s : finset α}
+  (h1 : x ∈ s)
+  (h2 : x ≠ y) :
+  x ∈ s \ {y} :=
+begin
+  simp only [finset.mem_sdiff, finset.mem_singleton],
+  exact and.intro h1 h2
+end
+
+lemma mem_sdiff_imp_mem
+  {α : Type}
+  [decidable_eq α]
+  {x y : α}
+  {s : finset α}
+  (h1 : x ∈ s \ {y}) :
+  x ∈ s :=
+begin
+  simp only [finset.mem_sdiff, finset.mem_singleton] at h1,
+  cases h1,
+  exact h1_left
+end
+
+lemma mem_sdiff_imp_ne
+  {α : Type}
+  [decidable_eq α]
+  {x y : α}
+  {s : finset α}
+  (h1 : x ∈ s \ {y}) :
+  x ≠ y :=
+begin
+  simp only [finset.mem_sdiff, finset.mem_singleton] at h1,
+  cases h1,
+  exact h1_right
+end
+
+lemma eq_imp_not_mem_sdiff
+  {α : Type}
+  [decidable_eq α]
+  {x y : α}
+  {s : finset α}
+  (h1 : x = y) :
+  x ∉ s \ {y} :=
+begin
+  simp only [finset.mem_sdiff, finset.mem_singleton],
+  push_neg,
+  intro, exact h1
+end
+
+lemma not_mem_imp_not_mem_sdiff
+  {α : Type}
+  [decidable_eq α]
+  {x y : α}
+  {s : finset α}
+  (h1 : x ∉ s) :
+  x ∉ s \ {y} :=
+begin
+  simp only [finset.mem_sdiff, finset.mem_singleton],
+  push_neg,
+  intro h2, by_contradiction, apply h1, exact h2
+end
+
+lemma not_mem_sdiff_mem_imp_eq
+  {α : Type}
+  [decidable_eq α]
+  {x y : α}
+  {s : finset α}
+  (h1 : x ∉ s \ {y})
+  (h2 : x ∈ s) :
+  x = y :=
+begin
+  simp only [finset.mem_sdiff, finset.mem_singleton] at h1,
+  push_neg at h1,
+  exact h1 h2
+end
+
+lemma not_mem_sdiff_ne_imp_not_mem
+  {α : Type}
+  [decidable_eq α]
+  {x y : α}
+  {s : finset α}
+  (h1 : x ∉ s \ {y})
+  (h2 : x ≠ y) :
+  x ∉ s :=
+begin
+  simp only [finset.mem_sdiff, finset.mem_singleton] at h1,
+  push_neg at h1,
+  intro h3, apply h2, exact h1 h3
+end
 
 end finset
 
