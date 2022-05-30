@@ -1365,7 +1365,7 @@ begin
       unfold formula.bind_var_set at h4,
       have s4 : y ≠ u, simp at h4, push_neg at h4, cases h4, exact h4_right,
       have s5 : ((xs \ {z}) ∪ {u}) = (xs ∪ {u}) \ {z}, admit, rewrite s5,
-      apply p_ih,
+      apply p_ih, finish, finish, finish,
     }
   },
   case formula.exists_ : u p p_ih
