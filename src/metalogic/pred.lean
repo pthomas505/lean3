@@ -56,7 +56,7 @@ lemma finset.bUnion_filter
   [decidable_pred p] :
   finset.bUnion (s.filter p) t = s.bUnion (fun x, if p x then t x else ∅) :=
 begin
-  apply finset.ext, intros a,
+  apply finset.ext, intro a,
   simp only [finset.mem_ite, imp_iff_not_or, or_and_distrib_right, finset.mem_bUnion, finset.mem_filter, exists_prop,
     finset.not_mem_empty, not_not, or_false, not_and_self, false_or],
   split,
@@ -77,14 +77,14 @@ lemma finset.sdiff_singleton_bUnion
   (finset.bUnion (s \ {x}) t) \ s' = (finset.bUnion s t) \ s' :=
 begin
   rewrite <- h1, simp only [finset.bUnion_sdiff, finset.sdiff_eq_filter s, finset.bUnion_filter],
-  congr, apply funext, rintro y, apply finset.ext, intros a,
+  congr, apply funext, intro y, apply finset.ext, intro a,
   simp only [finset.mem_singleton, ite_not, finset.mem_sdiff, and.congr_left_iff],
   intro h2,
   split,
   by_cases y = x,
-    simp only [if_pos h], intros h3, simp only [finset.not_mem_empty] at h3, contradiction,
-    simp only [if_neg h], intros h3, exact h3,
-  intros h3,
+    simp only [if_pos h], intro h3, simp only [finset.not_mem_empty] at h3, contradiction,
+    simp only [if_neg h], intro h3, exact h3,
+  intro h3,
   by_cases y = x,
     simp only [if_pos h], simp only [finset.not_mem_empty], apply h2, rewrite <- h, exact h3,
     simp only [if_neg h], exact h3
@@ -97,7 +97,7 @@ lemma finset.bUnion_union
   (t : α → finset β) :
   finset.bUnion (s ∪ s') t = finset.bUnion s t ∪ finset.bUnion s' t :=
 begin
-  apply finset.ext, intros a,
+  apply finset.ext, intro a,
   simp only [or_and_distrib_right, exists_or_distrib, finset.mem_bUnion, finset.mem_union, exists_prop]
 end
 
