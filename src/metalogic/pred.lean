@@ -38,7 +38,7 @@ lemma finset.bUnion_sdiff
   (s' : finset β) :
   (finset.bUnion s t) \ s' = finset.bUnion s (fun x : α, t x \ s') :=
 begin
-  apply finset.ext, intros a,
+  apply finset.ext, intro a,
   simp only [finset.mem_sdiff, finset.mem_bUnion, exists_prop],
   split,
   intro h1, cases h1, apply exists.elim h1_left, intros b h2, cases h2, apply exists.intro b,
