@@ -36,7 +36,7 @@ lemma finset.bUnion_sdiff
   (s : finset α)
   (t : α → finset β)
   (s' : finset β) :
-  s.bUnion t \ s' = s.bUnion (fun x : α, t x \ s') :=
+  (finset.bUnion s t) \ s' = finset.bUnion s (fun x : α, t x \ s') :=
 begin
   apply finset.ext, intros a,
   simp only [finset.mem_sdiff, finset.mem_bUnion, exists_prop],
@@ -54,7 +54,7 @@ lemma finset.bUnion_filter
   (t : α → finset β)
   (p : α → Prop)
   [decidable_pred p] :
-  (s.filter p).bUnion t = s.bUnion (fun x, if p x then t x else ∅) :=
+  finset.bUnion (s.filter p) t = s.bUnion (fun x, if p x then t x else ∅) :=
 begin
   apply finset.ext, intros a,
   simp only [finset.mem_ite, imp_iff_not_or, or_and_distrib_right, finset.mem_bUnion, finset.mem_filter, exists_prop,
@@ -74,7 +74,7 @@ lemma finset.sdiff_singleton_bUnion
   (x : α)
   (s' : finset β)
   (h1 : t x = s') :
-  (s \ {x}).bUnion t \ s' = s.bUnion t \ s' :=
+  (finset.bUnion (s \ {x}) t) \ s' = (finset.bUnion s t) \ s' :=
 begin
   rewrite <- h1, simp only [finset.bUnion_sdiff, finset.sdiff_eq_filter s, finset.bUnion_filter],
   congr, apply funext, rintro y, apply finset.ext, intros a,
@@ -95,7 +95,7 @@ lemma finset.bUnion_union
   [decidable_eq α] [decidable_eq β]
   (s s' : finset α)
   (t : α → finset β) :
-  (s ∪ s').bUnion t = s.bUnion t ∪ s'.bUnion t :=
+  finset.bUnion (s ∪ s') t = finset.bUnion s t ∪ finset.bUnion s' t :=
 begin
   apply finset.ext, intros a,
   simp only [or_and_distrib_right, exists_or_distrib, finset.mem_bUnion, finset.mem_union, exists_prop]
@@ -108,7 +108,7 @@ lemma finset.bUnion_sdiff_of_forall_disjoint
   (t : α → finset β)
   (s' : finset β)
   (h1 : ∀ y : α, y ∈ s → disjoint (t y) s') :
-  (s.bUnion t) \ s' = s.bUnion t :=
+  (finset.bUnion s t) \ s' = finset.bUnion s t :=
 begin
   simp only [finset.sdiff_eq_self_iff_disjoint, finset.disjoint_bUnion_left], intro i, exact h1 i
 end
