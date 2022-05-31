@@ -43,9 +43,9 @@ begin
   apply finset.ext, intros a,
   simp only [mem_sdiff, mem_bUnion, exists_prop],
   split,
-  intro h1, cases h1, apply exists.elim h1_left, intros b, intros h2, cases h2, apply exists.intro b,
+  intro h1, cases h1, apply exists.elim h1_left, intros b h2, cases h2, apply exists.intro b,
     split, exact h2_left, exact and.intro h2_right h1_right,
-  intro h1, apply exists.elim h1, intros b, intros h2, cases h2, cases h2_right,
+  intro h1, apply exists.elim h1, intros b h2, cases h2, cases h2_right,
     split, apply exists.intro b, exact and.intro h2_left h2_right_left, exact h2_right_right
 end
 
@@ -61,7 +61,11 @@ begin
   apply finset.ext, intros a,
   simp only [mem_ite, imp_iff_not_or, or_and_distrib_right, mem_bUnion, mem_filter, exists_prop,
     not_mem_empty, not_not, or_false, not_and_self, false_or],
-  tauto,
+  split,
+  intro h1, apply exists.elim h1, intros b h2, cases h2, cases h2_left, apply exists.intro b,
+    split, exact h2_left_left, exact and.intro h2_right h2_left_right,
+  intro h1, apply exists.elim h1, intros b h2, cases h2, cases h2_right, apply exists.intro b,
+    split, exact and.intro h2_left h2_right_right, exact h2_right_left
 end
 
 lemma sdiff_singleton_bUnion
