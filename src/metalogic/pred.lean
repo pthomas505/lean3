@@ -26,8 +26,8 @@ begin
     intro h2, simp only [if_pos h2] at h1, exact h1,
     intro h2, simp only [if_neg h2] at h1, exact h1,
   intro h1, cases h1, split_ifs,
-    apply h1_left, exact h,
-    apply h1_right, exact h
+    exact h1_left h,
+    exact h1_right h
 end
 
 lemma finset.bUnion_sdiff
