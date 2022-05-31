@@ -42,7 +42,11 @@ lemma bUnion_sdiff
 begin
   apply finset.ext, intros a,
   simp only [mem_sdiff, mem_bUnion, exists_prop],
-  tauto
+  split,
+  intro h1, cases h1, apply exists.elim h1_left, intros b, intros h2, cases h2, apply exists.intro b,
+    split, exact h2_left, exact and.intro h2_right h1_right,
+  intro h1, apply exists.elim h1, intros b, intros h2, cases h2, cases h2_right,
+    split, apply exists.intro b, exact and.intro h2_left h2_right_left, exact h2_right_right
 end
 
 lemma bUnion_filter
