@@ -78,14 +78,18 @@ lemma sdiff_singleton_bUnion
   (h1 : t x = s') :
   (s \ {x}).bUnion t \ s' = s.bUnion t \ s' :=
 begin
-  rw [← h1, bUnion_sdiff, bUnion_sdiff, sdiff_eq_filter s, bUnion_filter],
-  congr',
-  ext y,
-  suffices : (a ∉ t y ∨ a ∈ t x) ∨ ¬y = x,
-  { simpa [mem_ite, imp_false, imp_iff_not_or, and_or_distrib_left] },
-  rw [or_comm, ← imp_iff_not_or],
-  rintro rfl,
-  apply em',
+  rewrite <- h1, simp only [finset.bUnion_sdiff, finset.sdiff_eq_filter s, finset.bUnion_filter],
+  congr, apply funext, rintro y, apply finset.ext, intros a,
+  simp only [mem_singleton, ite_not, mem_sdiff, and.congr_left_iff],
+  intro h2,
+  split,
+  by_cases y = x,
+    simp only [if_pos h], intros h3, simp only [not_mem_empty] at h3, contradiction,
+    simp only [if_neg h], intros h3, exact h3,
+  intros h3,
+  by_cases y = x,
+    simp only [if_pos h], simp only [not_mem_empty], apply h2, rewrite <- h, exact h3,
+    simp only [if_neg h], exact h3
 end
 
 lemma bUnion_union
@@ -94,7 +98,10 @@ lemma bUnion_union
   (s s' : finset α)
   (t : α → finset β) :
   (s ∪ s').bUnion t = s.bUnion t ∪ s'.bUnion t :=
-by { ext, simp [or_and_distrib_right, exists_or_distrib] }
+begin
+  apply finset.ext, intros a,
+  simp only [or_and_distrib_right, exists_or_distrib, mem_bUnion, mem_union, exists_prop]
+end
 
 lemma bUnion_sdiff_of_forall_disjoint
   {α β : Type}
@@ -104,7 +111,9 @@ lemma bUnion_sdiff_of_forall_disjoint
   (s' : finset β)
   (h1 : ∀ y : α, y ∈ s → disjoint (t y) s') :
   (s.bUnion t) \ s' = s.bUnion t :=
-by simpa [sdiff_eq_self_iff_disjoint, disjoint_bUnion_left]
+begin
+  simp only [sdiff_eq_self_iff_disjoint, disjoint_bUnion_left], intro i, exact h1 i
+end
 
 
 lemma mem_ne_imp_mem_sdiff
