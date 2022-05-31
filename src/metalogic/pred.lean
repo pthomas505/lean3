@@ -22,9 +22,9 @@ lemma finset.mem_ite
   x ∈ (if p then s else s') ↔ (p → x ∈ s) ∧ (¬ p → x ∈ s') :=
 begin
   split,
-  intro h, split,
-    intro h1, simp only [if_pos h1] at h, exact h,
-    intro h1, simp only [if_neg h1] at h, exact h,
+  intro h1, split,
+    intro h2, simp only [if_pos h2] at h1, exact h1,
+    intro h2, simp only [if_neg h2] at h1, exact h1,
   intro h1, cases h1, split_ifs,
     apply h1_left, exact h,
     apply h1_right, exact h
