@@ -828,7 +828,7 @@ begin
         = (atom n x (fun i : fin n, sub_term s (terms i))).free_var_set : by unfold sub
     ... = finset.bUnion finset.univ (fun i : fin n, (sub_term s (terms i)).all_var_set) : by unfold formula.free_var_set
     ... = finset.bUnion finset.univ (fun i : fin n, (finset.bUnion (terms i).all_var_set (fun y : string, (s y).all_var_set))) :
-          begin congr, funext, apply lem_3_4 end
+          begin congr, funext, exact lem_3_4 (terms i) s end
     ... = finset.bUnion (finset.bUnion finset.univ (fun i : fin n, (terms i).all_var_set)) (fun y : string, (s y).all_var_set) :
           begin symmetry, apply finset.bUnion_bUnion end
     ... = finset.bUnion (atom n x terms).free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
