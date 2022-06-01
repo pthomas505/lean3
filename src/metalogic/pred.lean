@@ -1150,7 +1150,7 @@ inductive alpha_eqv : formula → formula → Prop
   alpha_eqv p q → alpha_eqv (forall_ z p) (forall_ z q)
 | compat_exists (p q : formula) (z : string) :
   alpha_eqv p q → alpha_eqv (exists_ z p) (exists_ z q)
-| reflex (p : formula) :
+| refl (p : formula) :
   alpha_eqv p p
 | symm (p p' : formula) :
   alpha_eqv p p' → alpha_eqv p' p
@@ -1555,33 +1555,49 @@ example
   (h1 : alpha_eqv p p') :
   holds D m v p ↔ holds D m v p' :=
 begin
-  induction h1,
+  induction h1 generalizing v,
   case alpha_eqv.rename_forall : h1_p h1_x h1_y h1_1 h1_2
   {
     unfold holds, apply forall_congr, intros a, apply lem_3, exact h1_1, exact h1_2,
   },
-  case alpha_eqv.rename_exists : h1_p h1_x h1_y h1_ᾰ h1_ᾰ_1
-  { admit },
-  case alpha_eqv.compat_not : h1_p h1_p' h1_ᾰ h1_ih
-  { admit },
-  case alpha_eqv.compat_and : h1_p h1_p' h1_q h1_q' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
-  { admit },
-  case alpha_eqv.compat_or : h1_p h1_p' h1_q h1_q' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
-  { admit },
-  case alpha_eqv.compat_imp : h1_p h1_p' h1_q h1_q' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
-  { admit },
-  case alpha_eqv.compat_iff : h1_p h1_p' h1_q h1_q' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
-  { admit },
-  case alpha_eqv.compat_forall : h1_p h1_q h1_z h1_ᾰ h1_ih
-  { admit },
-  case alpha_eqv.compat_exists : h1_p h1_q h1_z h1_ᾰ h1_ih
-  { admit },
-  case alpha_eqv.reflex : h1
-  { admit },
-  case alpha_eqv.symm : h1_p h1_p' h1_ᾰ h1_ih
-  { admit },
-  case alpha_eqv.trans : h1_p h1_p' h1_p'' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
-  { admit }
+  case alpha_eqv.rename_exists : h1_p h1_x h1_y h1_1 h1_2
+  {
+    unfold holds, apply exists_congr, intros a, apply lem_3, exact h1_1, exact h1_2,
+  },
+  case alpha_eqv.compat_not : h1_p h1_p' h1_1 h1_ih
+  {
+    unfold holds, rewrite h1_ih
+  },
+  case alpha_eqv.compat_and : h1_p h1_p' h1_q h1_q' h1_p_1 h1_q_1 h1_ih_p h1_ih_q
+  {
+    unfold holds, rewrite h1_ih_p, rewrite h1_ih_q
+  },
+  case alpha_eqv.compat_or : h1_p h1_p' h1_q h1_q' h1_p_1 h1_q_1 h1_ih_p h1_ih_q
+  {
+    unfold holds, rewrite h1_ih_p, rewrite h1_ih_q
+  },
+  case alpha_eqv.compat_imp : h1_p h1_p' h1_q h1_q' h1_p_1 h1_q_1 h1_ih_p h1_ih_q
+  {
+    unfold holds, rewrite h1_ih_p, rewrite h1_ih_q
+  },
+  case alpha_eqv.compat_iff : h1_p h1_p' h1_q h1_q' h1_p_1 h1_q_1 h1_ih_p h1_ih_q
+  {
+    unfold holds, rewrite h1_ih_p, rewrite h1_ih_q
+  },
+  case alpha_eqv.compat_forall : h1_p h1_q h1_z h1_1 h1_ih
+  {
+    unfold holds, apply forall_congr, intros a, rewrite h1_ih (function.update v h1_z a)
+  },
+  case alpha_eqv.compat_exists : h1_p h1_q h1_z h1_1 h1_ih
+  {
+    unfold holds, apply exists_congr, intros a, rewrite h1_ih (function.update v h1_z a)
+  },
+  case alpha_eqv.refl : h1
+  { refl },
+  case alpha_eqv.symm : h1_p h1_p' h1_1 h1_ih
+  { symmetry, exact h1_ih v },
+  case alpha_eqv.trans : h1_p h1_p' h1_p'' h1_1 h1_2 h1_ih_1 h1_ih_2
+  { rewrite h1_ih_1, rewrite h1_ih_2 }
 end
 
 
