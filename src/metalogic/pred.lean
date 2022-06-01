@@ -1157,42 +1157,6 @@ inductive alpha_eqv : formula → formula → Prop
 | trans (p p' p'' : formula) :
   alpha_eqv p p' → alpha_eqv p' p'' → alpha_eqv p p''
 
-example
-  (D : Type)
-  (m : interpretation D)
-  (v : valuation D)
-  (x y : string)
-  (xs : finset string)
-  (t : term)
-  (h1 : x ∉ xs)
-  (h2 : y ∉ t.all_var_set \ {x}) :
-  eval_term D m v t = eval_term D m ((y ↦ v x) v) (replace_term x y xs t) :=
-begin
-  induction t,
-  case term.var : z
-  {
-    unfold term.all_var_set at h2, simp only [finset.mem_sdiff, finset.mem_singleton, not_and, not_not] at h2,
-    by_cases h : x = z,
-    {
-      unfold replace_term, subst h, simp only [eq_self_iff_true, and_true, ite_not, if_neg h1],
-      unfold eval_term, simp only [function.update_same]
-    },
-    {
-      have s1 : z ≠ y, intro h3, apply h, rewrite h3, symmetry, apply h2, symmetry, rewrite h3,
-      unfold replace_term, simp only [ite_and, if_neg h, if_t_t], unfold eval_term,
-        simp only [function.update_noteq s1],
-    }
-  },
-  case term.func : n f terms ih
-  {
-    unfold term.all_var_set at h2,
-    simp only [finset.mem_sdiff, finset.mem_bUnion, finset.mem_univ,
-      exists_true_left, finset.mem_singleton, not_and, not_not, forall_exists_index] at h2,
-    simp only [finset.mem_sdiff, finset.mem_singleton, not_and, not_not] at ih,
-    unfold replace_term, unfold eval_term, congr, funext, apply ih, apply h2
-  },
-end
-
 lemma replace_term_id
   (x y : string)
   (xs : finset string)
