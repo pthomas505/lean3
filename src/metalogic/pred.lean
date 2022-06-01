@@ -947,10 +947,18 @@ theorem thm_3_7
 begin
   induction p generalizing s v,
   case formula.bottom {
-    unfold sub, unfold holds
+    calc
+    holds D m v (sub s bottom) ↔
+      holds D m v bottom : by unfold sub
+    ... ↔ false : by unfold holds
+    ... ↔ holds D m (eval_term D m v ∘ s) bottom : by unfold holds
   },
   case formula.top {
-    unfold sub, unfold holds
+    calc
+    holds D m v (sub s top) ↔
+      holds D m v top : by unfold sub
+    ... ↔ true : by unfold holds
+    ... ↔ holds D m (eval_term D m v ∘ s) top : by unfold holds
   },
   case formula.atom : n x terms {
     calc
