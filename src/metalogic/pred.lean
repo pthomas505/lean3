@@ -1241,17 +1241,17 @@ begin
   {
     unfold term.all_var_set at h2, simp only [finset.mem_singleton] at h2,
     unfold replace_term,
-    by_cases h3 : x = z,
+    by_cases x = z,
     {
-      rewrite <- h3, simp only [eq_self_iff_true, and_true, ite_not],
+      rewrite <- h, simp only [eq_self_iff_true, and_true, ite_not],
       simp only [if_neg h1], unfold eval_term, simp only [function.update_same]
     },
     {
-      have s1 : ¬ (z ∉ xs ∧ x = z), push_neg, intro h4, exact h3,
+      have s1 : ¬ (z ∉ xs ∧ x = z), push_neg, intro, exact h,
       simp only [if_neg s1], unfold eval_term,
-      have s2 : z ≠ y, intro h4, apply h2, symmetry, exact h4,
-      have s3 : z ≠ x, intro h4, apply h3, symmetry, exact h4,
-      simp only [function.update_noteq s2, function.update_noteq s3]
+      rewrite <- ne.def at h2, rewrite ne_comm at h2,
+      rewrite <- ne.def at h, rewrite ne_comm at h,
+      simp only [function.update_noteq h2, function.update_noteq h]
     }
   },
   case term.func : n f terms ih
