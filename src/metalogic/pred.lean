@@ -1021,7 +1021,7 @@ begin
             end
       ... ↔ (∀ a : D, holds D m ((x ↦ a) (eval_term D m v ∘ s)) p) :
             begin
-              apply forall_congr, intros a,
+              apply forall_congr, intro a,
               apply thm_3_2, intros z h2,
               by_cases z = x,
               {
@@ -1062,7 +1062,7 @@ begin
       ... ↔ (∃ a : D, holds D m ((x ↦ a) v) (sub s p)) : by unfold holds
       ... ↔ (∃ a : D, holds D m (eval_term D m ((x ↦ a) v) ∘ s) p) :
             begin
-              apply exists_congr, intros a,
+              apply exists_congr, intro a,
               exact ih s ((x ↦ a) v) h1_right_left
             end
       ... ↔ (∃ a : D, holds D m ((x ↦ a) (eval_term D m v ∘ s)) p) :
