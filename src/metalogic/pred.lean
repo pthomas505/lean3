@@ -1282,8 +1282,8 @@ begin
       simp only [if_pos s1, if_pos s2]
     },
     {
-      have s1 : ¬ (u ∉ xs ∧ x = u), push_neg, intro h3, exact h,
-      have s2 : ¬ (u ∉ xs \ {z} ∧ x = u), push_neg, intro h3, exact h,
+      have s1 : ¬ (u ∉ xs ∧ x = u), push_neg, intro, exact h,
+      have s2 : ¬ (u ∉ xs \ {z} ∧ x = u), push_neg, intro, exact h,
       simp only [if_neg s1, if_neg s2]
     }
   },
