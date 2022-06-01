@@ -1358,27 +1358,60 @@ begin
   case formula.forall_ : u p p_ih
   {
     unfold replace, simp only [finset.empty_union, eq_self_iff_true, true_and],
-    by_cases x = u,
+    by_cases z = u,
     {
-      rewrite replace_id, rewrite replace_id,
-      simp only [finset.mem_union], apply or.intro_right, rewrite h, simp only [finset.mem_singleton],
-      simp only [finset.mem_union], apply or.intro_right, rewrite h, simp only [finset.mem_singleton],
+      rewrite h, simp only [finset.sdiff_union_self_eq_union],
     },
     {
       unfold formula.free_var_set at h2,
       unfold formula.bind_var_set at h4,
-      have s4 : y ≠ u, simp at h4, push_neg at h4, cases h4, exact h4_right,
-      have s5 : ((xs \ {z}) ∪ {u}) = (xs ∪ {u}) \ {z}, admit, rewrite s5,
-      apply p_ih, finish, finish, finish,
+      by_cases h30 : x = u,
+      rewrite replace_id, rewrite replace_id,
+      simp only [finset.mem_union], apply or.intro_right, rewrite h30, simp only [finset.mem_singleton],
+      simp only [finset.mem_union], apply or.intro_right, rewrite h30, simp only [finset.mem_singleton],
+      have s1 : y ≠ u, simp at h4, push_neg at h4, cases h4, exact h4_right,
+      have s2 : ((xs \ {z}) ∪ {u}) = (xs ∪ {u}) \ {z}, ext, split, intro s10, simp at s10, cases s10, cases s10, simp, split,
+        apply or.intro_left, exact s10_left, exact s10_right, simp, split, apply or.intro_right, exact s10, rewrite s10,
+        intro h20, apply h, symmetry, exact h20,
+        intro h21, simp, simp at h21, cases h21, cases h21_left, apply or.intro_left, split, exact h21_left, exact h21_right,
+        apply or.intro_right, exact h21_left,
+      rewrite s2, apply p_ih,
+      have s23 : y ∉ p.free_var_set \ {u}, exact finset.not_mem_sdiff_ne_imp_not_mem h2 h3,
+      have s24 : y ∉ p.free_var_set, exact finset.not_mem_sdiff_ne_imp_not_mem s23 s1,
+      exact finset.not_mem_imp_not_mem_sdiff s24, simp at h4, push_neg at h4, cases h4, exact h4_left,
+      simp, push_neg, split, exact h1, exact h30
     }
   },
   case formula.exists_ : u p p_ih
   {
-    admit
+    unfold replace, simp only [finset.empty_union, eq_self_iff_true, true_and],
+    by_cases z = u,
+    {
+      rewrite h, simp only [finset.sdiff_union_self_eq_union],
+    },
+    {
+      unfold formula.free_var_set at h2,
+      unfold formula.bind_var_set at h4,
+      by_cases h30 : x = u,
+      rewrite replace_id, rewrite replace_id,
+      simp only [finset.mem_union], apply or.intro_right, rewrite h30, simp only [finset.mem_singleton],
+      simp only [finset.mem_union], apply or.intro_right, rewrite h30, simp only [finset.mem_singleton],
+      have s1 : y ≠ u, simp at h4, push_neg at h4, cases h4, exact h4_right,
+      have s2 : ((xs \ {z}) ∪ {u}) = (xs ∪ {u}) \ {z}, ext, split, intro s10, simp at s10, cases s10, cases s10, simp, split,
+        apply or.intro_left, exact s10_left, exact s10_right, simp, split, apply or.intro_right, exact s10, rewrite s10,
+        intro h20, apply h, symmetry, exact h20,
+        intro h21, simp, simp at h21, cases h21, cases h21_left, apply or.intro_left, split, exact h21_left, exact h21_right,
+        apply or.intro_right, exact h21_left,
+      rewrite s2, apply p_ih,
+      have s23 : y ∉ p.free_var_set \ {u}, exact finset.not_mem_sdiff_ne_imp_not_mem h2 h3,
+      have s24 : y ∉ p.free_var_set, exact finset.not_mem_sdiff_ne_imp_not_mem s23 s1,
+      exact finset.not_mem_imp_not_mem_sdiff s24, simp at h4, push_neg at h4, cases h4, exact h4_left,
+      simp, push_neg, split, exact h1, exact h30
+    }
   },
 end
 
-/-
+
 lemma lem_3
   (D : Type)
   (m : interpretation D)
@@ -1441,23 +1474,23 @@ begin
     unfold formula.free_var_set at h1,
     unfold formula.bind_var_set at h2, simp only [finset.mem_union, finset.mem_singleton] at h2, push_neg at h2,
     cases h2,
-    have s1 : y ∉ p.free_var_set, finish,
+    have s1 : y ∉ p.free_var_set, exact finset.not_mem_sdiff_ne_imp_not_mem h1 h2_right,
     simp only at p_ih,
     unfold replace, unfold holds,
     simp only [finset.empty_union],
     apply forall_congr, intros a',
     by_cases h : z = x,
     {
-      have s2 : x ∈ {z}, finish,
+      have s2 : x ∈ {z}, simp only [finset.mem_singleton], symmetry, exact h,
       rewrite replace_id x y {z} p s2,
       apply thm_3_2, intros u h3,
-      have s3 : u ≠ y, finish,
+      have s3 : u ≠ y, intro h4, apply s1, rewrite <- h4, exact h3,
       by_cases h' : u = x,
       {
         rewrite <- h at h', rewrite h', simp only [function.update_same],
       },
       {
-        have s4 : u ≠ z, finish,
+        have s4 : u ≠ z, rewrite <- h at h', rewrite <- ne.def at h', exact h',
         simp only [function.update_noteq s4],
         simp only [function.update_noteq h'],
         simp only [function.update_noteq s3]
@@ -1469,8 +1502,9 @@ begin
       apply function.update_comm s2,
       have s4 : function.update (function.update v y a) z a' = function.update (function.update v z a') y a,
       apply function.update_comm h2_right,
-      rewrite s3, rewrite s4, rewrite lem_2 x y z p {z} h1 h2_left h2_right s1, simp,
-      apply p_ih s1 h2_left, finish,
+      have s5 : x ∉ {z}, simp, exact s2,
+      rewrite s3, rewrite s4, rewrite lem_2 x y z p {z} s5 h1 h2_right h2_left, simp,
+      apply p_ih s1 h2_left
     }
   },
   case formula.exists_ : x p p_ih
@@ -1617,4 +1651,3 @@ example
   (t : term)
   (h1 : x ∉ t.all_var_set) :
   is_valid (exists_ x (mk_pred "eq" [var x, t])) := sorry
--/
