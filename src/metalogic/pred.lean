@@ -10,7 +10,7 @@ doi:10.1017/CBO9780511576430
 -/
 
 
-import data.set
+import data.finset
 
 
 lemma finset.mem_ite
@@ -547,7 +547,7 @@ begin
         ↔ ∀ a : D, holds D m ((x ↦ a) v) p : by unfold holds
     ... ↔ ∀ a : D, holds D m ((x ↦ a) v') p :
       begin
-        apply forall_congr, intros a, apply ih, intros y h3,
+        apply forall_congr, intro a, apply ih, intros y h3,
         by_cases y = x,
         rewrite h, simp only [function.update_same],
         simp only [function.update_noteq h], apply h1, exact and.intro h3 h
@@ -562,7 +562,7 @@ begin
         ↔ ∃ a : D, holds D m ((x ↦ a) v) p : by unfold holds
     ... ↔ ∃ a : D, holds D m ((x ↦ a) v') p :
       begin
-        apply exists_congr, intros a, apply ih, intros y h3,
+        apply exists_congr, intro a, apply ih, intros y h3,
         by_cases y = x,
         rewrite h, simp only [function.update_same],
         simp only [function.update_noteq h], apply h1, exact and.intro h3 h
@@ -605,15 +605,15 @@ def satisfies (D : Type) (m : interpretation D) (p : formula) : Prop :=
 /-
 satisfies_set D m S = m satisfies S.
 -/
-def satisfies_set (D : Type) (m : interpretation D) (S : set formula) : Prop :=
-∀ p ∈ S, satisfies D m p
+def satisfies_set (D : Type) (m : interpretation D) (s : finset formula) : Prop :=
+∀ p ∈ s, satisfies D m p
 
 
 def is_satisfiable (p : formula) : Prop :=
 ∃ D : Type, ∃ m : interpretation D, satisfies D m p
 
-def is_satisfiable_set (S : set formula) : Prop :=
-∃ D : Type, ∃ m : interpretation D, ∀ p ∈ S, satisfies D m p
+def is_satisfiable_set (s : finset formula) : Prop :=
+∃ D : Type, ∃ m : interpretation D, ∀ p ∈ s, satisfies D m p
 
 
 /-
@@ -625,8 +625,8 @@ satisfies D m p
 /-
 set_holds_in S D m = S holds in m.
 -/
-def set_holds_in (S : set formula) (D : Type) (m : interpretation D) : Prop :=
-satisfies_set D m S
+def set_holds_in (s : finset formula) (D : Type) (m : interpretation D) : Prop :=
+satisfies_set D m s
 
 
 example
@@ -654,7 +654,7 @@ end
 /-
 is_model_of D m Γ = m is a model of Γ
 -/
-def is_model_of (D : Type) (m : interpretation D) (Γ : set formula) :=
+def is_model_of (D : Type) (m : interpretation D) (Γ : finset formula) :=
 satisfies_set D m Γ
 
 
@@ -673,15 +673,14 @@ begin
     unfold is_valid, unfold holds_in, unfold satisfies, intros h1 D m h2, exact h1 D m
   },
   {
-    unfold is_valid, unfold is_model_of, unfold satisfies_set, unfold holds_in,
-    unfold satisfies, simp only [set.mem_empty_eq],
-    intros h1 D m v, apply h1, intros p h2, contradiction
+    unfold is_valid, unfold is_model_of, unfold satisfies_set, unfold holds_in, unfold satisfies,
+    simp only [finset.not_mem_empty, forall_false_left, implies_true_iff, forall_true_left, imp_self]
   }
 end
 
 
 example
-	(Γ : set formula) :
+	(Γ : finset formula) :
 	¬ (is_satisfiable_set Γ) ↔ (Γ ⊨ bottom) :=
 begin
   unfold is_model_of, unfold is_satisfiable_set, unfold satisfies_set, unfold holds_in, unfold satisfies,
