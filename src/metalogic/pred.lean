@@ -54,7 +54,7 @@ lemma finset.bUnion_filter
   (t : α → finset β)
   (p : α → Prop)
   [decidable_pred p] :
-  finset.bUnion (s.filter p) t = s.bUnion (fun x, if p x then t x else ∅) :=
+  finset.bUnion (finset.filter p s) t = finset.bUnion s (fun x, if p x then t x else ∅) :=
 begin
   apply finset.ext, intro a,
   simp only [finset.mem_ite, imp_iff_not_or, or_and_distrib_right, finset.mem_bUnion, finset.mem_filter, exists_prop,
