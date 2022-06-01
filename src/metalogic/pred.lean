@@ -352,6 +352,17 @@ example
   (h1 : a ≠ a') :
   ((a' ↦ v) f) a = f a := function.update_noteq h1 v f
 
+example
+  {T U : Type}
+  [decidable_eq T]
+  (f : T → U)
+  (a' a : T)
+  (v : U)
+  (h1 : a' ≠ a) :
+  ((a' ↦ v) f) a = f a :=
+begin
+  rewrite ne_comm at h1, exact function.update_noteq h1 v f
+end
 
 def holds (D : Type) (m : interpretation D) : valuation D → formula → Prop
 | _ bottom := false
