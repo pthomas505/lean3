@@ -1293,7 +1293,6 @@ begin
   },
 end
 
-
 lemma lem_2
   (x y z : string)
   (p : formula)
