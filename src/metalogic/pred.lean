@@ -807,10 +807,20 @@ lemma lem_3_6
 begin
   induction p generalizing s,
   case formula.bottom {
-    unfold sub, unfold formula.free_var_set, simp only [finset.bUnion_empty]
+    calc
+          (sub s bottom).free_var_set
+        = bottom.free_var_set : by unfold sub
+    ... = ∅ : by unfold formula.free_var_set
+    ... = finset.bUnion ∅ (fun y : string, (s y).all_var_set) : by simp only [finset.bUnion_empty]
+    ... = finset.bUnion bottom.free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
   },
   case formula.top {
-    unfold sub, unfold formula.free_var_set, simp only [finset.bUnion_empty]
+    calc
+          (sub s top).free_var_set
+        = top.free_var_set : by unfold sub
+    ... = ∅ : by unfold formula.free_var_set
+    ... = finset.bUnion ∅ (fun y : string, (s y).all_var_set) : by simp only [finset.bUnion_empty]
+    ... = finset.bUnion top.free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
   },
   case formula.atom : n x terms {
     calc
