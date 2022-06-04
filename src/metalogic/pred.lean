@@ -1684,7 +1684,7 @@ theorem is_valid_pred_2
 begin
   unfold is_valid, unfold holds,
   intros D m v h2,
-  simp only [thm_3_7 v (sub_single_var x t) p h1],
+  rewrite thm_3_7 v (sub_single_var x t) p h1,
   have s1 : ((eval_term D m v) ∘ (sub_single_var x t)) = ((x ↦ (eval_term D m v t)) v),
     apply funext, intros y, unfold function.comp, unfold sub_single_var,
     by_cases y = x,
