@@ -1403,22 +1403,24 @@ begin
   case formula.exists_ : u p p_ih
   {
     unfold replace, simp only [finset.empty_union, eq_self_iff_true, true_and],
-    by_cases z = u,
+    by_cases h : z = u,
     {
       rewrite h, simp only [finset.sdiff_union_self_eq_union],
     },
     {
-      by_cases h30 : x = u,
-      rewrite replace_id, rewrite replace_id,
-      simp only [finset.mem_union], apply or.intro_right, rewrite h30, simp only [finset.mem_singleton],
-      simp only [finset.mem_union], apply or.intro_right, rewrite h30, simp only [finset.mem_singleton],
-      have s2 : ((xs \ {z}) ∪ {u}) = (xs ∪ {u}) \ {z}, ext, split, intro s10, simp at s10, cases s10, cases s10, simp, split,
-        apply or.intro_left, exact s10_left, exact s10_right, simp, split, apply or.intro_right, exact s10, rewrite s10,
-        intro h20, apply h, symmetry, exact h20,
-        intro h21, simp, simp at h21, cases h21, cases h21_left, apply or.intro_left, split, exact h21_left, exact h21_right,
-        apply or.intro_right, exact h21_left,
-      rewrite s2, apply p_ih,
-      simp, push_neg, split, exact h1, exact h30
+      by_cases h' : x = u,
+      {
+        have s1 : x ∈ xs ∪ {u}, simp only [finset.mem_union, finset.mem_singleton], apply or.intro_right, exact h',
+        have s2 : x ∈ xs \ {z} ∪ {u}, simp only [finset.mem_union, finset.mem_sdiff, finset.mem_singleton],
+          apply or.intro_right, exact h',
+        rewrite replace_id x y (xs ∪ {u}) p s1,
+        rewrite replace_id x y ((xs \ {z}) ∪ {u}) p s2
+      },
+      {
+        have s1 : ((xs \ {z}) ∪ {u}) = (xs ∪ {u}) \ {z}, exact finset.ne_imp_sdiff_union_comm z u xs h,
+        rewrite s1, apply p_ih,
+        simp only [finset.mem_union, finset.mem_singleton], push_neg, exact and.intro h1 h'
+      }
     }
   },
 end
