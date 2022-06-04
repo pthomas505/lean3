@@ -113,6 +113,15 @@ begin
   simp only [finset.sdiff_eq_self_iff_disjoint, finset.disjoint_bUnion_left], intro i, exact h1 i
 end
 
+lemma finset.ne_imp_sdiff_union_comm
+  (a b : string)
+  (s : finset string)
+  (h1 : a ≠ b) :
+  s \ {a} ∪ {b} = (s ∪ {b}) \ {a} :=
+begin
+  admit,
+end
+
 
 lemma finset.mem_ne_imp_mem_sdiff
   {α : Type}
@@ -1337,22 +1346,27 @@ begin
   case formula.forall_ : u p p_ih
   {
     unfold replace, simp only [finset.empty_union, eq_self_iff_true, true_and],
-    by_cases z = u,
+    by_cases h : z = u,
     {
       rewrite h, simp only [finset.sdiff_union_self_eq_union],
     },
     {
-      by_cases h30 : x = u,
-      rewrite replace_id, rewrite replace_id,
-      simp only [finset.mem_union], apply or.intro_right, rewrite h30, simp only [finset.mem_singleton],
-      simp only [finset.mem_union], apply or.intro_right, rewrite h30, simp only [finset.mem_singleton],
-      have s2 : ((xs \ {z}) ∪ {u}) = (xs ∪ {u}) \ {z}, ext, split, intro s10, simp at s10, cases s10, cases s10, simp, split,
+      by_cases h' : x = u,
+      {
+        rewrite replace_id, rewrite replace_id,
+        simp only [finset.mem_union], apply or.intro_right, rewrite h', simp only [finset.mem_singleton],
+        simp only [finset.mem_union], apply or.intro_right, rewrite h', simp only [finset.mem_singleton],
+      },
+      {
+      have s1 : ((xs \ {z}) ∪ {u}) = (xs ∪ {u}) \ {z},
+        extract_goal, ext, split, intro s10, simp at s10, cases s10, cases s10, simp, split,
         apply or.intro_left, exact s10_left, exact s10_right, simp, split, apply or.intro_right, exact s10, rewrite s10,
         intro h20, apply h, symmetry, exact h20,
         intro h21, simp, simp at h21, cases h21, cases h21_left, apply or.intro_left, split, exact h21_left, exact h21_right,
         apply or.intro_right, exact h21_left,
-      rewrite s2, apply p_ih,
-      simp, push_neg, split, exact h1, exact h30
+      rewrite s1, apply p_ih,
+      simp, push_neg, split, exact h1, exact h'
+      }
     }
   },
   case formula.exists_ : u p p_ih
