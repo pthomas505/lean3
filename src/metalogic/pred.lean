@@ -1310,7 +1310,6 @@ begin
   { unfold replace },
   case formula.atom : n p terms
   {
-    unfold formula.free_var_set at h2,
     unfold replace, congr, funext,
     apply replace_sdiff_singleton_term, exact h1
   },
