@@ -1298,7 +1298,7 @@ lemma lem_2
   (p : formula)
   (xs : finset string)
   (h1 : x ∉ xs)
-  (h2 : y ∉ p.free_var_set \ {z})
+--  (h2 : y ∉ p.free_var_set \ {z})
   (h3 : y ≠ z)
   (h4 : y ∉ p.bind_var_set) :
   replace x y xs p = replace x y (xs \ {z}) p :=
@@ -1315,44 +1315,44 @@ begin
   },
   case formula.not : p p_ih
   {
-    unfold formula.free_var_set at h2,
-    unfold replace, rewrite p_ih h2 h4 xs h1,
+--    unfold formula.free_var_set at h2,
+    unfold replace, rewrite p_ih h4 xs h1,
   },
   case formula.and : p q p_ih q_ih
   {
-    unfold formula.free_var_set at h2,
-    simp only [finset.union_sdiff_distrib, finset.not_mem_union] at h2, cases h2,
+    --unfold formula.free_var_set at h2,
+    --simp only [finset.union_sdiff_distrib, finset.not_mem_union] at h2, cases h2,
     unfold formula.bind_var_set at h4,
     simp only [finset.union_sdiff_distrib, finset.not_mem_union] at h4, cases h4,
     unfold replace,
-    rewrite p_ih h2_left h4_left xs h1, rewrite q_ih h2_right h4_right xs h1,
+    rewrite p_ih h4_left xs h1, rewrite q_ih h4_right xs h1,
   },
   case formula.or : p q p_ih q_ih
   {
-    unfold formula.free_var_set at h2,
-    simp only [finset.union_sdiff_distrib, finset.not_mem_union] at h2, cases h2,
+    --unfold formula.free_var_set at h2,
+    --simp only [finset.union_sdiff_distrib, finset.not_mem_union] at h2, cases h2,
     unfold formula.bind_var_set at h4,
     simp only [finset.union_sdiff_distrib, finset.not_mem_union] at h4, cases h4,
     unfold replace,
-    rewrite p_ih h2_left h4_left xs h1, rewrite q_ih h2_right h4_right xs h1,
+    rewrite p_ih h4_left xs h1, rewrite q_ih h4_right xs h1,
   },
   case formula.imp : p q p_ih q_ih
   {
-    unfold formula.free_var_set at h2,
-    simp only [finset.union_sdiff_distrib, finset.not_mem_union] at h2, cases h2,
+    --unfold formula.free_var_set at h2,
+    --simp only [finset.union_sdiff_distrib, finset.not_mem_union] at h2, cases h2,
     unfold formula.bind_var_set at h4,
     simp only [finset.union_sdiff_distrib, finset.not_mem_union] at h4, cases h4,
     unfold replace,
-    rewrite p_ih h2_left h4_left xs h1, rewrite q_ih h2_right h4_right xs h1,
+    rewrite p_ih h4_left xs h1, rewrite q_ih h4_right xs h1,
   },
   case formula.iff : p q p_ih q_ih
   {
-    unfold formula.free_var_set at h2,
-    simp only [finset.union_sdiff_distrib, finset.not_mem_union] at h2, cases h2,
+    --unfold formula.free_var_set at h2,
+    --simp only [finset.union_sdiff_distrib, finset.not_mem_union] at h2, cases h2,
     unfold formula.bind_var_set at h4,
     simp only [finset.union_sdiff_distrib, finset.not_mem_union] at h4, cases h4,
     unfold replace,
-    rewrite p_ih h2_left h4_left xs h1, rewrite q_ih h2_right h4_right xs h1,
+    rewrite p_ih h4_left xs h1, rewrite q_ih h4_right xs h1,
   },
   case formula.forall_ : u p p_ih
   {
@@ -1362,7 +1362,7 @@ begin
       rewrite h, simp only [finset.sdiff_union_self_eq_union],
     },
     {
-      unfold formula.free_var_set at h2,
+      --unfold formula.free_var_set at h2,
       unfold formula.bind_var_set at h4,
       by_cases h30 : x = u,
       rewrite replace_id, rewrite replace_id,
@@ -1374,10 +1374,10 @@ begin
         intro h20, apply h, symmetry, exact h20,
         intro h21, simp, simp at h21, cases h21, cases h21_left, apply or.intro_left, split, exact h21_left, exact h21_right,
         apply or.intro_right, exact h21_left,
-      rewrite s2, apply p_ih,
-      have s23 : y ∉ p.free_var_set \ {u}, exact finset.not_mem_sdiff_ne_imp_not_mem h2 h3,
-      have s24 : y ∉ p.free_var_set, exact finset.not_mem_sdiff_ne_imp_not_mem s23 s1,
-      exact finset.not_mem_imp_not_mem_sdiff s24, simp at h4, push_neg at h4, cases h4, exact h4_left,
+      rewrite s2, apply p_ih, simp at h4, push_neg at h4, cases h4, exact h4_left,
+      --have s23 : y ∉ p.free_var_set \ {u}, exact finset.not_mem_sdiff_ne_imp_not_mem h2 h3,
+      --have s24 : y ∉ p.free_var_set, exact finset.not_mem_sdiff_ne_imp_not_mem s23 s1,
+      --exact finset.not_mem_imp_not_mem_sdiff s24, simp at h4, push_neg at h4, cases h4, exact h4_left,
       simp, push_neg, split, exact h1, exact h30
     }
   },
@@ -1389,7 +1389,7 @@ begin
       rewrite h, simp only [finset.sdiff_union_self_eq_union],
     },
     {
-      unfold formula.free_var_set at h2,
+      --unfold formula.free_var_set at h2,
       unfold formula.bind_var_set at h4,
       by_cases h30 : x = u,
       rewrite replace_id, rewrite replace_id,
@@ -1401,10 +1401,10 @@ begin
         intro h20, apply h, symmetry, exact h20,
         intro h21, simp, simp at h21, cases h21, cases h21_left, apply or.intro_left, split, exact h21_left, exact h21_right,
         apply or.intro_right, exact h21_left,
-      rewrite s2, apply p_ih,
-      have s23 : y ∉ p.free_var_set \ {u}, exact finset.not_mem_sdiff_ne_imp_not_mem h2 h3,
-      have s24 : y ∉ p.free_var_set, exact finset.not_mem_sdiff_ne_imp_not_mem s23 s1,
-      exact finset.not_mem_imp_not_mem_sdiff s24, simp at h4, push_neg at h4, cases h4, exact h4_left,
+      rewrite s2, apply p_ih, simp at h4, push_neg at h4, cases h4, exact h4_left,
+      --have s23 : y ∉ p.free_var_set \ {u}, exact finset.not_mem_sdiff_ne_imp_not_mem h2 h3,
+      --have s24 : y ∉ p.free_var_set, exact finset.not_mem_sdiff_ne_imp_not_mem s23 s1,
+      --exact finset.not_mem_imp_not_mem_sdiff s24, simp at h4, push_neg at h4, cases h4, exact h4_left,
       simp, push_neg, split, exact h1, exact h30
     }
   },
@@ -1502,7 +1502,7 @@ begin
       have s4 : function.update (function.update v y a) z a' = function.update (function.update v z a') y a,
       apply function.update_comm h2_right,
       have s5 : x ∉ {z}, simp, exact s2,
-      rewrite s3, rewrite s4, rewrite lem_2 x y z p {z} s5 h1 h2_right h2_left, simp,
+      rewrite s3, rewrite s4, rewrite lem_2 x y z p {z} s5 h2_right h2_left, simp,
       apply p_ih s1 h2_left
     }
   },
@@ -1540,7 +1540,7 @@ begin
       have s4 : function.update (function.update v y a) z a' = function.update (function.update v z a') y a,
       apply function.update_comm h2_right,
       have s5 : x ∉ {z}, simp, exact s2,
-      rewrite s3, rewrite s4, rewrite lem_2 x y z p {z} s5 h1 h2_right h2_left, simp,
+      rewrite s3, rewrite s4, rewrite lem_2 x y z p {z} s5 h2_right h2_left, simp,
       apply p_ih s1 h2_left
     }
   },
