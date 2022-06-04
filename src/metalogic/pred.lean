@@ -1387,14 +1387,16 @@ begin
     {
       by_cases h' : x = u,
       {
-        rewrite replace_id, rewrite replace_id,
-        simp only [finset.mem_union], apply or.intro_right, rewrite h', simp only [finset.mem_singleton],
-        simp only [finset.mem_union], apply or.intro_right, rewrite h', simp only [finset.mem_singleton],
+        have s1 : x ∈ xs ∪ {u}, simp only [finset.mem_union, finset.mem_singleton], apply or.intro_right, exact h',
+        have s2 : x ∈ xs \ {z} ∪ {u}, simp only [finset.mem_union, finset.mem_sdiff, finset.mem_singleton],
+          apply or.intro_right, exact h',
+        rewrite replace_id x y (xs ∪ {u}) p s1,
+        rewrite replace_id x y ((xs \ {z}) ∪ {u}) p s2
       },
       {
-      have s1 : ((xs \ {z}) ∪ {u}) = (xs ∪ {u}) \ {z}, exact finset.ne_imp_sdiff_union_comm z u xs h,
-      rewrite s1, apply p_ih,
-      simp, push_neg, split, exact h1, exact h'
+        have s1 : ((xs \ {z}) ∪ {u}) = (xs ∪ {u}) \ {z}, exact finset.ne_imp_sdiff_union_comm z u xs h,
+        rewrite s1, apply p_ih,
+        simp only [finset.mem_union, finset.mem_singleton], push_neg, exact and.intro h1 h'
       }
     }
   },
