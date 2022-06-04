@@ -1486,77 +1486,75 @@ begin
   case formula.forall_ : z p p_ih
   {
     unfold formula.free_var_set at h1,
-    unfold formula.bind_var_set at h2, simp only [finset.mem_union, finset.mem_singleton] at h2, push_neg at h2,
-    cases h2,
+    unfold formula.bind_var_set at h2, simp only [finset.mem_union, finset.mem_singleton] at h2, push_neg at h2, cases h2,
     have s1 : y ∉ p.free_var_set, exact finset.not_mem_sdiff_ne_imp_not_mem h1 h2_right,
-    simp only at p_ih,
     unfold replace, unfold holds,
     simp only [finset.empty_union],
     apply forall_congr, intros a',
-    by_cases h : z = x,
+    by_cases h : x = z,
     {
-      have s2 : x ∈ {z}, simp only [finset.mem_singleton], symmetry, exact h,
-      rewrite replace_id x y {z} p s2,
-      apply thm_3_2, intros u h3,
-      have s3 : u ≠ y, intro h4, apply s1, rewrite <- h4, exact h3,
-      by_cases h' : u = x,
-      {
-        rewrite <- h at h', rewrite h', simp only [function.update_same],
-      },
-      {
-        have s4 : u ≠ z, rewrite <- h at h', rewrite <- ne.def at h', exact h',
-        simp only [function.update_noteq s4],
-        simp only [function.update_noteq h'],
-        simp only [function.update_noteq s3]
-      },
+      have s2 : ∀ u : string, u ∈ p.free_var_set →
+        function.update (function.update v x a) z a' u = function.update (function.update v y a) z a' u,
+          intros u h3,
+          by_cases h' : u = z,
+          {
+            rewrite h', simp only [function.update_same]
+          },
+          {
+            simp only [function.update_noteq h'],
+            rewrite h, simp only [function.update_noteq h'],
+            have s3 : u ≠ y, intro h4, apply s1, rewrite <- h4, exact h3,
+            simp only [function.update_noteq s3]
+          },
+      rewrite replace_id,
+      apply thm_3_2, exact s2, simp only [finset.mem_singleton], exact h
     },
     {
-      have s2 : x ≠ z, finish,
+      have s2 : x ∉ {z}, simp only [finset.mem_singleton], exact h,
+      rewrite replace_sdiff_singleton x y z p {z} s2, simp only [finset.sdiff_self], simp only at p_ih,
       have s3 : function.update (function.update v x a) z a' = function.update (function.update v z a') x a,
-      apply function.update_comm s2,
+        apply function.update_comm h,
       have s4 : function.update (function.update v y a) z a' = function.update (function.update v z a') y a,
-      apply function.update_comm h2_right,
-      have s5 : x ∉ {z}, simp, exact s2,
-      rewrite s3, rewrite s4, rewrite replace_sdiff_singleton x y z p {z} s5, simp,
-      apply p_ih s1 h2_left
+        apply function.update_comm h2_right,
+      rewrite s3, rewrite s4,
+      exact p_ih s1 h2_left (function.update v z a')
     }
   },
   case formula.exists_ : z p p_ih
   {
     unfold formula.free_var_set at h1,
-    unfold formula.bind_var_set at h2, simp only [finset.mem_union, finset.mem_singleton] at h2, push_neg at h2,
-    cases h2,
+    unfold formula.bind_var_set at h2, simp only [finset.mem_union, finset.mem_singleton] at h2, push_neg at h2, cases h2,
     have s1 : y ∉ p.free_var_set, exact finset.not_mem_sdiff_ne_imp_not_mem h1 h2_right,
-    simp only at p_ih,
     unfold replace, unfold holds,
     simp only [finset.empty_union],
     apply exists_congr, intros a',
-    by_cases h : z = x,
+    by_cases h : x = z,
     {
-      have s2 : x ∈ {z}, simp only [finset.mem_singleton], symmetry, exact h,
-      rewrite replace_id x y {z} p s2,
-      apply thm_3_2, intros u h3,
-      have s3 : u ≠ y, intro h4, apply s1, rewrite <- h4, exact h3,
-      by_cases h' : u = x,
-      {
-        rewrite <- h at h', rewrite h', simp only [function.update_same],
-      },
-      {
-        have s4 : u ≠ z, rewrite <- h at h', rewrite <- ne.def at h', exact h',
-        simp only [function.update_noteq s4],
-        simp only [function.update_noteq h'],
-        simp only [function.update_noteq s3]
-      },
+      have s2 : ∀ u : string, u ∈ p.free_var_set →
+        function.update (function.update v x a) z a' u = function.update (function.update v y a) z a' u,
+          intros u h3,
+          by_cases h' : u = z,
+          {
+            rewrite h', simp only [function.update_same]
+          },
+          {
+            simp only [function.update_noteq h'],
+            rewrite h, simp only [function.update_noteq h'],
+            have s3 : u ≠ y, intro h4, apply s1, rewrite <- h4, exact h3,
+            simp only [function.update_noteq s3]
+          },
+      rewrite replace_id,
+      apply thm_3_2, exact s2, simp only [finset.mem_singleton], exact h
     },
     {
-      have s2 : x ≠ z, finish,
+      have s2 : x ∉ {z}, simp only [finset.mem_singleton], exact h,
+      rewrite replace_sdiff_singleton x y z p {z} s2, simp only [finset.sdiff_self], simp only at p_ih,
       have s3 : function.update (function.update v x a) z a' = function.update (function.update v z a') x a,
-      apply function.update_comm s2,
+        apply function.update_comm h,
       have s4 : function.update (function.update v y a) z a' = function.update (function.update v z a') y a,
-      apply function.update_comm h2_right,
-      have s5 : x ∉ {z}, simp, exact s2,
-      rewrite s3, rewrite s4, rewrite replace_sdiff_singleton x y z p {z} s5, simp,
-      apply p_ih s1 h2_left
+        apply function.update_comm h2_right,
+      rewrite s3, rewrite s4,
+      exact p_ih s1 h2_left (function.update v z a')
     }
   },
 end
