@@ -114,12 +114,14 @@ begin
 end
 
 lemma finset.ne_imp_sdiff_union_comm
-  (a b : string)
-  (s : finset string)
-  (h1 : a ≠ b) :
-  s \ {a} ∪ {b} = (s ∪ {b}) \ {a} :=
+  {α : Type}
+  [decidable_eq α]
+  (x y : α)
+  (s : finset α)
+  (h1 : x ≠ y) :
+  s \ {x} ∪ {y} = (s ∪ {y}) \ {x} :=
 begin
-  admit,
+  apply finset.ext, intros a, admit,
 end
 
 
