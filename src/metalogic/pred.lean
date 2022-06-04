@@ -1263,7 +1263,7 @@ begin
   },
 end
 
-lemma lem_1_5
+lemma replace_sdiff_singleton_term
   (x y z : string)
   (xs : finset string)
   (t : term)
@@ -1312,7 +1312,7 @@ begin
   {
     unfold formula.free_var_set at h2,
     unfold replace, congr, funext,
-    apply lem_1_5, exact h1
+    apply replace_sdiff_singleton_term, exact h1
   },
   case formula.not : p p_ih
   {
