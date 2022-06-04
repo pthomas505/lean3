@@ -1297,8 +1297,8 @@ lemma lem_2
   (x y z : string)
   (p : formula)
   (xs : finset string)
-  (h1 : x ∉ xs)
-  (h3 : y ≠ z) :
+  (h1 : x ∉ xs) :
+--  (h3 : y ≠ z) :
   replace x y xs p = replace x y (xs \ {z}) p :=
 begin
   induction p generalizing xs,
@@ -1471,7 +1471,7 @@ begin
       have s4 : function.update (function.update v y a) z a' = function.update (function.update v z a') y a,
       apply function.update_comm h2_right,
       have s5 : x ∉ {z}, simp, exact s2,
-      rewrite s3, rewrite s4, rewrite lem_2 x y z p {z} s5 h2_right, simp,
+      rewrite s3, rewrite s4, rewrite lem_2 x y z p {z} s5, simp,
       apply p_ih s1 h2_left
     }
   },
@@ -1509,7 +1509,7 @@ begin
       have s4 : function.update (function.update v y a) z a' = function.update (function.update v z a') y a,
       apply function.update_comm h2_right,
       have s5 : x ∉ {z}, simp, exact s2,
-      rewrite s3, rewrite s4, rewrite lem_2 x y z p {z} s5 h2_right, simp,
+      rewrite s3, rewrite s4, rewrite lem_2 x y z p {z} s5, simp,
       apply p_ih s1 h2_left
     }
   },
