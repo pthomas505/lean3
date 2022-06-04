@@ -1425,7 +1425,6 @@ begin
   },
 end
 
-
 lemma replace_empty_holds
   (D : Type)
   (m : interpretation D)
@@ -1559,7 +1558,7 @@ begin
   },
 end
 
-example
+theorem holds_iff_alpha_eqv_holds
   (D : Type)
   (m : interpretation D)
   (v : valuation D)
