@@ -1426,7 +1426,7 @@ begin
 end
 
 
-lemma lem_3
+lemma replace_empty_holds
   (D : Type)
   (m : interpretation D)
   (v : valuation D)
@@ -1570,11 +1570,11 @@ begin
   induction h1 generalizing v,
   case alpha_eqv.rename_forall : h1_p h1_x h1_y h1_1 h1_2
   {
-    unfold holds, apply forall_congr, intros a, apply lem_3, exact h1_1, exact h1_2,
+    unfold holds, apply forall_congr, intros a, apply replace_empty_holds, exact h1_1, exact h1_2,
   },
   case alpha_eqv.rename_exists : h1_p h1_x h1_y h1_1 h1_2
   {
-    unfold holds, apply exists_congr, intros a, apply lem_3, exact h1_1, exact h1_2,
+    unfold holds, apply exists_congr, intros a, apply replace_empty_holds, exact h1_1, exact h1_2,
   },
   case alpha_eqv.compat_not : h1_p h1_p' h1_1 h1_ih
   {
