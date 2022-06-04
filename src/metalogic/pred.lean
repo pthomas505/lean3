@@ -1224,7 +1224,7 @@ begin
   },
 end
 
-lemma lem_0_5
+lemma eval_replace_term
   (D : Type)
   (m : interpretation D)
   (v : valuation D)
@@ -1432,7 +1432,7 @@ begin
   {
     unfold replace, unfold holds,
     unfold formula.free_var_set at h1, simp at h1,
-    apply iff_of_eq, congr, funext, apply lem_0_5,
+    apply iff_of_eq, congr, funext, apply eval_replace_term,
     simp only [finset.not_mem_empty, not_false_iff], exact h1 i
   },
   case formula.not : p p_ih
