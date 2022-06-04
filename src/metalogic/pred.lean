@@ -119,9 +119,10 @@ lemma finset.ne_imp_sdiff_union_comm
   (x y : α)
   (s : finset α)
   (h1 : x ≠ y) :
-  s \ {x} ∪ {y} = (s ∪ {y}) \ {x} :=
+  (s \ {x}) ∪ {y} = (s ∪ {y}) \ {x} :=
 begin
-  apply finset.ext, intros a, admit,
+  apply finset.ext, intros a,
+  simp only [finset.mem_union, finset.mem_sdiff, finset.mem_singleton], admit,
 end
 
 
@@ -1360,12 +1361,7 @@ begin
         simp only [finset.mem_union], apply or.intro_right, rewrite h', simp only [finset.mem_singleton],
       },
       {
-      have s1 : ((xs \ {z}) ∪ {u}) = (xs ∪ {u}) \ {z},
-        extract_goal, ext, split, intro s10, simp at s10, cases s10, cases s10, simp, split,
-        apply or.intro_left, exact s10_left, exact s10_right, simp, split, apply or.intro_right, exact s10, rewrite s10,
-        intro h20, apply h, symmetry, exact h20,
-        intro h21, simp, simp at h21, cases h21, cases h21_left, apply or.intro_left, split, exact h21_left, exact h21_right,
-        apply or.intro_right, exact h21_left,
+      have s1 : ((xs \ {z}) ∪ {u}) = (xs ∪ {u}) \ {z}, exact finset.ne_imp_sdiff_union_comm z u xs h,
       rewrite s1, apply p_ih,
       simp, push_neg, split, exact h1, exact h'
       }
