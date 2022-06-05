@@ -1173,13 +1173,8 @@ def sub_in_formula (t : term) (x : string) : formula → formula
 | (or p q) := or (sub_in_formula p) (sub_in_formula q)
 | (imp p q) := imp (sub_in_formula p) (sub_in_formula q)
 | (iff p q) := iff (sub_in_formula p) (sub_in_formula q)
-| (forall_ y p) := sorry
-/-
-  | x = y → forall_ y p
-  | x ≠ y → x ∉ p.free_var_set \ {y} → forall_ y (sub_in_formula p)
-  | x ≠ y → y ∉ t.all_var_set → forall_ y (sub_in_formula p)
--/
-| (exists_ y p) := sorry
+| (forall_ y p) := if x ≠ y ∧ y ∉ t.all_var_set then forall_ y (sub_in_formula p) else forall_ y p
+| (exists_ y p) := if x ≠ y ∧ y ∉ t.all_var_set then exists_ y (sub_in_formula p) else exists_ y p
 
 
 def replace_term (x y : string) (xs : finset string) : term → term
