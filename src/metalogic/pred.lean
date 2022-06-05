@@ -1158,9 +1158,28 @@ begin
 end
 
 
+-- not certain if correct
+
+def sub_in_term (t : term) (v : string) : term → term
+| (var v') := if v = v' then t else var v'
+| (func n f terms) := func n f (fun i : fin n, sub_in_term (terms i))
+
+def sub_in_formula (t : term) (x : string) : formula → formula
+| bottom := bottom
+| top := top
+| (atom n p terms) := atom n p (fun i : fin n, sub_in_term t x (terms i))
+| (not p) := not (sub_in_formula p)
+| (and p q) := and (sub_in_formula p) (sub_in_formula q)
+| (or p q) := or (sub_in_formula p) (sub_in_formula q)
+| (imp p q) := imp (sub_in_formula p) (sub_in_formula q)
+| (iff p q) := iff (sub_in_formula p) (sub_in_formula q)
+| (forall_ y p) := if x ≠ y ∧ (y ∉ t.all_var_set ∨ x ∉ p.free_var_set) then forall_ x (sub_in_formula p) else forall_ x p
+| (exists_ y p) := if x ≠ y ∧ (y ∉ t.all_var_set ∨ x ∉ p.free_var_set) then exists_ x (sub_in_formula p) else exists_ x p
+
+
 def replace_term (x y : string) (xs : finset string) : term → term
 | (var x') := if x' ∉ xs ∧ x = x' then var y else var x'
-| (func n f terms) := func n f (fun i : fin n, replace_term(terms i))
+| (func n f terms) := func n f (fun i : fin n, replace_term (terms i))
 
 def replace (x y : string) : finset string → formula → formula
 | xs bottom := bottom
@@ -1609,6 +1628,76 @@ begin
   { symmetry, exact h1_ih v },
   case alpha_eqv.trans : h1_p h1_p' h1_p'' h1_1 h1_2 h1_ih_1 h1_ih_2
   { rewrite h1_ih_1, rewrite h1_ih_2 }
+end
+
+
+-- holds D m v (sub s p) ↔ holds D m ((eval_term D m v) ∘ s) p :=
+
+def sub_prop (x' y : string) : formula → formula
+| bottom := bottom
+| top := top
+| (atom n x terms) := if n = 0 ∧ x = x' then atom n y terms else atom n x terms
+| (not p) := not (sub_prop p)
+| (and p q) := and (sub_prop p) (sub_prop q)
+| (or p q) := or (sub_prop p) (sub_prop q)
+| (imp p q) := imp (sub_prop p) (sub_prop q)
+| (iff p q) := iff (sub_prop p) (sub_prop q)
+| (forall_ x p) := forall_ x (sub_prop p)
+| (exists_ x p) := exists_ x (sub_prop p)
+
+/-
+structure interpretation (domain : Type) : Type :=
+(nonempty : nonempty domain)
+(func (n : ℕ) : string → (fin n → domain) → domain)
+(pred (n : ℕ) : string → (fin n → domain) → Prop)
+-/
+
+example
+  (p : formula)
+  (x' y : string) :
+  is_valid p ↔ is_valid (sub_prop x' y p) :=
+begin
+  induction p,
+  case formula.bottom
+  { unfold sub_prop },
+  case formula.top
+  { unfold sub_prop },
+  case formula.atom : n x terms
+  {
+    unfold sub_prop,
+    by_cases n = 0 ∧ x = x',
+    {
+      simp only [if_pos h],
+      unfold is_valid, unfold holds,
+      split,
+      {
+        intros h1 D m v,
+        let prop' : ∀ n : ℕ, string → (fin n → D) → Prop := sorry,
+        let m' : interpretation D := interpretation.mk m.nonempty m.func prop',
+        admit,
+      },
+      {
+        admit,
+      }
+    },
+    {
+      simp only [if_neg h]
+    }
+  },
+  case formula.not : p_ᾰ p_ih
+  { admit },
+  case formula.and : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
+  { admit },
+  case formula.or : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
+  { admit },
+  case formula.imp : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
+  { admit },
+  case formula.iff : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
+  { admit },
+  case formula.forall_ : p_ᾰ p_ᾰ_1 p_ih
+  { admit },
+  case formula.exists_ : p_ᾰ p_ᾰ_1 p_ih
+  { admit },
 end
 
 
