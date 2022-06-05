@@ -1160,8 +1160,8 @@ end
 
 -- not certain if correct
 
-def sub_in_term (t : term) (v : string) : term → term
-| (var v') := if v = v' then t else var v'
+def sub_in_term (t : term) (x : string) : term → term
+| (var y) := if x = y then t else var y
 | (func n f terms) := func n f (fun i : fin n, sub_in_term (terms i))
 
 def sub_in_formula (t : term) (x : string) : formula → formula
