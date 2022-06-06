@@ -1158,6 +1158,7 @@ begin
 end
 
 
+-- substitution of a term for a single variable
 -- not certain if correct
 
 def sub_in_term (t : term) (x : string) : term → term
@@ -1631,12 +1632,10 @@ begin
 end
 
 
--- holds D m v (sub s p) ↔ holds D m ((eval_term D m v) ∘ s) p :=
-
-def sub_prop (x' y : string) : formula → formula
+def sub_prop (s : string → string) : formula → formula
 | bottom := bottom
 | top := top
-| (atom n x terms) := if n = 0 ∧ x = x' then atom n y terms else atom n x terms
+| (atom n x terms) := if n = 0 then atom n (s x) terms else atom n x terms
 | (not p) := not (sub_prop p)
 | (and p q) := and (sub_prop p) (sub_prop q)
 | (or p q) := or (sub_prop p) (sub_prop q)
@@ -1645,17 +1644,11 @@ def sub_prop (x' y : string) : formula → formula
 | (forall_ x p) := forall_ x (sub_prop p)
 | (exists_ x p) := exists_ x (sub_prop p)
 
-/-
-structure interpretation (domain : Type) : Type :=
-(nonempty : nonempty domain)
-(func (n : ℕ) : string → (fin n → domain) → domain)
-(pred (n : ℕ) : string → (fin n → domain) → Prop)
--/
 
 example
   (p : formula)
-  (x' y : string) :
-  is_valid p ↔ is_valid (sub_prop x' y p) :=
+  (s : string → string) :
+  is_valid p ↔ is_valid (sub_prop s p) :=
 begin
   induction p,
   case formula.bottom
@@ -1665,7 +1658,7 @@ begin
   case formula.atom : n x terms
   {
     unfold sub_prop,
-    by_cases n = 0 ∧ x = x',
+    by_cases n = 0,
     {
       simp only [if_pos h],
       unfold is_valid, unfold holds,
