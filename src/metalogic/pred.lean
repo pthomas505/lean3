@@ -1772,11 +1772,13 @@ begin
     unfold sub_prop_is_def at h1, cases h1,
     apply forall_congr, intros a,
     specialize p_ih h1_left (function.update v z a),
-    have s1 : λ (n : ℕ) (x : string) (terms : fin n → D),
-      ite (n = 0) (holds D m (function.update v z a) (f x)) (m.pred n x terms) =
+    have s1 : (λ (n : ℕ) (x : string) (terms : fin n → D),
+      ite (n = 0) (holds D m (function.update v z a) (f x)) (m.pred n x terms)) =
         λ (n : ℕ) (x : string) (terms : fin n → D),
           ite (n = 0) (holds D m v (f x)) (m.pred n x terms),
-
+    funext, apply propext, split_ifs, apply thm_3_2, intro u,
+    intro h2, specialize h1_right x, admit, admit, admit
+  },
   case formula.exists_ : p_ᾰ p_ᾰ_1 p_ih
   { admit },
 end
