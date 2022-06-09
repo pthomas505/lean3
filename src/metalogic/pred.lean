@@ -1178,6 +1178,68 @@ def sub_in_formula (t : term) (x : string) : formula → formula
 | (exists_ y p) := if x ≠ y ∧ y ∉ t.all_var_set then exists_ y (sub_in_formula p) else exists_ y p
 
 
+lemma lem_3_5'
+  (D : Type)
+  (m : interpretation D)
+  (v : valuation D)
+  (x : string)
+  (t t' : term) :
+  eval_term D m v (sub_in_term t' x t) = eval_term D m ((eval_term D m v) ∘ (fun y : string, if y = x then t' else var y)) t :=
+begin
+  induction t,
+  case term.var : z
+  { unfold sub_in_term, unfold eval_term, unfold function.comp,
+    congr' 2, simp only [eq_comm] },
+  case term.func : n f terms ih
+  { unfold sub_in_term, unfold eval_term, congr, funext, simp only at ih, exact ih i},
+end
+
+theorem thm_3_7'
+  {D : Type}
+  {m : interpretation D}
+  (v : valuation D)
+  (t : term)
+  (x : string)
+  (p : formula) :
+  holds D m v (sub_in_formula t x p) ↔
+    holds D m (fun y : string, eval_term D m v (ite (y = x) t (var y))) p :=
+begin
+  induction p generalizing v,
+  case formula.bottom
+  { admit },
+  case formula.top
+  { admit },
+  case formula.atom : n p terms
+  { unfold sub_in_formula, unfold holds, simp only [lem_3_5'] },
+  case formula.not : p_ᾰ p_ih
+  { admit },
+  case formula.and : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
+  { admit },
+  case formula.or : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
+  { admit },
+  case formula.imp : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
+  { admit },
+  case formula.iff : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
+  { admit },
+  case formula.forall_ : y p p_ih
+  { admit },
+  case formula.exists_ : p_ᾰ p_ᾰ_1 p_ih
+  { admit },
+end
+
+example
+  (t : term)
+  (x : string)
+  (p : formula)
+  (h1 : is_valid p) :
+  is_valid (sub_in_formula t x p) :=
+begin
+  unfold is_valid at *,
+  intros D m v,
+  simp only [thm_3_7'], apply h1
+end
+
+
 def replace_term (x y : string) (xs : finset string) : term → term
 | (var x') := if x' ∉ xs ∧ x = x' then var y else var x'
 | (func n f terms) := func n f (fun i : fin n, replace_term (terms i))
@@ -1632,10 +1694,22 @@ begin
 end
 
 
-def sub_prop (s : string → string) : formula → formula
+def formula.all_prop_set : formula → finset string
+| bottom := ∅
+| top := ∅
+| (atom n x terms) := if n = 0 then {x} else ∅
+| (not p) := p.all_prop_set
+| (and p q) := p.all_prop_set ∪ q.all_prop_set
+| (or p q) := p.all_prop_set ∪ q.all_prop_set
+| (imp p q) := p.all_prop_set ∪ q.all_prop_set
+| (iff p q) := p.all_prop_set ∪ q.all_prop_set
+| (forall_ x p) := p.all_prop_set
+| (exists_ x p) := p.all_prop_set
+
+def sub_prop (s : string → formula) : formula → formula
 | bottom := bottom
 | top := top
-| (atom n x terms) := if n = 0 then atom n (s x) terms else atom n x terms
+| (atom n x terms) := if n = 0 then s x else atom n x terms
 | (not p) := not (sub_prop p)
 | (and p q) := and (sub_prop p) (sub_prop q)
 | (or p q) := or (sub_prop p) (sub_prop q)
@@ -1645,50 +1719,64 @@ def sub_prop (s : string → string) : formula → formula
 | (exists_ x p) := exists_ x (sub_prop p)
 
 
+def sub_prop_is_def (s : string → formula) : formula → Prop
+| bottom := true
+| top := true
+| (atom _ _ _) := true
+| (not p) := sub_prop_is_def p
+| (and p q) := sub_prop_is_def p ∧ sub_prop_is_def q
+| (or p q) := sub_prop_is_def p ∧ sub_prop_is_def q
+| (imp p q) := sub_prop_is_def p ∧ sub_prop_is_def q
+| (iff p q) := sub_prop_is_def p ∧ sub_prop_is_def q
+| (forall_ x p) := sub_prop_is_def p ∧ ∀ y ∈ p.all_prop_set, x ∉ (s y).free_var_set
+| (exists_ x p) := sub_prop_is_def p ∧ ∀ y ∈ p.all_prop_set, x ∉ (s y).free_var_set
+
+
 example
+  (D : Type)
+  (m : interpretation D)
+  (v : valuation D)
   (p : formula)
-  (s : string → string) :
-  is_valid p ↔ is_valid (sub_prop s p) :=
+  (f : string → formula)
+  (h1 : sub_prop_is_def f p) :
+  let m' := interpretation.mk m.nonempty m.func
+    (fun n : ℕ, fun x : string, fun terms : fin n → D,
+      if n = 0 then holds D m v (f x) else m.pred n x terms) in
+  holds D m v (sub_prop f p)
+    ↔ holds D m' v p :=
 begin
-  induction p,
+  induction p generalizing v,
   case formula.bottom
-  { unfold sub_prop },
+  { simp only, unfold sub_prop, unfold holds },
   case formula.top
-  { unfold sub_prop },
-  case formula.atom : n x terms
-  {
-    unfold sub_prop,
-    by_cases n = 0,
-    {
-      simp only [if_pos h],
-      unfold is_valid, unfold holds,
-      split,
-      {
-        intros h1 D m v,
-        let prop' : ∀ n : ℕ, string → (fin n → D) → Prop := sorry,
-        let m' : interpretation D := interpretation.mk m.nonempty m.func prop',
-        admit,
-      },
-      {
-        admit,
-      }
-    },
-    {
-      simp only [if_neg h]
-    }
-  },
-  case formula.not : p_ᾰ p_ih
-  { admit },
-  case formula.and : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
-  { admit },
+  { simp only, unfold sub_prop, unfold holds },
+  case formula.atom : n p terms
+  { simp only, unfold sub_prop, unfold holds, split_ifs, refl,
+    unfold holds, apply iff_of_eq, congr, funext, induction (terms i), unfold eval_term,
+      unfold eval_term, simp only, congr, funext, apply ih },
+  case formula.not : p p_ih
+  { intros m', unfold sub_prop, unfold holds, unfold sub_prop_is_def at h1,
+    apply not_congr, apply p_ih h1 },
+  case formula.and : p q p_ih q_ih
+  { intros m', unfold sub_prop, unfold holds, unfold sub_prop_is_def at h1,
+    cases h1, apply and_congr, apply p_ih h1_left, apply q_ih h1_right },
   case formula.or : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
   { admit },
   case formula.imp : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
   { admit },
   case formula.iff : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
   { admit },
-  case formula.forall_ : p_ᾰ p_ᾰ_1 p_ih
-  { admit },
+  case formula.forall_ : z p p_ih
+  { 
+    simp only at *, unfold sub_prop, unfold holds,
+    unfold sub_prop_is_def at h1, cases h1,
+    apply forall_congr, intros a,
+    specialize p_ih h1_left (function.update v z a),
+    have s1 : λ (n : ℕ) (x : string) (terms : fin n → D),
+      ite (n = 0) (holds D m (function.update v z a) (f x)) (m.pred n x terms) =
+        λ (n : ℕ) (x : string) (terms : fin n → D),
+          ite (n = 0) (holds D m v (f x)) (m.pred n x terms),
+
   case formula.exists_ : p_ᾰ p_ᾰ_1 p_ih
   { admit },
 end
