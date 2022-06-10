@@ -1805,9 +1805,11 @@ begin
         ite (n = 0) (holds D m (function.update v y a) (f x)) (m.pred n x terms)) =
       (fun (n : ℕ) (x : string) (terms : fin n → D),
         ite (n = 0) (holds D m v (f x)) (m.pred n x terms)),
-    funext, apply propext, split_ifs,
-    apply thm_3_2, intros u h2, specialize h1_right x, apply function.update_noteq, admit,
-    refl,
+      funext, apply propext, split_ifs,
+      apply thm_3_2, intros u h2,
+      have s2 : u ≠ y, specialize h1_right x, admit,
+      apply function.update_noteq s2,
+      refl,
     rewrite <- s1, apply p_ih,
   },
   case formula.exists_ : y p p_ih
