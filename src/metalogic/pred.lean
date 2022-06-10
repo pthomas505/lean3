@@ -1718,7 +1718,6 @@ def sub_prop (s : string → formula) : formula → formula
 | (forall_ x p) := forall_ x (sub_prop p)
 | (exists_ x p) := exists_ x (sub_prop p)
 
-
 def sub_prop_is_def (s : string → formula) : formula → Prop
 | bottom := true
 | top := true
@@ -1730,7 +1729,6 @@ def sub_prop_is_def (s : string → formula) : formula → Prop
 | (iff p q) := sub_prop_is_def p ∧ sub_prop_is_def q
 | (forall_ x p) := sub_prop_is_def p ∧ ∀ y ∈ p.all_prop_set, x ∉ (s y).free_var_set
 | (exists_ x p) := sub_prop_is_def p ∧ ∀ y ∈ p.all_prop_set, x ∉ (s y).free_var_set
-
 
 example
   (D : Type)
@@ -1751,35 +1749,68 @@ begin
   case formula.top
   { simp only, unfold sub_prop, unfold holds },
   case formula.atom : n p terms
-  { simp only, unfold sub_prop, unfold holds, split_ifs, refl,
-    unfold holds, apply iff_of_eq, congr, funext, induction (terms i), unfold eval_term,
-      unfold eval_term, simp only, congr, funext, apply ih },
-  case formula.not : p p_ih
-  { intros m', unfold sub_prop, unfold holds, unfold sub_prop_is_def at h1,
-    apply not_congr, apply p_ih h1 },
-  case formula.and : p q p_ih q_ih
-  { intros m', unfold sub_prop, unfold holds, unfold sub_prop_is_def at h1,
-    cases h1, apply and_congr, apply p_ih h1_left, apply q_ih h1_right },
-  case formula.or : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
-  { admit },
-  case formula.imp : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
-  { admit },
-  case formula.iff : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
-  { admit },
-  case formula.forall_ : z p p_ih
-  { 
-    simp only at *, unfold sub_prop, unfold holds,
-    unfold sub_prop_is_def at h1, cases h1,
-    apply forall_congr, intros a,
-    specialize p_ih h1_left (function.update v z a),
-    have s1 : (λ (n : ℕ) (x : string) (terms : fin n → D),
-      ite (n = 0) (holds D m (function.update v z a) (f x)) (m.pred n x terms)) =
-        λ (n : ℕ) (x : string) (terms : fin n → D),
-          ite (n = 0) (holds D m v (f x)) (m.pred n x terms),
-    funext, apply propext, split_ifs, apply thm_3_2, intro u,
-    intro h2, specialize h1_right x, admit, admit, admit
+  {
+    simp only, unfold sub_prop, unfold holds, split_ifs, refl,
+    unfold holds, apply iff_of_eq, congr, funext,
+    induction (terms i),
+      unfold eval_term,
+      unfold eval_term, simp only, congr, funext, apply ih
   },
-  case formula.exists_ : p_ᾰ p_ᾰ_1 p_ih
+  case formula.not : p p_ih
+  {
+    unfold sub_prop_is_def at h1,
+    intros m', unfold sub_prop, unfold holds,
+    apply not_congr, apply p_ih h1
+  },
+  case formula.and : p q p_ih q_ih
+  {
+    unfold sub_prop_is_def at h1, cases h1,
+    intros m', unfold sub_prop, unfold holds,
+    apply and_congr,
+    exact p_ih h1_left v,
+    exact q_ih h1_right v
+  },
+  case formula.or : p q p_ih q_ih
+  {
+    unfold sub_prop_is_def at h1, cases h1,
+    intros m', unfold sub_prop, unfold holds,
+    apply or_congr,
+    exact p_ih h1_left v,
+    exact q_ih h1_right v
+  },
+  case formula.imp : p q p_ih q_ih
+  {
+    unfold sub_prop_is_def at h1, cases h1,
+    intros m', unfold sub_prop, unfold holds,
+    apply imp_congr,
+    exact p_ih h1_left v,
+    exact q_ih h1_right v
+  },
+  case formula.iff : p q p_ih q_ih
+  {
+    unfold sub_prop_is_def at h1, cases h1,
+    intros m', unfold sub_prop, unfold holds,
+    apply iff_congr,
+    exact p_ih h1_left v,
+    exact q_ih h1_right v
+  },
+  case formula.forall_ : y p p_ih
+  { 
+    unfold sub_prop_is_def at h1, cases h1,
+    simp only, unfold sub_prop, unfold holds,
+    apply forall_congr, intros a,
+    specialize p_ih h1_left (function.update v y a),
+    have s1 :
+      (fun (n : ℕ) (x : string) (terms : fin n → D),
+        ite (n = 0) (holds D m (function.update v y a) (f x)) (m.pred n x terms)) =
+      (fun (n : ℕ) (x : string) (terms : fin n → D),
+        ite (n = 0) (holds D m v (f x)) (m.pred n x terms)),
+    funext, apply propext, split_ifs,
+    apply thm_3_2, intros u h2, specialize h1_right x, apply function.update_noteq, admit,
+    refl,
+    rewrite <- s1, apply p_ih,
+  },
+  case formula.exists_ : y p p_ih
   { admit },
 end
 
