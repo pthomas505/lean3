@@ -1817,7 +1817,14 @@ begin
     rintro rfl, exact h1_right _ hy hx
   },
   case formula.exists_ : y p p_ih
-  { admit },
+  {
+    unfold sub_prop_is_def at h1, cases h1,
+    unfold sub_prop, unfold holds,
+    apply exists_congr, intros a,
+    refine p_ih h1_left _ (λ y hy x hx, _),
+    rw [function.update_noteq], exact hv _ hy _ hx,
+    rintro rfl, exact h1_right _ hy hx
+  },
 end
 
 
