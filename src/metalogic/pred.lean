@@ -769,10 +769,12 @@ A mapping of each variable name to a term.
 -/
 def instantiation := string → term
 
+
+-- uniform simultaneous replacement of the variables in a term by terms
+
 def term.sub_var_term (s : instantiation) : term → term
 | (var x) := s x
 | (func n name terms) := func n name (fun i : fin n, term.sub_var_term (terms i))
-
 
 lemma lem_3_4
   (t : term)
@@ -798,7 +800,6 @@ begin
     ... = finset.bUnion (func n f terms).all_var_set (fun y : string, (s y).all_var_set) : by unfold term.all_var_set
   }
 end
-
 
 lemma lem_3_5
   (D : Type)
@@ -828,6 +829,8 @@ begin
   }
 end
 
+
+-- uniform simultaneous replacement of the variables in a formula by terms
 
 def formula.sub_var_term (s : instantiation) : formula → formula
 | bottom := bottom
@@ -1170,87 +1173,26 @@ begin
 end
 
 
--- substitution of a term for a single variable
--- not certain if correct
+-- uniform simultaneous replacement of a single variable in a term by a term
 
-def sub_in_term (t : term) (x : string) : term → term
+def term.sub_single_var_term (t : term) (x : string) : term → term
 | (var y) := if x = y then t else var y
-| (func n f terms) := func n f (fun i : fin n, sub_in_term (terms i))
+| (func n f terms) := func n f (fun i : fin n, term.sub_single_var_term (terms i))
 
-def sub_in_formula (t : term) (x : string) : formula → formula
+def formula.sub_single_var_term (t : term) (x : string) : formula → formula
 | bottom := bottom
 | top := top
-| (atom n p terms) := atom n p (fun i : fin n, sub_in_term t x (terms i))
-| (not p) := not (sub_in_formula p)
-| (and p q) := and (sub_in_formula p) (sub_in_formula q)
-| (or p q) := or (sub_in_formula p) (sub_in_formula q)
-| (imp p q) := imp (sub_in_formula p) (sub_in_formula q)
-| (iff p q) := iff (sub_in_formula p) (sub_in_formula q)
-| (forall_ y p) := if x ≠ y ∧ y ∉ t.all_var_set then forall_ y (sub_in_formula p) else forall_ y p
-| (exists_ y p) := if x ≠ y ∧ y ∉ t.all_var_set then exists_ y (sub_in_formula p) else exists_ y p
+| (atom n p terms) := atom n p (fun i : fin n, term.sub_single_var_term t x (terms i))
+| (not p) := not (formula.sub_single_var_term p)
+| (and p q) := and (formula.sub_single_var_term p) (formula.sub_single_var_term q)
+| (or p q) := or (formula.sub_single_var_term p) (formula.sub_single_var_term q)
+| (imp p q) := imp (formula.sub_single_var_term p) (formula.sub_single_var_term q)
+| (iff p q) := iff (formula.sub_single_var_term p) (formula.sub_single_var_term q)
+| (forall_ y p) := if x ≠ y ∧ y ∉ t.all_var_set then forall_ y (formula.sub_single_var_term p) else forall_ y p
+| (exists_ y p) := if x ≠ y ∧ y ∉ t.all_var_set then exists_ y (formula.sub_single_var_term p) else exists_ y p
 
 
-lemma lem_3_5'
-  (D : Type)
-  (m : interpretation D)
-  (v : valuation D)
-  (x : string)
-  (t t' : term) :
-  eval_term D m v (sub_in_term t' x t) = eval_term D m ((eval_term D m v) ∘ (fun y : string, if y = x then t' else var y)) t :=
-begin
-  induction t,
-  case term.var : z
-  { unfold sub_in_term, unfold eval_term, unfold function.comp,
-    congr' 2, simp only [eq_comm] },
-  case term.func : n f terms ih
-  { unfold sub_in_term, unfold eval_term, congr, funext, simp only at ih, exact ih i},
-end
-
-theorem thm_3_7'
-  {D : Type}
-  {m : interpretation D}
-  (v : valuation D)
-  (t : term)
-  (x : string)
-  (p : formula) :
-  holds D m v (sub_in_formula t x p) ↔
-    holds D m (fun y : string, eval_term D m v (ite (y = x) t (var y))) p :=
-begin
-  induction p generalizing v,
-  case formula.bottom
-  { admit },
-  case formula.top
-  { admit },
-  case formula.atom : n p terms
-  { unfold sub_in_formula, unfold holds, simp only [lem_3_5'] },
-  case formula.not : p_ᾰ p_ih
-  { admit },
-  case formula.and : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
-  { admit },
-  case formula.or : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
-  { admit },
-  case formula.imp : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
-  { admit },
-  case formula.iff : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
-  { admit },
-  case formula.forall_ : y p p_ih
-  { admit },
-  case formula.exists_ : p_ᾰ p_ᾰ_1 p_ih
-  { admit },
-end
-
-example
-  (t : term)
-  (x : string)
-  (p : formula)
-  (h1 : is_valid p) :
-  is_valid (sub_in_formula t x p) :=
-begin
-  unfold is_valid at *,
-  intros D m v,
-  simp only [thm_3_7'], apply h1
-end
-
+-- uniform simultaneous replacement of the atoms in a formula by formulas
 
 def formula.sub_atom_formula (s : (ℕ × string) → formula) : formula → formula
 | bottom := bottom
