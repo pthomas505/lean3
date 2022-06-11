@@ -1173,27 +1173,6 @@ begin
 end
 
 
--- uniform simultaneous replacement of a single variable in a term by a term
-
-def term.sub_single_var_term (t : term) (x : string) : term → term
-| (var y) := if x = y then t else var y
-| (func n f terms) := func n f (fun i : fin n, term.sub_single_var_term (terms i))
-
--- uniform simultaneous replacement of a single variable in a formula by a term
-
-def formula.sub_single_var_term (t : term) (x : string) : formula → formula
-| bottom := bottom
-| top := top
-| (atom n p terms) := atom n p (fun i : fin n, term.sub_single_var_term t x (terms i))
-| (not p) := not (formula.sub_single_var_term p)
-| (and p q) := and (formula.sub_single_var_term p) (formula.sub_single_var_term q)
-| (or p q) := or (formula.sub_single_var_term p) (formula.sub_single_var_term q)
-| (imp p q) := imp (formula.sub_single_var_term p) (formula.sub_single_var_term q)
-| (iff p q) := iff (formula.sub_single_var_term p) (formula.sub_single_var_term q)
-| (forall_ y p) := if x ≠ y ∧ y ∉ t.all_var_set then forall_ y (formula.sub_single_var_term p) else forall_ y p
-| (exists_ y p) := if x ≠ y ∧ y ∉ t.all_var_set then exists_ y (formula.sub_single_var_term p) else exists_ y p
-
-
 -- uniform simultaneous replacement of the atoms in a formula by formulas
 
 def formula.sub_atom_formula (s : (ℕ × string) → formula) : formula → formula
@@ -1343,6 +1322,27 @@ begin
   intros y h3 x h4, refl,
   exact h1
 end
+
+
+-- uniform simultaneous replacement of a single variable in a term by a term
+
+def term.sub_single_var_term (t : term) (x : string) : term → term
+| (var y) := if x = y then t else var y
+| (func n f terms) := func n f (fun i : fin n, term.sub_single_var_term (terms i))
+
+-- uniform simultaneous replacement of a single variable in a formula by a term
+
+def formula.sub_single_var_term (t : term) (x : string) : formula → formula
+| bottom := bottom
+| top := top
+| (atom n p terms) := atom n p (fun i : fin n, term.sub_single_var_term t x (terms i))
+| (not p) := not (formula.sub_single_var_term p)
+| (and p q) := and (formula.sub_single_var_term p) (formula.sub_single_var_term q)
+| (or p q) := or (formula.sub_single_var_term p) (formula.sub_single_var_term q)
+| (imp p q) := imp (formula.sub_single_var_term p) (formula.sub_single_var_term q)
+| (iff p q) := iff (formula.sub_single_var_term p) (formula.sub_single_var_term q)
+| (forall_ y p) := if x ≠ y ∧ y ∉ t.all_var_set then forall_ y (formula.sub_single_var_term p) else forall_ y p
+| (exists_ y p) := if x ≠ y ∧ y ∉ t.all_var_set then exists_ y (formula.sub_single_var_term p) else exists_ y p
 
 
 -- alpha equivalence
