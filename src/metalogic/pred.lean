@@ -841,23 +841,23 @@ def formula.sub_var_for_term (s : instantiation) : formula → formula
 | (forall_ x p) := forall_ x (formula.sub_var_for_term p)
 | (exists_ x p) := exists_ x (formula.sub_var_for_term p)
 
-def sub_is_def (s : instantiation) : formula → Prop
+def formula.sub_var_for_term_is_def (s : instantiation) : formula → Prop
 | bottom := true
 | top := true
 | (atom _ _ _) := true
-| (not p) := sub_is_def p
-| (and p q) := sub_is_def p ∧ sub_is_def q
-| (or p q) := sub_is_def p ∧ sub_is_def q
-| (imp p q) := sub_is_def p ∧ sub_is_def q
-| (iff p q) := sub_is_def p ∧ sub_is_def q
-| (forall_ x p) := s x = var x ∧ sub_is_def p ∧ ∀ y ∈ p.free_var_set \ {x}, x ∉ (s y).all_var_set
-| (exists_ x p) := s x = var x ∧ sub_is_def p ∧ ∀ y ∈ p.free_var_set \ {x}, x ∉ (s y).all_var_set
+| (not p) := formula.sub_var_for_term_is_def p
+| (and p q) := formula.sub_var_for_term_is_def p ∧ formula.sub_var_for_term_is_def q
+| (or p q) := formula.sub_var_for_term_is_def p ∧ formula.sub_var_for_term_is_def q
+| (imp p q) := formula.sub_var_for_term_is_def p ∧ formula.sub_var_for_term_is_def q
+| (iff p q) := formula.sub_var_for_term_is_def p ∧ formula.sub_var_for_term_is_def q
+| (forall_ x p) := s x = var x ∧ formula.sub_var_for_term_is_def p ∧ ∀ y ∈ p.free_var_set \ {x}, x ∉ (s y).all_var_set
+| (exists_ x p) := s x = var x ∧ formula.sub_var_for_term_is_def p ∧ ∀ y ∈ p.free_var_set \ {x}, x ∉ (s y).all_var_set
 
 
 lemma lem_3_6
   (p : formula)
   (s : instantiation)
-  (h1 : sub_is_def s p) :
+  (h1 : formula.sub_var_for_term_is_def s p) :
   (formula.sub_var_for_term s p).free_var_set = finset.bUnion p.free_var_set (fun y : string, (s y).all_var_set) :=
 begin
   induction p generalizing s,
@@ -893,7 +893,7 @@ begin
           (formula.sub_var_for_term s (not p)).free_var_set
         = (not (formula.sub_var_for_term s p)).free_var_set : by unfold formula.sub_var_for_term
     ... = (formula.sub_var_for_term s p).free_var_set : by unfold formula.free_var_set
-    ... = finset.bUnion p.free_var_set (fun y : string, (s y).all_var_set) : begin unfold sub_is_def at h1, exact ih s h1 end
+    ... = finset.bUnion p.free_var_set (fun y : string, (s y).all_var_set) : begin unfold formula.sub_var_for_term_is_def at h1, exact ih s h1 end
     ... = finset.bUnion (not p).free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
   },
   case formula.and : p q ih_p ih_q {
@@ -904,7 +904,7 @@ begin
     ... = finset.bUnion p.free_var_set (fun y : string, (s y).all_var_set) ∪
             finset.bUnion q.free_var_set (fun y : string, (s y).all_var_set) :
           begin
-            unfold sub_is_def at h1, cases h1,
+            unfold formula.sub_var_for_term_is_def at h1, cases h1,
             congr, exact ih_p s h1_left, exact ih_q s h1_right,
           end
     ... = finset.bUnion (p.free_var_set ∪ q.free_var_set) (fun y : string, (s y).all_var_set) : by simp [finset.bUnion_union, finset.union_comm]
@@ -918,7 +918,7 @@ begin
     ... = finset.bUnion p.free_var_set (fun y : string, (s y).all_var_set) ∪
             finset.bUnion q.free_var_set (fun y : string, (s y).all_var_set) :
           begin
-            unfold sub_is_def at h1, cases h1,
+            unfold formula.sub_var_for_term_is_def at h1, cases h1,
             congr, exact ih_p s h1_left, exact ih_q s h1_right,
           end
     ... = finset.bUnion (p.free_var_set ∪ q.free_var_set) (fun y : string, (s y).all_var_set) : by simp [finset.bUnion_union, finset.union_comm]
@@ -932,7 +932,7 @@ begin
     ... = finset.bUnion p.free_var_set (fun y : string, (s y).all_var_set) ∪
             finset.bUnion q.free_var_set (fun y : string, (s y).all_var_set) :
           begin
-            unfold sub_is_def at h1, cases h1,
+            unfold formula.sub_var_for_term_is_def at h1, cases h1,
             congr, exact ih_p s h1_left, exact ih_q s h1_right,
           end
     ... = finset.bUnion (p.free_var_set ∪ q.free_var_set) (fun y : string, (s y).all_var_set) : by simp [finset.bUnion_union, finset.union_comm]
@@ -946,14 +946,14 @@ begin
     ... = finset.bUnion p.free_var_set (fun y : string, (s y).all_var_set) ∪
             finset.bUnion q.free_var_set (fun y : string, (s y).all_var_set) :
           begin
-            unfold sub_is_def at h1, cases h1,
+            unfold formula.sub_var_for_term_is_def at h1, cases h1,
             congr, exact ih_p s h1_left, exact ih_q s h1_right,
           end
     ... = finset.bUnion (p.free_var_set ∪ q.free_var_set) (fun y : string, (s y).all_var_set) : by simp [finset.bUnion_union, finset.union_comm]
     ... = finset.bUnion (iff p q).free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
   },
   case formula.forall_ : x p ih {
-    unfold sub_is_def at h1, cases h1, cases h1_right,
+    unfold formula.sub_var_for_term_is_def at h1, cases h1, cases h1_right,
     calc
           (formula.sub_var_for_term s (forall_ x p)).free_var_set
         = (forall_ x (formula.sub_var_for_term s p)).free_var_set :
@@ -971,7 +971,7 @@ begin
     ... = finset.bUnion (forall_ x p).free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
   },
   case formula.exists_ : x p ih {
-    unfold sub_is_def at h1, cases h1, cases h1_right,
+    unfold formula.sub_var_for_term_is_def at h1, cases h1, cases h1_right,
     calc
           (formula.sub_var_for_term s (exists_ x p)).free_var_set
         = (exists_ x (formula.sub_var_for_term s p)).free_var_set :
@@ -997,7 +997,7 @@ theorem thm_3_7
   (v : valuation D)
   (s : instantiation)
   (p : formula)
-  (h1 : sub_is_def s p) :
+  (h1 : formula.sub_var_for_term_is_def s p) :
   holds D m v (formula.sub_var_for_term s p) ↔ holds D m ((eval_term D m v) ∘ s) p :=
 begin
   induction p generalizing s v,
@@ -1027,7 +1027,7 @@ begin
     calc
     holds D m v (formula.sub_var_for_term s (not p)) ↔ holds D m v (not (formula.sub_var_for_term s p)) : by unfold formula.sub_var_for_term
     ... ↔ ¬ holds D m v (formula.sub_var_for_term s p) : by unfold holds
-    ... ↔ ¬ holds D m ((eval_term D m v) ∘ s) p : begin unfold sub_is_def at h1, rewrite ih s v h1 end
+    ... ↔ ¬ holds D m ((eval_term D m v) ∘ s) p : begin unfold formula.sub_var_for_term_is_def at h1, rewrite ih s v h1 end
     ... ↔ holds D m ((eval_term D m v) ∘ s) (not p) : by unfold holds
   },
   case formula.and : p q ih_p ih_q {
@@ -1035,7 +1035,7 @@ begin
     holds D m v (formula.sub_var_for_term s (and p q)) ↔ holds D m v (and (formula.sub_var_for_term s p) (formula.sub_var_for_term s q)) : by unfold formula.sub_var_for_term
     ... ↔ (holds D m v (formula.sub_var_for_term s p)) ∧ (holds D m v (formula.sub_var_for_term s q)) : by unfold holds
     ... ↔ (holds D m ((eval_term D m v) ∘ s) p) ∧ (holds D m ((eval_term D m v) ∘ s) q) :
-        begin unfold sub_is_def at h1, cases h1, rewrite ih_p s v h1_left, rewrite ih_q s v h1_right end
+        begin unfold formula.sub_var_for_term_is_def at h1, cases h1, rewrite ih_p s v h1_left, rewrite ih_q s v h1_right end
     ... ↔ holds D m ((eval_term D m v) ∘ s) (and p q) : by unfold holds
   },
   case formula.or : p q ih_p ih_q {
@@ -1043,7 +1043,7 @@ begin
     holds D m v (formula.sub_var_for_term s (or p q)) ↔ holds D m v (or (formula.sub_var_for_term s p) (formula.sub_var_for_term s q)) : by unfold formula.sub_var_for_term
     ... ↔ (holds D m v (formula.sub_var_for_term s p)) ∨ (holds D m v (formula.sub_var_for_term s q)) : by unfold holds
     ... ↔ (holds D m ((eval_term D m v) ∘ s) p) ∨ (holds D m ((eval_term D m v) ∘ s) q) :
-        begin unfold sub_is_def at h1, cases h1, rewrite ih_p s v h1_left, rewrite ih_q s v h1_right end
+        begin unfold formula.sub_var_for_term_is_def at h1, cases h1, rewrite ih_p s v h1_left, rewrite ih_q s v h1_right end
     ... ↔ holds D m ((eval_term D m v) ∘ s) (or p q) : by unfold holds
   },
   case formula.imp : p q ih_p ih_q {
@@ -1051,7 +1051,7 @@ begin
     holds D m v (formula.sub_var_for_term s (imp p q)) ↔ holds D m v (imp (formula.sub_var_for_term s p) (formula.sub_var_for_term s q)) : by unfold formula.sub_var_for_term
     ... ↔ (holds D m v (formula.sub_var_for_term s p)) → (holds D m v (formula.sub_var_for_term s q)) : by unfold holds
     ... ↔ (holds D m ((eval_term D m v) ∘ s) p) → (holds D m ((eval_term D m v) ∘ s) q) :
-        begin unfold sub_is_def at h1, cases h1, rewrite ih_p s v h1_left, rewrite ih_q s v h1_right end
+        begin unfold formula.sub_var_for_term_is_def at h1, cases h1, rewrite ih_p s v h1_left, rewrite ih_q s v h1_right end
     ... ↔ holds D m ((eval_term D m v) ∘ s) (imp p q) : by unfold holds
   },
   case formula.iff : p q ih_p ih_q {
@@ -1059,12 +1059,12 @@ begin
     holds D m v (formula.sub_var_for_term s (iff p q)) ↔ holds D m v (iff (formula.sub_var_for_term s p) (formula.sub_var_for_term s q)) : by unfold formula.sub_var_for_term
     ... ↔ ((holds D m v (formula.sub_var_for_term s p)) ↔ (holds D m v (formula.sub_var_for_term s q))) : by unfold holds
     ... ↔ ((holds D m ((eval_term D m v) ∘ s) p) ↔ (holds D m ((eval_term D m v) ∘ s) q)) :
-        begin unfold sub_is_def at h1, cases h1, rewrite ih_p s v h1_left, rewrite ih_q s v h1_right end
+        begin unfold formula.sub_var_for_term_is_def at h1, cases h1, rewrite ih_p s v h1_left, rewrite ih_q s v h1_right end
     ... ↔ holds D m ((eval_term D m v) ∘ s) (iff p q) : by unfold holds
   },
   case formula.forall_ : x p ih {
     begin
-      unfold sub_is_def at h1, cases h1, cases h1_right,
+      unfold formula.sub_var_for_term_is_def at h1, cases h1, cases h1_right,
       calc
             holds D m v (formula.sub_var_for_term s (forall_ x p))
           ↔ holds D m v (forall_ x (formula.sub_var_for_term s p)) : by unfold formula.sub_var_for_term
@@ -1110,7 +1110,7 @@ begin
   },
   case formula.exists_ : x p ih {
     begin
-      unfold sub_is_def at h1, cases h1, cases h1_right,
+      unfold formula.sub_var_for_term_is_def at h1, cases h1, cases h1_right,
       calc
             holds D m v (formula.sub_var_for_term s (exists_ x p))
           ↔ holds D m v (exists_ x (formula.sub_var_for_term s p)) : by unfold formula.sub_var_for_term
@@ -1160,7 +1160,7 @@ end
 theorem cor_3_8
   (p : formula)
   (s : instantiation)
-  (h1 : sub_is_def s p)
+  (h1 : formula.sub_var_for_term_is_def s p)
   (h2 : is_valid p) :
   is_valid (formula.sub_var_for_term s p) :=
 begin
@@ -1921,7 +1921,7 @@ theorem is_valid_pred_2
   (p : formula)
   (x : string)
   (t : term)
-  (h1 : sub_is_def (sub_single_var x t) p) :
+  (h1 : formula.sub_var_for_term_is_def (sub_single_var x t) p) :
   is_valid ((forall_ x p).imp (formula.sub_var_for_term (sub_single_var x t) p)) :=
 begin
   unfold is_valid, unfold holds,
