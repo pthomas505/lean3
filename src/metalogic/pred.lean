@@ -1738,16 +1738,16 @@ interpretation.mk m.nonempty m.func
   (fun n : ℕ, fun x : string, fun terms : fin n → D,
     if n = 0 then holds D m v (f x) else m.pred n x terms)
 
-example
+lemma sub_prop_holds
   (D : Type)
   (m : interpretation D)
   (v v' : valuation D)
   (p : formula)
-  (f : string → formula)
-  (hv : ∀ (y ∈ p.all_prop_set) (x ∈ (f y).free_var_set), v x = v' x)
-  (h1 : sub_prop_is_def f p) :
-  holds D m v (sub_prop f p)
-    ↔ holds D (m.sub v' f) v p :=
+  (s : string → formula)
+  (hv : ∀ (y ∈ p.all_prop_set) (x ∈ (s y).free_var_set), v x = v' x)
+  (h1 : sub_prop_is_def s p) :
+  holds D m v (sub_prop s p)
+    ↔ holds D (m.sub v' s) v p :=
 begin
   induction p generalizing v,
   case formula.bottom
@@ -1827,6 +1827,20 @@ begin
   },
 end
 
+example
+  (p : formula)
+  (s : string → formula)
+  (h1 : sub_prop_is_def s p)
+  (h2 : is_valid p) :
+  is_valid (sub_prop s p) :=
+begin
+  unfold is_valid at *,
+  intros D m v,
+  rewrite sub_prop_holds D m v v,
+  apply h2,
+  intros y h3 x h4, refl,
+  exact h1
+end
 
 theorem is_valid_mp
   (p q : formula)
