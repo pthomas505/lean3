@@ -1179,6 +1179,8 @@ def term.sub_single_var_term (t : term) (x : string) : term → term
 | (var y) := if x = y then t else var y
 | (func n f terms) := func n f (fun i : fin n, term.sub_single_var_term (terms i))
 
+-- uniform simultaneous replacement of a single variable in a formula by a term
+
 def formula.sub_single_var_term (t : term) (x : string) : formula → formula
 | bottom := bottom
 | top := top
