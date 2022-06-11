@@ -1833,6 +1833,18 @@ def is_alpha_eqv : list (string × string) → formula → formula → Prop
 | _ _ _ := false
 
 
+example
+  (D : Type)
+  (m : interpretation D)
+  (v : valuation D)
+  (p p' : formula)
+  (h1 : is_alpha_eqv [] p p') :
+  holds D m v p ↔ holds D m v p' :=
+begin
+  admit,
+end
+
+
 -- axioms of propositional logic
 
 theorem is_valid_mp
