@@ -1345,6 +1345,8 @@ begin
 end
 
 
+-- alpha equivalence
+
 def replace_term (x y : string) (xs : finset string) : term → term
 | (var x') := if x' ∉ xs ∧ x = x' then var y else var x'
 | (func n f terms) := func n f (fun i : fin n, replace_term (terms i))
@@ -1799,6 +1801,8 @@ begin
 end
 
 
+-- axioms of propositional logic
+
 theorem is_valid_mp
   (p q : formula)
   (h1 : is_valid p)
@@ -1837,6 +1841,8 @@ begin
   by_contradiction, apply h1, exact h, exact h2
 end
 
+
+-- axioms of predicate logic
 
 theorem is_valid_gen
   (p : formula)
@@ -1895,9 +1901,3 @@ begin
     by_contradiction, apply h1, rewrite <- h, exact h4,
   rewrite @thm_3_2 D m p ((x ↦ a) v) v s1, exact h2
 end
-
-example
-  (x : string)
-  (t : term)
-  (h1 : x ∉ t.all_var_set) :
-  is_valid (exists_ x (mk_pred "eq" [var x, t])) := sorry
