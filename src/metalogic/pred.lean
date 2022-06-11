@@ -1842,6 +1842,167 @@ begin
   exact h1
 end
 
+def formula.all_pred_set : formula → finset (ℕ × string)
+| bottom := ∅
+| top := ∅
+| (atom n x terms) := {(n, x)}
+| (not p) := p.all_pred_set
+| (and p q) := p.all_pred_set ∪ q.all_pred_set
+| (or p q) := p.all_pred_set ∪ q.all_pred_set
+| (imp p q) := p.all_pred_set ∪ q.all_pred_set
+| (iff p q) := p.all_pred_set ∪ q.all_pred_set
+| (forall_ x p) := p.all_pred_set
+| (exists_ x p) := p.all_pred_set
+
+def sub_pred (s : (ℕ × string) → formula) : formula → formula
+| bottom := bottom
+| top := top
+| (atom n x terms) := s (n, x)
+| (not p) := not (sub_pred p)
+| (and p q) := and (sub_pred p) (sub_pred q)
+| (or p q) := or (sub_pred p) (sub_pred q)
+| (imp p q) := imp (sub_pred p) (sub_pred q)
+| (iff p q) := iff (sub_pred p) (sub_pred q)
+| (forall_ x p) := forall_ x (sub_pred p)
+| (exists_ x p) := exists_ x (sub_pred p)
+
+def sub_pred_is_def (s : (ℕ × string) → formula) : formula → Prop
+| bottom := true
+| top := true
+| (atom _ _ _) := true
+| (not p) := sub_pred_is_def p
+| (and p q) := sub_pred_is_def p ∧ sub_pred_is_def q
+| (or p q) := sub_pred_is_def p ∧ sub_pred_is_def q
+| (imp p q) := sub_pred_is_def p ∧ sub_pred_is_def q
+| (iff p q) := sub_pred_is_def p ∧ sub_pred_is_def q
+| (forall_ x p) := sub_pred_is_def p ∧ ∀ y ∈ p.all_pred_set, x ∉ (s y).free_var_set
+| (exists_ x p) := sub_pred_is_def p ∧ ∀ y ∈ p.all_pred_set, x ∉ (s y).free_var_set
+
+def interpretation.sub' {D}
+  (m : interpretation D)
+  (v : valuation D)
+  (f : (ℕ × string) → formula) : interpretation D :=
+interpretation.mk m.nonempty m.func
+  (fun n : ℕ, fun x : string, fun terms : fin n → D,
+    holds D m v (f (n, x)))
+
+lemma sub_pred_holds
+  (D : Type)
+  (m : interpretation D)
+  (v v' : valuation D)
+  (p : formula)
+  (s : (ℕ × string) → formula)
+  (hv : ∀ (y ∈ p.all_pred_set) (x ∈ (s y).free_var_set), v x = v' x)
+  (h1 : sub_pred_is_def s p) :
+  holds D m v (sub_pred s p)
+    ↔ holds D (m.sub' v' s) v p :=
+begin
+  induction p generalizing v,
+  case formula.bottom : v hv
+  { unfold interpretation.sub', unfold sub_pred, unfold holds },
+  case formula.top : v hv
+  { unfold interpretation.sub', unfold sub_pred, unfold holds },
+  case formula.atom : n p terms v hv
+  {
+    simp only [interpretation.sub'], unfold sub_pred, unfold holds,
+    simp [formula.all_pred_set] at hv,
+    apply thm_3_2,
+    intros x h2, apply hv n p, refl, refl, exact h2
+  },
+  case formula.not : p p_ih v hv
+  {
+    unfold sub_pred_is_def at h1,
+    unfold sub_pred, unfold holds,
+    apply not_congr, apply p_ih h1 _ hv
+  },
+  case formula.and : p q p_ih q_ih
+  {
+    unfold sub_pred_is_def at h1, cases h1,
+    unfold sub_pred, unfold holds,
+    simp [formula.all_pred_set, or_imp_distrib, forall_and_distrib] at hv,
+    apply and_congr,
+    apply p_ih h1_left,
+    intros y h2 x h3, apply hv.1 y.1 y.2,
+    simp only [prod.mk.eta], exact h2, simp only [prod.mk.eta], exact h3,
+    apply q_ih h1_right,
+    intros y h2 x h3, apply hv.2 y.1 y.2,
+    simp only [prod.mk.eta], exact h2, simp only [prod.mk.eta], exact h3
+  },
+  case formula.or : p q p_ih q_ih
+  {
+    unfold sub_pred_is_def at h1, cases h1,
+    unfold sub_pred, unfold holds,
+    simp [formula.all_pred_set, or_imp_distrib, forall_and_distrib] at hv,
+    apply or_congr,
+    apply p_ih h1_left,
+    intros y h2 x h3, apply hv.1 y.1 y.2,
+    simp only [prod.mk.eta], exact h2, simp only [prod.mk.eta], exact h3,
+    apply q_ih h1_right,
+    intros y h2 x h3, apply hv.2 y.1 y.2,
+    simp only [prod.mk.eta], exact h2, simp only [prod.mk.eta], exact h3
+  },
+  case formula.imp : p q p_ih q_ih
+  {
+    unfold sub_pred_is_def at h1, cases h1,
+    unfold sub_pred, unfold holds,
+    simp [formula.all_pred_set, or_imp_distrib, forall_and_distrib] at hv,
+    apply imp_congr,
+    apply p_ih h1_left,
+    intros y h2 x h3, apply hv.1 y.1 y.2,
+    simp only [prod.mk.eta], exact h2, simp only [prod.mk.eta], exact h3,
+    apply q_ih h1_right,
+    intros y h2 x h3, apply hv.2 y.1 y.2,
+    simp only [prod.mk.eta], exact h2, simp only [prod.mk.eta], exact h3
+  },
+  case formula.iff : p q p_ih q_ih
+  {
+    unfold sub_pred_is_def at h1, cases h1,
+    unfold sub_pred, unfold holds,
+    simp [formula.all_pred_set, or_imp_distrib, forall_and_distrib] at hv,
+    apply iff_congr,
+    apply p_ih h1_left,
+    intros y h2 x h3, apply hv.1 y.1 y.2,
+    simp only [prod.mk.eta], exact h2, simp only [prod.mk.eta], exact h3,
+    apply q_ih h1_right,
+    intros y h2 x h3, apply hv.2 y.1 y.2,
+    simp only [prod.mk.eta], exact h2, simp only [prod.mk.eta], exact h3
+  },
+  case formula.forall_ : y p p_ih v hv
+  {
+    unfold sub_pred_is_def at h1, cases h1,
+    unfold sub_pred, unfold holds,
+    apply forall_congr, intros a,
+    refine p_ih h1_left _ (λ y hy x hx, _),
+    rw [function.update_noteq], exact hv _ hy _ hx,
+    rintro rfl, exact h1_right _ hy hx
+  },
+  case formula.exists_ : y p p_ih v hv
+  {
+    unfold sub_pred_is_def at h1, cases h1,
+    unfold sub_pred, unfold holds,
+    apply exists_congr, intros a,
+    refine p_ih h1_left _ (λ y hy x hx, _),
+    rw [function.update_noteq], exact hv _ hy _ hx,
+    rintro rfl, exact h1_right _ hy hx
+  },
+end
+
+example
+  (p : formula)
+  (s : (ℕ × string) → formula)
+  (h1 : sub_pred_is_def s p)
+  (h2 : is_valid p) :
+  is_valid (sub_pred s p) :=
+begin
+  unfold is_valid at *,
+  intros D m v,
+  rewrite sub_pred_holds D m v v,
+  apply h2,
+  intros y h3 x h4, refl,
+  exact h1
+end
+
+
 theorem is_valid_mp
   (p q : formula)
   (h1 : is_valid p)
