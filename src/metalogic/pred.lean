@@ -458,7 +458,8 @@ def holds (D : Type) (m : interpretation D) : valuation D → formula → Prop
 
 def term.all_var_set : term → finset string
 | (var x) := {x}
-| (func n f terms) := finset.bUnion finset.univ (fun i : fin n, (terms i).all_var_set)
+| (func n f terms) :=
+    finset.bUnion finset.univ (fun i : fin n, (terms i).all_var_set)
 
 
 theorem thm_3_1
