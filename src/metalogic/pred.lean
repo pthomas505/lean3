@@ -112,13 +112,17 @@ begin
     and.congr_left_iff],
   intro h2,
   split,
+  {
     split_ifs,
-      intro h3, simp only [finset.not_mem_empty] at h3, contradiction,
-      intro h3, exact h3,
+      { intro h3, simp only [finset.not_mem_empty] at h3, contradiction, },
+      { intro h3, exact h3, },
+  },
+  {
     intro h3,
     split_ifs,
-      simp only [finset.not_mem_empty], apply h2, rewrite <- h, exact h3,
-      exact h3
+      { simp only [finset.not_mem_empty], apply h2, rewrite <- h, exact h3, },
+      { exact h3, },
+  },
 end
 
 lemma finset.bUnion_union
@@ -129,7 +133,8 @@ lemma finset.bUnion_union
   finset.bUnion (s ∪ s') t = finset.bUnion s t ∪ finset.bUnion s' t :=
 begin
   apply finset.ext, intro a,
-  simp only [or_and_distrib_right, exists_or_distrib, finset.mem_bUnion, finset.mem_union, exists_prop]
+  simp only [or_and_distrib_right, exists_or_distrib, finset.mem_bUnion,
+    finset.mem_union, exists_prop]
 end
 
 lemma finset.bUnion_sdiff_of_forall_disjoint
