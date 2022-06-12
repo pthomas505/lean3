@@ -289,7 +289,8 @@ list.to_string (list.of_fn f)
 
 /-
 Term schemes.
-var "x" : An object variable named "x". Ranges over the domain of each interpretation.
+var "x" : An object variable named "x". Ranges over the domain of each
+interpretation.
 func 0 "c" [] : A constant named "c".
 func n "f" [x1 ... xn] : A function named "f" of n terms (arguments).
 -/
@@ -301,7 +302,8 @@ open term
 
 meta def term.repr : term → string
 | (var x) := x.quote
-| (func n f terms) := f.quote ++ fin_fun_to_string (fun i : fin n, (terms i).repr)
+| (func n f terms) :=
+    f.quote ++ fin_fun_to_string (fun i : fin n, (terms i).repr)
 
 meta instance : has_repr term := has_repr.mk term.repr
 
@@ -334,7 +336,8 @@ open formula
 meta def formula.repr : formula → string
 | bottom := "⊥"
 | top := "⊤"
-| (atom n x terms) := x.quote ++ fin_fun_to_string (fun i : fin n, (terms i).repr)
+| (atom n x terms) :=
+    x.quote ++ fin_fun_to_string (fun i : fin n, (terms i).repr)
 | (not p) := sformat!"(¬ {p.repr})"
 | (and p q) := sformat!"({p.repr} ∧ {q.repr})"
 | (or p q) := sformat!"({p.repr} ∨ {q.repr})"
@@ -356,7 +359,8 @@ atom terms.length name terms.to_fin_fun
 
 
 /-
-domain: A nonempty set D called the domain of the interpretation. The intention is that all terms have values in D.
+domain: A nonempty set D called the domain of the interpretation.
+The intention is that all terms have values in D.
 
 nonempty: A proof that there is at least one element in the domain.
 
@@ -365,7 +369,8 @@ A mapping of each n-ary function symbol f to a function f_{M}.
 n : The arity of the function symbol.
 f : The function symbol.
 f_{M} : The function that the function symbol is mapped to.
-terms : fin n → domain : The n terms (arguments) of the function expressed as a finite function.
+terms : fin n → domain : The n terms (arguments) of the function expressed as
+a finite function.
 v : domain : The result of the function. An element in the domain.
 
 pred: (n : ℕ, P : string) → (P_{M} : (terms : fin n → domain) → v : Prop)
@@ -373,7 +378,8 @@ A mapping of each n-ary predicate symbol P to a predicate P_{M}.
 n : The arity of the predicate symbol.
 P : The predicate symbol.
 P_{M} : The predicate that the predicate symbol is mapped to.
-terms : fin n → domain : The n terms (arguments) of the predicate expressed as a finite function.
+terms : fin n → domain : The n terms (arguments) of the predicate expressed
+as a finite function.
 v : Prop : The result of the predicate. True or false.
 -/
 structure interpretation (domain : Type) : Type :=
@@ -388,14 +394,16 @@ The type of mappings of object variable names to elements of a domain.
 def valuation (D : Type) := string → D
 
 /-
-The function mapping each term to an element of a domain by a given interpretation and valuation.
+The function mapping each term to an element of a domain by a given
+interpretation and valuation.
 -/
 def eval_term (D : Type) (m : interpretation D) (v : valuation D) : term → D
 | (var x) := v x
 | (func n f terms) := m.func n f (fun i : fin n, eval_term (terms i))
 
 /-
-f is a function. a' is an element in the domain of f. v is an element in the range of f.
+f is a function. a' is an element in the domain of f. v is an element in the
+range of f.
 if y = a' then ((a' `↦` v) f) y = v
 if y ≠ a' then ((a' `↦` v) f) y = f y
 -/
