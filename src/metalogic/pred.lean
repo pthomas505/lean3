@@ -282,7 +282,8 @@ def list.to_fin_fun {T : Type} (l : list T) : fin l.length → T :=
 fun i : fin l.length, list.nth_le l i.val i.property
 
 
-meta def fin_fun_to_string {T : Type} [has_to_string T] {n : ℕ} (f : fin n → T) : string :=
+meta def fin_fun_to_string {T : Type} [has_to_string T]
+  {n : ℕ} (f : fin n → T) : string :=
 list.to_string (list.of_fn f)
 
 
