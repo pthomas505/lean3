@@ -22,12 +22,18 @@ lemma finset.mem_ite
   x ∈ (if p then s else s') ↔ (p → x ∈ s) ∧ (¬ p → x ∈ s') :=
 begin
   split,
-  intro h1, split,
-    intro h2, simp only [if_pos h2] at h1, exact h1,
-    intro h2, simp only [if_neg h2] at h1, exact h1,
-  intro h1, cases h1, split_ifs,
-    exact h1_left h,
-    exact h1_right h
+  {
+    intro h1,
+    split,
+      { intro h2, simp only [if_pos h2] at h1, exact h1, },
+      { intro h2, simp only [if_neg h2] at h1, exact h1, },
+  },
+  {
+    intro h1, cases h1,
+    split_ifs,
+      { exact h1_left h, },
+      { exact h1_right h, },
+  },
 end
 
 lemma finset.bUnion_sdiff
@@ -41,16 +47,20 @@ begin
   apply finset.ext, intro a,
   simp only [finset.mem_sdiff, finset.mem_bUnion, exists_prop],
   split,
+  {
     intro h1, cases h1, apply exists.elim h1_left,
     intros b h2, cases h2, apply exists.intro b,
     split,
-      exact h2_left,
-      exact and.intro h2_right h1_right,
+      { exact h2_left, },
+      { exact and.intro h2_right h1_right, },
+  },
+  {
     intro h1, apply exists.elim h1,
     intros b h2, cases h2, cases h2_right,
     split,
-      apply exists.intro b, exact and.intro h2_left h2_right_left,
-      exact h2_right_right
+      { apply exists.intro b, exact and.intro h2_left h2_right_left, },
+      { exact h2_right_right, },
+  },
 end
 
 lemma finset.bUnion_filter
