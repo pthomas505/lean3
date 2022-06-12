@@ -78,16 +78,20 @@ begin
     finset.mem_bUnion, finset.mem_filter, exists_prop,
     finset.not_mem_empty, not_not, or_false, not_and_self, false_or],
   split,
-  intro h1, apply exists.elim h1, intros b h2, cases h2, cases h2_left,
-  apply exists.intro b,
+  {
+    intro h1, apply exists.elim h1, intros b h2, cases h2, cases h2_left,
+    apply exists.intro b,
     split,
-      exact h2_left_left,
-      exact and.intro h2_right h2_left_right,
-  intro h1, apply exists.elim h1, intros b h2, cases h2, cases h2_right,
-  apply exists.intro b,
+      { exact h2_left_left, },
+      { exact and.intro h2_right h2_left_right, },
+  },
+  {
+    intro h1, apply exists.elim h1, intros b h2, cases h2, cases h2_right,
+    apply exists.intro b,
     split,
-      exact and.intro h2_left h2_right_right,
-      exact h2_right_left
+      { exact and.intro h2_left h2_right_right, },
+      { exact h2_right_left },
+  },
 end
 
 lemma finset.sdiff_singleton_bUnion
