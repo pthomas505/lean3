@@ -462,7 +462,7 @@ def term.all_var_set : term → finset string
     finset.bUnion finset.univ (fun i : fin n, (terms i).all_var_set)
 
 
-theorem thm_3_1
+theorem eval_term_ext
   {D : Type}
   {m : interpretation D}
   {t : term}
@@ -543,7 +543,7 @@ def formula.bind_var_set : formula → finset string
 | (exists_ x p) := p.bind_var_set ∪ {x}
 
 
-theorem thm_3_2
+theorem holds_val_ext
   {D : Type}
   {m : interpretation D}
   {p : formula}
@@ -572,7 +572,7 @@ begin
     ... ↔ m.pred n x (fun i : fin n, eval_term D m v' (terms i)) :
       begin
         apply iff_of_eq, congr, funext,
-        apply thm_3_1, intros x h, apply h1,
+        apply eval_term_ext, intros x h, apply h1,
         simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left],
         exact exists.intro i h
       end
@@ -668,7 +668,7 @@ def is_sentence (p : formula) : Prop :=
 p.free_var_set = ∅
 
 
-theorem cor_3_3
+theorem sentence_holds_ext
   {p : formula}
   {D : Type}
   {m : interpretation D}
@@ -680,7 +680,7 @@ begin
   have s1 : ∀ x ∈ p.free_var_set, v x = v' x,
     rewrite h1,
     simp only [finset.not_mem_empty, forall_false_left, forall_const],
-  exact thm_3_2 v v' s1
+  exact holds_val_ext v v' s1
 end
 
 
@@ -731,7 +731,7 @@ begin
       intros h2 D m, let v := fun _ : string, m.nonempty.some, exact exists.intro v (h2 D m v),
   have s2 : (∀ (D : Type) (m : interpretation D), ∃ (v : valuation D), holds D m v p) →
     ∀ (D : Type) (m : interpretation D) (v : valuation D), holds D m v p,
-      intros h2 D m v, apply exists.elim, exact h2 D m, intros v', exact iff.elim_right (cor_3_3 v v' h1),
+      intros h2 D m v, apply exists.elim, exact h2 D m, intros v', exact iff.elim_right (sentence_holds_ext v v' h1),
   calc
         is_valid p
       ↔ ∀ (D : Type) (m : interpretation D) (v : valuation D), holds D m v p : by unfold is_valid
@@ -813,10 +813,11 @@ def term.sub_var_term (s : instantiation) : term → term
 | (var x) := s x
 | (func n name terms) := func n name (fun i : fin n, term.sub_var_term (terms i))
 
-lemma lem_3_4
+lemma sub_var_term_all_var_set
   (t : term)
   (s : instantiation) :
-  (term.sub_var_term s t).all_var_set = finset.bUnion t.all_var_set (fun y : string, (s y).all_var_set) :=
+  (term.sub_var_term s t).all_var_set =
+    finset.bUnion t.all_var_set (fun y : string, (s y).all_var_set) :=
 begin
   induction t,
   case term.var : x {
@@ -838,7 +839,7 @@ begin
   }
 end
 
-lemma lem_3_5
+lemma eval_term_sub_eq
   (D : Type)
   (t : term)
   (s : instantiation)
@@ -894,7 +895,7 @@ def formula.sub_var_term_is_def (s : instantiation) : formula → Prop
 | (exists_ x p) := s x = var x ∧ formula.sub_var_term_is_def p ∧ ∀ y ∈ p.free_var_set \ {x}, x ∉ (s y).all_var_set
 
 
-lemma lem_3_6
+example
   (p : formula)
   (s : instantiation)
   (h1 : formula.sub_var_term_is_def s p) :
@@ -923,7 +924,7 @@ begin
         = (atom n x (fun i : fin n, term.sub_var_term s (terms i))).free_var_set : by unfold formula.sub_var_term
     ... = finset.bUnion finset.univ (fun i : fin n, (term.sub_var_term s (terms i)).all_var_set) : by unfold formula.free_var_set
     ... = finset.bUnion finset.univ (fun i : fin n, (finset.bUnion (terms i).all_var_set (fun y : string, (s y).all_var_set))) :
-          begin congr, funext, apply lem_3_4 end
+          begin congr, funext, apply sub_var_term_all_var_set end
     ... = finset.bUnion (finset.bUnion finset.univ (fun i : fin n, (terms i).all_var_set)) (fun y : string, (s y).all_var_set) :
           begin symmetry, apply finset.bUnion_bUnion end
     ... = finset.bUnion (atom n x terms).free_var_set (fun y : string, (s y).all_var_set) : by unfold formula.free_var_set
@@ -1031,7 +1032,7 @@ begin
 end
 
 
-theorem thm_3_7
+theorem holds_sub_eval
   {D : Type}
   {m : interpretation D}
   (v : valuation D)
@@ -1060,7 +1061,7 @@ begin
     holds D m v (formula.sub_var_term s (atom n x terms)) ↔
       holds D m v (atom n x (fun i : fin n, term.sub_var_term s (terms i))) : by unfold formula.sub_var_term
     ... ↔ m.pred n x (fun i : fin n, eval_term D m v (term.sub_var_term s (terms i))) : by unfold holds
-    ... ↔ m.pred n x (fun i : fin n, eval_term D m ((eval_term D m v) ∘ s) (terms i)) : by simp only [lem_3_5]
+    ... ↔ m.pred n x (fun i : fin n, eval_term D m ((eval_term D m v) ∘ s) (terms i)) : by simp only [eval_term_sub_eq]
     ... ↔ holds D m ((eval_term D m v) ∘ s) (atom n x terms) : by unfold holds
   },
   case formula.not : p ih {
@@ -1117,7 +1118,7 @@ begin
       ... ↔ (∀ a : D, holds D m ((x ↦ a) (eval_term D m v ∘ s)) p) :
             begin
               apply forall_congr, intro a,
-              apply thm_3_2, intros z h2,
+              apply holds_val_ext, intros z h2,
               by_cases z = x,
               {
                 calc
@@ -1136,7 +1137,7 @@ begin
                     = eval_term D m ((x ↦ a) v) (s z) : by unfold function.comp
                 ... = eval_term D m v (s z) :
                       begin
-                        apply thm_3_1, intros y h3,
+                        apply eval_term_ext, intros y h3,
                         apply function.update_noteq, intros h4, apply h1_right_right z,
                         simp only [finset.mem_sdiff, finset.mem_singleton], exact and.intro h2 h,
                         rewrite h4 at h3, exact h3
@@ -1163,7 +1164,7 @@ begin
       ... ↔ (∃ a : D, holds D m ((x ↦ a) (eval_term D m v ∘ s)) p) :
             begin
               apply exists_congr, intros a,
-              apply thm_3_2, intros z h2,
+              apply holds_val_ext, intros z h2,
               by_cases z = x,
               {
                 calc
@@ -1182,7 +1183,7 @@ begin
                     = eval_term D m ((x ↦ a) v) (s z) : by unfold function.comp
                 ... = eval_term D m v (s z) :
                       begin
-                        apply thm_3_1, intros y h3,
+                        apply eval_term_ext, intros y h3,
                         apply function.update_noteq, intros h4, apply h1_right_right z,
                         simp only [finset.mem_sdiff, finset.mem_singleton], exact and.intro h2 h,
                         rewrite h4 at h3, exact h3
@@ -1197,7 +1198,7 @@ begin
 end
 
 
-theorem cor_3_8
+theorem valid_imp_sub_var_term_valid
   (p : formula)
   (s : instantiation)
   (h1 : formula.sub_var_term_is_def s p)
@@ -1206,7 +1207,7 @@ theorem cor_3_8
 begin
   unfold is_valid at *,
   intros D m v,
-  simp only [thm_3_7 v s p h1], apply h2
+  simp only [holds_sub_eval v s p h1], apply h2
 end
 
 
@@ -1264,7 +1265,7 @@ begin
   {
     simp only [interpretation.sub], unfold formula.sub_atom_formula, unfold holds,
     simp [formula.all_atom_set] at hv,
-    apply thm_3_2,
+    apply holds_val_ext,
     intros x h2, apply hv n p, refl, refl, exact h2
   },
   case formula.not : p p_ih v hv
@@ -1732,7 +1733,7 @@ begin
             simp only [function.update_noteq s3]
           },
       rewrite replace_id,
-      apply thm_3_2, exact s2, simp only [finset.mem_singleton], exact h
+      apply holds_val_ext, exact s2, simp only [finset.mem_singleton], exact h
     },
     {
       have s2 : x ∉ {z}, simp only [finset.mem_singleton], exact h,
@@ -1769,7 +1770,7 @@ begin
             simp only [function.update_noteq s3]
           },
       rewrite replace_id,
-      apply thm_3_2, exact s2, simp only [finset.mem_singleton], exact h
+      apply holds_val_ext, exact s2, simp only [finset.mem_singleton], exact h
     },
     {
       have s2 : x ∉ {z}, simp only [finset.mem_singleton], exact h,
@@ -1957,7 +1958,7 @@ theorem is_valid_pred_2
 begin
   unfold is_valid, unfold holds,
   intros D m v h2,
-  rewrite thm_3_7 v (sub_single_var x t) p h1,
+  rewrite holds_sub_eval v (sub_single_var x t) p h1,
   have s1 : ((eval_term D m v) ∘ (sub_single_var x t)) = ((x ↦ (eval_term D m v t)) v),
     apply funext, intros y, unfold function.comp, unfold sub_single_var,
     by_cases y = x,
@@ -1980,5 +1981,5 @@ begin
   intros D m v h2 a,
   have s1 : ∀ x' ∈ p.free_var_set, ((x ↦ a) v) x' = v x', intros x' h4, apply function.update_noteq,
     by_contradiction, apply h1, rewrite <- h, exact h4,
-  rewrite @thm_3_2 D m p ((x ↦ a) v) v s1, exact h2
+  rewrite @holds_val_ext D m p ((x ↦ a) v) v s1, exact h2
 end
