@@ -146,7 +146,8 @@ lemma finset.bUnion_sdiff_of_forall_disjoint
   (h1 : ∀ y : α, y ∈ s → disjoint (t y) s') :
   (finset.bUnion s t) \ s' = finset.bUnion s t :=
 begin
-  simp only [finset.sdiff_eq_self_iff_disjoint, finset.disjoint_bUnion_left], intro i, exact h1 i
+  simp only [finset.sdiff_eq_self_iff_disjoint, finset.disjoint_bUnion_left],
+  intro i, exact h1 i
 end
 
 lemma finset.ne_imp_sdiff_union_comm
