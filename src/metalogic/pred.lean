@@ -2547,5 +2547,7 @@ theorem cor_3_8
   (h1 : is_valid p) :
   is_valid (sub_formula s p) :=
 begin
-  sorry
+  unfold is_valid at *,
+  intros D m v,
+  simp only [thm_3_7], apply h1
 end
