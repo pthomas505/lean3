@@ -2613,7 +2613,7 @@ def sub_predicate :
   in
   let x' : var_symbols :=
     if x ∈ free_minus_param
-    then variant x free_minus_param
+    then variant x (free_minus_param ∪ (p.free_var_set \ {x}))
     else x
   in forall_ x' (sub_predicate m p)
 | m (exists_ x p) :=
@@ -2623,6 +2623,6 @@ def sub_predicate :
   in
   let x' : var_symbols :=
     if x ∈ free_minus_param
-    then variant x free_minus_param
+    then variant x (free_minus_param ∪ (p.free_var_set \ {x}))
     else x
   in exists_ x' (sub_predicate m p)
