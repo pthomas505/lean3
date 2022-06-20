@@ -10,7 +10,7 @@ doi:10.1017/CBO9780511576430
 -/
 
 
-import data.finset
+import data.finset data.finmap
 
 
 lemma finset.mem_ite
@@ -318,10 +318,34 @@ def mk_func (symbol : func_symbols) (terms : list term) :=
 func terms.length symbol terms.to_fin_fun
 
 
+def pi_decide {p q : Prop} [decidable p] (h : p → decidable q) : decidable (p ∧ q) :=
+if hp : p then
+  by haveI := h hp; exact
+  if hq : q then is_true ⟨hp, hq⟩
+  else is_false (assume h : p ∧ q, hq (and.right h))
+else is_false (assume h : p ∧ q, hp (and.left h))
+
+instance : decidable_eq term
+| (var s₁) (var s₂) :=
+    decidable_of_decidable_of_iff (by apply_instance : decidable (s₁ = s₂)) (by simp)
+| (var s) (func n s' t) := is_false (by simp)
+| (func n s' t) (var s) := is_false (by simp)
+| (func n₁ s₁ t₁) (func n₂ s₂ t₂) := decidable_of_decidable_of_iff
+  (begin
+    apply' pi_decide,
+    intro h,
+    apply' and.decidable,
+    rw fin.heq_fun_iff h,
+    apply' fintype.decidable_forall_fintype,
+    intro a,
+    apply term.decidable_eq,
+  end : decidable $ n₁ = n₂ ∧ s₁ = s₂ ∧ t₁ == t₂) (by simp)
+
 /-
 pred 0 "P" [] : A propositional variable named "P".
 pred n "P" [x1 ... xn] : A predicate variable named "P" of n terms (arguments).
 -/
+@[derive decidable_eq]
 inductive formula : Type
 | bottom : formula
 | top : formula
@@ -2551,3 +2575,54 @@ begin
   intros D m v,
   simp only [thm_3_7], apply h1
 end
+
+def formula.all_pred_set' : formula → finset pred_symbols
+| bottom := ∅
+| top := ∅
+| (pred n x terms) := {x}
+| (eq _ _) := ∅
+| (not p) := p.all_pred_set'
+| (and p q) := p.all_pred_set' ∪ q.all_pred_set'
+| (or p q) := p.all_pred_set' ∪ q.all_pred_set'
+| (imp p q) := p.all_pred_set' ∪ q.all_pred_set'
+| (iff p q) := p.all_pred_set' ∪ q.all_pred_set'
+| (forall_ x p) := p.all_pred_set'
+| (exists_ x p) := p.all_pred_set'
+
+
+def sub_predicate :
+  (pred_symbols → (list var_symbols × formula)) → formula → formula
+| m bottom := bottom
+| m top := top
+| m (pred n x terms) :=
+    let params := (m x).fst in
+    let p := (m x).snd in
+    if params.length = n
+    then sub_formula /- total function from zip of params and terms -/ sorry p
+    else pred n x terms
+| m (eq u v) := eq u v
+| m (not p) := not (sub_predicate m p)
+| m (and p q) := and (sub_predicate m p) (sub_predicate m q)
+| m (or p q) := or (sub_predicate m p) (sub_predicate m q)
+| m (imp p q) := imp (sub_predicate m p) (sub_predicate m q)
+| m (iff p q) := iff (sub_predicate m p) (sub_predicate m q)
+| m (forall_ x p) :=
+  let free_minus_param := 
+  finset.bUnion p.all_pred_set'
+    (fun y : pred_symbols, (m y).snd.free_var_set \ list.to_finset (m y).fst)
+  in
+  let x' : var_symbols :=
+    if x ∈ free_minus_param
+    then variant x free_minus_param
+    else x
+  in forall_ x' (sub_predicate m p)
+| m (exists_ x p) :=
+  let free_minus_param := 
+  finset.bUnion p.all_pred_set'
+    (fun y : pred_symbols, (m y).snd.free_var_set \ list.to_finset (m y).fst)
+  in
+  let x' : var_symbols :=
+    if x ∈ free_minus_param
+    then variant x free_minus_param
+    else x
+  in exists_ x' (sub_predicate m p)
