@@ -2620,6 +2620,7 @@ def fin_zip_fun
   α → β := list_zip_fun (list.of_fn f) (list.of_fn g)
   begin simp only [list.length_of_fn], exact h1, end default
 
+
 def sub_single_predicate
   (q_n : ℕ)
   (q : pred_symbols)
@@ -2666,8 +2667,12 @@ def sub_predicate :
 | m (pred n x terms) :=
     let params := (m x).fst in
     let p := (m x).snd in
-    if params.length = n
-    then sub_formula /- total function from zip of params and terms -/ sorry p
+    if h : n = params.length ∧ params.nodup
+    then sub_formula (list_zip_fun params (list.of_fn terms)
+      begin
+        simp only [list.length_of_fn], exact h.left,
+      end
+      (fun i : var_symbols, var i)) p
     else pred n x terms
 | m (eq u v) := eq u v
 | m (not p) := not (sub_predicate m p)
