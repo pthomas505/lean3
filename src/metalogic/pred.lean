@@ -2590,6 +2590,75 @@ def formula.all_pred_set' : formula → finset pred_symbols
 | (exists_ x p) := p.all_pred_set'
 
 
+def fin_fun_range
+  {α : Type} [decidable_eq α]
+  {n : ℕ}
+  (f : fin n → α) :
+  finset α := finset.image f (finset.fin_range n)
+
+def list_zip_fun
+  {α β : Type} [decidable_eq α]
+  (f : list α)
+  (g : list β)
+  (h2 : g.length = f.length)
+  (default : α → β) :
+  α → β :=
+  fun x : α,
+    if h3 : x ∈ f
+    then
+      g.nth_le (f.index_of x)
+      begin rewrite h2, simp only [list.index_of_lt_length], exact h3 end
+    else default x
+
+def fin_zip_fun
+  {α β : Type} [decidable_eq α]
+  {m n : ℕ}
+  (h1 : n = m)
+  (f : fin m → α)
+  (g : fin n → β)
+  (default : α → β) :
+  α → β := list_zip_fun (list.of_fn f) (list.of_fn g)
+  begin simp only [list.length_of_fn], exact h1, end default
+
+def sub_single_predicate
+  (q_n : ℕ)
+  (q : pred_symbols)
+  (params : fin q_n → var_symbols)
+  (h1 : (list.of_fn params).nodup)
+  (r : formula) :
+  formula → formula
+| bottom := bottom
+| top := top
+| (pred n x terms) :=
+    if h : n = q_n ∧ x = q
+    then sub_formula (fin_zip_fun h.left params terms (fun i : var_symbols, var i)) r
+    else pred n x terms
+| (eq u v) := eq u v
+| (not p) := not (sub_single_predicate p)
+| (and p q) := and (sub_single_predicate p) (sub_single_predicate q)
+| (or p q) := or (sub_single_predicate p) (sub_single_predicate q)
+| (imp p q) := imp (sub_single_predicate p) (sub_single_predicate q)
+| (iff p q) := iff (sub_single_predicate p) (sub_single_predicate q)
+| (forall_ x p) :=
+    let free_minus_params : finset var_symbols
+      := r.free_var_set \ fin_fun_range params
+    in
+  let x' : var_symbols :=
+    if x ∈ free_minus_params
+    then variant x (free_minus_params ∪ (p.free_var_set \ {x}))
+    else x
+  in forall_ x' (sub_single_predicate p)
+| (exists_ x p) :=
+    let free_minus_params : finset var_symbols
+      := r.free_var_set \ fin_fun_range params
+    in
+  let x' : var_symbols :=
+    if x ∈ free_minus_params
+    then variant x (free_minus_params ∪ (p.free_var_set \ {x}))
+    else x
+  in forall_ x' (sub_single_predicate p)
+
+
 def sub_predicate :
   (pred_symbols → (list var_symbols × formula)) → formula → formula
 | m bottom := bottom
