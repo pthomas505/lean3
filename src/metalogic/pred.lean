@@ -10,7 +10,7 @@ doi:10.1017/CBO9780511576430
 -/
 
 
-import data.finset data.finmap
+import data.finset data.finmap data.list.alist
 
 
 lemma finset.mem_ite
@@ -2731,6 +2731,16 @@ def sub_predicate :
   in exists_ x' (sub_predicate m p)
 
 
+theorem sub_pred_is_valid
+  (p : formula)
+  (h1 : is_valid p)
+  (m : pred_symbols → (list var_symbols × formula)) :
+  is_valid (sub_predicate m p) :=
+begin
+  sorry,
+end
+
+
 /-
 Proof schemes.
 Proof schemes are semantically valid formula schemes.
@@ -2854,7 +2864,7 @@ inductive step : Type
 | pred_1 : ℕ → ℕ → var_symbols → step
 | pred_2 : ℕ → var_symbols → ℕ → step
 | pred_3 : ℕ → var_symbols → step
---| apply_proof : ℕ → list (string × ℕ) → step
+| replace : ℕ → (pred_symbols → (list var_symbols × formula)) → step
 
 open step
 
@@ -3006,6 +3016,12 @@ If p and q are syntactically valid formulas then
   (plift.up h1) <- dguard (x ∉ p.free_var_set),
   let f := (p.imp (forall_ x p)),
   let t1 : is_valid f := is_valid_pred_3 p x h1,
+  return (local_context.append_proof (proof.mk f t1))
+
+| global_context local_context (replace p_index m) := do
+  (proof.mk p hp) <- global_context.get_nth_proof p_index,
+  let f := sub_predicate m p,
+  let t1 : is_valid f := sub_pred_is_valid p hp m,
   return (local_context.append_proof (proof.mk f t1))
 
 /-
