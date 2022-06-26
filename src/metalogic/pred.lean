@@ -2852,6 +2852,7 @@ inductive step : Type
 | prop_3 : ℕ → ℕ → step
 | gen : ℕ → ℕ → var_symbols → step
 | pred_1 : ℕ → ℕ → var_symbols → step
+| pred_2 : ℕ → var_symbols → ℕ → step
 | pred_3 : ℕ → var_symbols → step
 --| apply_proof : ℕ → list (string × ℕ) → step
 
@@ -2990,6 +2991,14 @@ If p and q are syntactically valid formulas then
   q <- local_context.get_nth_formula q_index,
   let f := ((forall_ x (p.imp q)).imp ((forall_ x p).imp (forall_ x q))),
   let t1 : is_valid f := is_valid_pred_1 p q x,
+  return (local_context.append_proof (proof.mk f t1))
+
+| _ local_context (pred_2 p_index x t_index) := do
+  p <- local_context.get_nth_formula p_index,
+  t <- local_context.get_nth_term t_index,
+  let s := sub_single_var' x t,
+  let f := (forall_ x p).imp (sub_formula s p),
+  let t1 : is_valid f := is_valid_pred_2' p x t,
   return (local_context.append_proof (proof.mk f t1))
 
 | _ local_context (pred_3 p_index x) := do
