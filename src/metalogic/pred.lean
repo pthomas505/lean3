@@ -2823,6 +2823,7 @@ inductive step : Type
 | prop_3 : ℕ → ℕ → step
 | gen : ℕ → ℕ → var_symbols → step
 | pred_1 : ℕ → ℕ → var_symbols → step
+| pred_3 : ℕ → var_symbols → step
 --| apply_proof : ℕ → list (string × ℕ) → step
 
 open step
@@ -2960,6 +2961,13 @@ If p and q are syntactically valid formulas then
   q <- local_context.get_nth_formula q_index,
   let f := ((forall_ x (p.imp q)).imp ((forall_ x p).imp (forall_ x q))),
   let t1 : is_valid f := is_valid_pred_1 p q x,
+  return (local_context.append_proof (proof.mk f t1))
+
+| _ local_context (pred_3 p_index x) := do
+  p <- local_context.get_nth_formula p_index,
+  (plift.up h1) <- dguard (x ∉ p.free_var_set),
+  let f := (p.imp (forall_ x p)),
+  let t1 : is_valid f := is_valid_pred_3 p x h1,
   return (local_context.append_proof (proof.mk f t1))
 
 /-
