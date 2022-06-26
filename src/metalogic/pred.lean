@@ -2576,6 +2576,35 @@ begin
   simp only [thm_3_7], apply h1
 end
 
+
+def sub_single_var' (x : var_symbols) (t : term) : instantiation :=
+  function.update (fun v : var_symbols, var v) x t
+
+theorem is_valid_pred_2'
+  (p : formula)
+  (x : var_symbols)
+  (t : term) :
+  let s := sub_single_var x t in
+  is_valid ((forall_ x p).imp (sub_formula s p)) :=
+begin
+  intro s,
+  unfold is_valid, unfold holds,
+  intros D m v h2,
+    rewrite thm_3_7 p s D m v,
+  have s1 : ((eval_term D m v) ∘ (sub_single_var x t)) =
+    (function.update v x (eval_term D m v t)),
+    apply funext, intros y, unfold function.comp, unfold sub_single_var,
+    by_cases y = x,
+    {
+      rewrite h, simp only [function.update_same]
+    },
+    {
+      simp only [function.update_noteq h], unfold eval_term
+    },
+  rewrite s1, apply h2
+end
+
+
 def formula.all_pred_set' : formula → finset pred_symbols
 | bottom := ∅
 | top := ∅
