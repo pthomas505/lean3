@@ -2713,67 +2713,81 @@ meta def proof.repr : proof → string
 | (proof.mk p _) := sformat!"⊢ {p.repr}"
 meta instance : has_repr proof := ⟨proof.repr⟩
 
+structure local_context_t : Type :=
+(term_list : list term)
+(formula_list : list formula)
+(proof_list : list proof)
 
-def local_context_t := (list formula) × (list proof)
+def local_context_t.append_term
+  (context : local_context_t)
+  (x : term) :
+  local_context_t :=
+let term_list := context.term_list ++ [x] in
+local_context_t.mk term_list context.formula_list context.proof_list
 
-meta def local_context_t.repr : local_context_t → string
-| (fs, ps) := sformat!"({fs.repr} {ps.repr})"
-meta instance : has_repr local_context_t := ⟨local_context_t.repr⟩
+def local_context_t.get_nth_term
+  (context : local_context_t)
+  (index : ℕ) :
+  option term :=
+list.nth context.term_list index
 
-/-
-loc_ctx.append_formula f = Appends the formula scheme f to the end of the list of
-syntactically checked formula schemes in the local context loc_ctx.
--/
-def local_context_t.append_formula :
-  local_context_t → formula → local_context_t
-| (fs, ps) f := (fs ++ [f], ps)
+def list.get_nth_sublist
+  {α : Type}
+  (l : list α) :
+  list ℕ → option (list α)
+| [] := return []
+| (index :: index_list) := do
+x <- list.nth l index,
+xs <- list.get_nth_sublist index_list,
+return (x :: xs)
 
-/-
-loc_ctx.get_formula idx = Gets the formula scheme at index idx in the list of
-syntactically checked formula schemes in the local context loc_ctx.
--/
-def local_context_t.get_formula :
-  local_context_t → ℕ → option formula
-| (fs, _) idx := list.nth fs idx
+def local_context_t.get_nth_term_list
+  (context : local_context_t)
+  (index_list : list ℕ) :
+  option (list term) :=
+list.get_nth_sublist context.term_list index_list
 
-/-
-loc_ctx.append_proof p = Appends the proof scheme p to the end of the list of
-proof schemes in the local context loc_ctx.
--/
-def local_context_t.append_proof :
-  local_context_t → proof → local_context_t
-| (fs, ps) p := (fs, ps ++ [p])
+def local_context_t.append_formula
+  (context : local_context_t)
+  (x : formula) :
+  local_context_t :=
+let formula_list := context.formula_list ++ [x] in
+local_context_t.mk context.term_list formula_list context.proof_list
 
-/-
-loc_ctx.get_proof idx = Gets the proof scheme at index idx in the list of
-proof schemes in the local context loc_ctx.
--/
-def local_context_t.get_proof :
-  local_context_t → ℕ → option proof
-| (_, ps) idx := list.nth ps idx
+def local_context_t.get_nth_formula
+  (context : local_context_t)
+  (index : ℕ) :
+  option formula :=
+list.nth context.formula_list index
 
+def local_context_t.append_proof
+  (context : local_context_t)
+  (x : proof) :
+  local_context_t :=
+let proof_list := context.proof_list ++ [x] in
+local_context_t.mk context.term_list context.formula_list proof_list
 
-def global_context_t := list proof
+def local_context_t.get_nth_proof
+  (context : local_context_t)
+  (index : ℕ) :
+  option proof :=
+list.nth context.proof_list index
 
-meta def global_context_t.repr : global_context_t → string
-| (ps : list proof) := sformat!"({ps.repr})"
-meta instance : has_repr global_context_t := ⟨global_context_t.repr⟩
+structure global_context_t : Type :=
+(proof_list : list proof)
 
-/-
-glb_ctx.append_proof p = Appends the proof scheme p to the end of the list of
-proof schemes in the global context glb_ctx.
--/
-def global_context_t.append_proof :
-  global_context_t → proof → global_context_t
-| ps p := list.append ps [p]
+def global_context_t.append_proof
+  (context : global_context_t)
+  (x : proof) :
+  global_context_t :=
+let proof_list := list.append context.proof_list [x] in
+global_context_t.mk proof_list
 
-/-
-glb_ctx.get_proof idx = Gets the proof scheme at index idx in the list of
-proof schemes in the global context glb_ctx.
--/
-def global_context_t.get_proof :
-  global_context_t → ℕ → option proof
-| ps idx := list.nth ps idx
+def global_context_t.get_nth_proof
+  (context : global_context_t)
+  (index : ℕ) :
+  option proof :=
+list.nth context.proof_list index
 
 
 def dguard (p : Prop) [decidable p] : option (plift p) :=
@@ -2792,14 +2806,17 @@ def to_fun : list (string × formula) → string → formula
 
 
 inductive step : Type
-| is_bottom : step
-| is_top : step
-| is_atom : string → step
-| is_not : ℕ → step
-| is_and : ℕ → ℕ → step
-| is_or : ℕ → ℕ → step
-| is_imp : ℕ → ℕ → step
-| is_iff : ℕ → ℕ → step
+| var_is_term : var_symbols → step
+| func_is_term : func_symbols → list ℕ → step
+| bottom_is_formula : step
+| top_is_formula : step
+| pred_is_formula : pred_symbols → list ℕ → step
+| eq_is_formula : ℕ → ℕ → step
+| not_is_formula : ℕ → step
+| and_is_formula : ℕ → ℕ → step
+| or_is_formula : ℕ → ℕ → step
+| imp_is_formula : ℕ → ℕ → step
+| iff_is_formula : ℕ → ℕ → step
 | mp : ℕ → ℕ → ℕ → ℕ → step
 | prop_1 : ℕ → ℕ → step
 | prop_2 : ℕ → ℕ → ℕ → step
@@ -2808,84 +2825,77 @@ inductive step : Type
 
 open step
 
-def check_step : global_context_t → local_context_t → step → option local_context_t
+def check_step :
+global_context_t → local_context_t → step → option local_context_t
 
 -- Syntax
 
-/-
-bottom is a syntactically valid formula scheme.
--/
-| _ loc_ctx is_bottom := do return (loc_ctx.append_formula bottom)
+| _ local_context (var_is_term x) := do
+  return (local_context.append_term (var x))
 
-/-
-top is a syntactically valid formula scheme.
--/
-| _ loc_ctx is_top := do return (loc_ctx.append_formula top)
+| _ local_context (func_is_term f index_list) := do
+  term_list <- local_context.get_nth_term_list index_list,
+  return (local_context.append_term (mk_func f term_list))
 
-/-
-(atom x) is a syntactically valid formula scheme for any name x.
--/
-| _ loc_ctx (is_atom x) := do return (loc_ctx.append_formula (mk_prop x))
+| _ local_context bottom_is_formula := do
+  return (local_context.append_formula bottom)
 
-/-
-If p is a syntactically valid formula scheme then ¬ p is a
-syntactically valid formula scheme.
--/
-| _ loc_ctx (is_not p_idx) := do
-  p <- loc_ctx.get_formula p_idx,
-  return (loc_ctx.append_formula (not p))
+| _ local_context top_is_formula := do
+  return (local_context.append_formula top)
 
-/-
-If p and q are syntactically valid formula schemes then p ∧ q is a
-syntactically valid formula scheme.
--/
-| _ loc_ctx (is_and p_idx q_idx) := do
-  p <- loc_ctx.get_formula p_idx,
-  q <- loc_ctx.get_formula q_idx,
-  return (loc_ctx.append_formula (and p q))
+| _ local_context (pred_is_formula r index_list) := do
+  term_list <- local_context.get_nth_term_list index_list,
+  return (local_context.append_formula (mk_pred r term_list))
 
-/-
-If p and q are syntactically valid formula schemes then p ∨ q is a
-syntactically valid formula scheme.
--/
-| _ loc_ctx (is_or p_idx q_idx) := do
-  p <- loc_ctx.get_formula p_idx,
-  q <- loc_ctx.get_formula q_idx,
-  return (loc_ctx.append_formula (or p q))
+| _ local_context (eq_is_formula lhs_index rhs_index) := do
+  lhs <- local_context.get_nth_term lhs_index,
+  rhs <- local_context.get_nth_term rhs_index,
+  return (local_context.append_formula (eq lhs rhs))
 
-/-
-If p and q are syntactically valid formula schemes then p → q is a
-syntactically valid formula scheme.
--/
-| _ loc_ctx (is_imp p_idx q_idx) := do
-  p <- loc_ctx.get_formula p_idx,
-  q <- loc_ctx.get_formula q_idx,
-  return (loc_ctx.append_formula (imp p q))
+| _ local_context (not_is_formula p_index) := do
+  p <- local_context.get_nth_formula p_index,
+  return (local_context.append_formula (not p))
 
-/-
-If p and q are syntactically valid formula schemes then p ↔ q is a
-syntactically valid formula scheme.
--/
-| _ loc_ctx (is_iff p_idx q_idx) := do
-  p <- loc_ctx.get_formula p_idx,
-  q <- loc_ctx.get_formula q_idx,
-  return (loc_ctx.append_formula (iff p q))
+| _ local_context (and_is_formula p_index q_index) := do
+  p <- local_context.get_nth_formula p_index,
+  q <- local_context.get_nth_formula q_index,
+  return (local_context.append_formula (and p q))
+
+| _ local_context (or_is_formula p_index q_index) := do
+  p <- local_context.get_nth_formula p_index,
+  q <- local_context.get_nth_formula q_index,
+  return (local_context.append_formula (or p q))
+
+| _ local_context (imp_is_formula p_index q_index) := do
+  p <- local_context.get_nth_formula p_index,
+  q <- local_context.get_nth_formula q_index,
+  return (local_context.append_formula (imp p q))
+
+| _ local_context (iff_is_formula p_index q_index) := do
+  p <- local_context.get_nth_formula p_index,
+  q <- local_context.get_nth_formula q_index,
+  return (local_context.append_formula (iff p q))
 
 -- Semantics
 
 -- modus ponens
 -- |- p & |- (p -> q) => |- q
 /-
-If p and q are syntactically valid formula schemes and p and p -> q are
-proof schemes then q is a proof scheme.
+If p and q are syntactically valid formulas and p and p -> q are
+semantically valid formulas then q is a semantically valid formula.
 -/
-| _ loc_ctx (mp p_idx q_idx h1_idx h2_idx) := do
-  p <- loc_ctx.get_formula p_idx,
-  q <- loc_ctx.get_formula q_idx,
-  (proof.mk a ha) <- loc_ctx.get_proof h1_idx,
-  (proof.mk (imp b c) hbc) <- loc_ctx.get_proof h2_idx | none,
+| _ local_context (mp p_index q_index h1_index h2_index) := do
+  p <- local_context.get_nth_formula p_index,
+  q <- local_context.get_nth_formula q_index,
+  -- ha : is_valid a
+  (proof.mk a ha) <- local_context.get_nth_proof h1_index,
+  -- hbc : is_valid (b → c)
+  (proof.mk (imp b c) hbc) <- local_context.get_nth_proof h2_index | none,
+  -- hap : a = p
   (plift.up hap) <- dguard (a = p),
+  -- hbp : b = p
   (plift.up hbp) <- dguard (b = p),
+  -- hcq : c = q
   (plift.up hcq) <- dguard (c = q),
   let t1 : is_valid q :=
   begin
@@ -2893,49 +2903,50 @@ proof schemes then q is a proof scheme.
     have s2 : is_valid (imp p q), rewrite <- hbp, rewrite <- hcq, exact hbc,
     exact is_valid_mp p q s1 s2,
   end,
-  return (loc_ctx.append_proof (proof.mk q t1))
+  return (local_context.append_proof (proof.mk q t1))
 
 -- |- (p -> (q -> p))
 /-
-If p and q are syntactically valid formula schemes then (p -> (q -> p)) 
-is a proof scheme.
+If p and q are syntactically valid formulas then (p -> (q -> p)) 
+is a semantically valid formula.
 -/
-| _ loc_ctx (prop_1 p_idx q_idx) := do
-  p <- loc_ctx.get_formula p_idx,
-  q <- loc_ctx.get_formula q_idx,
+| _ local_context (prop_1 p_index q_index) := do
+  p <- local_context.get_nth_formula p_index,
+  q <- local_context.get_nth_formula q_index,
   let f := (p.imp (q.imp p)),
   let t1 : is_valid f := is_valid_prop_1 p q,
-  return (loc_ctx.append_proof (proof.mk f t1))
+  return (local_context.append_proof (proof.mk f t1))
 
 -- |- ((p -> (q -> r)) -> ((p -> q) -> (p -> r)))
 /-
-If p and q and r are syntactically valid formula schemes then
-((p -> (q -> r)) -> ((p -> q) -> (p -> r))) is a proof scheme.
+If p and q and r are syntactically valid formulas then
+((p -> (q -> r)) -> ((p -> q) -> (p -> r)))
+is a semantically valid formula.
 -/
-| _ loc_ctx (prop_2 p_idx q_idx r_idx) := do
-  p <- loc_ctx.get_formula p_idx,
-  q <- loc_ctx.get_formula q_idx,
-  r <- loc_ctx.get_formula r_idx,
+| _ local_context (prop_2 p_index q_index r_index) := do
+  p <- local_context.get_nth_formula p_index,
+  q <- local_context.get_nth_formula q_index,
+  r <- local_context.get_nth_formula r_index,
   let f := ((p.imp (q.imp r)).imp ((p.imp q).imp (p.imp r))),
   let t1 : is_valid f := is_valid_prop_2 p q r,
-  return (loc_ctx.append_proof (proof.mk f t1))
+  return (local_context.append_proof (proof.mk f t1))
 
 -- |- ((~p -> ~q) -> (q -> p))
 /-
-If p and q are syntactically valid formula schemes then
-((~p -> ~q) -> (q -> p)) is a proof scheme.
+If p and q are syntactically valid formulas then
+((~p -> ~q) -> (q -> p)) is a semantically valid formula.
 -/
-| _ loc_ctx (prop_3 p_idx q_idx) := do
-  p <- loc_ctx.get_formula p_idx,
-  q <- loc_ctx.get_formula q_idx,
+| _ local_context (prop_3 p_index q_index) := do
+  p <- local_context.get_nth_formula p_index,
+  q <- local_context.get_nth_formula q_index,
   let f := (((not p).imp (not q)).imp (q.imp p)),
   let t1 : is_valid f := is_valid_prop_3 p q,
-  return (loc_ctx.append_proof (proof.mk f t1))
+  return (local_context.append_proof (proof.mk f t1))
 
 /-
-If p is a proof scheme in the global context then
-any consistent substitution of formula schemes for
-the atomic propositions in p is a proof scheme.
+If p is a semantically valid formula in the global context then
+any consistent substitution of formulas for
+the propositions in p is a semantically valid formula.
 -/
 /-
 | glb_ctx loc_ctx (apply_proof idx m) := do
@@ -2951,33 +2962,31 @@ the atomic propositions in p is a proof scheme.
   return (loc_ctx.append_proof (proof.mk f t1))
 -/
 
-def check_all :
+def check_step_list :
 global_context_t → local_context_t → list step → option global_context_t
-| glb_ctx loc_ctx [] := do
-  let prf_list := prod.snd loc_ctx,
-  prf <- list.last' prf_list,
-  return (glb_ctx.append_proof prf)
-| glb_ctx loc_ctx (step :: steps) := do
-  loc_ctx' <- check_step glb_ctx loc_ctx step,
-  check_all glb_ctx loc_ctx' steps
+| global_context local_context [] := do
+  last_proof <- list.last' local_context.proof_list,
+  return (global_context.append_proof last_proof)
+| global_context local_context (step :: step_list) := do
+  local_context' <- check_step global_context local_context step,
+  check_step_list global_context local_context' step_list
 
 
 -- example
 def ex := do
-  glb_ctx_1 <- (check_all [] ([], []) [
-    is_atom "P",  -- f0 = p
-    is_imp 0 0,   -- f1 = p -> p
-    is_imp 1 0,   -- f2 = (p -> p) -> p
-    is_imp 0 2,   -- f3 = p -> ((p -> p) -> p)
-    is_imp 0 1,   -- f4 = p -> (p -> p)
-    is_imp 4 1,   -- f5 = (p -> (p -> p)) -> (p -> p)
-    is_imp 3 5,   -- f6 = (p -> ((p -> p) -> p)) -> ((p -> (p -> p)) -> (p -> p))
+  global_context <- check_step_list (global_context_t.mk []) (local_context_t.mk [] [] [])
+  [
+    pred_is_formula "P" [],  -- f0 = p
+    imp_is_formula 0 0,   -- f1 = p -> p
+    imp_is_formula 1 0,   -- f2 = (p -> p) -> p
+    imp_is_formula 0 2,   -- f3 = p -> ((p -> p) -> p)
+    imp_is_formula 0 1,   -- f4 = p -> (p -> p)
+    imp_is_formula 4 1,   -- f5 = (p -> (p -> p)) -> (p -> p)
+    imp_is_formula 3 5,   -- f6 = (p -> ((p -> p) -> p)) -> ((p -> (p -> p)) -> (p -> p))
     prop_2 0 1 0, -- p0 = |- (p -> ((p -> p) -> p)) -> ((p -> (p -> p)) -> (p -> p))
     prop_1 0 1,   -- p1 = |- p -> ((p -> p) -> p)
     mp 3 5 1 0,   -- p2 = |- (p -> (p -> p)) -> (p -> p)
     prop_1 0 0,   -- p3 = |- p -> (p -> p)
     mp 4 1 3 2    -- p4 = |- p -> p
-    ]),
-  return glb_ctx_1
-
-#eval ex
+  ],
+  return global_context
