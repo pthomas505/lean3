@@ -2689,19 +2689,48 @@ def sub_single_predicate
   in forall_ x' (sub_single_predicate p)
 
 
+def fin_zip_fun'
+  {α β : Type} [decidable_eq α]
+  {m n : ℕ}
+  (h1 : m = n)
+  (f : fin m → α)
+  (nodup : ∀ a b : fin m, a ≠ b → f a ≠ f b)
+  (g : fin n → β)
+  (default : α → β) :
+  α → β :=
+fun x : α, if h : ∃ a : fin m, f a = x then
+  begin
+  subst h1,
+  apply g,
+  apply fintype.choose (fun a : fin m, f a = x),
+  simp only,
+  apply exists.elim h, intros a h2,
+  apply exists.intro a, simp only,
+  split,
+  exact h2,
+  intros y h3,
+  by_contradiction,
+  apply nodup y a h, rewrite h2, rewrite h3,
+  end
+ else default x
+
+
+
+structure blah : Type :=
+(n : ℕ)
+(params : fin n → var_symbols)
+(nodup : ∀ l m : fin n, l ≠ m → params l ≠ params m)
+(q : formula)
+
 def sub_predicate :
-  (pred_symbols → (list var_symbols × formula)) → formula → formula
+  (pred_symbols → blah) → formula → formula
 | m bottom := bottom
 | m top := top
 | m (pred n x terms) :=
-    let params := (m x).fst in
-    let p := (m x).snd in
-    if h : n = params.length ∧ params.nodup
-    then sub_formula (list_zip_fun params (list.of_fn terms)
-      begin
-        simp only [list.length_of_fn], exact h.left,
-      end
-      (fun i : var_symbols, var i)) p
+    let r := m x in
+    if h : r.n = n then
+    let s := fin_zip_fun' h r.params r.nodup terms (fun i : var_symbols, var i) in
+    sub_formula s r.q
     else pred n x terms
 | m (eq u v) := eq u v
 | m (not p) := not (sub_predicate m p)
@@ -2710,9 +2739,9 @@ def sub_predicate :
 | m (imp p q) := imp (sub_predicate m p) (sub_predicate m q)
 | m (iff p q) := iff (sub_predicate m p) (sub_predicate m q)
 | m (forall_ x p) :=
-  let free_minus_param := 
+  let free_minus_param :=
   finset.bUnion p.all_pred_set'
-    (fun y : pred_symbols, (m y).snd.free_var_set \ list.to_finset (m y).fst)
+    (fun y : pred_symbols, (m y).q.free_var_set \ finset.image (m y).params (finset.fin_range (m y).n))
   in
   let x' : var_symbols :=
     if x ∈ free_minus_param
@@ -2720,9 +2749,9 @@ def sub_predicate :
     else x
   in forall_ x' (sub_predicate m p)
 | m (exists_ x p) :=
-  let free_minus_param := 
+  let free_minus_param :=
   finset.bUnion p.all_pred_set'
-    (fun y : pred_symbols, (m y).snd.free_var_set \ list.to_finset (m y).fst)
+    (fun y : pred_symbols, (m y).q.free_var_set \ finset.image (m y).params (finset.fin_range (m y).n))
   in
   let x' : var_symbols :=
     if x ∈ free_minus_param
@@ -2734,10 +2763,40 @@ def sub_predicate :
 theorem sub_pred_is_valid
   (p : formula)
   (h1 : is_valid p)
-  (m : pred_symbols → (list var_symbols × formula)) :
-  is_valid (sub_predicate m p) :=
+  (a : pred_symbols → blah) :
+  is_valid (sub_predicate a p) :=
 begin
-  sorry,
+  induction p,
+  case formula.bottom
+  { unfold sub_predicate, exact h1, },
+  case formula.top
+  { unfold sub_predicate, exact h1, },
+  case formula.pred : n x terms
+  {
+    unfold sub_predicate,
+    unfold is_valid,
+    intros D m v,
+    simp only,
+    split_ifs,
+    simp only [thm_3_7],
+    sorry, sorry,    
+  },
+  case formula.eq : p_ᾰ p_ᾰ_1
+  { admit },
+  case formula.not : p_ᾰ p_ih
+  { admit },
+  case formula.and : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
+  { admit },
+  case formula.or : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
+  { admit },
+  case formula.imp : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
+  { admit },
+  case formula.iff : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
+  { admit },
+  case formula.forall_ : p_ᾰ p_ᾰ_1 p_ih
+  { admit },
+  case formula.exists_ : p_ᾰ p_ᾰ_1 p_ih
+  { admit },
 end
 
 
@@ -2864,7 +2923,7 @@ inductive step : Type
 | pred_1 : ℕ → ℕ → var_symbols → step
 | pred_2 : ℕ → var_symbols → ℕ → step
 | pred_3 : ℕ → var_symbols → step
-| replace : ℕ → (pred_symbols → (list var_symbols × formula)) → step
+--| replace : ℕ → (pred_symbols → (list var_symbols × formula)) → step
 
 open step
 
@@ -3017,13 +3076,13 @@ If p and q are syntactically valid formulas then
   let f := (p.imp (forall_ x p)),
   let t1 : is_valid f := is_valid_pred_3 p x h1,
   return (local_context.append_proof (proof.mk f t1))
-
+/-
 | global_context local_context (replace p_index m) := do
   (proof.mk p hp) <- global_context.get_nth_proof p_index,
   let f := sub_predicate m p,
   let t1 : is_valid f := sub_pred_is_valid p hp m,
   return (local_context.append_proof (proof.mk f t1))
-
+-/
 /-
 If p is a semantically valid formula in the global context then
 any consistent substitution of formulas for
