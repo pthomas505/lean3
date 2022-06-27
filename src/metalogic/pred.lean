@@ -2649,19 +2649,43 @@ def fin_zip_fun
   α → β := list_zip_fun (list.of_fn f) (list.of_fn g)
   begin simp only [list.length_of_fn], exact h1, end default
 
+def fin_zip_fun'
+  {α β : Type} [decidable_eq α]
+  {m n : ℕ}
+  (h1 : m = n)
+  (f : fin m → α)
+  (nodup : ∀ a b : fin m, a ≠ b → f a ≠ f b)
+  (g : fin n → β)
+  (default : α → β) :
+  α → β :=
+fun x : α, if h : ∃ a : fin m, f a = x then
+  begin
+  subst h1,
+  apply g,
+  apply fintype.choose (fun a : fin m, f a = x),
+  simp only,
+  apply exists.elim h, intros a h2,
+  apply exists.intro a, simp only,
+  split,
+  exact h2,
+  intros y h3,
+  by_contradiction,
+  apply nodup y a h, rewrite h2, rewrite h3,
+  end
+ else default x
 
 def sub_single_predicate
   (q_n : ℕ)
   (q : pred_symbols)
   (params : fin q_n → var_symbols)
-  (h1 : (list.of_fn params).nodup)
+  (h1 : ∀ a b : fin q_n, a ≠ b → params a ≠ params b)
   (r : formula) :
   formula → formula
 | bottom := bottom
 | top := top
 | (pred n x terms) :=
-    if h : n = q_n ∧ x = q
-    then sub_formula (fin_zip_fun h.left params terms (fun i : var_symbols, var i)) r
+    if h : q_n = n ∧ x = q
+    then sub_formula (fin_zip_fun' h.left params h1 terms term.var) r
     else pred n x terms
 | (eq u v) := eq u v
 | (not p) := not (sub_single_predicate p)
@@ -2689,33 +2713,6 @@ def sub_single_predicate
   in forall_ x' (sub_single_predicate p)
 
 
-def fin_zip_fun'
-  {α β : Type} [decidable_eq α]
-  {m n : ℕ}
-  (h1 : m = n)
-  (f : fin m → α)
-  (nodup : ∀ a b : fin m, a ≠ b → f a ≠ f b)
-  (g : fin n → β)
-  (default : α → β) :
-  α → β :=
-fun x : α, if h : ∃ a : fin m, f a = x then
-  begin
-  subst h1,
-  apply g,
-  apply fintype.choose (fun a : fin m, f a = x),
-  simp only,
-  apply exists.elim h, intros a h2,
-  apply exists.intro a, simp only,
-  split,
-  exact h2,
-  intros y h3,
-  by_contradiction,
-  apply nodup y a h, rewrite h2, rewrite h3,
-  end
- else default x
-
-
-
 structure blah : Type :=
 (n : ℕ)
 (params : fin n → var_symbols)
@@ -2729,7 +2726,7 @@ def sub_predicate :
 | m (pred n x terms) :=
     let r := m x in
     if h : r.n = n then
-    let s := fin_zip_fun' h r.params r.nodup terms (fun i : var_symbols, var i) in
+    let s := fin_zip_fun' h r.params r.nodup terms term.var in
     sub_formula s r.q
     else pred n x terms
 | m (eq u v) := eq u v
@@ -2779,6 +2776,10 @@ begin
     simp only,
     split_ifs,
     simp only [thm_3_7],
+    unfold function.comp,
+    unfold fin_zip_fun',
+    subst h,
+    simp only,
     sorry, sorry,    
   },
   case formula.eq : p_ᾰ p_ᾰ_1
