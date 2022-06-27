@@ -2780,7 +2780,7 @@ begin
     unfold fin_zip_fun',
     subst h,
     simp only,
-    sorry, sorry,    
+    sorry, sorry,
   },
   case formula.eq : p_ᾰ p_ᾰ_1
   { admit },
