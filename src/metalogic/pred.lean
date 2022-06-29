@@ -2726,17 +2726,85 @@ def formula.sub_pred_formula (s : (ℕ × string) → formula) : formula → for
 | (imp p q) := imp (formula.sub_pred_formula p) (formula.sub_pred_formula q)
 | (iff p q) := iff (formula.sub_pred_formula p) (formula.sub_pred_formula q)
 | (forall_ x p) :=
+  let free := finset.bUnion p.all_pred_set (fun r, (s r).free_var_set) in
   let x' :=
-  if ∃ r ∈ p.all_pred_set, x ∈ (s r).free_var_set
-  then variant x ((formula.sub_pred_formula p).free_var_set)
+  if x ∈ free
+  then variant x free
   else x
   in forall_ x' (formula.sub_pred_formula p)
 | (exists_ x p) :=
+  let free := finset.bUnion p.all_pred_set (fun r, (s r).free_var_set) in
   let x' :=
-  if ∃ r ∈ p.all_pred_set, x ∈ (s r).free_var_set
-  then variant x ((formula.sub_pred_formula p).free_var_set)
+  if x ∈ free
+  then variant x free
   else x
   in exists_ x' (formula.sub_pred_formula p)
+
+
+example
+  (x : var_symbols)
+  (p : formula)
+  (s : (ℕ × string) → formula)
+  (h1 : ∀ s, (formula.sub_pred_formula s p).free_var_set =
+    finset.bUnion p.all_pred_set (fun y, (s y).free_var_set)) :
+  let free := finset.bUnion p.all_pred_set (fun r, (s r).free_var_set) in
+  let x' :=
+  if x ∈ free
+  then variant x free
+  else x
+  in
+  x' ∉ free :=
+begin
+intro, split_ifs, simp only [variant_not_mem], simp, exact h,
+end
+
+
+theorem thm_10
+  (p : formula)
+  (s : (ℕ × string) → formula) :
+  (formula.sub_pred_formula s p).free_var_set =
+    finset.bUnion p.all_pred_set (fun r, (s r).free_var_set) :=
+begin
+  induction p generalizing s,
+  case formula.bottom : s
+  {
+    unfold formula.sub_pred_formula, unfold formula.all_pred_set,
+    unfold formula.free_var_set, simp,
+  },
+  case formula.top : s
+  { admit },
+  case formula.pred : n p terms s
+  {
+    unfold formula.sub_pred_formula, unfold formula.all_pred_set,
+    simp,
+  },
+  case formula.eq : p_ᾰ p_ᾰ_1 s
+  { admit },
+  case formula.not : p_ᾰ p_ih s
+  { unfold formula.sub_pred_formula, unfold formula.all_pred_set,
+    apply p_ih, },
+  case formula.and : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 s
+  { unfold formula.sub_pred_formula, unfold formula.all_pred_set,
+  sorry, },
+  case formula.or : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 s
+  { admit },
+  case formula.imp : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 s
+  { admit },
+  case formula.iff : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 s
+  { admit },
+  case formula.forall_ : x p p_ih s
+  {
+    unfold formula.sub_pred_formula, unfold formula.all_pred_set,
+    simp, unfold formula.free_var_set, rewrite p_ih,
+    split_ifs, have s1 : variant x (p.all_pred_set.bUnion (λ (r : ℕ × pred_symbols), (s r).free_var_set))
+∉ (p.all_pred_set.bUnion (λ (r : ℕ × pred_symbols), (s r).free_var_set)),
+    simp only [variant_not_mem],
+    simp, apply finset.sdiff_singleton_not_mem_eq_self, exact s1,
+    apply finset.sdiff_singleton_not_mem_eq_self, exact h,
+  },
+  case formula.exists_ : p_ᾰ p_ᾰ_1 p_ih s
+  { admit },
+end
 
 def interpretation.sub'
   {D : Type}
@@ -2745,6 +2813,45 @@ def interpretation.sub'
   (f : (ℕ × string) → formula) : interpretation D :=
     interpretation.mk m.nonempty m.func
       (fun n : ℕ, fun x : string, fun terms : fin n → D, holds D m v (f (n, x)))
+
+example
+  (p : formula)
+  (s : (ℕ × string) → formula)
+  (T : Type)
+  (m : interpretation T)
+  (v : valuation T) :
+  holds T m v (formula.sub_pred_formula s p) ↔
+    holds T (m.sub' v s) v p :=
+begin
+  induction p generalizing s v,
+  case formula.bottom : s v
+  { unfold formula.sub_pred_formula, unfold holds, },
+  case formula.top : s v
+  { admit },
+  case formula.pred : n p terms s v
+  { unfold formula.sub_pred_formula, unfold holds,
+    unfold interpretation.sub', },
+  case formula.eq : p_ᾰ p_ᾰ_1 s v
+  { admit },
+  case formula.not : p_ᾰ p_ih s v
+  { admit },
+  case formula.and : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 s v
+  { admit },
+  case formula.or : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 s v
+  { admit },
+  case formula.imp : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 s v
+  { admit },
+  case formula.iff : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 s v
+  { admit },
+  case formula.forall_ : x p p_ih s v
+  {
+    unfold formula.sub_pred_formula, unfold holds,
+    apply forall_congr, intros, admit,
+  },
+  case formula.exists_ : p_ᾰ p_ᾰ_1 p_ih s v
+  { admit },
+end
+
 
 lemma formula.sub_pred_formula_holds
   (D : Type)
@@ -2832,10 +2939,11 @@ begin
   {
     unfold formula.all_pred_set at hv,
     unfold formula.sub_pred_formula,
-    simp,
+    simp at *,
     unfold holds,
     apply forall_congr, intros a,
     specialize p_ih (function.update v y a),
+    
     sorry
   },
   case formula.exists_ : y p p_ih v hv
