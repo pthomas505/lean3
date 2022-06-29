@@ -2713,6 +2713,138 @@ def sub_single_predicate
   in forall_ x' (sub_single_predicate p)
 
 
+-- uniform simultaneous replacement of the predicates in a formula by formulas
+
+def formula.sub_pred_formula (s : (ℕ × string) → formula) : formula → formula
+| bottom := bottom
+| top := top
+| (pred n x terms) := s (n, x)
+| (eq u v) := eq u v
+| (not p) := not (formula.sub_pred_formula p)
+| (and p q) := and (formula.sub_pred_formula p) (formula.sub_pred_formula q)
+| (or p q) := or (formula.sub_pred_formula p) (formula.sub_pred_formula q)
+| (imp p q) := imp (formula.sub_pred_formula p) (formula.sub_pred_formula q)
+| (iff p q) := iff (formula.sub_pred_formula p) (formula.sub_pred_formula q)
+| (forall_ x p) :=
+  let x' :=
+  if ∃ r ∈ p.all_pred_set, x ∈ (s r).free_var_set
+  then variant x ((formula.sub_pred_formula p).free_var_set)
+  else x
+  in forall_ x' (formula.sub_pred_formula p)
+| (exists_ x p) :=
+  let x' :=
+  if ∃ r ∈ p.all_pred_set, x ∈ (s r).free_var_set
+  then variant x ((formula.sub_pred_formula p).free_var_set)
+  else x
+  in exists_ x' (formula.sub_pred_formula p)
+
+def interpretation.sub'
+  {D : Type}
+  (m : interpretation D)
+  (v : valuation D)
+  (f : (ℕ × string) → formula) : interpretation D :=
+    interpretation.mk m.nonempty m.func
+      (fun n : ℕ, fun x : string, fun terms : fin n → D, holds D m v (f (n, x)))
+
+lemma formula.sub_pred_formula_holds
+  (D : Type)
+  (m : interpretation D)
+  (v v' : valuation D)
+  (p : formula)
+  (s : (ℕ × string) → formula)
+  (hv : ∀ (y ∈ p.all_pred_set) (x ∈ (s y).free_var_set), v x = v' x) :
+  holds D m v (formula.sub_pred_formula s p)
+    ↔ holds D (m.sub v' s) v p :=
+begin
+  induction p generalizing v,
+  case formula.bottom : v hv
+  { unfold interpretation.sub, unfold formula.sub_pred_formula, unfold holds },
+  case formula.top : v hv
+  { unfold interpretation.sub, unfold formula.sub_pred_formula, unfold holds },
+  case formula.pred : n p terms v hv
+  {
+    simp only [interpretation.sub], unfold formula.sub_pred_formula, unfold holds,
+    simp [formula.all_pred_set] at hv,
+    apply thm_2,
+    intros x h2, apply hv n p, refl, refl, exact h2
+  },
+  case formula.eq : t t'
+  {
+    simp only [interpretation.sub],
+    unfold formula.sub_pred_formula,
+    unfold holds, 
+    admit,
+  },
+  case formula.not : p p_ih v hv
+  {
+    unfold formula.sub_pred_formula, unfold holds,
+    apply not_congr, apply p_ih _ hv
+  },
+  case formula.and : p q p_ih q_ih
+  {
+    unfold formula.sub_pred_formula, unfold holds,
+    simp [formula.all_pred_set, or_imp_distrib, forall_and_distrib] at hv,
+    apply and_congr,
+    apply p_ih,
+    intros y h2 x h3, apply hv.1 y.1 y.2,
+    simp only [prod.mk.eta], exact h2, simp only [prod.mk.eta], exact h3,
+    apply q_ih,
+    intros y h2 x h3, apply hv.2 y.1 y.2,
+    simp only [prod.mk.eta], exact h2, simp only [prod.mk.eta], exact h3
+  },
+  case formula.or : p q p_ih q_ih
+  {
+    unfold formula.sub_pred_formula, unfold holds,
+    simp [formula.all_pred_set, or_imp_distrib, forall_and_distrib] at hv,
+    apply or_congr,
+    apply p_ih,
+    intros y h2 x h3, apply hv.1 y.1 y.2,
+    simp only [prod.mk.eta], exact h2, simp only [prod.mk.eta], exact h3,
+    apply q_ih,
+    intros y h2 x h3, apply hv.2 y.1 y.2,
+    simp only [prod.mk.eta], exact h2, simp only [prod.mk.eta], exact h3
+  },
+  case formula.imp : p q p_ih q_ih
+  {
+    unfold formula.sub_pred_formula, unfold holds,
+    simp [formula.all_pred_set, or_imp_distrib, forall_and_distrib] at hv,
+    apply imp_congr,
+    apply p_ih,
+    intros y h2 x h3, apply hv.1 y.1 y.2,
+    simp only [prod.mk.eta], exact h2, simp only [prod.mk.eta], exact h3,
+    apply q_ih,
+    intros y h2 x h3, apply hv.2 y.1 y.2,
+    simp only [prod.mk.eta], exact h2, simp only [prod.mk.eta], exact h3
+  },
+  case formula.iff : p q p_ih q_ih
+  {
+    unfold formula.sub_pred_formula, unfold holds,
+    simp [formula.all_pred_set, or_imp_distrib, forall_and_distrib] at hv,
+    apply iff_congr,
+    apply p_ih,
+    intros y h2 x h3, apply hv.1 y.1 y.2,
+    simp only [prod.mk.eta], exact h2, simp only [prod.mk.eta], exact h3,
+    apply q_ih,
+    intros y h2 x h3, apply hv.2 y.1 y.2,
+    simp only [prod.mk.eta], exact h2, simp only [prod.mk.eta], exact h3
+  },
+  case formula.forall_ : y p p_ih v hv
+  {
+    unfold formula.all_pred_set at hv,
+    unfold formula.sub_pred_formula,
+    simp,
+    unfold holds,
+    apply forall_congr, intros a,
+    specialize p_ih (function.update v y a),
+    sorry
+  },
+  case formula.exists_ : y p p_ih v hv
+  {
+    sorry
+  },
+end
+
+
 structure blah : Type :=
 (n : ℕ)
 (params : fin n → var_symbols)
