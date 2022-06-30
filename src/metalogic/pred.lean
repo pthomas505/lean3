@@ -2806,14 +2806,6 @@ begin
   { admit },
 end
 
-def interpretation.sub'
-  {D : Type}
-  (m : interpretation D)
-  (v : valuation D)
-  (f : (ℕ × string) → formula) : interpretation D :=
-    interpretation.mk m.nonempty m.func
-      (fun n : ℕ, fun x : string, fun terms : fin n → D, holds D m v (f (n, x)))
-
 
 lemma formula.sub_pred_formula_holds
   (D : Type)
@@ -2897,15 +2889,13 @@ begin
     intros y h2 x h3, apply hv.2 y.1 y.2,
     simp only [prod.mk.eta], exact h2, simp only [prod.mk.eta], exact h3
   },
-  case formula.forall_ : y p p_ih v hv
+  case formula.forall_ : x p p_ih v hv
   {
     unfold formula.all_pred_set at hv,
     unfold formula.sub_pred_formula,
-    simp at *,
     unfold holds,
     apply forall_congr, intros a,
-    specialize p_ih (function.update v y a),    
-    sorry
+    admit
   },
   case formula.exists_ : y p p_ih v hv
   {
