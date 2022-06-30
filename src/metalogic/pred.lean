@@ -2814,49 +2814,6 @@ def interpretation.sub'
     interpretation.mk m.nonempty m.func
       (fun n : ℕ, fun x : string, fun terms : fin n → D, holds D m v (f (n, x)))
 
-example
-  (p : formula)
-  (s : (ℕ × string) → formula)
-  (T : Type)
-  (m : interpretation T)
-  (v v' : valuation T)
-  (hv : ∀ (y ∈ p.all_pred_set) (x ∈ (s y).free_var_set), v x = v' x) :
-  holds T m v (formula.sub_pred_formula s p) ↔
-    holds T (m.sub' v' s) v p :=
-begin
-  induction p generalizing s v,
-  case formula.bottom : s v
-  { unfold formula.sub_pred_formula, unfold holds, },
-  case formula.top : s v
-  { admit },
-  case formula.pred : n p terms s v
-  { unfold formula.sub_pred_formula, unfold holds,
-    unfold interpretation.sub', simp, apply thm_2,
-    simp at *, apply hv, unfold formula.all_pred_set, simp, },
-  case formula.eq : p_ᾰ p_ᾰ_1 s v
-  { admit },
-  case formula.not : p_ᾰ p_ih s v
-  { admit },
-  case formula.and : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 s v
-  { admit },
-  case formula.or : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 s v
-  { admit },
-  case formula.imp : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 s v
-  { admit },
-  case formula.iff : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 s v
-  { admit },
-  case formula.forall_ : x p p_ih s v
-  {
-    unfold formula.all_pred_set at hv,
-    unfold formula.sub_pred_formula, unfold holds,
-    rewrite thm_10,
-    apply forall_congr, intros a,
-    admit,
-  },
-  case formula.exists_ : p_ᾰ p_ᾰ_1 p_ih s v
-  { admit },
-end
-
 
 lemma formula.sub_pred_formula_holds
   (D : Type)
@@ -2947,8 +2904,7 @@ begin
     simp at *,
     unfold holds,
     apply forall_congr, intros a,
-    specialize p_ih (function.update v y a),
-    
+    specialize p_ih (function.update v y a),    
     sorry
   },
   case formula.exists_ : y p p_ih v hv
