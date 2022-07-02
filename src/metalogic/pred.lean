@@ -318,28 +318,32 @@ def mk_func (symbol : func_symbols) (terms : list term) :=
 func terms.length symbol terms.to_fin_fun
 
 
-def pi_decide {p q : Prop} [decidable p] (h : p → decidable q) : decidable (p ∧ q) :=
+def pi_decide
+  {p q : Prop} [decidable p]
+  (h : p → decidable q) :
+  decidable (p ∧ q) :=
 if hp : p then
   by haveI := h hp; exact
-  if hq : q then is_true ⟨hp, hq⟩
+  if hq : q then is_true (and.intro hp hq)
   else is_false (assume h : p ∧ q, hq (and.right h))
 else is_false (assume h : p ∧ q, hp (and.left h))
 
 instance : decidable_eq term
 | (var s₁) (var s₂) :=
-    decidable_of_decidable_of_iff (by apply_instance : decidable (s₁ = s₂)) (by simp)
-| (var s) (func n s' t) := is_false (by simp)
-| (func n s' t) (var s) := is_false (by simp)
+    decidable_of_decidable_of_iff
+      (by apply_instance : decidable (s₁ = s₂)) (by simp only)
+| (var s) (func n s' t) := is_false (by simp only [not_false_iff])
+| (func n s' t) (var s) := is_false (by simp only [not_false_iff])
 | (func n₁ s₁ t₁) (func n₂ s₂ t₂) := decidable_of_decidable_of_iff
   (begin
     apply' pi_decide,
     intro h,
     apply' and.decidable,
-    rw fin.heq_fun_iff h,
+    rewrite fin.heq_fun_iff h,
     apply' fintype.decidable_forall_fintype,
     intro a,
     apply term.decidable_eq,
-  end : decidable $ n₁ = n₂ ∧ s₁ = s₂ ∧ t₁ == t₂) (by simp)
+  end : decidable $ n₁ = n₂ ∧ s₁ = s₂ ∧ t₁ == t₂) (by simp only)
 
 /-
 pred 0 "P" [] : A propositional variable named "P".
