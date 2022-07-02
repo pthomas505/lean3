@@ -16,33 +16,33 @@ import data.finset
 lemma finset.mem_ite
   {α : Type}
   (x : α)
-  (p : Prop)
-  [decidable p]
-  (s s' : finset α) :
-  x ∈ (if p then s else s') ↔ (p → x ∈ s) ∧ (¬ p → x ∈ s') :=
+  (a : Prop)
+  [decidable a]
+  (s t : finset α) :
+  x ∈ (if a then s else t) ↔ (a → x ∈ s) ∧ (¬ a → x ∈ t) :=
 begin
   split,
   {
     intro h1,
     split,
-      { intro h2, simp only [if_pos h2] at h1, exact h1, },
-      { intro h2, simp only [if_neg h2] at h1, exact h1, },
+      { intro h2, simp only [if_pos h2] at h1, exact h1 },
+      { intro h2, simp only [if_neg h2] at h1, exact h1 }
   },
   {
     intro h1, cases h1,
     split_ifs,
-      { exact h1_left h, },
-      { exact h1_right h, },
-  },
+      { exact h1_left h },
+      { exact h1_right h }
+  }
 end
 
 lemma finset.bUnion_sdiff
   {α β : Type}
   [decidable_eq α] [decidable_eq β]
   (s : finset α)
-  (t : α → finset β)
-  (s' : finset β) :
-  (finset.bUnion s t) \ s' = finset.bUnion s (fun x : α, t x \ s') :=
+  (f : α → finset β)
+  (t : finset β) :
+  (finset.bUnion s f) \ t = finset.bUnion s (fun x : α, f x \ t) :=
 begin
   apply finset.ext, intro a,
   simp only [finset.mem_sdiff, finset.mem_bUnion, exists_prop],
@@ -51,16 +51,16 @@ begin
     intro h1, cases h1, apply exists.elim h1_left,
     intros b h2, cases h2, apply exists.intro b,
     split,
-      { exact h2_left, },
-      { exact and.intro h2_right h1_right, },
+      { exact h2_left },
+      { exact and.intro h2_right h1_right }
   },
   {
     intro h1, apply exists.elim h1,
     intros b h2, cases h2, cases h2_right,
     split,
-      { apply exists.intro b, exact and.intro h2_left h2_right_left, },
-      { exact h2_right_right, },
-  },
+      { apply exists.intro b, exact and.intro h2_left h2_right_left },
+      { exact h2_right_right }
+  }
 end
 
 lemma finset.bUnion_filter
