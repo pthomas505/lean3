@@ -141,10 +141,10 @@ lemma finset.bUnion_sdiff_of_forall_disjoint
   {α β : Type}
   [decidable_eq β]
   (s : finset α)
-  (t : α → finset β)
-  (s' : finset β)
-  (h1 : ∀ y : α, y ∈ s → disjoint (t y) s') :
-  (finset.bUnion s t) \ s' = finset.bUnion s t :=
+  (f : α → finset β)
+  (t : finset β)
+  (h1 : ∀ (y : α), y ∈ s → disjoint (f y) t) :
+  (finset.bUnion s f) \ t = finset.bUnion s f :=
 begin
   simp only [finset.sdiff_eq_self_iff_disjoint, finset.disjoint_bUnion_left],
   intro i, exact h1 i
