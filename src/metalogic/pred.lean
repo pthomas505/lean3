@@ -98,9 +98,9 @@ lemma finset.sdiff_singleton_bUnion
   {α β : Type}
   [decidable_eq α] [decidable_eq β]
   (s : finset α)
-  (t : α → finset β)
-  (x : α)
-  (s' : finset β)
+  {t : α → finset β}
+  {x : α}
+  {s' : finset β}
   (h1 : t x = s') :
   (finset.bUnion (s \ {x}) t) \ s' = (finset.bUnion s t) \ s' :=
 begin
@@ -140,9 +140,9 @@ end
 lemma finset.bUnion_sdiff_of_forall_disjoint
   {α β : Type}
   [decidable_eq β]
-  (s : finset α)
-  (t : α → finset β)
-  (s' : finset β)
+  {s : finset α}
+  {t : α → finset β}
+  {s' : finset β}
   (h1 : ∀ y : α, y ∈ s → disjoint (t y) s') :
   (finset.bUnion s t) \ s' = finset.bUnion s t :=
 begin
