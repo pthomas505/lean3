@@ -10,7 +10,7 @@ doi:10.1017/CBO9780511576430
 -/
 
 
-import data.finset data.finmap data.list.alist
+import data.finset
 
 
 lemma finset.mem_ite
@@ -98,9 +98,9 @@ lemma finset.sdiff_singleton_bUnion
   {α β : Type}
   [decidable_eq α] [decidable_eq β]
   (s : finset α)
-  {t : α → finset β}
-  {x : α}
-  {s' : finset β}
+  (t : α → finset β)
+  (x : α)
+  (s' : finset β)
   (h1 : t x = s') :
   (finset.bUnion (s \ {x}) t) \ s' = (finset.bUnion s t) \ s' :=
 begin
@@ -140,9 +140,9 @@ end
 lemma finset.bUnion_sdiff_of_forall_disjoint
   {α β : Type}
   [decidable_eq β]
-  {s : finset α}
-  {t : α → finset β}
-  {s' : finset β}
+  (s : finset α)
+  (t : α → finset β)
+  (s' : finset β)
   (h1 : ∀ y : α, y ∈ s → disjoint (t y) s') :
   (finset.bUnion s t) \ s' = finset.bUnion s t :=
 begin
@@ -153,7 +153,7 @@ end
 lemma finset.ne_imp_sdiff_union_comm
   {α : Type}
   [decidable_eq α]
-  {x y : α}
+  (x y : α)
   (s : finset α)
   (h1 : x ≠ y) :
   (s \ {x}) ∪ {y} = (s ∪ {y}) \ {x} :=
@@ -187,8 +187,8 @@ end
 lemma finset.mem_ne_imp_mem_sdiff
   {α : Type}
   [decidable_eq α]
-  {x y : α}
-  {s : finset α}
+  (x y : α)
+  (s : finset α)
   (h1 : x ∈ s)
   (h2 : x ≠ y) :
   x ∈ s \ {y} :=
@@ -200,8 +200,8 @@ end
 lemma finset.mem_sdiff_imp_mem
   {α : Type}
   [decidable_eq α]
-  {x y : α}
-  {s : finset α}
+  (x y : α)
+  (s : finset α)
   (h1 : x ∈ s \ {y}) :
   x ∈ s :=
 begin
@@ -213,8 +213,8 @@ end
 lemma finset.mem_sdiff_imp_ne
   {α : Type}
   [decidable_eq α]
-  {x y : α}
-  {s : finset α}
+  (x y : α)
+  (s : finset α)
   (h1 : x ∈ s \ {y}) :
   x ≠ y :=
 begin
@@ -226,7 +226,7 @@ end
 lemma finset.eq_imp_not_mem_sdiff
   {α : Type}
   [decidable_eq α]
-  {x y : α}
+  (x y : α)
   (s : finset α)
   (h1 : x = y) :
   x ∉ s \ {y} :=
@@ -239,9 +239,8 @@ end
 lemma finset.not_mem_imp_not_mem_sdiff
   {α : Type}
   [decidable_eq α]
-  {x : α}
-  (y : α)
-  {s : finset α}
+  (x y : α)
+  (s : finset α)
   (h1 : x ∉ s) :
   x ∉ s \ {y} :=
 begin
@@ -253,8 +252,8 @@ end
 lemma finset.not_mem_sdiff_mem_imp_eq
   {α : Type}
   [decidable_eq α]
-  {x y : α}
-  {s : finset α}
+  (x y : α)
+  (s : finset α)
   (h1 : x ∉ s \ {y})
   (h2 : x ∈ s) :
   x = y :=
@@ -267,8 +266,8 @@ end
 lemma finset.not_mem_sdiff_ne_imp_not_mem
   {α : Type}
   [decidable_eq α]
-  {x y : α}
-  {s : finset α}
+  (x y : α)
+  (s : finset α)
   (h1 : x ∉ s \ {y})
   (h2 : x ≠ y) :
   x ∉ s :=
@@ -1773,7 +1772,7 @@ begin
         rewrite replace_id x y ((xs \ {z}) ∪ {u}) p s2
       },
       {
-        have s1 : ((xs \ {z}) ∪ {u}) = (xs ∪ {u}) \ {z}, exact finset.ne_imp_sdiff_union_comm xs h,
+        have s1 : ((xs \ {z}) ∪ {u}) = (xs ∪ {u}) \ {z}, exact finset.ne_imp_sdiff_union_comm z u xs h,
         rewrite s1, apply p_ih,
         simp only [finset.mem_union, finset.mem_singleton], push_neg, exact and.intro h1 h'
       }
@@ -1796,7 +1795,7 @@ begin
         rewrite replace_id x y ((xs \ {z}) ∪ {u}) p s2
       },
       {
-        have s1 : ((xs \ {z}) ∪ {u}) = (xs ∪ {u}) \ {z}, exact finset.ne_imp_sdiff_union_comm xs h,
+        have s1 : ((xs \ {z}) ∪ {u}) = (xs ∪ {u}) \ {z}, exact finset.ne_imp_sdiff_union_comm z u xs h,
         rewrite s1, apply p_ih,
         simp only [finset.mem_union, finset.mem_singleton], push_neg, exact and.intro h1 h'
       }
@@ -1876,7 +1875,7 @@ begin
   {
     unfold formula.free_var_set at h1,
     unfold formula.bind_var_set at h2, simp only [finset.mem_union, finset.mem_singleton] at h2, push_neg at h2, cases h2,
-    have s1 : y ∉ p.free_var_set, exact finset.not_mem_sdiff_ne_imp_not_mem h1 h2_right,
+    have s1 : y ∉ p.free_var_set, exact finset.not_mem_sdiff_ne_imp_not_mem _ _ _ h1 h2_right,
     unfold replace, unfold holds,
     simp only [finset.empty_union],
     apply forall_congr, intros a',
@@ -1913,7 +1912,7 @@ begin
   {
     unfold formula.free_var_set at h1,
     unfold formula.bind_var_set at h2, simp only [finset.mem_union, finset.mem_singleton] at h2, push_neg at h2, cases h2,
-    have s1 : y ∉ p.free_var_set, exact finset.not_mem_sdiff_ne_imp_not_mem h1 h2_right,
+    have s1 : y ∉ p.free_var_set, exact finset.not_mem_sdiff_ne_imp_not_mem _ _ _ h1 h2_right,
     unfold replace, unfold holds,
     simp only [finset.empty_union],
     apply exists_congr, intros a',
