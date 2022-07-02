@@ -168,20 +168,20 @@ begin
     split,
     {
       cases h2,
-      { cases h2, apply or.intro_left, exact h2_left, },
+      { cases h2, apply or.intro_left, exact h2_left },
       { apply or.intro_right, exact h2 }
     },
     {
       cases h2,
-      { cases h2, exact h2_right, },
-      { rewrite h2, rewrite ne_comm at h1, exact h1, }
+      { cases h2, exact h2_right },
+      { rewrite h2, rewrite ne_comm at h1, exact h1 }
     }
   },
   {
     intros h2, cases h2,
     cases h2_left,
-    { apply or.intro_left, exact and.intro h2_left h2_right, },
-    { apply or.intro_right, exact h2_left, }
+    { apply or.intro_left, exact and.intro h2_left h2_right },
+    { apply or.intro_right, exact h2_left }
   }
 end
 
