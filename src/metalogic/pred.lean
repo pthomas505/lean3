@@ -128,9 +128,9 @@ end
 lemma finset.bUnion_union
   {α β : Type}
   [decidable_eq α] [decidable_eq β]
-  (s s' : finset α)
-  (t : α → finset β) :
-  finset.bUnion (s ∪ s') t = finset.bUnion s t ∪ finset.bUnion s' t :=
+  (s t : finset α)
+  (f : α → finset β) :
+  finset.bUnion (s ∪ t) f = finset.bUnion s f ∪ finset.bUnion t f :=
 begin
   apply finset.ext, intro a,
   simp only [or_and_distrib_right, exists_or_distrib, finset.mem_bUnion,
