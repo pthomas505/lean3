@@ -309,7 +309,7 @@ open term
 meta def term.repr : term → string
 | (var x) := x.repr
 | (func n f terms) :=
-    f.quote ++ fin_fun_to_string n (fun i : fin n, (terms i).repr)
+    f.quote ++ fin_fun_to_string n (fun (i : fin n), (terms i).repr)
 
 meta instance : has_repr term := has_repr.mk term.repr
 
