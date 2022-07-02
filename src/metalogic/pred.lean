@@ -40,7 +40,7 @@ end
 
 lemma finset.bUnion_sdiff
   {α β : Type}
-  [decidable_eq α] [decidable_eq β]
+  [decidable_eq β]
   (s : finset α)
   (f : α → finset β)
   (t : finset β) :
@@ -67,7 +67,7 @@ end
 
 lemma finset.bUnion_filter
   {α β : Type}
-  [decidable_eq α] [decidable_eq β]
+  [decidable_eq β]
   (s : finset α)
   (f : α → finset β)
   (p : α → Prop)
