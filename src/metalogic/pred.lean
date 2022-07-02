@@ -284,8 +284,8 @@ def list.to_fin_fun {α : Type} (l : list α) : fin l.length → α :=
 fun (i : fin l.length), l.nth_le i.val i.property
 
 
-meta def fin_fun_to_string {α : Type} [has_to_string α]
-  {n : ℕ} (f : fin n → α) : string :=
+def fin_fun_to_string {α : Type} [has_to_string α]
+  (n : ℕ) (f : fin n → α) : string :=
 (list.of_fn f).to_string
 
 
@@ -309,7 +309,7 @@ open term
 meta def term.repr : term → string
 | (var x) := x.repr
 | (func n f terms) :=
-    f.quote ++ fin_fun_to_string (fun i : fin n, (terms i).repr)
+    f.quote ++ fin_fun_to_string n (fun i : fin n, (terms i).repr)
 
 meta instance : has_repr term := has_repr.mk term.repr
 
@@ -371,7 +371,7 @@ meta def formula.repr : formula → string
 | bottom := "⊥"
 | top := "⊤"
 | (pred n x terms) :=
-    x.quote ++ fin_fun_to_string (fun i : fin n, (terms i).repr)
+    x.quote ++ fin_fun_to_string n (fun i : fin n, (terms i).repr)
 | (eq s t) := sformat!"({s.repr} = {t.repr})"
 | (not p) := sformat!"(¬ {p.repr})"
 | (and p q) := sformat!"({p.repr} ∧ {q.repr})"
