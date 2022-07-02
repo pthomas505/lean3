@@ -153,7 +153,7 @@ end
 lemma finset.ne_imp_sdiff_union_comm
   {α : Type}
   [decidable_eq α]
-  (x y : α)
+  {x y : α}
   (s : finset α)
   (h1 : x ≠ y) :
   (s \ {x}) ∪ {y} = (s ∪ {y}) \ {x} :=
@@ -1772,7 +1772,7 @@ begin
         rewrite replace_id x y ((xs \ {z}) ∪ {u}) p s2
       },
       {
-        have s1 : ((xs \ {z}) ∪ {u}) = (xs ∪ {u}) \ {z}, exact finset.ne_imp_sdiff_union_comm z u xs h,
+        have s1 : ((xs \ {z}) ∪ {u}) = (xs ∪ {u}) \ {z}, exact finset.ne_imp_sdiff_union_comm xs h,
         rewrite s1, apply p_ih,
         simp only [finset.mem_union, finset.mem_singleton], push_neg, exact and.intro h1 h'
       }
@@ -1795,7 +1795,7 @@ begin
         rewrite replace_id x y ((xs \ {z}) ∪ {u}) p s2
       },
       {
-        have s1 : ((xs \ {z}) ∪ {u}) = (xs ∪ {u}) \ {z}, exact finset.ne_imp_sdiff_union_comm z u xs h,
+        have s1 : ((xs \ {z}) ∪ {u}) = (xs ∪ {u}) \ {z}, exact finset.ne_imp_sdiff_union_comm xs h,
         rewrite s1, apply p_ih,
         simp only [finset.mem_union, finset.mem_singleton], push_neg, exact and.intro h1 h'
       }
