@@ -371,7 +371,7 @@ meta def formula.repr : formula → string
 | bottom := "⊥"
 | top := "⊤"
 | (pred n x terms) :=
-    x.quote ++ fin_fun_to_string n (fun i : fin n, (terms i).repr)
+    x.quote ++ fin_fun_to_string n (fun i : (fin n), (terms i).repr)
 | (eq s t) := sformat!"({s.repr} = {t.repr})"
 | (not p) := sformat!"(¬ {p.repr})"
 | (and p q) := sformat!"({p.repr} ∧ {q.repr})"
@@ -383,11 +383,11 @@ meta def formula.repr : formula → string
 
 meta instance : has_repr formula := has_repr.mk formula.repr
 
-def mk_prop (symbol : pred_symbols) :=
-pred 0 symbol list.nil.to_fin_fun
+def mk_prop (p : pred_symbols) :=
+pred 0 p list.nil.to_fin_fun
 
-def mk_pred (symbol : pred_symbols) (terms : list term) :=
-pred terms.length symbol terms.to_fin_fun
+def mk_pred (p : pred_symbols) (terms : list term) :=
+pred terms.length p terms.to_fin_fun
 
 
 -- #eval not (forall_ "x" (mk_pred "P" [mk_func "f" [(var "x")], var "y"]))
