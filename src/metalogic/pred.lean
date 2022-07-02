@@ -42,7 +42,7 @@ lemma finset.bUnion_sdiff
   (s : finset α)
   (f : α → finset β)
   (t : finset β) :
-  (finset.bUnion s f) \ t = finset.bUnion s (fun x : α, f x \ t) :=
+  (finset.bUnion s f) \ t = finset.bUnion s (fun (x : α), f x \ t) :=
 begin
   apply finset.ext, intro a,
   simp only [finset.mem_sdiff, finset.mem_bUnion, exists_prop],
@@ -67,11 +67,11 @@ lemma finset.bUnion_filter
   {α β : Type}
   [decidable_eq α] [decidable_eq β]
   (s : finset α)
-  (t : α → finset β)
+  (f : α → finset β)
   (p : α → Prop)
   [decidable_pred p] :
-  finset.bUnion (finset.filter p s) t =
-    finset.bUnion s (fun x, if p x then t x else ∅) :=
+  finset.bUnion (finset.filter p s) f =
+    finset.bUnion s (fun (x : α), if p x then f x else ∅) :=
 begin
   apply finset.ext, intro a,
   simp only [finset.mem_ite, imp_iff_not_or, or_and_distrib_right,
@@ -82,27 +82,27 @@ begin
     intro h1, apply exists.elim h1, intros b h2, cases h2, cases h2_left,
     apply exists.intro b,
     split,
-      { exact h2_left_left, },
-      { exact and.intro h2_right h2_left_right, },
+      { exact h2_left_left },
+      { exact and.intro h2_right h2_left_right }
   },
   {
     intro h1, apply exists.elim h1, intros b h2, cases h2, cases h2_right,
     apply exists.intro b,
     split,
-      { exact and.intro h2_left h2_right_right, },
-      { exact h2_right_left },
-  },
+      { exact and.intro h2_left h2_right_right },
+      { exact h2_right_left }
+  }
 end
 
 lemma finset.sdiff_singleton_bUnion
   {α β : Type}
   [decidable_eq α] [decidable_eq β]
   (s : finset α)
-  (t : α → finset β)
+  (f : α → finset β)
   (x : α)
-  (s' : finset β)
-  (h1 : t x = s') :
-  (finset.bUnion (s \ {x}) t) \ s' = (finset.bUnion s t) \ s' :=
+  (t : finset β)
+  (h1 : f x = t) :
+  (finset.bUnion (s \ {x}) f) \ t = (finset.bUnion s f) \ t :=
 begin
   rewrite <- h1,
   simp only [finset.bUnion_sdiff, finset.sdiff_eq_filter s,
@@ -114,15 +114,15 @@ begin
   split,
   {
     split_ifs,
-      { intro h3, simp only [finset.not_mem_empty] at h3, contradiction, },
-      { intro h3, exact h3, },
+      { intro h3, simp only [finset.not_mem_empty] at h3, contradiction },
+      { intro h3, exact h3 }
   },
   {
     intro h3,
     split_ifs,
-      { simp only [finset.not_mem_empty], apply h2, rewrite <- h, exact h3, },
-      { exact h3, },
-  },
+      { simp only [finset.not_mem_empty], apply h2, rewrite <- h, exact h3 },
+      { exact h3 }
+  }
 end
 
 lemma finset.bUnion_union
