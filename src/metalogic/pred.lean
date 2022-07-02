@@ -345,7 +345,7 @@ instance : decidable_eq term
     apply' fintype.decidable_forall_fintype,
     intro a,
     apply term.decidable_eq,
-  end : decidable $ n₁ = n₂ ∧ s₁ = s₂ ∧ t₁ == t₂) (by simp only)
+  end : decidable (n₁ = n₂ ∧ s₁ = s₂ ∧ t₁ == t₂)) (by simp only)
 
 /-
 pred 0 "P" [] : A propositional variable named "P".
