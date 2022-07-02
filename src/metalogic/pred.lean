@@ -313,11 +313,11 @@ meta def term.repr : term → string
 
 meta instance : has_repr term := has_repr.mk term.repr
 
-def mk_const (symbol : func_symbols) :=
-func 0 symbol list.nil.to_fin_fun
+def mk_const (f : func_symbols) :=
+func 0 f list.nil.to_fin_fun
 
-def mk_func (symbol : func_symbols) (terms : list term) :=
-func terms.length symbol terms.to_fin_fun
+def mk_func (f : func_symbols) (terms : list term) :=
+func terms.length f terms.to_fin_fun
 
 
 def pi_decide
