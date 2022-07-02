@@ -227,7 +227,7 @@ lemma finset.eq_imp_not_mem_sdiff
   {α : Type}
   [decidable_eq α]
   {x y : α}
-  {s : finset α}
+  (s : finset α)
   (h1 : x = y) :
   x ∉ s \ {y} :=
 begin
@@ -239,7 +239,8 @@ end
 lemma finset.not_mem_imp_not_mem_sdiff
   {α : Type}
   [decidable_eq α]
-  {x y : α}
+  {x : α}
+  (y : α)
   {s : finset α}
   (h1 : x ∉ s) :
   x ∉ s \ {y} :=
