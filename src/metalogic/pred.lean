@@ -391,7 +391,7 @@ pred 0 p list.nil.to_fin_fun
 def mk_pred (p : pred_symbols) (terms : list term) :=
 pred terms.length p terms.to_fin_fun
 
-instance formula.inhabited := inhabited.mk (mk_prop (default : pred_symbols))
+instance formula.inhabited := inhabited.mk bottom
 
 
 -- #eval not (forall_ "x" (mk_pred "P" [mk_func "f" [(var "x")], var "y"]))
