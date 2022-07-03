@@ -629,8 +629,8 @@ begin
     simp only [finset.mem_sdiff, finset.mem_singleton] at h1,
     calc
           holds D m v1 (forall_ x p)
-        ↔ ∀ a : D, holds D m (function.update v1 x a) p : by unfold holds
-    ... ↔ ∀ a : D, holds D m (function.update v2 x a) p :
+        ↔ ∀ y : D, holds D m (function.update v1 x y) p : by unfold holds
+    ... ↔ ∀ y : D, holds D m (function.update v2 x y) p :
       begin
         apply forall_congr, intro a, apply ih, intros y h3,
         by_cases y = x,
@@ -644,8 +644,8 @@ begin
     simp only [finset.mem_sdiff, finset.mem_singleton] at h1,
     calc
           holds D m v1 (exists_ x p)
-        ↔ ∃ a : D, holds D m (function.update v1 x a) p : by unfold holds
-    ... ↔ ∃ a : D, holds D m (function.update v2 x a) p :
+        ↔ ∃ y : D, holds D m (function.update v1 x y) p : by unfold holds
+    ... ↔ ∃ y : D, holds D m (function.update v2 x y) p :
       begin
         apply exists_congr, intro a, apply ih, intros y h3,
         by_cases y = x,
