@@ -308,8 +308,8 @@ open term
 
 def term.repr : term → string
 | (var x) := x.repr
-| (func n f terms) :=
-    f.quote ++ fin_fun_to_string n (fun (i : fin n), (terms i).repr)
+| (func n f t) :=
+    f.quote ++ fin_fun_to_string n (fun (i : fin n), (t i).repr)
 
 instance term.has_repr : has_repr term := has_repr.mk term.repr
 
@@ -317,22 +317,23 @@ instance term.inhabited : inhabited term :=
 inhabited.mk (var (default : var_symbols))
 
 def pi_decide
-  {p q : Prop} [decidable p]
-  (h : p → decidable q) :
-  decidable (p ∧ q) :=
-if hp : p then
+  {a b : Prop}
+  [decidable a]
+  (h : a → decidable b) :
+  decidable (a ∧ b) :=
+if hp : a then
   by haveI := h hp; exact
-  if hq : q then is_true (and.intro hp hq)
-  else is_false (assume h : p ∧ q, hq (and.right h))
-else is_false (assume h : p ∧ q, hp (and.left h))
+  if hq : b then is_true (and.intro hp hq)
+  else is_false (assume h : a ∧ b, hq (and.right h))
+else is_false (assume h : a ∧ b, hp (and.left h))
 
 instance term.decidable_eq : decidable_eq term
-| (var s₁) (var s₂) :=
+| (var x) (var x') :=
     decidable_of_decidable_of_iff
-      (by apply_instance : decidable (s₁ = s₂)) (by simp only)
-| (var s) (func n s' t) := is_false (by simp only [not_false_iff])
-| (func n s' t) (var s) := is_false (by simp only [not_false_iff])
-| (func n₁ s₁ t₁) (func n₂ s₂ t₂) := decidable_of_decidable_of_iff
+      (by apply_instance : decidable (x = x')) (by simp only)
+| (var x) (func n f t) := is_false (by simp only [not_false_iff])
+| (func n f t) (var x) := is_false (by simp only [not_false_iff])
+| (func n f t) (func n' f' t') := decidable_of_decidable_of_iff
   (begin
     apply' pi_decide,
     intro h,
@@ -341,13 +342,13 @@ instance term.decidable_eq : decidable_eq term
     apply' fintype.decidable_forall_fintype,
     intro a,
     apply term.decidable_eq,
-  end : decidable (n₁ = n₂ ∧ s₁ = s₂ ∧ t₁ == t₂)) (by simp only)
+  end : decidable (n = n' ∧ f = f' ∧ t == t')) (by simp only)
 
 def mk_const (f : func_symbols) :=
 func 0 f list.nil.to_fin_fun
 
-def mk_func (f : func_symbols) (terms : list term) :=
-func terms.length f terms.to_fin_fun
+def mk_func (f : func_symbols) (t : list term) :=
+func t.length f t.to_fin_fun
 
 
 /-
@@ -373,9 +374,9 @@ open formula
 def formula.repr : formula → string
 | bottom := "⊥"
 | top := "⊤"
-| (pred n x terms) :=
-    x.quote ++ fin_fun_to_string n (fun (i : fin n), (terms i).repr)
-| (eq s t) := sformat!"({s.repr} = {t.repr})"
+| (pred n p t) :=
+    p.quote ++ fin_fun_to_string n (fun (i : fin n), (t i).repr)
+| (eq t1 t2) := sformat!"({t1.repr} = {t2.repr})"
 | (not p) := sformat!"(¬ {p.repr})"
 | (and p q) := sformat!"({p.repr} ∧ {q.repr})"
 | (or p q) := sformat!"({p.repr} ∨ {q.repr})"
