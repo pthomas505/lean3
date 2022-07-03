@@ -450,40 +450,37 @@ def term.all_var_set : term → finset var_symbols
 
 theorem thm_1
   {D : Type}
-  {m : interpretation D}
-  {t : term}
-  (v v' : valuation D)
-  (h1 : ∀ x ∈ t.all_var_set, v x = v' x) :
-  eval_term D m v t = eval_term D m v' t :=
+  (m : interpretation D)
+  (t : term)
+  (v1 v2 : valuation D)
+  (h1 : ∀ x ∈ t.all_var_set, v1 x = v2 x) :
+  eval_term D m v1 t = eval_term D m v2 t :=
 begin
   induction t,
   case term.var : x {
     have s1 : x ∈ (var x).all_var_set, unfold term.all_var_set,
       simp only [finset.mem_singleton],
     calc
-          eval_term D m v (var x)
-        = v x : by unfold eval_term
-    ... = v' x : h1 x s1
-    ... = eval_term D m v' (var x) : by unfold eval_term
+          eval_term D m v1 (var x)
+        = v1 x : by unfold eval_term
+    ... = v2 x : h1 x s1
+    ... = eval_term D m v2 (var x) : by unfold eval_term
   },
-  case term.func : n f terms ih {
+  case term.func : n f t ih {
     calc
-          eval_term D m v (func n f terms)
-        = m.func n f (fun i : fin n, eval_term D m v (terms i)) :
+          eval_term D m v1 (func n f t)
+        = m.func n f (fun (i : fin n), eval_term D m v1 (t i)) :
             by unfold eval_term
-    ... = m.func n f (fun i : fin n, eval_term D m v' (terms i)) :
+    ... = m.func n f (fun (i : fin n), eval_term D m v2 (t i)) :
       begin
         congr, funext, apply ih,
         intros x h2, apply h1, unfold term.all_var_set,
         simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left],
         exact exists.intro i h2
       end
-    ... = eval_term D m v' (func n f terms) : by unfold eval_term
+    ... = eval_term D m v2 (func n f t) : by unfold eval_term
 	}
 end
-
-
---notation a' ` ↦ `:25 v := fun f, function.update f a' v
 
 
 def holds (D : Type) (m : interpretation D) : valuation D → formula → Prop
@@ -2492,7 +2489,7 @@ begin
         ((eval_term T m (function.update v x' a)) ∘ (function.update s x (var x'))) z =
               (eval_term T m (function.update v x' a)) ((function.update s x (var x')) z) : by simp only [function.comp_app]
         ... = (eval_term T m (function.update v x' a)) (s z) : by simp only [function.update_noteq h]
-        ... = eval_term T m v (s z) : begin apply thm_1 (function.update v x' a) v, intros x h3,
+        ... = eval_term T m v (s z) : begin apply thm_1 _ _ (function.update v x' a) v, intros x h3,
                                       apply function.update_noteq, exact s6 x h3 end
         ... = ((eval_term T m v) ∘ s) z : by simp only [eq_self_iff_true]
         ... = (function.update ((eval_term T m v) ∘ s) x a) z : begin symmetry, apply function.update_noteq h end
@@ -2542,7 +2539,7 @@ begin
         ((eval_term T m (function.update v x' a)) ∘ (function.update s x (var x'))) z =
               (eval_term T m (function.update v x' a)) ((function.update s x (var x')) z) : by simp only [function.comp_app]
         ... = (eval_term T m (function.update v x' a)) (s z) : by simp only [function.update_noteq h]
-        ... = eval_term T m v (s z) : begin apply thm_1 (function.update v x' a) v, intros x h3,
+        ... = eval_term T m v (s z) : begin apply thm_1 _ _ (function.update v x' a) v, intros x h3,
                                       apply function.update_noteq, exact s6 x h3 end
         ... = ((eval_term T m v) ∘ s) z : by simp only [eq_self_iff_true]
         ... = (function.update ((eval_term T m v) ∘ s) x a) z : begin symmetry, apply function.update_noteq h end
