@@ -513,45 +513,45 @@ def formula.free_var_set : formula → finset var_symbols
 theorem thm_2
   {D : Type}
   (m : interpretation D)
-  (v v' : valuation D)
+  (v1 v2 : valuation D)
   (p : formula)
-  (h1 : ∀ x ∈ p.free_var_set, v x = v' x) :
-  holds D m v p ↔ holds D m v' p :=
+  (h1 : ∀ x ∈ p.free_var_set, v1 x = v2 x) :
+  holds D m v1 p ↔ holds D m v2 p :=
 begin
-  induction p generalizing v v',
+  induction p generalizing v1 v2,
   case formula.bottom {
     calc
-          holds D m v bottom
+          holds D m v1 bottom
         ↔ false : by unfold holds
-    ... ↔ holds D m v' bottom : by unfold holds
+    ... ↔ holds D m v2 bottom : by unfold holds
   },
   case formula.top {
     calc
-          holds D m v top
+          holds D m v1 top
         ↔ true : by unfold holds
-    ... ↔ holds D m v' top : by unfold holds
+    ... ↔ holds D m v2 top : by unfold holds
   },
   case formula.pred : n x terms {
     unfold formula.free_var_set at h1,
     calc
-        holds D m v (pred n x terms)
-        ↔ m.pred n x (fun i : fin n, eval_term D m v (terms i)) :
+        holds D m v1 (pred n x terms)
+        ↔ m.pred n x (fun i : fin n, eval_term D m v1 (terms i)) :
       by unfold holds
-    ... ↔ m.pred n x (fun i : fin n, eval_term D m v' (terms i)) :
+    ... ↔ m.pred n x (fun i : fin n, eval_term D m v2 (terms i)) :
       begin
         apply iff_of_eq, congr, funext,
         apply thm_1, intros x h, apply h1,
         simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left],
         exact exists.intro i h
       end
-    ... ↔ holds D m v' (pred n x terms) : by unfold holds
+    ... ↔ holds D m v2 (pred n x terms) : by unfold holds
   },
   case formula.eq : s t {
     unfold formula.free_var_set at h1,
     calc
-        holds D m v (eq s t)
-        ↔ eval_term D m v s = eval_term D m v t : by unfold holds
-    ... ↔ eval_term D m v' s = eval_term D m v' t :
+        holds D m v1 (eq s t)
+        ↔ eval_term D m v1 s = eval_term D m v1 t : by unfold holds
+    ... ↔ eval_term D m v2 s = eval_term D m v2 t :
       begin
         apply iff_of_eq, congr' 1,
         {
@@ -565,94 +565,94 @@ begin
           apply or.intro_right, exact h,
         },
       end
-    ... ↔ holds D m v' (eq s t) : by unfold holds
+    ... ↔ holds D m v2 (eq s t) : by unfold holds
   },
   case formula.not : p ih {
     unfold formula.free_var_set at h1,
-    have s1 : holds D m v p ↔ holds D m v' p, exact ih v v' h1,
+    have s1 : holds D m v1 p ↔ holds D m v2 p, exact ih v1 v2 h1,
     calc
-          holds D m v (not p)
-        ↔ ¬ holds D m v p : by unfold holds
-    ... ↔ ¬ holds D m v' p : by simp only [s1]
-    ... ↔ holds D m v' (not p) : by unfold holds
+          holds D m v1 (not p)
+        ↔ ¬ holds D m v1 p : by unfold holds
+    ... ↔ ¬ holds D m v2 p : by simp only [s1]
+    ... ↔ holds D m v2 (not p) : by unfold holds
   },
   case formula.and : p q ih_p ih_q {
     unfold formula.free_var_set at h1,
     simp only [finset.mem_union, or_imp_distrib, forall_and_distrib] at h1,
     cases h1,
-    have s1 : holds D m v p ↔ holds D m v' p, exact ih_p v v' h1_left,
-    have s2 : holds D m v q ↔ holds D m v' q, exact ih_q v v' h1_right,
+    have s1 : holds D m v1 p ↔ holds D m v2 p, exact ih_p v1 v2 h1_left,
+    have s2 : holds D m v1 q ↔ holds D m v2 q, exact ih_q v1 v2 h1_right,
     calc
-          holds D m v (and p q)
-        ↔ (holds D m v p ∧ holds D m v q) : by unfold holds
-    ... ↔ (holds D m v' p ∧ holds D m v' q) : by simp only [s1, s2]
-    ... ↔ holds D m v' (and p q) : by unfold holds
+          holds D m v1 (and p q)
+        ↔ (holds D m v1 p ∧ holds D m v1 q) : by unfold holds
+    ... ↔ (holds D m v2 p ∧ holds D m v2 q) : by simp only [s1, s2]
+    ... ↔ holds D m v2 (and p q) : by unfold holds
   },
   case formula.or : p q ih_p ih_q {
     unfold formula.free_var_set at h1,
     simp only [finset.mem_union, or_imp_distrib, forall_and_distrib] at h1,
     cases h1,
-    have s1 : holds D m v p ↔ holds D m v' p, exact ih_p v v' h1_left,
-    have s2 : holds D m v q ↔ holds D m v' q, exact ih_q v v' h1_right,
+    have s1 : holds D m v1 p ↔ holds D m v2 p, exact ih_p v1 v2 h1_left,
+    have s2 : holds D m v1 q ↔ holds D m v2 q, exact ih_q v1 v2 h1_right,
     calc
-          holds D m v (or p q)
-        ↔ (holds D m v p ∨ holds D m v q) : by unfold holds
-    ... ↔ (holds D m v' p ∨ holds D m v' q) : by simp only [s1, s2]
-    ... ↔ holds D m v' (or p q) : by unfold holds
+          holds D m v1 (or p q)
+        ↔ (holds D m v1 p ∨ holds D m v1 q) : by unfold holds
+    ... ↔ (holds D m v2 p ∨ holds D m v2 q) : by simp only [s1, s2]
+    ... ↔ holds D m v2 (or p q) : by unfold holds
   },
   case formula.imp : p q ih_p ih_q {
     unfold formula.free_var_set at h1,
     simp only [finset.mem_union, or_imp_distrib, forall_and_distrib] at h1,
     cases h1,
-    have s1 : holds D m v p ↔ holds D m v' p, exact ih_p v v' h1_left,
-    have s2 : holds D m v q ↔ holds D m v' q, exact ih_q v v' h1_right,
+    have s1 : holds D m v1 p ↔ holds D m v2 p, exact ih_p v1 v2 h1_left,
+    have s2 : holds D m v1 q ↔ holds D m v2 q, exact ih_q v1 v2 h1_right,
     calc
-          holds D m v (imp p q)
-        ↔ (holds D m v p → holds D m v q) : by unfold holds
-    ... ↔ (holds D m v' p → holds D m v' q) : by simp only [s1, s2]
-    ... ↔ holds D m v' (imp p q) : by unfold holds
+          holds D m v1 (imp p q)
+        ↔ (holds D m v1 p → holds D m v1 q) : by unfold holds
+    ... ↔ (holds D m v2 p → holds D m v2 q) : by simp only [s1, s2]
+    ... ↔ holds D m v2 (imp p q) : by unfold holds
   },
   case formula.iff : p q ih_p ih_q {
     unfold formula.free_var_set at h1,
     simp only [finset.mem_union, or_imp_distrib, forall_and_distrib] at h1,
     cases h1,
-    have s1 : holds D m v p ↔ holds D m v' p, exact ih_p v v' h1_left,
-    have s2 : holds D m v q ↔ holds D m v' q, exact ih_q v v' h1_right,
+    have s1 : holds D m v1 p ↔ holds D m v2 p, exact ih_p v1 v2 h1_left,
+    have s2 : holds D m v1 q ↔ holds D m v2 q, exact ih_q v1 v2 h1_right,
     calc
-          holds D m v (iff p q)
-        ↔ (holds D m v p ↔ holds D m v q) : by unfold holds
-    ... ↔ (holds D m v' p ↔ holds D m v' q) : by simp only [s1, s2]
-    ... ↔ holds D m v' (iff p q) : by unfold holds
+          holds D m v1 (iff p q)
+        ↔ (holds D m v1 p ↔ holds D m v1 q) : by unfold holds
+    ... ↔ (holds D m v2 p ↔ holds D m v2 q) : by simp only [s1, s2]
+    ... ↔ holds D m v2 (iff p q) : by unfold holds
   },
   case formula.forall_ : x p ih {
     unfold formula.free_var_set at h1,
     simp only [finset.mem_sdiff, finset.mem_singleton] at h1,
     calc
-          holds D m v (forall_ x p)
-        ↔ ∀ a : D, holds D m (function.update v x a) p : by unfold holds
-    ... ↔ ∀ a : D, holds D m (function.update v' x a) p :
+          holds D m v1 (forall_ x p)
+        ↔ ∀ a : D, holds D m (function.update v1 x a) p : by unfold holds
+    ... ↔ ∀ a : D, holds D m (function.update v2 x a) p :
       begin
         apply forall_congr, intro a, apply ih, intros y h3,
         by_cases y = x,
         rewrite h, simp only [function.update_same],
         simp only [function.update_noteq h], apply h1, exact and.intro h3 h
       end
-    ... ↔ holds D m v' (forall_ x p) : by unfold holds
+    ... ↔ holds D m v2 (forall_ x p) : by unfold holds
   },
   case formula.exists_ : x p ih {
     unfold formula.free_var_set at h1,
     simp only [finset.mem_sdiff, finset.mem_singleton] at h1,
     calc
-          holds D m v (exists_ x p)
-        ↔ ∃ a : D, holds D m (function.update v x a) p : by unfold holds
-    ... ↔ ∃ a : D, holds D m (function.update v' x a) p :
+          holds D m v1 (exists_ x p)
+        ↔ ∃ a : D, holds D m (function.update v1 x a) p : by unfold holds
+    ... ↔ ∃ a : D, holds D m (function.update v2 x a) p :
       begin
         apply exists_congr, intro a, apply ih, intros y h3,
         by_cases y = x,
         rewrite h, simp only [function.update_same],
         simp only [function.update_noteq h], apply h1, exact and.intro h3 h
       end
-    ... ↔ holds D m v' (exists_ x p) : by unfold holds
+    ... ↔ holds D m v2 (exists_ x p) : by unfold holds
   }
 end
 
