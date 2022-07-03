@@ -374,7 +374,7 @@ def formula.repr : formula → string
 | bottom := "⊥"
 | top := "⊤"
 | (pred n x terms) :=
-    x.quote ++ fin_fun_to_string n (fun i : (fin n), (terms i).repr)
+    x.quote ++ fin_fun_to_string n (fun (i : fin n), (terms i).repr)
 | (eq s t) := sformat!"({s.repr} = {t.repr})"
 | (not p) := sformat!"(¬ {p.repr})"
 | (and p q) := sformat!"({p.repr} ∧ {q.repr})"
