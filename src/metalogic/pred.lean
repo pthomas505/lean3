@@ -535,9 +535,9 @@ begin
     unfold formula.free_var_set at h1,
     calc
         holds D m v1 (pred n x t)
-        ↔ m.pred n x (fun i : fin n, eval_term D m v1 (t i)) :
+        ↔ m.pred n x (fun (i : fin n), eval_term D m v1 (t i)) :
           by unfold holds
-    ... ↔ m.pred n x (fun i : fin n, eval_term D m v2 (t i)) :
+    ... ↔ m.pred n x (fun (i : fin n), eval_term D m v2 (t i)) :
           begin
             apply iff_of_eq, congr, funext,
             apply thm_1, intros x h2, apply h1,
