@@ -295,7 +295,7 @@ abbreviation pred_symbols := string
 
 
 /-
-var "x" : An object variable named "x". Ranges over the domain of each
+var "x" : A variable named "x". Ranges over the domain of each
 interpretation.
 func 0 "c" [] : A constant named "c".
 func n "f" [x1 ... xn] : A function named "f" of n terms (arguments).
@@ -353,7 +353,7 @@ func t.length f t.to_fin_fun
 
 /-
 pred 0 "P" [] : A propositional variable named "P".
-pred n "P" [x1 ... xn] : A predicate variable named "P" of n terms (arguments).
+pred n "P" [x₁ ... xₙ] : A predicate variable named "P" of n terms (arguments).
 -/
 @[derive decidable_eq]
 inductive formula : Type
@@ -400,34 +400,32 @@ pred terms.length p terms.to_fin_fun
 -- #eval not (forall_ "x" (mk_pred "P" [mk_func "f" [(var "x")], var "y"]))
 
 
-/-
-D: A nonempty set called the domain of the interpretation.
-The intention is that all terms have values in D.
+/--
+D : A nonempty set called the domain of the interpretation. The intention
+is that all terms have values in D.
 
-nonempty: A proof that there is at least one element in the domain.
+nonempty : A proof that there is at least one element in the domain.
 
-func: (n : ℕ, f : string) → (f_{M} : (terms : fin n → domain) → v : domain)
-A mapping of each n-ary function symbol f to a function f_{M}.
+func : (n : ℕ, f : func_symbols) → (fₘ : (t : fin n → D) → x : D)
+A mapping of each n-ary function symbol f to a function fₘ.
 n : The arity of the function symbol.
 f : The function symbol.
-f_{M} : The function that the function symbol is mapped to.
-terms : fin n → domain : The n terms (arguments) of the function expressed as
-a finite function.
-v : domain : The result of the function. An element in the domain.
+fₘ : The function that the function symbol is mapped to.
+t : The n terms (arguments) of the function expressed as a finite function.
+x : The result of the function. An element in the domain.
 
-pred: (n : ℕ, P : string) → (P_{M} : (terms : fin n → domain) → v : Prop)
-A mapping of each n-ary predicate symbol P to a predicate P_{M}.
+pred : (n : ℕ, p : pred_symbols) → (pₘ : (t : fin n → D) → a : Prop)
+A mapping of each n-ary predicate symbol p to a predicate pₘ.
 n : The arity of the predicate symbol.
-P : The predicate symbol.
-P_{M} : The predicate that the predicate symbol is mapped to.
-terms : fin n → domain : The n terms (arguments) of the predicate expressed
-as a finite function.
-v : Prop : The result of the predicate. True or false.
+p : The predicate symbol.
+pₘ : The predicate that the predicate symbol is mapped to.
+t : The n terms (arguments) of the predicate expressed as a finite function.
+a : The result of the predicate. A proposition.
 -/
 structure interpretation (D : Type) : Type :=
 (nonempty : nonempty D)
-(func (n : ℕ) : func_symbols → (fin n → D) → D)
-(pred (n : ℕ) : pred_symbols → (fin n → D) → Prop)
+(func (n : ℕ) : func_symbols → ((fin n → D) → D))
+(pred (n : ℕ) : pred_symbols → ((fin n → D) → Prop))
 
 
 /-
