@@ -472,12 +472,12 @@ begin
         = m.func n f (fun (i : fin n), eval_term D m v1 (t i)) :
             by unfold eval_term
     ... = m.func n f (fun (i : fin n), eval_term D m v2 (t i)) :
-      begin
-        congr, funext, apply ih,
-        intros x h2, apply h1, unfold term.all_var_set,
-        simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left],
-        exact exists.intro i h2
-      end
+            begin
+              congr, funext, apply ih,
+              intros x h2, apply h1, unfold term.all_var_set,
+              simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left],
+              exact exists.intro i h2
+            end
     ... = eval_term D m v2 (func n f t) : by unfold eval_term
 	}
 end
