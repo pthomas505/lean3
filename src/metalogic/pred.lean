@@ -313,13 +313,14 @@ meta def term.repr : term → string
 
 meta instance : has_repr term := has_repr.mk term.repr
 
+instance term.inhabited : inhabited term :=
+inhabited.mk (var (default : var_symbols))
+
 def mk_const (f : func_symbols) :=
 func 0 f list.nil.to_fin_fun
 
 def mk_func (f : func_symbols) (terms : list term) :=
 func terms.length f terms.to_fin_fun
-
-instance term.inhabited := inhabited.mk (var (default : var_symbols))
 
 
 def pi_decide
@@ -385,13 +386,14 @@ meta def formula.repr : formula → string
 
 meta instance : has_repr formula := has_repr.mk formula.repr
 
+instance formula.inhabited : inhabited formula :=
+inhabited.mk bottom
+
 def mk_prop (p : pred_symbols) :=
 pred 0 p list.nil.to_fin_fun
 
 def mk_pred (p : pred_symbols) (terms : list term) :=
 pred terms.length p terms.to_fin_fun
-
-instance formula.inhabited := inhabited.mk bottom
 
 
 -- #eval not (forall_ "x" (mk_pred "P" [mk_func "f" [(var "x")], var "y"]))
