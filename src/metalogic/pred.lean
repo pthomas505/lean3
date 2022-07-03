@@ -306,9 +306,6 @@ inductive term : Type
 
 open term
 
-instance term.inhabited := inhabited.mk (var (default : var_symbols))
-
-
 meta def term.repr : term → string
 | (var x) := x.repr
 | (func n f terms) :=
@@ -321,6 +318,8 @@ func 0 f list.nil.to_fin_fun
 
 def mk_func (f : func_symbols) (terms : list term) :=
 func terms.length f terms.to_fin_fun
+
+instance term.inhabited := inhabited.mk (var (default : var_symbols))
 
 
 def pi_decide
@@ -391,6 +390,8 @@ pred 0 p list.nil.to_fin_fun
 
 def mk_pred (p : pred_symbols) (terms : list term) :=
 pred terms.length p terms.to_fin_fun
+
+instance formula.inhabited := inhabited.mk (mk_prop (default : pred_symbols))
 
 
 -- #eval not (forall_ "x" (mk_pred "P" [mk_func "f" [(var "x")], var "y"]))
