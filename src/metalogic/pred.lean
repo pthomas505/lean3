@@ -306,12 +306,12 @@ inductive term : Type
 
 open term
 
-meta def term.repr : term → string
+def term.repr : term → string
 | (var x) := x.repr
 | (func n f terms) :=
     f.quote ++ fin_fun_to_string n (fun (i : fin n), (terms i).repr)
 
-meta instance : has_repr term := has_repr.mk term.repr
+instance term.has_repr : has_repr term := has_repr.mk term.repr
 
 instance term.inhabited : inhabited term :=
 inhabited.mk (var (default : var_symbols))
@@ -370,7 +370,7 @@ inductive formula : Type
 
 open formula
 
-meta def formula.repr : formula → string
+def formula.repr : formula → string
 | bottom := "⊥"
 | top := "⊤"
 | (pred n x terms) :=
@@ -384,7 +384,7 @@ meta def formula.repr : formula → string
 | (forall_ x p) := sformat!"(∀ {x.repr}. {p.repr})"
 | (exists_ x p) := sformat!"(∃ {x.repr}. {p.repr})"
 
-meta instance : has_repr formula := has_repr.mk formula.repr
+instance formula.has_repr : has_repr formula := has_repr.mk formula.repr
 
 instance formula.inhabited : inhabited formula :=
 inhabited.mk bottom
