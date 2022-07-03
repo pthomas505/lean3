@@ -496,21 +496,6 @@ def holds (D : Type) (m : interpretation D) : valuation D → formula → Prop
 | v (forall_ x p) := ∀ y : D, holds (function.update v x y) p
 | v (exists_ x p) := ∃ y : D, holds (function.update v x y) p
 
-
-def formula.all_var_set : formula → finset var_symbols
-| bottom := ∅
-| top := ∅
-| (pred n p t) :=
-    finset.univ.bUnion (fun (i : fin n), (t i).all_var_set)
-| (eq s t) := s.all_var_set ∪ t.all_var_set
-| (not p) := p.all_var_set
-| (and p q) := p.all_var_set ∪ q.all_var_set
-| (or p q) := p.all_var_set ∪ q.all_var_set
-| (imp p q) := p.all_var_set ∪ q.all_var_set
-| (iff p q) := p.all_var_set ∪ q.all_var_set
-| (forall_ x p) := p.all_var_set ∪ {x}
-| (exists_ x p) := p.all_var_set ∪ {x}
-
 def formula.free_var_set : formula → finset var_symbols
 | bottom := ∅
 | top := ∅
