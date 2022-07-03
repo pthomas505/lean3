@@ -352,8 +352,8 @@ func t.length f t.to_fin_fun
 
 
 /-
-pred 0 "P" [] : A propositional variable named "P".
-pred n "P" [x1 ... xn] : A predicate variable named "P" of n terms (arguments).
+pred 0 "a" [] : A propositional variable named "a".
+pred n "p" [x1 ... xn] : A predicate variable named "p" of n terms (arguments).
 -/
 @[derive decidable_eq]
 inductive formula : Type
