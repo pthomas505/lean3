@@ -393,8 +393,8 @@ inhabited.mk bottom
 def mk_prop (p : pred_symbols) :=
 pred 0 p list.nil.to_fin_fun
 
-def mk_pred (p : pred_symbols) (terms : list term) :=
-pred terms.length p terms.to_fin_fun
+def mk_pred (p : pred_symbols) (t : list term) :=
+pred t.length p t.to_fin_fun
 
 
 -- #eval not (forall_ "x" (mk_pred "P" [mk_func "f" [(var "x")], var "y"]))
@@ -445,7 +445,7 @@ def eval_term (D : Type) (m : interpretation D) (v : valuation D) : term → D
 def term.all_var_set : term → finset var_symbols
 | (var x) := {x}
 | (func n f t) :=
-    finset.bUnion finset.univ (fun (i : fin n), (t i).all_var_set)
+    finset.univ.bUnion (fun (i : fin n), (t i).all_var_set)
 
 
 theorem thm_1
