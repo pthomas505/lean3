@@ -306,6 +306,9 @@ inductive term : Type
 
 open term
 
+instance term.inhabited := inhabited.mk (var (default : var_symbols))
+
+
 meta def term.repr : term → string
 | (var x) := x.repr
 | (func n f terms) :=
