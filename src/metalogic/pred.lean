@@ -1395,26 +1395,26 @@ begin
 end
 
 
--- uniform simultaneous replacement of the atoms in a formula by formulas
+-- uniform simultaneous replacement of the predicates in a formula by formulas
 
-def sub_predicate
+def formula.sub_pred_formula
   (m : (ℕ × string) → formula) :
   instantiation → formula → formula
 | _ bottom := bottom
 | _ top := top
 | s (pred n x terms) := formula.sub_var_term s (m (n, x))
 | s (eq u v) := eq (term.sub_var_term s u) (term.sub_var_term s v)
-| s (not p) := not (sub_predicate s p)
-| s (and p q) := and (sub_predicate s p) (sub_predicate s q)
-| s (or p q) := or (sub_predicate s p) (sub_predicate s q)
-| s (imp p q) := imp (sub_predicate s p) (sub_predicate s q)
-| s (iff p q) := iff (sub_predicate s p) (sub_predicate s q)
+| s (not p) := not (formula.sub_pred_formula s p)
+| s (and p q) := and (formula.sub_pred_formula s p) (formula.sub_pred_formula s q)
+| s (or p q) := or (formula.sub_pred_formula s p) (formula.sub_pred_formula s q)
+| s (imp p q) := imp (formula.sub_pred_formula s p) (formula.sub_pred_formula s q)
+| s (iff p q) := iff (formula.sub_pred_formula s p) (formula.sub_pred_formula s q)
 | s (forall_ x p) :=
   let x' :=
   if x ∈ finset.bUnion p.all_pred_set (fun r, (m r).free_var_set)
-  then variant x (sub_predicate (function.update s x (var x)) p).free_var_set
+  then variant x (formula.sub_pred_formula (function.update s x (var x)) p).free_var_set
   else x in
-  forall_ x' (sub_predicate (function.update s x (var x')) p)
+  forall_ x' (formula.sub_pred_formula (function.update s x (var x')) p)
 | s (exists_ x p) := sorry
 
 def interpretation.sub
@@ -1432,7 +1432,7 @@ example
   (p : formula)
   (s : (ℕ × string) → formula)
   (hv : ∀ (r ∈ p.all_pred_set) (x ∈ (s r).free_var_set), v x = v' x) :
-  holds D m v (sub_predicate s var p)
+  holds D m v (formula.sub_pred_formula s var p)
     ↔ holds D (m.sub v' s) v p := sorry
 
 
