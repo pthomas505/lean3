@@ -316,13 +316,6 @@ instance term.has_repr : has_repr term := has_repr.mk term.repr
 instance term.inhabited : inhabited term :=
 inhabited.mk (var (default : var_symbols))
 
-def mk_const (f : func_symbols) :=
-func 0 f list.nil.to_fin_fun
-
-def mk_func (f : func_symbols) (terms : list term) :=
-func terms.length f terms.to_fin_fun
-
-
 def pi_decide
   {p q : Prop} [decidable p]
   (h : p → decidable q) :
@@ -333,7 +326,7 @@ if hp : p then
   else is_false (assume h : p ∧ q, hq (and.right h))
 else is_false (assume h : p ∧ q, hp (and.left h))
 
-instance : decidable_eq term
+instance term.decidable_eq : decidable_eq term
 | (var s₁) (var s₂) :=
     decidable_of_decidable_of_iff
       (by apply_instance : decidable (s₁ = s₂)) (by simp only)
@@ -349,6 +342,13 @@ instance : decidable_eq term
     intro a,
     apply term.decidable_eq,
   end : decidable (n₁ = n₂ ∧ s₁ = s₂ ∧ t₁ == t₂)) (by simp only)
+
+def mk_const (f : func_symbols) :=
+func 0 f list.nil.to_fin_fun
+
+def mk_func (f : func_symbols) (terms : list term) :=
+func terms.length f terms.to_fin_fun
+
 
 /-
 pred 0 "P" [] : A propositional variable named "P".
