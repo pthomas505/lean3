@@ -376,7 +376,7 @@ def formula.repr : formula → string
 | top := "⊤"
 | (pred n p t) :=
     p.quote ++ fin_fun_to_string n (fun (i : fin n), (t i).repr)
-| (eq t1 t2) := sformat!"({t1.repr} = {t2.repr})"
+| (eq s t) := sformat!"({s.repr} = {t.repr})"
 | (not p) := sformat!"(¬ {p.repr})"
 | (and p q) := sformat!"({p.repr} ∧ {q.repr})"
 | (or p q) := sformat!"({p.repr} ∨ {q.repr})"
@@ -487,21 +487,21 @@ def holds (D : Type) (m : interpretation D) : valuation D → formula → Prop
 | _ bottom := false
 | _ top := true
 | v (pred n p t) := m.pred n p (fun i : (fin n), eval_term D m v (t i))
-| v (eq t1 t2) := eval_term D m v t1 = eval_term D m v t2
+| v (eq s t) := eval_term D m v s = eval_term D m v t
 | v (not p) := ¬ holds v p
 | v (and p q) := holds v p ∧ holds v q
 | v (or p q) := holds v p ∨ holds v q
 | v (imp p q) := holds v p → holds v q
 | v (iff p q) := holds v p ↔ holds v q
-| v (forall_ x p) := ∀ a : D, holds (function.update v x a) p
-| v (exists_ x p) := ∃ a : D, holds (function.update v x a) p
+| v (forall_ x p) := ∀ y : D, holds (function.update v x y) p
+| v (exists_ x p) := ∃ y : D, holds (function.update v x y) p
 
 
 def formula.all_var_set : formula → finset var_symbols
 | bottom := ∅
 | top := ∅
-| (pred n x terms) :=
-    finset.bUnion finset.univ (fun i : fin n, (terms i).all_var_set)
+| (pred n p t) :=
+    finset.univ.bUnion (fun (i : fin n), (t i).all_var_set)
 | (eq s t) := s.all_var_set ∪ t.all_var_set
 | (not p) := p.all_var_set
 | (and p q) := p.all_var_set ∪ q.all_var_set
@@ -514,8 +514,8 @@ def formula.all_var_set : formula → finset var_symbols
 def formula.all_pred_set : formula → finset (ℕ × pred_symbols)
 | bottom := ∅
 | top := ∅
-| (pred n x terms) := {(n, x)}
-| (eq _ _) := ∅
+| (pred n p t) := {(n, p)}
+| (eq s t) := ∅
 | (not p) := p.all_pred_set
 | (and p q) := p.all_pred_set ∪ q.all_pred_set
 | (or p q) := p.all_pred_set ∪ q.all_pred_set
@@ -527,8 +527,8 @@ def formula.all_pred_set : formula → finset (ℕ × pred_symbols)
 def formula.free_var_set : formula → finset var_symbols
 | bottom := ∅
 | top := ∅
-| (pred n x terms) :=
-    finset.bUnion finset.univ (fun i : fin n, (terms i).all_var_set)
+| (pred n p t) :=
+    finset.univ.bUnion (fun (i : fin n), (t i).all_var_set)
 | (eq s t) := s.all_var_set ∪ t.all_var_set
 | (not p) := p.free_var_set
 | (and p q) := p.free_var_set ∪ q.free_var_set
@@ -541,8 +541,8 @@ def formula.free_var_set : formula → finset var_symbols
 def formula.bind_var_set : formula → finset var_symbols
 | bottom := ∅
 | top := ∅
-| (pred n x terms) := ∅
-| (eq _ _) := ∅
+| (pred n p t) := ∅
+| (eq s t) := ∅
 | (not p) := p.bind_var_set
 | (and p q) := p.bind_var_set ∪ q.bind_var_set
 | (or p q) := p.bind_var_set ∪ q.bind_var_set
