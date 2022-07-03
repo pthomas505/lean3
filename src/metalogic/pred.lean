@@ -280,8 +280,8 @@ begin
 end
 
 
-def list.to_fin_fun {α : Type} (l : list α) : fin l.length → α :=
-fun (i : fin l.length), l.nth_le i.val i.property
+def list.to_fin_fun {α : Type} (s : list α) : fin s.length → α :=
+fun (i : fin s.length), s.nth_le i.val i.property
 
 
 def fin_fun_to_string {α : Type} [has_to_string α]
