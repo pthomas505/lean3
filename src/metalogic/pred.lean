@@ -668,18 +668,18 @@ p.free_var_set = ∅
 
 
 theorem thm_3
-  {p : formula}
   {D : Type}
-  {m : interpretation D}
-  (v v' : valuation D)
+  (m : interpretation D)
+  (v1 v2 : valuation D)
+  (p : formula)
   (h1 : is_sentence p) :
-  holds D m v p ↔ holds D m v' p :=
+  holds D m v1 p ↔ holds D m v2 p :=
 begin
   unfold is_sentence at h1,
-  have s1 : ∀ x ∈ p.free_var_set, v x = v' x,
+  have s1 : ∀ x ∈ p.free_var_set, v1 x = v2 x,
     rewrite h1,
     simp only [finset.not_mem_empty, forall_false_left, implies_true_iff],
-  exact thm_2 m v v' p s1
+  exact thm_2 m v1 v2 p s1
 end
 
 
@@ -740,7 +740,7 @@ begin
       holds D m v p,
     intros h2 D m v,
     apply exists.elim, exact h2 D m,
-    intros v', exact iff.elim_right (thm_3 v v' h1),
+    intros v', exact iff.elim_right (thm_3 m v v' p h1),
   calc
         is_valid p
       ↔ ∀ (D : Type) (m : interpretation D) (v : valuation D),
