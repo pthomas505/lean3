@@ -439,13 +439,13 @@ interpretation and valuation.
 -/
 def eval_term (D : Type) (m : interpretation D) (v : valuation D) : term → D
 | (var x) := v x
-| (func n f terms) := m.func n f (fun i : fin n, eval_term (terms i))
+| (func n f t) := m.func n f (fun (i : fin n), eval_term (t i))
 
 
 def term.all_var_set : term → finset var_symbols
 | (var x) := {x}
-| (func n f terms) :=
-    finset.bUnion finset.univ (fun i : fin n, (terms i).all_var_set)
+| (func n f t) :=
+    finset.bUnion finset.univ (fun (i : fin n), (t i).all_var_set)
 
 
 theorem thm_1
