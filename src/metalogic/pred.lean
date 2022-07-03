@@ -186,8 +186,6 @@ begin
 end
 
 
-
-
 lemma finset.mem_ne_imp_mem_sdiff
   {α : Type}
   [decidable_eq α]
