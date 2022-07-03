@@ -2144,17 +2144,6 @@ list.nth context.proof_list index
 def dguard (p : Prop) [decidable p] : option (plift p) :=
 if h : p then pure (plift.up h) else failure
 
-/-
-to_fun = Takes a list of string formula pairs and returns a function
-from strings to formulas. For each pair in the list the function maps
-the string in the pair to the formula in the pair. The function maps
-each string not in a pair to an atomic proposition of the same name as
-the string.
--/
-def to_fun : list (string × formula) → string → formula
-| [] v := mk_prop v
-| ((u, f) :: fs) v := if u = v then f else to_fun fs v
-
 
 inductive step : Type
 | var_is_term : var_symbols → step
