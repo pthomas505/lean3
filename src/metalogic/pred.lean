@@ -1946,8 +1946,6 @@ def is_alpha_eqv : list (var_symbols × var_symbols) → formula → formula →
 | _ _ _ := false
 
 
-
-
 -- axioms of propositional logic
 
 theorem is_valid_mp
