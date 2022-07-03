@@ -486,8 +486,8 @@ end
 def holds (D : Type) (m : interpretation D) : valuation D → formula → Prop
 | _ bottom := false
 | _ top := true
-| v (pred n x terms) := m.pred n x (fun i : fin n, eval_term D m v (terms i))
-| v (eq s t) := eval_term D m v s = eval_term D m v t
+| v (pred n p t) := m.pred n p (fun i : (fin n), eval_term D m v (t i))
+| v (eq t1 t2) := eval_term D m v t1 = eval_term D m v t2
 | v (not p) := ¬ holds v p
 | v (and p q) := holds v p ∧ holds v q
 | v (or p q) := holds v p ∨ holds v q
