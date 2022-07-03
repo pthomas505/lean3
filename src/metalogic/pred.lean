@@ -634,9 +634,11 @@ begin
           begin
             apply forall_congr, intro a, apply ih, intros y h2,
             by_cases y = x,
-            rewrite h, simp only [function.update_same],
-            simp only [function.update_noteq h], apply h1,
-            exact and.intro h2 h
+            { rewrite h, simp only [function.update_same] },
+            {
+              simp only [function.update_noteq h], apply h1,
+              exact and.intro h2 h
+            }
           end
     ... ↔ holds D m v2 (forall_ x p) : by unfold holds
   },
@@ -650,9 +652,11 @@ begin
           begin
             apply exists_congr, intro a, apply ih, intros y h2,
             by_cases y = x,
-            rewrite h, simp only [function.update_same],
-            simp only [function.update_noteq h], apply h1,
-            exact and.intro h2 h
+            { rewrite h, simp only [function.update_same] },
+            {
+              simp only [function.update_noteq h], apply h1,
+              exact and.intro h2 h
+            }
           end
     ... ↔ holds D m v2 (exists_ x p) : by unfold holds
   }
