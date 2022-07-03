@@ -429,7 +429,7 @@ structure interpretation (D : Type) : Type :=
 
 
 /-
-The type of mappings of object variable names to elements of a domain.
+The type of mappings of variable names to elements of a domain.
 -/
 def valuation (D : Type) := var_symbols → D
 
