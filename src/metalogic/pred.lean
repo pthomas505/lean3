@@ -186,40 +186,6 @@ begin
 end
 
 
-lemma finset_bUnion_sdiff
-  {α : Type}
-  [decidable_eq α]
-  (x y : α)
-  (s : finset α)
-  (f : α → finset α)
-  (h1 : f x = {y}) :
-  (finset.bUnion s f) \ {y} = (finset.bUnion (s \ {x}) f) \ {y} :=
-begin
-  by_cases x ∈ s,
-  {
-    calc
-          (finset.bUnion s f) \ {y}
-        = finset.bUnion s (fun i : α, f i \ {y}) :
-          by simp only [finset.sdiff_singleton_eq_erase, finset.erase_bUnion]
-    ... = finset.bUnion ({x} ∪ (s \ {x})) (fun i : α, f i \ {y}) :
-          begin
-            congr, symmetry, apply finset.union_sdiff_of_subset,
-            simp only [finset.singleton_subset_iff], exact h
-          end
-    ... = (finset.bUnion (s \ {x}) (fun i : α, f i \ {y})) ∪ (fun i : α, f i \ {y}) x :
-          by simp only [finset.bUnion_union, finset.singleton_bUnion, finset.union_comm]
-    ...  = (finset.bUnion (s \ {x}) (fun i : α, f i \ {y})) :
-          begin
-            simp only, rewrite h1, rewrite sdiff_self, apply finset.union_empty
-          end
-    ... = (finset.bUnion (s \ {x}) (fun i : α, f i)) \ {y} :
-          by simp only [finset.sdiff_singleton_eq_erase, finset.erase_bUnion]
-    ... = (finset.bUnion (s \ {x}) f) \ {y} : by simp only
-  },
-  {
-    congr, symmetry, exact finset.sdiff_singleton_not_mem_eq_self s h,
-  }
-end
 
 
 lemma finset.mem_ne_imp_mem_sdiff
@@ -1159,7 +1125,7 @@ begin
     ... = (finset.bUnion p.free_var_set (fun (y : var_symbols), ((function.update s x (var x')) y).all_var_set)) \ {x'} :
             by simp only [ih (function.update s x (var x'))]
     ... = (finset.bUnion (p.free_var_set \ {x}) (fun (y : var_symbols), ((function.update s x (var x')) y).all_var_set)) \ {x'} :
-            begin apply finset_bUnion_sdiff, finish end
+            begin rewrite finset.sdiff_singleton_bUnion, finish end
     ... = (finset.bUnion (p.free_var_set \ {x}) (fun (y : var_symbols), (s y).all_var_set)) \ {x'} :
             begin congr' 1, apply finset.bUnion_congr, refl, intros a h1, congr, apply function.update_noteq,
             simp only [finset.mem_sdiff, finset.mem_singleton] at h1, cases h1, exact h1_right end
@@ -1180,7 +1146,7 @@ begin
     ... = (finset.bUnion p.free_var_set (fun (y : var_symbols), ((function.update s x (var x')) y).all_var_set)) \ {x'} :
             by simp only [ih (function.update s x (var x'))]
     ... = (finset.bUnion (p.free_var_set \ {x}) (fun (y : var_symbols), ((function.update s x (var x')) y).all_var_set)) \ {x'} :
-            begin apply finset_bUnion_sdiff, finish end
+            begin rewrite finset.sdiff_singleton_bUnion, finish end
     ... = (finset.bUnion (p.free_var_set \ {x}) (fun (y : var_symbols), (s y).all_var_set)) \ {x'} :
             begin congr' 1, apply finset.bUnion_congr, refl, intros a h1, congr, apply function.update_noteq,
             simp only [finset.mem_sdiff, finset.mem_singleton] at h1, cases h1, exact h1_right end
