@@ -309,7 +309,7 @@ open term
 def term.repr : term → string
 | (var x) := x.repr
 | (func n f t) :=
-    f.quote ++ fin_fun_to_string n (fun (i : fin n), (t i).repr)
+    f ++ fin_fun_to_string n (fun (i : fin n), (t i).repr)
 
 instance term.has_repr : has_repr term := has_repr.mk term.repr
 
@@ -375,7 +375,7 @@ def formula.repr : formula → string
 | bottom := "⊥"
 | top := "⊤"
 | (pred n p t) :=
-    p.quote ++ fin_fun_to_string n (fun (i : fin n), (t i).repr)
+    p ++ fin_fun_to_string n (fun (i : fin n), (t i).repr)
 | (eq s t) := sformat!"({s.repr} = {t.repr})"
 | (not p) := sformat!"(¬ {p.repr})"
 | (and p q) := sformat!"({p.repr} ∧ {q.repr})"
