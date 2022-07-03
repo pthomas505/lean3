@@ -511,19 +511,6 @@ def formula.all_var_set : formula → finset var_symbols
 | (forall_ x p) := p.all_var_set ∪ {x}
 | (exists_ x p) := p.all_var_set ∪ {x}
 
-def formula.all_pred_set : formula → finset (ℕ × pred_symbols)
-| bottom := ∅
-| top := ∅
-| (pred n p t) := {(n, p)}
-| (eq s t) := ∅
-| (not p) := p.all_pred_set
-| (and p q) := p.all_pred_set ∪ q.all_pred_set
-| (or p q) := p.all_pred_set ∪ q.all_pred_set
-| (imp p q) := p.all_pred_set ∪ q.all_pred_set
-| (iff p q) := p.all_pred_set ∪ q.all_pred_set
-| (forall_ x p) := p.all_pred_set
-| (exists_ x p) := p.all_pred_set
-
 def formula.free_var_set : formula → finset var_symbols
 | bottom := ∅
 | top := ∅
@@ -1348,6 +1335,19 @@ end
 
 
 -- uniform simultaneous replacement of the predicates in a formula by formulas
+
+def formula.all_pred_set : formula → finset (ℕ × pred_symbols)
+| bottom := ∅
+| top := ∅
+| (pred n p t) := {(n, p)}
+| (eq s t) := ∅
+| (not p) := p.all_pred_set
+| (and p q) := p.all_pred_set ∪ q.all_pred_set
+| (or p q) := p.all_pred_set ∪ q.all_pred_set
+| (imp p q) := p.all_pred_set ∪ q.all_pred_set
+| (iff p q) := p.all_pred_set ∪ q.all_pred_set
+| (forall_ x p) := p.all_pred_set
+| (exists_ x p) := p.all_pred_set
 
 def formula.sub_pred_formula
   (m : (ℕ × string) → formula) :
