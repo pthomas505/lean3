@@ -2053,10 +2053,6 @@ begin
 end
 
 
-/-
-Proof schemes.
-Proof schemes are semantically valid formula schemes.
--/
 inductive proof : Type
 | mk (p : formula) : is_valid p → proof
 
