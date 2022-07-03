@@ -557,12 +557,12 @@ begin
             {
               apply thm_1, intros x h, apply h1,
               simp only [finset.mem_union],
-              apply or.intro_left, exact h,
+              apply or.intro_left, exact h
             },
             {
               apply thm_1, intros x h, apply h1,
               simp only [finset.mem_union],
-              apply or.intro_right, exact h,
+              apply or.intro_right, exact h
             },
           end
     ... ↔ holds D m v2 (eq s t) : by unfold holds
