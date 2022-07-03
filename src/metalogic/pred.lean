@@ -512,9 +512,9 @@ def formula.free_var_set : formula → finset var_symbols
 
 theorem thm_2
   {D : Type}
-  {m : interpretation D}
-  {p : formula}
+  (m : interpretation D)
   (v v' : valuation D)
+  (p : formula)
   (h1 : ∀ x ∈ p.free_var_set, v x = v' x) :
   holds D m v p ↔ holds D m v' p :=
 begin
@@ -673,7 +673,7 @@ begin
   have s1 : ∀ x ∈ p.free_var_set, v x = v' x,
     rewrite h1,
     simp only [finset.not_mem_empty, forall_false_left, implies_true_iff],
-  exact thm_2 v v' s1
+  exact thm_2 m v v' p s1
 end
 
 
@@ -1222,9 +1222,9 @@ begin
     ... ↔ (∀ a : T, holds T m (function.update ((eval_term T m v) ∘ s) x a) p) :
       begin split,
       intros h1 a,
-      rewrite <- (thm_2 ((eval_term T m (function.update v x' a)) ∘ (function.update s x (var x'))) (function.update ((eval_term T m v) ∘ s) x a) (s1 a)), exact h1 a,
+      rewrite <- (thm_2 _ ((eval_term T m (function.update v x' a)) ∘ (function.update s x (var x'))) (function.update ((eval_term T m v) ∘ s) x a) _ (s1 a)), exact h1 a,
       intros h1 a,
-      rewrite (thm_2 ((eval_term T m (function.update v x' a)) ∘ (function.update s x (var x'))) (function.update ((eval_term T m v) ∘ s) x a) (s1 a)), exact h1 a
+      rewrite (thm_2 _ ((eval_term T m (function.update v x' a)) ∘ (function.update s x (var x'))) (function.update ((eval_term T m v) ∘ s) x a) _ (s1 a)), exact h1 a
       end
     ... ↔ holds T m (eval_term T m v ∘ s) (forall_ x p) : by unfold holds
   },
@@ -1275,17 +1275,17 @@ begin
       {
         intros h1,
         apply exists.elim h1, intros a h2, apply exists.intro a,
-        rewrite <- thm_2
+        rewrite <- thm_2 _
           ((eval_term T m (function.update v x' a)) ∘ (function.update s x (var x')))
-          (function.update ((eval_term T m v) ∘ s) x a) (s1 a),
+          (function.update ((eval_term T m v) ∘ s) x a) _ (s1 a),
         exact h2,
       },
       {
         intros h1,
         apply exists.elim h1, intros a h2, apply exists.intro a,
-        rewrite thm_2
+        rewrite thm_2 _
           ((eval_term T m (function.update v x' a)) ∘ (function.update s x (var x')))
-          (function.update ((eval_term T m v) ∘ s) x a) (s1 a),
+          (function.update ((eval_term T m v) ∘ s) x a) _ (s1 a),
         exact h2,
       },
     end
@@ -1983,7 +1983,7 @@ begin
   intros D m v h2 a,
   have s1 : ∀ x' ∈ p.free_var_set, (function.update v x a) x' = v x', intros x' h4, apply function.update_noteq,
     by_contradiction, apply h1, rewrite <- h, exact h4,
-  rewrite @thm_2 D m p (function.update v x a) v s1, exact h2
+  rewrite @thm_2 D m (function.update v x a) v p s1, exact h2
 end
 
 
