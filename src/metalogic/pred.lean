@@ -401,7 +401,7 @@ pred terms.length p terms.to_fin_fun
 
 
 /-
-domain: A nonempty set D called the domain of the interpretation.
+D: A nonempty set called the domain of the interpretation.
 The intention is that all terms have values in D.
 
 nonempty: A proof that there is at least one element in the domain.
@@ -424,10 +424,10 @@ terms : fin n → domain : The n terms (arguments) of the predicate expressed
 as a finite function.
 v : Prop : The result of the predicate. True or false.
 -/
-structure interpretation (domain : Type) : Type :=
-(nonempty : nonempty domain)
-(func (n : ℕ) : func_symbols → (fin n → domain) → domain)
-(pred (n : ℕ) : pred_symbols → (fin n → domain) → Prop)
+structure interpretation (D : Type) : Type :=
+(nonempty : nonempty D)
+(func (n : ℕ) : func_symbols → (fin n → D) → D)
+(pred (n : ℕ) : pred_symbols → (fin n → D) → Prop)
 
 
 /-
