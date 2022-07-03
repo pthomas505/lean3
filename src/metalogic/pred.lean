@@ -470,14 +470,14 @@ begin
     calc
           eval_term D m v1 (func n f t)
         = m.func n f (fun (i : fin n), eval_term D m v1 (t i)) :
-            by unfold eval_term
+          by unfold eval_term
     ... = m.func n f (fun (i : fin n), eval_term D m v2 (t i)) :
-            begin
-              congr, funext, apply ih,
-              intros x h2, apply h1, unfold term.all_var_set,
-              simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left],
-              exact exists.intro i h2
-            end
+          begin
+            congr, funext, apply ih,
+            intros x h2, apply h1, unfold term.all_var_set,
+            simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left],
+            exact exists.intro i h2
+          end
     ... = eval_term D m v2 (func n f t) : by unfold eval_term
 	}
 end
@@ -536,14 +536,14 @@ begin
     calc
         holds D m v1 (pred n x t)
         ↔ m.pred n x (fun i : fin n, eval_term D m v1 (t i)) :
-      by unfold holds
+          by unfold holds
     ... ↔ m.pred n x (fun i : fin n, eval_term D m v2 (t i)) :
-      begin
-        apply iff_of_eq, congr, funext,
-        apply thm_1, intros x h, apply h1,
-        simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left],
-        exact exists.intro i h
-      end
+          begin
+            apply iff_of_eq, congr, funext,
+            apply thm_1, intros x h, apply h1,
+            simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left],
+            exact exists.intro i h
+          end
     ... ↔ holds D m v2 (pred n x t) : by unfold holds
   },
   case formula.eq : s t {
@@ -552,19 +552,19 @@ begin
         holds D m v1 (eq s t)
         ↔ eval_term D m v1 s = eval_term D m v1 t : by unfold holds
     ... ↔ eval_term D m v2 s = eval_term D m v2 t :
-      begin
-        apply iff_of_eq, congr' 1,
-        {
-          apply thm_1, intros x h, apply h1,
-          simp only [finset.mem_union],
-          apply or.intro_left, exact h,
-        },
-        {
-          apply thm_1, intros x h, apply h1,
-          simp only [finset.mem_union],
-          apply or.intro_right, exact h,
-        },
-      end
+          begin
+            apply iff_of_eq, congr' 1,
+            {
+              apply thm_1, intros x h, apply h1,
+              simp only [finset.mem_union],
+              apply or.intro_left, exact h,
+            },
+            {
+              apply thm_1, intros x h, apply h1,
+              simp only [finset.mem_union],
+              apply or.intro_right, exact h,
+            },
+          end
     ... ↔ holds D m v2 (eq s t) : by unfold holds
   },
   case formula.not : p ih {
@@ -631,12 +631,13 @@ begin
           holds D m v1 (forall_ x p)
         ↔ ∀ y : D, holds D m (function.update v1 x y) p : by unfold holds
     ... ↔ ∀ y : D, holds D m (function.update v2 x y) p :
-      begin
-        apply forall_congr, intro a, apply ih, intros y h2,
-        by_cases y = x,
-        rewrite h, simp only [function.update_same],
-        simp only [function.update_noteq h], apply h1, exact and.intro h2 h
-      end
+          begin
+            apply forall_congr, intro a, apply ih, intros y h2,
+            by_cases y = x,
+            rewrite h, simp only [function.update_same],
+            simp only [function.update_noteq h], apply h1,
+            exact and.intro h2 h
+          end
     ... ↔ holds D m v2 (forall_ x p) : by unfold holds
   },
   case formula.exists_ : x p ih {
@@ -646,12 +647,13 @@ begin
           holds D m v1 (exists_ x p)
         ↔ ∃ y : D, holds D m (function.update v1 x y) p : by unfold holds
     ... ↔ ∃ y : D, holds D m (function.update v2 x y) p :
-      begin
-        apply exists_congr, intro a, apply ih, intros y h2,
-        by_cases y = x,
-        rewrite h, simp only [function.update_same],
-        simp only [function.update_noteq h], apply h1, exact and.intro h2 h
-      end
+          begin
+            apply exists_congr, intro a, apply ih, intros y h2,
+            by_cases y = x,
+            rewrite h, simp only [function.update_same],
+            simp only [function.update_noteq h], apply h1,
+            exact and.intro h2 h
+          end
     ... ↔ holds D m v2 (exists_ x p) : by unfold holds
   }
 end
