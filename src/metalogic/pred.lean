@@ -540,9 +540,9 @@ begin
     ... ↔ m.pred n x (fun i : fin n, eval_term D m v2 (t i)) :
           begin
             apply iff_of_eq, congr, funext,
-            apply thm_1, intros x h, apply h1,
+            apply thm_1, intros x h2, apply h1,
             simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left],
-            exact exists.intro i h
+            exact exists.intro i h2
           end
     ... ↔ holds D m v2 (pred n x t) : by unfold holds
   },
@@ -555,14 +555,14 @@ begin
           begin
             apply iff_of_eq, congr' 1,
             {
-              apply thm_1, intros x h, apply h1,
+              apply thm_1, intros x h2, apply h1,
               simp only [finset.mem_union],
-              apply or.intro_left, exact h
+              apply or.intro_left, exact h2
             },
             {
-              apply thm_1, intros x h, apply h1,
+              apply thm_1, intros x h2, apply h1,
               simp only [finset.mem_union],
-              apply or.intro_right, exact h
+              apply or.intro_right, exact h2
             },
           end
     ... ↔ holds D m v2 (eq s t) : by unfold holds
