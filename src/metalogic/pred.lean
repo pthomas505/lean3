@@ -946,7 +946,6 @@ begin
   { assumption }
 end
 
-
 def formula_sub_var_term : instantiation → formula → formula
 | _ bottom := bottom
 | _ top := top
@@ -982,7 +981,7 @@ def formula_sub_var_term : instantiation → formula → formula
   in exists_ x' (formula_sub_var_term (function.update sub_map x (var x')) p)
 
 
-lemma lem_3_6_1
+theorem thm_6
   (x : var_symbols)
   (p : formula)
   (s : instantiation)
@@ -1115,7 +1114,7 @@ begin
             begin congr' 1, apply finset.bUnion_congr, refl, intros a h1, congr, apply function.update_noteq,
             simp only [finset.mem_sdiff, finset.mem_singleton] at h1, cases h1, exact h1_right end
     ... = finset.bUnion (p.free_var_set \ {x}) (fun (y : var_symbols), (s y).all_var_set) :
-            begin apply finset.sdiff_singleton_not_mem_eq_self, exact lem_3_6_1 x p s ih end
+            begin apply finset.sdiff_singleton_not_mem_eq_self, exact thm_6 x p s ih end
   },
   case formula.exists_ : x p ih {
     let x' :=
@@ -1136,7 +1135,7 @@ begin
             begin congr' 1, apply finset.bUnion_congr, refl, intros a h1, congr, apply function.update_noteq,
             simp only [finset.mem_sdiff, finset.mem_singleton] at h1, cases h1, exact h1_right end
     ... = finset.bUnion (p.free_var_set \ {x}) (fun (y : var_symbols), (s y).all_var_set) :
-            begin apply finset.sdiff_singleton_not_mem_eq_self, exact lem_3_6_1 x p s ih end
+            begin apply finset.sdiff_singleton_not_mem_eq_self, exact thm_6 x p s ih end
   }
 end
 
@@ -1229,7 +1228,7 @@ begin
       {
         have s2 : z ∈ p.free_var_set \ {x}, simp only [finset.mem_sdiff, finset.mem_singleton], exact and.intro h1 h,
         have s3 : x' ∉ finset.bUnion (p.free_var_set \ {x}) (fun y : var_symbols, (s y).all_var_set),
-          exact lem_3_6_1 x p s (lem_3_6 p),
+          exact thm_6 x p s (lem_3_6 p),
         have s4 : (s z).all_var_set ⊆ finset.bUnion (p.free_var_set \ {x}) (fun y : var_symbols, (s y).all_var_set),
           exact finset.subset_bUnion_of_mem (fun y : var_symbols, (s y).all_var_set) s2,
         have s5 : x' ∉ (s z).all_var_set, exact finset.not_mem_mono s4 s3,
@@ -1279,7 +1278,7 @@ begin
       {
         have s2 : z ∈ p.free_var_set \ {x}, simp only [finset.mem_sdiff, finset.mem_singleton], exact and.intro h1 h,
         have s3 : x' ∉ finset.bUnion (p.free_var_set \ {x}) (fun y : var_symbols, (s y).all_var_set),
-          exact lem_3_6_1 x p s (lem_3_6 p),
+          exact thm_6 x p s (lem_3_6 p),
         have s4 : (s z).all_var_set ⊆ finset.bUnion (p.free_var_set \ {x}) (fun y : var_symbols, (s y).all_var_set),
           exact finset.subset_bUnion_of_mem (fun y : var_symbols, (s y).all_var_set) s2,
         have s5 : x' ∉ (s z).all_var_set, exact finset.not_mem_mono s4 s3,
