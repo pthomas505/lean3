@@ -762,14 +762,15 @@ end
 /-
 is_model_of D m Γ = m is a model of Γ
 -/
-def is_model_of (D : Type) (m : interpretation D) (Γ : finset formula) :=
+def is_model_of
+  (D : Type) (m : interpretation D) (Γ : finset formula) : Prop :=
 satisfies_set D m Γ
 
 
 /-
 Γ ⊨ p = p holds in all models of Γ.
 -/
-notation Γ `⊨` p := ∀ D : Type, ∀ m : interpretation D,
+notation Γ `⊨` p := ∀ (D : Type) (m : interpretation D),
   (is_model_of D m Γ) → (holds_in D m p)
 
 
