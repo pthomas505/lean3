@@ -874,10 +874,12 @@ begin
           by simp only [ih]
     ... = (finset.univ.bUnion (fun (i : fin n), (t i).all_var_set)).bUnion
             (fun (y : var_symbols), (sub_map y).all_var_set) :
-          begin symmetry, apply finset.bUnion_bUnion end
+          begin
+            symmetry, apply finset.bUnion_bUnion
+          end
     ... = (func n f t).all_var_set.bUnion
             (fun (y : var_symbols), (sub_map y).all_var_set) :
-              by unfold term.all_var_set
+          by unfold term.all_var_set
   }
 end
 
