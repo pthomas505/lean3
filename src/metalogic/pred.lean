@@ -1053,13 +1053,19 @@ begin
           by unfold formula.free_var_set
   },
   case formula.eq_ : s t {
-    have s1 :
-      (formula_sub_var_term sub_map (eq_ s t)).free_var_set =
-        (eq_ (term_sub_var_term sub_map s) (term_sub_var_term sub_map t)).free_var_set,
-      unfold formula_sub_var_term,
-
-    unfold formula_sub_var_term, unfold formula.free_var_set, simp only [thm_4],
-    simp only [finset.bUnion_union],    
+    calc
+          (formula_sub_var_term sub_map (eq_ s t)).free_var_set =
+            (eq_ (term_sub_var_term sub_map s) (term_sub_var_term sub_map t)).free_var_set :
+          by unfold formula_sub_var_term
+    ... = (term_sub_var_term sub_map s).all_var_set ∪ (term_sub_var_term sub_map t).all_var_set :
+          by unfold formula.free_var_set
+    ... = (s.all_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set) ∪
+            t.all_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set)) :
+          by simp only [thm_4]
+    ... = (s.all_var_set ∪ t.all_var_set).bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :
+          by simp only [finset.bUnion_union]
+    ... = (eq_ s t).free_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :
+          by unfold formula.free_var_set
   },
   case formula.not : p ih {
     calc
