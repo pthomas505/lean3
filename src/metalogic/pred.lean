@@ -925,11 +925,10 @@ end
 
 -- uniform simultaneous replacement of the variables in a formula by terms
 
-def variant : var_symbols → finset var_symbols → var_symbols
-| x vars :=
-if h : x ∈ vars
-then vars.max' (exists.intro x h) + 1
-else x
+def variant (x : var_symbols) (s : finset var_symbols) : var_symbols :=
+  if h : x ∈ s
+  then s.max' (exists.intro x h) + 1
+  else x
 
 lemma variant_not_mem
   (x : var_symbols)
@@ -939,7 +938,8 @@ begin
   unfold variant, split_ifs,
   {
     intro con,
-    have s1 : s.max' _ + 1 ≤ s.max' _, exact finset.le_max' s (s.max' _ + 1) con,
+    have s1 : s.max' _ + 1 ≤ s.max' _,
+      exact s.le_max' (s.max' _ + 1) con,
     have s2 : ¬ s.max' _ < s.max' _ + 1, exact s1.not_lt,
     apply s2, apply nat.lt_succ_self
   },
