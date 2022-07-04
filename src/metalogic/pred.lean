@@ -926,9 +926,9 @@ end
 -- uniform simultaneous replacement of the variables in a formula by terms
 
 def variant (x : var_symbols) (s : finset var_symbols) : var_symbols :=
-  if h : x ∈ s
-  then s.max' (exists.intro x h) + 1
-  else x
+if h : x ∈ s
+then s.max' (exists.intro x h) + 1
+else x
 
 lemma variant_not_mem
   (x : var_symbols)
