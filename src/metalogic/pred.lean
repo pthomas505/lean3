@@ -932,8 +932,7 @@ begin
   unfold variant, split_ifs,
   {
     intro con,
-    have s1 : s.max' _ + 1 ≤ s.max' _,
-      exact s.le_max' (s.max' _ + 1) con,
+    have s1 : s.max' _ + 1 ≤ s.max' _, exact s.le_max' (s.max' _ + 1) con,
     have s2 : ¬ s.max' _ < s.max' _ + 1, exact s1.not_lt,
     apply s2, apply nat.lt_succ_self
   },
@@ -943,20 +942,13 @@ end
 def formula_sub_var_term : instantiation → formula → formula
 | _ bottom := bottom
 | _ top := top
-| sub_map (pred n p t) :=
-    pred n p (fun (i : fin n), term_sub_var_term sub_map (t i))
-| sub_map (eq s t) :=
-    eq (term_sub_var_term sub_map s) (term_sub_var_term sub_map t)
-| sub_map (not p) :=
-    not (formula_sub_var_term sub_map p)
-| sub_map (and p q) :=
-    and (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)
-| sub_map (or p q) :=
-    or (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)
-| sub_map (imp p q) :=
-    imp (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)
-| sub_map (iff p q) :=
-    iff (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)
+| sub_map (pred n p t) := pred n p (fun (i : fin n), term_sub_var_term sub_map (t i))
+| sub_map (eq s t) := eq (term_sub_var_term sub_map s) (term_sub_var_term sub_map t)
+| sub_map (not p) := not (formula_sub_var_term sub_map p)
+| sub_map (and p q) := and (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)
+| sub_map (or p q) := or (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)
+| sub_map (imp p q) := imp (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)
+| sub_map (iff p q) := iff (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)
 | sub_map (forall_ x p) :=
   let x' :=
     if ∃ y ∈ p.free_var_set \ {x}, x ∈ (sub_map y).all_var_set
@@ -966,9 +958,7 @@ def formula_sub_var_term : instantiation → formula → formula
 | sub_map (exists_ x p) :=
   let x' :=
     if ∃ y ∈ p.free_var_set \ {x}, x ∈ (sub_map y).all_var_set
-    then variant x
-          (formula_sub_var_term
-            (function.update sub_map x (var x)) p).free_var_set
+    then variant x (formula_sub_var_term (function.update sub_map x (var x)) p).free_var_set
     else x
   in exists_ x' (formula_sub_var_term (function.update sub_map x (var x')) p)
 
@@ -982,28 +972,21 @@ theorem thm_6
       p.free_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set)) :
   let x' :=
       if ∃ y ∈ p.free_var_set \ {x}, x ∈ (sub_map y).all_var_set
-      then variant x
-            (formula_sub_var_term
-              (function.update sub_map x (var x)) p).free_var_set
+      then variant x (formula_sub_var_term (function.update sub_map x (var x)) p).free_var_set
       else x
   in
-  x' ∉ (p.free_var_set \ {x}).bUnion
-    (fun (y : var_symbols), (sub_map y).all_var_set) :=
+  x' ∉ (p.free_var_set \ {x}).bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :=
 begin
   intro x',
-  by_cases h2 : x ∈ (p.free_var_set \ {x}).bUnion
-    (fun (y : var_symbols), (sub_map y).all_var_set),
+  by_cases h2 : x ∈ (p.free_var_set \ {x}).bUnion (fun (y : var_symbols), (sub_map y).all_var_set),
   {
-    have s1 : (p.free_var_set \ {x}).bUnion
-      (fun y : var_symbols, (sub_map y).all_var_set) ⊆
-        (formula_sub_var_term
-          (function.update sub_map x (var x)) p).free_var_set,
+    have s1 : (p.free_var_set \ {x}).bUnion (fun y : var_symbols, (sub_map y).all_var_set) ⊆
+                (formula_sub_var_term (function.update sub_map x (var x)) p).free_var_set,
       calc
             (p.free_var_set \ {x}).bUnion
               (fun (y : var_symbols), (sub_map y).all_var_set) =
-                (p.free_var_set \ {x}).bUnion
-                  (fun (y : var_symbols),
-                    ((function.update sub_map x (var x)) y).all_var_set) :
+            (p.free_var_set \ {x}).bUnion
+              (fun (y : var_symbols), ((function.update sub_map x (var x)) y).all_var_set) :
             begin
               symmetry, apply finset.bUnion_congr, refl, intros a h1, congr,
               simp only [finset.mem_sdiff, finset.mem_singleton] at h1,
@@ -1011,25 +994,20 @@ begin
               exact function.update_noteq h1_right (var x) sub_map
             end
       ... ⊆ p.free_var_set.bUnion
-            (fun (y : var_symbols),
-              ((function.update sub_map x (var x)) y).all_var_set) : 
+              (fun (y : var_symbols), ((function.update sub_map x (var x)) y).all_var_set) : 
             begin
               apply finset.bUnion_subset_bUnion_of_subset_left,
               apply finset.sdiff_subset
             end
-      ... = (formula_sub_var_term
-              (function.update sub_map x (var x)) p).free_var_set :
+      ... = (formula_sub_var_term (function.update sub_map x (var x)) p).free_var_set :
             begin
               symmetry, exact h1 (function.update sub_map x (var x))
             end,
     have s2 :
-      x' = variant x
-            (formula_sub_var_term
-              (function.update sub_map x (var x)) p).free_var_set,
+      x' = variant x (formula_sub_var_term (function.update sub_map x (var x)) p).free_var_set,
         simp only [finset.mem_bUnion] at h2, exact if_pos h2,
     have s3 :
-      x' ∉ (formula_sub_var_term
-              (function.update sub_map x (var x)) p).free_var_set,
+      x' ∉ (formula_sub_var_term (function.update sub_map x (var x)) p).free_var_set,
         rewrite s2, apply variant_not_mem,
     exact finset.not_mem_mono s1 s3
   },
