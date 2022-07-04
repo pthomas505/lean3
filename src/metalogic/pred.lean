@@ -696,8 +696,8 @@ def satisfies (D : Type) (m : interpretation D) (p : formula) : Prop :=
 /-
 satisfies_set D m S = m satisfies S.
 -/
-def satisfies_set (D : Type)
-  (m : interpretation D) (s : finset formula) : Prop :=
+def satisfies_set
+  (D : Type) (m : interpretation D) (s : finset formula) : Prop :=
 ∀ p ∈ s, satisfies D m p
 
 
@@ -709,16 +709,16 @@ def is_satisfiable_set (s : finset formula) : Prop :=
 
 
 /-
-holds_in p D m = p holds in m.
+holds_in D m p = p holds in m.
 -/
-def holds_in (p : formula) (D : Type) (m : interpretation D) : Prop :=
+def holds_in (D : Type) (m : interpretation D) (p : formula) : Prop :=
 satisfies D m p
 
 /-
-set_holds_in S D m = S holds in m.
+set_holds_in D m s = s holds in m.
 -/
-def set_holds_in (s : finset formula) (D : Type)
-  (m : interpretation D) : Prop :=
+def set_holds_in
+  (D : Type) (m : interpretation D) (s : finset formula) : Prop :=
 satisfies_set D m s
 
 
@@ -768,7 +768,7 @@ satisfies_set D m Γ
 Γ ⊨ p = p holds in all models of Γ.
 -/
 notation Γ `⊨` p := ∀ D : Type, ∀ m : interpretation D,
-  (is_model_of D m Γ) → (holds_in p D m)
+  (is_model_of D m Γ) → (holds_in D m p)
 
 
 example
