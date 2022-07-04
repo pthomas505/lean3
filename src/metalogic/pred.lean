@@ -1093,13 +1093,49 @@ begin
   },
   case formula.and : p q ih_p ih_q {
     calc
-    (formula_sub_var_term sub_map (and p q)).free_var_set = (and (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)).free_var_set : by unfold formula_sub_var_term
-    ... = (formula_sub_var_term sub_map p).free_var_set ∪ (formula_sub_var_term sub_map q).free_var_set : by unfold formula.free_var_set
-    ... = finset.bUnion p.free_var_set (fun y : var_symbols, (sub_map y).all_var_set) ∪
-            finset.bUnion q.free_var_set (fun y : var_symbols, (sub_map y).all_var_set) : by simp only [ih_p, ih_q]
-    ... = finset.bUnion (p.free_var_set ∪ q.free_var_set) (fun y : var_symbols, (sub_map y).all_var_set) :
-          begin ext1, simp only [finset.mem_union, finset.mem_bUnion, exists_prop], split, finish, finish end
-    ... = finset.bUnion (and p q).free_var_set (fun y : var_symbols, (sub_map y).all_var_set) : by unfold formula.free_var_set
+          (formula_sub_var_term sub_map (and p q)).free_var_set =
+            (and (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)).free_var_set :
+          by unfold formula_sub_var_term
+    ... = (formula_sub_var_term sub_map p).free_var_set ∪ (formula_sub_var_term sub_map q).free_var_set :
+          by unfold formula.free_var_set
+    ... = p.free_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set) ∪
+            q.free_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :
+          by simp only [ih_p, ih_q]
+    ... = (p.free_var_set ∪ q.free_var_set).bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :
+          begin
+            apply finset.ext, intros a,
+            simp only [finset.mem_union, finset.mem_bUnion, exists_prop],
+            split,
+            {
+              intros h1, cases h1,
+              {
+                apply exists.elim h1, intros a2 h2, cases h2,
+                apply exists.intro a2, split,
+                apply or.intro_left, exact h2_left,
+                exact h2_right
+              },
+              {
+                apply exists.elim h1, intros a2 h2, cases h2,
+                apply exists.intro a2, split,
+                apply or.intro_right, exact h2_left,
+                exact h2_right
+              }
+            },
+            {
+              intros h1, apply exists.elim h1, intros a2 h2, cases h2,
+              cases h2_left,
+              {
+                apply or.intro_left, apply exists.intro a2,
+                exact and.intro h2_left h2_right
+              },
+              {
+                apply or.intro_right, apply exists.intro a2,
+                exact and.intro h2_left h2_right
+              }
+            }
+          end
+    ... = (and p q).free_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :
+          by unfold formula.free_var_set
   },
   case formula.or : p q ih_p ih_q {
     calc
