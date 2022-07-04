@@ -1366,7 +1366,12 @@ def formula_sub_pred_formula
   then variant x (formula_sub_pred_formula (function.update s x (var x)) p).free_var_set
   else x in
   forall_ x' (formula_sub_pred_formula (function.update s x (var x')) p)
-| s (exists_ x p) := sorry
+| s (exists_ x p) :=
+  let x' :=
+  if x ∈ finset.bUnion p.all_pred_set (fun r, (m r).free_var_set)
+  then variant x (formula_sub_pred_formula (function.update s x (var x)) p).free_var_set
+  else x in
+  exists_ x' (formula_sub_pred_formula (function.update s x (var x')) p)
 
 def interpretation.sub
   {D : Type}
