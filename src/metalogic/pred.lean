@@ -985,34 +985,60 @@ theorem thm_6
   (sub_map : instantiation)
   (p : formula)
   (x : var_symbols)
-  (h1 : ∀ sub_map : instantiation, (formula_sub_var_term sub_map p).free_var_set =
-    finset.bUnion p.free_var_set (fun y : var_symbols, (sub_map y).all_var_set)) :
+  (h1 : ∀ sub_map : instantiation,
+    (formula_sub_var_term sub_map p).free_var_set =
+      p.free_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set)) :
   let x' :=
       if ∃ y ∈ p.free_var_set \ {x}, x ∈ (sub_map y).all_var_set
-      then variant x (formula_sub_var_term (function.update sub_map x (var x)) p).free_var_set
+      then variant x
+            (formula_sub_var_term
+            (function.update sub_map x (var x)) p).free_var_set
       else x
   in
-  x' ∉ finset.bUnion (p.free_var_set \ {x}) (fun y : var_symbols, (sub_map y).all_var_set) :=
+  x' ∉ (p.free_var_set \ {x}).bUnion
+    (fun (y : var_symbols), (sub_map y).all_var_set) :=
 begin
   intro x',
-  by_cases x ∈ finset.bUnion (p.free_var_set \ {x}) (fun y : var_symbols, (sub_map y).all_var_set),
+  by_cases x ∈ (p.free_var_set \ {x}).bUnion
+    (fun (y : var_symbols), (sub_map y).all_var_set),
   {
-    have s1 : finset.bUnion (p.free_var_set \ {x}) (fun y : var_symbols, (sub_map y).all_var_set) ⊆
-      (formula_sub_var_term (function.update sub_map x (var x)) p).free_var_set,
+    have s1 : (p.free_var_set \ {x}).bUnion
+      (fun y : var_symbols, (sub_map y).all_var_set) ⊆
+        (formula_sub_var_term
+          (function.update sub_map x (var x)) p).free_var_set,
       calc
-      finset.bUnion (p.free_var_set \ {x}) (fun y : var_symbols, (sub_map y).all_var_set) =
-        finset.bUnion (p.free_var_set \ {x}) (fun y : var_symbols, ((function.update sub_map x (var x)) y).all_var_set) :
-          begin
-            symmetry, apply finset.bUnion_congr, refl, intros a h1, congr,
-            simp only [finset.mem_sdiff, finset.mem_singleton] at h1, cases h1,
-            exact function.update_noteq h1_right (var x) sub_map
-          end
-      ... ⊆ finset.bUnion p.free_var_set (fun y : var_symbols, ((function.update sub_map x (var x)) y).all_var_set) : 
-          begin apply finset.bUnion_subset_bUnion_of_subset_left, apply finset.sdiff_subset end
-      ... = (formula_sub_var_term (function.update sub_map x (var x)) p).free_var_set :
-          begin symmetry, exact h1 (function.update sub_map x (var x)) end,
-    have s2 : x' = variant x (formula_sub_var_term (function.update sub_map x (var x)) p).free_var_set, simp only [finset.mem_bUnion] at h, exact if_pos h,
-    have s3 : x' ∉ (formula_sub_var_term (function.update sub_map x (var x)) p).free_var_set, rewrite s2, apply variant_not_mem,
+            (p.free_var_set \ {x}).bUnion
+              (fun (y : var_symbols), (sub_map y).all_var_set) =
+                (p.free_var_set \ {x}).bUnion
+                  (fun (y : var_symbols),
+                    ((function.update sub_map x (var x)) y).all_var_set) :
+            begin
+              symmetry, apply finset.bUnion_congr, refl, intros a h1, congr,
+              simp only [finset.mem_sdiff, finset.mem_singleton] at h1,
+              cases h1,
+              exact function.update_noteq h1_right (var x) sub_map
+            end
+      ... ⊆ p.free_var_set.bUnion
+            (fun (y : var_symbols),
+              ((function.update sub_map x (var x)) y).all_var_set) : 
+            begin
+              apply finset.bUnion_subset_bUnion_of_subset_left,
+              apply finset.sdiff_subset
+            end
+      ... = (formula_sub_var_term
+              (function.update sub_map x (var x)) p).free_var_set :
+            begin
+              symmetry, exact h1 (function.update sub_map x (var x))
+            end,
+    have s2 :
+      x' = variant x
+            (formula_sub_var_term
+              (function.update sub_map x (var x)) p).free_var_set,
+        simp only [finset.mem_bUnion] at h, exact if_pos h,
+    have s3 :
+      x' ∉ (formula_sub_var_term
+              (function.update sub_map x (var x)) p).free_var_set,
+        rewrite s2, apply variant_not_mem,
     exact finset.not_mem_mono s1 s3
   },
   {
