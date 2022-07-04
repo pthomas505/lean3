@@ -1051,14 +1051,17 @@ end
 theorem thm_7
   (sub_map : instantiation)
   (p : formula) :
-  (formula_sub_var_term sub_map p).free_var_set = finset.bUnion p.free_var_set (fun y : var_symbols, (sub_map y).all_var_set) :=
+  (formula_sub_var_term sub_map p).free_var_set =
+    p.free_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :=
 begin
   induction p generalizing sub_map,
   case formula.bottom {
-    unfold formula_sub_var_term, unfold formula.free_var_set, simp only [finset.bUnion_empty]
+    unfold formula_sub_var_term, unfold formula.free_var_set,
+    simp only [finset.bUnion_empty]
   },
   case formula.top {
-    unfold formula_sub_var_term, unfold formula.free_var_set, simp only [finset.bUnion_empty]
+    unfold formula_sub_var_term, unfold formula.free_var_set,
+    simp only [finset.bUnion_empty]
   },
   case formula.pred : n x terms {
     calc
