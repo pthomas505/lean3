@@ -840,8 +840,8 @@ def term_sub_var_term (sub_map : instantiation) : term → term
     func n f (fun (i : fin n), term_sub_var_term (t i))
 
 theorem thm_4
-  (t : term)
-  (sub_map : instantiation) :
+  (sub_map : instantiation)
+  (t : term) :
   (term_sub_var_term sub_map t).all_var_set =
     t.all_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :=
 begin
@@ -885,33 +885,39 @@ end
 
 theorem thm_5
   (D : Type)
-  (t : term)
-  (s : instantiation)
   (m : interpretation D)
-  (v : valuation D) :
-  eval_term D m v (term_sub_var_term s t) =
-    eval_term D m ((eval_term D m v) ∘ s) t :=
+  (v : valuation D)
+  (sub_map : instantiation)
+  (t : term) :
+  eval_term D m v (term_sub_var_term sub_map t) =
+    eval_term D m ((eval_term D m v) ∘ sub_map) t :=
 begin
   induction t,
   case term.var : x {
     calc
-          eval_term D m v (term_sub_var_term s (var x))
-        = eval_term D m v (s x) : by unfold term_sub_var_term
-    ... = ((eval_term D m v) ∘ s) x : by unfold function.comp
-    ... = eval_term D m ((eval_term D m v) ∘ s) (var x) : by unfold eval_term
-  },
-  case term.func : n f terms ih {
-    have ih' : ∀ (i : fin n), eval_term D m v (term_sub_var_term s (terms i)) =
-      eval_term D m ((eval_term D m v) ∘ s) (terms i), exact ih,
-    calc
-          eval_term D m v (term_sub_var_term s (func n f terms))
-        = eval_term D m v (func n f (fun i, term_sub_var_term s (terms i))) :
-          by unfold term_sub_var_term
-    ... = m.func n f (fun i, eval_term D m v (term_sub_var_term s (terms i))) :
+          eval_term D m v (term_sub_var_term sub_map (var x))
+        = eval_term D m v (sub_map x) : by unfold term_sub_var_term
+    ... = ((eval_term D m v) ∘ sub_map) x : by unfold function.comp
+    ... = eval_term D m ((eval_term D m v) ∘ sub_map) (var x) :
           by unfold eval_term
-    ... = m.func n f (fun i, eval_term D m ((eval_term D m v) ∘ s) (terms i)) :
-          begin congr, apply funext, exact ih' end
-    ... = eval_term D m ((eval_term D m v) ∘ s) (func n f terms) :
+  },
+  case term.func : n f t ih {
+    calc
+          eval_term D m v (term_sub_var_term sub_map (func n f t))
+        = eval_term D m v
+            (func n f (fun (i : fin n), term_sub_var_term sub_map (t i))) :
+          by unfold term_sub_var_term
+    ... = m.func n f
+            (fun (i : fin n),
+              eval_term D m v (term_sub_var_term sub_map (t i))) :
+          by unfold eval_term
+    ... = m.func n f
+            (fun (i : fin n),
+              eval_term D m ((eval_term D m v) ∘ sub_map) (t i)) :
+          begin
+            congr, apply funext, exact ih
+          end
+    ... = eval_term D m ((eval_term D m v) ∘ sub_map) (func n f t) :
           by unfold eval_term
   }
 end
