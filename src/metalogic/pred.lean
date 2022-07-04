@@ -694,7 +694,7 @@ def satisfies (D : Type) (m : interpretation D) (p : formula) : Prop :=
 ∀ v : valuation D, holds D m v p
 
 /-
-satisfies_set D m S = m satisfies S.
+satisfies_set D m s = m satisfies s.
 -/
 def satisfies_set
   (D : Type) (m : interpretation D) (s : finset formula) : Prop :=
