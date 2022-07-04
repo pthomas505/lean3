@@ -733,7 +733,7 @@ begin
     ∀ (D : Type) (m : interpretation D), ∃ (v : valuation D),
       holds D m v p,
     intros h2 D m,
-    let v := fun _ : var_symbols, m.nonempty.some,
+    let v := fun (_ : var_symbols), m.nonempty.some,
     exact exists.intro v (h2 D m v),
   have s2 :
     (∀ (D : Type) (m : interpretation D), ∃ (v : valuation D),
