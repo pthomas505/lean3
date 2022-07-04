@@ -493,8 +493,8 @@ def holds (D : Type) (m : interpretation D) : valuation D → formula → Prop
 | v (or p q) := holds v p ∨ holds v q
 | v (imp p q) := holds v p → holds v q
 | v (iff p q) := holds v p ↔ holds v q
-| v (forall_ x p) := ∀ y : D, holds (function.update v x y) p
-| v (exists_ x p) := ∃ y : D, holds (function.update v x y) p
+| v (forall_ x p) := ∀ a : D, holds (function.update v x a) p
+| v (exists_ x p) := ∃ a : D, holds (function.update v x a) p
 
 def formula.free_var_set : formula → finset var_symbols
 | bottom := ∅
@@ -629,8 +629,8 @@ begin
     simp only [finset.mem_sdiff, finset.mem_singleton] at h1,
     calc
           holds D m v1 (forall_ x p)
-        ↔ ∀ y : D, holds D m (function.update v1 x y) p : by unfold holds
-    ... ↔ ∀ y : D, holds D m (function.update v2 x y) p :
+        ↔ ∀ a : D, holds D m (function.update v1 x a) p : by unfold holds
+    ... ↔ ∀ a : D, holds D m (function.update v2 x a) p :
           begin
             apply forall_congr, intro a, apply ih, intros y h2,
             by_cases h3 : y = x,
@@ -647,8 +647,8 @@ begin
     simp only [finset.mem_sdiff, finset.mem_singleton] at h1,
     calc
           holds D m v1 (exists_ x p)
-        ↔ ∃ y : D, holds D m (function.update v1 x y) p : by unfold holds
-    ... ↔ ∃ y : D, holds D m (function.update v2 x y) p :
+        ↔ ∃ a : D, holds D m (function.update v1 x a) p : by unfold holds
+    ... ↔ ∃ a : D, holds D m (function.update v2 x a) p :
           begin
             apply exists_congr, intro a, apply ih, intros y h2,
             by_cases h3 : y = x,
@@ -813,7 +813,7 @@ example
 	(D : Type)
 	(m : interpretation D)
 	(p : formula) :
-	(∀ x : var_symbols, ∀ v : valuation D, ∀ a : D,
+	(∀ (x : var_symbols) (v : valuation D) (a : D),
     holds D m (function.update v x a) p) ↔
       (∀ v : valuation D, holds D m v p) :=
 begin
