@@ -1045,7 +1045,7 @@ begin
     ... = (finset.univ.bUnion (fun (i : fin n), (t i).all_var_set)).bUnion
             (fun (y : var_symbols), (sub_map y).all_var_set) :
           begin
-            ext1, simp only [finset.mem_bUnion, finset.mem_univ, exists_prop,
+            apply finset.ext, intros a, simp only [finset.mem_bUnion, finset.mem_univ, exists_prop,
             exists_true_left], tauto
           end
     ... = (pred n x t).free_var_set.bUnion
