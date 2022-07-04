@@ -444,8 +444,7 @@ def eval_term (D : Type) (m : interpretation D) (v : valuation D) : term → D
 
 def term.all_var_set : term → finset var_symbols
 | (var x) := {x}
-| (func n f t) :=
-    finset.univ.bUnion (fun (i : fin n), (t i).all_var_set)
+| (func n f t) := finset.univ.bUnion (fun (i : fin n), (t i).all_var_set)
 
 
 theorem thm_1
@@ -499,8 +498,7 @@ def holds (D : Type) (m : interpretation D) : valuation D → formula → Prop
 def formula.free_var_set : formula → finset var_symbols
 | bottom := ∅
 | top := ∅
-| (pred n p t) :=
-    finset.univ.bUnion (fun (i : fin n), (t i).all_var_set)
+| (pred n p t) := finset.univ.bUnion (fun (i : fin n), (t i).all_var_set)
 | (eq s t) := s.all_var_set ∪ t.all_var_set
 | (not p) := p.free_var_set
 | (and p q) := p.free_var_set ∪ q.free_var_set
@@ -836,8 +834,7 @@ def instantiation := var_symbols → term
 
 def term_sub_var_term (sub_map : instantiation) : term → term
 | (var x) := sub_map x
-| (func n f t) :=
-    func n f (fun (i : fin n), term_sub_var_term (t i))
+| (func n f t) := func n f (fun (i : fin n), term_sub_var_term (t i))
 
 theorem thm_4
   (sub_map : instantiation)
@@ -867,9 +864,8 @@ begin
     ... = finset.univ.bUnion
             (fun (i : fin n), (term_sub_var_term sub_map (t i)).all_var_set) :
           by unfold term.all_var_set
-    ... = finset.bUnion finset.univ
-            (fun (i : fin n),
-              (t i).all_var_set.bUnion
+    ... = finset.univ.bUnion
+            (fun (i : fin n), (t i).all_var_set.bUnion
               (fun (y : var_symbols), (sub_map y).all_var_set)) :
           by simp only [ih]
     ... = (finset.univ.bUnion (fun (i : fin n), (t i).all_var_set)).bUnion
@@ -908,12 +904,10 @@ begin
             (func n f (fun (i : fin n), term_sub_var_term sub_map (t i))) :
           by unfold term_sub_var_term
     ... = m.func n f
-            (fun (i : fin n),
-              eval_term D m v (term_sub_var_term sub_map (t i))) :
+            (fun (i : fin n), eval_term D m v (term_sub_var_term sub_map (t i))) :
           by unfold eval_term
     ... = m.func n f
-            (fun (i : fin n),
-              eval_term D m ((eval_term D m v) ∘ sub_map) (t i)) :
+            (fun (i : fin n), eval_term D m ((eval_term D m v) ∘ sub_map) (t i)) :
           begin
             congr, apply funext, exact ih
           end
@@ -966,9 +960,7 @@ def formula_sub_var_term : instantiation → formula → formula
 | sub_map (forall_ x p) :=
   let x' :=
     if ∃ y ∈ p.free_var_set \ {x}, x ∈ (sub_map y).all_var_set
-    then variant x
-          (formula_sub_var_term
-            (function.update sub_map x (var x)) p).free_var_set
+    then variant x (formula_sub_var_term (function.update sub_map x (var x)) p).free_var_set
     else x
   in forall_ x' (formula_sub_var_term (function.update sub_map x (var x')) p)
 | sub_map (exists_ x p) :=
