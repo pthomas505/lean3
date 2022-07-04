@@ -805,7 +805,7 @@ begin
   },
   {
     intros h1, push_neg, intros D m, by_contradiction, push_neg at h,
-    exact h1 D m h (fun _ : var_symbols, m.nonempty.some)
+    exact h1 D m h (fun (_ : var_symbols), m.nonempty.some)
   }
 end
 
