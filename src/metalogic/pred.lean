@@ -950,25 +950,35 @@ end
 def formula.sub_var_term : instantiation → formula → formula
 | _ bottom := bottom
 | _ top := top
-| s (pred n x terms) := pred n x (fun i : fin n, term_sub_var_term s (terms i))
-| s (eq u v) := eq (term_sub_var_term s u) (term_sub_var_term s v)
-| s (not p) := not (formula.sub_var_term s p)
-| s (and p q) := and (formula.sub_var_term s p) (formula.sub_var_term s q)
-| s (or p q) := or (formula.sub_var_term s p) (formula.sub_var_term s q)
-| s (imp p q) := imp (formula.sub_var_term s p) (formula.sub_var_term s q)
-| s (iff p q) := iff (formula.sub_var_term s p) (formula.sub_var_term s q)
-| s (forall_ x p) :=
+| sub_map (pred n p t) :=
+    pred n p (fun (i : fin n), term_sub_var_term sub_map (t i))
+| sub_map (eq s t) := eq (term_sub_var_term sub_map s)
+    (term_sub_var_term sub_map t)
+| sub_map (not p) := not (formula.sub_var_term sub_map p)
+| sub_map (and p q) :=
+    and (formula.sub_var_term sub_map p) (formula.sub_var_term sub_map q)
+| sub_map (or p q) :=
+    or (formula.sub_var_term sub_map p) (formula.sub_var_term sub_map q)
+| sub_map (imp p q) :=
+    imp (formula.sub_var_term sub_map p) (formula.sub_var_term sub_map q)
+| sub_map (iff p q) :=
+    iff (formula.sub_var_term sub_map p) (formula.sub_var_term sub_map q)
+| sub_map (forall_ x p) :=
   let x' :=
-    if ∃ y ∈ p.free_var_set \ {x}, x ∈ (s y).all_var_set
-    then variant x (formula.sub_var_term (function.update s x (var x)) p).free_var_set
+    if ∃ y ∈ p.free_var_set \ {x}, x ∈ (sub_map y).all_var_set
+    then variant x
+          (formula.sub_var_term
+            (function.update sub_map x (var x)) p).free_var_set
     else x
-  in forall_ x' (formula.sub_var_term (function.update s x (var x')) p)
-| s (exists_ x p) :=
+  in forall_ x' (formula.sub_var_term (function.update sub_map x (var x')) p)
+| sub_map (exists_ x p) :=
   let x' :=
-    if ∃ y ∈ p.free_var_set \ {x}, x ∈ (s y).all_var_set
-    then variant x (formula.sub_var_term (function.update s x (var x)) p).free_var_set
+    if ∃ y ∈ p.free_var_set \ {x}, x ∈ (sub_map y).all_var_set
+    then variant x
+          (formula.sub_var_term
+            (function.update sub_map x (var x)) p).free_var_set
     else x
-  in exists_ x' (formula.sub_var_term (function.update s x (var x')) p)
+  in exists_ x' (formula.sub_var_term (function.update sub_map x (var x')) p)
 
 
 lemma lem_3_6_1
