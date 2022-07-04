@@ -967,9 +967,8 @@ theorem thm_6
   (sub_map : instantiation)
   (p : formula)
   (x : var_symbols)
-  (h1 : ∀ sub_map : instantiation,
-    (formula_sub_var_term sub_map p).free_var_set =
-      p.free_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set)) :
+  (h1 : ∀ sub_map : instantiation, (formula_sub_var_term sub_map p).free_var_set =
+          p.free_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set)) :
   let x' :=
       if ∃ y ∈ p.free_var_set \ {x}, x ∈ (sub_map y).all_var_set
       then variant x (formula_sub_var_term (function.update sub_map x (var x)) p).free_var_set
