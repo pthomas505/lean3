@@ -992,7 +992,7 @@ theorem thm_6
       if ∃ y ∈ p.free_var_set \ {x}, x ∈ (sub_map y).all_var_set
       then variant x
             (formula_sub_var_term
-            (function.update sub_map x (var x)) p).free_var_set
+              (function.update sub_map x (var x)) p).free_var_set
       else x
   in
   x' ∉ (p.free_var_set \ {x}).bUnion
