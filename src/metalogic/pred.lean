@@ -883,7 +883,7 @@ begin
   }
 end
 
-lemma thm_5
+theorem thm_5
   (D : Type)
   (t : term)
   (s : instantiation)
