@@ -999,7 +999,7 @@ theorem thm_6
     (fun (y : var_symbols), (sub_map y).all_var_set) :=
 begin
   intro x',
-  by_cases x ∈ (p.free_var_set \ {x}).bUnion
+  by_cases h2 : x ∈ (p.free_var_set \ {x}).bUnion
     (fun (y : var_symbols), (sub_map y).all_var_set),
   {
     have s1 : (p.free_var_set \ {x}).bUnion
@@ -1034,7 +1034,7 @@ begin
       x' = variant x
             (formula_sub_var_term
               (function.update sub_map x (var x)) p).free_var_set,
-        simp only [finset.mem_bUnion] at h, exact if_pos h,
+        simp only [finset.mem_bUnion] at h2, exact if_pos h2,
     have s3 :
       x' ∉ (formula_sub_var_term
               (function.update sub_map x (var x)) p).free_var_set,
@@ -1042,8 +1042,8 @@ begin
     exact finset.not_mem_mono s1 s3
   },
   {
-    have s1 : x' = x, simp only [finset.mem_bUnion] at h, exact if_neg h,
-    rewrite s1, exact h
+    have s1 : x' = x, simp only [finset.mem_bUnion] at h2, exact if_neg h2,
+    rewrite s1, exact h2
   }
 end
 
