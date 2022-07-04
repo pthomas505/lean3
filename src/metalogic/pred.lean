@@ -834,22 +834,22 @@ def instantiation := var_symbols → term
 
 -- uniform simultaneous replacement of the variables in a term by terms
 
-def term.sub_var_term (s : instantiation) : term → term
+def sub_var_term_term (s : instantiation) : term → term
 | (var x) := s x
 | (func n name terms) :=
-    func n name (fun i : fin n, term.sub_var_term (terms i))
+    func n name (fun i : fin n, sub_var_term_term (terms i))
 
 theorem thm_4
   (t : term)
   (s : instantiation) :
-  (term.sub_var_term s t).all_var_set =
+  (sub_var_term_term s t).all_var_set =
     finset.bUnion t.all_var_set (fun y : var_symbols, (s y).all_var_set) :=
 begin
   induction t,
   case term.var : x {
     calc
-          (term.sub_var_term s (var x)).all_var_set
-        = (s x).all_var_set : by unfold term.sub_var_term
+          (sub_var_term_term s (var x)).all_var_set
+        = (s x).all_var_set : by unfold sub_var_term_term
     ... = finset.bUnion {x} (fun y : var_symbols, (s y).all_var_set) :
           by simp only [finset.singleton_bUnion]
     ... = finset.bUnion (var x).all_var_set (fun y : var_symbols, (s y).all_var_set) :
@@ -858,12 +858,12 @@ begin
   case term.func : n f terms ih {
     simp at ih,
     calc
-          (term.sub_var_term s (func n f terms)).all_var_set
+          (sub_var_term_term s (func n f terms)).all_var_set
         = (func n f
-            (fun i : fin n, term.sub_var_term s (terms i))).all_var_set :
-          by unfold term.sub_var_term
+            (fun i : fin n, sub_var_term_term s (terms i))).all_var_set :
+          by unfold sub_var_term_term
     ... = finset.bUnion finset.univ
-            (fun i : fin n, (term.sub_var_term s (terms i)).all_var_set) :
+            (fun i : fin n, (sub_var_term_term s (terms i)).all_var_set) :
           by unfold term.all_var_set
     ... = finset.bUnion finset.univ
             (fun i : fin n, finset.bUnion
@@ -886,25 +886,25 @@ lemma thm_5
   (s : instantiation)
   (m : interpretation D)
   (v : valuation D) :
-  eval_term D m v (term.sub_var_term s t) =
+  eval_term D m v (sub_var_term_term s t) =
     eval_term D m ((eval_term D m v) ∘ s) t :=
 begin
   induction t,
   case term.var : x {
     calc
-          eval_term D m v (term.sub_var_term s (var x))
-        = eval_term D m v (s x) : by unfold term.sub_var_term
+          eval_term D m v (sub_var_term_term s (var x))
+        = eval_term D m v (s x) : by unfold sub_var_term_term
     ... = ((eval_term D m v) ∘ s) x : by unfold function.comp
     ... = eval_term D m ((eval_term D m v) ∘ s) (var x) : by unfold eval_term
   },
   case term.func : n f terms ih {
-    have ih' : ∀ (i : fin n), eval_term D m v (term.sub_var_term s (terms i)) =
+    have ih' : ∀ (i : fin n), eval_term D m v (sub_var_term_term s (terms i)) =
       eval_term D m ((eval_term D m v) ∘ s) (terms i), exact ih,
     calc
-          eval_term D m v (term.sub_var_term s (func n f terms))
-        = eval_term D m v (func n f (fun i, term.sub_var_term s (terms i))) :
-          by unfold term.sub_var_term
-    ... = m.func n f (fun i, eval_term D m v (term.sub_var_term s (terms i))) :
+          eval_term D m v (sub_var_term_term s (func n f terms))
+        = eval_term D m v (func n f (fun i, sub_var_term_term s (terms i))) :
+          by unfold sub_var_term_term
+    ... = m.func n f (fun i, eval_term D m v (sub_var_term_term s (terms i))) :
           by unfold eval_term
     ... = m.func n f (fun i, eval_term D m ((eval_term D m v) ∘ s) (terms i)) :
           begin congr, apply funext, exact ih' end
@@ -941,8 +941,8 @@ end
 def formula.sub_var_term : instantiation → formula → formula
 | _ bottom := bottom
 | _ top := top
-| s (pred n x terms) := pred n x (fun i : fin n, term.sub_var_term s (terms i))
-| s (eq u v) := eq (term.sub_var_term s u) (term.sub_var_term s v)
+| s (pred n x terms) := pred n x (fun i : fin n, sub_var_term_term s (terms i))
+| s (eq u v) := eq (sub_var_term_term s u) (sub_var_term_term s v)
 | s (not p) := not (formula.sub_var_term s p)
 | s (and p q) := and (formula.sub_var_term s p) (formula.sub_var_term s q)
 | s (or p q) := or (formula.sub_var_term s p) (formula.sub_var_term s q)
@@ -1017,8 +1017,8 @@ begin
   },
   case formula.pred : n x terms {
     calc
-    (formula.sub_var_term s (pred n x terms)).free_var_set = (pred n x (fun i : fin n, term.sub_var_term s (terms i))).free_var_set : by unfold formula.sub_var_term
-    ... = finset.bUnion finset.univ (fun i : fin n, (term.sub_var_term s (terms i)).all_var_set) : by unfold formula.free_var_set
+    (formula.sub_var_term s (pred n x terms)).free_var_set = (pred n x (fun i : fin n, sub_var_term_term s (terms i))).free_var_set : by unfold formula.sub_var_term
+    ... = finset.bUnion finset.univ (fun i : fin n, (sub_var_term_term s (terms i)).all_var_set) : by unfold formula.free_var_set
     ... = finset.bUnion finset.univ (fun i : fin n, (finset.bUnion (terms i).all_var_set (fun y : var_symbols, (s y).all_var_set))) :
         by simp only [thm_4]
     ... = finset.bUnion (finset.bUnion finset.univ (fun i : fin n, (terms i).all_var_set)) (fun y : var_symbols, (s y).all_var_set) :
@@ -1138,8 +1138,8 @@ begin
   case formula.pred : n x terms {
     calc
     holds T m v (formula.sub_var_term s (pred n x terms)) ↔
-      holds T m v (pred n x (fun i : fin n, term.sub_var_term s (terms i))) : by unfold formula.sub_var_term
-    ... ↔ m.pred n x (fun i : fin n, eval_term T m v (term.sub_var_term s (terms i))) : by unfold holds
+      holds T m v (pred n x (fun i : fin n, sub_var_term_term s (terms i))) : by unfold formula.sub_var_term
+    ... ↔ m.pred n x (fun i : fin n, eval_term T m v (sub_var_term_term s (terms i))) : by unfold holds
     ... ↔ m.pred n x (fun i : fin n, eval_term T m ((eval_term T m v) ∘ s) (terms i)) : by simp only [thm_5]
     ... ↔ holds T m ((eval_term T m v) ∘ s) (pred n x terms) : by unfold holds
   },
@@ -1335,7 +1335,7 @@ def formula.sub_pred_formula
 | _ bottom := bottom
 | _ top := top
 | s (pred n x terms) := formula.sub_var_term s (m (n, x))
-| s (eq u v) := eq (term.sub_var_term s u) (term.sub_var_term s v)
+| s (eq u v) := eq (sub_var_term_term s u) (sub_var_term_term s v)
 | s (not p) := not (formula.sub_pred_formula s p)
 | s (and p q) := and (formula.sub_pred_formula s p) (formula.sub_pred_formula s q)
 | s (or p q) := or (formula.sub_pred_formula s p) (formula.sub_pred_formula s q)
