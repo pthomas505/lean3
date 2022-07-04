@@ -1314,21 +1314,33 @@ begin
       then variant x (formula_sub_var_term (function.update sub_map x (var x)) p).free_var_set
       else x,
     calc
-          (formula_sub_var_term sub_map (exists_ x p)).free_var_set
-        = (exists_ x' (formula_sub_var_term (function.update sub_map x (var x')) p)).free_var_set :
-            by unfold formula_sub_var_term
+          (formula_sub_var_term sub_map (forall_ x p)).free_var_set
+        = (forall_ x' (formula_sub_var_term (function.update sub_map x (var x')) p)).free_var_set :
+          by unfold formula_sub_var_term
     ... = (formula_sub_var_term (function.update sub_map x (var x')) p).free_var_set \ {x'} :
-            by unfold formula.free_var_set
-    ... = (finset.bUnion p.free_var_set (fun (y : var_symbols), ((function.update sub_map x (var x')) y).all_var_set)) \ {x'} :
-            by simp only [ih (function.update sub_map x (var x'))]
-    ... = (finset.bUnion (p.free_var_set \ {x}) (fun (y : var_symbols), ((function.update sub_map x (var x')) y).all_var_set)) \ {x'} :
-            begin rewrite finset.sdiff_singleton_bUnion, finish end
-    ... = (finset.bUnion (p.free_var_set \ {x}) (fun (y : var_symbols), (sub_map y).all_var_set)) \ {x'} :
-            begin congr' 1, apply finset.bUnion_congr, refl, intros a h1, congr, apply function.update_noteq,
-            simp only [finset.mem_sdiff, finset.mem_singleton] at h1, cases h1, exact h1_right end
-    ... = finset.bUnion (p.free_var_set \ {x}) (fun (y : var_symbols), (sub_map y).all_var_set) :
-            begin apply finset.sdiff_singleton_not_mem_eq_self, exact thm_6 sub_map p x ih end
-  }
+          by unfold formula.free_var_set
+    ... = (p.free_var_set.bUnion
+            (fun (y : var_symbols), ((function.update sub_map x (var x')) y).all_var_set)) \ {x'} :
+          by simp only [ih (function.update sub_map x (var x'))]
+    ... = ((p.free_var_set \ {x}).bUnion
+            (fun (y : var_symbols), ((function.update sub_map x (var x')) y).all_var_set)) \ {x'} :
+          begin
+            rewrite finset.sdiff_singleton_bUnion,
+            simp only [function.update_same], unfold term.all_var_set
+          end
+    ... = ((p.free_var_set \ {x}).bUnion (fun (y : var_symbols), (sub_map y).all_var_set)) \ {x'} :
+          begin
+            congr' 1, apply finset.bUnion_congr, refl, intros a h1, congr,
+            apply function.update_noteq,
+            simp only [finset.mem_sdiff, finset.mem_singleton] at h1,
+            cases h1, exact h1_right
+          end
+    ... = (p.free_var_set \ {x}).bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :
+          begin
+            apply finset.sdiff_singleton_not_mem_eq_self,
+            exact thm_6 sub_map p x ih
+          end
+  },
 end
 
 theorem thm_8
