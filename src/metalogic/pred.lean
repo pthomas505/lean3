@@ -1022,7 +1022,7 @@ begin
 end
 
 
-lemma lem_3_6
+theorem thm_7
   (p : formula)
   (s : instantiation) :
   (formula_sub_var_term s p).free_var_set = finset.bUnion p.free_var_set (fun y : var_symbols, (s y).all_var_set) :=
@@ -1139,7 +1139,7 @@ begin
   }
 end
 
-theorem thm_3_7
+theorem thm_8
   (p : formula)
   (s : instantiation)
   (T : Type)
@@ -1228,7 +1228,7 @@ begin
       {
         have s2 : z ∈ p.free_var_set \ {x}, simp only [finset.mem_sdiff, finset.mem_singleton], exact and.intro h1 h,
         have s3 : x' ∉ finset.bUnion (p.free_var_set \ {x}) (fun y : var_symbols, (s y).all_var_set),
-          exact thm_6 x p s (lem_3_6 p),
+          exact thm_6 x p s (thm_7 p),
         have s4 : (s z).all_var_set ⊆ finset.bUnion (p.free_var_set \ {x}) (fun y : var_symbols, (s y).all_var_set),
           exact finset.subset_bUnion_of_mem (fun y : var_symbols, (s y).all_var_set) s2,
         have s5 : x' ∉ (s z).all_var_set, exact finset.not_mem_mono s4 s3,
@@ -1278,7 +1278,7 @@ begin
       {
         have s2 : z ∈ p.free_var_set \ {x}, simp only [finset.mem_sdiff, finset.mem_singleton], exact and.intro h1 h,
         have s3 : x' ∉ finset.bUnion (p.free_var_set \ {x}) (fun y : var_symbols, (s y).all_var_set),
-          exact thm_6 x p s (lem_3_6 p),
+          exact thm_6 x p s (thm_7 p),
         have s4 : (s z).all_var_set ⊆ finset.bUnion (p.free_var_set \ {x}) (fun y : var_symbols, (s y).all_var_set),
           exact finset.subset_bUnion_of_mem (fun y : var_symbols, (s y).all_var_set) s2,
         have s5 : x' ∉ (s z).all_var_set, exact finset.not_mem_mono s4 s3,
@@ -1321,7 +1321,7 @@ begin
   }
 end
 
-theorem cor_3_8
+theorem thm_9
   (p : formula)
   (s : instantiation)
   (h1 : is_valid p) :
@@ -1329,7 +1329,7 @@ theorem cor_3_8
 begin
   unfold is_valid at *,
   intros D m v,
-  simp only [thm_3_7], apply h1
+  simp only [thm_8], apply h1
 end
 
 
@@ -1348,24 +1348,24 @@ def formula.all_pred_set : formula → finset (ℕ × pred_symbols)
 | (forall_ x p) := p.all_pred_set
 | (exists_ x p) := p.all_pred_set
 
-def formula.sub_pred_formula
+def formula_sub_pred_formula
   (m : (ℕ × string) → formula) :
   instantiation → formula → formula
 | _ bottom := bottom
 | _ top := top
 | s (pred n x terms) := formula_sub_var_term s (m (n, x))
 | s (eq u v) := eq (term_sub_var_term s u) (term_sub_var_term s v)
-| s (not p) := not (formula.sub_pred_formula s p)
-| s (and p q) := and (formula.sub_pred_formula s p) (formula.sub_pred_formula s q)
-| s (or p q) := or (formula.sub_pred_formula s p) (formula.sub_pred_formula s q)
-| s (imp p q) := imp (formula.sub_pred_formula s p) (formula.sub_pred_formula s q)
-| s (iff p q) := iff (formula.sub_pred_formula s p) (formula.sub_pred_formula s q)
+| s (not p) := not (formula_sub_pred_formula s p)
+| s (and p q) := and (formula_sub_pred_formula s p) (formula_sub_pred_formula s q)
+| s (or p q) := or (formula_sub_pred_formula s p) (formula_sub_pred_formula s q)
+| s (imp p q) := imp (formula_sub_pred_formula s p) (formula_sub_pred_formula s q)
+| s (iff p q) := iff (formula_sub_pred_formula s p) (formula_sub_pred_formula s q)
 | s (forall_ x p) :=
   let x' :=
   if x ∈ finset.bUnion p.all_pred_set (fun r, (m r).free_var_set)
-  then variant x (formula.sub_pred_formula (function.update s x (var x)) p).free_var_set
+  then variant x (formula_sub_pred_formula (function.update s x (var x)) p).free_var_set
   else x in
-  forall_ x' (formula.sub_pred_formula (function.update s x (var x')) p)
+  forall_ x' (formula_sub_pred_formula (function.update s x (var x')) p)
 | s (exists_ x p) := sorry
 
 def interpretation.sub
@@ -1383,7 +1383,7 @@ example
   (p : formula)
   (s : (ℕ × string) → formula)
   (hv : ∀ (r ∈ p.all_pred_set) (x ∈ (s r).free_var_set), v x = v' x) :
-  holds D m v (formula.sub_pred_formula s var p)
+  holds D m v (formula_sub_pred_formula s var p)
     ↔ holds D (m.sub v' s) v p := sorry
 
 
@@ -1987,7 +1987,7 @@ begin
   intro s,
   unfold is_valid, unfold holds,
   intros D m v h2,
-    rewrite thm_3_7 p s D m v,
+    rewrite thm_8 p s D m v,
   have s1 : ((eval_term D m v) ∘ (sub_single_var x t)) =
     (function.update v x (eval_term D m v t)),
     apply funext, intros y, unfold function.comp, unfold sub_single_var,
