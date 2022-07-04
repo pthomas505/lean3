@@ -982,10 +982,9 @@ begin
     have s1 : (p.free_var_set \ {x}).bUnion (fun y : var_symbols, (sub_map y).all_var_set) ⊆
                 (formula_sub_var_term (function.update sub_map x (var x)) p).free_var_set,
       calc
-            (p.free_var_set \ {x}).bUnion
-              (fun (y : var_symbols), (sub_map y).all_var_set) =
-            (p.free_var_set \ {x}).bUnion
-              (fun (y : var_symbols), ((function.update sub_map x (var x)) y).all_var_set) :
+            (p.free_var_set \ {x}).bUnion (fun (y : var_symbols), (sub_map y).all_var_set) =
+              (p.free_var_set \ {x}).bUnion
+                (fun (y : var_symbols), ((function.update sub_map x (var x)) y).all_var_set) :
             begin
               symmetry, apply finset.bUnion_congr, refl, intros a h1, congr,
               simp only [finset.mem_sdiff, finset.mem_singleton] at h1,
@@ -1032,17 +1031,28 @@ begin
     unfold formula_sub_var_term, unfold formula.free_var_set,
     simp only [finset.bUnion_empty]
   },
-  case formula.pred : n x terms {
+  case formula.pred : n x t {
     calc
-    (formula_sub_var_term sub_map (pred n x terms)).free_var_set = (pred n x (fun i : fin n, term_sub_var_term sub_map (terms i))).free_var_set : by unfold formula_sub_var_term
-    ... = finset.bUnion finset.univ (fun i : fin n, (term_sub_var_term sub_map (terms i)).all_var_set) : by unfold formula.free_var_set
-    ... = finset.bUnion finset.univ (fun i : fin n, (finset.bUnion (terms i).all_var_set (fun y : var_symbols, (sub_map y).all_var_set))) :
-        by simp only [thm_4]
-    ... = finset.bUnion (finset.bUnion finset.univ (fun i : fin n, (terms i).all_var_set)) (fun y : var_symbols, (sub_map y).all_var_set) :
-        begin ext1, simp only [finset.mem_bUnion, finset.mem_univ, exists_prop, exists_true_left], tauto end
-    ... = finset.bUnion (pred n x terms).free_var_set (fun y : var_symbols, (sub_map y).all_var_set) : by unfold formula.free_var_set
+          (formula_sub_var_term sub_map (pred n x t)).free_var_set =
+            (pred n x (fun (i : fin n), term_sub_var_term sub_map (t i))).free_var_set :
+          by unfold formula_sub_var_term
+    ... = finset.univ.bUnion (fun (i : fin n), (term_sub_var_term sub_map (t i)).all_var_set) :
+          by unfold formula.free_var_set
+    ... = finset.univ.bUnion
+            (fun (i : fin n), ((t i).all_var_set.bUnion
+              (fun (y : var_symbols), (sub_map y).all_var_set))) :
+          by simp only [thm_4]
+    ... = (finset.univ.bUnion (fun (i : fin n), (t i).all_var_set)).bUnion
+            (fun y : var_symbols, (sub_map y).all_var_set) :
+          begin
+            ext1, simp only [finset.mem_bUnion, finset.mem_univ, exists_prop,
+            exists_true_left], tauto
+          end
+    ... = (pred n x t).free_var_set.bUnion
+            (fun (y : var_symbols), (sub_map y).all_var_set) :
+          by unfold formula.free_var_set
   },
-  case formula.eq : u v {
+  case formula.eq : s t {
     unfold formula_sub_var_term, unfold formula.free_var_set, simp only [thm_4],
     simp only [finset.bUnion_union],    
   },
