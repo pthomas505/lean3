@@ -360,7 +360,7 @@ inductive formula : Type
 | bottom : formula
 | top : formula
 | pred (n : ℕ) : pred_symbols → (fin n → term) → formula
-| eq : term → term → formula
+| eq_ : term → term → formula
 | not : formula → formula
 | and : formula → formula → formula
 | or : formula → formula → formula
@@ -376,7 +376,7 @@ def formula.repr : formula → string
 | top := "⊤"
 | (pred n p t) :=
     p ++ fin_fun_to_string n (fun (i : fin n), (t i).repr)
-| (eq s t) := sformat!"({s.repr} = {t.repr})"
+| (eq_ s t) := sformat!"({s.repr} = {t.repr})"
 | (not p) := sformat!"(¬ {p.repr})"
 | (and p q) := sformat!"({p.repr} ∧ {q.repr})"
 | (or p q) := sformat!"({p.repr} ∨ {q.repr})"
@@ -486,7 +486,7 @@ def holds (D : Type) (m : interpretation D) : valuation D → formula → Prop
 | _ bottom := false
 | _ top := true
 | v (pred n p t) := m.pred n p (fun (i : fin n), eval_term D m v (t i))
-| v (eq s t) := eval_term D m v s = eval_term D m v t
+| v (eq_ s t) := eval_term D m v s = eval_term D m v t
 | v (not p) := ¬ holds v p
 | v (and p q) := holds v p ∧ holds v q
 | v (or p q) := holds v p ∨ holds v q
@@ -499,7 +499,7 @@ def formula.free_var_set : formula → finset var_symbols
 | bottom := ∅
 | top := ∅
 | (pred n p t) := finset.univ.bUnion (fun (i : fin n), (t i).all_var_set)
-| (eq s t) := s.all_var_set ∪ t.all_var_set
+| (eq_ s t) := s.all_var_set ∪ t.all_var_set
 | (not p) := p.free_var_set
 | (and p q) := p.free_var_set ∪ q.free_var_set
 | (or p q) := p.free_var_set ∪ q.free_var_set
@@ -544,10 +544,10 @@ begin
           end
     ... ↔ holds D m v2 (pred n x t) : by unfold holds
   },
-  case formula.eq : s t {
+  case formula.eq_ : s t {
     unfold formula.free_var_set at h1,
     calc
-        holds D m v1 (eq s t)
+        holds D m v1 (eq_ s t)
         ↔ eval_term D m v1 s = eval_term D m v1 t : by unfold holds
     ... ↔ eval_term D m v2 s = eval_term D m v2 t :
           begin
@@ -563,7 +563,7 @@ begin
               apply or.intro_right, exact h2
             },
           end
-    ... ↔ holds D m v2 (eq s t) : by unfold holds
+    ... ↔ holds D m v2 (eq_ s t) : by unfold holds
   },
   case formula.not : p ih {
     unfold formula.free_var_set at h1,
@@ -943,7 +943,7 @@ def formula_sub_var_term : instantiation → formula → formula
 | _ bottom := bottom
 | _ top := top
 | sub_map (pred n p t) := pred n p (fun (i : fin n), term_sub_var_term sub_map (t i))
-| sub_map (eq s t) := eq (term_sub_var_term sub_map s) (term_sub_var_term sub_map t)
+| sub_map (eq_ s t) := eq_ (term_sub_var_term sub_map s) (term_sub_var_term sub_map t)
 | sub_map (not p) := not (formula_sub_var_term sub_map p)
 | sub_map (and p q) := and (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)
 | sub_map (or p q) := or (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)
@@ -1052,7 +1052,12 @@ begin
             (fun (y : var_symbols), (sub_map y).all_var_set) :
           by unfold formula.free_var_set
   },
-  case formula.eq : s t {
+  case formula.eq_ : s t {
+    have s1 :
+      (formula_sub_var_term sub_map (eq_ s t)).free_var_set =
+        (eq_ (term_sub_var_term sub_map s) (term_sub_var_term sub_map t)).free_var_set,
+      unfold formula_sub_var_term,
+
     unfold formula_sub_var_term, unfold formula.free_var_set, simp only [thm_4],
     simp only [finset.bUnion_union],    
   },
@@ -1170,7 +1175,7 @@ begin
     ... ↔ m.pred n x (fun i : fin n, eval_term D m ((eval_term D m v) ∘ sub_map) (terms i)) : by simp only [thm_5]
     ... ↔ holds D m ((eval_term D m v) ∘ sub_map) (pred n x terms) : by unfold holds
   },
-  case formula.eq : u v {
+  case formula.eq_ : u v {
     unfold formula_sub_var_term, unfold holds,
     simp only [thm_5],
   },
@@ -1347,7 +1352,7 @@ def formula.all_pred_set : formula → finset (ℕ × pred_symbols)
 | bottom := ∅
 | top := ∅
 | (pred n p t) := {(n, p)}
-| (eq s t) := ∅
+| (eq_ s t) := ∅
 | (not p) := p.all_pred_set
 | (and p q) := p.all_pred_set ∪ q.all_pred_set
 | (or p q) := p.all_pred_set ∪ q.all_pred_set
@@ -1362,7 +1367,7 @@ def formula_sub_pred_formula
 | _ bottom := bottom
 | _ top := top
 | s (pred n x terms) := formula_sub_var_term s (m (n, x))
-| s (eq u v) := eq (term_sub_var_term s u) (term_sub_var_term s v)
+| s (eq_ u v) := eq_ (term_sub_var_term s u) (term_sub_var_term s v)
 | s (not p) := not (formula_sub_pred_formula s p)
 | s (and p q) := and (formula_sub_pred_formula s p) (formula_sub_pred_formula s q)
 | s (or p q) := or (formula_sub_pred_formula s p) (formula_sub_pred_formula s q)
@@ -1410,7 +1415,7 @@ def replace (x y : var_symbols) : finset var_symbols → formula → formula
 | xs bottom := bottom
 | xs top := top
 | xs (pred n p terms) := pred n p (fun i : fin n, replace_term x y xs (terms i))
-| xs (eq u v) := eq (replace_term x y xs u) (replace_term x y xs v)
+| xs (eq_ u v) := eq_ (replace_term x y xs u) (replace_term x y xs v)
 | xs (not p) := not (replace xs p)
 | xs (and p q) := and (replace xs p) (replace xs q)
 | xs (or p q) := or (replace xs p) (replace xs q)
@@ -1423,7 +1428,7 @@ def formula.bind_var_set : formula → finset var_symbols
 | bottom := ∅
 | top := ∅
 | (pred n p t) := ∅
-| (eq s t) := ∅
+| (eq_ s t) := ∅
 | (not p) := p.bind_var_set
 | (and p q) := p.bind_var_set ∪ q.bind_var_set
 | (or p q) := p.bind_var_set ∪ q.bind_var_set
@@ -1503,7 +1508,7 @@ begin
   { unfold replace },
   case formula.pred : n p terms
   { unfold replace, congr, funext, apply replace_term_id, exact h1 },
-  case formula.eq : s t
+  case formula.eq_ : s t
   { unfold replace, congr, apply replace_term_id, exact h1,
     apply replace_term_id, exact h1, },
   case formula.not : p p_ih
@@ -1615,7 +1620,7 @@ begin
     unfold replace, congr, funext,
     apply replace_sdiff_singleton_term, exact h1
   },
-  case formula.eq : s t
+  case formula.eq_ : s t
   {
     unfold replace, congr' 1,
     apply replace_sdiff_singleton_term, exact h1,
@@ -1717,7 +1722,7 @@ begin
     apply iff_of_eq, congr, funext, apply eval_replace_term,
     simp only [finset.not_mem_empty, not_false_iff], exact h1 i
   },
-  case formula.eq : s t {
+  case formula.eq_ : s t {
     unfold replace, unfold holds,
     unfold formula.free_var_set at h1, simp at h1,
     push_neg at h1, cases h1,
@@ -2164,7 +2169,7 @@ global_context_t → local_context_t → step → option local_context_t
 | _ local_context (eq_is_formula lhs_index rhs_index) := do
   lhs <- local_context.get_nth_term lhs_index,
   rhs <- local_context.get_nth_term rhs_index,
-  return (local_context.append_formula (eq lhs rhs))
+  return (local_context.append_formula (eq_ lhs rhs))
 
 | _ local_context (not_is_formula p_index) := do
   p <- local_context.get_nth_formula p_index,
