@@ -1081,10 +1081,15 @@ begin
   },
   case formula.not : p ih {
     calc
-    (formula_sub_var_term sub_map (not p)).free_var_set = (not (formula_sub_var_term sub_map p)).free_var_set : by unfold formula_sub_var_term
-    ... = (formula_sub_var_term sub_map p).free_var_set : by unfold formula.free_var_set
-    ... = finset.bUnion p.free_var_set (fun y : var_symbols, (sub_map y).all_var_set) : ih sub_map
-    ... = finset.bUnion (not p).free_var_set (fun y : var_symbols, (sub_map y).all_var_set) : by unfold formula.free_var_set
+          (formula_sub_var_term sub_map (not p)).free_var_set =
+            (not (formula_sub_var_term sub_map p)).free_var_set :
+          by unfold formula_sub_var_term
+    ... = (formula_sub_var_term sub_map p).free_var_set :
+          by unfold formula.free_var_set
+    ... = p.free_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :
+          ih sub_map
+    ... = (not p).free_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :
+          by unfold formula.free_var_set
   },
   case formula.and : p q ih_p ih_q {
     calc
