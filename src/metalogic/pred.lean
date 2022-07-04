@@ -449,7 +449,7 @@ def term.all_var_set : term → finset var_symbols
 
 
 theorem thm_1
-  {D : Type}
+  (D : Type)
   (m : interpretation D)
   (t : term)
   (v1 v2 : valuation D)
@@ -511,7 +511,7 @@ def formula.free_var_set : formula → finset var_symbols
 | (exists_ x p) := p.free_var_set \ {x}
 
 theorem thm_2
-  {D : Type}
+  (D : Type)
   (m : interpretation D)
   (v1 v2 : valuation D)
   (p : formula)
@@ -668,7 +668,7 @@ p.free_var_set = ∅
 
 
 theorem thm_3
-  {D : Type}
+  (D : Type)
   (m : interpretation D)
   (v1 v2 : valuation D)
   (p : formula)
@@ -679,7 +679,7 @@ begin
   have s1 : ∀ x ∈ p.free_var_set, v1 x = v2 x,
     rewrite h1,
     simp only [finset.not_mem_empty, forall_false_left, implies_true_iff],
-  exact thm_2 m v1 v2 p s1
+  exact thm_2 D m v1 v2 p s1
 end
 
 
@@ -740,7 +740,7 @@ begin
       holds D m v p,
     intros h2 D m v,
     apply exists.elim, exact h2 D m,
-    intros v', exact iff.elim_right (thm_3 m v v' p h1),
+    intros v', exact iff.elim_right (thm_3 D m v v' p h1),
   calc
         is_valid p
       ↔ ∀ (D : Type) (m : interpretation D) (v : valuation D),
@@ -1215,7 +1215,7 @@ begin
         ((eval_term T m (function.update v x' a)) ∘ (function.update s x (var x'))) z =
               (eval_term T m (function.update v x' a)) ((function.update s x (var x')) z) : by simp only [function.comp_app]
         ... = (eval_term T m (function.update v x' a)) (s z) : by simp only [function.update_noteq h]
-        ... = eval_term T m v (s z) : begin apply thm_1 _ _ (function.update v x' a) v, intros x h3,
+        ... = eval_term T m v (s z) : begin apply thm_1 _ _ _ (function.update v x' a) v, intros x h3,
                                       apply function.update_noteq, exact s6 x h3 end
         ... = ((eval_term T m v) ∘ s) z : by simp only [eq_self_iff_true]
         ... = (function.update ((eval_term T m v) ∘ s) x a) z : begin symmetry, apply function.update_noteq h end
@@ -1228,9 +1228,9 @@ begin
     ... ↔ (∀ a : T, holds T m (function.update ((eval_term T m v) ∘ s) x a) p) :
       begin split,
       intros h1 a,
-      rewrite <- (thm_2 _ ((eval_term T m (function.update v x' a)) ∘ (function.update s x (var x'))) (function.update ((eval_term T m v) ∘ s) x a) _ (s1 a)), exact h1 a,
+      rewrite <- (thm_2 _ _ ((eval_term T m (function.update v x' a)) ∘ (function.update s x (var x'))) (function.update ((eval_term T m v) ∘ s) x a) _ (s1 a)), exact h1 a,
       intros h1 a,
-      rewrite (thm_2 _ ((eval_term T m (function.update v x' a)) ∘ (function.update s x (var x'))) (function.update ((eval_term T m v) ∘ s) x a) _ (s1 a)), exact h1 a
+      rewrite (thm_2 _ _ ((eval_term T m (function.update v x' a)) ∘ (function.update s x (var x'))) (function.update ((eval_term T m v) ∘ s) x a) _ (s1 a)), exact h1 a
       end
     ... ↔ holds T m (eval_term T m v ∘ s) (forall_ x p) : by unfold holds
   },
@@ -1265,7 +1265,7 @@ begin
         ((eval_term T m (function.update v x' a)) ∘ (function.update s x (var x'))) z =
               (eval_term T m (function.update v x' a)) ((function.update s x (var x')) z) : by simp only [function.comp_app]
         ... = (eval_term T m (function.update v x' a)) (s z) : by simp only [function.update_noteq h]
-        ... = eval_term T m v (s z) : begin apply thm_1 _ _ (function.update v x' a) v, intros x h3,
+        ... = eval_term T m v (s z) : begin apply thm_1 _ _ _ (function.update v x' a) v, intros x h3,
                                       apply function.update_noteq, exact s6 x h3 end
         ... = ((eval_term T m v) ∘ s) z : by simp only [eq_self_iff_true]
         ... = (function.update ((eval_term T m v) ∘ s) x a) z : begin symmetry, apply function.update_noteq h end
@@ -1281,7 +1281,7 @@ begin
       {
         intros h1,
         apply exists.elim h1, intros a h2, apply exists.intro a,
-        rewrite <- thm_2 _
+        rewrite <- thm_2 _ _
           ((eval_term T m (function.update v x' a)) ∘ (function.update s x (var x')))
           (function.update ((eval_term T m v) ∘ s) x a) _ (s1 a),
         exact h2,
@@ -1289,7 +1289,7 @@ begin
       {
         intros h1,
         apply exists.elim h1, intros a h2, apply exists.intro a,
-        rewrite thm_2 _
+        rewrite thm_2 _ _
           ((eval_term T m (function.update v x' a)) ∘ (function.update s x (var x')))
           (function.update ((eval_term T m v) ∘ s) x a) _ (s1 a),
         exact h2,
