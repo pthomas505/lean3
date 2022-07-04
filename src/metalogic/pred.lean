@@ -727,33 +727,35 @@ example
 	(h1 : is_sentence p) :
 	is_valid p ↔ ¬ (is_satisfiable (not p)) :=
 begin
-  have s1 : (∀ (D : Type) (m : interpretation D) (v : valuation D),
+  have s1 :
+    (∀ (D : Type) (m : interpretation D) (v : valuation D),
       holds D m v p) →
     ∀ (D : Type) (m : interpretation D), ∃ (v : valuation D),
       holds D m v p,
     intros h2 D m,
     let v := fun _ : var_symbols, m.nonempty.some,
     exact exists.intro v (h2 D m v),
-  have s2 : (∀ (D : Type) (m : interpretation D), ∃ (v : valuation D),
+  have s2 :
+    (∀ (D : Type) (m : interpretation D), ∃ (v : valuation D),
       holds D m v p) →
     ∀ (D : Type) (m : interpretation D) (v : valuation D),
       holds D m v p,
-    intros h2 D m v,
+    intros h2 D m v1,
     apply exists.elim, exact h2 D m,
-    intros v', exact iff.elim_right (thm_3 D m v v' p h1),
+    intros v2, exact iff.elim_right (thm_3 D m v1 v2 p h1),
   calc
         is_valid p
       ↔ ∀ (D : Type) (m : interpretation D) (v : valuation D),
           holds D m v p : by unfold is_valid
   ... ↔ ∀ (D : Type) (m : interpretation D), ∃ (v : valuation D),
           holds D m v p : iff.intro s1 s2
-  ... ↔ ¬∃ (D : Type) (m : interpretation D), ∀ (v : valuation D),
-          ¬holds D m v p : begin push_neg, refl end
-  ... ↔ ¬∃ (D : Type) (m : interpretation D), ∀ (v : valuation D),
+  ... ↔ ¬ ∃ (D : Type) (m : interpretation D), ∀ (v : valuation D),
+          ¬ holds D m v p : begin push_neg, refl end
+  ... ↔ ¬ ∃ (D : Type) (m : interpretation D), ∀ (v : valuation D),
           holds D m v (not p) : by unfold holds
-  ... ↔ ¬∃ (D : Type) (m : interpretation D), satisfies D m (not p) :
-          by unfold satisfies
-  ... ↔ ¬is_satisfiable (not p) : by unfold is_satisfiable
+  ... ↔ ¬ ∃ (D : Type) (m : interpretation D), satisfies D m (not p) :
+        by unfold satisfies
+  ... ↔ ¬ is_satisfiable (not p) : by unfold is_satisfiable
 end
 
 
