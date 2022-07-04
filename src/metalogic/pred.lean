@@ -1045,8 +1045,20 @@ begin
     ... = (finset.univ.bUnion (fun (i : fin n), (t i).all_var_set)).bUnion
             (fun (y : var_symbols), (sub_map y).all_var_set) :
           begin
-            apply finset.ext, intros a, simp only [finset.mem_bUnion, finset.mem_univ, exists_prop,
-            exists_true_left], tauto
+            apply finset.ext, intros a,
+            simp only [finset.mem_bUnion, finset.mem_univ, exists_prop,
+            exists_true_left], split,
+            {
+              intros h1, apply exists.elim h1, intros a2 h2,
+              apply exists.elim h2, intros a3 h3, cases h3,
+              apply exists.intro a3, split,
+              apply exists.intro a2, exact h3_left, exact h3_right
+            },
+            {
+              intro h1, apply exists.elim h1, intros a2 h2, cases h2,
+              apply exists.elim h2_left, intros a3 h3, apply exists.intro a3,
+              apply exists.intro a2, exact and.intro h3 h2_right
+            }
           end
     ... = (pred n x t).free_var_set.bUnion
             (fun (y : var_symbols), (sub_map y).all_var_set) :
