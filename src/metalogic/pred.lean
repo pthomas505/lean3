@@ -858,7 +858,7 @@ begin
           by unfold term.all_var_set
   },
   case term.func : n f t ih {
-    simp at ih,
+    simp only at ih,
     calc
           (term_sub_var_term sub_map (func n f t)).all_var_set
         = (func n f
