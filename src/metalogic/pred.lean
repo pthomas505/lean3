@@ -952,9 +952,10 @@ def formula_sub_var_term : instantiation → formula → formula
 | _ top := top
 | sub_map (pred n p t) :=
     pred n p (fun (i : fin n), term_sub_var_term sub_map (t i))
-| sub_map (eq s t) := eq (term_sub_var_term sub_map s)
-    (term_sub_var_term sub_map t)
-| sub_map (not p) := not (formula_sub_var_term sub_map p)
+| sub_map (eq s t) :=
+    eq (term_sub_var_term sub_map s) (term_sub_var_term sub_map t)
+| sub_map (not p) :=
+    not (formula_sub_var_term sub_map p)
 | sub_map (and p q) :=
     and (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)
 | sub_map (or p q) :=
