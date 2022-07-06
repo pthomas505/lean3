@@ -1366,7 +1366,7 @@ begin
           by unfold formula_sub_var_term
     ... ↔ m.pred n p (fun (i : fin n), eval_term D m v (term_sub_var_term sub_map (t i))) :
           by unfold holds
-    ... ↔ m.pred n p (fun i : fin n, eval_term D m ((eval_term D m v) ∘ sub_map) (t i)) :
+    ... ↔ m.pred n p (fun (i : fin n), eval_term D m ((eval_term D m v) ∘ sub_map) (t i)) :
           by simp only [thm_5]
     ... ↔ holds D m ((eval_term D m v) ∘ sub_map) (pred n p t) : by unfold holds
   },
