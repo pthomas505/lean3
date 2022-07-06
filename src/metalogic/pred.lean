@@ -1730,9 +1730,11 @@ def formula.bind_var_set : formula → finset var_symbols
 
 inductive alpha_eqv : formula → formula → Prop
 | rename_forall (p : formula) (x y : var_symbols) :
-  y ∉ p.free_var_set → y ∉ p.bind_var_set → alpha_eqv (forall_ x p) (forall_ y (replace x y ∅ p))
+  y ∉ p.free_var_set → y ∉ p.bind_var_set →
+    alpha_eqv (forall_ x p) (forall_ y (replace x y ∅ p))
 | rename_exists (p : formula) (x y : var_symbols) :
-  y ∉ p.free_var_set → y ∉ p.bind_var_set → alpha_eqv (exists_ x p) (exists_ y (replace x y ∅ p))
+  y ∉ p.free_var_set → y ∉ p.bind_var_set →
+    alpha_eqv (exists_ x p) (exists_ y (replace x y ∅ p))
 | compat_not (p p' : formula) :
   alpha_eqv p p' → alpha_eqv (not p) (not p')
 | compat_and (p p' q q' : formula) :
