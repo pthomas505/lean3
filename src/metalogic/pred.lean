@@ -1700,12 +1700,12 @@ example
 
 def replace_term (x y : var_symbols) (s : finset var_symbols) : term → term
 | (var x') := if x' ∉ s ∧ x = x' then var y else var x'
-| (func n f terms) := func n f (fun i : fin n, replace_term (terms i))
+| (func n f t) := func n f (fun i : fin n, replace_term (t i))
 
 def replace (x y : var_symbols) : finset var_symbols → formula → formula
 | s bottom := bottom
 | s top := top
-| s (pred n p terms) := pred n p (fun i : fin n, replace_term x y s (terms i))
+| s (pred n p t) := pred n p (fun i : fin n, replace_term x y s (t i))
 | s (eq_ u v) := eq_ (replace_term x y s u) (replace_term x y s v)
 | s (not p) := not (replace s p)
 | s (and p q) := and (replace s p) (replace s q)
@@ -1777,7 +1777,7 @@ begin
       contradiction
     }
   },
-  case term.func : n f terms ih
+  case term.func : n f t ih
   {
     unfold replace_term,
     simp only at ih,
@@ -1797,7 +1797,7 @@ begin
   { unfold replace },
   case formula.top
   { unfold replace },
-  case formula.pred : n p terms
+  case formula.pred : n p t
   { unfold replace, congr, funext, apply replace_term_id, exact h1 },
   case formula.eq_ : s t
   { unfold replace, congr, apply replace_term_id, exact h1,
@@ -1855,7 +1855,7 @@ begin
       simp only [function.update_noteq h2, function.update_noteq h]
     }
   },
-  case term.func : n f terms ih
+  case term.func : n f t ih
   {
     unfold term.all_var_set at h2,
     simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left, not_exists] at h2,
@@ -1888,7 +1888,7 @@ begin
       simp only [if_neg s1, if_neg s2]
     }
   },
-  case term.func : n f terms ih
+  case term.func : n f t ih
   {
     unfold replace_term, congr, funext, simp only at ih, apply ih
   },
@@ -1906,7 +1906,7 @@ begin
   { unfold replace },
   case formula.top
   { unfold replace },
-  case formula.pred : n p terms
+  case formula.pred : n p t
   {
     unfold replace, congr, funext,
     apply replace_sdiff_singleton_term, exact h1
@@ -2006,7 +2006,7 @@ begin
   { unfold replace, unfold holds },
   case formula.top
   { unfold replace, unfold holds },
-  case formula.pred : n p terms
+  case formula.pred : n p t
   {
     unfold replace, unfold holds,
     unfold formula.free_var_set at h1, simp at h1,
@@ -2196,18 +2196,18 @@ def is_alpha_eqv_var : list (var_symbols × var_symbols) → var_symbols → var
 
 def is_alpha_eqv_term : list (var_symbols × var_symbols) → term → term → Prop
 | m (var x) (var y) := is_alpha_eqv_var m x y
-| m (func n p terms) (func n' p' terms') :=
+| m (func n p t) (func n' p' t') :=
     if h : n = n'
-    then begin subst h; exact ∀ i, is_alpha_eqv_term m (terms i) (terms' i) end
+    then begin subst h; exact ∀ i, is_alpha_eqv_term m (t i) (t' i) end
     else false
 | _ _ _ := false
 
 def is_alpha_eqv : list (var_symbols × var_symbols) → formula → formula → Prop
 | m bottom bottom := true
 | m top top := true
-| m (pred n p terms) (pred n' p' terms') :=
+| m (pred n p t) (pred n' p' t') :=
   if h : n = n'
-  then begin subst h; exact ∀ i, is_alpha_eqv_term m (terms i) (terms' i) end
+  then begin subst h; exact ∀ i, is_alpha_eqv_term m (t i) (t' i) end
   else false
 | m (not p) (not p') := is_alpha_eqv m p p'
 | m (and p q) (and p' q') := is_alpha_eqv m p p' ∧ is_alpha_eqv m q q'
