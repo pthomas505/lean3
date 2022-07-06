@@ -1698,22 +1698,22 @@ example
 
 -- alpha equivalence
 
-def replace_term (x y : var_symbols) (xs : finset var_symbols) : term → term
-| (var x') := if x' ∉ xs ∧ x = x' then var y else var x'
+def replace_term (x y : var_symbols) (s : finset var_symbols) : term → term
+| (var x') := if x' ∉ s ∧ x = x' then var y else var x'
 | (func n f terms) := func n f (fun i : fin n, replace_term (terms i))
 
 def replace (x y : var_symbols) : finset var_symbols → formula → formula
-| xs bottom := bottom
-| xs top := top
-| xs (pred n p terms) := pred n p (fun i : fin n, replace_term x y xs (terms i))
-| xs (eq_ u v) := eq_ (replace_term x y xs u) (replace_term x y xs v)
-| xs (not p) := not (replace xs p)
-| xs (and p q) := and (replace xs p) (replace xs q)
-| xs (or p q) := or (replace xs p) (replace xs q)
-| xs (imp p q) := imp (replace xs p) (replace xs q)
-| xs (iff p q) := iff (replace xs p) (replace xs q)
-| xs (forall_ x p) := forall_ x (replace (xs ∪ {x}) p)
-| xs (exists_ x p) := exists_ x (replace (xs ∪ {x}) p)
+| s bottom := bottom
+| s top := top
+| s (pred n p terms) := pred n p (fun i : fin n, replace_term x y s (terms i))
+| s (eq_ u v) := eq_ (replace_term x y s u) (replace_term x y s v)
+| s (not p) := not (replace s p)
+| s (and p q) := and (replace s p) (replace s q)
+| s (or p q) := or (replace s p) (replace s q)
+| s (imp p q) := imp (replace s p) (replace s q)
+| s (iff p q) := iff (replace s p) (replace s q)
+| s (forall_ x p) := forall_ x (replace (s ∪ {x}) p)
+| s (exists_ x p) := exists_ x (replace (s ∪ {x}) p)
 
 def formula.bind_var_set : formula → finset var_symbols
 | bottom := ∅
@@ -1756,10 +1756,10 @@ inductive alpha_eqv : formula → formula → Prop
 
 lemma replace_term_id
   (x y : var_symbols)
-  (xs : finset var_symbols)
+  (s : finset var_symbols)
   (t : term)
-  (h1 : x ∈ xs) :
-  replace_term x y xs t = t :=
+  (h1 : x ∈ s) :
+  replace_term x y s t = t :=
 begin
   induction t,
   case term.var : z
@@ -1787,12 +1787,12 @@ end
 
 lemma replace_id
   (x y : var_symbols)
-  (xs : finset var_symbols)
+  (s : finset var_symbols)
   (p : formula)
-  (h1 : x ∈ xs) :
-  replace x y xs p = p :=
+  (h1 : x ∈ s) :
+  replace x y s p = p :=
 begin
-  induction p generalizing xs,
+  induction p generalizing s,
   case formula.bottom
   { unfold replace },
   case formula.top
@@ -1803,15 +1803,15 @@ begin
   { unfold replace, congr, apply replace_term_id, exact h1,
     apply replace_term_id, exact h1, },
   case formula.not : p p_ih
-  { unfold replace, rewrite p_ih xs h1 },
+  { unfold replace, rewrite p_ih s h1 },
   case formula.and : p q p_ih q_ih
-  { unfold replace, rewrite p_ih xs h1, rewrite q_ih xs h1 },
+  { unfold replace, rewrite p_ih s h1, rewrite q_ih s h1 },
   case formula.or : p q p_ih q_ih
-  { unfold replace, rewrite p_ih xs h1, rewrite q_ih xs h1 },
+  { unfold replace, rewrite p_ih s h1, rewrite q_ih s h1 },
   case formula.imp : p q p_ih q_ih
-  { unfold replace, rewrite p_ih xs h1, rewrite q_ih xs h1 },
+  { unfold replace, rewrite p_ih s h1, rewrite q_ih s h1 },
   case formula.iff : p q p_ih q_ih
-  { unfold replace, rewrite p_ih xs h1, rewrite q_ih xs h1 },
+  { unfold replace, rewrite p_ih s h1, rewrite q_ih s h1 },
   case formula.forall_ : z p p_ih
   {
     unfold replace, rewrite p_ih, simp only [finset.mem_union, finset.mem_singleton],
@@ -1830,12 +1830,12 @@ lemma eval_replace_term
   (v : valuation D)
   (a : D)
   (x y : var_symbols)
-  (xs : finset var_symbols)
+  (s : finset var_symbols)
   (t : term)
-  (h1 : x ∉ xs)
+  (h1 : x ∉ s)
   (h2 : y ∉ t.all_var_set) :
   eval_term D m (function.update v x a) t =
-    eval_term D m (function.update v y a) (replace_term x y xs t) :=
+    eval_term D m (function.update v y a) (replace_term x y s t) :=
 begin
   induction t,
   case term.var : z
@@ -1848,7 +1848,7 @@ begin
       simp only [if_neg h1], unfold eval_term, simp only [function.update_same]
     },
     {
-      have s1 : ¬ (z ∉ xs ∧ x = z), push_neg, intro, exact h,
+      have s1 : ¬ (z ∉ s ∧ x = z), push_neg, intro, exact h,
       simp only [if_neg s1], unfold eval_term,
       rewrite <- ne.def at h2, rewrite ne_comm at h2,
       rewrite <- ne.def at h, rewrite ne_comm at h,
@@ -1866,10 +1866,10 @@ end
 
 lemma replace_sdiff_singleton_term
   (x y z : var_symbols)
-  (xs : finset var_symbols)
+  (s : finset var_symbols)
   (t : term)
-  (h1 : x ∉ xs) :
-  replace_term x y xs t = replace_term x y (xs \ {z}) t :=
+  (h1 : x ∉ s) :
+  replace_term x y s t = replace_term x y (s \ {z}) t :=
 begin
   induction t,
   case term.var : u
@@ -1877,14 +1877,14 @@ begin
     unfold replace_term,
     by_cases x = u,
     {
-      have s1 : u ∉ xs ∧ x = u, rewrite <- h, split, exact h1, refl,
-      have s2 : u ∉ xs \ {z} ∧ x = u, subst h, split,
+      have s1 : u ∉ s ∧ x = u, rewrite <- h, split, exact h1, refl,
+      have s2 : u ∉ s \ {z} ∧ x = u, subst h, split,
       apply finset.not_mem_sdiff_of_not_mem_left h1, refl,
       simp only [if_pos s1, if_pos s2]
     },
     {
-      have s1 : ¬ (u ∉ xs ∧ x = u), push_neg, intro, exact h,
-      have s2 : ¬ (u ∉ xs \ {z} ∧ x = u), push_neg, intro, exact h,
+      have s1 : ¬ (u ∉ s ∧ x = u), push_neg, intro, exact h,
+      have s2 : ¬ (u ∉ s \ {z} ∧ x = u), push_neg, intro, exact h,
       simp only [if_neg s1, if_neg s2]
     }
   },
@@ -1897,11 +1897,11 @@ end
 lemma replace_sdiff_singleton
   (x y z : var_symbols)
   (p : formula)
-  (xs : finset var_symbols)
-  (h1 : x ∉ xs) :
-  replace x y xs p = replace x y (xs \ {z}) p :=
+  (s : finset var_symbols)
+  (h1 : x ∉ s) :
+  replace x y s p = replace x y (s \ {z}) p :=
 begin
-  induction p generalizing xs,
+  induction p generalizing s,
   case formula.bottom
   { unfold replace },
   case formula.top
@@ -1919,27 +1919,27 @@ begin
   },
   case formula.not : p p_ih
   {
-    unfold replace, rewrite p_ih xs h1,
+    unfold replace, rewrite p_ih s h1,
   },
   case formula.and : p q p_ih q_ih
   {
     unfold replace,
-    rewrite p_ih xs h1, rewrite q_ih xs h1,
+    rewrite p_ih s h1, rewrite q_ih s h1,
   },
   case formula.or : p q p_ih q_ih
   {
     unfold replace,
-    rewrite p_ih xs h1, rewrite q_ih xs h1,
+    rewrite p_ih s h1, rewrite q_ih s h1,
   },
   case formula.imp : p q p_ih q_ih
   {
     unfold replace,
-    rewrite p_ih xs h1, rewrite q_ih xs h1,
+    rewrite p_ih s h1, rewrite q_ih s h1,
   },
   case formula.iff : p q p_ih q_ih
   {
     unfold replace,
-    rewrite p_ih xs h1, rewrite q_ih xs h1,
+    rewrite p_ih s h1, rewrite q_ih s h1,
   },
   case formula.forall_ : u p p_ih
   {
@@ -1951,14 +1951,14 @@ begin
     {
       by_cases h' : x = u,
       {
-        have s1 : x ∈ xs ∪ {u}, simp only [finset.mem_union, finset.mem_singleton], apply or.intro_right, exact h',
-        have s2 : x ∈ xs \ {z} ∪ {u}, simp only [finset.mem_union, finset.mem_sdiff, finset.mem_singleton],
+        have s1 : x ∈ s ∪ {u}, simp only [finset.mem_union, finset.mem_singleton], apply or.intro_right, exact h',
+        have s2 : x ∈ s \ {z} ∪ {u}, simp only [finset.mem_union, finset.mem_sdiff, finset.mem_singleton],
           apply or.intro_right, exact h',
-        rewrite replace_id x y (xs ∪ {u}) p s1,
-        rewrite replace_id x y ((xs \ {z}) ∪ {u}) p s2
+        rewrite replace_id x y (s ∪ {u}) p s1,
+        rewrite replace_id x y ((s \ {z}) ∪ {u}) p s2
       },
       {
-        have s1 : ((xs \ {z}) ∪ {u}) = (xs ∪ {u}) \ {z}, exact finset.ne_imp_sdiff_union_comm z u xs h,
+        have s1 : ((s \ {z}) ∪ {u}) = (s ∪ {u}) \ {z}, exact finset.ne_imp_sdiff_union_comm z u s h,
         rewrite s1, apply p_ih,
         simp only [finset.mem_union, finset.mem_singleton], push_neg, exact and.intro h1 h'
       }
@@ -1974,14 +1974,14 @@ begin
     {
       by_cases h' : x = u,
       {
-        have s1 : x ∈ xs ∪ {u}, simp only [finset.mem_union, finset.mem_singleton], apply or.intro_right, exact h',
-        have s2 : x ∈ xs \ {z} ∪ {u}, simp only [finset.mem_union, finset.mem_sdiff, finset.mem_singleton],
+        have s1 : x ∈ s ∪ {u}, simp only [finset.mem_union, finset.mem_singleton], apply or.intro_right, exact h',
+        have s2 : x ∈ s \ {z} ∪ {u}, simp only [finset.mem_union, finset.mem_sdiff, finset.mem_singleton],
           apply or.intro_right, exact h',
-        rewrite replace_id x y (xs ∪ {u}) p s1,
-        rewrite replace_id x y ((xs \ {z}) ∪ {u}) p s2
+        rewrite replace_id x y (s ∪ {u}) p s1,
+        rewrite replace_id x y ((s \ {z}) ∪ {u}) p s2
       },
       {
-        have s1 : ((xs \ {z}) ∪ {u}) = (xs ∪ {u}) \ {z}, exact finset.ne_imp_sdiff_union_comm z u xs h,
+        have s1 : ((s \ {z}) ∪ {u}) = (s ∪ {u}) \ {z}, exact finset.ne_imp_sdiff_union_comm z u s h,
         rewrite s1, apply p_ih,
         simp only [finset.mem_union, finset.mem_singleton], push_neg, exact and.intro h1 h'
       }
