@@ -1759,27 +1759,19 @@ inductive alpha_eqv : formula → formula → Prop
   alpha_eqv p p' → alpha_eqv p' p'' → alpha_eqv p p''
 
 lemma replace_term_id
-  (x y : var_symbols)
+  (y z : var_symbols)
   (s : finset var_symbols)
   (t : term)
-  (h1 : x ∈ s) :
-  replace_term x y s t = t :=
+  (h1 : y ∈ s) :
+  replace_term y z s t = t :=
 begin
   induction t,
-  case term.var : z
+  case term.var : x
   {
     unfold replace_term,
-    by_cases x = z,
-    {
-      subst h,
-      simp only [eq_self_iff_true, and_true, ite_not, ite_eq_left_iff],
-      contradiction
-    },
-    {
-      simp only [ite_eq_right_iff, and_imp],
-      intros h2 h3,
-      contradiction
-    }
+    split_ifs,
+    { cases h, subst h_right, exfalso, apply h_left, exact h1 },
+    { refl }
   },
   case term.func : n f t ih
   {
