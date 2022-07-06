@@ -1698,8 +1698,8 @@ example
 
 -- alpha equivalence
 
-def replace_term (x y : var_symbols) (s : finset var_symbols) : term → term
-| (var x') := if x' ∉ s ∧ x = x' then var y else var x'
+def replace_term (y z : var_symbols) (s : finset var_symbols) : term → term
+| (var x) := if x ∉ s ∧ y = x then var z else var x
 | (func n f t) := func n f (fun i : fin n, replace_term (t i))
 
 def replace (x y : var_symbols) : finset var_symbols → formula → formula
