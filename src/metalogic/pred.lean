@@ -1698,22 +1698,24 @@ example
 
 -- alpha equivalence
 
-def replace_term (y z : var_symbols) (s : finset var_symbols) : term → term
-| (var x) := if x ∉ s ∧ y = x then var z else var x
+def replace_term (y z : var_symbols) (binders : finset var_symbols) : term → term
+| (var x) := if x ∉ binders ∧ y = x then var z else var x
 | (func n f t) := func n f (fun (i : fin n), replace_term (t i))
 
 def replace (x y : var_symbols) : finset var_symbols → formula → formula
-| s bottom := bottom
-| s top := top
-| s (pred n p t) := pred n p (fun (i : fin n), replace_term x y s (t i))
-| s (eq_ u v) := eq_ (replace_term x y s u) (replace_term x y s v)
-| s (not p) := not (replace s p)
-| s (and p q) := and (replace s p) (replace s q)
-| s (or p q) := or (replace s p) (replace s q)
-| s (imp p q) := imp (replace s p) (replace s q)
-| s (iff p q) := iff (replace s p) (replace s q)
-| s (forall_ x p) := forall_ x (replace (s ∪ {x}) p)
-| s (exists_ x p) := exists_ x (replace (s ∪ {x}) p)
+| binders bottom := bottom
+| binders top := top
+| binders (pred n p t) :=
+    pred n p (fun (i : fin n), replace_term x y binders (t i))
+| binders (eq_ s t) :=
+    eq_ (replace_term x y binders s) (replace_term x y binders t)
+| binders (not p) := not (replace binders p)
+| binders (and p q) := and (replace binders p) (replace binders q)
+| binders (or p q) := or (replace binders p) (replace binders q)
+| binders (imp p q) := imp (replace binders p) (replace binders q)
+| binders (iff p q) := iff (replace binders p) (replace binders q)
+| binders (forall_ x p) := forall_ x (replace (binders ∪ {x}) p)
+| binders (exists_ x p) := exists_ x (replace (binders ∪ {x}) p)
 
 def formula.bind_var_set : formula → finset var_symbols
 | bottom := ∅
