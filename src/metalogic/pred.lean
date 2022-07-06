@@ -1810,12 +1810,14 @@ begin
   { unfold replace, rewrite p_ih s h1, rewrite q_ih s h1 },
   case formula.forall_ : z p p_ih
   {
-    unfold replace, rewrite p_ih, simp only [finset.mem_union, finset.mem_singleton],
+    unfold replace, rewrite p_ih,
+    simp only [finset.mem_union, finset.mem_singleton],
     apply or.intro_left, exact h1,
   },
   case formula.exists_ : x p p_ih
   {
-    unfold replace, rewrite p_ih, simp only [finset.mem_union, finset.mem_singleton],
+    unfold replace, rewrite p_ih,
+    simp only [finset.mem_union, finset.mem_singleton],
     apply or.intro_left, exact h1
   },
 end
