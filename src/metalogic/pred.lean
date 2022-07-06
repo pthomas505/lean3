@@ -1349,7 +1349,8 @@ theorem thm_8
   (v : valuation D)
   (sub_map : instantiation)
   (p : formula) :
-  holds D m v (formula_sub_var_term sub_map p) ↔ holds D m ((eval_term D m v) ∘ sub_map) p :=
+  holds D m v (formula_sub_var_term sub_map p) ↔
+    holds D m ((eval_term D m v) ∘ sub_map) p :=
 begin
   induction p generalizing sub_map v,
   case formula.bottom {
@@ -1358,17 +1359,28 @@ begin
   case formula.top {
     unfold formula_sub_var_term, unfold holds
   },
-  case formula.pred : n x terms {
+  case formula.pred : n p t {
     calc
-    holds D m v (formula_sub_var_term sub_map (pred n x terms)) ↔
-      holds D m v (pred n x (fun i : fin n, term_sub_var_term sub_map (terms i))) : by unfold formula_sub_var_term
-    ... ↔ m.pred n x (fun i : fin n, eval_term D m v (term_sub_var_term sub_map (terms i))) : by unfold holds
-    ... ↔ m.pred n x (fun i : fin n, eval_term D m ((eval_term D m v) ∘ sub_map) (terms i)) : by simp only [thm_5]
-    ... ↔ holds D m ((eval_term D m v) ∘ sub_map) (pred n x terms) : by unfold holds
+          holds D m v (formula_sub_var_term sub_map (pred n p t)) ↔
+            holds D m v (pred n p (fun (i : fin n), term_sub_var_term sub_map (t i))) :
+          by unfold formula_sub_var_term
+    ... ↔ m.pred n p (fun (i : fin n), eval_term D m v (term_sub_var_term sub_map (t i))) :
+          by unfold holds
+    ... ↔ m.pred n p (fun i : fin n, eval_term D m ((eval_term D m v) ∘ sub_map) (t i)) :
+          by simp only [thm_5]
+    ... ↔ holds D m ((eval_term D m v) ∘ sub_map) (pred n p t) : by unfold holds
   },
-  case formula.eq_ : u v {
-    unfold formula_sub_var_term, unfold holds,
-    simp only [thm_5],
+  case formula.eq_ : s t {
+    calc
+          holds D m v (formula_sub_var_term sub_map (eq_ s t)) ↔
+            holds D m v (eq_ (term_sub_var_term sub_map s) (term_sub_var_term sub_map t)) :
+          by unfold formula_sub_var_term
+    ... ↔ (eval_term D m v (term_sub_var_term sub_map s) =
+            eval_term D m v (term_sub_var_term sub_map t)) :
+          by unfold holds
+    ... ↔ (eval_term D m (eval_term D m v ∘ sub_map) s =
+            eval_term D m (eval_term D m v ∘ sub_map) t) : by simp only [thm_5]
+    ... ↔ holds D m (eval_term D m v ∘ sub_map) (eq_ s t) : by unfold holds
   },
   case formula.not : p ih {
     calc
