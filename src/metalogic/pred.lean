@@ -1384,41 +1384,67 @@ begin
   },
   case formula.not : p ih {
     calc
-    holds D m v (formula_sub_var_term sub_map (not p)) ↔ holds D m v (not (formula_sub_var_term sub_map p)) : by unfold formula_sub_var_term
+          holds D m v (formula_sub_var_term sub_map (not p)) ↔
+            holds D m v (not (formula_sub_var_term sub_map p)) :
+          by unfold formula_sub_var_term
     ... ↔ ¬ holds D m v (formula_sub_var_term sub_map p) : by unfold holds
     ... ↔ ¬ holds D m ((eval_term D m v) ∘ sub_map) p : by rewrite ih sub_map v
     ... ↔ holds D m ((eval_term D m v) ∘ sub_map) (not p) : by unfold holds
   },
   case formula.and : p q ih_p ih_q {
     calc
-    holds D m v (formula_sub_var_term sub_map (and p q)) ↔ holds D m v (and (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)) : by unfold formula_sub_var_term
-    ... ↔ (holds D m v (formula_sub_var_term sub_map p)) ∧ (holds D m v (formula_sub_var_term sub_map q)) : by unfold holds
-    ... ↔ (holds D m ((eval_term D m v) ∘ sub_map) p) ∧ (holds D m ((eval_term D m v) ∘ sub_map) q) :
-        begin rewrite ih_p sub_map v, rewrite ih_q sub_map v end
+          holds D m v (formula_sub_var_term sub_map (and p q)) ↔
+            holds D m v (and (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)) :
+          by unfold formula_sub_var_term
+    ... ↔ (holds D m v (formula_sub_var_term sub_map p)) ∧
+            (holds D m v (formula_sub_var_term sub_map q)) : by unfold holds
+    ... ↔ (holds D m ((eval_term D m v) ∘ sub_map) p) ∧
+            (holds D m ((eval_term D m v) ∘ sub_map) q) :
+          begin
+            rewrite ih_p sub_map v, rewrite ih_q sub_map v
+          end
     ... ↔ holds D m ((eval_term D m v) ∘ sub_map) (and p q) : by unfold holds
   },
   case formula.or : p q ih_p ih_q {
     calc
-    holds D m v (formula_sub_var_term sub_map (or p q)) ↔ holds D m v (or (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)) : by unfold formula_sub_var_term
-    ... ↔ (holds D m v (formula_sub_var_term sub_map p)) ∨ (holds D m v (formula_sub_var_term sub_map q)) : by unfold holds
-    ... ↔ (holds D m ((eval_term D m v) ∘ sub_map) p) ∨ (holds D m ((eval_term D m v) ∘ sub_map) q) :
-        begin rewrite ih_p sub_map v, rewrite ih_q sub_map v end
+          holds D m v (formula_sub_var_term sub_map (or p q)) ↔
+            holds D m v (or (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)) :
+          by unfold formula_sub_var_term
+    ... ↔ (holds D m v (formula_sub_var_term sub_map p)) ∨
+            (holds D m v (formula_sub_var_term sub_map q)) : by unfold holds
+    ... ↔ (holds D m ((eval_term D m v) ∘ sub_map) p) ∨
+            (holds D m ((eval_term D m v) ∘ sub_map) q) :
+          begin
+            rewrite ih_p sub_map v, rewrite ih_q sub_map v
+          end
     ... ↔ holds D m ((eval_term D m v) ∘ sub_map) (or p q) : by unfold holds
   },
   case formula.imp : p q ih_p ih_q {
     calc
-    holds D m v (formula_sub_var_term sub_map (imp p q)) ↔ holds D m v (imp (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)) : by unfold formula_sub_var_term
-    ... ↔ (holds D m v (formula_sub_var_term sub_map p)) → (holds D m v (formula_sub_var_term sub_map q)) : by unfold holds
-    ... ↔ (holds D m ((eval_term D m v) ∘ sub_map) p) → (holds D m ((eval_term D m v) ∘ sub_map) q) :
-        begin rewrite ih_p sub_map v, rewrite ih_q sub_map v end
+          holds D m v (formula_sub_var_term sub_map (imp p q)) ↔
+            holds D m v (imp (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)) :
+          by unfold formula_sub_var_term
+    ... ↔ (holds D m v (formula_sub_var_term sub_map p)) →
+            (holds D m v (formula_sub_var_term sub_map q)) : by unfold holds
+    ... ↔ (holds D m ((eval_term D m v) ∘ sub_map) p) →
+            (holds D m ((eval_term D m v) ∘ sub_map) q) :
+          begin
+            rewrite ih_p sub_map v, rewrite ih_q sub_map v
+          end
     ... ↔ holds D m ((eval_term D m v) ∘ sub_map) (imp p q) : by unfold holds
   },
   case formula.iff : p q ih_p ih_q {
     calc
-    holds D m v (formula_sub_var_term sub_map (iff p q)) ↔ holds D m v (iff (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)) : by unfold formula_sub_var_term
-    ... ↔ ((holds D m v (formula_sub_var_term sub_map p)) ↔ (holds D m v (formula_sub_var_term sub_map q))) : by unfold holds
-    ... ↔ ((holds D m ((eval_term D m v) ∘ sub_map) p) ↔ (holds D m ((eval_term D m v) ∘ sub_map) q)) :
-        begin rewrite ih_p sub_map v, rewrite ih_q sub_map v end
+          holds D m v (formula_sub_var_term sub_map (iff p q)) ↔
+            holds D m v (iff (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)) :
+          by unfold formula_sub_var_term
+    ... ↔ ((holds D m v (formula_sub_var_term sub_map p)) ↔
+            (holds D m v (formula_sub_var_term sub_map q))) : by unfold holds
+    ... ↔ ((holds D m ((eval_term D m v) ∘ sub_map) p) ↔
+            (holds D m ((eval_term D m v) ∘ sub_map) q)) :
+          begin
+            rewrite ih_p sub_map v, rewrite ih_q sub_map v
+          end
     ... ↔ holds D m ((eval_term D m v) ∘ sub_map) (iff p q) : by unfold holds
   },
   case formula.forall_ : x p ih {
