@@ -1531,23 +1531,11 @@ begin
           end
     ... ↔ (∀ (a : D), holds D m (function.update ((eval_term D m v) ∘ sub_map) x a) p) :
           begin
-            split,
-            {
-              intros h1 a,
-              rewrite <- (thm_2 D m
-                ((eval_term D m (function.update v x' a)) ∘ (function.update sub_map x (var x')))
-                (function.update ((eval_term D m v) ∘ sub_map) x a)
-                p (s1 a)),
-              exact h1 a
-            },
-            {
-              intros h1 a,
-              rewrite (thm_2 D m
-                ((eval_term D m (function.update v x' a)) ∘ (function.update sub_map x (var x')))
-                (function.update ((eval_term D m v) ∘ sub_map) x a)
-                p (s1 a)),
-              exact h1 a
-            }
+            apply forall_congr, intros a,
+            rewrite (thm_2 D m
+              ((eval_term D m (function.update v x' a)) ∘ (function.update sub_map x (var x')))
+              (function.update ((eval_term D m v) ∘ sub_map) x a)
+              p (s1 a)),
           end
     ... ↔ holds D m (eval_term D m v ∘ sub_map) (forall_ x p) : by unfold holds
   },
@@ -1627,24 +1615,11 @@ begin
           end
     ... ↔ (∃ (a : D), holds D m (function.update ((eval_term D m v) ∘ sub_map) x a) p) :
           begin
-            split,
-            {
-              intros h1,
-              apply exists.elim h1, intros a h2, apply exists.intro a,
-              rewrite <- (thm_2 D m
-                ((eval_term D m (function.update v x' a)) ∘ (function.update sub_map x (var x')))
-                (function.update ((eval_term D m v) ∘ sub_map) x a)
-                p (s1 a)),
-              exact h2
-            },
-            {
-              intros h1, apply exists.elim h1, intros a h2, apply exists.intro a,
-              rewrite (thm_2 D m
-                ((eval_term D m (function.update v x' a)) ∘ (function.update sub_map x (var x')))
-                (function.update ((eval_term D m v) ∘ sub_map) x a)
-                p (s1 a)),
-              exact h2
-            }
+            apply exists_congr, intros a,
+            rewrite (thm_2 D m
+              ((eval_term D m (function.update v x' a)) ∘ (function.update sub_map x (var x')))
+              (function.update ((eval_term D m v) ∘ sub_map) x a)
+              p (s1 a)),
           end
     ... ↔ holds D m (eval_term D m v ∘ sub_map) (exists_ x p) : by unfold holds
   }
