@@ -1700,12 +1700,12 @@ example
 
 def replace_term (y z : var_symbols) (s : finset var_symbols) : term → term
 | (var x) := if x ∉ s ∧ y = x then var z else var x
-| (func n f t) := func n f (fun i : fin n, replace_term (t i))
+| (func n f t) := func n f (fun (i : fin n), replace_term (t i))
 
 def replace (x y : var_symbols) : finset var_symbols → formula → formula
 | s bottom := bottom
 | s top := top
-| s (pred n p t) := pred n p (fun i : fin n, replace_term x y s (t i))
+| s (pred n p t) := pred n p (fun (i : fin n), replace_term x y s (t i))
 | s (eq_ u v) := eq_ (replace_term x y s u) (replace_term x y s v)
 | s (not p) := not (replace s p)
 | s (and p q) := and (replace s p) (replace s q)
