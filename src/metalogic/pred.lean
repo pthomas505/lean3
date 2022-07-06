@@ -1548,62 +1548,96 @@ begin
       if ∃ y ∈ p.free_var_set \ {x}, x ∈ (sub_map y).all_var_set
       then variant x (formula_sub_var_term (function.update sub_map x (var x)) p).free_var_set
       else x,
-    have s1 : ∀ a : D, ∀ z ∈ p.free_var_set,
-      ((eval_term D m (function.update v x' a)) ∘ (function.update sub_map x (var x'))) z = (function.update ((eval_term D m v) ∘ sub_map) x a) z,
+    have s1 : ∀ (a : D) (z ∈ p.free_var_set),
+      ((eval_term D m (function.update v x' a)) ∘ (function.update sub_map x (var x'))) z =
+        (function.update ((eval_term D m v) ∘ sub_map) x a) z,
       intros a z h1,
-      by_cases z = x, {
+      by_cases h2 : z = x, {
         calc
-        ((eval_term D m (function.update v x' a)) ∘ (function.update sub_map x (var x'))) z =
-              ((eval_term D m (function.update v x' a)) ∘ (function.update sub_map x (var x'))) x : by rewrite h
-        ... = (eval_term D m (function.update v x' a)) ((function.update sub_map x (var x')) x) : by simp only [function.comp_app]
-        ... = (eval_term D m (function.update v x' a)) (var x') : by simp only [function.update_same]
+              ((eval_term D m (function.update v x' a)) ∘
+                (function.update sub_map x (var x'))) z =
+                  ((eval_term D m (function.update v x' a)) ∘
+                    (function.update sub_map x (var x'))) x : by rewrite h2
+        ... = (eval_term D m (function.update v x' a)) ((function.update sub_map x (var x')) x) :
+              by simp only [function.comp_app]
+        ... = (eval_term D m (function.update v x' a)) (var x') :
+              by simp only [function.update_same]
         ... = (function.update v x' a) x' : by unfold eval_term
         ... = a : by simp only [function.update_same]
-        ... = (function.update ((eval_term D m v) ∘ sub_map) x a) x : by simp only [function.update_same]
-        ... = (function.update ((eval_term D m v) ∘ sub_map) x a) z : by rewrite h
+        ... = (function.update ((eval_term D m v) ∘ sub_map) x a) x :
+              by simp only [function.update_same]
+        ... = (function.update ((eval_term D m v) ∘ sub_map) x a) z :
+              by rewrite h2
       },
       {
-        have s2 : z ∈ p.free_var_set \ {x}, simp only [finset.mem_sdiff, finset.mem_singleton], exact and.intro h1 h,
-        have s3 : x' ∉ finset.bUnion (p.free_var_set \ {x}) (fun y : var_symbols, (sub_map y).all_var_set),
+        have s2 : z ∈ p.free_var_set \ {x},
+          simp only [finset.mem_sdiff, finset.mem_singleton],
+          exact and.intro h1 h2,
+        have s3 : x' ∉ (p.free_var_set \ {x}).bUnion
+                    (fun (y : var_symbols), (sub_map y).all_var_set),
           apply thm_6 sub_map p x, intro sub_map, exact thm_7 sub_map p,
-        have s4 : (sub_map z).all_var_set ⊆ finset.bUnion (p.free_var_set \ {x}) (fun y : var_symbols, (sub_map y).all_var_set),
-          exact finset.subset_bUnion_of_mem (fun y : var_symbols, (sub_map y).all_var_set) s2,
+        have s4 : (sub_map z).all_var_set ⊆ (p.free_var_set \ {x}).bUnion
+                    (fun (y : var_symbols), (sub_map y).all_var_set),
+          exact finset.subset_bUnion_of_mem (fun (y : var_symbols), (sub_map y).all_var_set) s2,
         have s5 : x' ∉ (sub_map z).all_var_set, exact finset.not_mem_mono s4 s3,
-        have s6 : ∀ (x : var_symbols), x ∈ (sub_map z).all_var_set → x ≠ x', intros y h3, by_contradiction, apply s5, rewrite <- h, exact h3,
+        have s6 : ∀ (x : var_symbols), x ∈ (sub_map z).all_var_set → x ≠ x',
+          intros y h3, by_contradiction, apply s5, rewrite <- h, exact h3,
         calc
-        ((eval_term D m (function.update v x' a)) ∘ (function.update sub_map x (var x'))) z =
-              (eval_term D m (function.update v x' a)) ((function.update sub_map x (var x')) z) : by simp only [function.comp_app]
-        ... = (eval_term D m (function.update v x' a)) (sub_map z) : by simp only [function.update_noteq h]
-        ... = eval_term D m v (sub_map z) : begin apply thm_1 _ _ _ (function.update v x' a) v, intros x h3,
-                                      apply function.update_noteq, exact s6 x h3 end
+              ((eval_term D m (function.update v x' a)) ∘
+                (function.update sub_map x (var x'))) z =
+                  (eval_term D m (function.update v x' a))
+                    ((function.update sub_map x (var x')) z) :
+              by simp only [function.comp_app]
+        ... = (eval_term D m (function.update v x' a)) (sub_map z) :
+              by simp only [function.update_noteq h2]
+        ... = eval_term D m v (sub_map z) :
+              begin
+                apply thm_1 D m (sub_map z) (function.update v x' a) v,
+                intros x h3,
+                apply function.update_noteq, exact s6 x h3
+              end
         ... = ((eval_term D m v) ∘ sub_map) z : by simp only [eq_self_iff_true]
-        ... = (function.update ((eval_term D m v) ∘ sub_map) x a) z : begin symmetry, apply function.update_noteq h end
+        ... = (function.update ((eval_term D m v) ∘ sub_map) x a) z :
+              begin
+                symmetry, apply function.update_noteq h2
+              end
       },
     calc
-    holds D m v (formula_sub_var_term sub_map (exists_ x p))
-      ↔ holds D m v (exists_ x' (formula_sub_var_term (function.update sub_map x (var x')) p)) : by unfold formula_sub_var_term
-    ... ↔ ∃ a : D, holds D m (function.update v x' a) (formula_sub_var_term (function.update sub_map x (var x')) p) : by unfold holds
-    ... ↔ (∃ a : D, (holds D m ((eval_term D m (function.update v x' a)) ∘ (function.update sub_map x (var x'))) p)) : by finish
-    ... ↔ (∃ a : D, holds D m (function.update ((eval_term D m v) ∘ sub_map) x a) p) :
-    begin
-      split,
-      {
-        intros h1,
-        apply exists.elim h1, intros a h2, apply exists.intro a,
-        rewrite <- thm_2 _ _
-          ((eval_term D m (function.update v x' a)) ∘ (function.update sub_map x (var x')))
-          (function.update ((eval_term D m v) ∘ sub_map) x a) _ (s1 a),
-        exact h2,
-      },
-      {
-        intros h1,
-        apply exists.elim h1, intros a h2, apply exists.intro a,
-        rewrite thm_2 _ _
-          ((eval_term D m (function.update v x' a)) ∘ (function.update sub_map x (var x')))
-          (function.update ((eval_term D m v) ∘ sub_map) x a) _ (s1 a),
-        exact h2,
-      },
-    end
+          holds D m v
+            (formula_sub_var_term sub_map (exists_ x p))
+              ↔ holds D m v
+                (exists_ x' (formula_sub_var_term (function.update sub_map x (var x')) p)) :
+          by unfold formula_sub_var_term
+    ... ↔ ∃ (a : D), holds D m (function.update v x' a)
+            (formula_sub_var_term (function.update sub_map x (var x')) p) :
+          by unfold holds
+    ... ↔ (∃ (a : D), (holds D m
+            ((eval_term D m (function.update v x' a)) ∘ (function.update sub_map x (var x'))) p)) :
+          begin
+            apply exists_congr, intros a,
+            exact ih (function.update sub_map x (var x')) (function.update v x' a),
+          end
+    ... ↔ (∃ (a : D), holds D m (function.update ((eval_term D m v) ∘ sub_map) x a) p) :
+          begin
+            split,
+            {
+              intros h1,
+              apply exists.elim h1, intros a h2, apply exists.intro a,
+              rewrite <- (thm_2 D m
+                ((eval_term D m (function.update v x' a)) ∘ (function.update sub_map x (var x')))
+                (function.update ((eval_term D m v) ∘ sub_map) x a)
+                p (s1 a)),
+              exact h2
+            },
+            {
+              intros h1, apply exists.elim h1, intros a h2, apply exists.intro a,
+              rewrite (thm_2 D m
+                ((eval_term D m (function.update v x' a)) ∘ (function.update sub_map x (var x')))
+                (function.update ((eval_term D m v) ∘ sub_map) x a)
+                p (s1 a)),
+              exact h2
+            }
+          end
     ... ↔ holds D m (eval_term D m v ∘ sub_map) (exists_ x p) : by unfold holds
   }
 end
