@@ -1354,10 +1354,18 @@ theorem thm_8
 begin
   induction p generalizing sub_map v,
   case formula.bottom {
-    unfold formula_sub_var_term, unfold holds
+    calc
+          holds D m v (formula_sub_var_term sub_map bottom) ↔
+            holds D m v bottom : by unfold formula_sub_var_term
+    ... ↔ false : by unfold holds
+    ... ↔ holds D m (eval_term D m v ∘ sub_map) bottom : by unfold holds
   },
   case formula.top {
-    unfold formula_sub_var_term, unfold holds
+    calc
+          holds D m v (formula_sub_var_term sub_map top) ↔
+            holds D m v top : by unfold formula_sub_var_term
+    ... ↔ true : by unfold holds
+    ... ↔ holds D m (eval_term D m v ∘ sub_map) top : by unfold holds
   },
   case formula.pred : n p t {
     calc
