@@ -832,49 +832,49 @@ def instantiation := var_symbols → term
 
 -- uniform simultaneous replacement of the variables in a term by terms
 
-def term_sub_var_term (sub_map : instantiation) : term → term
-| (var x) := sub_map x
+def term_sub_var_term (var_to_term : instantiation) : term → term
+| (var x) := var_to_term x
 | (func n f t) := func n f (fun (i : fin n), term_sub_var_term (t i))
 
 theorem thm_4
-  (sub_map : instantiation)
+  (var_to_term : instantiation)
   (t : term) :
-  (term_sub_var_term sub_map t).all_var_set =
-    t.all_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :=
+  (term_sub_var_term var_to_term t).all_var_set =
+    t.all_var_set.bUnion (fun (y : var_symbols), (var_to_term y).all_var_set) :=
 begin
   induction t,
   case term.var : x {
     calc
-          (term_sub_var_term sub_map (var x)).all_var_set
-        = (sub_map x).all_var_set : by unfold term_sub_var_term
+          (term_sub_var_term var_to_term (var x)).all_var_set
+        = (var_to_term x).all_var_set : by unfold term_sub_var_term
     ... = ({x} : finset var_symbols).bUnion
-            (fun (y : var_symbols), (sub_map y).all_var_set) :
+            (fun (y : var_symbols), (var_to_term y).all_var_set) :
           by simp only [finset.singleton_bUnion]
     ... = (var x).all_var_set.bUnion
-            (fun (y : var_symbols), (sub_map y).all_var_set) :
+            (fun (y : var_symbols), (var_to_term y).all_var_set) :
           by unfold term.all_var_set
   },
   case term.func : n f t ih {
     simp only at ih,
     calc
-          (term_sub_var_term sub_map (func n f t)).all_var_set
+          (term_sub_var_term var_to_term (func n f t)).all_var_set
         = (func n f
-            (fun (i : fin n), term_sub_var_term sub_map (t i))).all_var_set :
+            (fun (i : fin n), term_sub_var_term var_to_term (t i))).all_var_set :
           by unfold term_sub_var_term
     ... = finset.univ.bUnion
-            (fun (i : fin n), (term_sub_var_term sub_map (t i)).all_var_set) :
+            (fun (i : fin n), (term_sub_var_term var_to_term (t i)).all_var_set) :
           by unfold term.all_var_set
     ... = finset.univ.bUnion
             (fun (i : fin n), (t i).all_var_set.bUnion
-              (fun (y : var_symbols), (sub_map y).all_var_set)) :
+              (fun (y : var_symbols), (var_to_term y).all_var_set)) :
           by simp only [ih]
     ... = (finset.univ.bUnion (fun (i : fin n), (t i).all_var_set)).bUnion
-            (fun (y : var_symbols), (sub_map y).all_var_set) :
+            (fun (y : var_symbols), (var_to_term y).all_var_set) :
           begin
             symmetry, apply finset.bUnion_bUnion
           end
     ... = (func n f t).all_var_set.bUnion
-            (fun (y : var_symbols), (sub_map y).all_var_set) :
+            (fun (y : var_symbols), (var_to_term y).all_var_set) :
           by unfold term.all_var_set
   }
 end
@@ -883,35 +883,35 @@ theorem thm_5
   (D : Type)
   (m : interpretation D)
   (v : valuation D)
-  (sub_map : instantiation)
+  (var_to_term : instantiation)
   (t : term) :
-  eval_term D m v (term_sub_var_term sub_map t) =
-    eval_term D m ((eval_term D m v) ∘ sub_map) t :=
+  eval_term D m v (term_sub_var_term var_to_term t) =
+    eval_term D m ((eval_term D m v) ∘ var_to_term) t :=
 begin
   induction t,
   case term.var : x {
     calc
-          eval_term D m v (term_sub_var_term sub_map (var x))
-        = eval_term D m v (sub_map x) : by unfold term_sub_var_term
-    ... = ((eval_term D m v) ∘ sub_map) x : by unfold function.comp
-    ... = eval_term D m ((eval_term D m v) ∘ sub_map) (var x) :
+          eval_term D m v (term_sub_var_term var_to_term (var x))
+        = eval_term D m v (var_to_term x) : by unfold term_sub_var_term
+    ... = ((eval_term D m v) ∘ var_to_term) x : by unfold function.comp
+    ... = eval_term D m ((eval_term D m v) ∘ var_to_term) (var x) :
           by unfold eval_term
   },
   case term.func : n f t ih {
     calc
-          eval_term D m v (term_sub_var_term sub_map (func n f t))
+          eval_term D m v (term_sub_var_term var_to_term (func n f t))
         = eval_term D m v
-            (func n f (fun (i : fin n), term_sub_var_term sub_map (t i))) :
+            (func n f (fun (i : fin n), term_sub_var_term var_to_term (t i))) :
           by unfold term_sub_var_term
     ... = m.func n f
-            (fun (i : fin n), eval_term D m v (term_sub_var_term sub_map (t i))) :
+            (fun (i : fin n), eval_term D m v (term_sub_var_term var_to_term (t i))) :
           by unfold eval_term
     ... = m.func n f
-            (fun (i : fin n), eval_term D m ((eval_term D m v) ∘ sub_map) (t i)) :
+            (fun (i : fin n), eval_term D m ((eval_term D m v) ∘ var_to_term) (t i)) :
           begin
             congr, apply funext, exact ih
           end
-    ... = eval_term D m ((eval_term D m v) ∘ sub_map) (func n f t) :
+    ... = eval_term D m ((eval_term D m v) ∘ var_to_term) (func n f t) :
           by unfold eval_term
   }
 end
@@ -942,70 +942,78 @@ end
 def formula_sub_var_term : instantiation → formula → formula
 | _ bottom := bottom
 | _ top := top
-| sub_map (pred n p t) := pred n p (fun (i : fin n), term_sub_var_term sub_map (t i))
-| sub_map (eq_ s t) := eq_ (term_sub_var_term sub_map s) (term_sub_var_term sub_map t)
-| sub_map (not p) := not (formula_sub_var_term sub_map p)
-| sub_map (and p q) := and (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)
-| sub_map (or p q) := or (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)
-| sub_map (imp p q) := imp (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)
-| sub_map (iff p q) := iff (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)
-| sub_map (forall_ x p) :=
+| var_to_term (pred n p t) :=
+    pred n p (fun (i : fin n), term_sub_var_term var_to_term (t i))
+| var_to_term (eq_ s t) :=
+    eq_ (term_sub_var_term var_to_term s) (term_sub_var_term var_to_term t)
+| var_to_term (not p) :=
+    not (formula_sub_var_term var_to_term p)
+| var_to_term (and p q) :=
+    and (formula_sub_var_term var_to_term p) (formula_sub_var_term var_to_term q)
+| var_to_term (or p q) :=
+    or (formula_sub_var_term var_to_term p) (formula_sub_var_term var_to_term q)
+| var_to_term (imp p q) :=
+    imp (formula_sub_var_term var_to_term p) (formula_sub_var_term var_to_term q)
+| var_to_term (iff p q) :=
+    iff (formula_sub_var_term var_to_term p) (formula_sub_var_term var_to_term q)
+| var_to_term (forall_ x p) :=
   let x' :=
-    if ∃ y ∈ p.free_var_set \ {x}, x ∈ (sub_map y).all_var_set
-    then variant x (formula_sub_var_term (function.update sub_map x (var x)) p).free_var_set
+    if ∃ y ∈ p.free_var_set \ {x}, x ∈ (var_to_term y).all_var_set
+    then variant x (formula_sub_var_term (function.update var_to_term x (var x)) p).free_var_set
     else x
-  in forall_ x' (formula_sub_var_term (function.update sub_map x (var x')) p)
-| sub_map (exists_ x p) :=
+  in forall_ x' (formula_sub_var_term (function.update var_to_term x (var x')) p)
+| var_to_term (exists_ x p) :=
   let x' :=
-    if ∃ y ∈ p.free_var_set \ {x}, x ∈ (sub_map y).all_var_set
-    then variant x (formula_sub_var_term (function.update sub_map x (var x)) p).free_var_set
+    if ∃ y ∈ p.free_var_set \ {x}, x ∈ (var_to_term y).all_var_set
+    then variant x (formula_sub_var_term (function.update var_to_term x (var x)) p).free_var_set
     else x
-  in exists_ x' (formula_sub_var_term (function.update sub_map x (var x')) p)
+  in exists_ x' (formula_sub_var_term (function.update var_to_term x (var x')) p)
 
 
 theorem thm_6
-  (sub_map : instantiation)
+  (var_to_term : instantiation)
   (p : formula)
   (x : var_symbols)
-  (h1 : ∀ sub_map : instantiation, (formula_sub_var_term sub_map p).free_var_set =
-          p.free_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set)) :
+  (h1 : ∀ var_to_term : instantiation, (formula_sub_var_term var_to_term p).free_var_set =
+          p.free_var_set.bUnion (fun (y : var_symbols), (var_to_term y).all_var_set)) :
   let x' :=
-      if ∃ y ∈ p.free_var_set \ {x}, x ∈ (sub_map y).all_var_set
-      then variant x (formula_sub_var_term (function.update sub_map x (var x)) p).free_var_set
+      if ∃ y ∈ p.free_var_set \ {x}, x ∈ (var_to_term y).all_var_set
+      then variant x (formula_sub_var_term (function.update var_to_term x (var x)) p).free_var_set
       else x
   in
-  x' ∉ (p.free_var_set \ {x}).bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :=
+  x' ∉ (p.free_var_set \ {x}).bUnion (fun (y : var_symbols), (var_to_term y).all_var_set) :=
 begin
   intro x',
-  by_cases h2 : x ∈ (p.free_var_set \ {x}).bUnion (fun (y : var_symbols), (sub_map y).all_var_set),
+  by_cases h2 : x ∈ (p.free_var_set \ {x}).bUnion
+    (fun (y : var_symbols), (var_to_term y).all_var_set),
   {
-    have s1 : (p.free_var_set \ {x}).bUnion (fun y : var_symbols, (sub_map y).all_var_set) ⊆
-                (formula_sub_var_term (function.update sub_map x (var x)) p).free_var_set,
+    have s1 : (p.free_var_set \ {x}).bUnion (fun y : var_symbols, (var_to_term y).all_var_set) ⊆
+                (formula_sub_var_term (function.update var_to_term x (var x)) p).free_var_set,
       calc
-            (p.free_var_set \ {x}).bUnion (fun (y : var_symbols), (sub_map y).all_var_set) =
+            (p.free_var_set \ {x}).bUnion (fun (y : var_symbols), (var_to_term y).all_var_set) =
               (p.free_var_set \ {x}).bUnion
-                (fun (y : var_symbols), ((function.update sub_map x (var x)) y).all_var_set) :
+                (fun (y : var_symbols), ((function.update var_to_term x (var x)) y).all_var_set) :
             begin
               symmetry, apply finset.bUnion_congr, refl, intros a h1, congr,
               simp only [finset.mem_sdiff, finset.mem_singleton] at h1,
               cases h1,
-              exact function.update_noteq h1_right (var x) sub_map
+              exact function.update_noteq h1_right (var x) var_to_term
             end
       ... ⊆ p.free_var_set.bUnion
-              (fun (y : var_symbols), ((function.update sub_map x (var x)) y).all_var_set) : 
+              (fun (y : var_symbols), ((function.update var_to_term x (var x)) y).all_var_set) : 
             begin
               apply finset.bUnion_subset_bUnion_of_subset_left,
               apply finset.sdiff_subset
             end
-      ... = (formula_sub_var_term (function.update sub_map x (var x)) p).free_var_set :
+      ... = (formula_sub_var_term (function.update var_to_term x (var x)) p).free_var_set :
             begin
-              symmetry, exact h1 (function.update sub_map x (var x))
+              symmetry, exact h1 (function.update var_to_term x (var x))
             end,
     have s2 :
-      x' = variant x (formula_sub_var_term (function.update sub_map x (var x)) p).free_var_set,
+      x' = variant x (formula_sub_var_term (function.update var_to_term x (var x)) p).free_var_set,
         simp only [finset.mem_bUnion] at h2, exact if_pos h2,
     have s3 :
-      x' ∉ (formula_sub_var_term (function.update sub_map x (var x)) p).free_var_set,
+      x' ∉ (formula_sub_var_term (function.update var_to_term x (var x)) p).free_var_set,
         rewrite s2, apply variant_not_mem,
     exact finset.not_mem_mono s1 s3
   },
@@ -1017,12 +1025,12 @@ end
 
 
 theorem thm_7
-  (sub_map : instantiation)
+  (var_to_term : instantiation)
   (p : formula) :
-  (formula_sub_var_term sub_map p).free_var_set =
-    p.free_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :=
+  (formula_sub_var_term var_to_term p).free_var_set =
+    p.free_var_set.bUnion (fun (y : var_symbols), (var_to_term y).all_var_set) :=
 begin
-  induction p generalizing sub_map,
+  induction p generalizing var_to_term,
   case formula.bottom {
     unfold formula_sub_var_term, unfold formula.free_var_set,
     simp only [finset.bUnion_empty]
@@ -1033,17 +1041,17 @@ begin
   },
   case formula.pred : n x t {
     calc
-          (formula_sub_var_term sub_map (pred n x t)).free_var_set =
-            (pred n x (fun (i : fin n), term_sub_var_term sub_map (t i))).free_var_set :
+          (formula_sub_var_term var_to_term (pred n x t)).free_var_set =
+            (pred n x (fun (i : fin n), term_sub_var_term var_to_term (t i))).free_var_set :
           by unfold formula_sub_var_term
-    ... = finset.univ.bUnion (fun (i : fin n), (term_sub_var_term sub_map (t i)).all_var_set) :
+    ... = finset.univ.bUnion (fun (i : fin n), (term_sub_var_term var_to_term (t i)).all_var_set) :
           by unfold formula.free_var_set
     ... = finset.univ.bUnion
             (fun (i : fin n), ((t i).all_var_set.bUnion
-              (fun (y : var_symbols), (sub_map y).all_var_set))) :
+              (fun (y : var_symbols), (var_to_term y).all_var_set))) :
           by simp only [thm_4]
     ... = (finset.univ.bUnion (fun (i : fin n), (t i).all_var_set)).bUnion
-            (fun (y : var_symbols), (sub_map y).all_var_set) :
+            (fun (y : var_symbols), (var_to_term y).all_var_set) :
           begin
             apply finset.ext, intros a,
             simp only [finset.mem_bUnion, finset.mem_univ, exists_prop,
@@ -1061,47 +1069,52 @@ begin
             }
           end
     ... = (pred n x t).free_var_set.bUnion
-            (fun (y : var_symbols), (sub_map y).all_var_set) :
+            (fun (y : var_symbols), (var_to_term y).all_var_set) :
           by unfold formula.free_var_set
   },
   case formula.eq_ : s t {
     calc
-          (formula_sub_var_term sub_map (eq_ s t)).free_var_set =
-            (eq_ (term_sub_var_term sub_map s) (term_sub_var_term sub_map t)).free_var_set :
+          (formula_sub_var_term var_to_term (eq_ s t)).free_var_set =
+            (eq_ (term_sub_var_term var_to_term s) (term_sub_var_term var_to_term t)).free_var_set :
           by unfold formula_sub_var_term
-    ... = (term_sub_var_term sub_map s).all_var_set ∪ (term_sub_var_term sub_map t).all_var_set :
+    ... = (term_sub_var_term var_to_term s).all_var_set ∪
+            (term_sub_var_term var_to_term t).all_var_set :
           by unfold formula.free_var_set
-    ... = (s.all_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set) ∪
-            t.all_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set)) :
+    ... = (s.all_var_set.bUnion (fun (y : var_symbols), (var_to_term y).all_var_set) ∪
+            t.all_var_set.bUnion (fun (y : var_symbols), (var_to_term y).all_var_set)) :
           by simp only [thm_4]
-    ... = (s.all_var_set ∪ t.all_var_set).bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :
+    ... = (s.all_var_set ∪ t.all_var_set).bUnion
+            (fun (y : var_symbols), (var_to_term y).all_var_set) :
           by simp only [finset.bUnion_union]
-    ... = (eq_ s t).free_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :
+    ... = (eq_ s t).free_var_set.bUnion (fun (y : var_symbols), (var_to_term y).all_var_set) :
           by unfold formula.free_var_set
   },
   case formula.not : p ih {
     calc
-          (formula_sub_var_term sub_map (not p)).free_var_set =
-            (not (formula_sub_var_term sub_map p)).free_var_set :
+          (formula_sub_var_term var_to_term (not p)).free_var_set =
+            (not (formula_sub_var_term var_to_term p)).free_var_set :
           by unfold formula_sub_var_term
-    ... = (formula_sub_var_term sub_map p).free_var_set :
+    ... = (formula_sub_var_term var_to_term p).free_var_set :
           by unfold formula.free_var_set
-    ... = p.free_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :
-          ih sub_map
-    ... = (not p).free_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :
+    ... = p.free_var_set.bUnion (fun (y : var_symbols), (var_to_term y).all_var_set) :
+          ih var_to_term
+    ... = (not p).free_var_set.bUnion (fun (y : var_symbols), (var_to_term y).all_var_set) :
           by unfold formula.free_var_set
   },
   case formula.and : p q ih_p ih_q {
     calc
-          (formula_sub_var_term sub_map (and p q)).free_var_set =
-            (and (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)).free_var_set :
+          (formula_sub_var_term var_to_term (and p q)).free_var_set =
+            (and (formula_sub_var_term var_to_term p)
+              (formula_sub_var_term var_to_term q)).free_var_set :
           by unfold formula_sub_var_term
-    ... = (formula_sub_var_term sub_map p).free_var_set ∪ (formula_sub_var_term sub_map q).free_var_set :
+    ... = (formula_sub_var_term var_to_term p).free_var_set ∪
+            (formula_sub_var_term var_to_term q).free_var_set :
           by unfold formula.free_var_set
-    ... = p.free_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set) ∪
-            q.free_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :
+    ... = p.free_var_set.bUnion (fun (y : var_symbols), (var_to_term y).all_var_set) ∪
+            q.free_var_set.bUnion (fun (y : var_symbols), (var_to_term y).all_var_set) :
           by simp only [ih_p, ih_q]
-    ... = (p.free_var_set ∪ q.free_var_set).bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :
+    ... = (p.free_var_set ∪ q.free_var_set).bUnion
+            (fun (y : var_symbols), (var_to_term y).all_var_set) :
           begin
             apply finset.ext, intros a,
             simp only [finset.mem_union, finset.mem_bUnion, exists_prop],
@@ -1134,20 +1147,23 @@ begin
               }
             }
           end
-    ... = (and p q).free_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :
+    ... = (and p q).free_var_set.bUnion (fun (y : var_symbols), (var_to_term y).all_var_set) :
           by unfold formula.free_var_set
   },
   case formula.or : p q ih_p ih_q {
     calc
-          (formula_sub_var_term sub_map (and p q)).free_var_set =
-            (and (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)).free_var_set :
+          (formula_sub_var_term var_to_term (and p q)).free_var_set =
+            (and (formula_sub_var_term var_to_term p)
+              (formula_sub_var_term var_to_term q)).free_var_set :
           by unfold formula_sub_var_term
-    ... = (formula_sub_var_term sub_map p).free_var_set ∪ (formula_sub_var_term sub_map q).free_var_set :
+    ... = (formula_sub_var_term var_to_term p).free_var_set ∪
+            (formula_sub_var_term var_to_term q).free_var_set :
           by unfold formula.free_var_set
-    ... = p.free_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set) ∪
-            q.free_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :
+    ... = p.free_var_set.bUnion (fun (y : var_symbols), (var_to_term y).all_var_set) ∪
+            q.free_var_set.bUnion (fun (y : var_symbols), (var_to_term y).all_var_set) :
           by simp only [ih_p, ih_q]
-    ... = (p.free_var_set ∪ q.free_var_set).bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :
+    ... = (p.free_var_set ∪ q.free_var_set).bUnion
+            (fun (y : var_symbols), (var_to_term y).all_var_set) :
           begin
             apply finset.ext, intros a,
             simp only [finset.mem_union, finset.mem_bUnion, exists_prop],
@@ -1180,20 +1196,23 @@ begin
               }
             }
           end
-    ... = (and p q).free_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :
+    ... = (and p q).free_var_set.bUnion (fun (y : var_symbols), (var_to_term y).all_var_set) :
           by unfold formula.free_var_set
   },
   case formula.imp : p q ih_p ih_q {
     calc
-          (formula_sub_var_term sub_map (and p q)).free_var_set =
-            (and (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)).free_var_set :
+          (formula_sub_var_term var_to_term (and p q)).free_var_set =
+            (and (formula_sub_var_term var_to_term p)
+              (formula_sub_var_term var_to_term q)).free_var_set :
           by unfold formula_sub_var_term
-    ... = (formula_sub_var_term sub_map p).free_var_set ∪ (formula_sub_var_term sub_map q).free_var_set :
+    ... = (formula_sub_var_term var_to_term p).free_var_set ∪
+            (formula_sub_var_term var_to_term q).free_var_set :
           by unfold formula.free_var_set
-    ... = p.free_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set) ∪
-            q.free_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :
+    ... = p.free_var_set.bUnion (fun (y : var_symbols), (var_to_term y).all_var_set) ∪
+            q.free_var_set.bUnion (fun (y : var_symbols), (var_to_term y).all_var_set) :
           by simp only [ih_p, ih_q]
-    ... = (p.free_var_set ∪ q.free_var_set).bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :
+    ... = (p.free_var_set ∪ q.free_var_set).bUnion
+            (fun (y : var_symbols), (var_to_term y).all_var_set) :
           begin
             apply finset.ext, intros a,
             simp only [finset.mem_union, finset.mem_bUnion, exists_prop],
@@ -1226,20 +1245,23 @@ begin
               }
             }
           end
-    ... = (and p q).free_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :
+    ... = (and p q).free_var_set.bUnion (fun (y : var_symbols), (var_to_term y).all_var_set) :
           by unfold formula.free_var_set
   },
   case formula.iff : p q ih_p ih_q {
     calc
-          (formula_sub_var_term sub_map (and p q)).free_var_set =
-            (and (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)).free_var_set :
+          (formula_sub_var_term var_to_term (and p q)).free_var_set =
+            (and (formula_sub_var_term var_to_term p)
+              (formula_sub_var_term var_to_term q)).free_var_set :
           by unfold formula_sub_var_term
-    ... = (formula_sub_var_term sub_map p).free_var_set ∪ (formula_sub_var_term sub_map q).free_var_set :
+    ... = (formula_sub_var_term var_to_term p).free_var_set ∪
+            (formula_sub_var_term var_to_term q).free_var_set :
           by unfold formula.free_var_set
-    ... = p.free_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set) ∪
-            q.free_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :
+    ... = p.free_var_set.bUnion (fun (y : var_symbols), (var_to_term y).all_var_set) ∪
+            q.free_var_set.bUnion (fun (y : var_symbols), (var_to_term y).all_var_set) :
           by simp only [ih_p, ih_q]
-    ... = (p.free_var_set ∪ q.free_var_set).bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :
+    ... = (p.free_var_set ∪ q.free_var_set).bUnion
+            (fun (y : var_symbols), (var_to_term y).all_var_set) :
           begin
             apply finset.ext, intros a,
             simp only [finset.mem_union, finset.mem_bUnion, exists_prop],
@@ -1272,73 +1294,83 @@ begin
               }
             }
           end
-    ... = (and p q).free_var_set.bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :
+    ... = (and p q).free_var_set.bUnion (fun (y : var_symbols), (var_to_term y).all_var_set) :
           by unfold formula.free_var_set
   },
   case formula.forall_ : x p ih {
     let x' :=
-      if ∃ y ∈ p.free_var_set \ {x}, x ∈ (sub_map y).all_var_set
-      then variant x (formula_sub_var_term (function.update sub_map x (var x)) p).free_var_set
+      if ∃ y ∈ p.free_var_set \ {x}, x ∈ (var_to_term y).all_var_set
+      then variant x (formula_sub_var_term (function.update var_to_term x (var x)) p).free_var_set
       else x,
     calc
-          (formula_sub_var_term sub_map (forall_ x p)).free_var_set
-        = (forall_ x' (formula_sub_var_term (function.update sub_map x (var x')) p)).free_var_set :
+          (formula_sub_var_term var_to_term (forall_ x p)).free_var_set
+        = (forall_ x' (formula_sub_var_term
+            (function.update var_to_term x (var x')) p)).free_var_set :
           by unfold formula_sub_var_term
-    ... = (formula_sub_var_term (function.update sub_map x (var x')) p).free_var_set \ {x'} :
+    ... = (formula_sub_var_term
+            (function.update var_to_term x (var x')) p).free_var_set \ {x'} :
           by unfold formula.free_var_set
     ... = (p.free_var_set.bUnion
-            (fun (y : var_symbols), ((function.update sub_map x (var x')) y).all_var_set)) \ {x'} :
-          by simp only [ih (function.update sub_map x (var x'))]
+            (fun (y : var_symbols),
+              ((function.update var_to_term x (var x')) y).all_var_set)) \ {x'} :
+          by simp only [ih (function.update var_to_term x (var x'))]
     ... = ((p.free_var_set \ {x}).bUnion
-            (fun (y : var_symbols), ((function.update sub_map x (var x')) y).all_var_set)) \ {x'} :
+            (fun (y : var_symbols),
+              ((function.update var_to_term x (var x')) y).all_var_set)) \ {x'} :
           begin
             rewrite finset.sdiff_singleton_bUnion,
             simp only [function.update_same], unfold term.all_var_set
           end
-    ... = ((p.free_var_set \ {x}).bUnion (fun (y : var_symbols), (sub_map y).all_var_set)) \ {x'} :
+    ... = ((p.free_var_set \ {x}).bUnion
+            (fun (y : var_symbols), (var_to_term y).all_var_set)) \ {x'} :
           begin
             congr' 1, apply finset.bUnion_congr, refl, intros a h1, congr,
             apply function.update_noteq,
             simp only [finset.mem_sdiff, finset.mem_singleton] at h1,
             cases h1, exact h1_right
           end
-    ... = (p.free_var_set \ {x}).bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :
+    ... = (p.free_var_set \ {x}).bUnion (fun (y : var_symbols), (var_to_term y).all_var_set) :
           begin
             apply finset.sdiff_singleton_not_mem_eq_self,
-            exact thm_6 sub_map p x ih
+            exact thm_6 var_to_term p x ih
           end
   },
   case formula.exists_ : x p ih {
     let x' :=
-      if ∃ y ∈ p.free_var_set \ {x}, x ∈ (sub_map y).all_var_set
-      then variant x (formula_sub_var_term (function.update sub_map x (var x)) p).free_var_set
+      if ∃ y ∈ p.free_var_set \ {x}, x ∈ (var_to_term y).all_var_set
+      then variant x (formula_sub_var_term (function.update var_to_term x (var x)) p).free_var_set
       else x,
     calc
-          (formula_sub_var_term sub_map (forall_ x p)).free_var_set
-        = (forall_ x' (formula_sub_var_term (function.update sub_map x (var x')) p)).free_var_set :
+          (formula_sub_var_term var_to_term (forall_ x p)).free_var_set
+        = (forall_ x' (formula_sub_var_term
+            (function.update var_to_term x (var x')) p)).free_var_set :
           by unfold formula_sub_var_term
-    ... = (formula_sub_var_term (function.update sub_map x (var x')) p).free_var_set \ {x'} :
+    ... = (formula_sub_var_term
+            (function.update var_to_term x (var x')) p).free_var_set \ {x'} :
           by unfold formula.free_var_set
     ... = (p.free_var_set.bUnion
-            (fun (y : var_symbols), ((function.update sub_map x (var x')) y).all_var_set)) \ {x'} :
-          by simp only [ih (function.update sub_map x (var x'))]
+            (fun (y : var_symbols),
+              ((function.update var_to_term x (var x')) y).all_var_set)) \ {x'} :
+          by simp only [ih (function.update var_to_term x (var x'))]
     ... = ((p.free_var_set \ {x}).bUnion
-            (fun (y : var_symbols), ((function.update sub_map x (var x')) y).all_var_set)) \ {x'} :
+            (fun (y : var_symbols),
+              ((function.update var_to_term x (var x')) y).all_var_set)) \ {x'} :
           begin
             rewrite finset.sdiff_singleton_bUnion,
             simp only [function.update_same], unfold term.all_var_set
           end
-    ... = ((p.free_var_set \ {x}).bUnion (fun (y : var_symbols), (sub_map y).all_var_set)) \ {x'} :
+    ... = ((p.free_var_set \ {x}).bUnion
+            (fun (y : var_symbols), (var_to_term y).all_var_set)) \ {x'} :
           begin
             congr' 1, apply finset.bUnion_congr, refl, intros a h1, congr,
             apply function.update_noteq,
             simp only [finset.mem_sdiff, finset.mem_singleton] at h1,
             cases h1, exact h1_right
           end
-    ... = (p.free_var_set \ {x}).bUnion (fun (y : var_symbols), (sub_map y).all_var_set) :
+    ... = (p.free_var_set \ {x}).bUnion (fun (y : var_symbols), (var_to_term y).all_var_set) :
           begin
             apply finset.sdiff_singleton_not_mem_eq_self,
-            exact thm_6 sub_map p x ih
+            exact thm_6 var_to_term p x ih
           end
   },
 end
@@ -1347,138 +1379,143 @@ theorem thm_8
   (D : Type)
   (m : interpretation D)
   (v : valuation D)
-  (sub_map : instantiation)
+  (var_to_term : instantiation)
   (p : formula) :
-  holds D m v (formula_sub_var_term sub_map p) ↔
-    holds D m ((eval_term D m v) ∘ sub_map) p :=
+  holds D m v (formula_sub_var_term var_to_term p) ↔
+    holds D m ((eval_term D m v) ∘ var_to_term) p :=
 begin
-  induction p generalizing sub_map v,
+  induction p generalizing var_to_term v,
   case formula.bottom {
     calc
-          holds D m v (formula_sub_var_term sub_map bottom) ↔
+          holds D m v (formula_sub_var_term var_to_term bottom) ↔
             holds D m v bottom : by unfold formula_sub_var_term
     ... ↔ false : by unfold holds
-    ... ↔ holds D m (eval_term D m v ∘ sub_map) bottom : by unfold holds
+    ... ↔ holds D m (eval_term D m v ∘ var_to_term) bottom : by unfold holds
   },
   case formula.top {
     calc
-          holds D m v (formula_sub_var_term sub_map top) ↔
+          holds D m v (formula_sub_var_term var_to_term top) ↔
             holds D m v top : by unfold formula_sub_var_term
     ... ↔ true : by unfold holds
-    ... ↔ holds D m (eval_term D m v ∘ sub_map) top : by unfold holds
+    ... ↔ holds D m (eval_term D m v ∘ var_to_term) top : by unfold holds
   },
   case formula.pred : n p t {
     calc
-          holds D m v (formula_sub_var_term sub_map (pred n p t)) ↔
-            holds D m v (pred n p (fun (i : fin n), term_sub_var_term sub_map (t i))) :
+          holds D m v (formula_sub_var_term var_to_term (pred n p t)) ↔
+            holds D m v (pred n p (fun (i : fin n), term_sub_var_term var_to_term (t i))) :
           by unfold formula_sub_var_term
-    ... ↔ m.pred n p (fun (i : fin n), eval_term D m v (term_sub_var_term sub_map (t i))) :
+    ... ↔ m.pred n p (fun (i : fin n), eval_term D m v (term_sub_var_term var_to_term (t i))) :
           by unfold holds
-    ... ↔ m.pred n p (fun (i : fin n), eval_term D m ((eval_term D m v) ∘ sub_map) (t i)) :
+    ... ↔ m.pred n p (fun (i : fin n), eval_term D m ((eval_term D m v) ∘ var_to_term) (t i)) :
           by simp only [thm_5]
-    ... ↔ holds D m ((eval_term D m v) ∘ sub_map) (pred n p t) : by unfold holds
+    ... ↔ holds D m ((eval_term D m v) ∘ var_to_term) (pred n p t) : by unfold holds
   },
   case formula.eq_ : s t {
     calc
-          holds D m v (formula_sub_var_term sub_map (eq_ s t)) ↔
-            holds D m v (eq_ (term_sub_var_term sub_map s) (term_sub_var_term sub_map t)) :
+          holds D m v (formula_sub_var_term var_to_term (eq_ s t)) ↔
+            holds D m v (eq_ (term_sub_var_term var_to_term s) (term_sub_var_term var_to_term t)) :
           by unfold formula_sub_var_term
-    ... ↔ (eval_term D m v (term_sub_var_term sub_map s) =
-            eval_term D m v (term_sub_var_term sub_map t)) :
+    ... ↔ (eval_term D m v (term_sub_var_term var_to_term s) =
+            eval_term D m v (term_sub_var_term var_to_term t)) :
           by unfold holds
-    ... ↔ (eval_term D m (eval_term D m v ∘ sub_map) s =
-            eval_term D m (eval_term D m v ∘ sub_map) t) : by simp only [thm_5]
-    ... ↔ holds D m (eval_term D m v ∘ sub_map) (eq_ s t) : by unfold holds
+    ... ↔ (eval_term D m (eval_term D m v ∘ var_to_term) s =
+            eval_term D m (eval_term D m v ∘ var_to_term) t) : by simp only [thm_5]
+    ... ↔ holds D m (eval_term D m v ∘ var_to_term) (eq_ s t) : by unfold holds
   },
   case formula.not : p ih {
     calc
-          holds D m v (formula_sub_var_term sub_map (not p)) ↔
-            holds D m v (not (formula_sub_var_term sub_map p)) :
+          holds D m v (formula_sub_var_term var_to_term (not p)) ↔
+            holds D m v (not (formula_sub_var_term var_to_term p)) :
           by unfold formula_sub_var_term
-    ... ↔ ¬ holds D m v (formula_sub_var_term sub_map p) : by unfold holds
-    ... ↔ ¬ holds D m ((eval_term D m v) ∘ sub_map) p : by rewrite ih sub_map v
-    ... ↔ holds D m ((eval_term D m v) ∘ sub_map) (not p) : by unfold holds
+    ... ↔ ¬ holds D m v (formula_sub_var_term var_to_term p) : by unfold holds
+    ... ↔ ¬ holds D m ((eval_term D m v) ∘ var_to_term) p : by rewrite ih var_to_term v
+    ... ↔ holds D m ((eval_term D m v) ∘ var_to_term) (not p) : by unfold holds
   },
   case formula.and : p q ih_p ih_q {
     calc
-          holds D m v (formula_sub_var_term sub_map (and p q)) ↔
-            holds D m v (and (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)) :
+          holds D m v (formula_sub_var_term var_to_term (and p q)) ↔
+            holds D m v (and (formula_sub_var_term var_to_term p)
+              (formula_sub_var_term var_to_term q)) :
           by unfold formula_sub_var_term
-    ... ↔ (holds D m v (formula_sub_var_term sub_map p)) ∧
-            (holds D m v (formula_sub_var_term sub_map q)) : by unfold holds
-    ... ↔ (holds D m ((eval_term D m v) ∘ sub_map) p) ∧
-            (holds D m ((eval_term D m v) ∘ sub_map) q) :
+    ... ↔ (holds D m v (formula_sub_var_term var_to_term p)) ∧
+            (holds D m v (formula_sub_var_term var_to_term q)) : by unfold holds
+    ... ↔ (holds D m ((eval_term D m v) ∘ var_to_term) p) ∧
+            (holds D m ((eval_term D m v) ∘ var_to_term) q) :
           begin
-            rewrite ih_p sub_map v, rewrite ih_q sub_map v
+            rewrite ih_p var_to_term v, rewrite ih_q var_to_term v
           end
-    ... ↔ holds D m ((eval_term D m v) ∘ sub_map) (and p q) : by unfold holds
+    ... ↔ holds D m ((eval_term D m v) ∘ var_to_term) (and p q) : by unfold holds
   },
   case formula.or : p q ih_p ih_q {
     calc
-          holds D m v (formula_sub_var_term sub_map (or p q)) ↔
-            holds D m v (or (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)) :
+          holds D m v (formula_sub_var_term var_to_term (or p q)) ↔
+            holds D m v (or (formula_sub_var_term var_to_term p)
+              (formula_sub_var_term var_to_term q)) :
           by unfold formula_sub_var_term
-    ... ↔ (holds D m v (formula_sub_var_term sub_map p)) ∨
-            (holds D m v (formula_sub_var_term sub_map q)) : by unfold holds
-    ... ↔ (holds D m ((eval_term D m v) ∘ sub_map) p) ∨
-            (holds D m ((eval_term D m v) ∘ sub_map) q) :
+    ... ↔ (holds D m v (formula_sub_var_term var_to_term p)) ∨
+            (holds D m v (formula_sub_var_term var_to_term q)) : by unfold holds
+    ... ↔ (holds D m ((eval_term D m v) ∘ var_to_term) p) ∨
+            (holds D m ((eval_term D m v) ∘ var_to_term) q) :
           begin
-            rewrite ih_p sub_map v, rewrite ih_q sub_map v
+            rewrite ih_p var_to_term v, rewrite ih_q var_to_term v
           end
-    ... ↔ holds D m ((eval_term D m v) ∘ sub_map) (or p q) : by unfold holds
+    ... ↔ holds D m ((eval_term D m v) ∘ var_to_term) (or p q) : by unfold holds
   },
   case formula.imp : p q ih_p ih_q {
     calc
-          holds D m v (formula_sub_var_term sub_map (imp p q)) ↔
-            holds D m v (imp (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)) :
+          holds D m v (formula_sub_var_term var_to_term (imp p q)) ↔
+            holds D m v (imp (formula_sub_var_term var_to_term p)
+              (formula_sub_var_term var_to_term q)) :
           by unfold formula_sub_var_term
-    ... ↔ (holds D m v (formula_sub_var_term sub_map p)) →
-            (holds D m v (formula_sub_var_term sub_map q)) : by unfold holds
-    ... ↔ (holds D m ((eval_term D m v) ∘ sub_map) p) →
-            (holds D m ((eval_term D m v) ∘ sub_map) q) :
+    ... ↔ (holds D m v (formula_sub_var_term var_to_term p)) →
+            (holds D m v (formula_sub_var_term var_to_term q)) : by unfold holds
+    ... ↔ (holds D m ((eval_term D m v) ∘ var_to_term) p) →
+            (holds D m ((eval_term D m v) ∘ var_to_term) q) :
           begin
-            rewrite ih_p sub_map v, rewrite ih_q sub_map v
+            rewrite ih_p var_to_term v, rewrite ih_q var_to_term v
           end
-    ... ↔ holds D m ((eval_term D m v) ∘ sub_map) (imp p q) : by unfold holds
+    ... ↔ holds D m ((eval_term D m v) ∘ var_to_term) (imp p q) : by unfold holds
   },
   case formula.iff : p q ih_p ih_q {
     calc
-          holds D m v (formula_sub_var_term sub_map (iff p q)) ↔
-            holds D m v (iff (formula_sub_var_term sub_map p) (formula_sub_var_term sub_map q)) :
+          holds D m v (formula_sub_var_term var_to_term (iff p q)) ↔
+            holds D m v (iff (formula_sub_var_term var_to_term p)
+              (formula_sub_var_term var_to_term q)) :
           by unfold formula_sub_var_term
-    ... ↔ ((holds D m v (formula_sub_var_term sub_map p)) ↔
-            (holds D m v (formula_sub_var_term sub_map q))) : by unfold holds
-    ... ↔ ((holds D m ((eval_term D m v) ∘ sub_map) p) ↔
-            (holds D m ((eval_term D m v) ∘ sub_map) q)) :
+    ... ↔ ((holds D m v (formula_sub_var_term var_to_term p)) ↔
+            (holds D m v (formula_sub_var_term var_to_term q))) : by unfold holds
+    ... ↔ ((holds D m ((eval_term D m v) ∘ var_to_term) p) ↔
+            (holds D m ((eval_term D m v) ∘ var_to_term) q)) :
           begin
-            rewrite ih_p sub_map v, rewrite ih_q sub_map v
+            rewrite ih_p var_to_term v, rewrite ih_q var_to_term v
           end
-    ... ↔ holds D m ((eval_term D m v) ∘ sub_map) (iff p q) : by unfold holds
+    ... ↔ holds D m ((eval_term D m v) ∘ var_to_term) (iff p q) : by unfold holds
   },
   case formula.forall_ : x p ih {
     let x' :=
-      if ∃ y ∈ p.free_var_set \ {x}, x ∈ (sub_map y).all_var_set
-      then variant x (formula_sub_var_term (function.update sub_map x (var x)) p).free_var_set
+      if ∃ y ∈ p.free_var_set \ {x}, x ∈ (var_to_term y).all_var_set
+      then variant x (formula_sub_var_term (function.update var_to_term x (var x)) p).free_var_set
       else x,
     have s1 : ∀ (a : D) (z ∈ p.free_var_set),
-      ((eval_term D m (function.update v x' a)) ∘ (function.update sub_map x (var x'))) z =
-        (function.update ((eval_term D m v) ∘ sub_map) x a) z,
+      ((eval_term D m (function.update v x' a)) ∘ (function.update var_to_term x (var x'))) z =
+        (function.update ((eval_term D m v) ∘ var_to_term) x a) z,
       intros a z h1,
       by_cases h2 : z = x, {
         calc
               ((eval_term D m (function.update v x' a)) ∘
-                (function.update sub_map x (var x'))) z =
+                (function.update var_to_term x (var x'))) z =
                   ((eval_term D m (function.update v x' a)) ∘
-                    (function.update sub_map x (var x'))) x : by rewrite h2
-        ... = (eval_term D m (function.update v x' a)) ((function.update sub_map x (var x')) x) :
+                    (function.update var_to_term x (var x'))) x : by rewrite h2
+        ... = (eval_term D m (function.update v x' a))
+                ((function.update var_to_term x (var x')) x) :
               by simp only [function.comp_app]
         ... = (eval_term D m (function.update v x' a)) (var x') :
               by simp only [function.update_same]
         ... = (function.update v x' a) x' : by unfold eval_term
         ... = a : by simp only [function.update_same]
-        ... = (function.update ((eval_term D m v) ∘ sub_map) x a) x :
+        ... = (function.update ((eval_term D m v) ∘ var_to_term) x a) x :
               by simp only [function.update_same]
-        ... = (function.update ((eval_term D m v) ∘ sub_map) x a) z :
+        ... = (function.update ((eval_term D m v) ∘ var_to_term) x a) z :
               by rewrite h2
       },
       {
@@ -1486,83 +1523,85 @@ begin
           simp only [finset.mem_sdiff, finset.mem_singleton],
           exact and.intro h1 h2,
         have s3 : x' ∉ (p.free_var_set \ {x}).bUnion
-                    (fun (y : var_symbols), (sub_map y).all_var_set),
-          apply thm_6 sub_map p x, intro sub_map, exact thm_7 sub_map p,
-        have s4 : (sub_map z).all_var_set ⊆ (p.free_var_set \ {x}).bUnion
-                    (fun (y : var_symbols), (sub_map y).all_var_set),
-          exact finset.subset_bUnion_of_mem (fun (y : var_symbols), (sub_map y).all_var_set) s2,
-        have s5 : x' ∉ (sub_map z).all_var_set, exact finset.not_mem_mono s4 s3,
-        have s6 : ∀ (x : var_symbols), x ∈ (sub_map z).all_var_set → x ≠ x',
+                    (fun (y : var_symbols), (var_to_term y).all_var_set),
+          apply thm_6 var_to_term p x, intro var_to_term, exact thm_7 var_to_term p,
+        have s4 : (var_to_term z).all_var_set ⊆ (p.free_var_set \ {x}).bUnion
+                    (fun (y : var_symbols), (var_to_term y).all_var_set),
+          exact finset.subset_bUnion_of_mem (fun (y : var_symbols), (var_to_term y).all_var_set) s2,
+        have s5 : x' ∉ (var_to_term z).all_var_set, exact finset.not_mem_mono s4 s3,
+        have s6 : ∀ (x : var_symbols), x ∈ (var_to_term z).all_var_set → x ≠ x',
           intros y h3, by_contradiction, apply s5, rewrite <- h, exact h3,
         calc
               ((eval_term D m (function.update v x' a)) ∘
-                (function.update sub_map x (var x'))) z =
+                (function.update var_to_term x (var x'))) z =
                   (eval_term D m (function.update v x' a))
-                    ((function.update sub_map x (var x')) z) :
+                    ((function.update var_to_term x (var x')) z) :
               by simp only [function.comp_app]
-        ... = (eval_term D m (function.update v x' a)) (sub_map z) :
+        ... = (eval_term D m (function.update v x' a)) (var_to_term z) :
               by simp only [function.update_noteq h2]
-        ... = eval_term D m v (sub_map z) :
+        ... = eval_term D m v (var_to_term z) :
               begin
-                apply thm_1 D m (sub_map z) (function.update v x' a) v,
+                apply thm_1 D m (var_to_term z) (function.update v x' a) v,
                 intros x h3,
                 apply function.update_noteq, exact s6 x h3
               end
-        ... = ((eval_term D m v) ∘ sub_map) z : by simp only [eq_self_iff_true]
-        ... = (function.update ((eval_term D m v) ∘ sub_map) x a) z :
+        ... = ((eval_term D m v) ∘ var_to_term) z : by simp only [eq_self_iff_true]
+        ... = (function.update ((eval_term D m v) ∘ var_to_term) x a) z :
               begin
                 symmetry, apply function.update_noteq h2
               end
       },
     calc
           holds D m v
-            (formula_sub_var_term sub_map (forall_ x p))
+            (formula_sub_var_term var_to_term (forall_ x p))
               ↔ holds D m v
-                (forall_ x' (formula_sub_var_term (function.update sub_map x (var x')) p)) :
+                (forall_ x' (formula_sub_var_term (function.update var_to_term x (var x')) p)) :
           by unfold formula_sub_var_term
     ... ↔ ∀ (a : D), holds D m (function.update v x' a)
-            (formula_sub_var_term (function.update sub_map x (var x')) p) :
+            (formula_sub_var_term (function.update var_to_term x (var x')) p) :
           by unfold holds
     ... ↔ (∀ (a : D), (holds D m
-            ((eval_term D m (function.update v x' a)) ∘ (function.update sub_map x (var x'))) p)) :
+            ((eval_term D m
+              (function.update v x' a)) ∘ (function.update var_to_term x (var x'))) p)) :
           begin
             apply forall_congr, intros a,
-            exact ih (function.update sub_map x (var x')) (function.update v x' a),
+            exact ih (function.update var_to_term x (var x')) (function.update v x' a),
           end
-    ... ↔ (∀ (a : D), holds D m (function.update ((eval_term D m v) ∘ sub_map) x a) p) :
+    ... ↔ (∀ (a : D), holds D m (function.update ((eval_term D m v) ∘ var_to_term) x a) p) :
           begin
             apply forall_congr, intros a,
             rewrite (thm_2 D m
-              ((eval_term D m (function.update v x' a)) ∘ (function.update sub_map x (var x')))
-              (function.update ((eval_term D m v) ∘ sub_map) x a)
+              ((eval_term D m (function.update v x' a)) ∘ (function.update var_to_term x (var x')))
+              (function.update ((eval_term D m v) ∘ var_to_term) x a)
               p (s1 a)),
           end
-    ... ↔ holds D m (eval_term D m v ∘ sub_map) (forall_ x p) : by unfold holds
+    ... ↔ holds D m (eval_term D m v ∘ var_to_term) (forall_ x p) : by unfold holds
   },
   case formula.exists_ : x p ih {
     let x' :=
-      if ∃ y ∈ p.free_var_set \ {x}, x ∈ (sub_map y).all_var_set
-      then variant x (formula_sub_var_term (function.update sub_map x (var x)) p).free_var_set
+      if ∃ y ∈ p.free_var_set \ {x}, x ∈ (var_to_term y).all_var_set
+      then variant x (formula_sub_var_term (function.update var_to_term x (var x)) p).free_var_set
       else x,
     have s1 : ∀ (a : D) (z ∈ p.free_var_set),
-      ((eval_term D m (function.update v x' a)) ∘ (function.update sub_map x (var x'))) z =
-        (function.update ((eval_term D m v) ∘ sub_map) x a) z,
+      ((eval_term D m (function.update v x' a)) ∘ (function.update var_to_term x (var x'))) z =
+        (function.update ((eval_term D m v) ∘ var_to_term) x a) z,
       intros a z h1,
       by_cases h2 : z = x, {
         calc
               ((eval_term D m (function.update v x' a)) ∘
-                (function.update sub_map x (var x'))) z =
+                (function.update var_to_term x (var x'))) z =
                   ((eval_term D m (function.update v x' a)) ∘
-                    (function.update sub_map x (var x'))) x : by rewrite h2
-        ... = (eval_term D m (function.update v x' a)) ((function.update sub_map x (var x')) x) :
+                    (function.update var_to_term x (var x'))) x : by rewrite h2
+        ... = (eval_term D m
+                (function.update v x' a)) ((function.update var_to_term x (var x')) x) :
               by simp only [function.comp_app]
         ... = (eval_term D m (function.update v x' a)) (var x') :
               by simp only [function.update_same]
         ... = (function.update v x' a) x' : by unfold eval_term
         ... = a : by simp only [function.update_same]
-        ... = (function.update ((eval_term D m v) ∘ sub_map) x a) x :
+        ... = (function.update ((eval_term D m v) ∘ var_to_term) x a) x :
               by simp only [function.update_same]
-        ... = (function.update ((eval_term D m v) ∘ sub_map) x a) z :
+        ... = (function.update ((eval_term D m v) ∘ var_to_term) x a) z :
               by rewrite h2
       },
       {
@@ -1570,66 +1609,67 @@ begin
           simp only [finset.mem_sdiff, finset.mem_singleton],
           exact and.intro h1 h2,
         have s3 : x' ∉ (p.free_var_set \ {x}).bUnion
-                    (fun (y : var_symbols), (sub_map y).all_var_set),
-          apply thm_6 sub_map p x, intro sub_map, exact thm_7 sub_map p,
-        have s4 : (sub_map z).all_var_set ⊆ (p.free_var_set \ {x}).bUnion
-                    (fun (y : var_symbols), (sub_map y).all_var_set),
-          exact finset.subset_bUnion_of_mem (fun (y : var_symbols), (sub_map y).all_var_set) s2,
-        have s5 : x' ∉ (sub_map z).all_var_set, exact finset.not_mem_mono s4 s3,
-        have s6 : ∀ (x : var_symbols), x ∈ (sub_map z).all_var_set → x ≠ x',
+                    (fun (y : var_symbols), (var_to_term y).all_var_set),
+          apply thm_6 var_to_term p x, intro var_to_term, exact thm_7 var_to_term p,
+        have s4 : (var_to_term z).all_var_set ⊆ (p.free_var_set \ {x}).bUnion
+                    (fun (y : var_symbols), (var_to_term y).all_var_set),
+          exact finset.subset_bUnion_of_mem (fun (y : var_symbols), (var_to_term y).all_var_set) s2,
+        have s5 : x' ∉ (var_to_term z).all_var_set, exact finset.not_mem_mono s4 s3,
+        have s6 : ∀ (x : var_symbols), x ∈ (var_to_term z).all_var_set → x ≠ x',
           intros y h3, by_contradiction, apply s5, rewrite <- h, exact h3,
         calc
               ((eval_term D m (function.update v x' a)) ∘
-                (function.update sub_map x (var x'))) z =
+                (function.update var_to_term x (var x'))) z =
                   (eval_term D m (function.update v x' a))
-                    ((function.update sub_map x (var x')) z) :
+                    ((function.update var_to_term x (var x')) z) :
               by simp only [function.comp_app]
-        ... = (eval_term D m (function.update v x' a)) (sub_map z) :
+        ... = (eval_term D m (function.update v x' a)) (var_to_term z) :
               by simp only [function.update_noteq h2]
-        ... = eval_term D m v (sub_map z) :
+        ... = eval_term D m v (var_to_term z) :
               begin
-                apply thm_1 D m (sub_map z) (function.update v x' a) v,
+                apply thm_1 D m (var_to_term z) (function.update v x' a) v,
                 intros x h3,
                 apply function.update_noteq, exact s6 x h3
               end
-        ... = ((eval_term D m v) ∘ sub_map) z : by simp only [eq_self_iff_true]
-        ... = (function.update ((eval_term D m v) ∘ sub_map) x a) z :
+        ... = ((eval_term D m v) ∘ var_to_term) z : by simp only [eq_self_iff_true]
+        ... = (function.update ((eval_term D m v) ∘ var_to_term) x a) z :
               begin
                 symmetry, apply function.update_noteq h2
               end
       },
     calc
           holds D m v
-            (formula_sub_var_term sub_map (exists_ x p))
+            (formula_sub_var_term var_to_term (exists_ x p))
               ↔ holds D m v
-                (exists_ x' (formula_sub_var_term (function.update sub_map x (var x')) p)) :
+                (exists_ x' (formula_sub_var_term (function.update var_to_term x (var x')) p)) :
           by unfold formula_sub_var_term
     ... ↔ ∃ (a : D), holds D m (function.update v x' a)
-            (formula_sub_var_term (function.update sub_map x (var x')) p) :
+            (formula_sub_var_term (function.update var_to_term x (var x')) p) :
           by unfold holds
     ... ↔ (∃ (a : D), (holds D m
-            ((eval_term D m (function.update v x' a)) ∘ (function.update sub_map x (var x'))) p)) :
+            ((eval_term D m
+              (function.update v x' a)) ∘ (function.update var_to_term x (var x'))) p)) :
           begin
             apply exists_congr, intros a,
-            exact ih (function.update sub_map x (var x')) (function.update v x' a),
+            exact ih (function.update var_to_term x (var x')) (function.update v x' a),
           end
-    ... ↔ (∃ (a : D), holds D m (function.update ((eval_term D m v) ∘ sub_map) x a) p) :
+    ... ↔ (∃ (a : D), holds D m (function.update ((eval_term D m v) ∘ var_to_term) x a) p) :
           begin
             apply exists_congr, intros a,
             rewrite (thm_2 D m
-              ((eval_term D m (function.update v x' a)) ∘ (function.update sub_map x (var x')))
-              (function.update ((eval_term D m v) ∘ sub_map) x a)
+              ((eval_term D m (function.update v x' a)) ∘ (function.update var_to_term x (var x')))
+              (function.update ((eval_term D m v) ∘ var_to_term) x a)
               p (s1 a)),
           end
-    ... ↔ holds D m (eval_term D m v ∘ sub_map) (exists_ x p) : by unfold holds
+    ... ↔ holds D m (eval_term D m v ∘ var_to_term) (exists_ x p) : by unfold holds
   }
 end
 
 theorem thm_9
-  (sub_map : instantiation)
+  (var_to_term : instantiation)
   (p : formula)
   (h1 : is_valid p) :
-  is_valid (formula_sub_var_term sub_map p) :=
+  is_valid (formula_sub_var_term var_to_term p) :=
 begin
   unfold is_valid at *,
   intros D m v,
