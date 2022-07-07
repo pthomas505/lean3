@@ -1653,47 +1653,55 @@ def formula.all_pred_set : formula → finset (ℕ × pred_symbols)
 | (exists_ x p) := p.all_pred_set
 
 def formula_sub_pred_formula
-  (m : (ℕ × string) → formula) :
+  (pred_to_formula : (ℕ × string) → formula) :
   instantiation → formula → formula
 | _ bottom := bottom
 | _ top := top
-| s (pred n x terms) := formula_sub_var_term s (m (n, x))
-| s (eq_ u v) := eq_ (term_sub_var_term s u) (term_sub_var_term s v)
-| s (not p) := not (formula_sub_pred_formula s p)
-| s (and p q) := and (formula_sub_pred_formula s p) (formula_sub_pred_formula s q)
-| s (or p q) := or (formula_sub_pred_formula s p) (formula_sub_pred_formula s q)
-| s (imp p q) := imp (formula_sub_pred_formula s p) (formula_sub_pred_formula s q)
-| s (iff p q) := iff (formula_sub_pred_formula s p) (formula_sub_pred_formula s q)
-| s (forall_ x p) :=
+| var_to_term (pred n x terms) :=
+    formula_sub_var_term var_to_term (pred_to_formula (n, x))
+| var_to_term (eq_ u v) :=
+    eq_ (term_sub_var_term var_to_term u) (term_sub_var_term var_to_term v)
+| var_to_term (not p) :=
+    not (formula_sub_pred_formula var_to_term p)
+| var_to_term (and p q) :=
+    and (formula_sub_pred_formula var_to_term p) (formula_sub_pred_formula var_to_term q)
+| var_to_term (or p q) :=
+    or (formula_sub_pred_formula var_to_term p) (formula_sub_pred_formula var_to_term q)
+| var_to_term (imp p q) :=
+    imp (formula_sub_pred_formula var_to_term p) (formula_sub_pred_formula var_to_term q)
+| var_to_term (iff p q) :=
+    iff (formula_sub_pred_formula var_to_term p) (formula_sub_pred_formula var_to_term q)
+| var_to_term (forall_ x p) :=
   let x' :=
-  if x ∈ finset.bUnion p.all_pred_set (fun r, (m r).free_var_set)
-  then variant x (formula_sub_pred_formula (function.update s x (var x)) p).free_var_set
+  if x ∈ p.all_pred_set.bUnion (fun r, (pred_to_formula r).free_var_set)
+  then variant x (formula_sub_pred_formula (function.update var_to_term x (var x)) p).free_var_set
   else x in
-  forall_ x' (formula_sub_pred_formula (function.update s x (var x')) p)
-| s (exists_ x p) :=
+  forall_ x' (formula_sub_pred_formula (function.update var_to_term x (var x')) p)
+| var_to_term (exists_ x p) :=
   let x' :=
-  if x ∈ finset.bUnion p.all_pred_set (fun r, (m r).free_var_set)
-  then variant x (formula_sub_pred_formula (function.update s x (var x)) p).free_var_set
+  if x ∈ finset.bUnion p.all_pred_set (fun r, (pred_to_formula r).free_var_set)
+  then variant x (formula_sub_pred_formula (function.update var_to_term x (var x)) p).free_var_set
   else x in
-  exists_ x' (formula_sub_pred_formula (function.update s x (var x')) p)
+  exists_ x' (formula_sub_pred_formula (function.update var_to_term x (var x')) p)
 
 def interpretation.sub
   {D : Type}
   (m : interpretation D)
   (v : valuation D)
-  (f : (ℕ × string) → formula) : interpretation D :=
+  (pred_to_formula : (ℕ × string) → formula) :
+  interpretation D :=
     interpretation.mk m.nonempty m.func
-      (fun n : ℕ, fun x : string, fun terms : fin n → D, holds D m v (f (n, x)))
+      (fun (n : ℕ) (x : string) (terms : fin n → D), holds D m v (pred_to_formula (n, x)))
 
 example
   (D : Type)
   (m : interpretation D)
-  (v v' : valuation D)
+  (v1 v2 : valuation D)
   (p : formula)
-  (s : (ℕ × string) → formula)
-  (hv : ∀ (r ∈ p.all_pred_set) (x ∈ (s r).free_var_set), v x = v' x) :
-  holds D m v (formula_sub_pred_formula s var p)
-    ↔ holds D (m.sub v' s) v p := sorry
+  (pred_to_formula : (ℕ × string) → formula)
+  (hv : ∀ (r ∈ p.all_pred_set) (x ∈ (pred_to_formula r).free_var_set), v1 x = v2 x) :
+  holds D m v1 (formula_sub_pred_formula pred_to_formula var p)
+    ↔ holds D (m.sub v2 pred_to_formula) v1 p := sorry
 
 
 -- alpha equivalence
