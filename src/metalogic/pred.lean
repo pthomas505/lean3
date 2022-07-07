@@ -1731,7 +1731,7 @@ def interpretation.sub
   (pred_to_formula : (ℕ × string) → formula) :
   interpretation D :=
     interpretation.mk m.nonempty m.func
-      (fun (n : ℕ) (x : string) (terms : fin n → D), holds D m v (pred_to_formula (n, x)))
+      (fun (n : ℕ) (x : pred_symbols) (t : fin n → D), holds D m v (pred_to_formula (n, x)))
 
 example
   (D : Type)
@@ -1741,7 +1741,45 @@ example
   (pred_to_formula : (ℕ × string) → formula)
   (hv : ∀ (r ∈ p.all_pred_set) (x ∈ (pred_to_formula r).free_var_set), v1 x = v2 x) :
   holds D m v1 (formula_sub_pred_formula pred_to_formula var p)
-    ↔ holds D (m.sub v2 pred_to_formula) v1 p := sorry
+    ↔ holds D (m.sub v2 pred_to_formula) v1 p :=
+begin
+  induction p generalizing v1,
+  case formula.bottom : v1 hv
+  { unfold formula_sub_pred_formula, unfold holds },
+  case formula.top : v1 hv
+  { unfold formula_sub_pred_formula, unfold holds },
+  case formula.pred : n p t v1 hv
+  {
+    admit
+  },
+  case formula.eq_ : s t v1 hv
+  {
+    admit
+  },
+  case formula.not : p p_ih v1 hv
+  {
+    unfold formula_sub_pred_formula, unfold holds,
+    apply not_congr, apply p_ih, exact hv,
+  },
+  case formula.and : p q p_ih q_ih v1 hv
+  {
+    unfold formula.all_pred_set at hv,
+    simp at hv,
+    unfold formula_sub_pred_formula, unfold holds,
+    apply and_congr, apply p_ih, intros r h1 x h2,
+
+  },
+  case formula.or : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 v1 hv
+  { admit },
+  case formula.imp : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 v1 hv
+  { admit },
+  case formula.iff : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 v1 hv
+  { admit },
+  case formula.forall_ : p_ᾰ p_ᾰ_1 p_ih v1 hv
+  { admit },
+  case formula.exists_ : p_ᾰ p_ᾰ_1 p_ih v1 hv
+  { admit },
+end
 
 
 -- alpha equivalence
