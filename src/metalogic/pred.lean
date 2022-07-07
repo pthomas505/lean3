@@ -1677,111 +1677,6 @@ begin
 end
 
 
--- uniform simultaneous replacement of the predicates in a formula by formulas
-
-def formula.all_pred_set : formula → finset (ℕ × pred_symbols)
-| bottom := ∅
-| top := ∅
-| (pred n p t) := {(n, p)}
-| (eq_ s t) := ∅
-| (not p) := p.all_pred_set
-| (and p q) := p.all_pred_set ∪ q.all_pred_set
-| (or p q) := p.all_pred_set ∪ q.all_pred_set
-| (imp p q) := p.all_pred_set ∪ q.all_pred_set
-| (iff p q) := p.all_pred_set ∪ q.all_pred_set
-| (forall_ x p) := p.all_pred_set
-| (exists_ x p) := p.all_pred_set
-
-def formula_sub_pred_formula
-  (pred_to_formula : (ℕ × string) → formula) :
-  instantiation → formula → formula
-| _ bottom := bottom
-| _ top := top
-| var_to_term (pred n x terms) :=
-    formula_sub_var_term var_to_term (pred_to_formula (n, x))
-| var_to_term (eq_ s t) :=
-    eq_ (term_sub_var_term var_to_term s) (term_sub_var_term var_to_term t)
-| var_to_term (not p) :=
-    not (formula_sub_pred_formula var_to_term p)
-| var_to_term (and p q) :=
-    and (formula_sub_pred_formula var_to_term p) (formula_sub_pred_formula var_to_term q)
-| var_to_term (or p q) :=
-    or (formula_sub_pred_formula var_to_term p) (formula_sub_pred_formula var_to_term q)
-| var_to_term (imp p q) :=
-    imp (formula_sub_pred_formula var_to_term p) (formula_sub_pred_formula var_to_term q)
-| var_to_term (iff p q) :=
-    iff (formula_sub_pred_formula var_to_term p) (formula_sub_pred_formula var_to_term q)
-| var_to_term (forall_ x p) :=
-  let x' :=
-  if x ∈ p.all_pred_set.bUnion (fun r, (pred_to_formula r).free_var_set)
-  then variant x (formula_sub_pred_formula (function.update var_to_term x (var x)) p).free_var_set
-  else x in
-  forall_ x' (formula_sub_pred_formula (function.update var_to_term x (var x')) p)
-| var_to_term (exists_ x p) :=
-  let x' :=
-  if x ∈ p.all_pred_set.bUnion (fun r, (pred_to_formula r).free_var_set)
-  then variant x (formula_sub_pred_formula (function.update var_to_term x (var x)) p).free_var_set
-  else x in
-  exists_ x' (formula_sub_pred_formula (function.update var_to_term x (var x')) p)
-
-def interpretation.sub
-  {D : Type}
-  (m : interpretation D)
-  (v : valuation D)
-  (pred_to_formula : (ℕ × string) → formula) :
-  interpretation D :=
-    interpretation.mk m.nonempty m.func
-      (fun (n : ℕ) (x : pred_symbols) (t : fin n → D), holds D m v (pred_to_formula (n, x)))
-
-example
-  (D : Type)
-  (m : interpretation D)
-  (v1 v2 : valuation D)
-  (p : formula)
-  (pred_to_formula : (ℕ × string) → formula)
-  (hv : ∀ (r ∈ p.all_pred_set) (x ∈ (pred_to_formula r).free_var_set), v1 x = v2 x) :
-  holds D m v1 (formula_sub_pred_formula pred_to_formula var p)
-    ↔ holds D (m.sub v2 pred_to_formula) v1 p :=
-begin
-  induction p generalizing v1,
-  case formula.bottom : v1 hv
-  { unfold formula_sub_pred_formula, unfold holds },
-  case formula.top : v1 hv
-  { unfold formula_sub_pred_formula, unfold holds },
-  case formula.pred : n p t v1 hv
-  {
-    admit
-  },
-  case formula.eq_ : s t v1 hv
-  {
-    admit
-  },
-  case formula.not : p p_ih v1 hv
-  {
-    unfold formula_sub_pred_formula, unfold holds,
-    apply not_congr, apply p_ih, exact hv,
-  },
-  case formula.and : p q p_ih q_ih v1 hv
-  {
-    unfold formula.all_pred_set at hv,
-    simp at hv,
-    unfold formula_sub_pred_formula, unfold holds,
-    apply and_congr, apply p_ih, intros r h1 x h2,
-
-  },
-  case formula.or : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 v1 hv
-  { admit },
-  case formula.imp : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 v1 hv
-  { admit },
-  case formula.iff : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 v1 hv
-  { admit },
-  case formula.forall_ : p_ᾰ p_ᾰ_1 p_ih v1 hv
-  { admit },
-  case formula.exists_ : p_ᾰ p_ᾰ_1 p_ih v1 hv
-  { admit },
-end
-
-
 -- alpha equivalence
 
 def replace_term (y z : var_symbols) (binders : finset var_symbols) : term → term
@@ -2698,3 +2593,122 @@ def ex := do
     mp 4 1 3 2    -- p4 = |- p -> p
   ],
   return global_context
+
+
+-- uniform simultaneous replacement of the predicates in a formula by formulas
+
+def formula.all_pred_set : formula → finset (ℕ × pred_symbols)
+| bottom := ∅
+| top := ∅
+| (pred n p t) := {(n, p)}
+| (eq_ s t) := ∅
+| (not p) := p.all_pred_set
+| (and p q) := p.all_pred_set ∪ q.all_pred_set
+| (or p q) := p.all_pred_set ∪ q.all_pred_set
+| (imp p q) := p.all_pred_set ∪ q.all_pred_set
+| (iff p q) := p.all_pred_set ∪ q.all_pred_set
+| (forall_ x p) := p.all_pred_set
+| (exists_ x p) := p.all_pred_set
+
+def formula_sub_pred_formula
+  (pred_to_formula : (ℕ × string) → formula) :
+  instantiation → formula → formula
+| _ bottom := bottom
+| _ top := top
+| var_to_term (pred n x terms) :=
+    formula_sub_var_term var_to_term (pred_to_formula (n, x))
+| var_to_term (eq_ s t) :=
+    eq_ (term_sub_var_term var_to_term s) (term_sub_var_term var_to_term t)
+| var_to_term (not p) :=
+    not (formula_sub_pred_formula var_to_term p)
+| var_to_term (and p q) :=
+    and (formula_sub_pred_formula var_to_term p) (formula_sub_pred_formula var_to_term q)
+| var_to_term (or p q) :=
+    or (formula_sub_pred_formula var_to_term p) (formula_sub_pred_formula var_to_term q)
+| var_to_term (imp p q) :=
+    imp (formula_sub_pred_formula var_to_term p) (formula_sub_pred_formula var_to_term q)
+| var_to_term (iff p q) :=
+    iff (formula_sub_pred_formula var_to_term p) (formula_sub_pred_formula var_to_term q)
+| var_to_term (forall_ x p) :=
+  let x' :=
+  if x ∈ p.all_pred_set.bUnion (fun r, (pred_to_formula r).free_var_set)
+  then variant x (formula_sub_pred_formula (function.update var_to_term x (var x)) p).free_var_set
+  else x in
+  forall_ x' (formula_sub_pred_formula (function.update var_to_term x (var x')) p)
+| var_to_term (exists_ x p) :=
+  let x' :=
+  if x ∈ p.all_pred_set.bUnion (fun r, (pred_to_formula r).free_var_set)
+  then variant x (formula_sub_pred_formula (function.update var_to_term x (var x)) p).free_var_set
+  else x in
+  exists_ x' (formula_sub_pred_formula (function.update var_to_term x (var x')) p)
+
+def interpretation.sub
+  {D : Type}
+  (m : interpretation D)
+  (v : valuation D)
+  (pred_to_formula : (ℕ × string) → formula) :
+  interpretation D :=
+    interpretation.mk m.nonempty m.func
+      (fun (n : ℕ) (x : pred_symbols) (t : fin n → D), holds D m v (pred_to_formula (n, x)))
+
+example
+  (D : Type)
+  (m : interpretation D)
+  (v1 v2 : valuation D)
+  (p : formula)
+  (pred_to_formula : (ℕ × string) → formula)
+  (hv : ∀ (r ∈ p.all_pred_set) (x ∈ (pred_to_formula r).free_var_set), v1 x = v2 x) :
+  holds D m v1 (formula_sub_pred_formula pred_to_formula var p)
+    ↔ holds D (m.sub v2 pred_to_formula) v1 p :=
+begin
+  induction p generalizing v1,
+  case formula.bottom : v1 hv
+  { unfold formula_sub_pred_formula, unfold holds },
+  case formula.top : v1 hv
+  { unfold formula_sub_pred_formula, unfold holds },
+  case formula.pred : n p t v1 hv
+  {
+    admit
+  },
+  case formula.eq_ : s t v1 hv
+  {
+    admit
+  },
+  case formula.not : p p_ih v1 hv
+  {
+    unfold formula_sub_pred_formula, unfold holds,
+    apply not_congr, apply p_ih, exact hv,
+  },
+  case formula.and : p q p_ih q_ih v1 hv
+  {
+    unfold formula.all_pred_set at hv,
+    unfold formula_sub_pred_formula, unfold holds,
+    apply and_congr,
+    {
+      apply p_ih, intros r h1 x h2,
+      apply hv r, simp only [finset.mem_union],
+      apply or.intro_left, exact h1, exact h2
+    },
+    {
+      apply q_ih, intros r h1 x h2,
+      apply hv r, simp only [finset.mem_union],
+      apply or.intro_right, exact h1, exact h2
+    }
+  },
+  case formula.or : p q p_ih q_ih v1 hv
+  { admit },
+  case formula.imp : p q p_ih q_ih v1 hv
+  { admit },
+  case formula.iff : p q p_ih q_ih v1 hv
+  { admit },
+  case formula.forall_ : x p p_ih v1 hv
+  {
+    unfold formula.all_pred_set at hv,
+    unfold formula_sub_pred_formula,
+    unfold holds,
+    apply forall_congr, intros a,
+    admit,
+  },
+  case formula.exists_ : x p p_ih v1 hv
+  { admit },
+end
