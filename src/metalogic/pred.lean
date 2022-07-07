@@ -1699,8 +1699,8 @@ def formula_sub_pred_formula
 | _ top := top
 | var_to_term (pred n x terms) :=
     formula_sub_var_term var_to_term (pred_to_formula (n, x))
-| var_to_term (eq_ u v) :=
-    eq_ (term_sub_var_term var_to_term u) (term_sub_var_term var_to_term v)
+| var_to_term (eq_ s t) :=
+    eq_ (term_sub_var_term var_to_term s) (term_sub_var_term var_to_term t)
 | var_to_term (not p) :=
     not (formula_sub_pred_formula var_to_term p)
 | var_to_term (and p q) :=
@@ -1719,7 +1719,7 @@ def formula_sub_pred_formula
   forall_ x' (formula_sub_pred_formula (function.update var_to_term x (var x')) p)
 | var_to_term (exists_ x p) :=
   let x' :=
-  if x ∈ finset.bUnion p.all_pred_set (fun r, (pred_to_formula r).free_var_set)
+  if x ∈ p.all_pred_set.bUnion (fun r, (pred_to_formula r).free_var_set)
   then variant x (formula_sub_pred_formula (function.update var_to_term x (var x)) p).free_var_set
   else x in
   exists_ x' (formula_sub_pred_formula (function.update var_to_term x (var x')) p)
