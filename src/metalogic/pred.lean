@@ -2642,6 +2642,60 @@ def formula_sub_pred_formula
   else x in
   exists_ x' (formula_sub_pred_formula (function.update var_to_term x (var x')) p)
 
+
+theorem thm_10
+  (t : term) :
+  term_sub_var_term var t = t :=
+begin
+  induction t,
+  case term.var : x
+  { unfold term_sub_var_term },
+  case term.func : n f t ih
+  { unfold term_sub_var_term, congr, funext, exact ih i },
+end
+
+theorem thm_11
+  (p : formula) :
+  formula_sub_var_term var p = p :=
+begin
+  induction p,
+  case formula.bottom
+  { unfold formula_sub_var_term },
+  case formula.top
+  { unfold formula_sub_var_term },
+  case formula.pred : n p t
+  { unfold formula_sub_var_term, congr, funext, exact thm_10 (t i) },
+  case formula.eq_ : s t
+  { unfold formula_sub_var_term, congr, exact thm_10 s, exact thm_10 t },
+  case formula.not : p p_ih
+  { unfold formula_sub_var_term, congr, exact p_ih },
+  case formula.and : p q p_ih q_ih
+  { unfold formula_sub_var_term, congr, exact p_ih, exact q_ih },
+  case formula.or : p q p_ih q_ih
+  { unfold formula_sub_var_term, congr, exact p_ih, exact q_ih },
+  case formula.imp : p q p_ih q_ih
+  { unfold formula_sub_var_term, congr, exact p_ih, exact q_ih },
+  case formula.iff : p q p_ih q_ih
+  { unfold formula_sub_var_term, congr, exact p_ih, exact q_ih },
+  case formula.forall_ : x p p_ih
+  {
+    unfold formula_sub_var_term,
+    simp, split,
+    intros y h1 h2 h3, unfold term.all_var_set at h3, simp at h3,
+    subst h3, contradiction,
+    unfold term.all_var_set, simp, exact p_ih
+  },
+  case formula.exists_ : x p p_ih
+  {
+    unfold formula_sub_var_term,
+    simp, split,
+    intros y h1 h2 h3, unfold term.all_var_set at h3, simp at h3,
+    subst h3, contradiction,
+    unfold term.all_var_set, simp, exact p_ih
+  },
+end
+
+
 def interpretation.sub
   {D : Type}
   (m : interpretation D)
@@ -2668,7 +2722,12 @@ begin
   { unfold formula_sub_pred_formula, unfold holds },
   case formula.pred : n p t v1 hv
   {
-    admit
+    unfold formula.all_pred_set at hv,
+    unfold formula_sub_pred_formula, unfold holds,
+    unfold interpretation.sub,
+    simp only [thm_11],
+    apply thm_2, intros x h1, apply hv (n, p),
+    simp only [finset.mem_singleton], exact h1
   },
   case formula.eq_ : s t v1 hv
   {
