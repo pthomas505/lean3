@@ -2723,15 +2723,16 @@ begin
   case formula.pred : n p t v1 hv
   {
     unfold formula.all_pred_set at hv,
-    unfold formula_sub_pred_formula, unfold holds,
-    unfold interpretation.sub,
+    unfold formula_sub_pred_formula,
     simp only [thm_11],
     apply thm_2, intros x h1, apply hv (n, p),
     simp only [finset.mem_singleton], exact h1
   },
   case formula.eq_ : s t v1 hv
   {
-    admit
+    unfold formula_sub_pred_formula,
+    simp only [thm_10],
+    unfold holds, admit
   },
   case formula.not : p p_ih v1 hv
   {
@@ -2755,11 +2756,53 @@ begin
     }
   },
   case formula.or : p q p_ih q_ih v1 hv
-  { admit },
+  {
+    unfold formula.all_pred_set at hv,
+    unfold formula_sub_pred_formula, unfold holds,
+    apply or_congr,
+    {
+      apply p_ih, intros r h1 x h2,
+      apply hv r, simp only [finset.mem_union],
+      apply or.intro_left, exact h1, exact h2
+    },
+    {
+      apply q_ih, intros r h1 x h2,
+      apply hv r, simp only [finset.mem_union],
+      apply or.intro_right, exact h1, exact h2
+    }
+  },
   case formula.imp : p q p_ih q_ih v1 hv
-  { admit },
+  {
+    unfold formula.all_pred_set at hv,
+    unfold formula_sub_pred_formula, unfold holds,
+    apply imp_congr,
+    {
+      apply p_ih, intros r h1 x h2,
+      apply hv r, simp only [finset.mem_union],
+      apply or.intro_left, exact h1, exact h2
+    },
+    {
+      apply q_ih, intros r h1 x h2,
+      apply hv r, simp only [finset.mem_union],
+      apply or.intro_right, exact h1, exact h2
+    }
+  },
   case formula.iff : p q p_ih q_ih v1 hv
-  { admit },
+  {
+    unfold formula.all_pred_set at hv,
+    unfold formula_sub_pred_formula, unfold holds,
+    apply iff_congr,
+    {
+      apply p_ih, intros r h1 x h2,
+      apply hv r, simp only [finset.mem_union],
+      apply or.intro_left, exact h1, exact h2
+    },
+    {
+      apply q_ih, intros r h1 x h2,
+      apply hv r, simp only [finset.mem_union],
+      apply or.intro_right, exact h1, exact h2
+    }
+  },
   case formula.forall_ : x p p_ih v1 hv
   {
     unfold formula.all_pred_set at hv,
