@@ -2703,7 +2703,7 @@ def interpretation.sub
   (pred_to_formula : (ℕ × string) → formula) :
   interpretation D :=
     interpretation.mk m.nonempty m.func
-      (fun (n : ℕ) (x : pred_symbols) (t : fin n → D), holds D m v (pred_to_formula (n, x)))
+      (fun (n : ℕ) (p : pred_symbols) (t : fin n → D), holds D m v (pred_to_formula (n, p)))
 
 example
   (D : Type)
