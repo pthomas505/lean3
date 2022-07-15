@@ -2605,10 +2605,10 @@ def formula_sub_prop_prop
   formula → formula
 | bottom := bottom
 | top := top
-| (pred n x terms) :=
+| (pred n p t) :=
     if n = 0
-    then pred n (prop_to_prop x) terms
-    else pred n x terms
+    then pred n (prop_to_prop p) t
+    else pred n p t
 | (eq_ s t) := eq_ s t
 | (not p) := not (formula_sub_prop_prop p)
 | (and p q) := and (formula_sub_prop_prop p) (formula_sub_prop_prop q)
