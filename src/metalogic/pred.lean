@@ -2656,8 +2656,17 @@ begin
     unfold eval_term, unfold eval_term, simp, congr,
     funext, apply ih, },
   case formula.eq_ : s t
-  { unfold formula_sub_prop_prop,
-    unfold holds, sorry, },
+  {
+    have s1 : ∀ s, eval_term D (m.sub' v prop_to_prop) v s = eval_term D m v s,
+      intros s,
+      induction s,
+        unfold eval_term,
+        unfold eval_term,
+        simp only [s_ih], unfold interpretation.sub',
+    unfold formula_sub_prop_prop,
+    unfold holds,
+    simp only [s1 s, s1 t],
+  },
   case formula.not : p p_ih
   { unfold formula_sub_prop_prop,
     unfold holds,
