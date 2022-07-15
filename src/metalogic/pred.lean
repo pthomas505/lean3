@@ -2595,6 +2595,100 @@ def ex := do
   return global_context
 
 
+/-
+uniform simultaneous replacement of the propositions in a formala by
+propositions
+-/
+
+def formula_sub_prop_prop
+  (prop_to_prop : pred_symbols → pred_symbols) :
+  formula → formula
+| bottom := bottom
+| top := top
+| (pred n x terms) :=
+    if n = 0
+    then pred n (prop_to_prop x) terms
+    else pred n x terms
+| (eq_ s t) := eq_ s t
+| (not p) := not (formula_sub_prop_prop p)
+| (and p q) := and (formula_sub_prop_prop p) (formula_sub_prop_prop q)
+| (or p q) := or (formula_sub_prop_prop p) (formula_sub_prop_prop q)
+| (imp p q) := imp (formula_sub_prop_prop p) (formula_sub_prop_prop q)
+| (iff p q) := iff (formula_sub_prop_prop p) (formula_sub_prop_prop q)
+| (forall_ x p) := forall_ x (formula_sub_prop_prop p)
+| (exists_ x p) := exists_ x (formula_sub_prop_prop p)
+
+
+def interpretation.sub'
+  {D : Type}
+  (m : interpretation D)
+  (v : valuation D)
+  (prop_to_prop : pred_symbols → pred_symbols) :
+  interpretation D :=
+    interpretation.mk m.nonempty m.func
+      (fun (n : ℕ) (p : pred_symbols) (t : fin n → D),
+        if n = 0 then m.pred n (prop_to_prop p) t else m.pred n p t)
+
+example
+  (D : Type)
+  (m : interpretation D)
+  (v : valuation D)
+  (p : formula)
+  (prop_to_prop : pred_symbols → pred_symbols) :
+  holds D m v (formula_sub_prop_prop prop_to_prop p)
+    ↔ holds D (m.sub' v prop_to_prop) v p :=
+begin
+  induction p generalizing v,
+  case formula.bottom
+  { unfold formula_sub_prop_prop, unfold holds },
+  case formula.top
+  { unfold formula_sub_prop_prop, unfold holds },
+  case formula.pred : n p t
+  { unfold formula_sub_prop_prop,
+    unfold interpretation.sub',
+    split_ifs,
+    unfold holds,
+    subst h,
+    simp, apply iff_of_eq, congr', funext,
+    apply fin.elim0 i,
+    unfold holds, simp, split_ifs, apply iff_of_eq, congr,
+    funext, induction (t i),
+    unfold eval_term, unfold eval_term, simp, congr,
+    funext, apply ih, },
+  case formula.eq_ : s t
+  { unfold formula_sub_prop_prop,
+    unfold holds, sorry, },
+  case formula.not : p p_ih
+  { unfold formula_sub_prop_prop,
+    unfold holds,
+    simp only [p_ih] },
+  case formula.and : p q p_ih q_ih
+  { unfold formula_sub_prop_prop,
+    unfold holds,
+    simp only [p_ih, q_ih] },
+  case formula.or : p q p_ih q_ih
+  { unfold formula_sub_prop_prop,
+    unfold holds,
+    simp only [p_ih, q_ih] },
+  case formula.imp : p q p_ih q_ih
+  { unfold formula_sub_prop_prop,
+    unfold holds,
+    simp only [p_ih, q_ih] },
+  case formula.iff : p q p_ih q_ih
+  { unfold formula_sub_prop_prop,
+    unfold holds,
+    simp only [p_ih, q_ih] },
+  case formula.forall_ : x p p_ih
+  { unfold formula_sub_prop_prop,
+    unfold holds, apply forall_congr, intros a,
+    apply p_ih },
+  case formula.exists_ : x p p_ih
+  { unfold formula_sub_prop_prop,
+    unfold holds, apply exists_congr, intros a,
+    apply p_ih },
+end
+
+
 -- uniform simultaneous replacement of the predicates in a formula by formulas
 
 def formula.all_pred_set : formula → finset (ℕ × pred_symbols)
