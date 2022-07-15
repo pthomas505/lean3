@@ -2697,6 +2697,17 @@ begin
     apply p_ih },
 end
 
+example
+  (prop_to_prop : pred_symbols → pred_symbols)
+  (p : formula)
+  (h1 : is_valid p) :
+  is_valid (formula_sub_prop_prop prop_to_prop p) :=
+begin
+  unfold is_valid at *,
+  intros D m v,
+  simp only [thm_10], apply h1
+end
+
 
 -- uniform simultaneous replacement of the predicates in a formula by formulas
 
