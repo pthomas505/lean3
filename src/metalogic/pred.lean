@@ -2629,7 +2629,7 @@ def interpretation.sub'
       (fun (n : ℕ) (p : pred_symbols),
         if n = 0 then m.pred n (prop_to_prop p) else m.pred n p)
 
-example
+theorem thm_10
   (D : Type)
   (m : interpretation D)
   (v : valuation D)
@@ -2746,7 +2746,7 @@ def formula_sub_pred_formula
   exists_ x' (formula_sub_pred_formula (function.update var_to_term x (var x')) p)
 
 
-theorem thm_10
+theorem thm_11
   (t : term) :
   term_sub_var_term var t = t :=
 begin
@@ -2757,7 +2757,7 @@ begin
   { unfold term_sub_var_term, congr, funext, exact ih i },
 end
 
-theorem thm_11
+theorem thm_12
   (p : formula) :
   formula_sub_var_term var p = p :=
 begin
@@ -2767,9 +2767,9 @@ begin
   case formula.top
   { unfold formula_sub_var_term },
   case formula.pred : n p t
-  { unfold formula_sub_var_term, congr, funext, exact thm_10 (t i) },
+  { unfold formula_sub_var_term, congr, funext, exact thm_11 (t i) },
   case formula.eq_ : s t
-  { unfold formula_sub_var_term, congr, exact thm_10 s, exact thm_10 t },
+  { unfold formula_sub_var_term, congr, exact thm_11 s, exact thm_11 t },
   case formula.not : p p_ih
   { unfold formula_sub_var_term, congr, exact p_ih },
   case formula.and : p q p_ih q_ih
@@ -2827,14 +2827,14 @@ begin
   {
     unfold formula.all_pred_set at hv,
     unfold formula_sub_pred_formula,
-    simp only [thm_11],
+    simp only [thm_12],
     apply thm_2, intros x h1, apply hv (n, p),
     simp only [finset.mem_singleton], exact h1
   },
   case formula.eq_ : s t v1 hv
   {
     unfold formula_sub_pred_formula,
-    simp only [thm_10],
+    simp only [thm_11],
     unfold holds, admit
   },
   case formula.not : p p_ih v1 hv
