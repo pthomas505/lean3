@@ -2626,8 +2626,8 @@ def interpretation.sub'
   (prop_to_prop : pred_symbols → pred_symbols) :
   interpretation D :=
     interpretation.mk m.nonempty m.func
-      (fun (n : ℕ) (p : pred_symbols) (t : fin n → D),
-        if n = 0 then m.pred n (prop_to_prop p) t else m.pred n p t)
+      (fun (n : ℕ) (p : pred_symbols),
+        if n = 0 then m.pred n (prop_to_prop p) else m.pred n p)
 
 example
   (D : Type)
