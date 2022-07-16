@@ -2980,11 +2980,13 @@ def formula_sub_prop_formula_aux
     iff (formula_sub_prop_formula_aux var_to_term p) (formula_sub_prop_formula_aux var_to_term q)
 | var_to_term (forall_ x p) :=
   let free := finset.bUnion p.all_prop_set (fun r, (prop_to_formula r).free_var_set) in
-  let x' := if x ∈ free then variant x (free ∪ (p.free_var_set \ {x})) else x in
+  let sub_free := (formula_sub_prop_formula_aux (function.update var_to_term x (var x)) p).free_var_set in
+  let x' := if x ∈ free then variant x (free ∪ sub_free) else x in
   forall_ x' (formula_sub_prop_formula_aux (function.update var_to_term x (var x')) p)
 | var_to_term (exists_ x p) :=
   let free := finset.bUnion p.all_prop_set (fun r, (prop_to_formula r).free_var_set) in
-  let x' := if x ∈ free then variant x (free ∪ (p.free_var_set \ {x})) else x in
+  let sub_free := (formula_sub_prop_formula_aux (function.update var_to_term x (var x)) p).free_var_set in
+  let x' := if x ∈ free then variant x (free ∪ sub_free) else x in
   exists_ x' (formula_sub_prop_formula_aux (function.update var_to_term x (var x')) p)
 
 def formula_sub_prop_formula
@@ -3081,8 +3083,16 @@ begin
   { admit },
   case formula.not : p_ᾰ p_ih v1
   { admit },
-  case formula.and : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 v1
-  { admit },
+  case formula.and : p q p_ih q_ih v1
+  {
+    unfold formula.all_prop_set at hv,
+    simp only [finset.mem_union] at hv,
+    unfold formula_sub_prop_formula at *,
+    unfold formula_sub_prop_formula_aux at *,
+    unfold holds, apply and_congr,
+    apply p_ih, intros, apply hv r, apply or.intro_left, exact H, exact H_1,
+    apply q_ih, intros, apply hv r, apply or.intro_right, exact H, exact H_1
+  },
   case formula.or : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 v1
   { admit },
   case formula.imp : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 v1
@@ -3096,14 +3106,15 @@ begin
     unfold formula_sub_prop_formula_aux at *,
     unfold holds at *,
     set free := finset.bUnion p.all_prop_set (fun r, (prop_to_formula r).free_var_set) with l1,
-    set x' := if x ∈ free then variant x (free ∪ (p.free_var_set \ {x})) else x with l2,
+    set sub_free := (formula_sub_prop_formula_aux prop_to_formula (function.update var x (var x)) p).free_var_set with l2,
+    set x' := if x ∈ free then variant x (free ∪ sub_free) else x with l3,
     apply forall_congr, intros a,
-    split_ifs at l2,
+    split_ifs at l3,
     {
       sorry,
     },
     {
-      rewrite l2, simp only [function.update_eq_self],
+      rewrite l3, simp only [function.update_eq_self],
       apply p_ih, intros,
       have s1 : x_1 ∈ free,
         rewrite l1,
