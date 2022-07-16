@@ -3090,11 +3090,6 @@ begin
     set free := finset.bUnion p.all_prop_set (fun r, (prop_to_formula r).free_var_set),
     set x' := if x ∈ free then variant x free else x with l2,
     apply forall_congr, intros a,
-    by_cases h : x ∈ free,
-    simp only [if_pos h] at l2,
-    sorry,
-    simp only [if_neg h] at l2,
-    rewrite l2, simp, apply p_ih,
     sorry
   },
   case formula.exists_ : p_ᾰ p_ᾰ_1 p_ih v1
