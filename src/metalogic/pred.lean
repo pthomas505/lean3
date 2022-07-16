@@ -2980,11 +2980,11 @@ def formula_sub_prop_formula_aux
     iff (formula_sub_prop_formula_aux var_to_term p) (formula_sub_prop_formula_aux var_to_term q)
 | var_to_term (forall_ x p) :=
   let free := finset.bUnion p.all_prop_set (fun r, (prop_to_formula r).free_var_set) in
-  let x' := if x ∈ free then variant x free else x in
+  let x' := if x ∈ free then variant x (free ∪ (p.free_var_set \ {x})) else x in
   forall_ x' (formula_sub_prop_formula_aux (function.update var_to_term x (var x')) p)
 | var_to_term (exists_ x p) :=
   let free := finset.bUnion p.all_prop_set (fun r, (prop_to_formula r).free_var_set) in
-  let x' := if x ∈ free then variant x free else x in
+  let x' := if x ∈ free then variant x (free ∪ (p.free_var_set \ {x})) else x in
   exists_ x' (formula_sub_prop_formula_aux (function.update var_to_term x (var x')) p)
 
 def formula_sub_prop_formula
@@ -3007,7 +3007,7 @@ formula_sub_prop_formula (single_prop_to_formula p q) r
 #eval sub_single_prop "P" (mk_prop "Q") (mk_prop "P")
 #eval sub_single_prop "P" (mk_pred "Q" [var 0]) (forall_ 0 (mk_pred "P" [var 0]))
 #eval sub_single_prop "P" (mk_pred "Q" [var 0]) (forall_ 0 (imp (mk_prop "P") (mk_prop "P")))
-#eval sub_single_prop "P" (mk_pred "R" [var 0]) (forall_ 0 (and (mk_prop "P") (mk_pred "Q" [var 0])))
+#eval sub_single_prop "P" (mk_pred "R" [var 0]) (forall_ 0 (and (and (mk_prop "P") (mk_pred "Q" [var 0]) ) (mk_pred "R" [var 1]) ))
 
 
 def interpretation.sub''
@@ -3096,12 +3096,10 @@ begin
     unfold formula_sub_prop_formula_aux at *,
     unfold holds at *,
     set free := finset.bUnion p.all_prop_set (fun r, (prop_to_formula r).free_var_set) with l1,
-    set x' := if x ∈ free then variant x free else x with l2,
+    set x' := if x ∈ free then variant x (free ∪ (p.free_var_set \ {x})) else x with l2,
     apply forall_congr, intros a,
     split_ifs at l2,
     {
-      have s1 : x' ∉ free, rewrite l2, apply variant_not_mem x free,
-      have s2 : x ≠ x', intro h1, apply s1, rewrite <- h1, exact h,
       sorry,
     },
     {
