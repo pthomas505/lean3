@@ -3092,7 +3092,9 @@ begin
     apply forall_congr, intros a,
     split_ifs at l2,
     {
-      sorry
+      have s1 : x' ∉ free, rewrite l2, apply variant_not_mem x free,
+      have s2 : x ≠ x', intro h1, apply s1, rewrite <- h1, exact h,
+      sorry,
     },
     {
       rewrite l2, simp only [function.update_eq_self],
