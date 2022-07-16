@@ -3084,13 +3084,26 @@ begin
   case formula.forall_ : x p p_ih v1
   {
     unfold formula.all_prop_set at hv,
-    unfold formula_sub_prop_formula,
-    unfold formula_sub_prop_formula_aux,
-    unfold holds,
-    set free := finset.bUnion p.all_prop_set (fun r, (prop_to_formula r).free_var_set),
+    unfold formula_sub_prop_formula at *,
+    unfold formula_sub_prop_formula_aux at *,
+    unfold holds at *,
+    set free := finset.bUnion p.all_prop_set (fun r, (prop_to_formula r).free_var_set) with l1,
     set x' := if x ∈ free then variant x free else x with l2,
     apply forall_congr, intros a,
-    sorry
+    split_ifs at l2,
+    {
+      sorry
+    },
+    {
+      rewrite l2, simp only [function.update_eq_self],
+      apply p_ih, intros,
+      have s1 : x_1 ∈ free,
+        rewrite l1,
+        simp only [finset.mem_bUnion, exists_prop],
+        apply exists.intro r, exact and.intro H H_1,
+      have s2 : x_1 ≠ x, intro h1, apply h, rewrite <- h1, exact s1,
+      simp only [function.update_noteq s2], exact hv r H x_1 H_1
+    }
   },
   case formula.exists_ : p_ᾰ p_ᾰ_1 p_ih v1
   { admit },
