@@ -3022,8 +3022,28 @@ begin
   { admit },
   case formula.top : v1
   { admit },
-  case formula.pred : p_n p_ᾰ p_ᾰ_1 v1
-  { admit },
+  case formula.pred : n p t v1
+  {
+    unfold formula_sub_prop_formula,
+    unfold interpretation.sub'',
+    unfold holds,
+    simp only,
+    split_ifs,
+    apply thm_2, sorry,
+    have s1 : formula_sub_var_term var (pred n p t) = pred n p t,
+    apply thm_12,
+    rewrite s1,
+    unfold holds,
+    apply iff_of_eq, congr, funext,
+    have s1 : ∀ s, eval_term D (m.sub'' v2 prop_to_formula) v1 s = eval_term D m v1 s,
+      intros s,
+      induction s,
+        unfold eval_term,
+        unfold eval_term,
+        simp only [s_ih], unfold interpretation.sub'',
+    induction (t i),
+    unfold eval_term, simp at *, rewrite <- s1, unfold interpretation.sub'',
+  },
   case formula.eq_ : p_ᾰ p_ᾰ_1 v1
   { admit },
   case formula.not : p_ᾰ p_ih v1
@@ -3046,7 +3066,7 @@ begin
     specialize p_ih (function.update v1 x a),
     by_cases h1 : ite (x ∈ p.all_prop_set.bUnion (λ (r : pred_symbols), (prop_to_formula r).free_var_set)) (variant x (p.all_prop_set.bUnion (λ (r : pred_symbols), (prop_to_formula r).free_var_set))) x = x,
     rewrite h1, simp, exact p_ih,
-    have s1 : (x ∉ p.all_prop_set.bUnion (λ (r : pred_symbols), (prop_to_formula r).free_var_set)), admit,
+    have s1 : (x ∉ p.all_prop_set.bUnion (λ (r : pred_symbols), (prop_to_formula r).free_var_set)), sorry,
     have s2 : (variant x (p.all_prop_set.bUnion (λ (r : pred_symbols), (prop_to_formula r).free_var_set))) = x,
     apply not_mem_imp_variant_eq, exact s1, rewrite s2,
     have s3 : (ite (x ∈ p.all_prop_set.bUnion (λ (r : pred_symbols), (prop_to_formula r).free_var_set)) x x) = x,
