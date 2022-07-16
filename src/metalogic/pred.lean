@@ -939,6 +939,16 @@ begin
   { assumption }
 end
 
+lemma not_mem_imp_variant_eq
+  (x : var_symbols)
+  (s : finset var_symbols)
+  (h1 : x ∉ s) :
+  variant x s = x :=
+begin
+  unfold variant,
+  split_ifs, refl
+end
+
 def formula_sub_var_term : instantiation → formula → formula
 | _ bottom := bottom
 | _ top := top
@@ -3027,7 +3037,21 @@ begin
   case formula.iff : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 v1
   { admit },
   case formula.forall_ : x p p_ih v1
-  { admit },
+  {
+    let free := finset.bUnion p.all_prop_set (fun r, (prop_to_formula r).free_var_set),
+    let x' := if x ∈ free then variant x free else x,
+    unfold formula_sub_prop_formula,
+    unfold holds,
+    apply forall_congr, intros a,
+    specialize p_ih (function.update v1 x a),
+    by_cases h1 : ite (x ∈ p.all_prop_set.bUnion (λ (r : pred_symbols), (prop_to_formula r).free_var_set)) (variant x (p.all_prop_set.bUnion (λ (r : pred_symbols), (prop_to_formula r).free_var_set))) x = x,
+    rewrite h1, simp, exact p_ih,
+    have s1 : (x ∉ p.all_prop_set.bUnion (λ (r : pred_symbols), (prop_to_formula r).free_var_set)), admit,
+    have s2 : (variant x (p.all_prop_set.bUnion (λ (r : pred_symbols), (prop_to_formula r).free_var_set))) = x,
+    apply not_mem_imp_variant_eq, exact s1, rewrite s2,
+    have s3 : (ite (x ∈ p.all_prop_set.bUnion (λ (r : pred_symbols), (prop_to_formula r).free_var_set)) x x) = x,
+    simp only [if_t_t], rewrite s3, simp, exact p_ih,
+  },
   case formula.exists_ : p_ᾰ p_ᾰ_1 p_ih v1
   { admit },
 end
