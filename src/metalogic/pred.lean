@@ -2993,12 +2993,20 @@ def formula_sub_prop_formula
   formula :=
   formula_sub_prop_formula_aux prop_to_formula var p
 
+
+def single_prop_to_formula
+  (p : pred_symbols)
+  (q : formula) :
+  pred_symbols → formula :=
+function.update mk_prop p q
+
 def sub_single_prop (p : pred_symbols) (q : formula) (r : formula) :=
-formula_sub_prop_formula (function.update (fun x : pred_symbols, mk_prop x) p q) r
+formula_sub_prop_formula (single_prop_to_formula p q) r
+
 
 #eval sub_single_prop "P" (mk_prop "Q") (mk_prop "P")
 #eval sub_single_prop "P" (mk_pred "Q" [var 0]) (forall_ 0 (mk_pred "P" [var 0]))
-#eval sub_single_prop "P" (mk_pred "Q" [var 0]) (forall_ 0 (mk_prop "P"))
+#eval sub_single_prop "P" (mk_pred "Q" [var 0]) (forall_ 0 (imp (mk_prop "P") (mk_prop "P")))
 #eval sub_single_prop "P" (mk_pred "R" [var 0]) (forall_ 0 (and (mk_prop "P") (mk_pred "Q" [var 0])))
 
 
