@@ -2928,3 +2928,106 @@ begin
   case formula.exists_ : x p p_ih v1 hv
   { admit },
 end
+
+
+/-
+uniform simultaneous replacement of the propositions in a formala by
+formulas
+-/
+
+def formula.all_prop_set : formula → finset pred_symbols
+| bottom := ∅
+| top := ∅
+| (pred n p t) := if n = 0 then {p} else ∅
+| (eq_ s t) := ∅
+| (not p) := p.all_prop_set
+| (and p q) := p.all_prop_set ∪ q.all_prop_set
+| (or p q) := p.all_prop_set ∪ q.all_prop_set
+| (imp p q) := p.all_prop_set ∪ q.all_prop_set
+| (iff p q) := p.all_prop_set ∪ q.all_prop_set
+| (forall_ x p) := p.all_prop_set
+| (exists_ x p) := p.all_prop_set
+
+
+def formula_sub_prop_formula
+  (prop_to_formula : pred_symbols → formula) :
+  (var_symbols → term) → formula → formula
+| _ bottom := bottom
+| _ top := top
+| var_to_term (pred n p t) :=
+    if n = 0
+    then prop_to_formula p
+    else formula_sub_var_term var_to_term (pred n p t)
+| _ (eq_ s t) := eq_ s t
+| var_to_term (not p) := not (formula_sub_prop_formula var_to_term p)
+| var_to_term (and p q) :=
+    and (formula_sub_prop_formula var_to_term p) (formula_sub_prop_formula var_to_term q)
+| var_to_term (or p q) :=
+    or (formula_sub_prop_formula var_to_term p) (formula_sub_prop_formula var_to_term q)
+| var_to_term (imp p q) :=
+    imp (formula_sub_prop_formula var_to_term p) (formula_sub_prop_formula var_to_term q)
+| var_to_term (iff p q) :=
+    iff (formula_sub_prop_formula var_to_term p) (formula_sub_prop_formula var_to_term q)
+| var_to_term (forall_ x p) :=
+  let free := finset.bUnion p.all_prop_set (fun r, (prop_to_formula r).free_var_set) in
+  let x' := if x ∈ free then variant x free else x in
+  forall_ x' (formula_sub_prop_formula (function.update var_to_term x (var x')) p)
+| var_to_term (exists_ x p) :=
+  let free := finset.bUnion p.all_prop_set (fun r, (prop_to_formula r).free_var_set) in
+  let x' := if x ∈ free then variant x free else x in
+  exists_ x' (formula_sub_prop_formula (function.update var_to_term x (var x')) p)
+
+def sub_single_prop (p : pred_symbols) (q : formula) (r : formula) :=
+formula_sub_prop_formula (function.update (fun x : pred_symbols, mk_prop x) p q) var r
+
+#eval sub_single_prop "P" (mk_prop "Q") (mk_prop "P")
+#eval sub_single_prop "P" (mk_pred "Q" [var 0]) (forall_ 0 (mk_pred "P" [var 0]))
+#eval sub_single_prop "P" (mk_pred "Q" [var 0]) (forall_ 0 (mk_prop "P"))
+#eval sub_single_prop "P" (mk_pred "R" [var 0]) (forall_ 0 (and (mk_prop "P") (mk_pred "Q" [var 0])))
+
+
+def interpretation.sub''
+  {D : Type}
+  (m : interpretation D)
+  (v : valuation D)
+  (prop_to_formula : pred_symbols → formula) :
+  interpretation D :=
+    interpretation.mk m.nonempty m.func
+      (fun (n : ℕ) (p : pred_symbols) (t : fin n → D),
+      if n = 0
+      then holds D m v (prop_to_formula p)
+      else m.pred n p t)
+
+example
+  (D : Type)
+  (m : interpretation D)
+  (v1 v2 : valuation D)
+  (p : formula)
+  (prop_to_formula : pred_symbols → formula) :
+  holds D m v1 (formula_sub_prop_formula prop_to_formula var p)
+    ↔ holds D (m.sub'' v2 prop_to_formula) v1 p :=
+begin
+  induction p generalizing v1,
+  case formula.bottom : v1
+  { admit },
+  case formula.top : v1
+  { admit },
+  case formula.pred : p_n p_ᾰ p_ᾰ_1 v1
+  { admit },
+  case formula.eq_ : p_ᾰ p_ᾰ_1 v1
+  { admit },
+  case formula.not : p_ᾰ p_ih v1
+  { admit },
+  case formula.and : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 v1
+  { admit },
+  case formula.or : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 v1
+  { admit },
+  case formula.imp : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 v1
+  { admit },
+  case formula.iff : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 v1
+  { admit },
+  case formula.forall_ : x p p_ih v1
+  { admit },
+  case formula.exists_ : p_ᾰ p_ᾰ_1 p_ih v1
+  { admit },
+end
