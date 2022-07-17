@@ -2950,6 +2950,7 @@ begin
     unfold formula.all_prop_set at hv,
     unfold formula_sub_prop_formula at *,
     unfold holds at *,
+    apply forall_congr, intros a,
     sorry,
   },
   case formula.exists_ : x p p_ih v1
