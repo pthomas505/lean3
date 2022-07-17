@@ -2946,6 +2946,7 @@ begin
   case formula.forall_ : x p p_ih v1
   {
     set s' := formula_sub_prop_formula prop_to_formula (function.update var x (var x)) p,
+    set x' := variant x s'.free_var_set,
     unfold formula.all_prop_set at hv,
     unfold formula_sub_prop_formula at *,
     unfold holds,
