@@ -2682,7 +2682,7 @@ def formula_sub_prop_prop
 | (exists_ x p) := exists_ x (formula_sub_prop_prop p)
 
 
-def interpretation.sub'
+def interpretation.sub
   {D : Type}
   (m : interpretation D)
   (v : valuation D)
@@ -2692,6 +2692,26 @@ def interpretation.sub'
       (fun (n : ℕ) (p : pred_symbols),
         if n = 0 then m.pred n (prop_to_prop p) else m.pred n p)
 
+
+lemma lem_1
+  {D : Type}
+  (prop_to_prop : pred_symbols → pred_symbols)
+  (m : interpretation D)
+  (t : term)
+  (v : valuation D) :
+  eval_term D m v t = eval_term D (m.sub v prop_to_prop) v t :=
+begin
+  induction t,
+  case term.var : x
+  { unfold eval_term },
+  case term.func : n f t t_ih
+  {
+    unfold eval_term, unfold interpretation.sub,
+    simp only, congr, funext, apply t_ih
+ },
+end
+
+
 theorem thm_12
   (D : Type)
   (m : interpretation D)
@@ -2699,7 +2719,7 @@ theorem thm_12
   (p : formula)
   (prop_to_prop : pred_symbols → pred_symbols) :
   holds D m v (formula_sub_prop_prop prop_to_prop p)
-    ↔ holds D (m.sub' v prop_to_prop) v p :=
+    ↔ holds D (m.sub v prop_to_prop) v p :=
 begin
   induction p generalizing v,
   case formula.bottom
@@ -2707,28 +2727,26 @@ begin
   case formula.top
   { unfold formula_sub_prop_prop, unfold holds },
   case formula.pred : n p t
-  { unfold formula_sub_prop_prop,
-    unfold interpretation.sub',
-    split_ifs,
+  {
+    unfold formula_sub_prop_prop,
+    unfold interpretation.sub,
     unfold holds,
-    subst h,
-    simp, apply iff_of_eq, congr', funext,
-    apply fin.elim0 i,
-    unfold holds, simp, split_ifs, apply iff_of_eq, congr,
-    funext, induction (t i),
-    unfold eval_term, unfold eval_term, simp, congr,
-    funext, apply ih, },
+    simp only,
+    split_ifs,
+    {
+      unfold holds,
+      apply iff_of_eq, congr, funext, subst h, apply fin.elim0 i
+    },
+    {
+      unfold holds,
+      apply iff_of_eq, congr, funext, apply lem_1,
+    }
+  },
   case formula.eq_ : s t
   {
-    have s1 : ∀ s, eval_term D (m.sub' v prop_to_prop) v s = eval_term D m v s,
-      intros s,
-      induction s,
-        unfold eval_term,
-        unfold eval_term,
-        simp only [s_ih], unfold interpretation.sub',
     unfold formula_sub_prop_prop,
     unfold holds,
-    simp only [s1 s, s1 t],
+    rewrite <- lem_1, rewrite <- lem_1
   },
   case formula.not : p p_ih
   { unfold formula_sub_prop_prop,
@@ -2768,7 +2786,7 @@ example
 begin
   unfold is_valid at *,
   intros D m v,
-  simp only [thm_12], apply h1
+  rewrite thm_12, apply h1
 end
 
 
@@ -2838,7 +2856,7 @@ formula_sub_prop_formula (single_prop_to_formula p q) var r
 #eval sub_single_prop "P" (mk_pred "R" [var 0]) (forall_ 0 (and (and (mk_prop "P") (mk_pred "Q" [var 0]) ) (mk_pred "R" [var 1]) ))
 
 
-def interpretation.sub''
+def interpretation.sub'
   {D : Type}
   (m : interpretation D)
   (v : valuation D)
@@ -2850,27 +2868,26 @@ def interpretation.sub''
       then holds D m v (prop_to_formula p)
       else m.pred n p t)
 
-lemma lem_1
+
+lemma lem_2
   {D : Type}
   (prop_to_formula : pred_symbols → formula)
-  (p : pred_symbols)
   (m : interpretation D)
   (v1 v2 : valuation D)
   (t : term) :
-  (eval_term D m v1 t =
-   eval_term D (m.sub'' v2 prop_to_formula) v1 t) :=
+  eval_term D m v1 t = eval_term D (m.sub' v2 prop_to_formula) v1 t :=
 begin
   induction t,
   case term.var : x
   { unfold eval_term },
   case term.func : n f t t_ih
   {
-    unfold eval_term, unfold interpretation.sub'',
+    unfold eval_term, unfold interpretation.sub',
     simp at *, congr, funext, apply t_ih
   },
 end
 
-lemma lem_2
+theorem thm_13
   {D : Type}
   (m : interpretation D)
   (v1 v2 : valuation D)
@@ -2878,18 +2895,18 @@ lemma lem_2
   (prop_to_formula : pred_symbols → formula)
   (hv : ∀ (r ∈ p.all_prop_set) (x ∈ (prop_to_formula r).free_var_set), v1 x = v2 x) :
   holds D m v1 (formula_sub_prop_formula prop_to_formula var p)
-    ↔ holds D (m.sub'' v2 prop_to_formula) v1 p :=
+    ↔ holds D (m.sub' v2 prop_to_formula) v1 p :=
 begin
   induction p generalizing v1,
   case formula.bottom : v1
-  { admit },
+  { unfold formula_sub_prop_formula, unfold holds },
   case formula.top : v1
-  { admit },
+  { unfold formula_sub_prop_formula, unfold holds },
   case formula.pred : n p t v1
   {
     unfold formula.all_prop_set at hv,
     unfold formula_sub_prop_formula,
-    unfold interpretation.sub'',
+    unfold interpretation.sub',
     unfold holds,
     simp only,
     split_ifs,
@@ -2901,12 +2918,12 @@ begin
       simp only [thm_11],
       unfold holds,
       apply iff_of_eq, congr, funext,
-      apply lem_1 prop_to_formula p,
+      apply lem_2,
     }
   },
-  case formula.eq_ : p_ᾰ p_ᾰ_1 v1
+  case formula.eq_ : s t v1
   { admit },
-  case formula.not : p_ᾰ p_ih v1
+  case formula.not : p p_ih v1
   { admit },
   case formula.and : p q p_ih q_ih v1
   {
@@ -2917,11 +2934,11 @@ begin
     apply p_ih, intros, apply hv r, apply or.intro_left, exact H, exact H_1,
     apply q_ih, intros, apply hv r, apply or.intro_right, exact H, exact H_1
   },
-  case formula.or : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 v1
+  case formula.or : p q p_ih q_ih v1
   { admit },
-  case formula.imp : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 v1
+  case formula.imp : p q p_ih q_ih v1
   { admit },
-  case formula.iff : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 v1
+  case formula.iff : p q p_ih q_ih v1
   { admit },
   case formula.forall_ : x p p_ih v1
   {
@@ -2929,9 +2946,9 @@ begin
     unfold formula.all_prop_set at hv,
     unfold formula_sub_prop_formula at *,
     unfold holds at *,
-
+    sorry,
   },
-  case formula.exists_ : p_ᾰ p_ᾰ_1 p_ih v1
+  case formula.exists_ : x p p_ih v1
   { admit },
 end
 
@@ -2943,7 +2960,7 @@ example
 begin
   unfold is_valid at *,
   intros D m v,
-  rewrite lem_2, apply h1,
+  rewrite thm_13, apply h1,
   intros, refl
 end
 
@@ -2956,5 +2973,5 @@ example
 begin
   unfold is_valid at *,
   intros D m v,
-
+  sorry,
 end
