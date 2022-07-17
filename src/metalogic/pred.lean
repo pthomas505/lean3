@@ -676,7 +676,7 @@ begin
   unfold is_sentence at h1,
   have s1 : ∀ x ∈ p.free_var_set, v1 x = v2 x,
     rewrite h1,
-    simp only [finset.not_mem_empty, forall_false_left, implies_true_iff],
+    simp only [finset.not_mem_empty, is_empty.forall_iff, forall_const],
   exact thm_2 D m v1 v2 p s1
 end
 
@@ -784,8 +784,7 @@ begin
   {
     unfold is_valid, unfold is_model_of, unfold satisfies_set,
     unfold holds_in, unfold satisfies,
-    simp only [finset.not_mem_empty, forall_false_left, implies_true_iff,
-    forall_true_left, imp_self]
+    simp only [finset.not_mem_empty, forall_const, imp_self],
   }
 end
 
