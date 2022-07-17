@@ -2839,7 +2839,7 @@ def formula_sub_prop_formula
   let free := finset.bUnion p.all_prop_set (fun r, (prop_to_formula r).free_var_set) in
   let x' :=
   if x ∈ free
-  then variant x free
+  then x
   else x
   in exists_ x (formula_sub_prop_formula (function.update var_to_term x (var x')) p)
 
