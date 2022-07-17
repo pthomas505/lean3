@@ -2951,11 +2951,11 @@ begin
     simp only,
     split_ifs,
     {
-      apply exists.elim h, intros a h1, apply exists.elim h1, intros a_1 h2,
+      apply exists.elim h, intros r h1, apply exists.elim h1, intros r_1 h2,
       clear h, clear h1,
       simp only [function.update_eq_self],
       unfold holds,
-      apply forall_congr, intros a_2,
+      apply forall_congr, intros a,
       set s' := formula_sub_prop_formula prop_to_formula var p,
       set x' := variant x s'.free_var_set,
       by_cases h3 : x = x',
@@ -2963,7 +2963,7 @@ begin
         rewrite h3,
         simp only [function.update_eq_self],
         apply p_ih,
-        intros r h4 x_1 h5,
+        intros r_2 h4 x_1 h5,
         by_cases h6 : x_1 = x',
         {
           rewrite h6,
@@ -2972,7 +2972,7 @@ begin
         },
         {
           simp only [function.update_noteq h6],
-          apply hv r h4 x_1 h5
+          apply hv r_2 h4 x_1 h5
         }
       },
       {
