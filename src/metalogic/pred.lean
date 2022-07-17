@@ -2953,7 +2953,7 @@ begin
     {
       apply exists.elim h, intros a h1, apply exists.elim h1, intros a_1 h2,
       clear h, clear h1,
-      simp,
+      simp only [function.update_eq_self],
       unfold holds,
       apply forall_congr, intros a_2,
       set s' := formula_sub_prop_formula prop_to_formula var p,
@@ -2961,13 +2961,13 @@ begin
       by_cases h3 : x = x',
       {
         rewrite h3,
-        simp,
+        simp only [function.update_eq_self],
         apply p_ih,
         intros r h4 x_1 h5,
         by_cases h6 : x_1 = x',
         {
           rewrite h6,
-          simp,
+          simp only [function.update_same],
           sorry,
         },
         {
