@@ -2951,7 +2951,8 @@ begin
     unfold formula_sub_prop_formula at *,
     unfold holds at *,
     apply forall_congr, intros a,
-    sorry,
+    apply p_ih,
+    intros r h1 y h2,
   },
   case formula.exists_ : x p p_ih v1
   { admit },
