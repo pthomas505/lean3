@@ -2830,18 +2830,20 @@ def formula_sub_prop_formula
     iff (formula_sub_prop_formula var_to_term p) (formula_sub_prop_formula var_to_term q)
 | var_to_term (forall_ x p) :=
   let free := finset.bUnion p.all_prop_set (fun r, (prop_to_formula r).free_var_set) in
+  let free' := (formula_sub_prop_formula (function.update var_to_term x (var x)) p).free_var_set in
   let x' :=
   if x ∈ free
-  then x
+  then variant x (free ∪ free')
   else x
-  in forall_ x (formula_sub_prop_formula (function.update var_to_term x (var x')) p)
+  in forall_ x' (formula_sub_prop_formula (function.update var_to_term x (var x')) p)
 | var_to_term (exists_ x p) :=
   let free := finset.bUnion p.all_prop_set (fun r, (prop_to_formula r).free_var_set) in
+  let free' := (formula_sub_prop_formula (function.update var_to_term x (var x)) p).free_var_set in
   let x' :=
   if x ∈ free
-  then x
+  then variant x (free ∪ free')
   else x
-  in exists_ x (formula_sub_prop_formula (function.update var_to_term x (var x')) p)
+  in exists_ x' (formula_sub_prop_formula (function.update var_to_term x (var x')) p)
 
 
 def single_prop_to_formula
@@ -2951,7 +2953,7 @@ begin
     unfold formula_sub_prop_formula at *,
     unfold holds at *,
     apply forall_congr, intros a,
-    simp only [if_t_t, function.update_eq_self],
+    
     apply p_ih,
     intros r h1 y h2,
     by_cases y = x,
