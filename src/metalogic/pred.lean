@@ -2829,21 +2829,19 @@ def formula_sub_prop_formula
 | var_to_term (iff p q) :=
     iff (formula_sub_prop_formula var_to_term p) (formula_sub_prop_formula var_to_term q)
 | var_to_term (forall_ x p) :=
-  let free := finset.bUnion p.all_prop_set (fun r, (prop_to_formula r).free_var_set) in
-  let free' := (formula_sub_prop_formula (function.update var_to_term x (var x)) p).free_var_set in
-  let x' :=
-  if x ∈ free
-  then variant x (free ∪ free')
-  else x
-  in forall_ x' (formula_sub_prop_formula (function.update var_to_term x (var x')) p)
+  let s' := formula_sub_prop_formula (function.update var_to_term x (var x)) p in
+  if ∃ r ∈ p.all_prop_set, x ∈ (prop_to_formula r).free_var_set then
+    let x' := variant x s'.free_var_set in
+    forall_ x' (formula_sub_prop_formula (function.update var_to_term x (var x')) p)
+  else
+    forall_ x s'
 | var_to_term (exists_ x p) :=
-  let free := finset.bUnion p.all_prop_set (fun r, (prop_to_formula r).free_var_set) in
-  let free' := (formula_sub_prop_formula (function.update var_to_term x (var x)) p).free_var_set in
-  let x' :=
-  if x ∈ free
-  then variant x (free ∪ free')
-  else x
-  in exists_ x' (formula_sub_prop_formula (function.update var_to_term x (var x')) p)
+  let s' := formula_sub_prop_formula (function.update var_to_term x (var x)) p in
+  if ∃ r ∈ p.all_prop_set, x ∈ (prop_to_formula r).free_var_set then
+    let x' := variant x s'.free_var_set in
+    exists_ x' (formula_sub_prop_formula (function.update var_to_term x (var x')) p)
+  else
+    exists_ x s'
 
 
 def single_prop_to_formula
@@ -2948,13 +2946,9 @@ begin
   { admit },
   case formula.forall_ : x p p_ih v1
   {
+    --set s' := formula_sub_prop_formula prop_to_formula (function.update var x (var x)) p,
     unfold formula.all_prop_set at hv,
     unfold formula_sub_prop_formula at *,
-    unfold holds at *,
-    apply forall_congr, intros a,
-    set free := finset.bUnion p.all_prop_set (fun r, (prop_to_formula r).free_var_set),
-    set free' := (formula_sub_prop_formula prop_to_formula (function.update var x (var x)) p).free_var_set,
-    set x' := if x ∈ free then variant x (free ∪ free') else x,
     sorry
   },
   case formula.exists_ : x p p_ih v1
