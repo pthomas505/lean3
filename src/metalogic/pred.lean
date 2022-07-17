@@ -2948,22 +2948,14 @@ begin
   { admit },
   case formula.forall_ : x p p_ih v1
   {
-    set free := finset.bUnion p.all_prop_set (fun r, (prop_to_formula r).free_var_set),
     unfold formula.all_prop_set at hv,
     unfold formula_sub_prop_formula at *,
     unfold holds at *,
     apply forall_congr, intros a,
-    
-    apply p_ih,
-    intros r h1 y h2,
-    by_cases y = x,
-    {
-      rewrite h, simp only [function.update_same], sorry,
-    },
-    {
-      simp only [function.update_noteq h],
-      apply hv r h1 y h2
-    },
+    set free := finset.bUnion p.all_prop_set (fun r, (prop_to_formula r).free_var_set),
+    set free' := (formula_sub_prop_formula prop_to_formula (function.update var x (var x)) p).free_var_set,
+    set x' := if x ∈ free then variant x (free ∪ free') else x,
+    sorry
   },
   case formula.exists_ : x p p_ih v1
   { admit },
