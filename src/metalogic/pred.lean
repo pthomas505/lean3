@@ -2953,7 +2953,14 @@ begin
     apply forall_congr, intros a,
     apply p_ih,
     intros r h1 y h2,
-    sorry,
+    by_cases y = x,
+    {
+      rewrite h, simp only [function.update_same], sorry,
+    },
+    {
+      simp only [function.update_noteq h],
+      apply hv r h1 y h2
+    },
   },
   case formula.exists_ : x p p_ih v1
   { admit },
