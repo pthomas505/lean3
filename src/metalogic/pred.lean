@@ -2950,38 +2950,72 @@ begin
     unfold formula_sub_prop_formula at *,
     unfold holds,
     simp only,
-    split_ifs,
-    unfold holds,
-    apply forall_congr, intros a,
-    simp only [function.update_eq_self],
-    have s1 : (function.update var x (var x)) = var, simp only [function.update_eq_self],
-    rewrite s1,
-    by_cases h1 : (variant x (formula_sub_prop_formula prop_to_formula var p).free_var_set) = x,
-    rewrite h1,
-    simp only [function.update_eq_self],
-    apply p_ih,
-    intros,
-    by_cases h2 : x_1 = x,
-    rewrite h2,
-    simp only [function.update_same],
-    sorry,
-    simp only [function.update_noteq h2],
-    apply hv r H x_1 H_1,
-    sorry,
-    simp only [function.update_eq_self],
-    unfold holds,
-    apply forall_congr, intros a,
-    apply p_ih,
-    intros,
-    push_neg at h,
-    specialize h r H,
-    have s2 : x_1 ≠ x,
-    intro h1,
-    apply h,
-    rewrite <- h1,
-    apply H_1,
-    simp only [function.update_noteq s2],
-    apply hv r H x_1 H_1,
+    split,
+    {
+      split_ifs,
+      {
+        unfold holds,
+        apply forall_imp, intros a,
+        simp only [function.update_eq_self],
+        have s1 : function.update var x (var x) = var, simp only [function.update_eq_self],
+        rewrite s1,
+        apply exists.elim h, intros a_1 h1,
+        apply exists.elim h1, intros a_2 h2,
+        intros h3,
+        sorry,
+      },
+      {
+        push_neg at h,
+        unfold holds,
+        apply forall_imp, intros a,
+        simp only [function.update_eq_self],
+        rewrite p_ih,
+        simp only [imp_self],
+        intros,
+        by_cases h1 : x_1 = x,
+        {
+          rewrite h1,
+          simp only [function.update_same],
+          by_contradiction h2,
+          apply h r H,
+          rewrite <- h1,
+          exact H_1
+        },
+        {
+          simp only [function.update_noteq h1],
+          apply hv r H x_1 H_1
+        }
+      }
+    },
+    {
+      simp only [function.update_eq_self],
+      split_ifs,
+      {
+        unfold holds,
+        apply forall_imp, intros a,
+        rewrite <- p_ih,
+        sorry, sorry,
+      },
+      {
+        push_neg at h,
+        unfold holds,
+        apply forall_imp, intros a,
+        rewrite p_ih,
+        simp only [imp_self],
+        intros,
+        by_cases h1 : x_1 = x,
+        {
+          by_contradiction h2,
+          apply h r H,
+          rewrite <- h1,
+          exact H_1
+        },
+        {
+          simp only [function.update_noteq h1],
+          apply hv r H x_1 H_1
+        }
+      }
+    }
   },
   case formula.exists_ : x p p_ih v1
   { admit },
