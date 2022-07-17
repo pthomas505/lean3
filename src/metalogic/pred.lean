@@ -2980,12 +2980,12 @@ begin
       }
     },
     {
-      push_neg at h,
-      simp,
       unfold holds,
       apply forall_congr, intros a,
+      simp only [function.update_eq_self],
       apply p_ih,
       intros r h1 x_1 h2,
+      push_neg at h,
       have s1 : x_1 ≠ x, intros h3, subst h3, apply h r h1 h2,
       simp only [function.update_noteq s1],
       apply hv r h1 x_1 h2
