@@ -1,8 +1,8 @@
 [package]
 name = "lean3"
 version = "0.1"
-lean_version = "leanprover-community/lean:3.42.1"
+lean_version = "leanprover-community/lean:3.45.0"
 path = "src"
 
 [dependencies]
-mathlib = {git = "https://github.com/leanprover-community/mathlib", rev = "b673ed8a6bfde770e8505d0cb2d302549b19b4eb"}
+mathlib = {git = "https://github.com/leanprover-community/mathlib", rev = "d69acdc909d92d9dde5648922412c946c2392f03"}
