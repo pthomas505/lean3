@@ -2900,7 +2900,7 @@ theorem thm_13
   holds D m v1 (formula_sub_prop_formula prop_to_formula var p)
     ↔ holds D (m.sub' v2 prop_to_formula) v1 p :=
 begin
-  induction p generalizing v1 v2,
+  induction p generalizing v1,
   case formula.bottom : v1
   { unfold formula_sub_prop_formula, unfold holds },
   case formula.top : v1
@@ -2952,10 +2952,11 @@ begin
     split_ifs,
     {
       apply exists.elim h, intros a h1, apply exists.elim h1, intros a_1 h2,
+      clear h, clear h1,
       simp,
       unfold holds,
       apply forall_congr, intros a_2,
-      set s' := formula_sub_prop_formula prop_to_formula var p with l1,
+      set s' := formula_sub_prop_formula prop_to_formula var p,
       set x' := variant x s'.free_var_set,
       by_cases h3 : x = x',
       {
@@ -2965,6 +2966,8 @@ begin
         intros r h4 x_1 h5,
         by_cases h6 : x_1 = x',
         {
+          rewrite h6,
+          simp,
           sorry,
         },
         {
