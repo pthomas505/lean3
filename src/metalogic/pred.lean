@@ -2953,6 +2953,7 @@ begin
     apply forall_congr, intros a,
     apply p_ih,
     intros r h1 y h2,
+    sorry,
   },
   case formula.exists_ : x p p_ih v1
   { admit },
