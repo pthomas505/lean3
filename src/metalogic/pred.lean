@@ -3031,11 +3031,11 @@ example
   is_valid (formula_sub_prop_formula prop_to_formula var_to_term p) :=
 begin
   induction p generalizing var_to_term,
-  case formula.bottom
-  { unfold formula_sub_prop_formula, exact h1 },
-  case formula.top
-  { unfold formula_sub_prop_formula, exact h1 },
-  case formula.pred : n p t
+  case formula.bottom : var_to_term
+  { unfold formula_sub_prop_formula, exact h1, },
+  case formula.top : var_to_term
+  { unfold formula_sub_prop_formula, exact h1, },
+  case formula.pred : n p t var_to_term
   {
     unfold formula_sub_prop_formula,
     split_ifs,
@@ -3053,19 +3053,19 @@ begin
       exact h1
     }
   },
-  case formula.eq_ : s t
+  case formula.eq_ : s t var_to_term
   {
     unfold formula_sub_prop_formula,
     exact h1
   },
-  case formula.not : p p_ih
+  case formula.not : p p_ih var_to_term
   {
     unfold formula_sub_prop_formula at *,
     unfold is_valid at *,
     unfold holds at *,
     sorry
   },
-  case formula.and : p q p_ih q_ih
+  case formula.and : p q p_ih q_ih var_to_term
   {
     unfold formula_sub_prop_formula at *,
     unfold is_valid at *,
@@ -3081,13 +3081,13 @@ begin
       specialize h1 D' m' v', exact h1.right
     }
   },
-  case formula.or : p q p_ih q_ih
+  case formula.or : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 var_to_term
   { admit },
-  case formula.imp : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
+  case formula.imp : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 var_to_term
   { admit },
-  case formula.iff : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1
+  case formula.iff : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 var_to_term
   { admit },
-  case formula.forall_ : x p p_ih
+  case formula.forall_ : x p p_ih var_to_term
   {
     have s1 : is_valid p, apply forall_valid_imp_valid p x h1,
     specialize p_ih s1,
@@ -3101,6 +3101,8 @@ begin
       apply is_valid_gen, apply p_ih,
     }
   },
-  case formula.exists_ : p_ᾰ p_ᾰ_1 p_ih
-  { admit },
+  case formula.exists_ : x p p_ih var_to_term
+  {
+    sorry,
+  },
 end
