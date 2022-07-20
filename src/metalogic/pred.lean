@@ -3095,7 +3095,7 @@ begin
     simp only [function.update_eq_self],
     split_ifs,
     {
-      sorry,
+      apply is_valid_gen, apply p_ih,
     },
     {
       apply is_valid_gen, apply p_ih,
