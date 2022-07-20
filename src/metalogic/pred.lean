@@ -3026,10 +3026,11 @@ end
 example
   (p : formula)
   (prop_to_formula : pred_symbols → formula)
+  (var_to_term : var_symbols → term)
   (h1 : is_valid p) :
-  is_valid (formula_sub_prop_formula prop_to_formula var p) :=
+  is_valid (formula_sub_prop_formula prop_to_formula var_to_term p) :=
 begin
-  induction p,
+  induction p generalizing var_to_term,
   case formula.bottom
   { unfold formula_sub_prop_formula, exact h1 },
   case formula.top
@@ -3048,7 +3049,7 @@ begin
       exact h1
     },
     {
-      simp only [thm_11],
+      apply thm_9,
       exact h1
     }
   },
@@ -3097,7 +3098,7 @@ begin
       sorry,
     },
     {
-      apply is_valid_gen, exact p_ih,
+      apply is_valid_gen, apply p_ih,
     }
   },
   case formula.exists_ : p_ᾰ p_ᾰ_1 p_ih
