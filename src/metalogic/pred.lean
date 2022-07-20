@@ -3022,6 +3022,19 @@ begin
   exact h1,
 end
 
+theorem is_valid_exists
+  (p : formula)
+  (x : var_symbols)
+  (h1 : is_valid p) :
+  is_valid (exists_ x p) :=
+begin
+  unfold is_valid at *, unfold holds at *,
+  intros D m v,
+  apply exists.intro (v x),
+  simp only [function.update_eq_self],
+  apply h1,
+end
+
 
 example
   (p : formula)
@@ -3103,6 +3116,14 @@ begin
   },
   case formula.exists_ : x p p_ih var_to_term
   {
-    sorry,
+    unfold formula_sub_prop_formula,
+    simp only,
+    split_ifs,
+    {
+
+    },
+    {
+
+    }
   },
 end
