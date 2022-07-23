@@ -2918,10 +2918,9 @@ begin
       simp only [if_pos h, finset.mem_singleton]
     },
     {
-      unfold formula_sub_var_term,
+      simp only [thm_11],
       unfold holds,
       apply iff_of_eq, congr, funext,
-      simp only [thm_10],
       apply lem_2
     }
   },
