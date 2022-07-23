@@ -2918,10 +2918,11 @@ begin
       simp only [if_pos h, finset.mem_singleton]
     },
     {
-      simp only [thm_11],
+      unfold formula_sub_var_term,
       unfold holds,
       apply iff_of_eq, congr, funext,
-      apply lem_2,
+      simp only [thm_10],
+      apply lem_2
     }
   },
   case formula.eq_ : s t v1
@@ -2951,33 +2952,9 @@ begin
     simp only,
     split_ifs,
     {
-      apply exists.elim h, intros r h1, apply exists.elim h1, intros r_1 h2,
-      clear h, clear h1,
-      simp only [function.update_eq_self],
       unfold holds,
       apply forall_congr, intros a,
-      set s' := formula_sub_prop_formula prop_to_formula var p,
-      set x' := variant x s'.free_var_set,
-      by_cases h3 : x = x',
-      {
-        rewrite h3,
-        simp only [function.update_eq_self],
-        apply p_ih,
-        intros r_2 h4 x_1 h5,
-        by_cases h6 : x_1 = x',
-        {
-          rewrite h6,
-          simp only [function.update_same],
-          sorry,
-        },
-        {
-          simp only [function.update_noteq h6],
-          apply hv r_2 h4 x_1 h5
-        }
-      },
-      {
-        sorry,
-      }
+      sorry
     },
     {
       unfold holds,
@@ -2992,7 +2969,32 @@ begin
     }
   },
   case formula.exists_ : x p p_ih v1
-  { admit },
+  {
+    unfold formula.all_prop_set at hv,
+    unfold formula_sub_prop_formula at *,
+    unfold holds,
+    simp only,
+    split_ifs,
+    {
+      set s' := formula_sub_prop_formula prop_to_formula (function.update var x (var x)) p,
+      set x' := variant x s'.free_var_set,
+      apply exists.elim h, intros r h1, apply exists.elim h1, intros h2 h3,
+      unfold holds,
+      apply exists_congr, intros a,
+      sorry,
+    },
+    {
+      unfold holds,
+      apply exists_congr, intros a,
+      simp only [function.update_eq_self],
+      apply p_ih,
+      intros r h1 x_1 h2,
+      push_neg at h,
+      have s1 : x_1 ≠ x, intros h3, subst h3, apply h r h1 h2,
+      simp only [function.update_noteq s1],
+      apply hv r h1 x_1 h2
+    }
+  },
 end
 
 example
@@ -3022,6 +3024,25 @@ begin
   exact h1,
 end
 
+lemma exists_valid_imp_valid
+  (p : formula)
+  (x : var_symbols)
+  (h1 : is_valid (exists_ x p))
+  (h2 : x ∉ p.free_var_set) :
+  is_valid p :=
+begin
+  unfold is_valid at *,
+  unfold holds at *,
+  intros D m v,
+  specialize h1 D m v,
+  apply exists.elim h1, intros a h3,
+  rewrite thm_2 D m v (function.update v x a),
+  exact h3,
+  intros,
+  have s1 : x_1 ≠ x, intro contra, apply h2, subst contra, exact H,
+  simp only [function.update_noteq s1],
+end
+
 theorem is_valid_exists
   (p : formula)
   (x : var_symbols)
@@ -3033,97 +3054,4 @@ begin
   apply exists.intro (v x),
   simp only [function.update_eq_self],
   apply h1,
-end
-
-
-example
-  (p : formula)
-  (prop_to_formula : pred_symbols → formula)
-  (var_to_term : var_symbols → term)
-  (h1 : is_valid p) :
-  is_valid (formula_sub_prop_formula prop_to_formula var_to_term p) :=
-begin
-  induction p generalizing var_to_term,
-  case formula.bottom : var_to_term
-  { unfold formula_sub_prop_formula, exact h1, },
-  case formula.top : var_to_term
-  { unfold formula_sub_prop_formula, exact h1, },
-  case formula.pred : n p t var_to_term
-  {
-    unfold formula_sub_prop_formula,
-    split_ifs,
-    {
-      unfold is_valid at *,
-      intros D m v,
-      specialize h1 D (interpretation.mk m.nonempty m.func
-      (fun (n : ℕ) (p : pred_symbols) (t : fin n → D), holds D m v (prop_to_formula p))) v,
-      unfold holds at h1,
-      simp only at h1,
-      exact h1
-    },
-    {
-      apply thm_9,
-      exact h1
-    }
-  },
-  case formula.eq_ : s t var_to_term
-  {
-    unfold formula_sub_prop_formula,
-    exact h1
-  },
-  case formula.not : p p_ih var_to_term
-  {
-    unfold formula_sub_prop_formula at *,
-    unfold is_valid at *,
-    unfold holds at *,
-    sorry
-  },
-  case formula.and : p q p_ih q_ih var_to_term
-  {
-    unfold formula_sub_prop_formula at *,
-    unfold is_valid at *,
-    unfold holds at *,
-    intros D m v,
-    split,
-    {
-      apply p_ih, intros D' m' v',
-      specialize h1 D' m' v', exact h1.left
-    },
-    {
-      apply q_ih, intros D' m' v',
-      specialize h1 D' m' v', exact h1.right
-    }
-  },
-  case formula.or : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 var_to_term
-  { admit },
-  case formula.imp : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 var_to_term
-  { admit },
-  case formula.iff : p_ᾰ p_ᾰ_1 p_ih_ᾰ p_ih_ᾰ_1 var_to_term
-  { admit },
-  case formula.forall_ : x p p_ih var_to_term
-  {
-    have s1 : is_valid p, apply forall_valid_imp_valid p x h1,
-    specialize p_ih s1,
-    unfold formula_sub_prop_formula,
-    simp only [function.update_eq_self],
-    split_ifs,
-    {
-      apply is_valid_gen, apply p_ih,
-    },
-    {
-      apply is_valid_gen, apply p_ih,
-    }
-  },
-  case formula.exists_ : x p p_ih var_to_term
-  {
-    unfold formula_sub_prop_formula,
-    simp only,
-    split_ifs,
-    {
-
-    },
-    {
-
-    }
-  },
 end
