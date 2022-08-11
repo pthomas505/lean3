@@ -2951,9 +2951,23 @@ begin
     simp only,
     split_ifs,
     {
+      set s' := formula_sub_prop_formula prop_to_formula (function.update var x (var x)) p,
+      set x' := variant x s'.free_var_set,
+      apply exists.elim h, intros r h1, apply exists.elim h1, intros h2 h3,
       unfold holds,
       apply forall_congr, intros a,
-      sorry
+      rewrite <- p_ih, sorry,
+      intros r_1 h2_1 x_1 h3_1,
+      by_cases h4 : x_1 = x,
+      {
+        rewrite h4,
+        simp only [function.update_same],
+        sorry,
+      },
+      {
+        simp only [function.update_noteq h4],
+        exact hv r_1 h2_1 x_1 h3_1
+      }
     },
     {
       unfold holds,
@@ -3053,4 +3067,230 @@ begin
   apply exists.intro (v x),
   simp only [function.update_eq_self],
   apply h1,
+end
+
+
+def fin_fun_range
+  {α : Type} [decidable_eq α]
+  {n : ℕ}
+  (f : fin n → α) :
+  finset α := finset.image f (finset.fin_range n)
+
+def zip_fin_fun
+  {α β : Type}
+  [decidable_eq α]
+  (m n : ℕ)
+  (f : fin m → α)
+  (g : fin n → β)
+  (default : α → β)
+  (h1 : m = n)
+  (h2 : function.injective f) :
+  α → β :=
+  fun x : α, if h : ∃ i : fin m, f i = x then
+  begin
+    apply g,
+    rewrite <- h1,
+    apply fintype.choose (fun a : fin m, f a = x),
+    simp only,
+    apply exists.elim h, intros a h3,
+    apply exists.intro a, simp only,
+    split,
+    exact h3,
+    intros y h4, apply h2,
+    subst h3, exact h4
+  end
+  else default x
+
+structure def_ : Type :=
+(n : ℕ)
+(params : fin n → var_symbols)
+(nodup : function.injective params)
+(q : formula)
+
+def option.extract {α β : Type} (f : α → β) (b : β) : option α → β
+| (some a) := f a
+| none := b
+
+def formula_sub_pred
+(pred_to_def : (ℕ × pred_symbols) → option def_) : formula → formula
+| bottom := bottom
+| top := top
+| (pred n p t) := do
+  let f := fun d : def_,
+    if h : d.n = n
+    then formula_sub_var_term (zip_fin_fun d.n n d.params t var h d.nodup) d.q
+    else pred n p t
+  in option.extract f (pred n p t) (pred_to_def (n, p))
+| (eq_ s t) := eq_ s t
+| (not p) := not (formula_sub_pred p)
+| (and p q) := and (formula_sub_pred p) (formula_sub_pred q)
+| (or p q) := or (formula_sub_pred p) (formula_sub_pred q)
+| (imp p q) := imp (formula_sub_pred p) (formula_sub_pred q)
+| (iff p q) := iff (formula_sub_pred p) (formula_sub_pred q)
+| (forall_ x p) := forall_ x (formula_sub_pred p)
+| (exists_ x p) := exists_ x (formula_sub_pred p)
+
+def formula_sub_pred_is_def
+  (pred_to_def : (ℕ × pred_symbols) → option def_) :
+  finset var_symbols → formula → Prop
+| _ bottom := true
+| _ top := true
+| binders (pred n p t) := do
+  let f := fun d : def_,
+    if d.n = n
+    then disjoint binders (d.q.free_var_set \ fin_fun_range d.params)
+    else true
+  in option.extract f true (pred_to_def (n, p))
+| binders (eq_ s t) := true
+| binders (not p) := formula_sub_pred_is_def binders p
+| binders (and p q) :=
+    (formula_sub_pred_is_def binders p) ∧ (formula_sub_pred_is_def binders q)
+| binders (or p q) :=
+    (formula_sub_pred_is_def binders p) ∧ (formula_sub_pred_is_def binders q)
+| binders (imp p q) :=
+    (formula_sub_pred_is_def binders p) ∧ (formula_sub_pred_is_def binders q)
+| binders (iff p q) :=
+    (formula_sub_pred_is_def binders p) ∧ (formula_sub_pred_is_def binders q)
+| binders (forall_ x p) := formula_sub_pred_is_def (binders ∪ {x}) p
+| binders (exists_ x p) := formula_sub_pred_is_def (binders ∪ {x}) p
+
+def sub_single_pred
+  (φ : formula)
+  (n : ℕ)
+  (p : pred_symbols)
+  (params : fin n → var_symbols)
+  (nodup : function.injective params)
+  (q : formula) : formula :=
+  let d := fun (r : ℕ × pred_symbols),
+    if r.fst = n ∧ r.snd = p
+    then some (def_.mk n params nodup q)
+    else none in
+  formula_sub_pred d φ
+
+#eval sub_single_pred
+(forall_ 1 (imp (mk_pred "P" [var 1]) (mk_prop "R")))
+2 "P"
+(list.to_fin_fun [0, 1])
+sorry
+(mk_pred "Q" [var 1])
+
+
+
+def formula_sub_single_pred
+  (n' : ℕ)
+  (p' : pred_symbols)
+  (params : fin n' → var_symbols)
+  (nodup : function.injective params)
+  (q : formula) :
+  formula → formula
+| bottom := bottom
+| top := top
+| (pred n p t) :=
+    if h : n' = n ∧ p' = p
+    then formula_sub_var_term (zip_fin_fun n' n params t var h.left nodup) q
+    else pred n p t
+| (eq_ s t) := eq_ s t
+| (not p) := not (formula_sub_single_pred p)
+| (and p q) := and (formula_sub_single_pred p) (formula_sub_single_pred q)
+| (or p q) := or (formula_sub_single_pred p) (formula_sub_single_pred q)
+| (imp p q) := imp (formula_sub_single_pred p) (formula_sub_single_pred q)
+| (iff p q) := iff (formula_sub_single_pred p) (formula_sub_single_pred q)
+| (forall_ x p) := forall_ x (formula_sub_single_pred p)
+| (exists_ x p) := exists_ x (formula_sub_single_pred p)
+
+
+def formula_sub_single_pred_is_def
+  (n' : ℕ)
+  (p' : pred_symbols)
+  (params : fin n' → var_symbols)
+  (nodup : function.injective params)
+  (q : formula) :
+  finset var_symbols → formula → Prop
+| _ bottom := true
+| _ top := true
+| binders (pred n p t) :=
+    if n' = n ∧ p' = p 
+    then disjoint binders (q.free_var_set \ fin_fun_range params)
+    else true
+| binders (eq_ s t) := true
+| binders (not p) := formula_sub_single_pred_is_def binders p
+| binders (and p q) :=
+    (formula_sub_single_pred_is_def binders p) ∧ (formula_sub_single_pred_is_def binders q)
+| binders (or p q) :=
+    (formula_sub_single_pred_is_def binders p) ∧ (formula_sub_single_pred_is_def binders q)
+| binders (imp p q) :=
+    (formula_sub_single_pred_is_def binders p) ∧ (formula_sub_single_pred_is_def binders q)
+| binders (iff p q) :=
+    (formula_sub_single_pred_is_def binders p) ∧ (formula_sub_single_pred_is_def binders q)
+| binders (forall_ x p) := formula_sub_single_pred_is_def (binders ∪ {x}) p
+| binders (exists_ x p) := formula_sub_single_pred_is_def (binders ∪ {x}) p
+
+
+def interpretation.sub''
+  {D : Type}
+  (m : interpretation D)
+  (v : valuation D)
+  (n : ℕ)
+  (p : pred_symbols)
+  (params : fin n → var_symbols)
+  (nodup : function.injective params)
+  (q : formula) :
+  interpretation D :=
+    interpretation.mk m.nonempty m.func
+      (fun (n' : ℕ) (p' : pred_symbols) (t' : fin n' → D),
+        if h : n' = n ∧ p' = p
+        then holds D m v q
+        else m.pred n' p' t')
+
+
+example
+  {D : Type}
+  (m m' : interpretation D)
+  (v1 v2 : valuation D)
+  (φ : formula)
+  (h1 : is_valid φ)
+  (n : ℕ)
+  (p : pred_symbols)
+  (t : fin n → term)
+  (params : fin n → var_symbols)
+  (nodup : function.injective params)
+  (q : formula)
+  (h2 : formula_sub_single_pred_is_def n p params nodup q ∅ φ)
+  (hv : ∀ x ∈ φ.free_var_set, v1 x = v2 x) :
+  holds D m v1 (formula_sub_single_pred n p params nodup q φ)
+    ↔ holds D m' v1 φ :=
+begin
+  induction φ generalizing v1 m',
+  case formula.bottom : v1 m' hv
+  { unfold formula_sub_single_pred, unfold holds, },
+  case formula.top : v1 m' hv
+  { unfold formula_sub_single_pred, unfold holds, },
+  case formula.pred : n p t v1 m' hv
+  {
+    unfold formula_sub_single_pred,
+    split_ifs,
+    {
+      unfold holds,
+      sorry
+    },
+    {
+      sorry
+    }
+  },
+  case formula.eq_ : φ_ᾰ φ_ᾰ_1 v1 m' hv
+  { admit },
+  case formula.not : φ_ᾰ φ_ih v1 m' hv
+  { admit },
+  case formula.and : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1 v1 m' hv
+  { admit },
+  case formula.or : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1 v1 m' hv
+  { admit },
+  case formula.imp : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1 v1 m' hv
+  { admit },
+  case formula.iff : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1 v1 m' hv
+  { admit },
+  case formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih v1 m' hv
+  { admit },
+  case formula.exists_ : φ_ᾰ φ_ᾰ_1 φ_ih v1 m' hv
+  { admit },
 end
