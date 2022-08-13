@@ -76,7 +76,7 @@ lemma lem_2
 	(τ : type_var_symbols → hol_type)
 	(M : model)
 	(V : valuation) :
-  M.type V (σ.instance τ) = M.type (λ i, M.type V (τ i)) σ :=
+  M.type V (σ.instance τ) = M.type (fun i, M.type V (τ i)) σ :=
 begin
 	induction σ,
 	case hol_type.var : α
