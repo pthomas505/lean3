@@ -19,26 +19,31 @@ inductive hol_type : Type
 | const (n : ℕ) : type_name_symbols → (fin n → hol_type) → hol_type
 | func : hol_type → hol_type → hol_type
 
-open hol_type
 
 def hol_type.var_set : hol_type → finset type_var_symbols
-| (var α) := {α}
-| (const n _ args) := finset.univ.bUnion (fun (i : fin n), (args i).var_set)
-| (func σ₁ σ₂) := σ₁.var_set ∪ σ₂.var_set
+| (hol_type.var α) := {α}
+| (hol_type.const n _ args) := finset.univ.bUnion (fun (i : fin n), (args i).var_set)
+| (hol_type.func σ₁ σ₂) := σ₁.var_set ∪ σ₂.var_set
 
+
+-- semantics of types
 
 def type_model := Π (n : ℕ), type_name_symbols → (fin n → Type) → Type
+
 def type_valuation := type_var_symbols → Type
 
 def type_model.type (M : type_model) (V : type_valuation) : hol_type → Type
-| (var α) := V α
-| (const n ν args) := M n ν (fun i : fin n, type_model.type (args i))
-| (func σ₁ σ₂) := type_model.type σ₁ → type_model.type σ₂
+| (hol_type.var α) := V α
+| (hol_type.const n ν args) := M n ν (fun i : fin n, type_model.type (args i))
+| (hol_type.func σ₁ σ₂) := type_model.type σ₁ → type_model.type σ₂
+
+
+-- substitution of types
 
 def hol_type.instance (τ : type_var_symbols → hol_type) : hol_type → hol_type
-| (var α) := τ α
-| (const n ν args) := const n ν (fun i : fin n, hol_type.instance (args i))
-| (func σ₁ σ₂) := func (hol_type.instance σ₁) (hol_type.instance σ₂)
+| (hol_type.var α) := τ α
+| (hol_type.const n ν args) := hol_type.const n ν (fun i : fin n, hol_type.instance (args i))
+| (hol_type.func σ₁ σ₂) := hol_type.func (hol_type.instance σ₁) (hol_type.instance σ₂)
 
 lemma lem_1
 	(σ : hol_type)
@@ -99,15 +104,19 @@ end
 abbreviation term_name_symbols := ℕ
 
 inductive hol_term : Type
-| var : term_name_symbols → hol_term
-| const : term_name_symbols → hol_term
+| var : term_name_symbols → hol_type → hol_term
+| const : term_name_symbols → hol_type → hol_term
 | app : hol_term → hol_term → hol_term
-| abs : term_name_symbols → hol_term → hol_term
+| abs : term_name_symbols → hol_type → hol_term → hol_term
 
-
-def term_model (M : type_model) (c : term_name_symbols) : hol_type → Type
-| (var α) := sorry
-| (const n ν args) := M n ν (fun i : fin n, term_model (args i))
-| (func σ₁ σ₂) := term_model σ₁ → term_model σ₂
-
-#check term_model
+inductive hol_term.has_type : hol_term → hol_type → Prop
+| var {x : term_name_symbols} {σ : hol_type} :
+	hol_term.has_type (hol_term.var x σ) σ
+| const {c : term_name_symbols} {σ : hol_type} :
+	hol_term.has_type (hol_term.var c σ) σ
+| app {t₁ t₂ : hol_term} {α β : hol_type} :
+	hol_term.has_type t₁ (hol_type.func α β) →
+	hol_term.has_type t₂ α →
+	hol_term.has_type (hol_term.app t₁ t₂) β
+| abs {x : term_name_symbols} {α β : hol_type} {t : hol_term} :
+	hol_term.has_type (hol_term.abs x α t) (hol_type.func α β)
