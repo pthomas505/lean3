@@ -160,7 +160,6 @@ inductive hol_term.has_type : hol_term → hol_type → Prop
 | abs {x : term_name_symbols} {α β : hol_type} {t : hol_term} :
 	hol_term.has_type (hol_term.abs x α t) (hol_type.func α β)
 
-
 def hol_term.type : hol_term → option hol_type
 | (hol_term.var x σ) := some σ
 | (hol_term.const c σ) := some σ
