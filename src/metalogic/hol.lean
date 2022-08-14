@@ -170,3 +170,15 @@ def hol_term.type : hol_term → option hol_type
 | (hol_term.abs x σₓ t) := do
 	σₜ <- t.type,
 	return (hol_type.func σₓ σₜ)
+
+
+def term_valuation := term_name_symbols → hol_type → Type
+
+def hol_term.semantics
+	(V : type_valuation)
+	(v : term_valuation) :
+	hol_term → Type
+| (hol_term.var x σ) := v x σ
+| (hol_term.const c σ) := v c σ
+| (hol_term.app t₁ t₂) := sorry
+| (hol_term.abs x σ t) := sorry
