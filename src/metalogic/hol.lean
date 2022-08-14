@@ -27,13 +27,13 @@ def hol_type.var_set : hol_type → finset type_var_symbols
 | (func σ₁ σ₂) := σ₁.var_set ∪ σ₂.var_set
 
 
-def model := Π (n : ℕ), type_name_symbols → (fin n → Type) → Type
-def valuation := type_var_symbols → Type
+def type_model := Π (n : ℕ), type_name_symbols → (fin n → Type) → Type
+def type_valuation := type_var_symbols → Type
 
-def model.type (M : model) (V : valuation) : hol_type → Type
+def type_model.type (M : type_model) (V : type_valuation) : hol_type → Type
 | (var α) := V α
-| (const n ν args) := M n ν (fun i : fin n, model.type (args i))
-| (func σ₁ σ₂) := model.type σ₁ → model.type σ₂
+| (const n ν args) := M n ν (fun i : fin n, type_model.type (args i))
+| (func σ₁ σ₂) := type_model.type σ₁ → type_model.type σ₂
 
 def hol_type.instance (type_var_symbol_to_type : type_var_symbols → hol_type) : hol_type → hol_type
 | (var α) := type_var_symbol_to_type α
@@ -74,23 +74,23 @@ end
 lemma lem_2
 	(σ : hol_type)
 	(τ : type_var_symbols → hol_type)
-	(M : model)
-	(V : valuation) :
+	(M : type_model)
+	(V : type_valuation) :
   M.type V (σ.instance τ) = M.type (fun i, M.type V (τ i)) σ :=
 begin
 	induction σ,
 	case hol_type.var : α
   {
-		unfold hol_type.instance, unfold model.type
+		unfold hol_type.instance, unfold type_model.type
 	},
   case hol_type.const : n ν args σ_ih
   {
-		unfold hol_type.instance at *, unfold model.type at *,
+		unfold hol_type.instance at *, unfold type_model.type at *,
 		congr, funext, apply σ_ih
 	},
   case hol_type.func : σ₁ σ₂ σ₁_ih σ₂_ih
   {
-		unfold hol_type.instance at *, unfold model.type at *,
+		unfold hol_type.instance at *, unfold type_model.type at *,
 		rewrite σ₁_ih, rewrite σ₂_ih
 	},
 end
