@@ -148,17 +148,19 @@ inductive hol_term : Type
 | app : hol_term → hol_term → hol_term
 | abs : term_name_symbols → hol_type → hol_term → hol_term
 
+
 inductive hol_term.has_type : hol_term → hol_type → Prop
 | var {x : term_name_symbols} {σ : hol_type} :
 	hol_term.has_type (hol_term.var x σ) σ
 | const {c : term_name_symbols} {σ : hol_type} :
 	hol_term.has_type (hol_term.var c σ) σ
-| app {t₁ t₂ : hol_term} {α β : hol_type} :
-	hol_term.has_type t₁ (hol_type.func α β) →
-	hol_term.has_type t₂ α →
-	hol_term.has_type (hol_term.app t₁ t₂) β
-| abs {x : term_name_symbols} {α β : hol_type} {t : hol_term} :
-	hol_term.has_type (hol_term.abs x α t) (hol_type.func α β)
+| app {t₁ t₂ : hol_term} {σ₁ σ₂ : hol_type} :
+	hol_term.has_type t₁ (hol_type.func σ₁ σ₂) →
+	hol_term.has_type t₂ σ₁ →
+	hol_term.has_type (hol_term.app t₁ t₂) σ₂
+| abs {x : term_name_symbols} {σₓ σₜ : hol_type} {t : hol_term} :
+	hol_term.has_type t σₜ →
+	hol_term.has_type (hol_term.abs x σₓ t) (hol_type.func σₓ σₜ)
 
 def hol_term.type : hol_term → option hol_type
 | (hol_term.var x σ) := some σ
@@ -170,6 +172,7 @@ def hol_term.type : hol_term → option hol_type
 | (hol_term.abs x σₓ t) := do
 	σₜ <- t.type,
 	return (hol_type.func σₓ σₜ)
+
 
 def term_valuation
 	(M : type_model)
