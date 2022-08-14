@@ -35,8 +35,8 @@ def type_model.type (M : type_model) (V : type_valuation) : hol_type → Type
 | (const n ν args) := M n ν (fun i : fin n, type_model.type (args i))
 | (func σ₁ σ₂) := type_model.type σ₁ → type_model.type σ₂
 
-def hol_type.instance (type_var_symbol_to_type : type_var_symbols → hol_type) : hol_type → hol_type
-| (var α) := type_var_symbol_to_type α
+def hol_type.instance (τ : type_var_symbols → hol_type) : hol_type → hol_type
+| (var α) := τ α
 | (const n ν args) := const n ν (fun i : fin n, hol_type.instance (args i))
 | (func σ₁ σ₂) := func (hol_type.instance σ₁) (hol_type.instance σ₂)
 
@@ -104,3 +104,10 @@ inductive hol_term : Type
 | app : hol_term → hol_term → hol_term
 | abs : term_name_symbols → hol_term → hol_term
 
+
+def term_model (M : type_model) (c : term_name_symbols) : hol_type → Type
+| (var α) := sorry
+| (const n ν args) := M n ν (fun i : fin n, term_model (args i))
+| (func σ₁ σ₂) := term_model σ₁ → term_model σ₂
+
+#check term_model
