@@ -19,6 +19,45 @@ inductive hol_type : Type
 | const (n : ℕ) : type_name_symbols → (fin n → hol_type) → hol_type
 | func : hol_type → hol_type → hol_type
 
+def pi_decide
+  {a b : Prop}
+  [decidable a]
+  (h : a → decidable b) :
+  decidable (a ∧ b) :=
+if hp : a then
+  by haveI := h hp; exact
+  if hq : b then is_true (and.intro hp hq)
+  else is_false (assume h : a ∧ b, hq (and.right h))
+else is_false (assume h : a ∧ b, hp (and.left h))
+
+instance hol_type.decidable_eq : decidable_eq hol_type
+| (hol_type.var α) (hol_type.var α') :=
+    decidable_of_decidable_of_iff
+      (by apply_instance : decidable (α = α')) (by simp only)
+| (hol_type.var α) (hol_type.const n ν t) := is_false (by simp only [not_false_iff])
+| (hol_type.var α) (hol_type.func σ₁ σ₂) := is_false (by simp only [not_false_iff])
+| (hol_type.const n ν t) (hol_type.var α) := is_false (by simp only [not_false_iff])
+| (hol_type.const n ν t) (hol_type.const n' ν' t') := decidable_of_decidable_of_iff
+  (begin
+    apply' pi_decide,
+    intro h,
+    apply' and.decidable,
+    rewrite fin.heq_fun_iff h,
+    apply' fintype.decidable_forall_fintype,
+    intro a,
+    apply hol_type.decidable_eq,
+  end : decidable (n = n' ∧ ν = ν' ∧ t == t')) (by simp only)
+| (hol_type.const n ν t) (hol_type.func σ₁ σ₂) := is_false (by simp only [not_false_iff])
+| (hol_type.func σ₁ σ₂) (hol_type.var α) := is_false (by simp only [not_false_iff])
+| (hol_type.func σ₁ σ₂) (hol_type.const n ν t) := is_false (by simp only [not_false_iff])
+| (hol_type.func σ₁ σ₂) (hol_type.func σ₁' σ₂') := decidable_of_decidable_of_iff
+	(begin
+    apply' pi_decide,
+    apply hol_type.decidable_eq,
+		intro h,
+		apply hol_type.decidable_eq
+	end : decidable (σ₁ = σ₁' ∧ σ₂ = σ₂')) (by simp only)
+
 
 def hol_type.var_set : hol_type → finset type_var_symbols
 | (hol_type.var α) := {α}
@@ -120,3 +159,15 @@ inductive hol_term.has_type : hol_term → hol_type → Prop
 	hol_term.has_type (hol_term.app t₁ t₂) β
 | abs {x : term_name_symbols} {α β : hol_type} {t : hol_term} :
 	hol_term.has_type (hol_term.abs x α t) (hol_type.func α β)
+
+
+def hol_term.type : hol_term → option hol_type
+| (hol_term.var x σ) := some σ
+| (hol_term.const c σ) := some σ
+| (hol_term.app t₁ t₂) := do
+	hol_type.func σ₁₁ σ₁₂ <- t₁.type | none,
+	σ₂ <- t₂.type,
+	if σ₁₁ = σ₂ then return σ₁₂ else none
+| (hol_term.abs x σₓ t) := do
+	σₜ <- t.type,
+	return (hol_type.func σₓ σₜ)
