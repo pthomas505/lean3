@@ -94,3 +94,13 @@ begin
 		rewrite σ₁_ih, rewrite σ₂_ih
 	},
 end
+
+
+abbreviation term_name_symbols := ℕ
+
+inductive hol_term : Type
+| var : term_name_symbols → hol_term
+| const : term_name_symbols → hol_term
+| app : hol_term → hol_term → hol_term
+| abs : term_name_symbols → hol_term → hol_term
+
