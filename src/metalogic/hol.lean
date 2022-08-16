@@ -141,24 +141,25 @@ end
 
 
 abbreviation term_name_symbols := ℕ
+abbreviation term_var_symbols := ℕ
 
 inductive hol_term : Type
-| var : term_name_symbols → hol_type → hol_term
+| var : term_var_symbols → hol_type → hol_term
 | const : term_name_symbols → hol_type → hol_term
 | app : hol_term → hol_term → hol_term
-| abs : term_name_symbols → hol_type → hol_term → hol_term
+| abs : term_var_symbols → hol_type → hol_term → hol_term
 
 
 inductive hol_term.has_type : hol_term → hol_type → Prop
-| var {x : term_name_symbols} {σ : hol_type} :
+| var {x : term_var_symbols} {σ : hol_type} :
 	hol_term.has_type (hol_term.var x σ) σ
 | const {c : term_name_symbols} {σ : hol_type} :
-	hol_term.has_type (hol_term.var c σ) σ
+	hol_term.has_type (hol_term.const c σ) σ
 | app {t₁ t₂ : hol_term} {σ₁ σ₂ : hol_type} :
 	hol_term.has_type t₁ (hol_type.func σ₁ σ₂) →
 	hol_term.has_type t₂ σ₁ →
 	hol_term.has_type (hol_term.app t₁ t₂) σ₂
-| abs {x : term_name_symbols} {σₓ σₜ : hol_type} {t : hol_term} :
+| abs {x : term_var_symbols} {σₓ σₜ : hol_type} {t : hol_term} :
 	hol_term.has_type t σₜ →
 	hol_term.has_type (hol_term.abs x σₓ t) (hol_type.func σₓ σₜ)
 
@@ -172,3 +173,42 @@ def hol_term.type : hol_term → option hol_type
 | (hol_term.abs x σₓ t) := do
 	σₜ <- t.type,
 	return (hol_type.func σₓ σₜ)
+
+
+def term_valuation
+	(M : type_model)
+	(V : type_valuation) :
+	Type :=
+	term_var_symbols → Π σ : hol_type, M.type V σ
+
+def term_valuation.update
+	(M : type_model)
+	(V : type_valuation)
+	(f : term_valuation M V)
+  (x : term_var_symbols)
+	(σ : hol_type)
+	(v : M.type V σ) :
+	term_valuation M V :=
+	function.update f x (function.update (f x) σ v)
+
+def term_model
+	(M : type_model)
+	(V : type_valuation) :
+	Type :=
+	term_name_symbols → Π σ : hol_type, M.type V σ
+
+inductive hol_term_of : hol_type → Type
+| var : term_var_symbols → ∀ σ, hol_term_of σ
+| const : term_name_symbols → ∀ σ, hol_term_of σ
+| app {σ τ : hol_type} : hol_term_of (σ.func τ) → hol_term_of σ → hol_term_of τ
+| abs {τ : hol_type} : term_var_symbols → ∀ σ : hol_type, hol_term_of τ → hol_term_of (σ.func τ)
+
+def hol_term_of.semantics
+	(M : type_model)
+	(V : type_valuation)
+	(m : term_model M V) :
+	Π {σ}, hol_term_of σ → term_valuation M V → M.type V σ
+| _ (hol_term_of.var x σ) v := v x σ
+| _ (hol_term_of.const c σ) v := m c σ
+| _ (hol_term_of.app t₁ t₂) v := (hol_term_of.semantics t₁ v) (hol_term_of.semantics t₂ v)
+| _ (hol_term_of.abs x σ t) v := fun a : M.type V σ, hol_term_of.semantics t (v.update M V x σ a)
