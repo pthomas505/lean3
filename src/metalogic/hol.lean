@@ -126,7 +126,7 @@ def eval_type_default
 | (hol_type.func σ₁ σ₂) := fun (x : eval_type C V σ₁), eval_type_default σ₂
 
 
-def hol_type_lean_type_pair
+def hol_type_lean_term_pair
 	(C : type_const_valuation)
 	(V : type_var_valuation) :
 	Type :=
@@ -143,7 +143,7 @@ instance
 	(C : type_const_valuation)
 	(V : type_var_valuation)
 	(σ : hol_type) :
-	has_coe (eval_type C V σ) (option (hol_type_lean_type_pair C V)) :=
+	has_coe (eval_type C V σ) (option (hol_type_lean_term_pair C V)) :=
 	{coe := fun (x : eval_type C V σ), some {fst := σ, snd := x}}
 
 
