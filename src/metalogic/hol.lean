@@ -126,6 +126,27 @@ def eval_type_default
 | (hol_type.func σ₁ σ₂) := fun (x : eval_type C V σ₁), eval_type_default σ₂
 
 
+def hol_type_lean_type_pair
+	(C : type_const_valuation)
+	(V : type_var_valuation) :
+	Type :=
+	Σ σ : hol_type, eval_type C V σ
+
+instance
+	(C : type_const_valuation)
+	(V : type_var_valuation)
+	(σ : hol_type) :
+	inhabited (eval_type C V σ) :=
+	{default := eval_type_default C V σ}
+
+instance
+	(C : type_const_valuation)
+	(V : type_var_valuation)
+	(σ : hol_type) :
+	has_coe (eval_type C V σ) (option (hol_type_lean_type_pair C V)) :=
+	{coe := fun (x : eval_type C V σ), some {fst := σ, snd := x}}
+
+
 -- Type substitution.
 
 /-
@@ -207,6 +228,9 @@ inductive hol_term : Type
 | abs : term_var_symbols → hol_type → hol_term → hol_term
 
 
+/-
+hol_term.has_type t σ = t : σ
+-/
 inductive hol_term.has_type : hol_term → hol_type → Prop
 | var {x : term_var_symbols} {σ : hol_type} :
 	hol_term.has_type (hol_term.var x σ) σ
@@ -221,7 +245,7 @@ inductive hol_term.has_type : hol_term → hol_type → Prop
 	hol_term.has_type (hol_term.abs x σₓ t) (hol_type.func σₓ σₜ)
 
 
--- Returns the hol type of a hol term if the hol term is syntactically valid.
+-- The hol type of a hol term if the hol term is syntactically valid.
 def hol_term.type : hol_term → option hol_type
 | (hol_term.var x σ) := some σ
 | (hol_term.const c σ) := some σ
@@ -236,7 +260,7 @@ def hol_term.type : hol_term → option hol_type
 
 /-
 A mapping of each hol term to a Lean term belonging to the Lean type that the
-hol type of the hol term is evaluated to.
+a hol type is evaluated to.
 -/
 def term_var_valuation
 	(C : type_const_valuation)
@@ -259,23 +283,3 @@ def term_const_valuation
 	(V : type_var_valuation) :
 	Type :=
 	term_name_symbols → Π σ : hol_type, eval_type C V σ
-
-
-def type_eval_type_pair_type
-	(C : type_const_valuation)
-	(V : type_var_valuation) :
-	Type :=
-	option (Σ σ : hol_type, eval_type C V σ)
-
-instance
-	(C : type_const_valuation)
-	(V : type_var_valuation)
-	(σ : hol_type) : inhabited (eval_type C V σ) :=
-	{default := eval_type_default C V σ}
-
-instance
-	(C : type_const_valuation)
-	(V : type_var_valuation)
-	(σ : hol_type) :
-	has_coe (eval_type C V σ) (type_eval_type_pair_type C V) :=
-	{coe := fun (x : eval_type C V σ), some {fst := σ, snd := x}}
