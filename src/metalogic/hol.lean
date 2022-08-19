@@ -9,6 +9,15 @@ https://www.cl.cam.ac.uk/~jrh13/papers/holhol.pdf
 
 import data.finset
 
+/-
+variable α : Type
+variable X : set α
+variable U : set X
+
+structure elem_of (α : Type) (X : set α) : Type :=
+(x : α)
+(prop : x ∈ X)
+-/
 
 abbreviation type_name_symbols := ℕ -- ν
 abbreviation type_var_symbols := ℕ -- α, β, ...
@@ -65,41 +74,87 @@ def hol_type.var_set : hol_type → finset type_var_symbols
 | (hol_type.func σ₁ σ₂) := σ₁.var_set ∪ σ₂.var_set
 
 
--- semantics of types
+-- The semantics of hol types.
 
-def type_model := Π (n : ℕ), type_name_symbols → (fin n → Type) → Type
+/-
+const : (n : ℕ, ν : const_name_symbols) → (op : (args : fin n → Type) → T : Type)
+The type of mappings of n-ary hol type constant symbols to operations on Lean types.
+n : The arity of the hol type constant symbol.
+ν : The hol type constant symbol.
+op : The operation on Lean types that the hol type constant symbol is mapped to.
+args : The n arguments of the operation expressed as a finite function.
+T : The result of the operation. A Lean type.
 
-def type_valuation := type_var_symbols → Type
+default : A Lean term belonging to the Lean type mapped to by const.
+(A proof by construction that the Lean type mapped to by const is not empty.)
+-/
+structure type_const_valuation :=
+(const : Π (n : ℕ), type_name_symbols → ((fin n → Type) → Type))
+(default : Π (n : ℕ) (ν : type_name_symbols) (args : fin n → Type), const n ν args)
 
-def type_model.type (M : type_model) (V : type_valuation) : hol_type → Type
-| (hol_type.var α) := V α
-| (hol_type.const n ν args) := M n ν (fun i : fin n, type_model.type (args i))
-| (hol_type.func σ₁ σ₂) := type_model.type σ₁ → type_model.type σ₂
+/-
+The type of mappings of hol type variable symbols to Lean types.
+default : A Lean term belonging to the Lean type mapped to by var.
+(A proof by construction that the Lean type mapped to by var is not empty.)
+-/
+structure type_var_valuation :=
+(var : type_var_symbols → Type)
+(default : Π (α : type_var_symbols), var α)
+
+/-
+The function mapping each hol type to a Lean type for a given
+type_constant_valuation and type_variable_valuation.
+-/
+def eval_type
+	(C : type_const_valuation)
+	(V : type_var_valuation) :
+	hol_type → Type
+| (hol_type.var α) := V.var α
+| (hol_type.const n ν args) := C.const n ν (fun (i : fin n), eval_type (args i))
+| (hol_type.func σ₁ σ₂) := eval_type σ₁ → eval_type σ₂
+
+/-
+The function mapping each hol type to the default Lean term of the Lean type
+that the hol type is evaluated to.
+-/
+def eval_type_default
+	(C : type_const_valuation)
+	(V : type_var_valuation) :
+	Π (σ : hol_type), eval_type C V σ
+| (hol_type.var α) := V.default α
+| (hol_type.const n ν args) := C.default n ν (fun (i : fin n), eval_type C V (args i))
+| (hol_type.func σ₁ σ₂) := fun (x : eval_type C V σ₁), eval_type_default σ₂
 
 
--- substitution of types
+-- Type substitution.
 
-def hol_type.instance (τ : type_var_symbols → hol_type) : hol_type → hol_type
+/-
+sub_type_var_type τ σ = The replacement of each var symbol α in the
+hol type σ by the hol type τ α.
+-/
+def sub_type_var_type
+	(τ : type_var_symbols → hol_type) :
+	hol_type → hol_type
 | (hol_type.var α) := τ α
-| (hol_type.const n ν args) := hol_type.const n ν (fun i : fin n, hol_type.instance (args i))
-| (hol_type.func σ₁ σ₂) := hol_type.func (hol_type.instance σ₁) (hol_type.instance σ₂)
+| (hol_type.const n ν args) := hol_type.const n ν (fun (i : fin n), sub_type_var_type (args i))
+| (hol_type.func σ₁ σ₂) := hol_type.func (sub_type_var_type σ₁) (sub_type_var_type σ₂)
 
 lemma lem_1
 	(σ : hol_type)
 	(τ₁ τ₂ : type_var_symbols → hol_type)
-	(h1 : σ.instance τ₁ = σ.instance τ₂) :
+	(h1 : sub_type_var_type τ₁ σ = sub_type_var_type τ₂ σ) :
 	∀ α ∈ σ.var_set, τ₁ α = τ₂ α :=
 begin
 	intros α' h2,
 	induction σ,
 	case hol_type.var : α
   {
-		unfold hol_type.instance at h1, unfold hol_type.var_set at h2,
+		unfold sub_type_var_type at h1, unfold hol_type.var_set at h2,
 		simp only [finset.mem_singleton] at h2, subst h2, exact h1,
 	},
   case hol_type.const : n ν args σ_ih
   {
-		unfold hol_type.instance at h1, unfold hol_type.var_set at h2,
+		unfold sub_type_var_type at h1, unfold hol_type.var_set at h2,
 		simp only [eq_self_iff_true, heq_iff_eq, true_and] at h1,
 		simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left] at h2,
 		apply exists.elim h2, intros i h3,
@@ -107,7 +162,7 @@ begin
 	},
   case hol_type.func : σ₁ σ₂ σ₁_ih σ₂_ih
   {
-		unfold hol_type.instance at h1, unfold hol_type.var_set at h2,
+		unfold sub_type_var_type at h1, unfold hol_type.var_set at h2,
 		simp at h1, cases h1,
 		simp at h2, cases h2,
 		exact σ₁_ih h1_left h2,
@@ -118,23 +173,25 @@ end
 lemma lem_2
 	(σ : hol_type)
 	(τ : type_var_symbols → hol_type)
-	(M : type_model)
-	(V : type_valuation) :
-  M.type V (σ.instance τ) = M.type (fun i, M.type V (τ i)) σ :=
+	(C : type_const_valuation)
+	(V : type_var_valuation) :
+  eval_type C V (sub_type_var_type τ σ) =
+		eval_type C {var := fun (α : type_var_symbols), eval_type C V (τ α),
+								default := fun (α : type_var_symbols), eval_type_default C V (τ α)} σ :=
 begin
 	induction σ,
 	case hol_type.var : α
   {
-		unfold hol_type.instance, unfold type_model.type
+		unfold sub_type_var_type, unfold eval_type
 	},
   case hol_type.const : n ν args σ_ih
   {
-		unfold hol_type.instance at *, unfold type_model.type at *,
+		unfold sub_type_var_type at *, unfold eval_type at *,
 		congr, funext, apply σ_ih
 	},
   case hol_type.func : σ₁ σ₂ σ₁_ih σ₂_ih
   {
-		unfold hol_type.instance at *, unfold type_model.type at *,
+		unfold sub_type_var_type at *, unfold eval_type at *,
 		rewrite σ₁_ih, rewrite σ₂_ih
 	},
 end
@@ -163,6 +220,8 @@ inductive hol_term.has_type : hol_term → hol_type → Prop
 	hol_term.has_type t σₜ →
 	hol_term.has_type (hol_term.abs x σₓ t) (hol_type.func σₓ σₜ)
 
+
+-- Returns the hol type of a hol term if the hol term is syntactically valid.
 def hol_term.type : hol_term → option hol_type
 | (hol_term.var x σ) := some σ
 | (hol_term.const c σ) := some σ
@@ -175,40 +234,48 @@ def hol_term.type : hol_term → option hol_type
 	return (hol_type.func σₓ σₜ)
 
 
-def term_valuation
-	(M : type_model)
-	(V : type_valuation) :
+/-
+A mapping of each hol term to a Lean term belonging to the Lean type that the
+hol type of the hol term is evaluated to.
+-/
+def term_var_valuation
+	(C : type_const_valuation)
+	(V : type_var_valuation) :
 	Type :=
-	term_var_symbols → Π σ : hol_type, M.type V σ
+	term_var_symbols → Π (σ : hol_type), eval_type C V σ
 
-def term_valuation.update
-	(M : type_model)
-	(V : type_valuation)
-	(f : term_valuation M V)
+def term_var_valuation.update
+	(C : type_const_valuation)
+	(V : type_var_valuation)
+	(f : term_var_valuation C V)
   (x : term_var_symbols)
 	(σ : hol_type)
-	(v : M.type V σ) :
-	term_valuation M V :=
-	function.update f x (function.update (f x) σ v)
+	(y : eval_type C V σ) :
+	term_var_valuation C V :=
+	function.update f x (function.update (f x) σ y)
 
-def term_model
-	(M : type_model)
-	(V : type_valuation) :
+def term_const_valuation
+	(C : type_const_valuation)
+	(V : type_var_valuation) :
 	Type :=
-	term_name_symbols → Π σ : hol_type, M.type V σ
+	term_name_symbols → Π σ : hol_type, eval_type C V σ
 
-inductive hol_term_of : hol_type → Type
-| var : term_var_symbols → ∀ σ, hol_term_of σ
-| const : term_name_symbols → ∀ σ, hol_term_of σ
-| app {σ τ : hol_type} : hol_term_of (σ.func τ) → hol_term_of σ → hol_term_of τ
-| abs {τ : hol_type} : term_var_symbols → ∀ σ : hol_type, hol_term_of τ → hol_term_of (σ.func τ)
 
-def hol_term_of.semantics
-	(M : type_model)
-	(V : type_valuation)
-	(m : term_model M V) :
-	Π {σ}, hol_term_of σ → term_valuation M V → M.type V σ
-| _ (hol_term_of.var x σ) v := v x σ
-| _ (hol_term_of.const c σ) v := m c σ
-| _ (hol_term_of.app t₁ t₂) v := (hol_term_of.semantics t₁ v) (hol_term_of.semantics t₂ v)
-| _ (hol_term_of.abs x σ t) v := fun a : M.type V σ, hol_term_of.semantics t (v.update M V x σ a)
+def type_eval_type_pair_type
+	(C : type_const_valuation)
+	(V : type_var_valuation) :
+	Type :=
+	option (Σ σ : hol_type, eval_type C V σ)
+
+instance
+	(C : type_const_valuation)
+	(V : type_var_valuation)
+	(σ : hol_type) : inhabited (eval_type C V σ) :=
+	{default := eval_type_default C V σ}
+
+instance
+	(C : type_const_valuation)
+	(V : type_var_valuation)
+	(σ : hol_type) :
+	has_coe (eval_type C V σ) (type_eval_type_pair_type C V) :=
+	{coe := fun (x : eval_type C V σ), some {fst := σ, snd := x}}
