@@ -96,7 +96,7 @@ structure type_var_valuation :=
 
 /-
 The function mapping each hol type to a Lean type for a given
-type_constant_valuation and type_variable_valuation.
+type constant valuation and type variable valuation.
 -/
 def eval_type
 	(C : type_const_valuation)
