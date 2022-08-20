@@ -211,8 +211,7 @@ def app
 	(option Σ σ : hol_type, eval_type C V σ) →
 		(option Σ σ : hol_type, eval_type C V σ) →
 			(option Σ σ : hol_type, eval_type C V σ)
-| (some {fst := hol_type.func σ τ, snd := f}) x :=
-		some {fst := τ, snd := f (as_eval_type C V σ x)}
+| (some {fst := hol_type.func σ τ, snd := f}) x := some {fst := τ, snd := f (as_eval_type C V σ x)}
 | _ _ := none
 
 
