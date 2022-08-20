@@ -231,7 +231,7 @@ def hol_term.semantics
   (m : term_const_valuation C V) :
   hol_term → term_var_valuation C V → option (Σ σ : hol_type, eval_type C V σ)
 | (hol_term.var x σ) v := v x σ
-| (hol_term.const c σ) v := m c σ
+| (hol_term.const c σ) _ := m c σ
 | (hol_term.app t₁ t₂) v :=
 		app (hol_term.semantics t₁ v) (hol_term.semantics t₂ v)
 | (hol_term.abs x σ t) v := do
