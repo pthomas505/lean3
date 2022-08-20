@@ -127,6 +127,12 @@ def eval_type_default
 | (hol_type.const n ν args) := C.default n ν (fun (i : fin n), eval_type C V (args i))
 | (hol_type.func σ₁ σ₂) := fun (x : eval_type C V σ₁), eval_type_default σ₂
 
+instance
+	(C : type_const_valuation)
+	(V : type_var_valuation)
+	(σ : hol_type) :
+	inhabited (eval_type C V σ) :=
+	{default := eval_type_default C V σ}
 
 
 abbreviation term_name_symbols := ℕ
@@ -170,14 +176,25 @@ def hol_term.type : hol_term → option hol_type
 
 
 /-
-A mapping of each hol var term symbol to a Lean term belonging to the 
-Lean type that a hol type is evaluated to.
+A mapping of each hol term variable to a Lean term belonging to the 
+Lean type that the hol type of the hol term variable is evaluated to.
 -/
 def term_var_valuation
 	(C : type_const_valuation)
 	(V : type_var_valuation) :
 	Type :=
 	term_var_symbols → Π (σ : hol_type), eval_type C V σ
+
+/-
+A mapping of each hol term constant to a Lean term belonging to the 
+Lean type that the hol type of the hol term constant is evaluated to.
+-/
+def term_const_valuation
+	(C : type_const_valuation)
+	(V : type_var_valuation) :
+	Type :=
+	term_name_symbols → Π σ : hol_type, eval_type C V σ
+
 
 def term_var_valuation.update
 	(C : type_const_valuation)
@@ -189,19 +206,6 @@ def term_var_valuation.update
 	term_var_valuation C V :=
 	function.update f x (function.update (f x) σ y)
 
-def term_const_valuation
-	(C : type_const_valuation)
-	(V : type_var_valuation) :
-	Type :=
-	term_name_symbols → Π σ : hol_type, eval_type C V σ
-
-
-instance
-	(C : type_const_valuation)
-	(V : type_var_valuation)
-	(σ : hol_type) :
-	inhabited (eval_type C V σ) :=
-	{default := eval_type_default C V σ}
 
 instance
 	(C : type_const_valuation)
@@ -217,6 +221,7 @@ def as_eval_type
 	(option Σ σ : hol_type, eval_type C V σ) → eval_type C V σ
 | (some {fst := σ', snd := x}) := if h : σ = σ' then by rewrite h; exact x else default
 | _ := default
+
 
 def app
 	{C : type_const_valuation}
