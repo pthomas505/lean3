@@ -67,7 +67,9 @@ instance hol_type.decidable_eq : decidable_eq hol_type
 		apply hol_type.decidable_eq
 	end : decidable (σ₁ = σ₁' ∧ σ₂ = σ₂')) (by simp only)
 
-
+/-
+The finite set of all of the type variable symbols occurring in a given hol type.
+-/
 def hol_type.var_set : hol_type → finset type_var_symbols
 | (hol_type.var α) := {α}
 | (hol_type.const n _ args) := finset.univ.bUnion (fun (i : fin n), (args i).var_set)
@@ -147,6 +149,14 @@ instance
 	(σ : hol_type) :
 	has_coe (eval_type C V σ) (option (hol_type_lean_term_pair C V)) :=
 	{coe := fun (x : eval_type C V σ), some {fst := σ, snd := x}}
+
+def as_eval_type_term
+	(C : type_const_valuation)
+	(V : type_var_valuation)
+	(σ : hol_type) :
+	option (hol_type_lean_term_pair C V) → eval_type C V σ
+| (some {fst := σ', snd := x}) := if h : σ = σ' then by rewrite h; exact x else default
+| _ := default
 
 
 -- Type substitution.
