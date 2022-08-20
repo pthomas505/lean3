@@ -127,14 +127,74 @@ def eval_type_default
 | (hol_type.const n ν args) := C.default n ν (fun (i : fin n), eval_type C V (args i))
 | (hol_type.func σ₁ σ₂) := fun (x : eval_type C V σ₁), eval_type_default σ₂
 
+
+
+abbreviation term_name_symbols := ℕ
+abbreviation term_var_symbols := ℕ
+
+inductive hol_term : Type
+| var : term_var_symbols → hol_type → hol_term
+| const : term_name_symbols → hol_type → hol_term
+| app : hol_term → hol_term → hol_term
+| abs : term_var_symbols → hol_type → hol_term → hol_term
+
+
 /-
-A hol type and a Lean term of the Lean type that the hol type is evaluated to.
+hol_term.has_type t σ = t : σ
 -/
-def hol_type_lean_term_pair
+inductive hol_term.has_type : hol_term → hol_type → Prop
+| var {x : term_var_symbols} {σ : hol_type} :
+	hol_term.has_type (hol_term.var x σ) σ
+| const {c : term_name_symbols} {σ : hol_type} :
+	hol_term.has_type (hol_term.const c σ) σ
+| app {t₁ t₂ : hol_term} {σ₁ σ₂ : hol_type} :
+	hol_term.has_type t₁ (hol_type.func σ₁ σ₂) →
+	hol_term.has_type t₂ σ₁ →
+	hol_term.has_type (hol_term.app t₁ t₂) σ₂
+| abs {x : term_var_symbols} {σₓ σₜ : hol_type} {t : hol_term} :
+	hol_term.has_type t σₜ →
+	hol_term.has_type (hol_term.abs x σₓ t) (hol_type.func σₓ σₜ)
+
+
+-- The hol type of a hol term if the hol term is syntactically valid.
+def hol_term.type : hol_term → option hol_type
+| (hol_term.var x σ) := some σ
+| (hol_term.const c σ) := some σ
+| (hol_term.app t₁ t₂) := do
+	hol_type.func σ₁₁ σ₁₂ <- t₁.type | none,
+	σ₂ <- t₂.type,
+	if σ₁₁ = σ₂ then return σ₁₂ else none
+| (hol_term.abs x σₓ t) := do
+	σₜ <- t.type,
+	return (hol_type.func σₓ σₜ)
+
+
+/-
+A mapping of each hol var term symbol to a Lean term belonging to the 
+Lean type that a hol type is evaluated to.
+-/
+def term_var_valuation
 	(C : type_const_valuation)
 	(V : type_var_valuation) :
 	Type :=
-	Σ σ : hol_type, eval_type C V σ
+	term_var_symbols → Π (σ : hol_type), eval_type C V σ
+
+def term_var_valuation.update
+	(C : type_const_valuation)
+	(V : type_var_valuation)
+	(f : term_var_valuation C V)
+  (x : term_var_symbols)
+	(σ : hol_type)
+	(y : eval_type C V σ) :
+	term_var_valuation C V :=
+	function.update f x (function.update (f x) σ y)
+
+def term_const_valuation
+	(C : type_const_valuation)
+	(V : type_var_valuation) :
+	Type :=
+	term_name_symbols → Π σ : hol_type, eval_type C V σ
+
 
 instance
 	(C : type_const_valuation)
@@ -147,26 +207,44 @@ instance
 	(C : type_const_valuation)
 	(V : type_var_valuation)
 	(σ : hol_type) :
-	has_coe (eval_type C V σ) (option (hol_type_lean_term_pair C V)) :=
+	has_coe (eval_type C V σ) (option (Σ σ : hol_type, eval_type C V σ)) :=
 	{coe := fun (x : eval_type C V σ), some {fst := σ, snd := x}}
 
-def as_eval_type_term
+def as_eval_type
 	(C : type_const_valuation)
 	(V : type_var_valuation)
 	(σ : hol_type) :
-	option (hol_type_lean_term_pair C V) → eval_type C V σ
+	(option Σ σ : hol_type, eval_type C V σ) → eval_type C V σ
 | (some {fst := σ', snd := x}) := if h : σ = σ' then by rewrite h; exact x else default
 | _ := default
 
-def hol_type_lean_term_pair.app
+def app
 	{C : type_const_valuation}
 	{V : type_var_valuation} :
-	option (hol_type_lean_term_pair C V) →
-		(option (hol_type_lean_term_pair C V)) →
-			option (hol_type_lean_term_pair C V)
+	(option Σ σ : hol_type, eval_type C V σ) →
+		(option Σ σ : hol_type, eval_type C V σ) →
+			(option Σ σ : hol_type, eval_type C V σ)
 | (some {fst := hol_type.func σ τ, snd := f}) x :=
-		some {fst := τ, snd := f (as_eval_type_term C V σ x)}
+		some {fst := τ, snd := f (as_eval_type C V σ x)}
 | _ _ := none
+
+
+def hol_term.semantics
+	(C : type_const_valuation)
+  (V : type_var_valuation)
+  (m : term_const_valuation C V) :
+  hol_term → term_var_valuation C V → (option Σ σ : hol_type, eval_type C V σ)
+| (hol_term.var x σ) v := v x σ
+| (hol_term.const c σ) v := m c σ
+| (hol_term.app t₁ t₂) v :=
+		app (hol_term.semantics t₁ v) (hol_term.semantics t₂ v)
+| (hol_term.abs x σ t) v := do
+  σ₂ ← t.type,
+  some {fst := hol_type.func σ σ₂,
+				snd := sorry
+			 }
+
+
 
 
 -- Type substitution.
@@ -238,70 +316,3 @@ begin
 		rewrite σ₁_ih, rewrite σ₂_ih
 	},
 end
-
-
-abbreviation term_name_symbols := ℕ
-abbreviation term_var_symbols := ℕ
-
-inductive hol_term : Type
-| var : term_var_symbols → hol_type → hol_term
-| const : term_name_symbols → hol_type → hol_term
-| app : hol_term → hol_term → hol_term
-| abs : term_var_symbols → hol_type → hol_term → hol_term
-
-
-/-
-hol_term.has_type t σ = t : σ
--/
-inductive hol_term.has_type : hol_term → hol_type → Prop
-| var {x : term_var_symbols} {σ : hol_type} :
-	hol_term.has_type (hol_term.var x σ) σ
-| const {c : term_name_symbols} {σ : hol_type} :
-	hol_term.has_type (hol_term.const c σ) σ
-| app {t₁ t₂ : hol_term} {σ₁ σ₂ : hol_type} :
-	hol_term.has_type t₁ (hol_type.func σ₁ σ₂) →
-	hol_term.has_type t₂ σ₁ →
-	hol_term.has_type (hol_term.app t₁ t₂) σ₂
-| abs {x : term_var_symbols} {σₓ σₜ : hol_type} {t : hol_term} :
-	hol_term.has_type t σₜ →
-	hol_term.has_type (hol_term.abs x σₓ t) (hol_type.func σₓ σₜ)
-
-
--- The hol type of a hol term if the hol term is syntactically valid.
-def hol_term.type : hol_term → option hol_type
-| (hol_term.var x σ) := some σ
-| (hol_term.const c σ) := some σ
-| (hol_term.app t₁ t₂) := do
-	hol_type.func σ₁₁ σ₁₂ <- t₁.type | none,
-	σ₂ <- t₂.type,
-	if σ₁₁ = σ₂ then return σ₁₂ else none
-| (hol_term.abs x σₓ t) := do
-	σₜ <- t.type,
-	return (hol_type.func σₓ σₜ)
-
-
-/-
-A mapping of each hol var term symbol to a Lean term belonging to the 
-Lean type that a hol type is evaluated to.
--/
-def term_var_valuation
-	(C : type_const_valuation)
-	(V : type_var_valuation) :
-	Type :=
-	term_var_symbols → Π (σ : hol_type), eval_type C V σ
-
-def term_var_valuation.update
-	(C : type_const_valuation)
-	(V : type_var_valuation)
-	(f : term_var_valuation C V)
-  (x : term_var_symbols)
-	(σ : hol_type)
-	(y : eval_type C V σ) :
-	term_var_valuation C V :=
-	function.update f x (function.update (f x) σ y)
-
-def term_const_valuation
-	(C : type_const_valuation)
-	(V : type_var_valuation) :
-	Type :=
-	term_name_symbols → Π σ : hol_type, eval_type C V σ
