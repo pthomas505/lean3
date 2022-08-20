@@ -197,14 +197,6 @@ def term_var_valuation.update
 	term_var_valuation C V :=
 	function.update f x (function.update (f x) σ y)
 
-
-instance
-	(C : type_const_valuation)
-	(V : type_var_valuation)
-	(σ : hol_type) :
-	has_coe (eval_type C V σ) (option (Σ σ : hol_type, eval_type C V σ)) :=
-	{coe := fun (x : eval_type C V σ), some {fst := σ, snd := x}}
-
 def as_eval_type
 	(C : type_const_valuation)
 	(V : type_var_valuation)
@@ -212,7 +204,6 @@ def as_eval_type
 	(option Σ σ : hol_type, eval_type C V σ) → eval_type C V σ
 | (some {fst := σ', snd := x}) := if h : σ = σ' then by rewrite h; exact x else default
 | _ := default
-
 
 def app
 	{C : type_const_valuation}
@@ -230,8 +221,8 @@ def hol_term.semantics
   (V : type_var_valuation)
   (m : term_const_valuation C V) :
   hol_term → term_var_valuation C V → option (Σ σ : hol_type, eval_type C V σ)
-| (hol_term.var x σ) v := v x σ
-| (hol_term.const c σ) _ := m c σ
+| (hol_term.var x σ) v := some {fst := σ, snd := v x σ}
+| (hol_term.const c σ) _ := some {fst := σ, snd := m c σ}
 | (hol_term.app t₁ t₂) v :=
 		app (hol_term.semantics t₁ v) (hol_term.semantics t₂ v)
 | (hol_term.abs x σ t) v := do
