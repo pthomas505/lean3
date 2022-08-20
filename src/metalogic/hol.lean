@@ -125,7 +125,9 @@ def eval_type_default
 | (hol_type.const n ν args) := C.default n ν (fun (i : fin n), eval_type C V (args i))
 | (hol_type.func σ₁ σ₂) := fun (x : eval_type C V σ₁), eval_type_default σ₂
 
-
+/-
+A hol type and a Lean term of the Lean type that the hol type is evaluated to.
+-/
 def hol_type_lean_term_pair
 	(C : type_const_valuation)
 	(V : type_var_valuation) :
@@ -259,8 +261,8 @@ def hol_term.type : hol_term → option hol_type
 
 
 /-
-A mapping of each hol term to a Lean term belonging to the Lean type that the
-a hol type is evaluated to.
+A mapping of each hol var term symbol to a Lean term belonging to the 
+Lean type that a hol type is evaluated to.
 -/
 def term_var_valuation
 	(C : type_const_valuation)
