@@ -9,15 +9,6 @@ https://www.cl.cam.ac.uk/~jrh13/papers/holhol.pdf
 
 import data.finset
 
-/-
-variable α : Type
-variable X : set α
-variable U : set X
-
-structure elem_of (α : Type) (X : set α) : Type :=
-(x : α)
-(prop : x ∈ X)
--/
 
 abbreviation type_name_symbols := ℕ -- ν
 abbreviation type_var_symbols := ℕ -- α, β, ...
