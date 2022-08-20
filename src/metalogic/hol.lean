@@ -237,10 +237,9 @@ def hol_term.semantics
 | (hol_term.abs x σ t) v := do
   σ₂ ← t.type,
   some {fst := hol_type.func σ σ₂,
-				snd := fun (a : eval_type C V σ), sorry
+				snd := fun (a : eval_type C V σ),
+				as_eval_type C V σ₂ (hol_term.semantics t (term_var_valuation.update C V v x σ a))
 			 }
-
-
 
 
 -- Type substitution.
