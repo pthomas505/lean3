@@ -167,8 +167,8 @@ def hol_term.type : hol_term → option hol_type
 
 
 /-
-A mapping of each hol term variable to a Lean term belonging to the 
-Lean type that the hol type of the hol term variable is evaluated to.
+A mapping of each hol term variable symbol and hol type to a Lean term
+belonging to the Lean type that the hol type is evaluated to.
 -/
 def term_var_valuation
 	(C : type_const_valuation)
@@ -177,8 +177,8 @@ def term_var_valuation
 	term_var_symbols → Π (σ : hol_type), eval_type C V σ
 
 /-
-A mapping of each hol term constant to a Lean term belonging to the 
-Lean type that the hol type of the hol term constant is evaluated to.
+A mapping of each hol term constant symbol and hol type to a Lean term
+belonging to the Lean type that the hol type is evaluated to.
 -/
 def term_const_valuation
 	(C : type_const_valuation)
