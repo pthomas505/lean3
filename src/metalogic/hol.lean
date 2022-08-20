@@ -158,6 +158,16 @@ def as_eval_type_term
 | (some {fst := σ', snd := x}) := if h : σ = σ' then by rewrite h; exact x else default
 | _ := default
 
+def hol_type_lean_term_pair.app
+	{C : type_const_valuation}
+	{V : type_var_valuation} :
+	option (hol_type_lean_term_pair C V) →
+		(option (hol_type_lean_term_pair C V)) →
+			option (hol_type_lean_term_pair C V)
+| (some {fst := hol_type.func σ τ, snd := f}) x :=
+		some {fst := τ, snd := f (as_eval_type_term C V σ x)}
+| _ _ := none
+
 
 -- Type substitution.
 
