@@ -197,6 +197,15 @@ def term_var_valuation.update
 	term_var_valuation C V :=
 	function.update f x (function.update (f x) σ y)
 
+
+instance
+	{C : type_const_valuation}
+	{V : type_var_valuation}
+	{σ : hol_type} :
+	has_coe (eval_type C V σ) (option Σ σ : hol_type, eval_type C V σ) :=
+	{coe := fun (x : eval_type C V σ), some {fst := σ, snd := x}}
+
+
 def as_eval_type
 	(C : type_const_valuation)
 	(V : type_var_valuation)
@@ -230,6 +239,34 @@ def hol_term.semantics
 				snd := fun (a : eval_type C V σ),
 				as_eval_type C V σ₂ (hol_term.semantics t (term_var_valuation.update C V v x σ a))
 			 }
+
+
+theorem hol_term.semantics_type
+  (C : type_const_valuation)
+  (V : type_var_valuation)
+  (m : term_const_valuation C V)
+  (v : term_var_valuation C V)
+	(t : hol_term)
+  (σ : hol_type)
+	(h : t.type = some σ) :
+	(t.semantics C V m v).map sigma.fst = some σ :=
+begin
+	sorry
+end
+
+
+theorem hol_term.semantics_val
+  (C : type_const_valuation)
+  (V : type_var_valuation)
+  (m : term_const_valuation C V)
+	(v : term_var_valuation C V)
+	(t : hol_term)
+  (σ : hol_type)
+	(h : t.type = some σ) :
+	hol_term.semantics C V m t v = as_eval_type C V σ (hol_term.semantics C V m t v) :=
+begin
+	sorry
+end
 
 
 -- Type substitution.
