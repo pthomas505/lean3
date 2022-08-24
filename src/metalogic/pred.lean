@@ -2311,6 +2311,46 @@ begin
   rewrite @thm_2 D m (function.update v x a) v p s1, exact h2
 end
 
+theorem is_valid_eq_1
+  (t : term) :
+  is_valid (eq_ t t) :=
+begin
+  unfold is_valid, unfold holds,
+  intros D m v,
+  refl,
+end
+
+
+def eq_zip_imp (p : formula) : Π (n : ℕ) (s t : fin n → term), formula
+| 0 s t := p
+| (n + 1) s t :=
+    imp
+    (eq_ (s n) (t n))
+    (eq_zip_imp n (fun (i : fin n), s i) (fun (i : fin n), t i))
+
+
+theorem is_valid_eq_2
+  (f : func_symbols)
+  (n : ℕ)
+  (s t : fin n → term) :
+  is_valid (eq_zip_imp (eq_ (func n f s) (func n f t)) n s t) :=
+begin
+  induction n,
+  case nat.zero
+  {
+    unfold eq_zip_imp, unfold is_valid, unfold holds, unfold eval_term,
+    intros D m v,
+    congr, funext, apply fin.elim0 i
+  },
+  case nat.succ : n ih
+  {
+    unfold eq_zip_imp at *, unfold is_valid at *, unfold holds at *,
+    intros D m v h1,
+    sorry,
+  },
+end
+
+
 
 inductive proof : Type
 | mk (p : formula) : is_valid p → proof
@@ -2400,6 +2440,9 @@ def dguard (p : Prop) [decidable p] : option (plift p) :=
 if h : p then pure (plift.up h) else failure
 
 
+def mem (x y : var_symbols) : formula := mk_pred "∈" [var x, var y]
+
+
 inductive step : Type
 | var_is_term : var_symbols → step
 | func_is_term : func_symbols → list ℕ → step
@@ -2420,6 +2463,9 @@ inductive step : Type
 | pred_1 : ℕ → ℕ → var_symbols → step
 | pred_2 : ℕ → var_symbols → ℕ → step
 | pred_3 : ℕ → var_symbols → step
+| zfc_1 : var_symbols → var_symbols → var_symbols → step
+| zfc_2 : var_symbols → var_symbols → var_symbols → formula → step
+
 
 open step
 
@@ -2572,6 +2618,19 @@ If p and q are syntactically valid formulas then
   let f := (p.imp (forall_ x p)),
   let t1 : is_valid f := is_valid_pred_3 p x h1,
   return (local_context.append_proof (proof.mk f t1))
+
+
+-- zfc
+
+-- axiom of extensionality
+| _ local_context (zfc_1 x y z) := do
+  let ax := forall_ x (forall_ y (imp (forall_ z (iff (mem z x) (mem z y))) (eq_ (var x) (var y)))),
+  return (local_context.append_proof (proof.mk ax sorry))
+
+-- axiom schema of specification
+| _ local_context (zfc_2 x y z p) := do
+  let ax := forall_ z (exists_ y (forall_ x (iff (mem x y) (and (mem x z) p)))),
+  return (local_context.append_proof (proof.mk ax sorry))
 
 
 def check_step_list :
