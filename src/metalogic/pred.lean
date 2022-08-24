@@ -2625,7 +2625,9 @@ If p and q are syntactically valid formulas then
 -- axiom of extensionality
 | _ local_context (zfc_1 x y z) := do
   let ax := forall_ x (forall_ y (imp (forall_ z (iff (mem z x) (mem z y))) (eq_ (var x) (var y)))),
-  return (local_context.append_proof (proof.mk ax sorry))
+  if x ≠ y ∧ x ≠ z ∧ y ≠ z
+  then return (local_context.append_proof (proof.mk ax sorry))
+  else none
 
 -- axiom schema of specification
 | _ local_context (zfc_2 x y z p) := do
