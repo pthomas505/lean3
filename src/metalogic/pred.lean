@@ -2630,7 +2630,9 @@ If p and q are syntactically valid formulas then
 -- axiom schema of specification
 | _ local_context (zfc_2 x y z p) := do
   let ax := exists_ y (forall_ x (iff (mem x y) (and (mem x z) (forall_ y p)))),
-  return (local_context.append_proof (proof.mk ax sorry))
+  if x ≠ y ∧ x ≠ z ∧ y ≠ z
+  then return (local_context.append_proof (proof.mk ax sorry))
+  else none
 
 
 def check_step_list :
