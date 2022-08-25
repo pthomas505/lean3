@@ -10,7 +10,7 @@ doi:10.1017/CBO9780511576430
 -/
 
 
-import data.finset
+import data.finset data.fin.vec_notation
 
 set_option pp.parens true
 
@@ -2320,36 +2320,14 @@ begin
   refl,
 end
 
+open matrix
 
-def eq_zip_imp (p : formula) : Π (n : ℕ) (s t : fin n → term), formula
-| 0 s t := p
-| (n + 1) s t :=
-    imp
-    (eq_ (s n) (t n))
-    (eq_zip_imp n (fun (i : fin n), s i) (fun (i : fin n), t i))
+def And : Π (n : ℕ) (phi : fin n → formula), formula
+| 0 phi := top
+| (n + 1) phi := and (vec_head phi) (And n (vec_tail phi))
 
-
-theorem is_valid_eq_2
-  (f : func_symbols)
-  (n : ℕ)
-  (s t : fin n → term) :
-  is_valid (eq_zip_imp (eq_ (func n f s) (func n f t)) n s t) :=
-begin
-  induction n,
-  case nat.zero
-  {
-    unfold eq_zip_imp, unfold is_valid, unfold holds, unfold eval_term,
-    intros D m v,
-    congr, funext, apply fin.elim0 i
-  },
-  case nat.succ : n ih
-  {
-    unfold eq_zip_imp at *, unfold is_valid at *, unfold holds at *,
-    intros D m v h1,
-    sorry,
-  },
-end
-
+def eq_sub_ax (n : ℕ) (f : func_symbols) (s t : fin n → term) : formula :=
+imp (And n (fun (i : fin n), eq_ (s i) (t i))) (eq_ (func n f s) (func n f t))
 
 
 inductive proof : Type
