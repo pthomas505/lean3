@@ -2326,8 +2326,40 @@ def And : Π (n : ℕ) (phi : fin n → formula), formula
 | 0 phi := top
 | (n + 1) phi := and (vec_head phi) (And n (vec_tail phi))
 
+theorem holds_And (D : Type) (m : interpretation D) (v : valuation D)
+  (n : ℕ) (phi : fin n → formula) :
+  holds D m v (And n phi) ↔ ∀ i, holds D m v (phi i) :=
+begin
+  induction n,
+  case nat.zero
+  {
+    simp only [is_empty.forall_iff, iff_true]
+  },
+  case nat.succ : n ih
+  {
+    simp only [And, holds, is_empty.forall_iff, fin.forall_fin_succ, vec_head, vec_tail],
+    specialize ih (vec_tail phi), unfold vec_tail at ih, unfold function.comp at *,
+    simp only [ih],
+  },
+end
+
 def eq_sub_ax (n : ℕ) (f : func_symbols) (s t : fin n → term) : formula :=
 imp (And n (fun (i : fin n), eq_ (s i) (t i))) (eq_ (func n f s) (func n f t))
+
+example
+  (n : ℕ)
+  (f : func_symbols)
+  (s t : fin n → term) :
+  is_valid (eq_sub_ax n f s t) :=
+begin
+  unfold eq_sub_ax,
+  unfold is_valid,
+  unfold holds,
+  intros D m v,
+  simp only [holds_And],
+  unfold holds, unfold eval_term,
+  intros h1, congr, funext, apply h1,
+end
 
 
 inductive proof : Type
