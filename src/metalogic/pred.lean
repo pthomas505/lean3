@@ -2337,9 +2337,7 @@ begin
   },
   case nat.succ : n ih
   {
-    simp only [And, holds, is_empty.forall_iff, fin.forall_fin_succ, vec_head, vec_tail],
-    specialize ih (vec_tail phi), unfold vec_tail at ih, unfold function.comp at *,
-    simp only [ih],
+    simp only [And, holds, is_empty.forall_iff, fin.forall_fin_succ, *, vec_head, vec_tail]
   },
 end
 
