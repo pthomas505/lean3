@@ -2311,7 +2311,7 @@ begin
   rewrite @thm_2 D m (function.update v x a) v p s1, exact h2
 end
 
-theorem is_valid_eq_1
+theorem is_valid_eq_refl
   (t : term) :
   is_valid (eq_ t t) :=
 begin
@@ -2341,16 +2341,16 @@ begin
   },
 end
 
-def eq_sub_ax (n : ℕ) (f : func_symbols) (s t : fin n → term) : formula :=
+def eq_sub_func (n : ℕ) (f : func_symbols) (s t : fin n → term) : formula :=
 imp (And n (fun (i : fin n), eq_ (s i) (t i))) (eq_ (func n f s) (func n f t))
 
-example
+theorem is_valid_eq_sub_func
   (n : ℕ)
   (f : func_symbols)
   (s t : fin n → term) :
-  is_valid (eq_sub_ax n f s t) :=
+  is_valid (eq_sub_func n f s t) :=
 begin
-  unfold eq_sub_ax,
+  unfold eq_sub_func,
   unfold is_valid,
   unfold holds,
   intros D m v,
