@@ -2490,6 +2490,7 @@ inductive step : Type
 | pred_1 : ℕ → ℕ → var_symbols → step
 | pred_2 : ℕ → var_symbols → ℕ → step
 | pred_3 : ℕ → var_symbols → step
+| eq_1 : ℕ → step
 | zfc_1 : var_symbols → var_symbols → var_symbols → step
 | zfc_2 : var_symbols → var_symbols → var_symbols → formula → step
 
@@ -2644,6 +2645,15 @@ If p and q are syntactically valid formulas then
   (plift.up h1) <- dguard (x ∉ p.free_var_set),
   let f := (p.imp (forall_ x p)),
   let t1 : is_valid f := is_valid_pred_3 p x h1,
+  return (local_context.append_proof (proof.mk f t1))
+
+
+-- equality
+
+| _ local_context (eq_1 t_index) := do
+  t <- local_context.get_nth_term t_index,
+  let f := eq_ t t,
+  let t1 : is_valid f := is_valid_eq_refl t,
   return (local_context.append_proof (proof.mk f t1))
 
 
