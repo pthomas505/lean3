@@ -2491,6 +2491,8 @@ inductive step : Type
 | pred_2 : ℕ → var_symbols → ℕ → step
 | pred_3 : ℕ → var_symbols → step
 | eq_1 : ℕ → step
+| eq_2 : func_symbols → list ℕ → list ℕ → step
+| eq_3 : pred_symbols → list ℕ → list ℕ → step
 | zfc_1 : var_symbols → var_symbols → var_symbols → step
 | zfc_2 : var_symbols → var_symbols → var_symbols → formula → step
 
@@ -2655,6 +2657,32 @@ If p and q are syntactically valid formulas then
   let f := eq_ t t,
   let t1 : is_valid f := is_valid_eq_refl t,
   return (local_context.append_proof (proof.mk f t1))
+
+| _ local_context (eq_2 f s_index_list t_index_list) := do
+  s_term_list <- local_context.get_nth_term_list s_index_list,
+  t_term_list <- local_context.get_nth_term_list s_index_list,
+  if h : s_term_list.length = t_term_list.length
+  then
+    let n := s_term_list.length in
+    let s := fun (i : fin n), s_term_list.nth_le i.val i.property in
+    let t := fun (i : fin n), t_term_list.nth_le i.val begin rewrite <- h, exact i.property end in
+    let frm := eq_sub_func n f s t in
+    let prf : is_valid frm := is_valid_eq_sub_func n f s t in
+    some (local_context.append_proof (proof.mk frm prf))
+  else none
+
+| _ local_context (eq_3 p s_index_list t_index_list) := do
+  s_term_list <- local_context.get_nth_term_list s_index_list,
+  t_term_list <- local_context.get_nth_term_list s_index_list,
+  if h : s_term_list.length = t_term_list.length
+  then
+    let n := s_term_list.length in
+    let s := fun (i : fin n), s_term_list.nth_le i.val i.property in
+    let t := fun (i : fin n), t_term_list.nth_le i.val begin rewrite <- h, exact i.property end in
+    let frm := eq_sub_pred n p s t in
+    let prf : is_valid frm := is_valid_eq_sub_pred n p s t in
+    some (local_context.append_proof (proof.mk frm prf))
+  else none
 
 
 -- zfc
