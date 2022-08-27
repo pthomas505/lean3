@@ -2356,7 +2356,26 @@ begin
   intros D m v,
   simp only [holds_And],
   unfold holds, unfold eval_term,
-  intros h1, congr, funext, apply h1,
+  intros h1, congr, funext, apply h1
+end
+
+def eq_sub_pred (n : ℕ) (p : pred_symbols) (s t : fin n → term) : formula :=
+imp (And n (fun (i : fin n), eq_ (s i) (t i))) (imp (pred n p s) (pred n p t))
+
+theorem is_valid_eq_sub_pred
+  (n : ℕ)
+  (p : pred_symbols)
+  (s t : fin n → term) :
+  is_valid (eq_sub_pred n p s t) :=
+begin
+  unfold eq_sub_pred,
+  unfold is_valid,
+  unfold holds,
+  intros D m v,
+  simp only [holds_And],
+  unfold holds,
+  intros h1,
+  simp only [h1, imp_self]
 end
 
 
