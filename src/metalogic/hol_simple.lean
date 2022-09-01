@@ -186,30 +186,6 @@ inductive proof : list hol_term → hol_term → Prop
 
 
 example
-	(Γ : list hol_term)
-	(p : hol_term)
-	(h1 : proof Γ p) :
-	p.type_of = some hol_type.bool :=
-begin
-	induction h1,
-	case proof.refl_ : t σ ih
-  { unfold mk_eq, unfold hol_term.type_of, rewrite ih, simp, sorry},
-  case proof.trans_ : h1_s h1_t h1_u h1_σ h1_Γ h1_Δ h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
-  { admit },
-  case proof.app_ : h1_s h1_t h1_u h1_v h1_σ₁ h1_σ₂ h1_Γ h1_Δ h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
-  { admit },
-  case proof.abs_ : h1_s h1_t h1_x h1_σₓ h1_σₛₜ h1_Γ h1_ᾰ h1_ᾰ_1 h1_ih
-  { admit },
-  case proof.assume_ : h1_p h1_ᾰ
-  { admit },
-  case proof.eq_mp : h1_p h1_q h1_Γ h1_Δ h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
-  { admit },
-  case proof.deduct_anti_symm : h1_p h1_q h1_Γ h1_Δ h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
-  { admit },
-end
-
-
-example
   (t₁ t₂ : hol_term)
   (σ₂ : hol_type)
   (h1 : (hol_term.app t₁ t₂).type_of = some σ₂) :
@@ -239,4 +215,28 @@ begin
       contradiction
     }
   },
+end
+
+
+example
+	(Γ : list hol_term)
+	(p : hol_term)
+	(h1 : proof Γ p) :
+	p.type_of = some hol_type.bool :=
+begin
+	induction h1,
+	case proof.refl_ : t σ ih
+  { unfold mk_eq, unfold hol_term.type_of, rewrite ih, simp, sorry},
+  case proof.trans_ : h1_s h1_t h1_u h1_σ h1_Γ h1_Δ h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  { admit },
+  case proof.app_ : h1_s h1_t h1_u h1_v h1_σ₁ h1_σ₂ h1_Γ h1_Δ h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  { admit },
+  case proof.abs_ : h1_s h1_t h1_x h1_σₓ h1_σₛₜ h1_Γ h1_ᾰ h1_ᾰ_1 h1_ih
+  { admit },
+  case proof.assume_ : h1_p h1_ᾰ
+  { admit },
+  case proof.eq_mp : h1_p h1_q h1_Γ h1_Δ h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  { admit },
+  case proof.deduct_anti_symm : h1_p h1_q h1_Γ h1_Δ h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  { admit },
 end
