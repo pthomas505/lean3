@@ -228,6 +228,7 @@ begin
 	induction h1,
 	case proof.refl_ : t σ ih
   {
+		unfold mk_eq,
 		sorry,
 	},
   case proof.trans_ : h1_s h1_t h1_u h1_σ h1_Γ h1_Δ h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
