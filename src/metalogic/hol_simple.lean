@@ -192,17 +192,18 @@ example
   ∃ σ₁, t₁.type_of = some (hol_type.func σ₁ σ₂) ∧ t₂.type_of = some σ₁ :=
 begin
   unfold hol_term.type_of at h1, simp only [option.bind_eq_some] at h1,
-  apply exists.elim h1, clear h1,
+  apply exists.elim h1,
   intros a h2,
   cases h2, cases a,
   case hol_type.bool
   {
-    rewrite [hol_term.type_of] at h2_right, contradiction
+    unfold hol_term.type_of at h2_right, contradiction
   },
   case hol_type.func : a b
   {
-    rewrite [hol_term.type_of] at h2_right, simp only [option.bind_eq_some] at h2_right,
-    apply exists.elim h2_right, clear h2_right,
+    unfold hol_term.type_of at h2_right,
+		simp only [option.bind_eq_some] at h2_right,
+    apply exists.elim h2_right,
     intros c h3, cases h3,
     split_ifs at h3_right,
     {
@@ -227,10 +228,7 @@ begin
 	induction h1,
 	case proof.refl_ : t σ ih
   {
-		unfold mk_eq, unfold hol_term.type_of,
-		rewrite ih,
-		simp only [option.some_bind, option.bind_eq_some],
-		sorry,		
+		sorry,
 	},
   case proof.trans_ : h1_s h1_t h1_u h1_σ h1_Γ h1_Δ h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
   { admit },
