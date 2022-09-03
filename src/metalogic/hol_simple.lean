@@ -218,6 +218,40 @@ begin
   },
 end
 
+lemma lem_1
+  (t₁ t₂ : hol_term)
+  (σ₁ σ₂ : hol_type)
+	(h1 : t₁.type_of = some (hol_type.func σ₁ σ₂))
+	(h2 : t₂.type_of = some σ₁) :
+	(hol_term.app t₁ t₂).type_of = some σ₂ :=
+begin
+	unfold hol_term.type_of,
+	simp only [option.bind_eq_some],
+	apply exists.intro (hol_type.func σ₁ σ₂),
+	split,
+	exact h1,
+	unfold hol_term.type_of,
+	simp only [option.bind_eq_some],
+	apply exists.intro σ₁,
+	split,
+	exact h2,
+	simp only [eq_self_iff_true, if_true],
+	refl,
+end
+
+lemma lem_2
+  (t₁ t₂ : hol_term)
+  (σ : hol_type)
+	(h1 : t₁.type_of = some σ)
+	(h2 : t₂.type_of = some σ) :
+	(mk_eq σ t₁ t₂).type_of = some hol_type.bool :=
+begin
+	unfold mk_eq,
+	apply lem_1 ((hol_term.eq σ).app t₁) t₂ σ,
+	apply lem_1 (hol_term.eq σ) t₁ σ,
+	unfold hol_term.type_of, exact h1, exact h2,
+end
+
 
 example
 	(Γ : list hol_term)
@@ -228,8 +262,7 @@ begin
 	induction h1,
 	case proof.refl_ : t σ ih
   {
-		unfold mk_eq,
-		sorry,
+		exact lem_2 t t σ ih ih,
 	},
   case proof.trans_ : h1_s h1_t h1_u h1_σ h1_Γ h1_Δ h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
   { admit },
