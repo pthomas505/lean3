@@ -385,12 +385,36 @@ begin
   {
 		exact lem_3 t t σ ih ih,
 	},
-  case proof.trans_ : s t u σ Γ Δ h1_s h1_t ih_s ih_t
+  case proof.trans_ : s t u σ Γ Δ _ _ ih_1 ih_2
   {
-		apply lem_3, apply (lem_4 s t σ ih_s).left, apply (lem_4 t u σ ih_t).right,
+		apply lem_3, apply (lem_4 s t σ ih_1).left, apply (lem_4 t u σ ih_2).right,
 	},
-  case proof.app_ : h1_s h1_t h1_u h1_v h1_σ₁ h1_σ₂ h1_Γ h1_Δ h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
-  { admit },
+  case proof.app_ : s t u v σ₁ σ₂ Γ Δ _ _ ih_1 ih_2
+  {
+		apply lem_3,
+		unfold hol_term.type_of,
+		simp,
+		apply exists.intro (hol_type.func σ₁ σ₂),
+		split,
+		apply (lem_4 s t (hol_type.func σ₁ σ₂) ih_1).left,
+		unfold hol_term.type_of, simp,
+		apply exists.intro σ₁,
+		split,
+		apply (lem_4 u v σ₁ ih_2).left,
+		simp,
+		refl,
+		unfold hol_term.type_of,
+		simp,
+		apply exists.intro (hol_type.func σ₁ σ₂),
+		split,
+		apply (lem_4 s t (hol_type.func σ₁ σ₂) ih_1).right,
+		unfold hol_term.type_of, simp,
+		apply exists.intro σ₁,
+		split,
+		apply (lem_4 u v σ₁ ih_2).right,
+		simp,
+		refl,
+	},
   case proof.abs_ : h1_s h1_t h1_x h1_σₓ h1_σₛₜ h1_Γ h1_ᾰ h1_ᾰ_1 h1_ih
   { admit },
   case proof.assume_ : h1_p h1_ᾰ
