@@ -415,8 +415,22 @@ begin
 		simp,
 		refl,
 	},
-  case proof.abs_ : h1_s h1_t h1_x h1_σₓ h1_σₛₜ h1_Γ h1_ᾰ h1_ᾰ_1 h1_ih
-  { admit },
+  case proof.abs_ : s t x σₓ σₛₜ Γ _ _ ih
+  {
+		apply lem_3,
+		unfold hol_term.type_of,
+		simp,
+		apply exists.intro σₛₜ,
+		split,
+		apply (lem_4 s t σₛₜ ih).left,
+		refl,
+		unfold hol_term.type_of,
+		simp,
+		apply exists.intro σₛₜ,
+		split,
+		apply (lem_4 s t σₛₜ ih).right,
+		refl,
+	},
   case proof.assume_ : h1_p h1_ᾰ
   { admit },
   case proof.eq_mp : h1_p h1_q h1_Γ h1_Δ h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
