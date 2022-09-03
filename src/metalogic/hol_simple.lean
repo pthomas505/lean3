@@ -100,7 +100,83 @@ example
 	(h : t.type_of = some σ) :
 	(eval_term t v).map sigma.fst = some σ :=
 begin
-	sorry
+	induction t,
+	case hol_term.var : x σ
+  {
+		unfold hol_term.type_of at h,
+		simp only at h,
+		unfold eval_term,
+		simp only [option.map_some'],
+		exact h
+	},
+  case hol_term.eq : t
+  {
+		unfold hol_term.type_of at h,
+		simp only at h,
+		unfold eval_term,
+		simp only [option.map_some'],
+		exact h
+	},
+  case hol_term.app : t₁ t₂ ih_1 ih_2
+  {
+		unfold eval_term,
+		unfold option.map at *,
+		simp at *,
+
+		unfold hol_term.type_of at h,
+		simp at h,
+		apply exists.elim h,
+		intros a h1,
+
+		cases a,
+		case hol_type.bool
+  	{
+			unfold hol_term.type_of at h1,
+			cases h1, contradiction,
+		},
+  	case hol_type.func : σ₁ σ₂
+  	{
+			unfold hol_term.type_of at h1,
+			simp at h1,
+			cases h1,
+			apply exists.elim h1_right,
+			intros a h2,
+			cases h2,
+			split_ifs at h2_right,
+			sorry, sorry,
+		},
+	},
+  case hol_term.abs : x σₓ t ih
+  {
+		unfold hol_term.type_of at h,
+		simp only [option.bind_eq_some] at h,
+		apply exists.elim h,
+		intros a h2,
+		cases h2,
+
+		unfold option.map at ih,
+		simp only [option.bind_eq_some', function.comp_app, sigma.exists, exists_and_distrib_right, exists_eq_right] at ih,
+		cases σ,
+		case hol_type.bool
+	  {
+			unfold return at h2_right,
+			unfold pure at h2_right,
+			simp at h2_right,
+			contradiction
+		},
+  	case hol_type.func : σ₁ σ₂
+  	{
+			unfold return at h2_right,
+			unfold pure at h2_right,
+			simp at h2_right,
+			cases h2_right,
+			subst h2_right_left, subst h2_right_right,
+			unfold option.map, simp,
+			unfold eval_term,
+			simp,
+			sorry,
+		},
+	},
 end
 
 
@@ -185,7 +261,7 @@ inductive proof : list hol_term → hol_term → Prop
 	proof ((Γ \ [q]) ∪ (Δ \ [p])) (mk_eq hol_type.bool p q)
 
 
-example
+lemma lem_1
   (t₁ t₂ : hol_term)
   (σ₂ : hol_type)
   (h1 : (hol_term.app t₁ t₂).type_of = some σ₂) :
@@ -218,7 +294,7 @@ begin
   },
 end
 
-lemma lem_1
+lemma lem_2
   (t₁ t₂ : hol_term)
   (σ₁ σ₂ : hol_type)
 	(h1 : t₁.type_of = some (hol_type.func σ₁ σ₂))
@@ -239,7 +315,7 @@ begin
 	refl,
 end
 
-lemma lem_2
+lemma lem_3
   (t₁ t₂ : hol_term)
   (σ : hol_type)
 	(h1 : t₁.type_of = some σ)
@@ -247,9 +323,54 @@ lemma lem_2
 	(mk_eq σ t₁ t₂).type_of = some hol_type.bool :=
 begin
 	unfold mk_eq,
-	apply lem_1 ((hol_term.eq σ).app t₁) t₂ σ,
-	apply lem_1 (hol_term.eq σ) t₁ σ,
+	apply lem_2 ((hol_term.eq σ).app t₁) t₂ σ,
+	apply lem_2 (hol_term.eq σ) t₁ σ,
 	unfold hol_term.type_of, exact h1, exact h2,
+end
+
+lemma lem_4
+  (t₁ t₂ : hol_term)
+  (σ : hol_type)
+	(h1 : (mk_eq σ t₁ t₂).type_of = some hol_type.bool) :
+	t₁.type_of = some σ ∧ t₂.type_of = some σ :=
+begin
+	unfold mk_eq at h1,
+	unfold hol_term.type_of at h1,
+	simp at h1,
+	apply exists.elim h1,
+	intros a h2, clear h1,
+	cases h2,
+	unfold hol_term.type_of at h2_left, simp at h2_left,
+	apply exists.elim h2_left, clear h2_left,
+	intros b h3,
+
+	cases a,
+	case hol_type.bool
+  {
+		unfold hol_term.type_of at h2_right,
+		simp at h2_right,
+		contradiction,
+	},
+  case hol_type.func : σ₁ σ₂
+  {
+		unfold hol_term.type_of at h2_right,
+		simp at h2_right,
+		apply exists.elim h2_right,
+		intros c h4, clear h2_right,
+		cases h3, cases h4,
+		split_ifs at h3_right,
+		subst h,
+		split_ifs at h4_right,
+		subst h,
+		unfold return at h3_right,
+		unfold pure at h3_right,
+		simp at h3_right,
+		cases h3_right,
+		subst h3_right_left,
+		exact and.intro h3_left h4_left,
+		contradiction,
+		contradiction
+	}
 end
 
 
@@ -262,10 +383,12 @@ begin
 	induction h1,
 	case proof.refl_ : t σ ih
   {
-		exact lem_2 t t σ ih ih,
+		exact lem_3 t t σ ih ih,
 	},
-  case proof.trans_ : h1_s h1_t h1_u h1_σ h1_Γ h1_Δ h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
-  { admit },
+  case proof.trans_ : s t u σ Γ Δ h1_s h1_t ih_s ih_t
+  {
+		apply lem_3, apply (lem_4 s t σ ih_s).left, apply (lem_4 t u σ ih_t).right,
+	},
   case proof.app_ : h1_s h1_t h1_u h1_v h1_σ₁ h1_σ₂ h1_Γ h1_Δ h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
   { admit },
   case proof.abs_ : h1_s h1_t h1_x h1_σₓ h1_σₛₜ h1_Γ h1_ᾰ h1_ᾰ_1 h1_ih
