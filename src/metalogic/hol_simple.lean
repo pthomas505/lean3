@@ -387,32 +387,34 @@ begin
 	},
   case proof.trans_ : s t u σ Γ Δ _ _ ih_1 ih_2
   {
-		apply lem_3, apply (lem_4 s t σ ih_1).left, apply (lem_4 t u σ ih_2).right,
+		apply lem_3, exact (lem_4 s t σ ih_1).left, exact (lem_4 t u σ ih_2).right
 	},
   case proof.app_ : s t u v σ₁ σ₂ Γ Δ _ _ ih_1 ih_2
   {
 		apply lem_3,
 		unfold hol_term.type_of,
-		simp,
+		simp only [option.bind_eq_some],
 		apply exists.intro (hol_type.func σ₁ σ₂),
 		split,
 		apply (lem_4 s t (hol_type.func σ₁ σ₂) ih_1).left,
-		unfold hol_term.type_of, simp,
+		unfold hol_term.type_of,
+		simp only [option.bind_eq_some],
 		apply exists.intro σ₁,
 		split,
 		apply (lem_4 u v σ₁ ih_2).left,
-		simp,
+		simp only [eq_self_iff_true, if_true],
 		refl,
 		unfold hol_term.type_of,
-		simp,
+		simp only [option.bind_eq_some],
 		apply exists.intro (hol_type.func σ₁ σ₂),
 		split,
 		apply (lem_4 s t (hol_type.func σ₁ σ₂) ih_1).right,
-		unfold hol_term.type_of, simp,
+		unfold hol_term.type_of,
+		simp only [option.bind_eq_some],
 		apply exists.intro σ₁,
 		split,
 		apply (lem_4 u v σ₁ ih_2).right,
-		simp,
+		simp only [eq_self_iff_true, if_true],
 		refl,
 	},
   case proof.abs_ : s t x σₓ σₛₜ Γ _ _ ih
@@ -431,10 +433,16 @@ begin
 		apply (lem_4 s t σₛₜ ih).right,
 		refl,
 	},
-  case proof.assume_ : h1_p h1_ᾰ
-  { admit },
-  case proof.eq_mp : h1_p h1_q h1_Γ h1_Δ h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
-  { admit },
-  case proof.deduct_anti_symm : h1_p h1_q h1_Γ h1_Δ h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
-  { admit },
+  case proof.assume_ : p ih
+  {
+		exact ih
+	},
+  case proof.eq_mp : p q Γ Δ _ _ ih_1 ih_2
+  {
+		exact (lem_4 p q hol_type.bool ih_1).right
+	},
+  case proof.deduct_anti_symm : p q Γ Δ _ _ ih_1 ih_2
+  {
+		exact lem_3 p q hol_type.bool ih_1 ih_2
+	},
 end
