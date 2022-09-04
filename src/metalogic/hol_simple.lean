@@ -328,50 +328,6 @@ begin
 	unfold hol_term.type_of, exact h1, exact h2,
 end
 
-lemma lem_4
-  (t₁ t₂ : hol_term)
-  (σ : hol_type)
-	(h1 : (mk_eq σ t₁ t₂).type_of = some hol_type.bool) :
-	t₁.type_of = some σ ∧ t₂.type_of = some σ :=
-begin
-	unfold mk_eq at h1,
-	unfold hol_term.type_of at h1,
-	simp at h1,
-	apply exists.elim h1,
-	intros a h2, clear h1,
-	cases h2,
-	unfold hol_term.type_of at h2_left, simp at h2_left,
-	apply exists.elim h2_left, clear h2_left,
-	intros b h3,
-
-	cases a,
-	case hol_type.bool
-  {
-		unfold hol_term.type_of at h2_right,
-		simp at h2_right,
-		contradiction,
-	},
-  case hol_type.func : σ₁ σ₂
-  {
-		unfold hol_term.type_of at h2_right,
-		simp at h2_right,
-		apply exists.elim h2_right,
-		intros c h4, clear h2_right,
-		cases h3, cases h4,
-		split_ifs at h3_right,
-		subst h,
-		split_ifs at h4_right,
-		subst h,
-		unfold return at h3_right,
-		unfold pure at h3_right,
-		simp at h3_right,
-		cases h3_right,
-		subst h3_right_left,
-		exact and.intro h3_left h4_left,
-		contradiction,
-		contradiction
-	}
-end
 
 
 example
