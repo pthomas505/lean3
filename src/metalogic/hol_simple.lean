@@ -351,15 +351,6 @@ begin
 	contradiction,
 end
 
-lemma eq_type_of_right
-  (t₁ t₂ : hol_term)
-  (σ : hol_type)
-	(h1 : (mk_eq σ t₁ t₂).type_of = some hol_type.bool) :
-	t₂.type_of = some σ :=
-begin
-	sorry
-end
-
 lemma lem_4
   (t₁ t₂ : hol_term)
   (σ : hol_type)
