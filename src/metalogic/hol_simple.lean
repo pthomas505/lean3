@@ -242,7 +242,7 @@ inductive proof : list hol_term → hol_term → Prop
 	p.type_of = some hol_type.bool →
 	proof [p] p
 
-| eq_mp {p q : hol_term} {Γ Δ : list hol_term} :
+| eq_mp_ {p q : hol_term} {Γ Δ : list hol_term} :
 /-
 	p.type_of = some hol_type.bool →
 	q.type_of = some hol_type.bool →
@@ -251,7 +251,7 @@ inductive proof : list hol_term → hol_term → Prop
 	proof Δ p →
 	proof (Γ ∪ Δ) q
 
-| deduct_anti_symm {p q : hol_term} {Γ Δ : list hol_term} :
+| deduct_anti_symm_ {p q : hol_term} {Γ Δ : list hol_term} :
 /-
 	p.type_of = some hol_type.bool →
 	q.type_of = some hol_type.bool →
@@ -421,13 +421,13 @@ begin
   {
 		apply lem_3,
 		unfold hol_term.type_of,
-		simp,
+		simp only [option.bind_eq_some],
 		apply exists.intro σₛₜ,
 		split,
 		apply (lem_4 s t σₛₜ ih).left,
 		refl,
 		unfold hol_term.type_of,
-		simp,
+		simp only [option.bind_eq_some],
 		apply exists.intro σₛₜ,
 		split,
 		apply (lem_4 s t σₛₜ ih).right,
@@ -437,11 +437,11 @@ begin
   {
 		exact ih
 	},
-  case proof.eq_mp : p q Γ Δ _ _ ih_1 ih_2
+  case proof.eq_mp_ : p q Γ Δ _ _ ih_1 ih_2
   {
 		exact (lem_4 p q hol_type.bool ih_1).right
 	},
-  case proof.deduct_anti_symm : p q Γ Δ _ _ ih_1 ih_2
+  case proof.deduct_anti_symm_ : p q Γ Δ _ _ ih_1 ih_2
   {
 		exact lem_3 p q hol_type.bool ih_1 ih_2
 	},
