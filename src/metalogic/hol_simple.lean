@@ -328,6 +328,38 @@ begin
 	unfold hol_term.type_of, exact h1, exact h2,
 end
 
+lemma eq_type_of_left
+  (t₁ t₂ : hol_term)
+  (σ : hol_type)
+	(h1 : (mk_eq σ t₁ t₂).type_of = some hol_type.bool) :
+	t₁.type_of = some σ :=
+begin
+	unfold mk_eq at h1,
+	unfold hol_term.type_of at h1,
+	simp only [option.some_bind, option.bind_eq_some] at h1,
+	apply exists.elim h1,
+	intros a h2, clear h1,
+	cases h2,
+	unfold hol_term.type_of at h2_left,
+	simp only [option.bind_eq_some] at h2_left,
+	apply exists.elim h2_left, clear h2_left,
+	intros b h3,
+	cases h3,
+	split_ifs at h3_right,
+	subst h,
+	exact h3_left,
+	contradiction,
+end
+
+lemma eq_type_of_right
+  (t₁ t₂ : hol_term)
+  (σ : hol_type)
+	(h1 : (mk_eq σ t₁ t₂).type_of = some hol_type.bool) :
+	t₂.type_of = some σ :=
+begin
+	sorry
+end
+
 lemma lem_4
   (t₁ t₂ : hol_term)
   (σ : hol_type)
