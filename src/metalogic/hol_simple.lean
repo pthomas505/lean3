@@ -469,3 +469,13 @@ begin
 		exact lem_3 p q hol_type.bool ih_1 ih_2
 	},
 end
+
+example
+	(Γ : list hol_term)
+	(p : hol_term)
+	(h1 : proof Γ p)
+	(h2 : ∀ h ∈ Γ, ∀ v : term_var_valuation, eval_term h v = some {fst := hol_type.bool, snd := true}) :
+	∀ v : term_var_valuation, eval_term p v = some {fst := hol_type.bool, snd := true} :=
+begin
+	sorry
+end
