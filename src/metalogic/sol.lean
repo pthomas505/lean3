@@ -31,6 +31,8 @@ inductive formula : Type
 | iff : formula → formula → formula
 | forall_var : var_symbol → formula → formula
 | exists_var : var_symbol → formula → formula
+| forall_func_var : ℕ → func_var_symbol → formula → formula
+| exists_func_var : ℕ → func_var_symbol → formula → formula
 | forall_pred_var : ℕ → pred_var_symbol → formula → formula
 | exists_pred_var : ℕ → pred_var_symbol → formula → formula
 
@@ -43,6 +45,18 @@ structure assignment (D : Type) : Type :=
 (func_var (n : ℕ) : func_var_symbol → ((fin n → D) → D))
 -- n place relation variable to an n place relation
 (pred_var (n : ℕ) : pred_var_symbol → ((fin n → D) → Prop))
+
+def update_func_var
+	(D : Type)
+	(v : assignment D)
+	(n : ℕ)
+	(f : func_var_symbol)
+	(a : (fin n → D) → D) :
+	Π (k : ℕ), func_var_symbol → ((fin k → D) → D) :=
+	fun (k : ℕ) (g : func_var_symbol),
+	if h : k = n ∧ g = f
+	then by {cases h, subst h_left, exact a}
+	else v.func_var k g
 
 def update_pred_var
 	(D : Type)
@@ -68,7 +82,7 @@ def eval_term (D : Type) (m : model D) (v : assignment D) : term → D
 | (func n f t) := m.func n f (fun (i : fin n), eval_term (t i))
 | (func_var n u t) := v.func_var n u (fun (i : fin n), eval_term (t i))
 
-/-
+
 def holds (D : Type) (m : model D) : assignment D → formula → Prop
 | _ bottom := false
 | _ top := true
@@ -90,9 +104,23 @@ def holds (D : Type) (m : model D) : assignment D → formula → Prop
 			var := function.update v.var x a,
 			func_var := v.func_var,
 			pred_var := v.pred_var } φ
+| v (forall_func_var n X φ) := ∀ (a : (fin n → D) → D),
+		holds {
+			var := v.var,
+			func_var := update_func_var D v n X a,
+			pred_var := v.pred_var } φ
+| v (exists_func_var n X φ) := ∃ (a : (fin n → D) → D),
+		holds {
+			var := v.var,
+			func_var := update_func_var D v n X a,
+			pred_var := v.pred_var } φ
 | v (forall_pred_var n X φ) := ∀ (a : (fin n → D) → Prop),
 		holds {
 			var := v.var,
 			func_var := v.func_var,
 			pred_var := update_pred_var D v n X a } φ
--/
+| v (exists_pred_var n X φ) := ∃ (a : (fin n → D) → Prop),
+		holds {
+			var := v.var,
+			func_var := v.func_var,
+			pred_var := update_pred_var D v n X a } φ
