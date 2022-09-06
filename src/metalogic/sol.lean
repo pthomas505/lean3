@@ -52,7 +52,7 @@ def update_pred_var
 	(a : (fin n → D) → Prop) :
 	Π (k : ℕ), pred_var_symbol → ((fin k → D) → Prop) :=
 begin
-	apply function.update v.pred_var, intro P, exact a,
+	apply function.update v.pred_var, exact (fun (P : pred_var_symbol), a),
 end
 
 
