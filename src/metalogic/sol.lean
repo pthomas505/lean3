@@ -51,9 +51,10 @@ def update_pred_var
 	(X : pred_var_symbol)
 	(a : (fin n → D) → Prop) :
 	Π (k : ℕ), pred_var_symbol → ((fin k → D) → Prop) :=
-begin
-	apply function.update v.pred_var, exact (fun (P : pred_var_symbol), a),
-end
+	fun (k : ℕ) (P : pred_var_symbol),
+	if h : k = n ∧ P = X
+	then by {cases h, subst h_left, exact a}
+	else v.pred_var k P
 
 
 structure model (D : Type) : Type :=
