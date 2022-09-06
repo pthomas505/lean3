@@ -44,6 +44,17 @@ structure assignment (D : Type) : Type :=
 -- n place relation variable to an n place relation
 (pred_var (n : ℕ) : pred_var_symbol → ((fin n → D) → Prop))
 
+def update_pred_var
+	(D : Type)
+	(v : assignment D)
+	(n : ℕ)
+	(X : pred_var_symbol)
+	(a : (fin n → D) → Prop) :
+	Π (k : ℕ), pred_var_symbol → ((fin k → D) → Prop) :=
+begin
+	apply function.update v.pred_var, intro P, exact a,
+end
+
 
 structure model (D : Type) : Type :=
 (nonempty : nonempty D)
@@ -56,7 +67,7 @@ def eval_term (D : Type) (m : model D) (v : assignment D) : term → D
 | (func n f t) := m.func n f (fun (i : fin n), eval_term (t i))
 | (func_var n u t) := v.func_var n u (fun (i : fin n), eval_term (t i))
 
-
+/-
 def holds (D : Type) (m : model D) : assignment D → formula → Prop
 | _ bottom := false
 | _ top := true
@@ -82,4 +93,5 @@ def holds (D : Type) (m : model D) : assignment D → formula → Prop
 		holds {
 			var := v.var,
 			func_var := v.func_var,
-			pred_var := sorry } φ
+			pred_var := update_pred_var D v n X a } φ
+-/
