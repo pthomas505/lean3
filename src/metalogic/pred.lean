@@ -1175,6 +1175,30 @@ inductive is_sub_pred_formula
   is_sub_var_formula (zip_fin_fun n0 n zs ts var h h1) H H' →
   is_sub_pred_formula (pred n p ts) H
 
+| pred_not (p p' : formula) :
+  is_sub_pred_formula p p' →
+  is_sub_pred_formula (not p) (not p')
+
+| pred_and (p p' q q' : formula) :
+  is_sub_pred_formula p p' →
+  is_sub_pred_formula q q' →
+  is_sub_pred_formula (and p q) (and p' q')
+
+| pred_or (p p' q q' : formula) :
+  is_sub_pred_formula p p' →
+  is_sub_pred_formula q q' →
+  is_sub_pred_formula (or p q) (or p' q')
+
+| pred_imp (p p' q q' : formula) :
+  is_sub_pred_formula p p' →
+  is_sub_pred_formula q q' →
+  is_sub_pred_formula (imp p q) (imp p' q')
+
+| pred_iff (p p' q q' : formula) :
+  is_sub_pred_formula p p' →
+  is_sub_pred_formula q q' →
+  is_sub_pred_formula (iff p q) (iff p' q')
+
 | forall_ne (x : var_symbols) (p : formula) :
   ({ name := p0, arity := n0 } : pred_var) ∉ (forall_ x p).all_pred_set → 
   is_sub_pred_formula (forall_ x p) (forall_ x p)
@@ -1185,6 +1209,17 @@ inductive is_sub_pred_formula
   x ∉ H.free_var_set →
   is_sub_pred_formula p p' →
   is_sub_pred_formula (forall_ x p) (forall_ x p')
+
+| exists_ne (x : var_symbols) (p : formula) :
+  ({ name := p0, arity := n0 } : pred_var) ∉ (exists_ x p).all_pred_set → 
+  is_sub_pred_formula (exists_ x p) (exists_ x p)
+
+| exists_eq (x : var_symbols) (p : formula)
+  (p' : formula) :
+  ({ name := p0, arity := n0 } : pred_var) ∈ (exists_ x p).all_pred_set →
+  x ∉ H.free_var_set →
+  is_sub_pred_formula p p' →
+  is_sub_pred_formula (exists_ x p) (exists_ x p')
 
 
 theorem thm_6
