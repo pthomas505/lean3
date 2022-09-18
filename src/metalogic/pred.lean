@@ -1117,6 +1117,25 @@ inductive is_sub_var_formula : instantiation → formula → formula → Prop
   is_sub_var_formula var_to_term (exists_ x p) (exists_ x p')
 
 
+@[derive decidable_eq]
+structure pred_var : Type :=
+(name : pred_symbols)
+(arity : ℕ)
+
+def formula.all_pred_var : formula → finset pred_var
+| bottom := ∅
+| top := ∅
+| (pred n p t) := { { name := p, arity := n } }
+| (eq_ s t) := ∅
+| (not p) := p.all_pred_var
+| (and p q) := p.all_pred_var ∪ q.all_pred_var
+| (or p q) := p.all_pred_var ∪ q.all_pred_var
+| (imp p q) := p.all_pred_var ∪ q.all_pred_var
+| (iff p q) := p.all_pred_var ∪ q.all_pred_var
+| (forall_ _ p) := p.all_pred_var
+| (exists_ _ p) := p.all_pred_var
+
+
 theorem thm_6
   (var_to_term : instantiation)
   (p : formula)
