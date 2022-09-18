@@ -1122,18 +1122,69 @@ structure pred_var : Type :=
 (name : pred_symbols)
 (arity : ℕ)
 
-def formula.all_pred_var : formula → finset pred_var
+def formula.all_pred_set : formula → finset pred_var
 | bottom := ∅
 | top := ∅
 | (pred n p t) := { { name := p, arity := n } }
 | (eq_ s t) := ∅
-| (not p) := p.all_pred_var
-| (and p q) := p.all_pred_var ∪ q.all_pred_var
-| (or p q) := p.all_pred_var ∪ q.all_pred_var
-| (imp p q) := p.all_pred_var ∪ q.all_pred_var
-| (iff p q) := p.all_pred_var ∪ q.all_pred_var
-| (forall_ _ p) := p.all_pred_var
-| (exists_ _ p) := p.all_pred_var
+| (not p) := p.all_pred_set
+| (and p q) := p.all_pred_set ∪ q.all_pred_set
+| (or p q) := p.all_pred_set ∪ q.all_pred_set
+| (imp p q) := p.all_pred_set ∪ q.all_pred_set
+| (iff p q) := p.all_pred_set ∪ q.all_pred_set
+| (forall_ _ p) := p.all_pred_set
+| (exists_ _ p) := p.all_pred_set
+
+
+def zip_fin_fun
+  {α β : Type}
+  [decidable_eq α]
+  (m n : ℕ)
+  (f : fin m → α)
+  (g : fin n → β)
+  (default : α → β)
+  (h1 : m = n)
+  (h2 : function.injective f) :
+  α → β :=
+  fun x : α, if h : ∃ i : fin m, f i = x then
+  begin
+    apply g,
+    rewrite <- h1,
+    apply fintype.choose (fun a : fin m, f a = x),
+    simp only,
+    apply exists.elim h, intros a h3,
+    apply exists.intro a, simp only,
+    split,
+    exact h3,
+    intros y h4, apply h2,
+    subst h3, exact h4
+  end
+  else default x
+
+inductive is_sub_pred_formula
+  (p0 : pred_symbols) (n0 : ℕ) (H : formula) (zs : fin n0 → var_symbols)
+  (h1 : function.injective zs) :
+  formula → formula → Prop
+| pred_ne (n : ℕ) (p : pred_symbols) (ts : fin n → term) :
+  p0 ≠ p ∨ n0 ≠ n →
+  is_sub_pred_formula (pred n p ts) (pred n p ts)
+
+| pred_eq (n : ℕ) (p : pred_symbols) (ts : fin n → term)
+  (H' : formula) (h : n0 = n) :
+  p0 = p →
+  is_sub_var_formula (zip_fin_fun n0 n zs ts var h h1) H H' →
+  is_sub_pred_formula (pred n p ts) H
+
+| forall_ne (x : var_symbols) (p : formula) :
+  ({ name := p0, arity := n0 } : pred_var) ∉ (forall_ x p).all_pred_set → 
+  is_sub_pred_formula (forall_ x p) (forall_ x p)
+
+| forall_eq (x : var_symbols) (p : formula)
+  (p' : formula) :
+  ({ name := p0, arity := n0 } : pred_var) ∈ (forall_ x p).all_pred_set →
+  x ∉ H.free_var_set →
+  is_sub_pred_formula p p' →
+  is_sub_pred_formula (forall_ x p) (forall_ x p')
 
 
 theorem thm_6
