@@ -835,6 +835,16 @@ def term_sub_var_term (var_to_term : instantiation) : term → term
 | (var x) := var_to_term x
 | (func n f t) := func n f (fun (i : fin n), term_sub_var_term (t i))
 
+
+inductive is_sub_var_term : instantiation → term → term → Prop
+| var (x : var_symbols) (var_to_term : instantiation) :
+is_sub_var_term var_to_term (var x) (var_to_term x)
+
+| func (n : ℕ) (f : func_symbols) (t t' : fin n → term) (var_to_term : instantiation) :
+∀ (i : fin n), is_sub_var_term var_to_term (t i) (t' i) →
+is_sub_var_term var_to_term (func n f t) (func n f t')
+
+
 theorem thm_4
   (var_to_term : instantiation)
   (t : term) :
@@ -977,6 +987,57 @@ def formula_sub_var_term : instantiation → formula → formula
     then variant x (formula_sub_var_term (function.update var_to_term x (var x)) p).free_var_set
     else x
   in exists_ x' (formula_sub_var_term (function.update var_to_term x (var x')) p)
+
+
+inductive is_sub_var_formula : instantiation → formula → formula → Prop
+| bottom (var_to_term : instantiation) :
+  is_sub_var_formula var_to_term bottom bottom
+
+| top (var_to_term : instantiation) :
+  is_sub_var_formula var_to_term top top
+
+| pred (n : ℕ) (p : pred_symbols) (t t' : fin n → term) (var_to_term : instantiation) :
+  ∀ i : fin n, is_sub_var_term var_to_term (t i) (t' i) →
+  is_sub_var_formula var_to_term (pred n p t) (pred n p t')
+
+| eq_ (s s' t t' : term) (var_to_term : instantiation) :
+  is_sub_var_term var_to_term s s' →
+  is_sub_var_term var_to_term t t' →
+  is_sub_var_formula var_to_term (eq_ s t) (eq_ s' t')
+
+| not (p p' : formula) (var_to_term : instantiation) :
+  is_sub_var_formula var_to_term p p' →
+  is_sub_var_formula var_to_term (not p) (not p')
+
+| and (p p' q q' : formula) (var_to_term : instantiation) :
+  is_sub_var_formula var_to_term p p' →
+  is_sub_var_formula var_to_term q q' →
+  is_sub_var_formula var_to_term (and p q) (and p' q')
+
+| or (p p' q q' : formula) (var_to_term : instantiation) :
+  is_sub_var_formula var_to_term p p' →
+  is_sub_var_formula var_to_term q q' →
+  is_sub_var_formula var_to_term (or p q) (or p' q')
+
+| imp (p p' q q' : formula) (var_to_term : instantiation) :
+  is_sub_var_formula var_to_term p p' →
+  is_sub_var_formula var_to_term q q' →
+  is_sub_var_formula var_to_term (imp p q) (imp p' q')
+
+| iff (p p' q q' : formula) (var_to_term : instantiation) :
+  is_sub_var_formula var_to_term p p' →
+  is_sub_var_formula var_to_term q q' →
+  is_sub_var_formula var_to_term (iff p q) (iff p' q')
+
+| forall_ (x : var_symbols) (p p' : formula) (var_to_term : instantiation) :
+  ∀ y ∈ p.free_var_set \ {x}, x ∉ (var_to_term y).all_var_set →
+  is_sub_var_formula var_to_term p p' →
+  is_sub_var_formula var_to_term (forall_ x p) (forall_ x p')
+
+| exists_ (x : var_symbols) (p p' : formula) (var_to_term : instantiation) :
+  ∀ y ∈ p.free_var_set \ {x}, x ∉ (var_to_term y).all_var_set →
+  is_sub_var_formula var_to_term p p' →
+  is_sub_var_formula var_to_term (exists_ x p) (exists_ x p')
 
 
 theorem thm_6
