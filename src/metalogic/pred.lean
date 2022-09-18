@@ -838,11 +838,28 @@ def term_sub_var_term (var_to_term : instantiation) : term → term
 
 inductive is_sub_var_term : instantiation → term → term → Prop
 | var (x : var_symbols) (var_to_term : instantiation) :
-is_sub_var_term var_to_term (var x) (var_to_term x)
+  is_sub_var_term var_to_term (var x) (var_to_term x)
 
 | func (n : ℕ) (f : func_symbols) (t t' : fin n → term) (var_to_term : instantiation) :
-∀ (i : fin n), is_sub_var_term var_to_term (t i) (t' i) →
-is_sub_var_term var_to_term (func n f t) (func n f t')
+  ∀ (i : fin n), is_sub_var_term var_to_term (t i) (t' i) →
+  is_sub_var_term var_to_term (func n f t) (func n f t')
+
+
+inductive is_sub_var_term_single : term → var_symbols → term → term → Prop
+| var_eq (x : var_symbols)
+  (x0 : var_symbols) (t0 : term) :
+  x = x0 →
+  is_sub_var_term_single (var x) x0 t0 t0
+
+| var_ne (x : var_symbols)
+  (x0 : var_symbols) (t0 : term) :
+  x ≠ x0 →
+  is_sub_var_term_single (var x) x0 t0 (var x)
+
+| func (n : ℕ) (f : func_symbols) (ts : fin n → term)
+  (x0 : var_symbols) (t0 : term) (ts' : fin n → term) :
+  ∀ (i : fin n), is_sub_var_term_single (ts i) x0 t0 (ts' i) →
+  is_sub_var_term_single (func n f ts) x0 t0 (func n f ts')
 
 
 theorem thm_4
@@ -987,6 +1004,66 @@ def formula_sub_var_term : instantiation → formula → formula
     then variant x (formula_sub_var_term (function.update var_to_term x (var x)) p).free_var_set
     else x
   in exists_ x' (formula_sub_var_term (function.update var_to_term x (var x')) p)
+
+
+inductive is_sub_var_formula_single : formula → var_symbols → term → formula → Prop
+| bottom (x0 : var_symbols) (t0 : term) :
+  is_sub_var_formula_single bottom x0 t0 bottom
+
+| top (x0 : var_symbols) (t0 : term) :
+  is_sub_var_formula_single top x0 t0 top
+
+| pred (n : ℕ) (p : pred_symbols) (ts : fin n → term)
+  (x0 : var_symbols) (t0 : term) (ts' : fin n → term) :
+  ∀ (i : fin n), is_sub_var_term_single (ts i) x0 t0 (ts' i) →
+  is_sub_var_formula_single (pred n p ts) x0 t0 (pred n p ts')
+
+| eq_ (s t : term)
+  (x0 : var_symbols) (t0 : term) (s' t' : term) :
+  is_sub_var_term_single s x0 t0 s' →
+  is_sub_var_term_single t x0 t0 t' →
+  is_sub_var_formula_single (eq_ s t) x0 t0 (eq_ s' t')
+
+| not (p : formula)
+  (x0 : var_symbols) (t0 : term) (p' : formula) :
+  is_sub_var_formula_single p x0 t0 p' →
+  is_sub_var_formula_single (not p) x0 t0 (not p')
+
+| and (p q : formula)
+  (x0 : var_symbols) (t0 : term) (p' q' : formula) :
+  is_sub_var_formula_single p x0 t0 p' →
+  is_sub_var_formula_single q x0 t0 q' →
+  is_sub_var_formula_single (and p q) x0 t0 (and p' q')
+
+| or (p q : formula)
+  (x0 : var_symbols) (t0 : term) (p' q' : formula) :
+  is_sub_var_formula_single p x0 t0 p' →
+  is_sub_var_formula_single q x0 t0 q' →
+  is_sub_var_formula_single (or p q) x0 t0 (or p' q')
+
+| imp (p q : formula)
+  (x0 : var_symbols) (t0 : term) (p' q' : formula) :
+  is_sub_var_formula_single p x0 t0 p' →
+  is_sub_var_formula_single q x0 t0 q' →
+  is_sub_var_formula_single (imp p q) x0 t0 (imp p' q')
+
+| iff (p q : formula)
+  (x0 : var_symbols) (t0 : term) (p' q' : formula) :
+  is_sub_var_formula_single p x0 t0 p' →
+  is_sub_var_formula_single q x0 t0 q' →
+  is_sub_var_formula_single (iff p q) x0 t0 (iff p' q')
+
+| forall_ne (x : var_symbols) (p : formula)
+  (x0 : var_symbols) (t0 : term) :
+  x0 ∉ (forall_ x p).free_var_set →
+  is_sub_var_formula_single (forall_ x p) x0 t0 (forall_ x p)
+
+| forall_eq (x : var_symbols) (p : formula)
+  (x0 : var_symbols) (t0 : term) (p' : formula) :
+  x0 ∈ (forall_ x p).free_var_set →
+  x ∉ t0.all_var_set →
+  is_sub_var_formula_single p x0 t0 p' →
+  is_sub_var_formula_single (forall_ x p) x0 t0 (forall_ x p')
 
 
 inductive is_sub_var_formula : instantiation → formula → formula → Prop
