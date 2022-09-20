@@ -19,6 +19,18 @@ def fin_zip
 		(fin_zip n (fun (i : fin n), (f i)) (fun (i : fin n), (g i)))
 		(f n) (g n)
 
+
+def function.update_list
+	{α β : Type}
+	[decidable_eq α]
+	(σ : α → β)
+	(pairs : list (α × β)) :
+	(α → β) :=
+	list.foldl (fun (σ' : α → β) (p : α × β), function.update σ' p.fst p.snd) σ pairs
+
+#eval (function.update_list (fun (n : ℕ), n) [(0, 1), (0, 10), (1, 2)]) 0
+
+
 def fin_map
 	{α β : Type}
 	(m : α → β)
