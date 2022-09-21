@@ -4,31 +4,63 @@ References:
 -/
 
 
-import data.finset
+import data.finset data.fin.vec_notation
 
 set_option pp.parens true
 
 
-def fin_zip
+def function.update_fin
 	{α β : Type}
 	[decidable_eq α]
-	(σ : α → β) : Π (n : ℕ), (fin n → α) → (fin n → β) → (α → β)
+	(σ : α → β) :
+	Π (n : ℕ), (fin n → α) → (fin n → β) → (α → β)
 | 0 _ _ := σ
 | (n + 1) f g :=
 	function.update
-		(fin_zip n (fun (i : fin n), (f i)) (fun (i : fin n), (g i)))
+		(function.update_fin n (fun (i : fin n), (f i)) (fun (i : fin n), (g i)))
 		(f n) (g n)
 
+#eval function.update_fin (fun (n : ℕ), n) 3 ![0, 5, 0] ![10, 8, 5] 0
 
-def function.update_list
+
+example
 	{α β : Type}
 	[decidable_eq α]
 	(σ : α → β)
-	(pairs : list (α × β)) :
-	(α → β) :=
-	list.foldl (fun (σ' : α → β) (p : α × β), function.update σ' p.fst p.snd) σ pairs
+	(n : ℕ)
+	(xs : fin n → α)
+	(nodup : function.injective xs)
+	(ys : fin n → β)
+	(x : α)
+	(i : fin n)
+	(h1 : x = xs i) :
+	function.update_fin σ n xs ys x = ys i :=
+begin
+	induction n,
+	case nat.zero
+  { admit },
+  case nat.succ : n ih
+  {
+		have s1 : ∀ (j : fin n.succ), i ≠ j → function.update σ (xs j) (ys j) x = σ x,
+		intros j h2,
+		apply function.update_noteq,
+		intro contra, subst h1,
+		unfold function.injective at nodup,
+		specialize nodup contra, apply h2, exact nodup,
 
-#eval (function.update_list (fun (n : ℕ), n) [(0, 1), (0, 10), (1, 2)]) 0
+		unfold function.update_fin,
+		by_cases i = n,
+		{
+			subst h, rewrite h1, apply function.update_same
+		},
+		{
+			have s2 : x ≠ xs ↑n, intro contra, apply h, rewrite h1 at contra,
+			unfold function.injective at nodup, exact nodup contra,
+			rewrite function.update_noteq s2,
+			sorry,
+		}
+	},
+end
 
 
 def fin_map
@@ -105,7 +137,7 @@ def interpretation.var_update_repeat
 	interpretation ω :=
 	{
 		nonempty := I.nonempty,
-		var := fin_zip I.var n xs ds,
+		var := function.update_fin I.var n xs ds,
 		func := I.func,
 		pred := I.pred
 	}
@@ -171,5 +203,19 @@ lemma lem_1_b
 	(I.var_update_repeat n zs (fin_map I.term n ts)).term t0 =
 		I.term (sub_var_term_single_repeat t0 n zs ts) :=
 begin
-	admit
+	induction t0,
+	case term.var : x
+  {
+		by_cases ∃ (i : fin n), x = zs i,
+		{
+			apply exists.elim h, intros i h2,
+			rewrite h2,
+			sorry
+		},
+		{
+			sorry
+		}
+	},
+  case term.func : t0_n t0_ᾰ t0_ᾰ_1 t0_ih
+  { admit },
 end
