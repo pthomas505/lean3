@@ -57,7 +57,13 @@ begin
 			have s2 : x ≠ xs ↑n, intro contra, apply h, rewrite h1 at contra,
 			unfold function.injective at nodup, exact nodup contra,
 			rewrite function.update_noteq s2,
+			specialize ih (fin.init xs),
+
+			have s3 : ∀ (i : fin n), function.injective (fin.init xs), intros i',
+			unfold function.injective at nodup, unfold function.injective, unfold fin.init,
 			sorry,
+
+			sorry
 		}
 	},
 end
