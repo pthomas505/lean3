@@ -48,7 +48,7 @@ begin
 		intros i,
 		by_cases ↑i = ↑n,
 		rewrite h, exact s1,
-		apply h1
+		exact h1 ↑i
 	},
 end
 
@@ -85,10 +85,6 @@ begin
 			have s2 : ∀ (i : fin n.succ), function.injective (fin.init xs), intros i',
 			unfold function.injective at nodup, unfold function.injective, unfold fin.init,
 			sorry,
-
-			specialize ih (s2 i) (fin.init ys),
-			simp at *,
-			specialize ih 
 			sorry
 		}
 	},
@@ -272,7 +268,7 @@ begin
 			unfold interpretation.var_update_repeat,
 			simp only,
 			have s1 : function.update_fin I.var n zs (fin_map I.term n ts) (zs i) = (fin_map I.term n ts) i,
-			apply lem_a I.var n zs nodup (fin_map I.term n ts) (zs i), refl,
+			sorry, --apply lem_a I.var n zs nodup (fin_map I.term n ts) (zs i), refl,
 			rewrite s1,
 			rewrite lem_b,
 			unfold fin_map
@@ -283,7 +279,8 @@ begin
 			unfold interpretation.term,
 			simp,
 			have s1 : function.update_fin I.var n zs (fin_map I.term n ts) x = I.var x,
-			
+			sorry,
+			sorry,
 		}
 	},
   case term.func : t0_n t0_ᾰ t0_ᾰ_1 t0_ih
