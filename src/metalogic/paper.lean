@@ -52,6 +52,14 @@ begin
 	},
 end
 
+example
+	{α : Type}
+	(n : ℕ)
+	(f : fin n.succ → α)
+	(nodup : function.injective f) :
+	function.injective (fun (i : fin n), f i.cast_succ) :=
+nodup.comp (fin.cast_succ_injective _)
+
 
 example
 	{α β : Type}
@@ -72,20 +80,18 @@ begin
   case nat.succ : n ih
   {
 		unfold function.update_fin,
-		by_cases i = n,
+		subst h1,
+		by_cases i = ↑n,
 		{
-			subst h, rewrite h1, apply function.update_same
+			rewrite h, apply function.update_same
 		},
 		{
-			have s1 : x ≠ xs ↑n, intro contra, apply h, rewrite h1 at contra,
-			unfold function.injective at nodup, exact nodup contra,
-			rewrite function.update_noteq s1,
-			specialize ih (fin.init xs),
-
-			have s2 : ∀ (i : fin n.succ), function.injective (fin.init xs), intros i',
-			unfold function.injective at nodup, unfold function.injective, unfold fin.init,
+			have s1 : xs i ≠ xs ↑n, intro contra, apply h, tauto,
+			simp only [function.update_noteq s1],
+			have s2 : function.injective (fun (i : fin n), xs ↑i),
+			unfold function.injective at *, intros a b h2,
 			sorry,
-			sorry
+			sorry,
 		}
 	},
 end
