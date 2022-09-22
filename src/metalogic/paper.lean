@@ -29,6 +29,36 @@ example
 	(σ : α → β)
 	(n : ℕ)
 	(xs : fin n → α)
+	(ys : fin n → β)
+	(x : α)
+	(h1 : ∀ (i : fin n), x ≠ xs i) :
+	function.update_fin σ n xs ys x = σ x :=
+begin
+	induction n,
+	case nat.zero
+  {
+		unfold function.update_fin
+	},
+  case nat.succ : n ih
+  {
+		unfold function.update_fin,
+		have s1 : x ≠ xs ↑n, apply h1,
+		simp only [function.update_noteq s1],
+		apply ih,
+		intros i,
+		by_cases ↑i = ↑n,
+		rewrite h, exact s1,
+		apply h1
+	},
+end
+
+
+example
+	{α β : Type}
+	[decidable_eq α]
+	(σ : α → β)
+	(n : ℕ)
+	(xs : fin n → α)
 	(nodup : function.injective xs)
 	(ys : fin n → β)
 	(x : α)
@@ -38,31 +68,27 @@ example
 begin
 	induction n,
 	case nat.zero
-  { admit },
+  { exact fin.elim0 i },
   case nat.succ : n ih
   {
-		have s1 : ∀ (j : fin n.succ), i ≠ j → function.update σ (xs j) (ys j) x = σ x,
-		intros j h2,
-		apply function.update_noteq,
-		intro contra, subst h1,
-		unfold function.injective at nodup,
-		specialize nodup contra, apply h2, exact nodup,
-
 		unfold function.update_fin,
 		by_cases i = n,
 		{
 			subst h, rewrite h1, apply function.update_same
 		},
 		{
-			have s2 : x ≠ xs ↑n, intro contra, apply h, rewrite h1 at contra,
+			have s1 : x ≠ xs ↑n, intro contra, apply h, rewrite h1 at contra,
 			unfold function.injective at nodup, exact nodup contra,
-			rewrite function.update_noteq s2,
+			rewrite function.update_noteq s1,
 			specialize ih (fin.init xs),
 
-			have s3 : ∀ (i : fin n), function.injective (fin.init xs), intros i',
+			have s2 : ∀ (i : fin n.succ), function.injective (fin.init xs), intros i',
 			unfold function.injective at nodup, unfold function.injective, unfold fin.init,
 			sorry,
 
+			specialize ih (s2 i) (fin.init ys),
+			simp at *,
+			specialize ih 
 			sorry
 		}
 	},
@@ -106,11 +132,37 @@ def sub_var_term_single (x : var_name) (t : term) : term → term
 
 
 -- (((t0 [x1 / t1]) [x2 / t2]) ... [xn / tn])
-def sub_var_term_single_repeat (t0 : term) : Π n : ℕ, (fin n → var_name) → (fin n → term) → term
+def sub_var_term_single_repeat
+	(t0 : term) :
+	Π (n : ℕ), (fin n → var_name) → (fin n → term) → term
 | 0 _ _ := t0
 | (n + 1) xs ts :=
 	sub_var_term_single (xs n) (ts n)
 		(sub_var_term_single_repeat n (fun (i : fin n), (xs i)) (fun (i : fin n), (ts i)))
+
+
+lemma lem_b
+	(n : ℕ)
+	(zs : fin n → var_name)
+	(ts : fin n → term)
+	(i : fin n) :
+	sub_var_term_single_repeat (var (zs i)) n zs ts = ts i :=
+begin
+	induction n,
+	case nat.zero
+  { apply fin.elim0 i },
+  case nat.succ : n ih
+  {
+		by_cases i = n,
+		{
+			specialize ih (fin.init zs) (fin.init ts),
+			sorry
+		},
+		{
+			sorry
+		}
+	},
+end
 
 
 structure interpretation (ω : Type) : Type :=
@@ -216,10 +268,22 @@ begin
 		{
 			apply exists.elim h, intros i h2,
 			rewrite h2,
-			sorry
+			unfold interpretation.term,
+			unfold interpretation.var_update_repeat,
+			simp only,
+			have s1 : function.update_fin I.var n zs (fin_map I.term n ts) (zs i) = (fin_map I.term n ts) i,
+			apply lem_a I.var n zs nodup (fin_map I.term n ts) (zs i), refl,
+			rewrite s1,
+			rewrite lem_b,
+			unfold fin_map
 		},
 		{
-			sorry
+			push_neg at h,
+			unfold interpretation.var_update_repeat,
+			unfold interpretation.term,
+			simp,
+			have s1 : function.update_fin I.var n zs (fin_map I.term n ts) x = I.var x,
+			
 		}
 	},
   case term.func : t0_n t0_ᾰ t0_ᾰ_1 t0_ih
