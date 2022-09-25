@@ -161,11 +161,11 @@ theorem thm_2
   (D : Type)
   (M : interpretation D)
   (V1 V2 : valuation D)
-  (p : formula)
-  (h1 : ∀ x ∈ p.free_var_set, V1 x = V2 x) :
-  holds D M V1 p ↔ holds D M V2 p :=
+  (φ : formula)
+  (h1 : ∀ x ∈ φ.free_var_set, V1 x = V2 x) :
+  holds D M V1 φ ↔ holds D M V2 φ :=
 begin
-  induction p generalizing V1 V2,
+  induction φ generalizing V1 V2,
   case formula.pred : n P ts {
     unfold formula.free_var_set at h1,
     simp only [finset.mem_bUnion, finset.mem_univ, exists_true_left, forall_exists_index] at h1,
