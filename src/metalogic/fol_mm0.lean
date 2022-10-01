@@ -110,3 +110,24 @@ begin
 		rewrite s1, apply φ_ih,
 	},
 end
+
+
+def is_not_free (D : Type) (M : meta_valuation D) (φ : formula) (x : var_name) : Prop :=
+∀ (V : valuation D) (a : D),
+holds D V M φ ↔ holds D (function.update V x a) M φ
+
+theorem is_valid_pred_3
+  (D : Type)
+  (V : valuation D)
+  (M : meta_valuation D)
+  (φ : formula)
+  (x : var_name)
+  (h1 : is_not_free D M φ x) :
+  holds D V M (φ.imp (forall_ x φ)) :=
+begin
+	unfold is_not_free at h1,
+	unfold holds,
+	intros h3 a,
+	cases h1 V a,
+	exact mp h3,
+end
