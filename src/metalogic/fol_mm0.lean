@@ -94,27 +94,19 @@ begin
 		unfold formula.subst,
 		unfold holds,
 		apply forall_congr, intros a,
-		unfold function.comp at *,
 
-		specialize φ_ih (function.update V (σ x) a),
-
-		have s1 : (fun (x' : var_name), function.update V (σ x) a (σ x')) =
-			function.update (fun (x : var_name), V (σ x)) x a,
+		have s1 : function.update (V ∘ σ) x a = (function.update V (σ x) a) ∘ σ,
 		apply funext, intros x',
+		unfold function.comp,
 		unfold function.update,
 		simp only [eq_rec_constant, dite_eq_ite],
-
-		have s2 : function.injective σ,
+		apply if_congr,
+		split,
+		apply congr_arg,
 		apply function.left_inverse.injective,
 		exact congr_fun h2,
+		refl, refl,
 
-		have s3 : σ x' = σ x ↔ x' = x,
-		split,
-		intros h3, exact s2 h3,
-		exact congr_arg (λ (x' : var_name), σ x'),
-
-		simp only [s3],
-		rewrite s1 at φ_ih,
-		exact φ_ih,
+		rewrite s1, apply φ_ih,
 	},
 end
