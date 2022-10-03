@@ -13,7 +13,7 @@ inductive formula : Type
 | meta_var : meta_var_name → formula
 | not : formula → formula
 | imp : formula → formula → formula
-| eq : var_name → var_name → formula
+| eq_ : var_name → var_name → formula
 | forall_ : var_name → formula → formula
 
 open formula
@@ -26,7 +26,7 @@ def holds (D : Type) : valuation D → meta_valuation D → formula → Prop
 | V M (meta_var X) := M X V
 | V M (not φ) := ¬ holds V M φ
 | V M (imp φ ψ) := holds V M φ → holds V M ψ
-| V M (eq x y) := V x = V y
+| V M (eq_ x y) := V x = V y
 | V M (forall_ x φ) := ∀ (a : D), holds (function.update V x a) M φ
 
 
@@ -46,7 +46,7 @@ def formula.subst (σ : instantiation) (τ : meta_instantiation) : formula → f
 | (meta_var X) := τ X
 | (not φ) := not φ.subst
 | (imp φ ψ) := imp φ.subst ψ.subst
-| (eq x y) := eq (σ x) (σ y)
+| (eq_ x y) := eq_ (σ x) (σ y)
 | (forall_ x φ) := forall_ (σ x) φ.subst
 
 
@@ -84,7 +84,7 @@ begin
 		unfold holds,
 		simp only [φ_ih, ψ_ih],
 	},
-  case formula.eq : x y
+  case formula.eq_ : x y
   {
 		unfold formula.subst,
 		unfold holds,
@@ -112,18 +112,123 @@ begin
 end
 
 
-def is_not_free (D : Type) (M : meta_valuation D) (φ : formula) (x : var_name) : Prop :=
+def is_not_free' (D : Type) (M : meta_valuation D) : formula → var_name → Prop
+| (meta_var X) v := ∀ (V : valuation D) (a : D), M X V ↔ M X (function.update V v a)
+| (not φ) v := is_not_free' φ v
+| (imp φ ψ) v := is_not_free' φ v ∧ is_not_free' ψ v
+| (eq_ x y) v := x ≠ v ∧ y ≠ v
+| (forall_ x φ) v := x = v ∨ is_not_free' φ v
+
+def is_not_free (D : Type) (M : meta_valuation D) (φ : formula) (v : var_name) : Prop :=
 ∀ (V : valuation D) (a : D),
-holds D V M φ ↔ holds D (function.update V x a) M φ
+holds D V M φ ↔ holds D (function.update V v a) M φ
+
+
+example
+	(D : Type)
+	(M : meta_valuation D)
+	(X : meta_var_name)
+	(v : var_name) :
+	(∀ (V : valuation D) (a : D), M X V ↔ M X (function.update V v a)) →
+		is_not_free D M (meta_var X) v :=
+begin
+	unfold is_not_free,
+	unfold holds,
+	intros h1 V a,
+	apply h1,
+end
+
+example
+	(D : Type)
+	(M : meta_valuation D)
+	(φ : formula)
+	(v : var_name) :
+	is_not_free D M φ v → is_not_free D M (not φ) v :=
+begin
+	unfold is_not_free,
+	unfold holds,
+	intros h1 V a,
+	rewrite h1,
+end
+
+example
+	(D : Type)
+	(M : meta_valuation D)
+	(φ ψ : formula)
+	(v : var_name) :
+	is_not_free D M φ v ∧ is_not_free D M ψ v → is_not_free D M (imp φ ψ) v :=
+begin
+	unfold is_not_free,
+	unfold holds,
+	intros h1 V a,
+	cases h1,
+	rewrite h1_left V a,
+	rewrite h1_right V a,
+end
+
+example
+	(D : Type)
+	(M : meta_valuation D)
+	(x : var_name)
+	(x y : var_name)
+	(v : var_name) :
+	x ≠ v ∧ y ≠ v → is_not_free D M (eq_ x y) v :=
+begin
+	unfold is_not_free,
+	unfold holds,
+	intros h1 V a,
+	cases h1,
+	simp only [function.update_noteq h1_left, function.update_noteq h1_right],
+end
+
+example
+	(D : Type)
+	(M : meta_valuation D)
+	(x : var_name)
+	(φ : formula)
+	(v : var_name) :
+	v = x → is_not_free D M (forall_ x φ) v :=
+begin
+	unfold is_not_free,
+	unfold holds,
+	intros h1 V a,
+	apply forall_congr, intros a',
+	rewrite h1,
+	simp only [function.update_idem],
+end
+
+example
+	(D : Type)
+	(M : meta_valuation D)
+	(x : var_name)
+	(φ : formula)
+	(v : var_name) :
+	is_not_free D M φ v → is_not_free D M (forall_ x φ) v :=
+begin
+	unfold is_not_free,
+	unfold holds,
+	intros h1 V a,
+	apply forall_congr, intros a',
+	by_cases v = x,
+	{
+		rewrite h,
+		simp only [function.update_idem],
+	},
+	{
+		simp only [function.update_comm h],
+		apply h1,
+	}
+end
+
 
 theorem is_valid_pred_3
-  (D : Type)
-  (V : valuation D)
-  (M : meta_valuation D)
-  (φ : formula)
-  (x : var_name)
-  (h1 : is_not_free D M φ x) :
-  holds D V M (φ.imp (forall_ x φ)) :=
+	(D : Type)
+	(V : valuation D)
+	(M : meta_valuation D)
+	(φ : formula)
+	(x : var_name)
+	(h1 : is_not_free D M φ x) :
+	holds D V M (φ.imp (forall_ x φ)) :=
 begin
 	unfold is_not_free at h1,
 	unfold holds,
