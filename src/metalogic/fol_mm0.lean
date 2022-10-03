@@ -119,9 +119,49 @@ def is_not_free' (D : Type) (M : meta_valuation D) : formula → var_name → Pr
 | (eq_ x y) v := x ≠ v ∧ y ≠ v
 | (forall_ x φ) v := x = v ∨ is_not_free' φ v
 
+
+-- changing v does not cause the value of φ to change
+
+def is_not_free'' (D : Type) (M : meta_valuation D) (φ : formula) (v : var_name) : Prop :=
+	∀ (V V' : valuation D), (∀ (y : var_name), (y ≠ v → (V y = V' y))) → (holds D V M φ ↔ holds D V' M φ)
+
 def is_not_free (D : Type) (M : meta_valuation D) (φ : formula) (v : var_name) : Prop :=
-∀ (V : valuation D) (a : D),
-holds D V M φ ↔ holds D (function.update V v a) M φ
+	∀ (V : valuation D) (a : D),
+	holds D V M φ ↔ holds D (function.update V v a) M φ
+
+
+example
+	(D : Type)
+	(M : meta_valuation D)
+	(φ : formula)
+	(v : var_name) :
+	is_not_free'' D M φ v ↔ is_not_free D M φ v :=
+begin
+	unfold is_not_free,
+	unfold is_not_free'',
+	split,
+	{
+		intros h1 V a,
+		apply h1,
+		intros a' h2,
+		simp only [function.update_noteq h2],
+	},
+	{
+		intros h1 V V' h2,
+		have s1 : function.update V v (V' v) = V',
+			funext y,
+			by_cases y = v,
+			{
+				rewrite h, simp,
+			},
+			{
+				simp only [function.update_noteq h],
+				apply h2 y h,
+			},
+		rewrite <- s1,
+		apply h1,
+	}
+end
 
 
 example
