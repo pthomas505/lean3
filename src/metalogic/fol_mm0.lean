@@ -292,6 +292,14 @@ begin
 end
 
 
+def not_free (Γ : list (var_name × meta_var_name)) (v : var_name) : formula → Prop
+| (meta_var X) := (v, X) ∈ Γ
+| (not φ) := not_free φ
+| (imp φ ψ) := not_free φ ∧ not_free ψ
+| (eq_ x y) := x ≠ v ∧ y ≠ v
+| (forall_ x φ) := x = v ∨ not_free φ
+
+
 inductive is_proof : list (var_name × meta_var_name) → list formula → formula → Prop
 | mp (Γ : list (var_name × meta_var_name)) (Δ : list formula)
 	{φ ψ : formula} :
@@ -319,4 +327,4 @@ inductive is_proof : list (var_name × meta_var_name) → list formula → formu
 
 | pred_2 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
 	{φ : formula} {x : var_name} :
-	not_free φ x Γ → is_proof Γ Δ (φ.imp (forall_ x φ))
+	not_free Γ x φ → is_proof Γ Δ (φ.imp (forall_ x φ))
