@@ -311,4 +311,5 @@ inductive is_proof : formula → Prop
 | pred_1 {φ ψ : formula} {x : var_name} :
 	is_proof ((forall_ x (φ.imp ψ)).imp ((forall_ x φ).imp (forall_ x ψ)))
 
-| pred_2 {φ : formula} {x : var_name} :
+| pred_2 {φ : formula} {x : var_name} {D : Type} {M : meta_valuation D} :
+	is_not_free D M φ x → is_proof (φ.imp (forall_ x φ))
