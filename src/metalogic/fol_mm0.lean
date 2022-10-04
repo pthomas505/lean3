@@ -50,6 +50,28 @@ def formula.subst (σ : instantiation) (τ : meta_instantiation) : formula → f
 | (forall_ x φ) := forall_ (σ x) φ.subst
 
 
+lemma lem_1
+	{α β : Type}
+	[decidable_eq α]
+	(f f' : α → α)
+  (x : α)
+  (h1 : (f' ∘ f) = id)
+  (g : α → β)
+  (a : β) :
+  (function.update (g ∘ f) x a = function.update g (f x) a ∘ f) :=
+begin
+		apply funext, intros x',
+		unfold function.comp,
+		unfold function.update,
+		simp only [eq_rec_constant, dite_eq_ite],
+		apply if_congr,
+		split,
+		apply congr_arg,
+		apply function.left_inverse.injective,
+		exact congr_fun h1,
+		refl, refl,
+end
+
 example
 	(φ : formula)
 	(D : Type)
@@ -94,20 +116,8 @@ begin
 		unfold formula.subst,
 		unfold holds,
 		apply forall_congr, intros a,
-
-		have s1 : function.update (V ∘ σ) x a = (function.update V (σ x) a) ∘ σ,
-		apply funext, intros x',
-		unfold function.comp,
-		unfold function.update,
-		simp only [eq_rec_constant, dite_eq_ite],
-		apply if_congr,
-		split,
-		apply congr_arg,
-		apply function.left_inverse.injective,
-		exact congr_fun h2,
-		refl, refl,
-
-		rewrite s1, apply φ_ih,
+		rewrite lem_1 σ σ' x h2 V a,
+		apply φ_ih,
 	},
 end
 
@@ -126,8 +136,7 @@ def is_not_free (D : Type) (M : meta_valuation D) (φ : formula) (v : var_name) 
 	∀ (V : valuation D) (a : D),
 	holds D V M φ ↔ holds D (function.update V v a) M φ
 
-
-lemma lem_1
+lemma lem_2
 	{α β : Type}
 	[decidable_eq α]
   (f g : α → β)
@@ -143,7 +152,6 @@ begin
 	exact h1 a h,
 end
 
-
 theorem is_not_free_equiv
 	{D : Type}
 	(M : meta_valuation D)
@@ -158,7 +166,7 @@ begin
 	split,
 	{
 		intros h1 V V' h2,
-		rewrite <- lem_1 V V' v h2,
+		rewrite <- lem_2 V V' v h2,
 		apply h1,
 	},
 	{
