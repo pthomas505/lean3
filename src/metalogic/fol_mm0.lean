@@ -112,54 +112,60 @@ begin
 end
 
 
-def is_not_free' (D : Type) (M : meta_valuation D) : formula → var_name → Prop
+def is_not_free_rec (D : Type) (M : meta_valuation D) : formula → var_name → Prop
 | (meta_var X) v := ∀ (V : valuation D) (a : D), M X V ↔ M X (function.update V v a)
-| (not φ) v := is_not_free' φ v
-| (imp φ ψ) v := is_not_free' φ v ∧ is_not_free' ψ v
+| (not φ) v := is_not_free_rec φ v
+| (imp φ ψ) v := is_not_free_rec φ v ∧ is_not_free_rec ψ v
 | (eq_ x y) v := x ≠ v ∧ y ≠ v
-| (forall_ x φ) v := x = v ∨ is_not_free' φ v
+| (forall_ x φ) v := x = v ∨ is_not_free_rec φ v
 
 
 -- changing v does not cause the value of φ to change
-
-def is_not_free'' (D : Type) (M : meta_valuation D) (φ : formula) (v : var_name) : Prop :=
-	∀ (V V' : valuation D), (∀ (y : var_name), (y ≠ v → (V y = V' y))) → (holds D V M φ ↔ holds D V' M φ)
 
 def is_not_free (D : Type) (M : meta_valuation D) (φ : formula) (v : var_name) : Prop :=
 	∀ (V : valuation D) (a : D),
 	holds D V M φ ↔ holds D (function.update V v a) M φ
 
 
-example
-	(D : Type)
+lemma lem_1
+	{α β : Type}
+	[decidable_eq α]
+  (f g : α → β)
+	(x : α)
+  (h1 : ∀ (y : α), y ≠ x → f y = g y) :
+  function.update f x (g x) = g :=
+begin
+  apply funext, intros a,
+	unfold function.update,
+	simp only [eq_rec_constant, dite_eq_ite],
+	split_ifs,
+	rewrite h,
+	exact h1 a h,
+end
+
+
+theorem is_not_free_equiv
+	{D : Type}
 	(M : meta_valuation D)
 	(φ : formula)
 	(v : var_name) :
-	is_not_free'' D M φ v ↔ is_not_free D M φ v :=
+	is_not_free D M φ v ↔
+		∀ (V V' : valuation D),
+			(∀ (y : var_name), (y ≠ v → (V y = V' y))) →
+				(holds D V M φ ↔ holds D V' M φ):=
 begin
 	unfold is_not_free,
-	unfold is_not_free'',
 	split,
+	{
+		intros h1 V V' h2,
+		rewrite <- lem_1 V V' v h2,
+		apply h1,
+	},
 	{
 		intros h1 V a,
 		apply h1,
 		intros a' h2,
 		simp only [function.update_noteq h2],
-	},
-	{
-		intros h1 V V' h2,
-		have s1 : function.update V v (V' v) = V',
-			funext y,
-			by_cases y = v,
-			{
-				rewrite h, simp,
-			},
-			{
-				simp only [function.update_noteq h],
-				apply h2 y h,
-			},
-		rewrite <- s1,
-		apply h1,
 	}
 end
 
