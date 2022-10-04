@@ -290,3 +290,25 @@ begin
 	cases h1 V a,
 	exact mp h3,
 end
+
+
+inductive is_proof : formula → Prop
+| mp {φ ψ : formula} :
+	is_proof φ → is_proof (φ.imp ψ) → is_proof ψ
+
+| prop_1 {φ ψ : formula} :
+  is_proof (φ.imp (ψ.imp φ))
+
+| prop_2 {φ ψ χ : formula} :
+	is_proof ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ)))
+
+| prop_3 {φ ψ : formula} :
+	is_proof (((not φ).imp (not ψ)).imp (ψ.imp φ))
+
+| gen {φ : formula} {x : var_name} :
+	is_proof φ → is_proof (forall_ x φ)
+
+| pred_1 {φ ψ : formula} {x : var_name} :
+	is_proof ((forall_ x (φ.imp ψ)).imp ((forall_ x φ).imp (forall_ x ψ)))
+
+| pred_2 {φ : formula} {x : var_name} :
