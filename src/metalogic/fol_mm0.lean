@@ -292,24 +292,31 @@ begin
 end
 
 
-inductive is_proof : formula → Prop
-| mp {φ ψ : formula} :
-	is_proof φ → is_proof (φ.imp ψ) → is_proof ψ
+inductive is_proof : list (var_name × meta_var_name) → list formula → formula → Prop
+| mp (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+	{φ ψ : formula} :
+	is_proof Γ Δ φ → is_proof Γ Δ (φ.imp ψ) → is_proof Γ Δ ψ
 
-| prop_1 {φ ψ : formula} :
-  is_proof (φ.imp (ψ.imp φ))
+| prop_1 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+	{φ ψ : formula} :
+	is_proof Γ Δ (φ.imp (ψ.imp φ))
 
-| prop_2 {φ ψ χ : formula} :
-	is_proof ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ)))
+| prop_2 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+	{φ ψ χ : formula} :
+	is_proof Γ Δ ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ)))
 
-| prop_3 {φ ψ : formula} :
-	is_proof (((not φ).imp (not ψ)).imp (ψ.imp φ))
+| prop_3 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+	{φ ψ : formula} :
+	is_proof Γ Δ (((not φ).imp (not ψ)).imp (ψ.imp φ))
 
-| gen {φ : formula} {x : var_name} :
-	is_proof φ → is_proof (forall_ x φ)
+| gen (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+	{φ : formula} {x : var_name} :
+	is_proof Γ Δ φ → is_proof Γ Δ (forall_ x φ)
 
-| pred_1 {φ ψ : formula} {x : var_name} :
-	is_proof ((forall_ x (φ.imp ψ)).imp ((forall_ x φ).imp (forall_ x ψ)))
+| pred_1 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+	{φ ψ : formula} {x : var_name} :
+	is_proof Γ Δ ((forall_ x (φ.imp ψ)).imp ((forall_ x φ).imp (forall_ x ψ)))
 
-| pred_2 {φ : formula} {x : var_name} {D : Type} {M : meta_valuation D} :
-	is_not_free D M φ x → is_proof (φ.imp (forall_ x φ))
+| pred_2 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+	{φ : formula} {x : var_name} :
+	not_free φ x Γ → is_proof Γ Δ (φ.imp (forall_ x φ))
