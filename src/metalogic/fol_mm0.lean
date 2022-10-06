@@ -152,7 +152,7 @@ theorem is_not_free_equiv
 	is_not_free D M v φ ↔
 		∀ (V V' : valuation D),
 			(∀ (y : var_name), (y ≠ v → (V y = V' y))) →
-				(holds D V M φ ↔ holds D V' M φ):=
+				(holds D V M φ ↔ holds D V' M φ) :=
 begin
 	unfold is_not_free,
 	split,
