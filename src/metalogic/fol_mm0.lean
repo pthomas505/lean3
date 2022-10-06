@@ -329,8 +329,11 @@ begin
 	},
   case is_proof.pred_2 : Γ Δ φ x h1
   {
-		have s1 : is_not_free D M x φ, apply not_free_imp_is_not_free M Γ,
-		intros p h4, apply nf, simp only [prod.mk.eta], exact h4, exact h1,
+		have s1 : ∀ (V V' : valuation D), (∀ (y : var_name), (y ≠ x → (V y = V' y))) →
+			(holds D V M φ ↔ holds D V' M φ),
+				rewrite <- is_not_free_equiv M x φ,
+				apply not_free_imp_is_not_free M Γ,
+				intros p h2, apply nf, simp only [prod.mk.eta], exact h2, exact h1,
 
 		unfold holds,
 		intros V h2 a,
