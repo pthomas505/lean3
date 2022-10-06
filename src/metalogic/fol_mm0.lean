@@ -337,7 +337,6 @@ begin
 
 		unfold holds,
 		intros V h2 a,
-		rewrite is_not_free_equiv M x φ at s1,
 		rewrite s1 (function.update V x a) V, exact h2,
 		intros y h3,
 		apply function.update_noteq h3,
