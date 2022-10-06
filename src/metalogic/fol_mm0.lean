@@ -182,6 +182,17 @@ lemma not_free_imp_is_not_free
 	{D : Type}
 	(M : meta_valuation D)
 	(Γ : list (var_name × meta_var_name))
+	(x : var_name)
+	(φ : formula)
+	(H : not_free Γ x φ)
+	(nf : ∀ X, (x, X) ∈ Γ -> is_not_free D M x (meta_var X)) :
+	is_not_free D M x φ := sorry
+
+/-
+lemma not_free_imp_is_not_free
+	{D : Type}
+	(M : meta_valuation D)
+	(Γ : list (var_name × meta_var_name))
 	(v : var_name)
 	(φ : formula)
 	(h1 : ∀ (p : (var_name × meta_var_name)), p ∈ Γ → is_not_free D M p.fst (meta_var p.snd)) :
@@ -245,7 +256,7 @@ begin
 		}
 	},
 end
-
+-/
 
 inductive is_proof : list (var_name × meta_var_name) → list formula → formula → Prop
 | mp (Γ : list (var_name × meta_var_name)) (Δ : list formula)
@@ -329,16 +340,13 @@ begin
 	},
   case is_proof.pred_2 : Γ Δ φ x h1
   {
-		have s1 : ∀ (V V' : valuation D), (∀ (y : var_name), (y ≠ x → (V y = V' y))) →
-			(holds D V M φ ↔ holds D V' M φ),
-				rewrite <- is_not_free_equiv M x φ,
-				apply not_free_imp_is_not_free M Γ,
-				intros p h2, apply nf, simp only [prod.mk.eta], exact h2, exact h1,
+		have s1 : is_not_free D M x φ,
+		apply not_free_imp_is_not_free M Γ x φ h1,
+		intros X h2, exact nf x X h2,
 
 		unfold holds,
 		intros V h2 a,
-		rewrite s1 (function.update V x a) V, exact h2,
-		intros y h3,
-		apply function.update_noteq h3,
+		unfold is_not_free at s1,
+		rewrite <- s1, exact h2,
 	},
 end
