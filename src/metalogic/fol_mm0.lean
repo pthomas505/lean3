@@ -178,8 +178,8 @@ def not_free (Γ : list (var_name × meta_var_name)) (v : var_name) : formula �
 | (forall_ x φ) := x = v ∨ not_free φ
 
 
-example
-	(D : Type)
+lemma not_free_imp_is_not_free
+	{D : Type}
 	(M : meta_valuation D)
 	(Γ : list (var_name × meta_var_name))
 	(v : var_name)
@@ -275,3 +275,68 @@ inductive is_proof : list (var_name × meta_var_name) → list formula → formu
 | pred_2 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
 	{φ : formula} {x : var_name} :
 	not_free Γ x φ → is_proof Γ Δ (φ.imp (forall_ x φ))
+
+
+example
+	(D : Type)
+	(M : meta_valuation D)
+	(Γ : list (var_name × meta_var_name))
+	(Δ : list formula)
+	(φ : formula)
+	(H : is_proof Γ Δ φ)
+	(nf : ∀ v X, (v, X) ∈ Γ -> is_not_free D M v (meta_var X))
+	(hyp : ∀ (φ ∈ Δ) V, holds D V M φ) :
+	∀ (V : valuation D), holds D V M φ :=
+begin
+	induction H,
+	case is_proof.mp : Γ Δ φ ψ minor major minor_ih major_ih
+  {
+		intros V,
+		unfold holds at *,
+		apply major_ih nf hyp,
+		apply minor_ih nf hyp,
+	},
+  case is_proof.prop_1 : Γ Δ φ ψ
+  {
+		unfold holds,
+		intros V h1 h2, exact h1,
+	},
+  case is_proof.prop_2 : Γ Δ φ ψ χ
+  {
+		unfold holds,
+		intros V h1 h2 h3,
+		apply h1, exact h3, apply h2, exact h3,
+	},
+  case is_proof.prop_3 : Γ Δ φ ψ
+  {
+		unfold holds,
+		intros V h1 h2,
+		by_contradiction,
+		exact h1 h h2,
+	},
+  case is_proof.gen : Γ Δ φ x h1 ih
+  {
+		unfold holds,
+		intros V a,
+		apply ih nf hyp,
+	},
+  case is_proof.pred_1 : Γ Δ φ ψ x
+  {
+		unfold holds,
+		intros V h1 h2 a,
+		apply h1,
+		apply h2,
+	},
+  case is_proof.pred_2 : Γ Δ φ x h1
+  {
+		have s1 : is_not_free D M x φ, apply not_free_imp_is_not_free M Γ,
+		intros p h4, apply nf, simp only [prod.mk.eta], exact h4, exact h1,
+
+		unfold holds,
+		intros V h2 a,
+		rewrite is_not_free_equiv M x φ at s1,
+		rewrite s1 (function.update V x a) V, exact h2,
+		intros y h3,
+		apply function.update_noteq h3,
+	},
+end
