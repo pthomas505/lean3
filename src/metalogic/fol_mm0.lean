@@ -182,65 +182,57 @@ lemma not_free_imp_is_not_free
 	{D : Type}
 	(M : meta_valuation D)
 	(Γ : list (var_name × meta_var_name))
-	(x : var_name)
-	(φ : formula)
-	(H : not_free Γ x φ)
-	(nf : ∀ X, (x, X) ∈ Γ -> is_not_free D M x (meta_var X)) :
-	is_not_free D M x φ := sorry
-
-/-
-lemma not_free_imp_is_not_free
-	{D : Type}
-	(M : meta_valuation D)
-	(Γ : list (var_name × meta_var_name))
 	(v : var_name)
 	(φ : formula)
-	(h1 : ∀ (p : (var_name × meta_var_name)), p ∈ Γ → is_not_free D M p.fst (meta_var p.snd)) :
-	not_free Γ v φ → is_not_free D M v φ :=
+	(H : not_free Γ v φ)
+	(nf : ∀ X, (v, X) ∈ Γ → is_not_free D M v (meta_var X)) :
+	is_not_free D M v φ :=
 begin
 	induction φ,
 	case formula.meta_var : X
   {
-		unfold not_free,
-		apply h1,
+		unfold not_free at H,
+		exact nf X H,
 	},
   case formula.not : φ φ_ih
   {
-		unfold is_not_free at *,
 		unfold not_free at *,
+		unfold is_not_free at *,
 		unfold holds at *,
-		intros h2 V a,
-		rewrite φ_ih h2 V a,
+		intros V a,
+		apply not_congr,
+		exact φ_ih H V a,
 	},
   case formula.imp : φ ψ φ_ih ψ_ih
   {
-		unfold is_not_free at *,
 		unfold not_free at *,
+		unfold is_not_free at *,
 		unfold holds at *,
-		intros h2 V a,
-		cases h2,
-		simp only [φ_ih h2_left V a, ψ_ih h2_right V a],
+		cases H,
+		intros V a,
+		apply imp_congr,
+		exact φ_ih H_left V a,
+		exact ψ_ih H_right V a,
 	},
   case formula.eq_ : x y
   {
+		unfold not_free at H,
 		unfold is_not_free at *,
-		unfold not_free at *,
-		unfold holds at *,
-		intros h2 V a,
-		cases h2,
-		simp only [function.update_noteq h2_left, function.update_noteq h2_right],
+		unfold holds,
+		cases H,
+		intros V a,
+		simp only [function.update_noteq H_left, function.update_noteq H_right],
 	},
   case formula.forall_ : x φ φ_ih
   {
 		unfold is_not_free at *,
 		unfold not_free at *,
 		unfold holds at *,
-		intros h2 V a,
+		intros V a,
 		apply forall_congr, intros a',
-		simp only [prod.forall] at *,
-		cases h2,
+		cases H,
 		{
-			rewrite h2,
+			rewrite H,
 			simp only [function.update_idem],
 		},
 		{
@@ -251,12 +243,12 @@ begin
 			},
 			{
 				simp only [function.update_comm h],
-				apply φ_ih h2,
+				apply φ_ih H,
 			}
 		}
 	},
 end
--/
+
 
 inductive is_proof : list (var_name × meta_var_name) → list formula → formula → Prop
 | mp (Γ : list (var_name × meta_var_name)) (Δ : list formula)
