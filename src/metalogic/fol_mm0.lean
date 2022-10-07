@@ -250,7 +250,14 @@ begin
 end
 
 
+def exists_ (x : var_name) (φ : formula) : formula := not (forall_ x (not φ))
+
+
 inductive is_proof : list (var_name × meta_var_name) → list formula → formula → Prop
+| hyp (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+	{φ : formula} :
+	φ ∈ Δ → is_proof Γ Δ φ
+
 | mp (Γ : list (var_name × meta_var_name)) (Δ : list formula)
 	{φ ψ : formula} :
 	is_proof Γ Δ φ → is_proof Γ Δ (φ.imp ψ) → is_proof Γ Δ ψ
@@ -279,6 +286,14 @@ inductive is_proof : list (var_name × meta_var_name) → list formula → formu
 	{φ : formula} {x : var_name} :
 	not_free Γ x φ → is_proof Γ Δ (φ.imp (forall_ x φ))
 
+| pred_3 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+	{x y : var_name} :
+	x ≠ y → is_proof Γ Δ (exists_ x (eq_ x y))
+
+| eq_1 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+	{x y z : var_name} :
+	is_proof Γ Δ ((eq_ x y).imp ((eq_ x z).imp (eq_ y z)))
+
 
 example
 	(D : Type)
@@ -287,11 +302,15 @@ example
 	(Δ : list formula)
 	(φ : formula)
 	(H : is_proof Γ Δ φ)
-	(nf : ∀ v X, (v, X) ∈ Γ -> is_not_free D M v (meta_var X))
+	(nf : ∀ v X, (v, X) ∈ Γ → is_not_free D M v (meta_var X))
 	(hyp : ∀ (φ ∈ Δ) V, holds D V M φ) :
 	∀ (V : valuation D), holds D V M φ :=
 begin
 	induction H,
+	case is_proof.hyp : Γ Δ φ H
+  {
+		exact hyp φ H,
+	},
 	case is_proof.mp : Γ Δ φ ψ minor major minor_ih major_ih
   {
 		intros V,
@@ -340,5 +359,26 @@ begin
 		intros V h2 a,
 		unfold is_not_free at s1,
 		rewrite <- s1, exact h2,
+	},
+  case is_proof.pred_3 : Γ Δ x y H
+  {
+		unfold exists_,
+		unfold holds,
+		intros V,
+		push_neg,
+		simp only [function.update_same],
+		apply exists.intro (V y),
+		symmetry,
+		apply function.update_noteq,
+		symmetry, exact H,
+	},
+  case is_proof.eq_1 : Γ Δ x y z
+  {
+		unfold holds,
+		intros V h1 h2,
+		transitivity V x,
+		symmetry,
+		exact h1,
+		exact h2,
 	},
 end
