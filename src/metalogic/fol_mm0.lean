@@ -34,7 +34,8 @@ def holds (D : Type) : valuation D → meta_valuation D → formula → Prop
 A substitution mapping.
 A mapping of each variable name to another name.
 -/
-def instantiation : Type := var_name → var_name
+def instantiation :=
+	{σ : var_name → var_name // ∃ (σ' : var_name → var_name), σ ∘ σ' = id ∧ σ' ∘ σ = id}
 
 /-
 A meta substitution mapping.
@@ -46,8 +47,8 @@ def formula.subst (σ : instantiation) (τ : meta_instantiation) : formula → f
 | (meta_var X) := τ X
 | (not φ) := not φ.subst
 | (imp φ ψ) := imp φ.subst ψ.subst
-| (eq_ x y) := eq_ (σ x) (σ y)
-| (forall_ x φ) := forall_ (σ x) φ.subst
+| (eq_ x y) := eq_ (σ.1 x) (σ.1 y)
+| (forall_ x φ) := forall_ (σ.1 x) φ.subst
 
 
 lemma lem_1
@@ -77,11 +78,12 @@ lemma lem_10
 	(D : Type)
 	(V : valuation D)
 	(M : meta_valuation D)
-	(σ σ' : instantiation)
+	(σ : instantiation)
+	(σ' : var_name → var_name)
 	(τ : meta_instantiation)
-	(h1 : σ ∘ σ' = id)
-	(h2 : σ' ∘ σ = id) :
-	holds D (V ∘ σ)
+	(h1 : σ.1 ∘ σ' = id)
+	(h2 : σ' ∘ σ.1 = id) :
+	holds D (V ∘ σ.1)
 		(fun (X : meta_var_name) (V' : valuation D), holds D (V' ∘ σ') M (τ X)) φ ↔
 	holds D V M (φ.subst σ τ) :=
 begin
@@ -90,7 +92,7 @@ begin
   {
 		unfold formula.subst,
 		unfold holds,
-		rewrite function.comp.assoc V σ σ',
+		rewrite function.comp.assoc V σ.1 σ',
 		rewrite h1,
 		rewrite function.comp.right_id V,
 	},
@@ -116,7 +118,7 @@ begin
 		unfold formula.subst,
 		unfold holds,
 		apply forall_congr, intros a,
-		rewrite lem_1 σ σ' x h2 V a,
+		rewrite lem_1 σ.1 σ' x h2 V a,
 		apply φ_ih,
 	},
 end
@@ -298,7 +300,7 @@ inductive is_proof : list (var_name × meta_var_name) → list formula → formu
 | thm (Γ Γ' : list (var_name × meta_var_name)) (Δ Δ' : list formula)
 	{φ : formula} {σ : instantiation} {τ : meta_instantiation} :
 	is_proof Γ Δ φ →
-	(∀ (x : var_name) (X : meta_var_name), (x, X) ∈ Γ → not_free Γ' (σ x) (τ X)) →
+	(∀ (x : var_name) (X : meta_var_name), (x, X) ∈ Γ → not_free Γ' (σ.1 x) (τ X)) →
 	(∀ (ψ : formula), ψ ∈ Δ → is_proof Γ' Δ' (ψ.subst σ τ)) →
 	is_proof Γ' Δ' (φ.subst σ τ)
 
@@ -390,5 +392,7 @@ begin
 		exact h2,
 	},
   case is_proof.thm : Γ Γ' Δ Δ' φ σ τ h1 h2 h3 ih_1 ih_2
-  { admit },
+  {
+		admit
+	},
 end
