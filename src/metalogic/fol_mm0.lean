@@ -59,7 +59,7 @@ lemma lem_1
   (h1 : (f' ∘ f) = id)
   (g : α → β)
   (a : β) :
-  (function.update (g ∘ f) x a = function.update g (f x) a ∘ f) :=
+  (function.update (g ∘ f) x a = (function.update g (f x) a) ∘ f) :=
 begin
 		apply funext, intros x',
 		unfold function.comp,
@@ -394,11 +394,31 @@ begin
   case is_proof.thm : H_Γ H_Γ' H_Δ H_Δ' H_φ H_σ H_τ H_ᾰ H_ᾰ_1 H_ᾰ_2 H_ih_ᾰ H_ih_ᾰ_1
   {
 		obtain ⟨σ', left, right⟩ := H_σ.2,
-		intros V,
+		intros,
 		rewrite <- lem_2 V M H_σ σ' H_τ left right,
-		apply H_ih_ᾰ,
-		intros v X h1,
-		apply not_free_imp_is_not_free _ H_Γ',
+		apply H_ih_ᾰ, clear H_ih_ᾰ,
+		intros,
+		unfold is_not_free,
+		unfold holds,
+		intros,
+		specialize H_ᾰ_1 v X ᾰ,
+		have := not_free_imp_is_not_free M _ _ _ H_ᾰ_1 _ _ a,
+		convert this,
+		apply funext, intros,
+		unfold function.comp,
+		by_cases σ' x = v,
+		have s1 : x = H_σ.val v,
+		rewrite <- h,
+		rewrite <- function.comp_apply H_σ.val σ' x, rewrite left, simp,
+		rewrite h,
+		rewrite s1, simp only [function.update_same],
+		have s1 : ¬ x = H_σ.val v,
+		intro contra,
+		apply h,
+		rewrite contra,
+		symmetry,
+		rewrite <- function.comp_apply σ' H_σ.val v, rewrite right, simp,
+		rewrite function.update_noteq h, rewrite function.update_noteq s1,
 
 	},
 end
