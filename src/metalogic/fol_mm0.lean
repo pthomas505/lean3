@@ -316,7 +316,7 @@ example
 	(hyp : ∀ (φ ∈ Δ) V, holds D V M φ) :
 	∀ (V : valuation D), holds D V M φ :=
 begin
-	induction H,
+	induction H generalizing M,
 	case is_proof.hyp : Γ Δ φ H
   {
 		exact hyp φ H,
@@ -325,8 +325,8 @@ begin
   {
 		intros V,
 		unfold holds at *,
-		apply major_ih nf hyp,
-		apply minor_ih nf hyp,
+		apply major_ih M nf hyp,
+		apply minor_ih M nf hyp,
 	},
   case is_proof.prop_1 : Γ Δ φ ψ
   {
@@ -350,7 +350,7 @@ begin
   {
 		unfold holds,
 		intros V a,
-		apply ih nf hyp,
+		apply ih M nf hyp,
 	},
   case is_proof.pred_1 : Γ Δ φ ψ x
   {
@@ -391,8 +391,14 @@ begin
 		exact h1,
 		exact h2,
 	},
-  case is_proof.thm : Γ Γ' Δ Δ' φ σ τ h1 h2 h3 ih_1 ih_2
+  case is_proof.thm : H_Γ H_Γ' H_Δ H_Δ' H_φ H_σ H_τ H_ᾰ H_ᾰ_1 H_ᾰ_2 H_ih_ᾰ H_ih_ᾰ_1
   {
-		admit
+		obtain ⟨σ', left, right⟩ := H_σ.2,
+		intros V,
+		rewrite <- lem_2 V M H_σ σ' H_τ left right,
+		apply H_ih_ᾰ,
+		intros v X h1,
+		apply not_free_imp_is_not_free _ H_Γ',
+
 	},
 end
