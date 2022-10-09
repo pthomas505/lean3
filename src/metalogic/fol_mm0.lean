@@ -389,6 +389,6 @@ begin
 		exact h1,
 		exact h2,
 	},
-  case is_proof.thm : H_Γ H_Γ' H_Δ H_Δ' H_φ H_σ H_τ H_ᾰ H_ᾰ_1 H_ᾰ_2 H_ih_ᾰ H_ih_ᾰ_1
+  case is_proof.thm : Γ Γ' Δ Δ' φ σ τ h1 h2 h3 ih_1 ih_2
   { admit },
 end
