@@ -419,6 +419,7 @@ begin
 		symmetry,
 		rewrite <- function.comp_apply σ' H_σ.val v, rewrite right, simp,
 		rewrite function.update_noteq h, rewrite function.update_noteq s1,
+		apply nf,
 
 	},
 end
