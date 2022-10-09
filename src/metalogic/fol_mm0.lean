@@ -72,7 +72,7 @@ begin
 		refl, refl,
 end
 
-example
+lemma lem_10
 	(φ : formula)
 	(D : Type)
 	(V : valuation D)
@@ -253,6 +253,7 @@ end
 def exists_ (x : var_name) (φ : formula) : formula := not (forall_ x (not φ))
 
 
+-- if (v, X) ∈ Γ then v is not free in (meta_var X)
 inductive is_proof : list (var_name × meta_var_name) → list formula → formula → Prop
 | hyp (Γ : list (var_name × meta_var_name)) (Δ : list formula)
 	{φ : formula} :
@@ -293,6 +294,13 @@ inductive is_proof : list (var_name × meta_var_name) → list formula → formu
 | eq_2 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
 	{x y z : var_name} :
 	is_proof Γ Δ ((eq_ x y).imp ((eq_ x z).imp (eq_ y z)))
+
+| thm (Γ Γ' : list (var_name × meta_var_name)) (Δ Δ' : list formula)
+	{φ : formula} {σ : instantiation} {τ : meta_instantiation} :
+	is_proof Γ Δ φ →
+	(∀ (x : var_name) (X : meta_var_name), (x, X) ∈ Γ → not_free Γ' (σ x) (τ X)) →
+	(∀ (ψ : formula), ψ ∈ Δ → is_proof Γ' Δ' (ψ.subst σ τ)) →
+	is_proof Γ' Δ' (φ.subst σ τ)
 
 
 example
@@ -381,4 +389,6 @@ begin
 		exact h1,
 		exact h2,
 	},
+  case is_proof.thm : H_Γ H_Γ' H_Δ H_Δ' H_φ H_σ H_τ H_ᾰ H_ᾰ_1 H_ᾰ_2 H_ih_ᾰ H_ih_ᾰ_1
+  { admit },
 end
