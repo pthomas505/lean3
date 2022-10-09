@@ -73,16 +73,16 @@ begin
 		refl, refl,
 end
 
-lemma lem_10
-	(φ : formula)
-	(D : Type)
+lemma lem_2
+	{D : Type}
 	(V : valuation D)
 	(M : meta_valuation D)
 	(σ : instantiation)
 	(σ' : var_name → var_name)
 	(τ : meta_instantiation)
 	(h1 : σ.1 ∘ σ' = id)
-	(h2 : σ' ∘ σ.1 = id) :
+	(h2 : σ' ∘ σ.1 = id)
+	(φ : formula) :
 	holds D (V ∘ σ.1)
 		(fun (X : meta_var_name) (V' : valuation D), holds D (V' ∘ σ') M (τ X)) φ ↔
 	holds D V M (φ.subst σ τ) :=
@@ -130,7 +130,7 @@ def is_not_free (D : Type) (M : meta_valuation D) (v : var_name) (φ : formula) 
 	∀ (V : valuation D) (a : D),
 	holds D V M φ ↔ holds D (function.update V v a) M φ
 
-lemma lem_2
+lemma lem_3
 	{α β : Type}
 	[decidable_eq α]
   (f g : α → β)
@@ -160,7 +160,7 @@ begin
 	split,
 	{
 		intros h1 V V' h2,
-		rewrite <- lem_2 V V' v h2,
+		rewrite <- lem_3 V V' v h2,
 		apply h1,
 	},
 	{
