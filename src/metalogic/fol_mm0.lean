@@ -254,13 +254,11 @@ end
 
 example
 	(D : Type)
-	(V : valuation D)
 	(M : meta_valuation D)
 	(Γ Γ' : list (var_name × meta_var_name))
-	{φ : formula}
-	{σ : instantiation}
+	(σ : instantiation)
 	(σ' : var_name → var_name)
-  {τ : meta_instantiation}
+  (τ : meta_instantiation)
   (nf : ∀ (v : var_name) (X : meta_var_name), ((v, X) ∈ Γ') → is_not_free D M v (meta_var X))
   (left : ((σ.val ∘ σ') = id))
   (right : ((σ' ∘ σ.val) = id))
