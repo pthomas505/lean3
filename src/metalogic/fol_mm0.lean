@@ -275,7 +275,7 @@ begin
 	intros v X h1,
 	unfold is_not_free,
 	unfold holds,
-	intros,
+	intros V a,
 	specialize H v X h1,
 	have := not_free_imp_is_not_free M _ _ _ H _ _ a,
 	convert this,
