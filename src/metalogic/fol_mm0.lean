@@ -420,6 +420,13 @@ begin
 		rewrite <- function.comp_apply σ' H_σ.val v, rewrite right, simp,
 		rewrite function.update_noteq h, rewrite function.update_noteq s1,
 		apply nf,
-
+		intros,
+		simp at *,
+		specialize H_ih_ᾰ_1 φ_1 H M nf hyp (V_1 ∘ σ'),
+		rewrite <- lem_2 (V_1 ∘ σ') M H_σ σ' H_τ left right φ_1 at H_ih_ᾰ_1,
+		rewrite function.comp.assoc at H_ih_ᾰ_1,
+		simp at *,
+		rewrite right at H_ih_ᾰ_1, simp at H_ih_ᾰ_1,
+		exact H_ih_ᾰ_1,
 	},
 end
