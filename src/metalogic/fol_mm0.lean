@@ -59,7 +59,7 @@ lemma lem_1
   (h1 : (f' ∘ f) = id)
   (g : α → β)
   (a : β) :
-  (function.update (g ∘ f) x a = (function.update g (f x) a) ∘ f) :=
+  (function.update (g ∘ f) x a = function.update g (f x) a ∘ f) :=
 begin
 		apply funext, intros x',
 		unfold function.comp,
@@ -72,6 +72,45 @@ begin
 		exact congr_fun h1,
 		refl, refl,
 end
+
+
+example
+	(α β : Type)
+	[decidable_eq α]
+  (f f' : α → α)
+	(x : α)
+  (h1 : f' ∘ f = id)
+  (h2 : f ∘ f' = id)
+  (g : α → β)
+  (a : β) :
+  function.update (g ∘ f) (f' x) a = function.update g x a ∘ f :=
+begin
+	apply funext, intros x',
+	unfold function.comp,
+	by_cases f x' = x,
+	{
+		have s2 : x' = f' x,
+		rewrite <- h,
+		rewrite <- function.comp_apply f' f x',
+		rewrite h1,
+		simp only [id.def],
+
+		rewrite h,
+		rewrite s2,
+		simp only [function.update_same],
+	},
+	{
+		have s2 : ¬ x' = f' x,
+		intro contra,
+		apply h,
+		rewrite contra,
+		symmetry,
+		rewrite <- function.comp_apply f f' x, rewrite h2, simp,
+
+		rewrite function.update_noteq h, rewrite function.update_noteq s2,
+	},
+end
+
 
 lemma lem_2
 	{D : Type}
@@ -274,6 +313,7 @@ begin
 	intros V a,
 
 	have s1 : function.update V v a ∘ σ' = function.update (V ∘ σ') (σ.val v) a,
+	extract_goal,
 	apply funext, intros x,
 	unfold function.comp,
 	by_cases σ' x = v,
