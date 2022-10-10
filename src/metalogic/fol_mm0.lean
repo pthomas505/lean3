@@ -252,6 +252,52 @@ begin
 end
 
 
+example
+	(D : Type)
+	(V : valuation D)
+	(M : meta_valuation D)
+	(H_Γ H_Γ' : list (var_name × meta_var_name))
+  (H_Δ H_Δ' : list formula)
+	{H_φ : formula}
+	{H_σ : instantiation}
+  {H_τ : meta_instantiation}
+	(σ' : var_name → var_name)
+  (nf : ∀ (v : var_name) (X : meta_var_name), ((v, X) ∈ H_Γ') → is_not_free D M v (meta_var X))
+  (left : ((H_σ.val ∘ σ') = id))
+  (right : ((σ' ∘ H_σ.val) = id))
+  (H : ∀ (x : var_name) (X : meta_var_name),
+		((x, X) ∈ H_Γ) → not_free H_Γ' (H_σ.val x) (H_τ X)) :
+  ∀ (v : var_name) (X : meta_var_name),
+		((v, X) ∈ H_Γ) →
+			is_not_free D (fun (X : meta_var_name) (V' : valuation D), holds D (V' ∘ σ') M (H_τ X))
+				v (meta_var X) :=
+begin
+	intros,
+	unfold is_not_free,
+	unfold holds,
+	intros,
+	specialize H v X ᾰ,
+	have := not_free_imp_is_not_free M _ _ _ H _ _ a,
+	convert this,
+	apply funext, intros,
+	unfold function.comp,
+	by_cases σ' x = v,
+	have s1 : x = H_σ.val v,
+	rewrite <- h,
+	rewrite <- function.comp_apply H_σ.val σ' x, rewrite left, simp,
+	rewrite h,
+	rewrite s1, simp only [function.update_same],
+	have s1 : ¬ x = H_σ.val v,
+	intro contra,
+	apply h,
+	rewrite contra,
+	symmetry,
+	rewrite <- function.comp_apply σ' H_σ.val v, rewrite right, simp,
+	rewrite function.update_noteq h, rewrite function.update_noteq s1,
+	apply nf,
+end
+
+
 def exists_ (x : var_name) (φ : formula) : formula := not (forall_ x (not φ))
 
 
@@ -397,6 +443,7 @@ begin
 		intros,
 		rewrite <- lem_2 V M H_σ σ' H_τ left right,
 		apply H_ih_ᾰ, clear H_ih_ᾰ,
+
 		intros,
 		unfold is_not_free,
 		unfold holds,
@@ -420,6 +467,7 @@ begin
 		rewrite <- function.comp_apply σ' H_σ.val v, rewrite right, simp,
 		rewrite function.update_noteq h, rewrite function.update_noteq s1,
 		apply nf,
+
 		intros,
 		simp at *,
 		specialize H_ih_ᾰ_1 φ_1 H M nf hyp (V_1 ∘ σ'),
