@@ -273,40 +273,37 @@ begin
 	unfold holds,
 	intros V a,
 
-	have s1 : holds D (V ∘ σ') M (τ X) ↔ holds D (function.update (V ∘ σ') (σ.val v) a) M (τ X),
-	apply not_free_imp_is_not_free M Γ',
-	exact H v X h1,
-	intros X' h2,
-	exact nf (σ.val v) X' h2,
-
-	have s2 : function.update (V ∘ σ') (σ.val v) a = function.update V v a ∘ σ',
+	have s1 : function.update V v a ∘ σ' = function.update (V ∘ σ') (σ.val v) a,
 	apply funext, intros x,
 	unfold function.comp,
 	by_cases σ' x = v,
 	{
-		have s3 : x = σ.val v,
+		have s2 : x = σ.val v,
 		rewrite <- h,
 		rewrite <- function.comp_apply σ.val σ' x,
 		rewrite left,
 		simp only [id.def],
 
 		rewrite h,
-		rewrite s3,
+		rewrite s2,
 		simp only [function.update_same],
 	},
 	{
-		have s3 : ¬ x = σ.val v,
+		have s2 : ¬ x = σ.val v,
 		intro contra,
 		apply h,
 		rewrite contra,
 		symmetry,
 		rewrite <- function.comp_apply σ' σ.val v, rewrite right, simp,
 
-		rewrite function.update_noteq h, rewrite function.update_noteq s3,
+		rewrite function.update_noteq h, rewrite function.update_noteq s2,
 	},
 
-	rewrite <- s2,
-	exact s1,
+	rewrite s1,
+	apply not_free_imp_is_not_free M Γ',
+	exact H v X h1,
+	intros X' h2,
+	exact nf (σ.val v) X' h2,
 end
 
 
