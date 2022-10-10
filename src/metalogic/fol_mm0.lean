@@ -257,7 +257,6 @@ example
 	(V : valuation D)
 	(M : meta_valuation D)
 	(Γ Γ' : list (var_name × meta_var_name))
-  (Δ Δ' : list formula)
 	{φ : formula}
 	{σ : instantiation}
 	(σ' : var_name → var_name)
@@ -277,24 +276,40 @@ begin
 	unfold holds,
 	intros V a,
 	specialize H v X h1,
-	have := not_free_imp_is_not_free M _ _ _ H _ _ a,
-	convert this,
-	apply funext, intros,
+
+	have s1 : holds D (V ∘ σ') M (τ X) ↔ holds D (function.update (V ∘ σ') (σ.val v) a) M (τ X),
+	apply not_free_imp_is_not_free M Γ',
+	exact H,
+	intros X' h2,
+	exact nf (σ.val v) X' h2,
+
+	have s2 : function.update (V ∘ σ') (σ.val v) a = function.update V v a ∘ σ',
+	apply funext, intros x,
 	unfold function.comp,
 	by_cases σ' x = v,
-	have s1 : x = σ.val v,
-	rewrite <- h,
-	rewrite <- function.comp_apply σ.val σ' x, rewrite left, simp,
-	rewrite h,
-	rewrite s1, simp only [function.update_same],
-	have s1 : ¬ x = σ.val v,
-	intro contra,
-	apply h,
-	rewrite contra,
-	symmetry,
-	rewrite <- function.comp_apply σ' σ.val v, rewrite right, simp,
-	rewrite function.update_noteq h, rewrite function.update_noteq s1,
-	apply nf,
+	{
+		have s3 : x = σ.val v,
+		rewrite <- h,
+		rewrite <- function.comp_apply σ.val σ' x,
+		rewrite left,
+		simp only [id.def],
+
+		rewrite h,
+		rewrite s3,
+		simp only [function.update_same],
+	},
+	{
+		have s3 : ¬ x = σ.val v,
+		intro contra,
+		apply h,
+		rewrite contra,
+		symmetry,
+		rewrite <- function.comp_apply σ' σ.val v, rewrite right, simp,
+		rewrite function.update_noteq h, rewrite function.update_noteq s3,
+	},
+
+	rewrite s2 at s1,
+	exact s1,
 end
 
 
