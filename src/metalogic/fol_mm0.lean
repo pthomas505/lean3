@@ -87,28 +87,12 @@ example
 begin
 	apply funext, intros x',
 	unfold function.comp,
-	by_cases f x' = x,
-	{
-		have s2 : x' = f' x,
-		rewrite <- h,
-		rewrite <- function.comp_apply f' f x',
-		rewrite h1,
-		simp only [id.def],
-
-		rewrite h,
-		rewrite s2,
-		simp only [function.update_same],
-	},
-	{
-		have s2 : ¬ x' = f' x,
-		intro contra,
-		apply h,
-		rewrite contra,
-		symmetry,
-		rewrite <- function.comp_apply f f' x, rewrite h2, simp,
-
-		rewrite function.update_noteq h, rewrite function.update_noteq s2,
-	},
+	unfold function.update,
+	simp only [eq_rec_constant, dite_eq_ite],
+	congr' 1, simp only [eq_iff_iff],
+	split,
+	intros h3, rewrite h3, rewrite <- function.comp_app f f' x, rewrite h2, simp only [id.def],
+	intros h3, rewrite <- h3, rewrite <- function.comp_app f' f x', rewrite h1, simp only [id.def],
 end
 
 
@@ -313,7 +297,6 @@ begin
 	intros V a,
 
 	have s1 : function.update V v a ∘ σ' = function.update (V ∘ σ') (σ.val v) a,
-	extract_goal,
 	apply funext, intros x,
 	unfold function.comp,
 	by_cases σ' x = v,
