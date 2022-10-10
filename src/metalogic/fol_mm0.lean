@@ -272,11 +272,11 @@ example
 			is_not_free D (fun (X : meta_var_name) (V' : valuation D), holds D (V' ∘ σ') M (τ X))
 				v (meta_var X) :=
 begin
-	intros,
+	intros v X h1,
 	unfold is_not_free,
 	unfold holds,
 	intros,
-	specialize H v X ᾰ,
+	specialize H v X h1,
 	have := not_free_imp_is_not_free M _ _ _ H _ _ a,
 	convert this,
 	apply funext, intros,
