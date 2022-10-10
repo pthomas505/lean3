@@ -74,7 +74,7 @@ begin
 end
 
 
-example
+lemma lem_2
 	(α β : Type)
 	[decidable_eq α]
   (f f' : α → α)
@@ -96,7 +96,7 @@ begin
 end
 
 
-lemma lem_2
+lemma lem_3
 	{D : Type}
 	(V : valuation D)
 	(M : meta_valuation D)
@@ -153,7 +153,7 @@ def is_not_free (D : Type) (M : meta_valuation D) (v : var_name) (φ : formula) 
 	∀ (V : valuation D) (a : D),
 	holds D V M φ ↔ holds D (function.update V v a) M φ
 
-lemma lem_3
+lemma lem_4
 	{α β : Type}
 	[decidable_eq α]
   (f g : α → β)
@@ -183,7 +183,7 @@ begin
 	split,
 	{
 		intros h1 V V' h2,
-		rewrite <- lem_3 V V' v h2,
+		rewrite <- lem_4 V V' v h2,
 		apply h1,
 	},
 	{
@@ -473,7 +473,7 @@ begin
   {
 		obtain ⟨σ', left, right⟩ := H_σ.2,
 		intros,
-		rewrite <- lem_2 V M H_σ σ' H_τ left right,
+		rewrite <- lem_3 V M H_σ σ' H_τ left right,
 		apply H_ih_ᾰ, clear H_ih_ᾰ,
 
 		intros,
@@ -503,7 +503,7 @@ begin
 		intros,
 		simp at *,
 		specialize H_ih_ᾰ_1 φ_1 H M nf hyp (V_1 ∘ σ'),
-		rewrite <- lem_2 (V_1 ∘ σ') M H_σ σ' H_τ left right φ_1 at H_ih_ᾰ_1,
+		rewrite <- lem_3 (V_1 ∘ σ') M H_σ σ' H_τ left right φ_1 at H_ih_ᾰ_1,
 		rewrite function.comp.assoc at H_ih_ᾰ_1,
 		simp at *,
 		rewrite right at H_ih_ᾰ_1, simp at H_ih_ᾰ_1,
