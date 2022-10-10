@@ -75,7 +75,7 @@ end
 
 
 lemma lem_2
-	(α β : Type)
+	{α β : Type}
 	[decidable_eq α]
   (f f' : α → α)
 	(x : α)
@@ -295,34 +295,7 @@ begin
 	unfold is_not_free,
 	unfold holds,
 	intros V a,
-
-	have s1 : function.update V v a ∘ σ' = function.update (V ∘ σ') (σ.val v) a,
-	apply funext, intros x,
-	unfold function.comp,
-	by_cases σ' x = v,
-	{
-		have s2 : x = σ.val v,
-		rewrite <- h,
-		rewrite <- function.comp_apply σ.val σ' x,
-		rewrite left,
-		simp only [id.def],
-
-		rewrite h,
-		rewrite s2,
-		simp only [function.update_same],
-	},
-	{
-		have s2 : ¬ x = σ.val v,
-		intro contra,
-		apply h,
-		rewrite contra,
-		symmetry,
-		rewrite <- function.comp_apply σ' σ.val v, rewrite right, simp,
-
-		rewrite function.update_noteq h, rewrite function.update_noteq s2,
-	},
-
-	rewrite s1,
+	rewrite <- lem_2 σ' σ.val v left right,
 	apply not_free_imp_is_not_free M Γ',
 	exact H v X h1,
 	intros X' h2,
