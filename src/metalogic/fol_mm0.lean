@@ -302,6 +302,7 @@ begin
 		rewrite contra,
 		symmetry,
 		rewrite <- function.comp_apply σ' σ.val v, rewrite right, simp,
+
 		rewrite function.update_noteq h, rewrite function.update_noteq s3,
 	},
 
