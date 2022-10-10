@@ -256,20 +256,20 @@ example
 	(D : Type)
 	(V : valuation D)
 	(M : meta_valuation D)
-	(H_Γ H_Γ' : list (var_name × meta_var_name))
-  (H_Δ H_Δ' : list formula)
-	{H_φ : formula}
-	{H_σ : instantiation}
-  {H_τ : meta_instantiation}
+	(Γ Γ' : list (var_name × meta_var_name))
+  (Δ Δ' : list formula)
+	{φ : formula}
+	{σ : instantiation}
 	(σ' : var_name → var_name)
-  (nf : ∀ (v : var_name) (X : meta_var_name), ((v, X) ∈ H_Γ') → is_not_free D M v (meta_var X))
-  (left : ((H_σ.val ∘ σ') = id))
-  (right : ((σ' ∘ H_σ.val) = id))
+  {τ : meta_instantiation}
+  (nf : ∀ (v : var_name) (X : meta_var_name), ((v, X) ∈ Γ') → is_not_free D M v (meta_var X))
+  (left : ((σ.val ∘ σ') = id))
+  (right : ((σ' ∘ σ.val) = id))
   (H : ∀ (x : var_name) (X : meta_var_name),
-		((x, X) ∈ H_Γ) → not_free H_Γ' (H_σ.val x) (H_τ X)) :
+		((x, X) ∈ Γ) → not_free Γ' (σ.val x) (τ X)) :
   ∀ (v : var_name) (X : meta_var_name),
-		((v, X) ∈ H_Γ) →
-			is_not_free D (fun (X : meta_var_name) (V' : valuation D), holds D (V' ∘ σ') M (H_τ X))
+		((v, X) ∈ Γ) →
+			is_not_free D (fun (X : meta_var_name) (V' : valuation D), holds D (V' ∘ σ') M (τ X))
 				v (meta_var X) :=
 begin
 	intros,
@@ -282,17 +282,17 @@ begin
 	apply funext, intros,
 	unfold function.comp,
 	by_cases σ' x = v,
-	have s1 : x = H_σ.val v,
+	have s1 : x = σ.val v,
 	rewrite <- h,
-	rewrite <- function.comp_apply H_σ.val σ' x, rewrite left, simp,
+	rewrite <- function.comp_apply σ.val σ' x, rewrite left, simp,
 	rewrite h,
 	rewrite s1, simp only [function.update_same],
-	have s1 : ¬ x = H_σ.val v,
+	have s1 : ¬ x = σ.val v,
 	intro contra,
 	apply h,
 	rewrite contra,
 	symmetry,
-	rewrite <- function.comp_apply σ' H_σ.val v, rewrite right, simp,
+	rewrite <- function.comp_apply σ' σ.val v, rewrite right, simp,
 	rewrite function.update_noteq h, rewrite function.update_noteq s1,
 	apply nf,
 end
