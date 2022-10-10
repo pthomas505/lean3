@@ -275,8 +275,8 @@ begin
 end
 
 
-example
-	(D : Type)
+lemma lem_5
+	{D : Type}
 	(M : meta_valuation D)
 	(Γ Γ' : list (var_name × meta_var_name))
 	(σ : instantiation)
@@ -448,31 +448,8 @@ begin
 		intros,
 		rewrite <- lem_3 V M H_σ σ' H_τ left right,
 		apply H_ih_ᾰ, clear H_ih_ᾰ,
-
 		intros,
-		unfold is_not_free,
-		unfold holds,
-		intros,
-		specialize H_ᾰ_1 v X ᾰ,
-		have := not_free_imp_is_not_free M _ _ _ H_ᾰ_1 _ _ a,
-		convert this,
-		apply funext, intros,
-		unfold function.comp,
-		by_cases σ' x = v,
-		have s1 : x = H_σ.val v,
-		rewrite <- h,
-		rewrite <- function.comp_apply H_σ.val σ' x, rewrite left, simp,
-		rewrite h,
-		rewrite s1, simp only [function.update_same],
-		have s1 : ¬ x = H_σ.val v,
-		intro contra,
-		apply h,
-		rewrite contra,
-		symmetry,
-		rewrite <- function.comp_apply σ' H_σ.val v, rewrite right, simp,
-		rewrite function.update_noteq h, rewrite function.update_noteq s1,
-		apply nf,
-
+		exact lem_5 M H_Γ H_Γ' H_σ σ' H_τ left right nf H_ᾰ_1 v X ᾰ,
 		intros,
 		simp at *,
 		specialize H_ih_ᾰ_1 φ_1 H M nf hyp (V_1 ∘ σ'),
