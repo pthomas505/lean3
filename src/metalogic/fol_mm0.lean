@@ -447,7 +447,7 @@ begin
 		obtain ⟨σ', left, right⟩ := H_σ.2,
 		intros,
 		rewrite <- lem_3 V M H_σ σ' H_τ left right,
-		apply H_ih_ᾰ, clear H_ih_ᾰ,
+		apply H_ih_ᾰ,
 		intros,
 		exact lem_5 M H_Γ H_Γ' H_σ σ' H_τ left right nf H_ᾰ_1 v X ᾰ,
 		intros,
