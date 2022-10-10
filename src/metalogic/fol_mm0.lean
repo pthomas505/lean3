@@ -305,7 +305,7 @@ begin
 		rewrite function.update_noteq h, rewrite function.update_noteq s3,
 	},
 
-	rewrite s2 at s1,
+	rewrite <- s2,
 	exact s1,
 end
 
