@@ -259,10 +259,10 @@ example
 	(σ : instantiation)
 	(σ' : var_name → var_name)
   (τ : meta_instantiation)
-  (nf : ∀ (v : var_name) (X : meta_var_name), ((v, X) ∈ Γ') → is_not_free D M v (meta_var X))
   (left : ((σ.val ∘ σ') = id))
   (right : ((σ' ∘ σ.val) = id))
-  (H : ∀ (x : var_name) (X : meta_var_name), ((x, X) ∈ Γ) → not_free Γ' (σ.val x) (τ X)) :
+  (nf : ∀ (v : var_name) (X : meta_var_name), ((v, X) ∈ Γ') → is_not_free D M v (meta_var X))
+  (H : ∀ (v : var_name) (X : meta_var_name), ((v, X) ∈ Γ) → not_free Γ' (σ.val v) (τ X)) :
   ∀ (v : var_name) (X : meta_var_name),
 		((v, X) ∈ Γ) →
 			is_not_free D (fun (X : meta_var_name) (V' : valuation D), holds D (V' ∘ σ') M (τ X))
