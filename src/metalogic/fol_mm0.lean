@@ -272,11 +272,10 @@ begin
 	unfold is_not_free,
 	unfold holds,
 	intros V a,
-	specialize H v X h1,
 
 	have s1 : holds D (V ∘ σ') M (τ X) ↔ holds D (function.update (V ∘ σ') (σ.val v) a) M (τ X),
 	apply not_free_imp_is_not_free M Γ',
-	exact H,
+	exact H v X h1,
 	intros X' h2,
 	exact nf (σ.val v) X' h2,
 
