@@ -103,10 +103,10 @@ lemma lem_3
 	(σ : instantiation)
 	(σ' : var_name → var_name)
 	(τ : meta_instantiation)
-	(h1 : σ.val ∘ σ' = id)
-	(h2 : σ' ∘ σ.val = id)
+	(h1 : σ.1 ∘ σ' = id)
+	(h2 : σ' ∘ σ.1 = id)
 	(φ : formula) :
-	holds D (V ∘ σ.val)
+	holds D (V ∘ σ.1)
 		(fun (X : meta_var_name) (V' : valuation D), holds D (V' ∘ σ') M (τ X)) φ ↔
 	holds D V M (φ.subst σ τ) :=
 begin
@@ -115,7 +115,7 @@ begin
   {
 		unfold formula.subst,
 		unfold holds,
-		rewrite function.comp.assoc V σ.val σ',
+		rewrite function.comp.assoc V σ.1 σ',
 		rewrite h1,
 		rewrite function.comp.right_id V,
 	},
@@ -141,7 +141,7 @@ begin
 		unfold formula.subst,
 		unfold holds,
 		apply forall_congr, intros a,
-		rewrite lem_1 σ.val σ' x h2 V a,
+		rewrite lem_1 σ.1 σ' x h2 V a,
 		apply φ_ih,
 	},
 end
@@ -282,10 +282,10 @@ lemma lem_5
 	(σ : instantiation)
 	(σ' : var_name → var_name)
   (τ : meta_instantiation)
-  (left : ((σ.val ∘ σ') = id))
-  (right : ((σ' ∘ σ.val) = id))
+  (left : ((σ.1 ∘ σ') = id))
+  (right : ((σ' ∘ σ.1) = id))
   (nf : ∀ (v : var_name) (X : meta_var_name), ((v, X) ∈ Γ') → is_not_free D M v (meta_var X))
-  (H : ∀ (v : var_name) (X : meta_var_name), ((v, X) ∈ Γ) → not_free Γ' (σ.val v) (τ X)) :
+  (H : ∀ (v : var_name) (X : meta_var_name), ((v, X) ∈ Γ) → not_free Γ' (σ.1 v) (τ X)) :
   ∀ (v : var_name) (X : meta_var_name),
 		((v, X) ∈ Γ) →
 			is_not_free D (fun (X : meta_var_name) (V' : valuation D), holds D (V' ∘ σ') M (τ X))
@@ -295,11 +295,11 @@ begin
 	unfold is_not_free,
 	unfold holds,
 	intros V a,
-	rewrite <- lem_2 σ' σ.val v left right,
+	rewrite <- lem_2 σ' σ.1 v left right,
 	apply not_free_imp_is_not_free M Γ',
 	exact H v X h1,
 	intros X' h2,
-	exact nf (σ.val v) X' h2,
+	exact nf (σ.1 v) X' h2,
 end
 
 
@@ -445,18 +445,17 @@ begin
   case is_proof.thm : H_Γ H_Γ' H_Δ H_Δ' H_φ H_σ H_τ H_ᾰ H_ᾰ_1 H_ᾰ_2 H_ih_ᾰ H_ih_ᾰ_1
   {
 		obtain ⟨σ', left, right⟩ := H_σ.2,
-		intros,
+		intros V,
 		rewrite <- lem_3 V M H_σ σ' H_τ left right,
 		apply H_ih_ᾰ,
-		intros,
-		exact lem_5 M H_Γ H_Γ' H_σ σ' H_τ left right nf H_ᾰ_1 v X ᾰ,
-		intros,
-		simp at *,
-		specialize H_ih_ᾰ_1 φ_1 H M nf hyp (V_1 ∘ σ'),
-		rewrite <- lem_3 (V_1 ∘ σ') M H_σ σ' H_τ left right φ_1 at H_ih_ᾰ_1,
+		intros v X h1,
+		exact lem_5 M H_Γ H_Γ' H_σ σ' H_τ left right nf H_ᾰ_1 v X h1,
+		intros φ h2 V',
+		specialize H_ih_ᾰ_1 φ h2 M nf hyp (V' ∘ σ'),
+		rewrite <- lem_3 (V' ∘ σ') M H_σ σ' H_τ left right φ at H_ih_ᾰ_1,
 		rewrite function.comp.assoc at H_ih_ᾰ_1,
-		simp at *,
-		rewrite right at H_ih_ᾰ_1, simp at H_ih_ᾰ_1,
+		rewrite right at H_ih_ᾰ_1,
+		simp only [function.comp.right_id] at H_ih_ᾰ_1,
 		exact H_ih_ᾰ_1,
 	},
 end
