@@ -474,25 +474,47 @@ example
 begin
 	induction H generalizing M,
 	case is_proof.hyp : H_Γ H_Δ H_φ H_ᾰ M nf hyp
-  { admit },
+  {
+
+	},
   case is_proof.mp : H_Γ H_Δ H_φ H_ψ H_ᾰ H_ᾰ_1 H_ih_ᾰ H_ih_ᾰ_1 M nf hyp
-  { admit },
+  {
+
+	},
   case is_proof.prop_1 : H_Γ H_Δ H_φ H_ψ M nf hyp
-  { admit },
+  {
+
+	},
   case is_proof.prop_2 : H_Γ H_Δ H_φ H_ψ H_χ M nf hyp
-  { admit },
+  {
+
+	},
   case is_proof.prop_3 : H_Γ H_Δ H_φ H_ψ M nf hyp
-  { admit },
+  {
+
+	},
   case is_proof.gen : H_Γ H_Δ H_φ H_x H_ᾰ H_ih M nf hyp
-  { admit },
+  {
+
+	},
   case is_proof.pred_1 : H_Γ H_Δ H_φ H_ψ H_x M nf hyp
-  { admit },
+  {
+
+	},
   case is_proof.pred_2 : H_Γ H_Δ H_φ H_x H_ᾰ M nf hyp
-  { admit },
+  {
+
+	},
   case is_proof.eq_1 : H_Γ H_Δ H_x H_y H_ᾰ M nf hyp
-  { admit },
+  {
+
+	},
   case is_proof.eq_2 : H_Γ H_Δ H_x H_y H_z M nf hyp
-  { admit },
+  {
+
+	},
   case is_proof.thm : H_Γ H_Γ' H_Δ H_Δ' H_φ H_σ H_τ H_ᾰ H_ᾰ_1 H_ᾰ_2 H_ih_ᾰ H_ih_ᾰ_1 M nf hyp
-  { admit },
+  {
+
+	},
 end
