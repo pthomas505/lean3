@@ -59,7 +59,7 @@ lemma lem_1
   (h1 : (f' ∘ f) = id)
   (g : α → β)
   (a : β) :
-  (function.update (g ∘ f) x a = function.update g (f x) a ∘ f) :=
+  function.update (g ∘ f) x a = (function.update g (f x) a) ∘ f :=
 begin
 		apply funext, intros x',
 		unfold function.comp,
@@ -83,7 +83,7 @@ lemma lem_2
   (h2 : f ∘ f' = id)
   (g : α → β)
   (a : β) :
-  function.update (g ∘ f) (f' x) a = function.update g x a ∘ f :=
+  function.update (g ∘ f) (f' x) a = (function.update g x a) ∘ f :=
 begin
 	apply funext, intros x',
 	unfold function.comp,
@@ -103,10 +103,10 @@ lemma lem_3
 	(σ : instantiation)
 	(σ' : var_name → var_name)
 	(τ : meta_instantiation)
-	(h1 : σ.1 ∘ σ' = id)
-	(h2 : σ' ∘ σ.1 = id)
+	(h1 : σ.val ∘ σ' = id)
+	(h2 : σ' ∘ σ.val = id)
 	(φ : formula) :
-	holds D (V ∘ σ.1)
+	holds D (V ∘ σ.val)
 		(fun (X : meta_var_name) (V' : valuation D), holds D (V' ∘ σ') M (τ X)) φ ↔
 	holds D V M (φ.subst σ τ) :=
 begin
@@ -115,7 +115,7 @@ begin
   {
 		unfold formula.subst,
 		unfold holds,
-		rewrite function.comp.assoc V σ.1 σ',
+		rewrite function.comp.assoc V σ.val σ',
 		rewrite h1,
 		rewrite function.comp.right_id V,
 	},
@@ -141,7 +141,7 @@ begin
 		unfold formula.subst,
 		unfold holds,
 		apply forall_congr, intros a,
-		rewrite lem_1 σ.1 σ' x h2 V a,
+		rewrite lem_1 σ.val σ' x h2 V a,
 		apply φ_ih,
 	},
 end
