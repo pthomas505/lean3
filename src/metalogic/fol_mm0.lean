@@ -475,46 +475,92 @@ begin
 	induction H generalizing M,
 	case is_proof.hyp : H_Γ H_Δ H_φ H_ᾰ M nf hyp
   {
-
+		exact hyp H_φ H_ᾰ,
 	},
   case is_proof.mp : H_Γ H_Δ H_φ H_ψ H_ᾰ H_ᾰ_1 H_ih_ᾰ H_ih_ᾰ_1 M nf hyp
   {
-
+		intros V,
+		unfold holds at *,
+		apply H_ih_ᾰ_1 M nf hyp,
+		apply H_ih_ᾰ M nf hyp,
 	},
   case is_proof.prop_1 : H_Γ H_Δ H_φ H_ψ M nf hyp
   {
-
+		unfold holds,
+		intros V h1 h2, exact h1,
 	},
   case is_proof.prop_2 : H_Γ H_Δ H_φ H_ψ H_χ M nf hyp
   {
-
+		unfold holds,
+		intros V h1 h2 h3,
+		apply h1, exact h3, apply h2, exact h3,
 	},
   case is_proof.prop_3 : H_Γ H_Δ H_φ H_ψ M nf hyp
   {
-
+		unfold holds,
+		intros V h1 h2,
+		by_contradiction,
+		exact h1 h h2,
 	},
   case is_proof.gen : H_Γ H_Δ H_φ H_x H_ᾰ H_ih M nf hyp
   {
-
+		unfold holds,
+		intros V a,
+		apply H_ih M nf hyp,
 	},
   case is_proof.pred_1 : H_Γ H_Δ H_φ H_ψ H_x M nf hyp
   {
-
+		unfold holds,
+		intros V h1 h2 a,
+		apply h1,
+		apply h2,
 	},
   case is_proof.pred_2 : H_Γ H_Δ H_φ H_x H_ᾰ M nf hyp
   {
+		have s1 : is_not_free D M H_x H_φ,
+		apply not_free_imp_is_not_free M H_Γ H_x H_φ H_ᾰ,
+		intros X h2, exact nf H_x X h2,
 
+		unfold holds,
+		intros V h2 a,
+		unfold is_not_free at s1,
+		rewrite <- s1, exact h2,
 	},
   case is_proof.eq_1 : H_Γ H_Δ H_x H_y H_ᾰ M nf hyp
   {
-
+		unfold exists_,
+		unfold holds,
+		intros V,
+		push_neg,
+		simp only [function.update_same],
+		apply exists.intro (V H_y),
+		symmetry,
+		apply function.update_noteq,
+		symmetry, exact H_ᾰ,
 	},
   case is_proof.eq_2 : H_Γ H_Δ H_x H_y H_z M nf hyp
   {
-
+		unfold holds,
+		intros V h1 h2,
+		transitivity V H_x,
+		symmetry,
+		exact h1,
+		exact h2,
 	},
   case is_proof.thm : H_Γ H_Γ' H_Δ H_Δ' H_φ H_σ H_τ H_ᾰ H_ᾰ_1 H_ᾰ_2 H_ih_ᾰ H_ih_ᾰ_1 M nf hyp
   {
-
+		obtain ⟨σ', left, right⟩ := H_σ.2,
+		intros V,
+		rewrite <- lem_3 V M H_σ σ' H_τ left right,
+		apply H_ih_ᾰ,
+		intros v X h1,
+		exact lem_5 M H_Γ H_Γ' H_σ σ' H_τ left right nf H_ᾰ_1 v X h1,
+		intros φ h2 V',
+		specialize H_ih_ᾰ_1 φ h2 M nf hyp (V' ∘ σ'),
+		rewrite <- lem_3 (V' ∘ σ') M H_σ σ' H_τ left right φ at H_ih_ᾰ_1,
+		rewrite function.comp.assoc at H_ih_ᾰ_1,
+		rewrite right at H_ih_ᾰ_1,
+		simp only [function.comp.right_id] at H_ih_ᾰ_1,
+		exact H_ih_ᾰ_1,
 	},
 end
