@@ -459,3 +459,40 @@ begin
 		exact H_ih_ᾰ_1,
 	},
 end
+
+
+example
+	(D : Type)
+	(M : meta_valuation D)
+	(Γ : list (var_name × meta_var_name))
+	(Δ : list formula)
+	(φ : formula)
+	(H : is_proof Γ Δ φ)
+	(nf : ∀ v X, (v, X) ∈ Γ → is_not_free D M v (meta_var X))
+	(hyp : ∀ (φ ∈ Δ) V, holds D V M φ) :
+	∀ (V : valuation D), holds D V M φ :=
+begin
+	induction H generalizing M,
+	case is_proof.hyp : H_Γ H_Δ H_φ H_ᾰ M nf hyp
+  { admit },
+  case is_proof.mp : H_Γ H_Δ H_φ H_ψ H_ᾰ H_ᾰ_1 H_ih_ᾰ H_ih_ᾰ_1 M nf hyp
+  { admit },
+  case is_proof.prop_1 : H_Γ H_Δ H_φ H_ψ M nf hyp
+  { admit },
+  case is_proof.prop_2 : H_Γ H_Δ H_φ H_ψ H_χ M nf hyp
+  { admit },
+  case is_proof.prop_3 : H_Γ H_Δ H_φ H_ψ M nf hyp
+  { admit },
+  case is_proof.gen : H_Γ H_Δ H_φ H_x H_ᾰ H_ih M nf hyp
+  { admit },
+  case is_proof.pred_1 : H_Γ H_Δ H_φ H_ψ H_x M nf hyp
+  { admit },
+  case is_proof.pred_2 : H_Γ H_Δ H_φ H_x H_ᾰ M nf hyp
+  { admit },
+  case is_proof.eq_1 : H_Γ H_Δ H_x H_y H_ᾰ M nf hyp
+  { admit },
+  case is_proof.eq_2 : H_Γ H_Δ H_x H_y H_z M nf hyp
+  { admit },
+  case is_proof.thm : H_Γ H_Γ' H_Δ H_Δ' H_φ H_σ H_τ H_ᾰ H_ᾰ_1 H_ᾰ_2 H_ih_ᾰ H_ih_ᾰ_1 M nf hyp
+  { admit },
+end
