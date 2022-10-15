@@ -328,24 +328,22 @@ begin
 	case formula.def_ : n name args V
   {
 		unfold formula.subst,
-		induction E generalizing M,
+		induction E,
+		case list.nil :
 		{
 			simp only [holds_nil_def],
 		},
+		case list.cons : hd tl ih
 		{
-			simp only [holds_not_nil_def],
-			unfold function.comp at *,
+			simp only [holds_not_nil_def] at *,
 			split_ifs,
 			{
-				unfold holds,
-				sorry
+				sorry,
 			},
 			{
-				unfold holds,
-				rewrite <- E_ih,
-				sorry
+				sorry,
 			}
-		}
+		},
 	},
 end
 
