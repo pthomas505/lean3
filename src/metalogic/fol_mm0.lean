@@ -1,5 +1,6 @@
 import logic.function.basic
 import tactic
+import data.fin.vec_notation
 
 
 set_option pp.parens true
@@ -9,12 +10,51 @@ def function.update_fin
 	{α β : Type}
 	[decidable_eq α]
 	(σ : α → β) :
-	Π (m n : ℕ), (fin m → α) → (fin n → β) → (α → β)
-| (m + 1) (n + 1) f g :=
+	Π (n : ℕ), (fin n → α) → (fin n → β) → (α → β)
+| 0 _ _ := σ
+| (n + 1) f g :=
 	function.update
-		(function.update_fin m n (fun (i : fin m), (f i)) (fun (i : fin n), (g i)))
-		(f m) (g n)
-| _ _ _ _ := σ
+		(function.update_fin n (fun (i : fin n), (f i)) (fun (i : fin n), (g i)))
+		(f n) (g n)
+
+
+lemma function.update_fin_noteq
+	{α β : Type}
+	[decidable_eq α]
+	(σ : α → β)
+	(n : ℕ)
+	(xs : fin n → α)
+	(ys : fin n → β)
+	(x : α)
+	(h1 : ∀ (i : fin n), x ≠ xs i) :
+	function.update_fin σ n xs ys x = σ x :=
+begin
+	induction n,
+	case nat.zero
+  {
+		unfold function.update_fin
+	},
+  case nat.succ : n ih
+  {
+		unfold function.update_fin,
+		have s1 : x ≠ xs ↑n, apply h1,
+		simp only [function.update_noteq s1],
+		apply ih,
+		intros i,
+		by_cases ↑i = ↑n,
+		rewrite h, exact s1,
+		exact h1 ↑i
+	},
+end
+
+def vec_cast
+	{α : Type}
+	[decidable_eq α]
+	(m n : ℕ)
+	(h : m = n)
+	(f : fin m → α) :
+	fin n → α := by {subst h, exact f}
+
 
 
 abbreviation var_name := string
@@ -80,7 +120,7 @@ def holds'
 		option.elim false
 			(fun d : def_t,
 				if h : name = d.name ∧ n = d.n
-				then holds d.q (function.update_fin V d.n n d.args (V ∘ args))
+				then holds d.q (function.update_fin V d.n d.args (V ∘ (vec_cast n d.n h.right args)))
 				else holds (def_ n name args) V)
 			d
 
@@ -164,8 +204,8 @@ lemma holds_not_nil_def
 	(args : fin n → var_name)
 	(d : def_t) :
 	holds D M (d :: E) (def_ n name args) V ↔
-		if name = d.name ∧ n = d.n
-		then holds D M E d.q (function.update_fin V d.n n d.args (V ∘ args))
+		if h : name = d.name ∧ n = d.n
+		then holds D M E d.q (function.update_fin V d.n d.args (V ∘ (vec_cast n d.n h.right args)))
 		else holds D M E (def_ n name args) V := by {refl}
 
 
@@ -365,7 +405,7 @@ def not_free (Γ : list (var_name × meta_var_name)) (v : var_name) : formula �
 | (imp φ ψ) := not_free φ ∧ not_free ψ
 | (eq_ x y) := x ≠ v ∧ y ≠ v
 | (forall_ x φ) := x = v ∨ not_free φ
-| (def_ n name args) := ¬ ∃ (i : fin n), args i = v
+| (def_ n name args) := ∀ (i : fin n), ¬ args i = v
 
 
 lemma not_free_imp_is_not_free
@@ -442,21 +482,27 @@ begin
   {
 		unfold is_not_free at *,
 		unfold not_free at *,
-		push_neg at H,
 		induction E,
-		simp only [holds_nil_def, iff_self, forall_2_true_iff],
-		simp only [holds_not_nil_def],
-		intros V a,
-		split_ifs,
+		case list.nil
 		{
-			simp at *,
-			sorry,						
+			simp only [holds_nil_def, iff_self, forall_2_true_iff],
 		},
+		case list.cons : hd tl ih
 		{
-			apply E_ih,
-			simp at *,
-			exact nf,
-		}
+			intros V a,
+			simp only [holds_not_nil_def, ne.def, holds_meta_var] at *,
+			specialize ih nf V a,
+			split_ifs,
+			{
+				rewrite iff_eq_eq, congr' 1,
+				funext,
+				rewrite [function.update_fin_noteq, function.update_fin_noteq],
+				sorry, sorry, sorry,
+			},
+			{
+				exact ih,
+			}
+		},
 	}
 end
 
