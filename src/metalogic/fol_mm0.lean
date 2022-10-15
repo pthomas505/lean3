@@ -5,6 +5,18 @@ import tactic
 set_option pp.parens true
 
 
+def function.update_fin
+	{α β : Type}
+	[decidable_eq α]
+	(σ : α → β) :
+	Π (m n : ℕ), (fin m → α) → (fin n → β) → (α → β)
+| (m + 1) (n + 1) f g :=
+	function.update
+		(function.update_fin m n (fun (i : fin m), (f i)) (fun (i : fin n), (g i)))
+		(f m) (g n)
+| _ _ _ _ := σ
+
+
 abbreviation var_name := string
 abbreviation meta_var_name := string
 abbreviation def_name := string
@@ -21,6 +33,9 @@ inductive formula : Type
 open formula
 
 
+def valuation (D : Type) : Type := var_name → D
+def meta_valuation (D : Type) : Type := meta_var_name → valuation D → Prop
+
 structure def_t : Type :=
 (name : string)
 (n : ℕ)
@@ -28,23 +43,7 @@ structure def_t : Type :=
 (nodup : function.injective args)
 (q : formula)
 
-
-def function.update_fin
-	{α β : Type}
-	[decidable_eq α]
-	(σ : α → β) :
-	Π (m n : ℕ), (fin m → α) → (fin n → β) → (α → β)
-| (m + 1) (n + 1) f g :=
-	function.update
-		(function.update_fin m n (fun (i : fin m), (f i)) (fun (i : fin n), (g i)))
-		(f m) (g n)
-| _ _ _ _ := σ
-
-
 def env : Type := list def_t
-
-def valuation (D : Type) : Type := var_name → D
-def meta_valuation (D : Type) : Type := meta_var_name → valuation D → Prop
 
 
 /-
@@ -61,11 +60,9 @@ def holds (D : Type) : meta_valuation D → env → formula → valuation D → 
 		else holds M E (def_ n name args) V
 -/
 
-
 /-
 Lean is unable to determine that the above definition of holds is decreasing,
-so it needs to be broken into this pair of mutually recursive definitions that
-Lean is able to determine are decreasing.
+so it needs to be broken into this pair of mutually recursive definitions.
 -/
 
 def holds'
@@ -96,8 +93,8 @@ def holds
 
 
 /-
-These lemmas prove that holds is equivalent to the commented out version of
-holds that Lean is unable to determine is decreasing.
+These lemmas demonstrate that the pair of mutually recursive definitions
+is equivalent to the version the Lean is unable to determine is decreasing.
 -/
 
 @[simp]
@@ -291,14 +288,23 @@ begin
 	case formula.def_ : n name args V
   {
 		unfold formula.subst,
-		cases E,
+		induction E generalizing M,
 		{
 			simp only [holds_nil_def],
 		},
 		{
 			simp only [holds_not_nil_def],
-			unfold holds,
-			sorry,
+			unfold function.comp at *,
+			split_ifs,
+			{
+				unfold holds,
+				sorry
+			},
+			{
+				unfold holds,
+				rewrite <- E_ih,
+				sorry
+			}
 		}
 	},
 end
@@ -436,9 +442,21 @@ begin
   {
 		unfold is_not_free at *,
 		unfold not_free at *,
-		cases E,
+		push_neg at H,
+		induction E,
 		simp only [holds_nil_def, iff_self, forall_2_true_iff],
-		simp only [holds_not_nil_def], sorry
+		simp only [holds_not_nil_def],
+		intros V a,
+		split_ifs,
+		{
+			simp at *,
+			sorry,						
+		},
+		{
+			apply E_ih,
+			simp at *,
+			exact nf,
+		}
 	}
 end
 
