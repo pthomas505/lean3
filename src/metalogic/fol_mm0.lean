@@ -25,11 +25,11 @@ lemma function.update_fin_not_eq
 	[decidable_eq α]
 	(σ : α → β)
 	(n : ℕ)
-	(xs : fin n → α)
-	(ys : fin n → β)
+	(f : fin n → α)
+	(g : fin n → β)
 	(x : α)
-	(h1 : ∀ (i : fin n), ¬ x = xs i) :
-	function.update_fin σ n xs ys x = σ x :=
+	(h1 : ∀ (i : fin n), ¬ x = f i) :
+	function.update_fin σ n f g x = σ x :=
 begin
 	induction n,
 	case nat.zero
@@ -39,7 +39,7 @@ begin
   case nat.succ : n ih
   {
 		unfold function.update_fin,
-		have s1 : ¬ x = xs ↑n, apply h1,
+		have s1 : ¬ x = f ↑n, apply h1,
 		rewrite if_neg s1,
 		apply ih,
 		intros i,
