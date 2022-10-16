@@ -576,7 +576,7 @@ begin
 end
 
 
-lemma lem_5
+lemma lem_2
 	{D : Type}
 	(M : meta_valuation D)
 	(E : env)
@@ -753,7 +753,7 @@ begin
 		apply H_ih_ᾰ,
 		intros v X h1,
 		sorry,
-		--exact lem_5 M E H_Γ H_Γ' H_σ σ' H_τ left right nf H_ᾰ_1 v X h1,
+		--exact lem_2 M E H_Γ H_Γ' H_σ σ' H_τ left right nf H_ᾰ_1 v X h1,
 		intros φ h2 V',
 		specialize H_ih_ᾰ_1 φ h2 M nf hyp (V' ∘ σ'),
 		rewrite <- lem_1 (V' ∘ σ') M E sorry H_σ σ' H_τ left right sorry φ at H_ih_ᾰ_1,
