@@ -202,7 +202,7 @@ is equivalent to the version the Lean is unable to determine is decreasing.
 -/
 
 @[simp]
-lemma holds_meta_var_
+lemma holds_meta_var
 	(D : Type)
 	(M : meta_valuation D)
 	(E : env)
@@ -211,7 +211,7 @@ lemma holds_meta_var_
 	holds D M E (meta_var_ X) V ↔ M X V := by {cases E; refl}
 
 @[simp]
-lemma holds_not_
+lemma holds_not
 	(D : Type)
 	(M : meta_valuation D)
 	(E : env)
@@ -220,7 +220,7 @@ lemma holds_not_
 	holds D M E (not_ φ) V ↔ ¬ holds D M E φ V := by {cases E; refl}
 
 @[simp]
-lemma holds_imp_
+lemma holds_imp
 	(D : Type)
 	(M : meta_valuation D)
 	(E : env)
@@ -229,7 +229,7 @@ lemma holds_imp_
 	holds D M E (imp_ φ ψ) V ↔ holds D M E φ V → holds D M E ψ V := by {cases E; refl}
 
 @[simp]
-lemma holds_eq_
+lemma holds_eq
 	(D : Type)
 	(M : meta_valuation D)
 	(E : env)
@@ -238,7 +238,7 @@ lemma holds_eq_
 	holds D M E (eq_ x y) V ↔ V x = V y := by {cases E; refl}
 
 @[simp]
-lemma holds_forall_
+lemma holds_forall
 	(D : Type)
 	(M : meta_valuation D)
 	(E : env)
@@ -258,7 +258,7 @@ lemma holds_nil_def
 	holds D M [] (def_ n name args) V ↔ false := by {refl}
 
 @[simp]
-lemma holds_not__nil_def
+lemma holds_not_nil_def
 	(D : Type)
 	(M : meta_valuation D)
 	(E : env)
@@ -327,7 +327,7 @@ begin
 		induction φ generalizing V,
 		case formula.meta_var_ : φ V
 		{
-			simp only [holds_meta_var_],
+			simp only [holds_meta_var],
 			unfold formula.subst,
 			rewrite function.comp.assoc V σ.1 σ',
 			rewrite h1,
@@ -336,27 +336,27 @@ begin
 		},
 		case formula.not_ : φ ih V
 		{
-			simp only [holds_not_] at *,
+			simp only [holds_not] at *,
 			unfold formula.subst,
 			rewrite ih,
-			simp only [holds_not_],
+			simp only [holds_not],
 		},
 		case formula.imp_ : φ ψ φ_ih ψ_ih V
 		{
-			simp only [holds_imp_] at *,
+			simp only [holds_imp] at *,
 			unfold formula.subst,
 			simp only [φ_ih, ψ_ih],
-			simp only [holds_imp_],
+			simp only [holds_imp],
 		},
 		case formula.eq_ : x y V
 		{
-			simp only [holds_eq_] at *,
+			simp only [holds_eq] at *,
 			unfold formula.subst,
-			simp only [holds_eq_],
+			simp only [holds_eq],
 		},
 		case formula.forall_ : x φ φ_ih V
 		{
-			simp only [holds_forall_],
+			simp only [holds_forall],
 			apply forall_congr, intros a,
 			rewrite aux_1 σ.1 σ' x h2 V a,
 			apply φ_ih,
@@ -373,7 +373,7 @@ begin
 		induction φ generalizing V,
 		case formula.meta_var_ : φ V
 		{
-			simp only [holds_meta_var_],
+			simp only [holds_meta_var],
 			unfold formula.subst,
 			rewrite function.comp.assoc V σ.1 σ',
 			rewrite h1,
@@ -382,29 +382,29 @@ begin
 		},
 		case formula.not_ : φ ih
 		{
-			simp only [holds_not_] at *,
+			simp only [holds_not] at *,
 			unfold formula.subst at *,
 			rewrite ih,
-			simp only [holds_not_],
+			simp only [holds_not],
 		},
 		case formula.imp_ : φ ψ φ_ih ψ_ih
 		{
-			simp only [holds_imp_] at *,
+			simp only [holds_imp] at *,
 			unfold formula.subst,
 			rewrite φ_ih, rewrite ψ_ih,
-			simp only [holds_imp_],
+			simp only [holds_imp],
 		},
 		case formula.eq_ : x y
 		{
-			simp only [holds_eq_] at *,
+			simp only [holds_eq] at *,
 			unfold formula.subst,
-			simp only [holds_eq_],
+			simp only [holds_eq],
 		},
 		case formula.forall_ : x φ φ_ih
 		{
-			simp only [holds_forall_],
+			simp only [holds_forall],
 			unfold formula.subst at *,
-			simp only [holds_forall_],
+			simp only [holds_forall],
 			apply forall_congr, intros a,
 			rewrite aux_1 σ.1 σ' x h2 V a,
 			apply φ_ih,
@@ -417,9 +417,9 @@ begin
 			simp only [list.append_assoc, list.singleton_append],
 			exact h4,
 
-			simp only [holds_not__nil_def] at *,
+			simp only [holds_not_nil_def] at *,
 			unfold formula.subst at *,
-			simp only [holds_not__nil_def] at *,
+			simp only [holds_not_nil_def] at *,
 			split_ifs,
 			{
 				specialize E_ih s1 E_hd.q,
@@ -498,7 +498,7 @@ begin
   {
 		unfold not_free at *,
 		unfold is_not_free at *,
-		simp only [holds_not_],
+		simp only [holds_not],
 		intros V a,
 		apply not_congr,
 		exact φ_ih H V a,
@@ -507,7 +507,7 @@ begin
   {
 		unfold not_free at *,
 		unfold is_not_free at *,
-		simp only [holds_imp_],
+		simp only [holds_imp],
 		cases H,
 		intros V a,
 		apply imp_congr,
@@ -518,7 +518,7 @@ begin
   {
 		unfold not_free at H,
 		unfold is_not_free at *,
-		simp only [holds_eq_],
+		simp only [holds_eq],
 		cases H,
 		intros V a,
 		simp only [function.update_noteq H_left, function.update_noteq H_right],
@@ -527,7 +527,7 @@ begin
   {
 		unfold is_not_free at *,
 		unfold not_free at *,
-		simp only [holds_forall_],
+		simp only [holds_forall],
 		intros V a,
 		apply forall_congr, intros a',
 		cases H,
@@ -559,7 +559,7 @@ begin
 		case list.cons : hd tl ih
 		{
 			intros V a,
-			simp only [holds_not__nil_def, ne.def, holds_meta_var_] at *,
+			simp only [holds_not_nil_def, ne.def, holds_meta_var] at *,
 			specialize ih nf V a,
 			split_ifs,
 			{
@@ -595,7 +595,7 @@ lemma lem_5
 begin
 	intros v X h1,
 	unfold is_not_free,
-	simp only [holds_meta_var_],
+	simp only [holds_meta_var],
 	intros V a,
 	rewrite <- aux_2 σ' σ.1 v left right,
 	apply not_free_imp_is_not_free M E Γ',
@@ -678,37 +678,37 @@ begin
   case is_proof.mp : H_Γ H_Δ H_φ H_ψ H_ᾰ H_ᾰ_1 H_ih_ᾰ H_ih_ᾰ_1 M nf hyp
   {
 		intros V,
-		simp only [holds_imp_] at *,
+		simp only [holds_imp] at *,
 		apply H_ih_ᾰ_1 M nf hyp,
 		apply H_ih_ᾰ M nf hyp,
 	},
   case is_proof.prop_1 : H_Γ H_Δ H_φ H_ψ M nf hyp
   {
-		simp only [holds_imp_],
+		simp only [holds_imp],
 		intros V h1 h2, exact h1,
 	},
   case is_proof.prop_2 : H_Γ H_Δ H_φ H_ψ H_χ M nf hyp
   {
-		simp only [holds_imp_],
+		simp only [holds_imp],
 		intros V h1 h2 h3,
 		apply h1, exact h3, apply h2, exact h3,
 	},
   case is_proof.prop_3 : H_Γ H_Δ H_φ H_ψ M nf hyp
   {
-		simp only [holds_imp_, holds_not_],
+		simp only [holds_imp, holds_not],
 		intros V h1 h2,
 		by_contradiction,
 		exact h1 h h2,
 	},
   case is_proof.gen : H_Γ H_Δ H_φ H_x H_ᾰ H_ih M nf hyp
   {
-		simp only [holds_forall_],
+		simp only [holds_forall],
 		intros V a,
 		apply H_ih M nf hyp,
 	},
   case is_proof.pred_1 : H_Γ H_Δ H_φ H_ψ H_x M nf hyp
   {
-		simp only [holds_imp_, holds_forall_],
+		simp only [holds_imp, holds_forall],
 		intros V h1 h2 a,
 		apply h1,
 		apply h2,
@@ -719,7 +719,7 @@ begin
 		apply not_free_imp_is_not_free M E H_Γ H_x H_φ H_ᾰ,
 		intros X h2, exact nf H_x X h2,
 
-		simp only [holds_imp_, holds_forall_],
+		simp only [holds_imp, holds_forall],
 		intros V h2 a,
 		unfold is_not_free at s1,
 		rewrite <- s1, exact h2,
@@ -727,7 +727,7 @@ begin
   case is_proof.eq_1 : H_Γ H_Δ H_x H_y H_ᾰ M nf hyp
   {
 		unfold exists_,
-		simp only [holds_not_, holds_forall_, holds_eq_, not_forall],
+		simp only [holds_not, holds_forall, holds_eq, not_forall],
 		intros V,
 		push_neg,
 		simp only [function.update_same],
@@ -738,7 +738,7 @@ begin
 	},
   case is_proof.eq_2 : H_Γ H_Δ H_x H_y H_z M nf hyp
   {
-		simp only [holds_imp_, holds_eq_],
+		simp only [holds_imp, holds_eq],
 		intros V h1 h2,
 		transitivity V H_x,
 		symmetry,
