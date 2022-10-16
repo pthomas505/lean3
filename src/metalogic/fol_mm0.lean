@@ -49,6 +49,7 @@ begin
 	},
 end
 
+
 def function.cast_fin
 	{α : Type}
 	[decidable_eq α]
