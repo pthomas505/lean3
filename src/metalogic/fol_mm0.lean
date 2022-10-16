@@ -275,67 +275,166 @@ begin
 	intros h3, rewrite <- h3, rewrite <- function.comp_app f' f x', rewrite h1, simp only [id.def],
 end
 
+lemma ext_env_holds
+	{D : Type}
+	(M : meta_valuation D)
+	(E E1 : env)
+	(φ : formula)
+	(V : valuation D) :
+	holds D M (E1.append E) φ V ↔ holds D M E φ V :=
+begin
+	induction E generalizing φ,
+	case list.nil : φ
+  {
+		induction φ generalizing V,
+		case formula.meta_var : φ V
+		{
+			squeeze_simp,
+		},
+		case formula.not : φ_ᾰ φ_ih V
+		{ admit },
+		case formula.imp : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1 V
+		{ admit },
+		case formula.eq_ : φ_ᾰ φ_ᾰ_1 V
+		{ admit },
+		case formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih V
+		{ admit },
+		case formula.def_ : n name args V'
+		{
+			sorry,
+		},
+	},
+  case list.cons : E_hd E_tl E_ih φ
+  {
+		induction φ generalizing V,
+		case formula.meta_var : φ V E_ih
+		{ admit },
+		case formula.not : φ_ᾰ φ_ih V E_ih
+		{ admit },
+		case formula.imp : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1 V E_ih
+		{ admit },
+		case formula.eq_ : φ_ᾰ φ_ᾰ_1 V E_ih
+		{ admit },
+		case formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih V E_ih
+		{ admit },
+		case formula.def_ : n name args V E_ih
+		{
+			squeeze_simp,
+			sorry,
+		},
+	},
+end
 
-lemma lem_3
+
+example
 	{D : Type}
 	(V : valuation D)
 	(M : meta_valuation D)
-	(E : env)
+	(E E1 : env)
 	(σ : instantiation)
 	(σ' : var_name → var_name)
 	(τ : meta_instantiation)
 	(h1 : σ.1 ∘ σ' = id)
 	(h2 : σ' ∘ σ.1 = id)
 	(φ : formula) :
+	let E' := E1.append E in
 	holds D
-		(fun (X : meta_var_name) (V' : valuation D), holds D M E (τ X) (V' ∘ σ')) E φ (V ∘ σ.1) ↔
+		(fun (X : meta_var_name) (V' : valuation D), holds D M E' (τ X) (V' ∘ σ')) E φ (V ∘ σ.1) ↔
 	holds D M E (φ.subst σ τ) V :=
 begin
-	induction φ generalizing V,
-	case formula.meta_var : X V
+	induction E generalizing φ V,
+	case list.nil
   {
-		unfold formula.subst,
-		simp only [holds_meta_var],
-		rewrite function.comp.assoc V σ.1 σ',
-		rewrite h1,
-		rewrite function.comp.right_id V,
-	},
-  case formula.not : φ ih V
-  {
-		unfold formula.subst,
-		simp only [holds_not],
-		simp only [ih],
-	},
-  case formula.imp : φ ψ φ_ih ψ_ih V
-  {
-		unfold formula.subst,
-		simp only [holds_imp],
-		simp only [φ_ih, ψ_ih],
-	},
-  case formula.eq_ : x y V
-  {
-		unfold formula.subst,
-		simp only [holds_eq_],
-	},
-  case formula.forall_ : x φ φ_ih V
-  {
-		unfold formula.subst,
-		simp only [holds_forall_],
-		apply forall_congr, intros a,
-		rewrite lem_1 σ.1 σ' x h2 V a,
-		apply φ_ih,
-	},
-	case formula.def_ : n name args V
-  {
-		unfold formula.subst,
-		induction E,
-		case list.nil :
+		induction φ generalizing V,
+		case formula.meta_var : φ V
+		{
+			simp only [holds_meta_var],
+			unfold formula.subst,
+			rewrite function.comp.assoc V σ.1 σ',
+			rewrite h1,
+			rewrite function.comp.right_id V,
+			apply ext_env_holds,
+		},
+		case formula.not : φ ih V
+		{
+			simp only [holds_not] at *,
+			unfold formula.subst,
+			rewrite ih,
+			simp only [holds_not],
+		},
+		case formula.imp : φ ψ φ_ih ψ_ih V
+		{
+			simp only [holds_imp] at *,
+			unfold formula.subst,
+			simp only [φ_ih, ψ_ih],
+			simp only [holds_imp],
+		},
+		case formula.eq_ : x y V
+		{
+			simp only [holds_eq_] at *,
+			unfold formula.subst,
+			simp only [holds_eq_],
+		},
+		case formula.forall_ : x φ φ_ih V
+		{
+			simp only [holds_forall_],
+			apply forall_congr, intros a,
+			rewrite lem_1 σ.1 σ' x h2 V a,
+			apply φ_ih,
+		},
+		case formula.def_ : n name args V
 		{
 			simp only [holds_nil_def],
+			unfold formula.subst,
+			simp only [holds_nil_def],
 		},
-		case list.cons : hd tl ih
+	},
+  case list.cons : E_hd E_tl E_ih
+  {
+		induction φ generalizing V,
+		case formula.meta_var : φ V
+		{
+			simp only [holds_meta_var],
+			unfold formula.subst,
+			rewrite function.comp.assoc V σ.1 σ',
+			rewrite h1,
+			rewrite function.comp.right_id V,
+			apply ext_env_holds,	
+		},
+		case formula.not : φ ih
+		{
+			simp only [holds_not] at *,
+			unfold formula.subst at *,
+			rewrite ih,
+			simp only [holds_not],
+		},
+		case formula.imp : φ ψ φ_ih ψ_ih
+		{
+			simp only [holds_imp] at *,
+			unfold formula.subst,
+			rewrite φ_ih, rewrite ψ_ih,
+			simp only [holds_imp],
+		},
+		case formula.eq_ : x y
+		{
+			simp only [holds_eq_] at *,
+			unfold formula.subst,
+			simp only [holds_eq_],
+		},
+		case formula.forall_ : x φ φ_ih
+		{
+			simp only [holds_forall_],
+			unfold formula.subst at *,
+			simp only [holds_forall_],
+			apply forall_congr, intros a,
+			rewrite lem_1 σ.1 σ' x h2 V a,
+			apply φ_ih,
+		},
+		case formula.def_ : n name args
 		{
 			simp only [holds_not_nil_def] at *,
+			unfold formula.subst,
+			simp only [holds_not_nil_def],
 			split_ifs,
 			{
 				sorry,
