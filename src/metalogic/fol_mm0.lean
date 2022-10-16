@@ -203,70 +203,70 @@ is equivalent to the version the Lean is unable to determine is decreasing.
 
 @[simp]
 lemma holds_meta_var
-	(D : Type)
+	{D : Type}
 	(M : meta_valuation D)
 	(E : env)
-	(V : valuation D)
-	(X : meta_var_name) :
+	(X : meta_var_name)
+	(V : valuation D) :
 	holds D M E (meta_var_ X) V ↔ M X V := by {cases E; refl}
 
 @[simp]
 lemma holds_not
-	(D : Type)
+	{D : Type}
 	(M : meta_valuation D)
 	(E : env)
-	(V : valuation D)
-	(φ : formula) :
+	(φ : formula)
+	(V : valuation D) :
 	holds D M E (not_ φ) V ↔ ¬ holds D M E φ V := by {cases E; refl}
 
 @[simp]
 lemma holds_imp
-	(D : Type)
+	{D : Type}
 	(M : meta_valuation D)
 	(E : env)
-	(V : valuation D)
-	(φ ψ : formula) :
+	(φ ψ : formula)
+	(V : valuation D) :
 	holds D M E (imp_ φ ψ) V ↔ holds D M E φ V → holds D M E ψ V := by {cases E; refl}
 
 @[simp]
 lemma holds_eq
-	(D : Type)
+	{D : Type}
 	(M : meta_valuation D)
 	(E : env)
-	(V : valuation D)
-	(x y : var_name) :
+	(x y : var_name)
+	(V : valuation D) :
 	holds D M E (eq_ x y) V ↔ V x = V y := by {cases E; refl}
 
 @[simp]
 lemma holds_forall
-	(D : Type)
+	{D : Type}
 	(M : meta_valuation D)
 	(E : env)
-	(V : valuation D)
 	(φ : formula)
-	(x : var_name) :
+	(x : var_name)
+	(V : valuation D) :
 	holds D M E (forall_ x φ) V ↔ ∀ (a : D), holds D M E φ (function.update V x a) := by {cases E; refl}
 
 @[simp]
 lemma holds_nil_def
-	(D : Type)
+	{D : Type}
 	(M : meta_valuation D)
-	(V : valuation D)
 	(n : ℕ)
 	(name : def_name)
-	(args : fin n → var_name) :
+	(args : fin n → var_name)
+	(V : valuation D) :
 	holds D M [] (def_ n name args) V ↔ false := by {refl}
 
 @[simp]
 lemma holds_not_nil_def
-	(D : Type)
+	{D : Type}
 	(M : meta_valuation D)
+	(d : definition_)
 	(E : env)
-	(V : valuation D)
 	(n : ℕ)
 	(name : def_name)
 	(args : fin n → var_name)
-	(d : definition_) :
+	(V : valuation D) :
 	holds D M (d :: E) (def_ n name args) V ↔
 		if h : name = d.name ∧ n = d.n
 		then holds D M E d.q (function.update_fin V d.n d.args (V ∘ (function.cast_fin n d.n h.right args)))
