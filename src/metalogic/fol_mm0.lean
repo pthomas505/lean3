@@ -97,8 +97,8 @@ def holds (D : Type) : meta_valuation D → env → formula → valuation D → 
 | M E (forall_ x φ) V := ∀ (a : D), holds M E φ (function.update V x a)
 | M [] (def_ _ _ _) V := false
 | M (d :: E) (def_ n name args) V := 
-		if name = d.name ∧ n = d.n
-		then holds M E d.q (function.update_fin V d.n n d.args (V ∘ args))
+		if h : name = d.name ∧ n = d.n
+		then holds M E d.q (function.update_fin V d.n d.args (V ∘ (function.cast_fin n d.n h.right args)))
 		else holds M E (def_ n name args) V
 -/
 
