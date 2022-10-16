@@ -275,7 +275,7 @@ lemma holds_not_nil_def
 
 /-
 A substitution mapping.
-A mapping of each variable name to anot_her name.
+A mapping of each variable name to another name.
 -/
 def instantiation :=
 	{σ : var_name → var_name // ∃ (σ' : var_name → var_name), σ ∘ σ' = id ∧ σ' ∘ σ = id}
