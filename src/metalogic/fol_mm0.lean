@@ -434,20 +434,24 @@ begin
 		},
 		case formula.def_ : n name args
 		{
+			have s1 : ∃ (E1 : env), E' = E1 ++ E_tl,
+			apply exists.elim h3, intros a h4,
+			apply exists.intro (a ++ [E_hd]),
+			simp only [list.append_assoc, list.singleton_append],
+			exact h4,
+
 			simp only [holds_not_nil_def] at *,
 			unfold formula.subst at *,
 			simp only [holds_not_nil_def] at *,
 			split_ifs,
 			{
-				sorry,
+				specialize E_ih s1,
+				
 			},
 			{
 				rewrite E_ih,
 				unfold formula.subst,
-				apply exists.elim h3, intros a h4,
-				apply exists.intro (a ++ [E_hd]),
-				simp only [list.append_assoc, list.singleton_append],
-				exact h4,
+				exact s1,
 			}
 		},
 	},
