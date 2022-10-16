@@ -198,7 +198,7 @@ def holds
 
 /-
 These lemmas demonstrate that the pair of mutually recursive definitions
-is equivalent to the version the Lean is unable to determine is decreasing.
+is equivalent to the version that Lean is unable to determine is decreasing.
 -/
 
 @[simp]
