@@ -66,7 +66,7 @@ abbreviation def_name := string
 inductive formula : Type
 | meta_var : meta_var_name → formula
 | not_ : formula → formula
-| imp : formula → formula → formula
+| imp_ : formula → formula → formula
 | eq_ : var_name → var_name → formula
 | forall_ : var_name → formula → formula
 | def_ (n : ℕ) : def_name → (fin n → var_name) → formula
@@ -92,7 +92,7 @@ def env : Type := list def_t
 def holds (D : Type) : meta_valuation D → env → formula → valuation D → Prop
 | M E (meta_var X) V := M X V
 | M E (not_ φ) V := ¬ holds M E φ V
-| M E (imp φ ψ) V := holds M E φ V → holds M E ψ V
+| M E (imp_ φ ψ) V := holds M E φ V → holds M E ψ V
 | M E (eq_ x y) V := V x = V y
 | M E (forall_ x φ) V := ∀ (a : D), holds M E φ (function.update V x a)
 | M [] (def_ _ _ _) V := false
@@ -115,7 +115,7 @@ def holds'
 	formula → valuation D → Prop
 | (meta_var X) V := M X V
 | (not_ φ) V := ¬ holds' φ V
-| (imp φ ψ) V := holds' φ V → holds' ψ V
+| (imp_ φ ψ) V := holds' φ V → holds' ψ V
 | (eq_ x y) V := V x = V y
 | (forall_ x φ) V := ∀ (a : D), holds' φ (function.update V x a)
 | (def_ n name args) V :=
@@ -158,13 +158,13 @@ lemma holds_not_
 	holds D M E (not_ φ) V ↔ ¬ holds D M E φ V := by {cases E; refl}
 
 @[simp]
-lemma holds_imp
+lemma holds_imp_
 	(D : Type)
 	(M : meta_valuation D)
 	(E : env)
 	(V : valuation D)
 	(φ ψ : formula) :
-	holds D M E (imp φ ψ) V ↔ holds D M E φ V → holds D M E ψ V := by {cases E; refl}
+	holds D M E (imp_ φ ψ) V ↔ holds D M E φ V → holds D M E ψ V := by {cases E; refl}
 
 @[simp]
 lemma holds_eq_
@@ -227,7 +227,7 @@ def meta_instantiation : Type := meta_var_name → formula
 def formula.subst (σ : instantiation) (τ : meta_instantiation) : formula → formula
 | (meta_var X) := τ X
 | (not_ φ) := not_ φ.subst
-| (imp φ ψ) := imp φ.subst ψ.subst
+| (imp_ φ ψ) := imp_ φ.subst ψ.subst
 | (eq_ x y) := eq_ (σ.1 x) (σ.1 y)
 | (forall_ x φ) := forall_ (σ.1 x) φ.subst
 | (def_ n name args) := def_ n name (fun (i : fin n), σ.1 (args i))
@@ -323,12 +323,12 @@ begin
 			rewrite ih,
 			simp only [holds_not_],
 		},
-		case formula.imp : φ ψ φ_ih ψ_ih V
+		case formula.imp_ : φ ψ φ_ih ψ_ih V
 		{
-			simp only [holds_imp] at *,
+			simp only [holds_imp_] at *,
 			unfold formula.subst,
 			simp only [φ_ih, ψ_ih],
-			simp only [holds_imp],
+			simp only [holds_imp_],
 		},
 		case formula.eq_ : x y V
 		{
@@ -369,12 +369,12 @@ begin
 			rewrite ih,
 			simp only [holds_not_],
 		},
-		case formula.imp : φ ψ φ_ih ψ_ih
+		case formula.imp_ : φ ψ φ_ih ψ_ih
 		{
-			simp only [holds_imp] at *,
+			simp only [holds_imp_] at *,
 			unfold formula.subst,
 			rewrite φ_ih, rewrite ψ_ih,
-			simp only [holds_imp],
+			simp only [holds_imp_],
 		},
 		case formula.eq_ : x y
 		{
@@ -469,13 +469,13 @@ end
 def not__free (Γ : list (var_name × meta_var_name)) (v : var_name) : formula → Prop
 | (meta_var X) := (v, X) ∈ Γ
 | (not_ φ) := not__free φ
-| (imp φ ψ) := not__free φ ∧ not__free ψ
+| (imp_ φ ψ) := not__free φ ∧ not__free ψ
 | (eq_ x y) := x ≠ v ∧ y ≠ v
 | (forall_ x φ) := x = v ∨ not__free φ
 | (def_ n name args) := ∀ (i : fin n), ¬ args i = v
 
 
-lemma not__free_imp_is_not__free
+lemma not__free_imp__is_not__free
 	{D : Type}
 	(M : meta_valuation D)
 	(E : env)
@@ -501,11 +501,11 @@ begin
 		apply not_congr,
 		exact φ_ih H V a,
 	},
-  case formula.imp : φ ψ φ_ih ψ_ih
+  case formula.imp_ : φ ψ φ_ih ψ_ih
   {
 		unfold not__free at *,
 		unfold is_not__free at *,
-		simp only [holds_imp],
+		simp only [holds_imp_],
 		cases H,
 		intros V a,
 		apply imp_congr,
@@ -596,7 +596,7 @@ begin
 	simp only [holds_meta_var],
 	intros V a,
 	rewrite <- lem_2 σ' σ.1 v left right,
-	apply not__free_imp_is_not__free M E Γ',
+	apply not__free_imp__is_not__free M E Γ',
 	exact H v X h1,
 	intros X' h2,
 	exact nf (σ.1 v) X' h2,
@@ -614,19 +614,19 @@ inductive is_proof : list (var_name × meta_var_name) → list formula → formu
 
 | mp (Γ : list (var_name × meta_var_name)) (Δ : list formula)
 	{φ ψ : formula} :
-	is_proof Γ Δ φ → is_proof Γ Δ (φ.imp ψ) → is_proof Γ Δ ψ
+	is_proof Γ Δ φ → is_proof Γ Δ (φ.imp_ ψ) → is_proof Γ Δ ψ
 
 | prop_1 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
 	{φ ψ : formula} :
-	is_proof Γ Δ (φ.imp (ψ.imp φ))
+	is_proof Γ Δ (φ.imp_ (ψ.imp_ φ))
 
 | prop_2 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
 	{φ ψ χ : formula} :
-	is_proof Γ Δ ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ)))
+	is_proof Γ Δ ((φ.imp_ (ψ.imp_ χ)).imp_ ((φ.imp_ ψ).imp_ (φ.imp_ χ)))
 
 | prop_3 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
 	{φ ψ : formula} :
-	is_proof Γ Δ (((not_ φ).imp (not_ ψ)).imp (ψ.imp φ))
+	is_proof Γ Δ (((not_ φ).imp_ (not_ ψ)).imp_ (ψ.imp_ φ))
 
 | gen (Γ : list (var_name × meta_var_name)) (Δ : list formula)
 	{φ : formula} {x : var_name} :
@@ -634,11 +634,11 @@ inductive is_proof : list (var_name × meta_var_name) → list formula → formu
 
 | pred_1 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
 	{φ ψ : formula} {x : var_name} :
-	is_proof Γ Δ ((forall_ x (φ.imp ψ)).imp ((forall_ x φ).imp (forall_ x ψ)))
+	is_proof Γ Δ ((forall_ x (φ.imp_ ψ)).imp_ ((forall_ x φ).imp_ (forall_ x ψ)))
 
 | pred_2 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
 	{φ : formula} {x : var_name} :
-	not__free Γ x φ → is_proof Γ Δ (φ.imp (forall_ x φ))
+	not__free Γ x φ → is_proof Γ Δ (φ.imp_ (forall_ x φ))
 
 | eq_1 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
 	{x y : var_name} :
@@ -646,7 +646,7 @@ inductive is_proof : list (var_name × meta_var_name) → list formula → formu
 
 | eq_2 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
 	{x y z : var_name} :
-	is_proof Γ Δ ((eq_ x y).imp ((eq_ x z).imp (eq_ y z)))
+	is_proof Γ Δ ((eq_ x y).imp_ ((eq_ x z).imp_ (eq_ y z)))
 
 | thm (Γ Γ' : list (var_name × meta_var_name)) (Δ Δ' : list formula)
 	{φ : formula} {σ : instantiation} {τ : meta_instantiation} :
@@ -676,24 +676,24 @@ begin
   case is_proof.mp : H_Γ H_Δ H_φ H_ψ H_ᾰ H_ᾰ_1 H_ih_ᾰ H_ih_ᾰ_1 M nf hyp
   {
 		intros V,
-		simp only [holds_imp] at *,
+		simp only [holds_imp_] at *,
 		apply H_ih_ᾰ_1 M nf hyp,
 		apply H_ih_ᾰ M nf hyp,
 	},
   case is_proof.prop_1 : H_Γ H_Δ H_φ H_ψ M nf hyp
   {
-		simp only [holds_imp],
+		simp only [holds_imp_],
 		intros V h1 h2, exact h1,
 	},
   case is_proof.prop_2 : H_Γ H_Δ H_φ H_ψ H_χ M nf hyp
   {
-		simp only [holds_imp],
+		simp only [holds_imp_],
 		intros V h1 h2 h3,
 		apply h1, exact h3, apply h2, exact h3,
 	},
   case is_proof.prop_3 : H_Γ H_Δ H_φ H_ψ M nf hyp
   {
-		simp only [holds_imp, holds_not_],
+		simp only [holds_imp_, holds_not_],
 		intros V h1 h2,
 		by_contradiction,
 		exact h1 h h2,
@@ -706,7 +706,7 @@ begin
 	},
   case is_proof.pred_1 : H_Γ H_Δ H_φ H_ψ H_x M nf hyp
   {
-		simp only [holds_imp, holds_forall_],
+		simp only [holds_imp_, holds_forall_],
 		intros V h1 h2 a,
 		apply h1,
 		apply h2,
@@ -714,10 +714,10 @@ begin
   case is_proof.pred_2 : H_Γ H_Δ H_φ H_x H_ᾰ M nf hyp
   {
 		have s1 : is_not__free D M E H_x H_φ,
-		apply not__free_imp_is_not__free M E H_Γ H_x H_φ H_ᾰ,
+		apply not__free_imp__is_not__free M E H_Γ H_x H_φ H_ᾰ,
 		intros X h2, exact nf H_x X h2,
 
-		simp only [holds_imp, holds_forall_],
+		simp only [holds_imp_, holds_forall_],
 		intros V h2 a,
 		unfold is_not__free at s1,
 		rewrite <- s1, exact h2,
@@ -736,7 +736,7 @@ begin
 	},
   case is_proof.eq_2 : H_Γ H_Δ H_x H_y H_z M nf hyp
   {
-		simp only [holds_imp, holds_eq_],
+		simp only [holds_imp_, holds_eq_],
 		intros V h1 h2,
 		transitivity V H_x,
 		symmetry,
