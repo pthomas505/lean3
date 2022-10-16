@@ -445,8 +445,8 @@ begin
 			simp only [holds_not_nil_def] at *,
 			split_ifs,
 			{
-				specialize E_ih s1,
-				
+				specialize E_ih s1 E_hd.q,
+				sorry,
 			},
 			{
 				rewrite E_ih,
