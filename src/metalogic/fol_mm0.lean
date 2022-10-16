@@ -79,10 +79,10 @@ def valuation (D : Type) : Type := var_name → D
 def meta_valuation (D : Type) : Type := meta_var_name → valuation D → Prop
 
 structure definition_ : Type :=
-(definiendum : string)
+(name : string)
 (n : ℕ)
 (args : fin n → var_name)
-(definiens : formula)
+(q : formula)
 
 @[derive has_append]
 def env : Type := list definition_
@@ -98,7 +98,7 @@ def holds (D : Type) : meta_valuation D → env → formula → valuation D → 
 | M [] (def_ _ _ _) V := false
 | M (d :: E) (def_ n name args) V := 
 		if name = d.name ∧ n = d.n
-		then holds M E d.definiens (function.update_fin V d.n n d.args (V ∘ args))
+		then holds M E d.q (function.update_fin V d.n n d.args (V ∘ args))
 		else holds M E (def_ n name args) V
 -/
 
@@ -118,12 +118,12 @@ def holds'
 | (imp_ φ ψ) V := holds' φ V → holds' ψ V
 | (eq_ x y) V := V x = V y
 | (forall_ x φ) V := ∀ (a : D), holds' φ (function.update V x a)
-| (def_ n definiendum args) V :=
+| (def_ n name args) V :=
 		option.elim false
 			(fun d : definition_,
-				if h : definiendum = d.definiendum ∧ n = d.n
-				then holds d.definiens (function.update_fin V d.n d.args (V ∘ (function.cast_fin n d.n h.right args)))
-				else holds (def_ n definiendum args) V)
+				if h : name = d.name ∧ n = d.n
+				then holds d.q (function.update_fin V d.n d.args (V ∘ (function.cast_fin n d.n h.right args)))
+				else holds (def_ n name args) V)
 			d
 
 def holds
@@ -202,13 +202,13 @@ lemma holds_not__nil_def
 	(E : env)
 	(V : valuation D)
 	(n : ℕ)
-	(definiendum : def_name)
+	(name : def_name)
 	(args : fin n → var_name)
 	(d : definition_) :
-	holds D M (d :: E) (def_ n definiendum args) V ↔
-		if h : definiendum = d.definiendum ∧ n = d.n
-		then holds D M E d.definiens (function.update_fin V d.n d.args (V ∘ (function.cast_fin n d.n h.right args)))
-		else holds D M E (def_ n definiendum args) V := by {refl}
+	holds D M (d :: E) (def_ n name args) V ↔
+		if h : name = d.name ∧ n = d.n
+		then holds D M E d.q (function.update_fin V d.n d.args (V ∘ (function.cast_fin n d.n h.right args)))
+		else holds D M E (def_ n name args) V := by {refl}
 
 
 /-
@@ -404,7 +404,7 @@ begin
 			simp only [holds_not__nil_def] at *,
 			split_ifs,
 			{
-				specialize E_ih s1 E_hd.definiens,
+				specialize E_ih s1 E_hd.q,
 				sorry,
 			},
 			{
