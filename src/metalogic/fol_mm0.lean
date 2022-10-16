@@ -11,11 +11,13 @@ def function.update_fin
 	[decidable_eq α]
 	(σ : α → β) :
 	Π (n : ℕ), (fin n → α) → (fin n → β) → (α → β)
-| 0 _ _ := σ
-| (n + 1) f g :=
-	function.update
-		(function.update_fin n (fun (i : fin n), (f i)) (fun (i : fin n), (g i)))
-		(f n) (g n)
+| 0 _ _ x := σ x
+| (n + 1) f g x :=
+	if x = f n
+	then g n
+	else function.update_fin n (fun (i : fin n), f i) (fun (i : fin n), g i) x
+
+#eval function.update_fin (fun (n : ℕ), n) 5 ![1, 5, 10, 11, 1] ![10, 8, 5, 8, 12] 0
 
 
 lemma function.update_fin_noteq
@@ -26,7 +28,7 @@ lemma function.update_fin_noteq
 	(xs : fin n → α)
 	(ys : fin n → β)
 	(x : α)
-	(h1 : ∀ (i : fin n), x ≠ xs i) :
+	(h1 : ∀ (i : fin n), ¬ x = xs i) :
 	function.update_fin σ n xs ys x = σ x :=
 begin
 	induction n,
@@ -37,24 +39,23 @@ begin
   case nat.succ : n ih
   {
 		unfold function.update_fin,
-		have s1 : x ≠ xs ↑n, apply h1,
-		simp only [function.update_noteq s1],
+		have s1 : ¬ x = xs ↑n, apply h1,
+		rewrite if_neg s1,
 		apply ih,
 		intros i,
 		by_cases ↑i = ↑n,
 		rewrite h, exact s1,
-		exact h1 ↑i
+		exact h1 ↑i,
 	},
 end
 
-def vec_cast
+def function.cast_fin
 	{α : Type}
 	[decidable_eq α]
 	(m n : ℕ)
 	(h : m = n)
 	(f : fin m → α) :
 	fin n → α := by {subst h, exact f}
-
 
 
 abbreviation var_name := string
@@ -121,7 +122,7 @@ def holds'
 		option.elim false
 			(fun d : def_t,
 				if h : name = d.name ∧ n = d.n
-				then holds d.q (function.update_fin V d.n d.args (V ∘ (vec_cast n d.n h.right args)))
+				then holds d.q (function.update_fin V d.n d.args (V ∘ (function.cast_fin n d.n h.right args)))
 				else holds (def_ n name args) V)
 			d
 
@@ -206,7 +207,7 @@ lemma holds_not_nil_def
 	(d : def_t) :
 	holds D M (d :: E) (def_ n name args) V ↔
 		if h : name = d.name ∧ n = d.n
-		then holds D M E d.q (function.update_fin V d.n d.args (V ∘ (vec_cast n d.n h.right args)))
+		then holds D M E d.q (function.update_fin V d.n d.args (V ∘ (function.cast_fin n d.n h.right args)))
 		else holds D M E (def_ n name args) V := by {refl}
 
 
