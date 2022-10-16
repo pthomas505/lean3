@@ -20,7 +20,7 @@ def function.update_fin
 #eval function.update_fin (fun (n : ℕ), n) 5 ![1, 5, 10, 11, 1] ![10, 8, 5, 8, 12] 0
 
 
-lemma function.update_fin_noteq
+lemma function.update_fin_not_eq
 	{α β : Type}
 	[decidable_eq α]
 	(σ : α → β)
@@ -65,7 +65,7 @@ abbreviation def_name := string
 
 inductive formula : Type
 | meta_var : meta_var_name → formula
-| not : formula → formula
+| not_ : formula → formula
 | imp : formula → formula → formula
 | eq_ : var_name → var_name → formula
 | forall_ : var_name → formula → formula
@@ -91,7 +91,7 @@ def env : Type := list def_t
 /-
 def holds (D : Type) : meta_valuation D → env → formula → valuation D → Prop
 | M E (meta_var X) V := M X V
-| M E (not φ) V := ¬ holds M E φ V
+| M E (not_ φ) V := ¬ holds M E φ V
 | M E (imp φ ψ) V := holds M E φ V → holds M E ψ V
 | M E (eq_ x y) V := V x = V y
 | M E (forall_ x φ) V := ∀ (a : D), holds M E φ (function.update V x a)
@@ -114,7 +114,7 @@ def holds'
 	(d : option def_t) :
 	formula → valuation D → Prop
 | (meta_var X) V := M X V
-| (not φ) V := ¬ holds' φ V
+| (not_ φ) V := ¬ holds' φ V
 | (imp φ ψ) V := holds' φ V → holds' ψ V
 | (eq_ x y) V := V x = V y
 | (forall_ x φ) V := ∀ (a : D), holds' φ (function.update V x a)
@@ -149,13 +149,13 @@ lemma holds_meta_var
 	holds D M E (meta_var X) V ↔ M X V := by {cases E; refl}
 
 @[simp]
-lemma holds_not
+lemma holds_not_
 	(D : Type)
 	(M : meta_valuation D)
 	(E : env)
 	(V : valuation D)
 	(φ : formula) :
-	holds D M E (not φ) V ↔ ¬ holds D M E φ V := by {cases E; refl}
+	holds D M E (not_ φ) V ↔ ¬ holds D M E φ V := by {cases E; refl}
 
 @[simp]
 lemma holds_imp
@@ -196,7 +196,7 @@ lemma holds_nil_def
 	holds D M [] (def_ n name args) V ↔ false := by {refl}
 
 @[simp]
-lemma holds_not_nil_def
+lemma holds_not__nil_def
 	(D : Type)
 	(M : meta_valuation D)
 	(E : env)
@@ -213,7 +213,7 @@ lemma holds_not_nil_def
 
 /-
 A substitution mapping.
-A mapping of each variable name to another name.
+A mapping of each variable name to anot_her name.
 -/
 def instantiation :=
 	{σ : var_name → var_name // ∃ (σ' : var_name → var_name), σ ∘ σ' = id ∧ σ' ∘ σ = id}
@@ -226,7 +226,7 @@ def meta_instantiation : Type := meta_var_name → formula
 
 def formula.subst (σ : instantiation) (τ : meta_instantiation) : formula → formula
 | (meta_var X) := τ X
-| (not φ) := not φ.subst
+| (not_ φ) := not_ φ.subst
 | (imp φ ψ) := imp φ.subst ψ.subst
 | (eq_ x y) := eq_ (σ.1 x) (σ.1 y)
 | (forall_ x φ) := forall_ (σ.1 x) φ.subst
@@ -316,12 +316,12 @@ begin
 			rewrite function.comp.right_id V,
 			apply ext_env_holds, exact h3,
 		},
-		case formula.not : φ ih V
+		case formula.not_ : φ ih V
 		{
-			simp only [holds_not] at *,
+			simp only [holds_not_] at *,
 			unfold formula.subst,
 			rewrite ih,
-			simp only [holds_not],
+			simp only [holds_not_],
 		},
 		case formula.imp : φ ψ φ_ih ψ_ih V
 		{
@@ -362,12 +362,12 @@ begin
 			rewrite function.comp.right_id V,
 			apply ext_env_holds, exact h3,
 		},
-		case formula.not : φ ih
+		case formula.not_ : φ ih
 		{
-			simp only [holds_not] at *,
+			simp only [holds_not_] at *,
 			unfold formula.subst at *,
 			rewrite ih,
-			simp only [holds_not],
+			simp only [holds_not_],
 		},
 		case formula.imp : φ ψ φ_ih ψ_ih
 		{
@@ -399,9 +399,9 @@ begin
 			simp only [list.append_assoc, list.singleton_append],
 			exact h4,
 
-			simp only [holds_not_nil_def] at *,
+			simp only [holds_not__nil_def] at *,
 			unfold formula.subst at *,
-			simp only [holds_not_nil_def] at *,
+			simp only [holds_not__nil_def] at *,
 			split_ifs,
 			{
 				specialize E_ih s1 E_hd.q,
@@ -417,9 +417,9 @@ begin
 end
 
 
--- changing v does not cause the value of φ to change
+-- changing v does not_ cause the value of φ to change
 
-def is_not_free (D : Type) (M : meta_valuation D) (E : env) (v : var_name) (φ : formula) : Prop :=
+def is_not__free (D : Type) (M : meta_valuation D) (E : env) (v : var_name) (φ : formula) : Prop :=
 	∀ (V : valuation D) (a : D),
 	holds D M E φ V ↔ holds D M E φ (function.update V v a)
 
@@ -439,18 +439,18 @@ begin
 	exact h1 a h,
 end
 
-theorem is_not_free_equiv
+theorem is_not__free_equiv
 	{D : Type}
 	(M : meta_valuation D)
 	(E : env)
 	(v : var_name)
 	(φ : formula) :
-	is_not_free D M E v φ ↔
+	is_not__free D M E v φ ↔
 		∀ (V V' : valuation D),
 			(∀ (y : var_name), (y ≠ v → (V y = V' y))) →
 				(holds D M E φ V ↔ holds D M E φ V') :=
 begin
-	unfold is_not_free,
+	unfold is_not__free,
 	split,
 	{
 		intros h1 V V' h2,
@@ -466,45 +466,45 @@ begin
 end
 
 
-def not_free (Γ : list (var_name × meta_var_name)) (v : var_name) : formula → Prop
+def not__free (Γ : list (var_name × meta_var_name)) (v : var_name) : formula → Prop
 | (meta_var X) := (v, X) ∈ Γ
-| (not φ) := not_free φ
-| (imp φ ψ) := not_free φ ∧ not_free ψ
+| (not_ φ) := not__free φ
+| (imp φ ψ) := not__free φ ∧ not__free ψ
 | (eq_ x y) := x ≠ v ∧ y ≠ v
-| (forall_ x φ) := x = v ∨ not_free φ
+| (forall_ x φ) := x = v ∨ not__free φ
 | (def_ n name args) := ∀ (i : fin n), ¬ args i = v
 
 
-lemma not_free_imp_is_not_free
+lemma not__free_imp_is_not__free
 	{D : Type}
 	(M : meta_valuation D)
 	(E : env)
 	(Γ : list (var_name × meta_var_name))
 	(v : var_name)
 	(φ : formula)
-	(H : not_free Γ v φ)
-	(nf : ∀ X, (v, X) ∈ Γ → is_not_free D M E v (meta_var X)) :
-	is_not_free D M E v φ :=
+	(H : not__free Γ v φ)
+	(nf : ∀ X, (v, X) ∈ Γ → is_not__free D M E v (meta_var X)) :
+	is_not__free D M E v φ :=
 begin
 	induction φ,
 	case formula.meta_var : X
   {
-		unfold not_free at H,
+		unfold not__free at H,
 		exact nf X H,
 	},
-  case formula.not : φ φ_ih
+  case formula.not_ : φ φ_ih
   {
-		unfold not_free at *,
-		unfold is_not_free at *,
-		simp only [holds_not],
+		unfold not__free at *,
+		unfold is_not__free at *,
+		simp only [holds_not_],
 		intros V a,
 		apply not_congr,
 		exact φ_ih H V a,
 	},
   case formula.imp : φ ψ φ_ih ψ_ih
   {
-		unfold not_free at *,
-		unfold is_not_free at *,
+		unfold not__free at *,
+		unfold is_not__free at *,
 		simp only [holds_imp],
 		cases H,
 		intros V a,
@@ -514,8 +514,8 @@ begin
 	},
   case formula.eq_ : x y
   {
-		unfold not_free at H,
-		unfold is_not_free at *,
+		unfold not__free at H,
+		unfold is_not__free at *,
 		simp only [holds_eq_],
 		cases H,
 		intros V a,
@@ -523,8 +523,8 @@ begin
 	},
   case formula.forall_ : x φ φ_ih
   {
-		unfold is_not_free at *,
-		unfold not_free at *,
+		unfold is_not__free at *,
+		unfold not__free at *,
 		simp only [holds_forall_],
 		intros V a,
 		apply forall_congr, intros a',
@@ -547,8 +547,8 @@ begin
 	},
 	case formula.def_ : n name args
   {
-		unfold is_not_free at *,
-		unfold not_free at *,
+		unfold is_not__free at *,
+		unfold not__free at *,
 		induction E,
 		case list.nil
 		{
@@ -557,13 +557,13 @@ begin
 		case list.cons : hd tl ih
 		{
 			intros V a,
-			simp only [holds_not_nil_def, ne.def, holds_meta_var] at *,
+			simp only [holds_not__nil_def, ne.def, holds_meta_var] at *,
 			specialize ih nf V a,
 			split_ifs,
 			{
 				rewrite iff_eq_eq, congr' 1,
 				funext,
-				rewrite [function.update_fin_noteq, function.update_fin_noteq],
+				rewrite [function.update_fin_not_eq, function.update_fin_not_eq],
 				sorry, sorry, sorry,
 			},
 			{
@@ -584,29 +584,29 @@ lemma lem_5
   (τ : meta_instantiation)
   (left : ((σ.1 ∘ σ') = id))
   (right : ((σ' ∘ σ.1) = id))
-  (nf : ∀ (v : var_name) (X : meta_var_name), ((v, X) ∈ Γ') → is_not_free D M E v (meta_var X))
-  (H : ∀ (v : var_name) (X : meta_var_name), ((v, X) ∈ Γ) → not_free Γ' (σ.1 v) (τ X)) :
+  (nf : ∀ (v : var_name) (X : meta_var_name), ((v, X) ∈ Γ') → is_not__free D M E v (meta_var X))
+  (H : ∀ (v : var_name) (X : meta_var_name), ((v, X) ∈ Γ) → not__free Γ' (σ.1 v) (τ X)) :
   ∀ (v : var_name) (X : meta_var_name),
 		((v, X) ∈ Γ) →
-			is_not_free D (fun (X : meta_var_name) (V' : valuation D), holds D M E (τ X) (V' ∘ σ'))
+			is_not__free D (fun (X : meta_var_name) (V' : valuation D), holds D M E (τ X) (V' ∘ σ'))
 				E v (meta_var X) :=
 begin
 	intros v X h1,
-	unfold is_not_free,
+	unfold is_not__free,
 	simp only [holds_meta_var],
 	intros V a,
 	rewrite <- lem_2 σ' σ.1 v left right,
-	apply not_free_imp_is_not_free M E Γ',
+	apply not__free_imp_is_not__free M E Γ',
 	exact H v X h1,
 	intros X' h2,
 	exact nf (σ.1 v) X' h2,
 end
 
 
-def exists_ (x : var_name) (φ : formula) : formula := not (forall_ x (not φ))
+def exists_ (x : var_name) (φ : formula) : formula := not_ (forall_ x (not_ φ))
 
 
--- if (v, X) ∈ Γ then v is not free in (meta_var X)
+-- if (v, X) ∈ Γ then v is not_ free in (meta_var X)
 inductive is_proof : list (var_name × meta_var_name) → list formula → formula → Prop
 | hyp (Γ : list (var_name × meta_var_name)) (Δ : list formula)
 	{φ : formula} :
@@ -626,7 +626,7 @@ inductive is_proof : list (var_name × meta_var_name) → list formula → formu
 
 | prop_3 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
 	{φ ψ : formula} :
-	is_proof Γ Δ (((not φ).imp (not ψ)).imp (ψ.imp φ))
+	is_proof Γ Δ (((not_ φ).imp (not_ ψ)).imp (ψ.imp φ))
 
 | gen (Γ : list (var_name × meta_var_name)) (Δ : list formula)
 	{φ : formula} {x : var_name} :
@@ -638,7 +638,7 @@ inductive is_proof : list (var_name × meta_var_name) → list formula → formu
 
 | pred_2 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
 	{φ : formula} {x : var_name} :
-	not_free Γ x φ → is_proof Γ Δ (φ.imp (forall_ x φ))
+	not__free Γ x φ → is_proof Γ Δ (φ.imp (forall_ x φ))
 
 | eq_1 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
 	{x y : var_name} :
@@ -651,7 +651,7 @@ inductive is_proof : list (var_name × meta_var_name) → list formula → formu
 | thm (Γ Γ' : list (var_name × meta_var_name)) (Δ Δ' : list formula)
 	{φ : formula} {σ : instantiation} {τ : meta_instantiation} :
 	is_proof Γ Δ φ →
-	(∀ (x : var_name) (X : meta_var_name), (x, X) ∈ Γ → not_free Γ' (σ.1 x) (τ X)) →
+	(∀ (x : var_name) (X : meta_var_name), (x, X) ∈ Γ → not__free Γ' (σ.1 x) (τ X)) →
 	(∀ (ψ : formula), ψ ∈ Δ → is_proof Γ' Δ' (ψ.subst σ τ)) →
 	is_proof Γ' Δ' (φ.subst σ τ)
 
@@ -664,7 +664,7 @@ example
 	(Δ : list formula)
 	(φ : formula)
 	(H : is_proof Γ Δ φ)
-	(nf : ∀ v X, (v, X) ∈ Γ → is_not_free D M E v (meta_var X))
+	(nf : ∀ v X, (v, X) ∈ Γ → is_not__free D M E v (meta_var X))
 	(hyp : ∀ (φ ∈ Δ) V, holds D M E φ V) :
 	∀ (V : valuation D), holds D M E φ V :=
 begin
@@ -693,7 +693,7 @@ begin
 	},
   case is_proof.prop_3 : H_Γ H_Δ H_φ H_ψ M nf hyp
   {
-		simp only [holds_imp, holds_not],
+		simp only [holds_imp, holds_not_],
 		intros V h1 h2,
 		by_contradiction,
 		exact h1 h h2,
@@ -713,19 +713,19 @@ begin
 	},
   case is_proof.pred_2 : H_Γ H_Δ H_φ H_x H_ᾰ M nf hyp
   {
-		have s1 : is_not_free D M E H_x H_φ,
-		apply not_free_imp_is_not_free M E H_Γ H_x H_φ H_ᾰ,
+		have s1 : is_not__free D M E H_x H_φ,
+		apply not__free_imp_is_not__free M E H_Γ H_x H_φ H_ᾰ,
 		intros X h2, exact nf H_x X h2,
 
 		simp only [holds_imp, holds_forall_],
 		intros V h2 a,
-		unfold is_not_free at s1,
+		unfold is_not__free at s1,
 		rewrite <- s1, exact h2,
 	},
   case is_proof.eq_1 : H_Γ H_Δ H_x H_y H_ᾰ M nf hyp
   {
 		unfold exists_,
-		simp only [holds_not, holds_forall_, holds_eq_, not_forall],
+		simp only [holds_not_, holds_forall_, holds_eq_, not_forall],
 		intros V,
 		push_neg,
 		simp only [function.update_same],
