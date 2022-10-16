@@ -305,7 +305,7 @@ lemma ext_env_holds
 	holds D M E' φ V ↔ holds D M E φ V := sorry
 
 
-lemma lem_3
+lemma lem_1
 	{D : Type}
 	(V : valuation D)
 	(M : meta_valuation D)
@@ -749,14 +749,14 @@ begin
   {
 		obtain ⟨σ', left, right⟩ := H_σ.2,
 		intros V,
-		rewrite <- lem_3 V M E sorry H_σ σ' H_τ left right,
+		rewrite <- lem_1 V M E sorry H_σ σ' H_τ left right,
 		apply H_ih_ᾰ,
 		intros v X h1,
 		sorry,
 		--exact lem_5 M E H_Γ H_Γ' H_σ σ' H_τ left right nf H_ᾰ_1 v X h1,
 		intros φ h2 V',
 		specialize H_ih_ᾰ_1 φ h2 M nf hyp (V' ∘ σ'),
-		rewrite <- lem_3 (V' ∘ σ') M E sorry H_σ σ' H_τ left right sorry φ at H_ih_ᾰ_1,
+		rewrite <- lem_1 (V' ∘ σ') M E sorry H_σ σ' H_τ left right sorry φ at H_ih_ᾰ_1,
 		rewrite function.comp.assoc at H_ih_ᾰ_1,
 		rewrite right at H_ih_ᾰ_1,
 		simp only [function.comp.right_id] at H_ih_ᾰ_1,
