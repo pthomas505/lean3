@@ -83,6 +83,7 @@ structure def_t : Type :=
 (nodup : function.injective args)
 (q : formula)
 
+@[derive has_append]
 def env : Type := list def_t
 
 
@@ -278,10 +279,11 @@ end
 lemma ext_env_holds
 	{D : Type}
 	(M : meta_valuation D)
-	(E E1 : env)
+	(E E' : env)
 	(φ : formula)
-	(V : valuation D) :
-	holds D M (E1.append E) φ V ↔ holds D M E φ V :=
+	(V : valuation D)
+	(h1 : ∃ E1, E' = E1 ++ E) :
+	holds D M E' φ V ↔ holds D M E φ V :=
 begin
 	induction E generalizing φ,
 	case list.nil : φ
@@ -330,14 +332,14 @@ example
 	{D : Type}
 	(V : valuation D)
 	(M : meta_valuation D)
-	(E E1 : env)
+	(E E' : env)
 	(σ : instantiation)
 	(σ' : var_name → var_name)
 	(τ : meta_instantiation)
 	(h1 : σ.1 ∘ σ' = id)
 	(h2 : σ' ∘ σ.1 = id)
+	(h3 : ∃ E1, E' = E1 ++ E)
 	(φ : formula) :
-	let E' := E1.append E in
 	holds D
 		(fun (X : meta_var_name) (V' : valuation D), holds D M E' (τ X) (V' ∘ σ')) E φ (V ∘ σ.1) ↔
 	holds D M E (φ.subst σ τ) V :=
@@ -353,7 +355,7 @@ begin
 			rewrite function.comp.assoc V σ.1 σ',
 			rewrite h1,
 			rewrite function.comp.right_id V,
-			apply ext_env_holds,
+			apply ext_env_holds, exact h3,
 		},
 		case formula.not : φ ih V
 		{
@@ -399,7 +401,7 @@ begin
 			rewrite function.comp.assoc V σ.1 σ',
 			rewrite h1,
 			rewrite function.comp.right_id V,
-			apply ext_env_holds,	
+			apply ext_env_holds, exact h3,
 		},
 		case formula.not : φ ih
 		{
@@ -433,14 +435,19 @@ begin
 		case formula.def_ : n name args
 		{
 			simp only [holds_not_nil_def] at *,
-			unfold formula.subst,
-			simp only [holds_not_nil_def],
+			unfold formula.subst at *,
+			simp only [holds_not_nil_def] at *,
 			split_ifs,
 			{
 				sorry,
 			},
 			{
-				sorry,
+				rewrite E_ih,
+				unfold formula.subst,
+				apply exists.elim h3, intros a h4,
+				apply exists.intro (a ++ [E_hd]),
+				simp only [list.append_assoc, list.singleton_append],
+				exact h4,
 			}
 		},
 	},
