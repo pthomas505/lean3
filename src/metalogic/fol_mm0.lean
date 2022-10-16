@@ -283,52 +283,10 @@ lemma ext_env_holds
 	(φ : formula)
 	(V : valuation D)
 	(h1 : ∃ E1, E' = E1 ++ E) :
-	holds D M E' φ V ↔ holds D M E φ V :=
-begin
-	induction E generalizing φ,
-	case list.nil : φ
-  {
-		induction φ generalizing V,
-		case formula.meta_var : φ V
-		{
-			squeeze_simp,
-		},
-		case formula.not : φ_ᾰ φ_ih V
-		{ admit },
-		case formula.imp : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1 V
-		{ admit },
-		case formula.eq_ : φ_ᾰ φ_ᾰ_1 V
-		{ admit },
-		case formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih V
-		{ admit },
-		case formula.def_ : n name args V'
-		{
-			sorry,
-		},
-	},
-  case list.cons : E_hd E_tl E_ih φ
-  {
-		induction φ generalizing V,
-		case formula.meta_var : φ V E_ih
-		{ admit },
-		case formula.not : φ_ᾰ φ_ih V E_ih
-		{ admit },
-		case formula.imp : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1 V E_ih
-		{ admit },
-		case formula.eq_ : φ_ᾰ φ_ᾰ_1 V E_ih
-		{ admit },
-		case formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih V E_ih
-		{ admit },
-		case formula.def_ : n name args V E_ih
-		{
-			squeeze_simp,
-			sorry,
-		},
-	},
-end
+	holds D M E' φ V ↔ holds D M E φ V := sorry
 
 
-example
+lemma lem_3
 	{D : Type}
 	(V : valuation D)
 	(M : meta_valuation D)
@@ -788,16 +746,17 @@ begin
   {
 		obtain ⟨σ', left, right⟩ := H_σ.2,
 		intros V,
-		rewrite <- lem_3 V M E H_σ σ' H_τ left right,
+		rewrite <- lem_3 V M E sorry H_σ σ' H_τ left right,
 		apply H_ih_ᾰ,
 		intros v X h1,
-		exact lem_5 M E H_Γ H_Γ' H_σ σ' H_τ left right nf H_ᾰ_1 v X h1,
+		sorry,
+		--exact lem_5 M E H_Γ H_Γ' H_σ σ' H_τ left right nf H_ᾰ_1 v X h1,
 		intros φ h2 V',
 		specialize H_ih_ᾰ_1 φ h2 M nf hyp (V' ∘ σ'),
-		rewrite <- lem_3 (V' ∘ σ') M E H_σ σ' H_τ left right φ at H_ih_ᾰ_1,
+		rewrite <- lem_3 (V' ∘ σ') M E sorry H_σ σ' H_τ left right sorry φ at H_ih_ᾰ_1,
 		rewrite function.comp.assoc at H_ih_ᾰ_1,
 		rewrite right at H_ih_ᾰ_1,
 		simp only [function.comp.right_id] at H_ih_ᾰ_1,
-		exact H_ih_ᾰ_1,
+		exact H_ih_ᾰ_1, sorry,
 	},
 end
