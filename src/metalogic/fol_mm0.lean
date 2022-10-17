@@ -181,11 +181,14 @@ def holds'
 | (eq_ x y) V := V x = V y
 | (forall_ x φ) V := ∀ (a : D), holds' φ (function.update V x a)
 | (def_ n name args) V :=
-		option.elim false
-			(fun d : definition_,
-				if h : name = d.name ∧ n = d.n
-				then holds d.q (function.update_fin V d.n d.args (V ∘ (function.cast_fin n d.n h.right args)))
-				else holds (def_ n name args) V)
+		option.elim
+			false
+			(
+				fun d : definition_,
+					if h : name = d.name ∧ n = d.n
+					then holds d.q (function.update_fin V d.n d.args (V ∘ (function.cast_fin n d.n h.right args)))
+					else holds (def_ n name args) V
+			)
 			d
 
 def holds
