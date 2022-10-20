@@ -11,7 +11,7 @@ lemma aux_1
 	[decidable_eq α]
 	(f f' : α → α)
   (x : α)
-  (h1 : (f' ∘ f) = id)
+  (h1 : f' ∘ f = id)
   (g : α → β)
   (a : β) :
   function.update (g ∘ f) x a = (function.update g (f x) a) ∘ f :=
@@ -110,6 +110,17 @@ begin
 		exact h1 ↑i,
 	},
 end
+
+
+def function.update_fin'
+	{α β : Type}
+	[decidable_eq α]
+	(σ : α → β) :
+	Π (n : ℕ), (fin n → α) → (fin n → β) → (α → β)
+| 0 _ _ := σ
+| (n + 1) f g := function.update (function.update_fin' n (fun (i : fin n), f i) (fun (i : fin n), g i)) (f n) (g n)
+
+#eval function.update_fin' (fun (n : ℕ), n) 5 ![1, 5, 10, 11, 1] ![10, 8, 5, 8, 12] 20
 
 
 def function.cast_fin
@@ -425,7 +436,6 @@ begin
 			simp only [holds_not_nil_def] at *,
 			split_ifs,
 			{
-				specialize E_ih s1 E_hd.q,
 				sorry,
 			},
 			{
