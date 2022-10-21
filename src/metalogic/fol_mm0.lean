@@ -1,6 +1,5 @@
 import logic.function.basic
 import tactic
-import data.fin.vec_notation
 
 
 set_option pp.parens true
@@ -68,68 +67,45 @@ begin
 end
 
 
-def function.update_fin
+def function.update_list
 	{α β : Type}
 	[decidable_eq α]
-	(σ : α → β) :
-	Π (n : ℕ), (fin n → α) → (fin n → β) → (α → β)
-| 0 _ _ x := σ x
-| (n + 1) f g x :=
-	if x = f n
-	then g n
-	else function.update_fin n (fun (i : fin n), f i) (fun (i : fin n), g i) x
+	(f : α → β) :
+	list (α × β) → α → β
+| [] := f
+| (hd :: tl) := function.update (function.update_list tl) hd.fst hd.snd
 
-#eval function.update_fin (fun (n : ℕ), n) 5 ![1, 5, 10, 11, 1] ![10, 8, 5, 8, 12] 0
+#eval function.update_list (fun (n : ℕ), n) [(0,1), (3,2), (0,2)] 0
 
 
-lemma function.update_fin_not_eq
+lemma function.update_list_noteq
 	{α β : Type}
 	[decidable_eq α]
-	(σ : α → β)
-	(n : ℕ)
-	(f : fin n → α)
-	(g : fin n → β)
+	(f : α → β)
+	(l : list (α × β))
 	(x : α)
-	(h1 : ∀ (i : fin n), ¬ x = f i) :
-	function.update_fin σ n f g x = σ x :=
+	(h1 : ∀ (p : α × β), p ∈ l → ¬ x = p.fst) :
+	function.update_list f l x = f x :=
 begin
-	induction n,
-	case nat.zero
+	induction l,
+	case list.nil
+  { unfold function.update_list, },
+  case list.cons : hd tl ih
   {
-		unfold function.update_fin
-	},
-  case nat.succ : n ih
-  {
-		unfold function.update_fin,
-		have s1 : ¬ x = f ↑n, apply h1,
-		rewrite if_neg s1,
+		unfold function.update_list,
+		have s1 : ¬ x = hd.fst,
+		apply h1,
+		simp only [list.mem_cons_iff, eq_self_iff_true, true_or],
+
+		simp only [function.update_noteq s1],
 		apply ih,
-		intros i,
-		by_cases ↑i = ↑n,
-		rewrite h, exact s1,
-		exact h1 ↑i,
+		intros p h2,
+		apply h1,
+		simp only [list.mem_cons_iff],
+		apply or.intro_right,
+		exact h2,
 	},
 end
-
-
-def function.update_fin'
-	{α β : Type}
-	[decidable_eq α]
-	(σ : α → β) :
-	Π (n : ℕ), (fin n → α) → (fin n → β) → (α → β)
-| 0 _ _ := σ
-| (n + 1) f g := function.update (function.update_fin' n (fun (i : fin n), f i) (fun (i : fin n), g i)) (f n) (g n)
-
-#eval function.update_fin' (fun (n : ℕ), n) 5 ![1, 5, 10, 11, 1] ![10, 8, 5, 8, 12] 20
-
-
-def function.cast_fin
-	{α : Type}
-	[decidable_eq α]
-	(m n : ℕ)
-	(h : m = n)
-	(f : fin m → α) :
-	fin n → α := by {subst h, exact f}
 
 
 abbreviation var_name := string
@@ -143,7 +119,7 @@ inductive formula : Type
 | imp_ : formula → formula → formula
 | eq_ : var_name → var_name → formula
 | forall_ : var_name → formula → formula
-| def_ (n : ℕ) : def_name → (fin n → var_name) → formula
+| def_ : def_name → list var_name → formula
 
 open formula
 
@@ -154,7 +130,7 @@ def meta_valuation (D : Type) : Type := meta_var_name → valuation D → Prop
 structure definition_ : Type :=
 (name : string)
 (n : ℕ)
-(args : fin n → var_name)
+(args : list var_name)
 (q : formula)
 
 @[derive has_append]
@@ -168,11 +144,11 @@ def holds (D : Type) : meta_valuation D → env → formula → valuation D → 
 | M E (imp_ φ ψ) V := holds M E φ V → holds M E ψ V
 | M E (eq_ x y) V := V x = V y
 | M E (forall_ x φ) V := ∀ (a : D), holds M E φ (function.update V x a)
-| M [] (def_ _ _ _) V := false
-| M (d :: E) (def_ n name args) V := 
-		if h : name = d.name ∧ n = d.n
-		then holds M E d.q (function.update_fin V d.n d.args (V ∘ (function.cast_fin n d.n h.right args)))
-		else holds M E (def_ n name args) V
+| M [] (def_ _ _) V := false
+| M (d :: E) (def_ name args) V := 
+		if name = d.name
+		then holds M E d.q (function.update_list V (list.zip d.args (list.map V args)))
+		else holds M E (def_ name args) V
 -/
 
 /-
@@ -191,14 +167,14 @@ def holds'
 | (imp_ φ ψ) V := holds' φ V → holds' ψ V
 | (eq_ x y) V := V x = V y
 | (forall_ x φ) V := ∀ (a : D), holds' φ (function.update V x a)
-| (def_ n name args) V :=
+| (def_ name args) V :=
 		option.elim
 			false
 			(
 				fun d : definition_,
-					if h : name = d.name ∧ n = d.n
-					then holds d.q (function.update_fin V d.n d.args (V ∘ (function.cast_fin n d.n h.right args)))
-					else holds (def_ n name args) V
+				if name = d.name
+				then holds d.q (function.update_list V (list.zip d.args (list.map V args)))
+				else holds (def_ name args) V
 			)
 			d
 
@@ -265,11 +241,10 @@ lemma holds_forall
 lemma holds_nil_def
 	{D : Type}
 	(M : meta_valuation D)
-	(n : ℕ)
 	(name : def_name)
-	(args : fin n → var_name)
+	(args : list var_name)
 	(V : valuation D) :
-	holds D M [] (def_ n name args) V ↔ false := by {refl}
+	holds D M [] (def_ name args) V ↔ false := by {refl}
 
 @[simp]
 lemma holds_not_nil_def
@@ -277,14 +252,16 @@ lemma holds_not_nil_def
 	(M : meta_valuation D)
 	(d : definition_)
 	(E : env)
-	(n : ℕ)
 	(name : def_name)
-	(args : fin n → var_name)
+	(args : list var_name)
 	(V : valuation D) :
-	holds D M (d :: E) (def_ n name args) V ↔
-		if h : name = d.name ∧ n = d.n
-		then holds D M E d.q (function.update_fin V d.n d.args (V ∘ (function.cast_fin n d.n h.right args)))
-		else holds D M E (def_ n name args) V := by {refl}
+	holds D M (d :: E) (def_ name args) V ↔
+		if name = d.name
+		then holds D M E d.q (function.update_list V (list.zip d.args (list.map V args)))
+		else holds D M E (def_ name args) V :=
+begin
+	unfold holds, unfold holds', simp only [option.elim],
+end
 
 
 /-
@@ -306,7 +283,7 @@ def formula.subst (σ : instantiation) (τ : meta_instantiation) : formula → f
 | (imp_ φ ψ) := imp_ φ.subst ψ.subst
 | (eq_ x y) := eq_ (σ.1 x) (σ.1 y)
 | (forall_ x φ) := forall_ (σ.1 x) φ.subst
-| (def_ n name args) := def_ n name (fun (i : fin n), σ.1 (args i))
+| (def_ name args) := def_ name (list.map σ.1 args)
 
 
 lemma ext_env_holds
@@ -375,7 +352,7 @@ begin
 			rewrite aux_1 σ.1 σ' x h2 V a,
 			apply φ_ih,
 		},
-		case formula.def_ : n name args V
+		case formula.def_ : name args V
 		{
 			simp only [holds_nil_def],
 			unfold formula.subst,
@@ -423,7 +400,7 @@ begin
 			rewrite aux_1 σ.1 σ' x h2 V a,
 			apply φ_ih,
 		},
-		case formula.def_ : n name args
+		case formula.def_ : name args
 		{
 			have s1 : ∃ (E1 : env), E' = E1 ++ E_tl,
 			apply exists.elim h3, intros a h4,
@@ -487,7 +464,7 @@ def not_free (Γ : list (var_name × meta_var_name)) (v : var_name) : formula �
 | (imp_ φ ψ) := not_free φ ∧ not_free ψ
 | (eq_ x y) := x ≠ v ∧ y ≠ v
 | (forall_ x φ) := x = v ∨ not_free φ
-| (def_ n name args) := ∀ (i : fin n), ¬ args i = v
+| (def_ name args) := ∀ (x : var_name), x ∈ args → ¬ x = v
 
 
 lemma not_free_imp_is_not_free
@@ -560,7 +537,7 @@ begin
 			}
 		}
 	},
-	case formula.def_ : n name args
+	case formula.def_ : name args
   {
 		unfold is_not_free at *,
 		unfold not_free at *,
@@ -578,7 +555,7 @@ begin
 			{
 				rewrite iff_eq_eq, congr' 1,
 				funext,
-				rewrite [function.update_fin_not_eq, function.update_fin_not_eq],
+				rewrite [function.update_list_noteq, function.update_list_noteq],
 				sorry, sorry, sorry,
 			},
 			{
