@@ -78,6 +78,55 @@ def function.update_list
 #eval function.update_list (fun (n : ℕ), n) [(0,1), (3,2), (0,2)] 0
 
 
+lemma function.update_comp
+	{α β γ : Type}
+	[decidable_eq α]
+  (f : α → β)
+	(x : α)
+  (a : β)
+	(g : β → γ) :
+  g ∘ function.update f x a = function.update (g ∘ f) x (g a) :=
+begin
+	funext x',
+	unfold function.comp,
+	by_cases x' = x,
+	{
+		rewrite h,
+		simp only [function.update_same],
+	},
+	{
+		simp only [function.update_noteq h],
+	}
+end
+
+
+example
+	{α β γ : Type}
+	[decidable_eq α]
+	(f : α → β)
+	(l : list (α × β))
+	(g : β → γ) :
+	g ∘ function.update_list f l =
+		function.update_list (g ∘ f) (list.map (fun (i : α × β), (i.fst, g i.snd)) l) :=
+begin
+	induction l,
+	case list.nil
+  {
+		unfold function.update_list,
+		unfold list.map,
+		unfold function.update_list,
+	},
+  case list.cons : hd tl ih
+  {
+		unfold function.update_list,
+		unfold list.map,
+		unfold function.update_list,
+		rewrite function.update_comp,
+		rewrite ih,
+	},
+end
+
+
 lemma function.update_list_noteq
 	{α β : Type}
 	[decidable_eq α]
@@ -478,91 +527,112 @@ lemma not_free_imp_is_not_free
 	(nf : ∀ X, (v, X) ∈ Γ → is_not_free D M E v (meta_var_ X)) :
 	is_not_free D M E v φ :=
 begin
-	induction φ,
-	case formula.meta_var_ : X
+	induction E,
+	case list.nil
   {
-		unfold not_free at H,
-		exact nf X H,
-	},
-  case formula.not_ : φ φ_ih
-  {
-		unfold not_free at *,
-		unfold is_not_free at *,
-		simp only [holds_not],
-		intros V a,
-		apply not_congr,
-		exact φ_ih H V a,
-	},
-  case formula.imp_ : φ ψ φ_ih ψ_ih
-  {
-		unfold not_free at *,
-		unfold is_not_free at *,
-		simp only [holds_imp],
-		cases H,
-		intros V a,
-		apply imp_congr,
-		exact φ_ih H_left V a,
-		exact ψ_ih H_right V a,
-	},
-  case formula.eq_ : x y
-  {
-		unfold not_free at H,
-		unfold is_not_free at *,
-		simp only [holds_eq],
-		cases H,
-		intros V a,
-		simp only [function.update_noteq H_left, function.update_noteq H_right],
-	},
-  case formula.forall_ : x φ φ_ih
-  {
-		unfold is_not_free at *,
-		unfold not_free at *,
-		simp only [holds_forall],
-		intros V a,
-		apply forall_congr, intros a',
-		cases H,
+		induction φ,
+		case formula.meta_var_ : φ
 		{
-			rewrite H,
-			simp only [function.update_idem],
+			unfold not_free at H,
+			exact nf φ H,
 		},
+		case formula.not_ : φ φ_ih
 		{
-			by_cases v = x,
+			unfold not_free at *,
+			unfold is_not_free at *,
+			simp only [holds_not],
+			intros V a,
+			apply not_congr,
+			exact φ_ih H V a,
+		},
+		case formula.imp_ : φ ψ φ_ih ψ_ih
+		{
+			unfold not_free at *,
+			unfold is_not_free at *,
+			simp only [holds_imp],
+			cases H,
+			intros V a,
+			apply imp_congr,
+			exact φ_ih H_left V a,
+			exact ψ_ih H_right V a,
+		},
+		case formula.eq_ : x y
+		{
+			unfold not_free at H,
+			unfold is_not_free at *,
+			simp only [holds_eq],
+			cases H,
+			intros V a,
+			simp only [function.update_noteq H_left, function.update_noteq H_right],
+		},
+		case formula.forall_ : x φ φ_ih
+		{
+			unfold is_not_free at *,
+			unfold not_free at *,
+			simp only [holds_forall],
+			intros V a,
+			apply forall_congr, intros a',
+			cases H,
 			{
-				rewrite h,
+				rewrite H,
 				simp only [function.update_idem],
 			},
 			{
-				simp only [function.update_comm h],
-				apply φ_ih H,
+				by_cases v = x,
+				{
+					rewrite h,
+					simp only [function.update_idem],
+				},
+				{
+					simp only [function.update_comm h],
+					apply φ_ih H,
+				}
 			}
-		}
-	},
-	case formula.def_ : name args
-  {
-		unfold is_not_free at *,
-		unfold not_free at *,
-		induction E,
-		case list.nil
-		{
-			simp only [holds_nil_def, iff_self, forall_2_true_iff],
 		},
-		case list.cons : hd tl ih
+		case formula.def_ : name args
 		{
+			unfold is_not_free at *,
+			unfold not_free at *,
 			intros V a,
-			simp only [holds_not_nil_def, ne.def, holds_meta_var] at *,
-			specialize ih nf V a,
+			simp only [holds_nil_def],
+		},
+	},
+  case list.cons : E_hd E_tl E_ih
+  {
+		induction φ,
+		case formula.meta_var_ : φ
+		{
+			unfold not_free at H,
+			apply nf, exact H,
+		},
+		case formula.not_ : φ φ_ih
+		{
+			unfold not_free at *,
+			unfold is_not_free at *,
+			sorry,
+		},
+		case formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
+		{ admit },
+		case formula.eq_ : φ_ᾰ φ_ᾰ_1
+		{ admit },
+		case formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
+		{ admit },
+		case formula.def_ : name args
+		{
+			unfold not_free at H,
+			unfold is_not_free at *,
+			simp only [holds_not_nil_def, holds_meta_var] at *,
+			specialize E_ih nf,
+			intros V a,
 			split_ifs,
 			{
-				rewrite iff_eq_eq, congr' 1,
-				funext,
-				rewrite [function.update_list_noteq, function.update_list_noteq],
-				sorry, sorry, sorry,
+				sorry,
 			},
 			{
-				exact ih,
+				apply E_ih,
 			}
 		},
-	}
+	},
 end
 
 
