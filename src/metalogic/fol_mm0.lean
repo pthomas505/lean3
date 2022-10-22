@@ -157,6 +157,9 @@ begin
 end
 
 
+-- Syntax
+
+
 abbreviation var_name := string
 abbreviation meta_var_name := string
 abbreviation def_name := string
@@ -173,8 +176,36 @@ inductive formula : Type
 open formula
 
 
-def valuation (D : Type) : Type := var_name → D
-def meta_valuation (D : Type) : Type := meta_var_name → valuation D → Prop
+def not_free (Γ : list (var_name × meta_var_name)) (v : var_name) : formula → Prop
+| (meta_var_ X) := (v, X) ∈ Γ
+| (not_ φ) := not_free φ
+| (imp_ φ ψ) := not_free φ ∧ not_free ψ
+| (eq_ x y) := x ≠ v ∧ y ≠ v
+| (forall_ x φ) := x = v ∨ not_free φ
+| (def_ name args) := ∀ (x : var_name), x ∈ args → ¬ x = v
+
+
+/-
+A substitution mapping.
+A mapping of each variable name to another name.
+-/
+def instantiation :=
+	{σ : var_name → var_name // ∃ (σ' : var_name → var_name), σ ∘ σ' = id ∧ σ' ∘ σ = id}
+
+/-
+A meta substitution mapping.
+A mapping of each meta variable name to a formula.
+-/
+def meta_instantiation : Type := meta_var_name → formula
+
+def formula.subst (σ : instantiation) (τ : meta_instantiation) : formula → formula
+| (meta_var_ X) := τ X
+| (not_ φ) := not_ φ.subst
+| (imp_ φ ψ) := imp_ φ.subst ψ.subst
+| (eq_ x y) := eq_ (σ.1 x) (σ.1 y)
+| (forall_ x φ) := forall_ (σ.1 x) φ.subst
+| (def_ name args) := def_ name (list.map σ.1 args)
+
 
 structure definition_ : Type :=
 (name : string)
@@ -182,9 +213,69 @@ structure definition_ : Type :=
 (args : list var_name)
 (q : formula)
 
+
 @[derive has_append]
 def env : Type := list definition_
 
+
+def exists_ (x : var_name) (φ : formula) : formula := not_ (forall_ x (not_ φ))
+
+
+-- if (v, X) ∈ Γ then v is not_ free in (meta_var_ X)
+inductive is_proof : list (var_name × meta_var_name) → list formula → formula → Prop
+| hyp (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+	{φ : formula} :
+	φ ∈ Δ → is_proof Γ Δ φ
+
+| mp (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+	{φ ψ : formula} :
+	is_proof Γ Δ φ → is_proof Γ Δ (φ.imp_ ψ) → is_proof Γ Δ ψ
+
+| prop_1 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+	{φ ψ : formula} :
+	is_proof Γ Δ (φ.imp_ (ψ.imp_ φ))
+
+| prop_2 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+	{φ ψ χ : formula} :
+	is_proof Γ Δ ((φ.imp_ (ψ.imp_ χ)).imp_ ((φ.imp_ ψ).imp_ (φ.imp_ χ)))
+
+| prop_3 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+	{φ ψ : formula} :
+	is_proof Γ Δ (((not_ φ).imp_ (not_ ψ)).imp_ (ψ.imp_ φ))
+
+| gen (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+	{φ : formula} {x : var_name} :
+	is_proof Γ Δ φ → is_proof Γ Δ (forall_ x φ)
+
+| pred_1 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+	{φ ψ : formula} {x : var_name} :
+	is_proof Γ Δ ((forall_ x (φ.imp_ ψ)).imp_ ((forall_ x φ).imp_ (forall_ x ψ)))
+
+| pred_2 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+	{φ : formula} {x : var_name} :
+	not_free Γ x φ → is_proof Γ Δ (φ.imp_ (forall_ x φ))
+
+| eq_1 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+	{x y : var_name} :
+	x ≠ y → is_proof Γ Δ (exists_ x (eq_ x y))
+
+| eq_2 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+	{x y z : var_name} :
+	is_proof Γ Δ ((eq_ x y).imp_ ((eq_ x z).imp_ (eq_ y z)))
+
+| thm (Γ Γ' : list (var_name × meta_var_name)) (Δ Δ' : list formula)
+	{φ : formula} {σ : instantiation} {τ : meta_instantiation} :
+	is_proof Γ Δ φ →
+	(∀ (x : var_name) (X : meta_var_name), (x, X) ∈ Γ → not_free Γ' (σ.1 x) (τ X)) →
+	(∀ (ψ : formula), ψ ∈ Δ → is_proof Γ' Δ' (ψ.subst σ τ)) →
+	is_proof Γ' Δ' (φ.subst σ τ)
+
+
+-- Semantics
+
+
+def valuation (D : Type) : Type := var_name → D
+def meta_valuation (D : Type) : Type := meta_var_name → valuation D → Prop
 
 /-
 def holds (D : Type) : meta_valuation D → env → formula → valuation D → Prop
@@ -311,28 +402,6 @@ lemma holds_not_nil_def
 begin
 	unfold holds, unfold holds', simp only [option.elim],
 end
-
-
-/-
-A substitution mapping.
-A mapping of each variable name to another name.
--/
-def instantiation :=
-	{σ : var_name → var_name // ∃ (σ' : var_name → var_name), σ ∘ σ' = id ∧ σ' ∘ σ = id}
-
-/-
-A meta substitution mapping.
-A mapping of each meta variable name to a formula.
--/
-def meta_instantiation : Type := meta_var_name → formula
-
-def formula.subst (σ : instantiation) (τ : meta_instantiation) : formula → formula
-| (meta_var_ X) := τ X
-| (not_ φ) := not_ φ.subst
-| (imp_ φ ψ) := imp_ φ.subst ψ.subst
-| (eq_ x y) := eq_ (σ.1 x) (σ.1 y)
-| (forall_ x φ) := forall_ (σ.1 x) φ.subst
-| (def_ name args) := def_ name (list.map σ.1 args)
 
 
 lemma ext_env_holds
@@ -507,15 +576,6 @@ begin
 end
 
 
-def not_free (Γ : list (var_name × meta_var_name)) (v : var_name) : formula → Prop
-| (meta_var_ X) := (v, X) ∈ Γ
-| (not_ φ) := not_free φ
-| (imp_ φ ψ) := not_free φ ∧ not_free ψ
-| (eq_ x y) := x ≠ v ∧ y ≠ v
-| (forall_ x φ) := x = v ∨ not_free φ
-| (def_ name args) := ∀ (x : var_name), x ∈ args → ¬ x = v
-
-
 lemma not_free_imp_is_not_free
 	{D : Type}
 	(M : meta_valuation D)
@@ -663,59 +723,6 @@ begin
 	intros X' h2,
 	exact nf (σ.1 v) X' h2,
 end
-
-
-def exists_ (x : var_name) (φ : formula) : formula := not_ (forall_ x (not_ φ))
-
-
--- if (v, X) ∈ Γ then v is not_ free in (meta_var_ X)
-inductive is_proof : list (var_name × meta_var_name) → list formula → formula → Prop
-| hyp (Γ : list (var_name × meta_var_name)) (Δ : list formula)
-	{φ : formula} :
-	φ ∈ Δ → is_proof Γ Δ φ
-
-| mp (Γ : list (var_name × meta_var_name)) (Δ : list formula)
-	{φ ψ : formula} :
-	is_proof Γ Δ φ → is_proof Γ Δ (φ.imp_ ψ) → is_proof Γ Δ ψ
-
-| prop_1 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
-	{φ ψ : formula} :
-	is_proof Γ Δ (φ.imp_ (ψ.imp_ φ))
-
-| prop_2 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
-	{φ ψ χ : formula} :
-	is_proof Γ Δ ((φ.imp_ (ψ.imp_ χ)).imp_ ((φ.imp_ ψ).imp_ (φ.imp_ χ)))
-
-| prop_3 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
-	{φ ψ : formula} :
-	is_proof Γ Δ (((not_ φ).imp_ (not_ ψ)).imp_ (ψ.imp_ φ))
-
-| gen (Γ : list (var_name × meta_var_name)) (Δ : list formula)
-	{φ : formula} {x : var_name} :
-	is_proof Γ Δ φ → is_proof Γ Δ (forall_ x φ)
-
-| pred_1 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
-	{φ ψ : formula} {x : var_name} :
-	is_proof Γ Δ ((forall_ x (φ.imp_ ψ)).imp_ ((forall_ x φ).imp_ (forall_ x ψ)))
-
-| pred_2 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
-	{φ : formula} {x : var_name} :
-	not_free Γ x φ → is_proof Γ Δ (φ.imp_ (forall_ x φ))
-
-| eq_1 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
-	{x y : var_name} :
-	x ≠ y → is_proof Γ Δ (exists_ x (eq_ x y))
-
-| eq_2 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
-	{x y z : var_name} :
-	is_proof Γ Δ ((eq_ x y).imp_ ((eq_ x z).imp_ (eq_ y z)))
-
-| thm (Γ Γ' : list (var_name × meta_var_name)) (Δ Δ' : list formula)
-	{φ : formula} {σ : instantiation} {τ : meta_instantiation} :
-	is_proof Γ Δ φ →
-	(∀ (x : var_name) (X : meta_var_name), (x, X) ∈ Γ → not_free Γ' (σ.1 x) (τ X)) →
-	(∀ (ψ : formula), ψ ∈ Δ → is_proof Γ' Δ' (ψ.subst σ τ)) →
-	is_proof Γ' Δ' (φ.subst σ τ)
 
 
 example
