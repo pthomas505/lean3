@@ -100,7 +100,7 @@ begin
 end
 
 
-example
+lemma function.update_list_comp
 	{α β γ : Type}
 	[decidable_eq α]
 	(f : α → β)
