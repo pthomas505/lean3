@@ -157,6 +157,57 @@ begin
 end
 
 
+lemma function.update_list_mem
+	{α β : Type}
+	[decidable_eq α]
+	(f : α → β)
+	(l : list (α × β))
+	(x : α × β)
+	(h1 : ∀ (i : α × β) (j : α × β), i ∈ l ∧ j ∈ l → i.fst = j.fst → i = j)
+	(h2 : x ∈ l) :
+	function.update_list f l x.fst = x.snd :=
+begin
+	induction l,
+	case list.nil
+  {
+		unfold function.update_list,
+		simp only [list.not_mem_nil] at h2,
+		contradiction,
+	},
+  case list.cons : hd tl ih
+  {
+		unfold function.update_list,
+		by_cases x = hd,
+		{
+			rewrite h,
+			simp only [function.update_same],
+		},
+		{
+			have s1 : ¬ x.fst = hd.fst,
+			by_contradiction contra,
+			apply h, apply h1,
+			simp only [list.mem_cons_iff, eq_self_iff_true, true_or, and_true],
+			simp only [list.mem_cons_iff] at h2,
+			exact h2, exact contra,
+
+			simp only [function.update_noteq s1],
+			apply ih,
+			intros i j h3 h4,
+			apply h1,
+			simp only [list.mem_cons_iff],
+			cases h3,
+			split,
+			apply or.intro_right, exact h3_left,
+			apply or.intro_right, exact h3_right,
+			exact h4,
+			simp only [list.mem_cons_iff] at h2,
+			cases h2, by_contradiction contra, apply h, exact h2,
+			exact h2,
+		}
+	},
+end
+
+
 -- Syntax
 
 
@@ -176,6 +227,7 @@ inductive formula : Type
 open formula
 
 
+-- If (v, X) ∈ Γ then v is not free in meta_var_ X.
 def not_free (Γ : list (var_name × meta_var_name)) (v : var_name) : formula → Prop
 | (meta_var_ X) := (v, X) ∈ Γ
 | (not_ φ) := not_free φ
@@ -183,6 +235,16 @@ def not_free (Γ : list (var_name × meta_var_name)) (v : var_name) : formula �
 | (eq_ x y) := x ≠ v ∧ y ≠ v
 | (forall_ x φ) := x = v ∨ not_free φ
 | (def_ name args) := ∀ (x : var_name), x ∈ args → ¬ x = v
+
+
+-- φ.not_free S ↔ φ.free_var_set ⊆ S
+def formula.not_free : formula → list var_name → Prop
+| (meta_var_ X) S := false
+| (not_ φ) S := φ.not_free S
+| (imp_ φ ψ) S := φ.not_free S ∧ ψ.not_free S
+| (eq_ x y) S := x ∈ S ∧ y ∈ S
+| (forall_ x φ) S := φ.not_free (x :: S)
+| (def_ name args) S := args ⊆ S
 
 
 /-
@@ -212,6 +274,7 @@ structure definition_ : Type :=
 (n : ℕ)
 (args : list var_name)
 (q : formula)
+(nf : q.not_free args)
 
 
 @[derive has_append]
@@ -285,8 +348,8 @@ def holds (D : Type) : meta_valuation D → env → formula → valuation D → 
 | M E (eq_ x y) V := V x = V y
 | M E (forall_ x φ) V := ∀ (a : D), holds M E φ (function.update V x a)
 | M [] (def_ _ _) V := false
-| M (d :: E) (def_ name args) V := 
-		if name = d.name
+| M (d :: E) (def_ name args) V :=
+		if name = d.name ∧ args.length = d.args.length
 		then holds M E d.q (function.update_list V (list.zip d.args (list.map V args)))
 		else holds M E (def_ name args) V
 -/
@@ -312,7 +375,7 @@ def holds'
 			false
 			(
 				fun d : definition_,
-				if name = d.name
+				if name = d.name ∧ args.length = d.args.length
 				then holds d.q (function.update_list V (list.zip d.args (list.map V args)))
 				else holds (def_ name args) V
 			)
@@ -396,11 +459,46 @@ lemma holds_not_nil_def
 	(args : list var_name)
 	(V : valuation D) :
 	holds D M (d :: E) (def_ name args) V ↔
-		if name = d.name
+		if name = d.name ∧ args.length = d.args.length
 		then holds D M E d.q (function.update_list V (list.zip d.args (list.map V args)))
 		else holds D M E (def_ name args) V :=
 begin
 	unfold holds, unfold holds', simp only [option.elim],
+end
+
+
+
+example
+	{D : Type}
+	(M : meta_valuation D)
+	(E : env)
+	(V1 V2 : valuation D)
+	(φ : formula)
+	(S : list var_name)
+	(hf : φ.not_free S)
+	(h1 : ∀ v ∈ S, V1 v = V2 v) :
+  holds D M E φ V1 ↔ holds D M E φ V2 :=
+begin
+	induction E generalizing S φ V1 V2,
+	sorry,
+	induction φ generalizing V1 V2,
+	sorry, sorry, sorry, sorry, sorry,
+		case formula.def_ : name args
+		{
+			unfold formula.not_free at hf,
+			simp only [holds_not_nil_def],
+			split_ifs,
+			{
+				cases h,
+				apply E_ih E_hd.args E_hd.q _ _ E_hd.nf,
+				intros v h2,
+				sorry,
+			},
+			{
+				apply E_ih,
+				unfold formula.not_free, exact hf, exact h1,
+			}
+		},
 end
 
 
@@ -529,15 +627,7 @@ begin
 			simp only [holds_not_nil_def] at *,
 			unfold formula.subst at *,
 			simp only [holds_not_nil_def] at *,
-			split_ifs,
-			{
-				sorry,
-			},
-			{
-				rewrite E_ih,
-				unfold formula.subst,
-				exact s1,
-			}
+			sorry,
 		},
 	},
 end
