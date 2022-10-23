@@ -200,13 +200,6 @@ begin
 end
 
 
-/-
-that is, if v \in E_hd.args
-then v = E_hd.args[i] for some i < E_hd.args.length,
-and then (function.update_list V1 (E_hd.args.zip (list.map V1 args))) (E_hd.args[i]) =
-	(list.map V1 args)[i] = V1 args[i]
--/
-
 lemma function.update_list_mem_dom
 	{α β : Type}
 	[decidable_eq α]
@@ -219,21 +212,7 @@ lemma function.update_list_mem_dom
 	(function.update_list V1 (E_hd_args.zip (list.map V1 args))) (E_hd_args.nth_le n h1) =
 		(list.map V1 args).nth_le n h1' :=
 begin
-sorry,
-end
-
-lemma blah
-	{α β : Type}
-	[decidable_eq α]
-	(V1 : α → β)
-	(args E_hd_args : list α)
-	(n : ℕ)
-	(h1 : n < args.length)
-	(h1' : n < (list.map V1 args).length)
-	(h3 : E_hd_args.nodup) :
-		(list.map V1 args).nth_le n h1' = V1 (args.nth_le n h1) :=
-begin
-
+	sorry,
 end
 
 
