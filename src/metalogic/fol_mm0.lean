@@ -211,7 +211,7 @@ lemma list.nth_le_zip_eq
   (h3 : n < (l.zip l').length) :
   ((l.nth_le n h1, l'.nth_le n h2) = ((l.zip l').nth_le n h3)) :=
 begin
-  sorry
+	simp,
 end
 
 lemma blah
