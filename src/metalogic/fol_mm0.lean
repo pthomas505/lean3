@@ -512,7 +512,6 @@ begin
 end
 
 
-
 example
 	{D : Type}
 	(M : meta_valuation D)
@@ -522,13 +521,114 @@ example
 	(S : list var_name)
 	(hf : φ.not_free S)
 	(h1 : ∀ v ∈ S, V1 v = V2 v) :
-  holds D M E φ V1 ↔ holds D M E φ V2 :=
+	holds D M E φ V1 ↔ holds D M E φ V2 :=
 begin
 	induction E generalizing S φ V1 V2,
-	sorry,
-	induction φ generalizing V1 V2,
-	sorry, sorry, sorry, sorry, sorry,
-		case formula.def_ : name args
+	case list.nil : S φ V1 V2 hf h1
+  {
+		induction φ generalizing V1 V2,
+		case formula.meta_var_ : φ V1 V2 h1
+		{
+			unfold formula.not_free at hf,
+			contradiction,
+		},
+		case formula.not_ : φ φ_ih V1 V2 h1
+		{
+			unfold formula.not_free at hf,
+			simp only [holds_not],
+			apply not_congr,
+			apply φ_ih hf, exact h1,
+		},
+		case formula.imp_ : φ ψ φ_ih ψ_ih V1 V2 h1
+		{
+			unfold formula.not_free at hf,
+			cases hf,
+			simp only [holds_imp],
+			apply imp_congr,
+			exact φ_ih hf_left V1 V2 h1,
+			exact ψ_ih hf_right V1 V2 h1,
+		},
+		case formula.eq_ : x y V1 V2 h1
+		{
+			unfold formula.not_free at hf,
+			cases hf,
+			simp only [holds_eq],
+			simp only [h1 x hf_left, h1 y hf_right],
+		},
+		case formula.forall_ : x φ φ_ih V1 V2 h1
+		{
+			unfold formula.not_free at hf,
+			simp only [holds_forall],
+			apply forall_congr, intros a,
+			apply φ_ih,
+			sorry,
+			intros v h2,
+			by_cases v = x,
+			{
+				rewrite h,
+				simp only [function.update_same],
+			},
+			{
+				simp only [function.update_noteq h],
+				exact h1 v h2,
+			},
+		},
+		case formula.def_ : name args V1 V2 h1
+		{
+			unfold formula.not_free at hf,
+			simp only [holds_nil_def],
+		},
+	},
+  case list.cons : E_hd E_tl E_ih S φ V1 V2 hf h1
+  {
+		induction φ generalizing V1 V2,
+		case formula.meta_var_ : φ V1 V2 h1
+		{
+			unfold formula.not_free at hf,
+			contradiction,
+		},
+		case formula.not_ : φ φ_ih V1 V2 h1
+		{
+			unfold formula.not_free at hf,
+			simp only [holds_not],
+			apply not_congr,
+			apply φ_ih hf, exact h1,
+		},
+		case formula.imp_ : φ ψ φ_ih ψ_ih V1 V2 h1
+		{
+			unfold formula.not_free at hf,
+			cases hf,
+			simp only [holds_imp],
+			apply imp_congr,
+			exact φ_ih hf_left V1 V2 h1,
+			exact ψ_ih hf_right V1 V2 h1,
+		},
+		case formula.eq_ : x y V1 V2 h1
+		{
+			unfold formula.not_free at hf,
+			cases hf,
+			simp only [holds_eq],
+			simp only [h1 x hf_left, h1 y hf_right],
+		},
+		case formula.forall_ : x φ φ_ih V1 V2 h1
+		{
+			unfold formula.not_free at hf,
+			simp only [holds_forall],
+			apply forall_congr, intros a,
+			apply φ_ih,
+			sorry,
+			intros v h2,
+			by_cases v = x,
+			{
+				rewrite h,
+				simp only [function.update_same],
+			},
+			{
+				simp only [function.update_noteq h],
+				exact h1 v h2,
+			},
+		},
+		case formula.def_ : name args V1 V2 h1
 		{
 			unfold formula.not_free at hf,
 			simp only [holds_not_nil_def],
@@ -573,6 +673,7 @@ begin
 				unfold formula.not_free, exact hf, exact h1,
 			}
 		},
+	},
 end
 
 
