@@ -200,19 +200,55 @@ begin
 end
 
 
-lemma function.update_list_mem_dom
+lemma list.nth_le_zip_eq
+	{α β : Type}
+  [decidable_eq α]
+	(n : ℕ)
+  (l : list α)
+	(l' : list β)
+  (h1 : n < l.length)
+  (h2 : n < l'.length)
+  (h3 : n < (l.zip l').length) :
+  ((l.nth_le n h1, l'.nth_le n h2) = ((l.zip l').nth_le n h3)) :=
+begin
+  sorry
+end
+
+lemma blah
+	{α β : Type}
+  [decidable_eq α]
+	(n : ℕ)
+  (l : list α)
+	(l' : list β)
+  (h1 : (n < l.length))
+  (h2 : (n < l'.length))
+  (h3 : l.length = l'.length) :
+  ((l.nth_le n h1, l'.nth_le n h2) ∈ l.zip l') :=
+begin
+  have h4 : n < (l.zip l').length,
+	simp, split, exact h1, exact h2,
+	have s1 : ((l.nth_le n h1, l'.nth_le n h2) = ((l.zip l').nth_le n h4)),
+	apply list.nth_le_zip_eq,
+	rewrite s1, apply list.nth_le_mem,
+end
+
+lemma function.update_list_zip
 	{α β : Type}
 	[decidable_eq α]
-	(V1 : α → β)
-	(args E_hd_args : list α)
+	(f : α → β)
+	(l l' : list α)
 	(n : ℕ)
-	(h1 : n < E_hd_args.length)
-	(h1' : n < (list.map V1 args).length)
-	(h3 : E_hd_args.nodup) :
-	(function.update_list V1 (E_hd_args.zip (list.map V1 args))) (E_hd_args.nth_le n h1) =
-		(list.map V1 args).nth_le n h1' :=
+	(h1 : n < l'.length)
+	(h2 : n < (list.map f l).length)
+	(h3 : l'.nodup)
+	(h4 : l.length = l'.length) :
+	(function.update_list f (l'.zip (list.map f l))) (l'.nth_le n h1) =
+		(list.map f l).nth_le n h2 :=
 begin
-	sorry,
+	apply function.update_list_mem f (l'.zip (list.map f l)) (l'.nth_le n h1, (list.map f l).nth_le n h2),
+	rewrite list.map_fst_zip, exact h3,
+	simp, rewrite h4,
+	apply blah n l' (list.map f l) h1 h2, rewrite <- h4, simp,
 end
 
 
@@ -514,8 +550,8 @@ begin
 
 				have s3 : a < args.length, rewrite h_right, exact h4,
 
-				rewrite function.update_list_mem_dom V1 args E_hd.args a h4 s1,
-				rewrite function.update_list_mem_dom V2 args E_hd.args a h4 s2,
+				rewrite function.update_list_zip V1 args E_hd.args a h4 s1,
+				rewrite function.update_list_zip V2 args E_hd.args a h4 s2,
 
 				have s4 : (list.map V1 args).nth_le a s1 = V1 (args.nth_le a s3),
 				simp, rewrite s4,
@@ -530,7 +566,7 @@ begin
 				apply set.mem_of_mem_of_subset _ hf,
 				apply s7,
 
-				exact E_hd.nodup, exact E_hd.nodup,
+				exact E_hd.nodup, exact h_right, exact E_hd.nodup, exact h_right,
 			},
 			{
 				apply E_ih,
