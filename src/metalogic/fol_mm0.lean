@@ -163,7 +163,7 @@ lemma function.update_list_mem
 	(f : α → β)
 	(l : list (α × β))
 	(x : α × β)
-	(h1 : ∀ (i : α × β) (j : α × β), i ∈ l ∧ j ∈ l → i.fst = j.fst → i = j)
+	(h1 : list.nodup (list.map prod.fst l))
 	(h2 : x ∈ l) :
 	function.update_list f l x.fst = x.snd :=
 begin
@@ -176,33 +176,25 @@ begin
 	},
   case list.cons : hd tl ih
   {
+		simp only [list.map, list.nodup_cons, list.mem_map, prod.exists, exists_and_distrib_right, exists_eq_right, not_exists] at h1,
+		cases h1,
+
 		unfold function.update_list,
-		by_cases x = hd,
+		cases h2,
 		{
-			rewrite h,
+			rewrite h2,
 			simp only [function.update_same],
 		},
 		{
 			have s1 : ¬ x.fst = hd.fst,
 			by_contradiction contra,
-			apply h, apply h1,
-			simp only [list.mem_cons_iff, eq_self_iff_true, true_or, and_true],
-			simp only [list.mem_cons_iff] at h2,
-			exact h2, exact contra,
+			apply h1_left x.snd,
+			rewrite <- contra,
+			simp only [prod.mk.eta],
+			exact h2,
 
 			simp only [function.update_noteq s1],
-			apply ih,
-			intros i j h3 h4,
-			apply h1,
-			simp only [list.mem_cons_iff],
-			cases h3,
-			split,
-			apply or.intro_right, exact h3_left,
-			apply or.intro_right, exact h3_right,
-			exact h4,
-			simp only [list.mem_cons_iff] at h2,
-			cases h2, by_contradiction contra, apply h, exact h2,
-			exact h2,
+			exact ih h1_right h2,
 		}
 	},
 end
@@ -273,6 +265,7 @@ structure definition_ : Type :=
 (name : string)
 (n : ℕ)
 (args : list var_name)
+(nodup : args.nodup)
 (q : formula)
 (nf : q.not_free args)
 
