@@ -200,6 +200,43 @@ begin
 end
 
 
+/-
+that is, if v \in E_hd.args
+then v = E_hd.args[i] for some i < E_hd.args.length,
+and then (function.update_list V1 (E_hd.args.zip (list.map V1 args))) (E_hd.args[i]) =
+	(list.map V1 args)[i] = V1 args[i]
+-/
+
+lemma function.update_list_mem_dom
+	{α β : Type}
+	[decidable_eq α]
+	(V1 : α → β)
+	(args E_hd_args : list α)
+	(n : ℕ)
+	(h1 : n < E_hd_args.length)
+	(h1' : n < (list.map V1 args).length)
+	(h3 : E_hd_args.nodup) :
+	(function.update_list V1 (E_hd_args.zip (list.map V1 args))) (E_hd_args.nth_le n h1) =
+		(list.map V1 args).nth_le n h1' :=
+begin
+sorry,
+end
+
+lemma blah
+	{α β : Type}
+	[decidable_eq α]
+	(V1 : α → β)
+	(args E_hd_args : list α)
+	(n : ℕ)
+	(h1 : n < args.length)
+	(h1' : n < (list.map V1 args).length)
+	(h3 : E_hd_args.nodup) :
+		(list.map V1 args).nth_le n h1' = V1 (args.nth_le n h1) :=
+begin
+
+end
+
+
 -- Syntax
 
 
@@ -485,7 +522,36 @@ begin
 				cases h,
 				apply E_ih E_hd.args E_hd.q _ _ E_hd.nf,
 				intros v h2,
-				sorry,
+				simp only [list.mem_iff_nth_le] at h2,
+				apply exists.elim h2,
+				intros a h3,
+				apply exists.elim h3, intros h4 h5,
+				rewrite <- h5,
+				have s1 : a < (list.map V1 args).length, simp,
+				rewrite h_right, exact h4,
+
+				have s2 : a < (list.map V2 args).length, simp,
+				rewrite h_right, exact h4,
+
+				have s3 : a < args.length, rewrite h_right, exact h4,
+
+				rewrite function.update_list_mem_dom V1 args E_hd.args a h4 s1,
+				rewrite function.update_list_mem_dom V2 args E_hd.args a h4 s2,
+
+				have s4 : (list.map V1 args).nth_le a s1 = V1 (args.nth_le a s3),
+				simp, rewrite s4,
+
+				have s5 : (list.map V2 args).nth_le a s2 = V2 (args.nth_le a s3),
+				simp, rewrite s5, apply h1,
+
+
+				have s7 : args.nth_le a s3 ∈ args,
+				apply list.nth_le_mem args a s3,
+				
+				apply set.mem_of_mem_of_subset _ hf,
+				apply s7,
+
+				exact E_hd.nodup, exact E_hd.nodup,
 			},
 			{
 				apply E_ih,
