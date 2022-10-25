@@ -204,7 +204,8 @@ begin
 	},
   case list.cons : hd tl ih
   {
-		simp only [list.map, list.nodup_cons, list.mem_map, prod.exists, exists_and_distrib_right, exists_eq_right, not_exists] at h1,
+		simp only [list.map, list.nodup_cons, list.mem_map, prod.exists,
+			exists_and_distrib_right, exists_eq_right, not_exists] at h1,
 		cases h1,
 
 		unfold function.update_list,
@@ -239,13 +240,16 @@ lemma list.nth_le_mem_zip
   ((l.nth_le n h1, l'.nth_le n h2) ∈ l.zip l') :=
 begin
   have s1 : n < (l.zip l').length,
-	simp only [list.length_zip, lt_min_iff], exact and.intro h1 h2,
+	simp only [list.length_zip, lt_min_iff],
+	exact and.intro h1 h2,
 
 	have s2 : (l.nth_le n h1, l'.nth_le n h2) = (l.zip l').nth_le n s1,
 	simp only [list.nth_le_zip],
 
-	rewrite s2, apply list.nth_le_mem,
+	rewrite s2,
+	apply list.nth_le_mem,
 end
+
 
 lemma function.update_list_zip
 	{α β : Type}
@@ -260,9 +264,12 @@ lemma function.update_list_zip
 	(function.update_list f (l.zip (list.map f l'))) (l.nth_le n h1) =
 		(list.map f l').nth_le n h2 :=
 begin
-	apply function.update_list_mem f (l.zip (list.map f l')) (l.nth_le n h1, (list.map f l').nth_le n h2),
-	rewrite list.map_fst_zip, exact h3,
-	simp only [list.length_map], rewrite h4,
+	apply function.update_list_mem f (l.zip (list.map f l'))
+		(l.nth_le n h1, (list.map f l').nth_le n h2),
+	rewrite list.map_fst_zip,
+	exact h3,
+	simp only [list.length_map],
+	rewrite h4,
 	apply list.nth_le_mem_zip n l (list.map f l') h1 h2,
 end
 
