@@ -169,11 +169,11 @@ begin
   { unfold function.update_list, },
   case list.cons : hd tl ih
   {
-		unfold function.update_list,
 		have s1 : ¬ x = hd.fst,
 		apply h1,
 		simp only [list.mem_cons_iff, eq_self_iff_true, true_or],
 
+		unfold function.update_list,
 		simp only [function.update_noteq s1],
 		apply ih,
 		intros p h2,
