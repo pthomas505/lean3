@@ -20,11 +20,22 @@ begin
 		unfold function.update,
 		simp only [eq_rec_constant, dite_eq_ite],
 		apply if_congr,
-		split,
-		apply congr_arg,
-		apply function.left_inverse.injective,
-		exact congr_fun h1,
-		refl, refl,
+		{
+			split,
+			{
+				apply congr_arg,
+			},
+			{
+				apply function.left_inverse.injective,
+				exact congr_fun h1,
+			},
+		},
+		{
+			refl,
+		},
+		{
+			refl,
+		}
 end
 
 
@@ -43,10 +54,23 @@ begin
 	unfold function.comp,
 	unfold function.update,
 	simp only [eq_rec_constant, dite_eq_ite],
-	congr' 1, simp only [eq_iff_iff],
+	congr' 1,
+	simp only [eq_iff_iff],
 	split,
-	intros h3, rewrite h3, rewrite <- function.comp_app f f' x, rewrite h2, simp only [id.def],
-	intros h3, rewrite <- h3, rewrite <- function.comp_app f' f x', rewrite h1, simp only [id.def],
+	{
+		intros h3,
+		rewrite h3,
+		rewrite <- function.comp_app f f' x,
+		rewrite h2,
+		simp only [id.def],
+	},
+	{
+		intros h3,
+		rewrite <- h3,
+		rewrite <- function.comp_app f' f x',
+		rewrite h1,
+		simp only [id.def],
+	}
 end
 
 
@@ -62,8 +86,12 @@ begin
 	unfold function.update,
 	simp only [eq_rec_constant, dite_eq_ite],
 	split_ifs,
-	rewrite h,
-	exact h1 a h,
+	{
+		rewrite h,
+	},
+	{
+		exact h1 a h,
+	}
 end
 
 
