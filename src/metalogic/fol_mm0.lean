@@ -40,6 +40,28 @@ end
 
 
 lemma aux_2
+	{α β γ : Type}
+	[decidable_eq α]
+  (f : α → β)
+	(x : α)
+  (a : β)
+	(g : β → γ) :
+  g ∘ function.update f x a = function.update (g ∘ f) x (g a) :=
+begin
+	apply funext, intros x',
+	unfold function.comp,
+	by_cases x' = x,
+	{
+		rewrite h,
+		simp only [function.update_same],
+	},
+	{
+		simp only [function.update_noteq h],
+	}
+end
+
+
+lemma aux_3
 	{α β : Type}
 	[decidable_eq α]
   (f f' : α → α)
@@ -74,7 +96,7 @@ begin
 end
 
 
-lemma aux_3
+lemma aux_4
 	{α β : Type}
 	[decidable_eq α]
   (f g : α → β)
@@ -106,28 +128,6 @@ def function.update_list
 #eval function.update_list (fun (n : ℕ), n) [(0,1), (3,2), (0,2)] 0
 
 
-lemma function.update_comp
-	{α β γ : Type}
-	[decidable_eq α]
-  (f : α → β)
-	(x : α)
-  (a : β)
-	(g : β → γ) :
-  g ∘ function.update f x a = function.update (g ∘ f) x (g a) :=
-begin
-	funext x',
-	unfold function.comp,
-	by_cases x' = x,
-	{
-		rewrite h,
-		simp only [function.update_same],
-	},
-	{
-		simp only [function.update_noteq h],
-	}
-end
-
-
 lemma function.update_list_comp
 	{α β γ : Type}
 	[decidable_eq α]
@@ -149,7 +149,7 @@ begin
 		unfold function.update_list,
 		unfold list.map,
 		unfold function.update_list,
-		rewrite function.update_comp,
+		rewrite aux_2,
 		rewrite ih,
 	},
 end
@@ -846,7 +846,7 @@ begin
 	split,
 	{
 		intros h1 V V' h2,
-		rewrite <- aux_3 V V' v h2,
+		rewrite <- aux_4 V V' v h2,
 		apply h1,
 	},
 	{
@@ -999,7 +999,7 @@ begin
 	unfold is_not_free,
 	simp only [holds_meta_var],
 	intros V a,
-	rewrite <- aux_2 σ' σ.1 v left right,
+	rewrite <- aux_3 σ' σ.1 v left right,
 	apply not_free_imp_is_not_free M E Γ',
 	exact H v X h1,
 	intros X' h2,
