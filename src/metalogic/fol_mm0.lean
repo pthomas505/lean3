@@ -42,10 +42,10 @@ end
 lemma aux_2
 	{α β γ : Type}
 	[decidable_eq α]
+	(g : β → γ)
   (f : α → β)
 	(x : α)
-  (a : β)
-	(g : β → γ) :
+  (a : β) :
   g ∘ function.update f x a = function.update (g ∘ f) x (g a) :=
 begin
 	apply funext, intros x',
