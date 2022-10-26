@@ -636,8 +636,12 @@ begin
 			cases hf,
 			simp only [holds_imp],
 			apply imp_congr,
-			exact φ_ih hf_left V1 V2 h1,
-			exact ψ_ih hf_right V1 V2 h1,
+			{
+				exact φ_ih hf_left V1 V2 h1,
+			},
+			{
+				exact ψ_ih hf_right V1 V2 h1,
+			}
 		},
 		case formula.eq_ : x y V1 V2 h1
 		{
