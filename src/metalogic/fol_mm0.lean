@@ -343,7 +343,6 @@ def formula.subst (σ : instantiation) (τ : meta_instantiation) : formula → f
 
 structure definition_ : Type :=
 (name : string)
-(n : ℕ)
 (args : list var_name)
 (nodup : args.nodup)
 (q : formula)
