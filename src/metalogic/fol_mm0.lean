@@ -628,7 +628,8 @@ begin
 			unfold formula.free_subset at hf,
 			simp only [holds_not],
 			apply not_congr,
-			apply φ_ih hf, exact h1,
+			apply φ_ih hf,
+			exact h1,
 		},
 		case formula.imp_ : φ ψ φ_ih ψ_ih V1 V2 h1
 		{
@@ -656,16 +657,20 @@ begin
 			simp only [holds_forall],
 			apply forall_congr, intros a,
 			apply φ_ih,
-			sorry,
-			intros v h2,
-			by_cases v = x,
 			{
-				rewrite h,
-				simp only [function.update_same],
+				sorry,
 			},
 			{
-				simp only [function.update_noteq h],
-				exact h1 v h2,
+				intros v h2,
+				by_cases v = x,
+				{
+					rewrite h,
+					simp only [function.update_same],
+				},
+				{
+					simp only [function.update_noteq h],
+					exact h1 v h2,
+				},
 			},
 		},
 		case formula.def_ : name args V1 V2 h1
