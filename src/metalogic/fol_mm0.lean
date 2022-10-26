@@ -131,9 +131,9 @@ def function.update_list
 lemma function.update_list_comp
 	{α β γ : Type}
 	[decidable_eq α]
+	(g : β → γ)
 	(f : α → β)
-	(l : list (α × β))
-	(g : β → γ) :
+	(l : list (α × β)) :
 	g ∘ function.update_list f l =
 		function.update_list (g ∘ f) (list.map (fun (i : α × β), (i.fst, g i.snd)) l) :=
 begin
@@ -166,7 +166,9 @@ lemma function.update_list_noteq
 begin
 	induction l,
 	case list.nil
-  { unfold function.update_list, },
+  {
+		unfold function.update_list,
+	},
   case list.cons : hd tl ih
   {
 		have s1 : ¬ x = hd.fst,
