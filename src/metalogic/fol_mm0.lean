@@ -681,7 +681,8 @@ begin
 			{
 				cases h,
 
-				apply E_ih E_hd.args E_hd.q _ _ E_hd.nf,
+				apply E_ih E_hd.args E_hd.q (function.update_list V1 (E_hd.args.zip (list.map V1 args)))
+  				(function.update_list V2 (E_hd.args.zip (list.map V2 args))) E_hd.nf,
 
 				intros v h2,
 				simp only [list.mem_iff_nth_le] at h2,
