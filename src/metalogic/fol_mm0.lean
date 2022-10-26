@@ -681,56 +681,57 @@ begin
 			{
 				cases h,
 
-				apply E_ih E_hd.args E_hd.q (function.update_list V1 (E_hd.args.zip (list.map V1 args)))
-  				(function.update_list V2 (E_hd.args.zip (list.map V2 args))) E_hd.nf,
-
+				have s1 : ∀ (v : var_name),
+					(v ∈ E_hd.args) →
+						(function.update_list V1 (E_hd.args.zip (list.map V1 args)) v =
+							function.update_list V2 (E_hd.args.zip (list.map V2 args)) v),
 				intros v h2,
 				simp only [list.mem_iff_nth_le] at h2,
-				apply exists.elim h2,
-				intros a h3,
-				apply exists.elim h3, intros h4 h5,
+				apply exists.elim h2, intros n h3, clear h2,
+				apply exists.elim h3, intros h4 h5, clear h3,
 				rewrite <- h5,
-				
-				have s1 : a < (list.map V1 args).length, simp,
+
+				have s2 : E_hd.args.length ≤ (list.map V1 args).length,
+				simp only [list.length_map],
+				rewrite h_right,
+
+				have s3 : n < (list.map V1 args).length,
+				simp only [list.length_map],
 				rewrite h_right,
 				exact h4,
 
-				have s2 : a < (list.map V2 args).length, simp,
+				have s4 : E_hd.args.length ≤ (list.map V2 args).length,
+				simp only [list.length_map],
+				rewrite h_right,
+
+				have s5 : n < (list.map V2 args).length,
+				simp only [list.length_map],
 				rewrite h_right,
 				exact h4,
 
-				have s3 : a < args.length,
+				have s6 : (function.update_list V1 (E_hd.args.zip (list.map V1 args)) (E_hd.args.nth_le n h4) =
+					(list.map V1 args).nth_le n s3),
+				exact function.update_list_zip V1 E_hd.args (list.map V1 args) n h4 s3 s2 E_hd.nodup,
+
+				have s7 : (function.update_list V2 (E_hd.args.zip (list.map V2 args)) (E_hd.args.nth_le n h4) =
+					(list.map V2 args).nth_le n s5),
+				exact function.update_list_zip V2 E_hd.args (list.map V2 args) n h4 s5 s4 E_hd.nodup,
+
+				have s8 : n < args.length,
 				rewrite h_right,
 				exact h4,
 
-				rewrite function.update_list_zip V1 E_hd.args (list.map V1 args) a h4 s1,
-				rewrite function.update_list_zip V2 E_hd.args (list.map V2 args) a h4 s2,
+				have s9 : (args.nth_le n s8) ∈ args,
+				exact list.nth_le_mem args n s8,
 
-				have s4 : (list.map V1 args).nth_le a s1 = V1 (args.nth_le a s3),
+				rewrite s6,
+				rewrite s7,
 				simp only [list.nth_le_map'],
-				rewrite s4,
-
-				have s5 : (list.map V2 args).nth_le a s2 = V2 (args.nth_le a s3),
-				simp only [list.nth_le_map'],
-				rewrite s5,
-
 				apply h1,
+				apply set.mem_of_subset_of_mem hf s9,
 
-				have s6 : args.nth_le a s3 ∈ args,
-				apply list.nth_le_mem args a s3,
-				
-				apply set.mem_of_mem_of_subset _ hf,
-				apply s6,
-
-				rewrite <- h_right,
-				simp only [list.length_map],
-
-				exact E_hd.nodup,
-
-				rewrite <- h_right,
-				simp only [list.length_map],
-
- 				exact E_hd.nodup,
+				exact E_ih E_hd.args E_hd.q (function.update_list V1 (E_hd.args.zip (list.map V1 args)))
+  				(function.update_list V2 (E_hd.args.zip (list.map V2 args))) E_hd.nf s1,
 			},
 			{
 				apply E_ih,
