@@ -356,7 +356,7 @@ def env : Type := list definition_
 def exists_ (x : var_name) (φ : formula) : formula := not_ (forall_ x (not_ φ))
 
 
--- if (v, X) ∈ Γ then v is not_ free in (meta_var_ X)
+-- (v, X) ∈ Γ if and only if v is not free in meta_var_ X.
 inductive is_proof : list (var_name × meta_var_name) → list formula → formula → Prop
 | hyp (Γ : list (var_name × meta_var_name)) (Δ : list formula)
 	{φ : formula} :
