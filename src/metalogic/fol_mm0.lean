@@ -310,12 +310,12 @@ def not_free (Γ : list (var_name × meta_var_name)) (v : var_name) : formula �
 
 
 -- φ.not_free S if and only if φ.free_var_set ⊆ S
-def formula.not_free : formula → list var_name → Prop
+def formula.free_subset : formula → list var_name → Prop
 | (meta_var_ X) S := false
-| (not_ φ) S := φ.not_free S
-| (imp_ φ ψ) S := φ.not_free S ∧ ψ.not_free S
+| (not_ φ) S := φ.free_subset S
+| (imp_ φ ψ) S := φ.free_subset S ∧ ψ.free_subset S
 | (eq_ x y) S := x ∈ S ∧ y ∈ S
-| (forall_ x φ) S := φ.not_free (x :: S)
+| (forall_ x φ) S := φ.free_subset (x :: S)
 | (def_ name args) S := args ⊆ S
 
 
@@ -347,7 +347,7 @@ structure definition_ : Type :=
 (args : list var_name)
 (nodup : args.nodup)
 (q : formula)
-(nf : q.not_free args)
+(nf : q.free_subset args)
 
 
 @[derive has_append]
@@ -547,7 +547,7 @@ example
 	(V1 V2 : valuation D)
 	(φ : formula)
 	(S : list var_name)
-	(hf : φ.not_free S)
+	(hf : φ.free_subset S)
 	(h1 : ∀ v ∈ S, V1 v = V2 v) :
 	holds D M E φ V1 ↔ holds D M E φ V2 :=
 begin
@@ -557,19 +557,19 @@ begin
 		induction φ generalizing V1 V2,
 		case formula.meta_var_ : φ V1 V2 h1
 		{
-			unfold formula.not_free at hf,
+			unfold formula.free_subset at hf,
 			contradiction,
 		},
 		case formula.not_ : φ φ_ih V1 V2 h1
 		{
-			unfold formula.not_free at hf,
+			unfold formula.free_subset at hf,
 			simp only [holds_not],
 			apply not_congr,
 			apply φ_ih hf, exact h1,
 		},
 		case formula.imp_ : φ ψ φ_ih ψ_ih V1 V2 h1
 		{
-			unfold formula.not_free at hf,
+			unfold formula.free_subset at hf,
 			cases hf,
 			simp only [holds_imp],
 			apply imp_congr,
@@ -578,14 +578,14 @@ begin
 		},
 		case formula.eq_ : x y V1 V2 h1
 		{
-			unfold formula.not_free at hf,
+			unfold formula.free_subset at hf,
 			cases hf,
 			simp only [holds_eq],
 			simp only [h1 x hf_left, h1 y hf_right],
 		},
 		case formula.forall_ : x φ φ_ih V1 V2 h1
 		{
-			unfold formula.not_free at hf,
+			unfold formula.free_subset at hf,
 			simp only [holds_forall],
 			apply forall_congr, intros a,
 			apply φ_ih,
@@ -603,7 +603,7 @@ begin
 		},
 		case formula.def_ : name args V1 V2 h1
 		{
-			unfold formula.not_free at hf,
+			unfold formula.free_subset at hf,
 			simp only [holds_nil_def],
 		},
 	},
@@ -612,19 +612,19 @@ begin
 		induction φ generalizing V1 V2,
 		case formula.meta_var_ : φ V1 V2 h1
 		{
-			unfold formula.not_free at hf,
+			unfold formula.free_subset at hf,
 			contradiction,
 		},
 		case formula.not_ : φ φ_ih V1 V2 h1
 		{
-			unfold formula.not_free at hf,
+			unfold formula.free_subset at hf,
 			simp only [holds_not],
 			apply not_congr,
 			apply φ_ih hf, exact h1,
 		},
 		case formula.imp_ : φ ψ φ_ih ψ_ih V1 V2 h1
 		{
-			unfold formula.not_free at hf,
+			unfold formula.free_subset at hf,
 			cases hf,
 			simp only [holds_imp],
 			apply imp_congr,
@@ -633,14 +633,14 @@ begin
 		},
 		case formula.eq_ : x y V1 V2 h1
 		{
-			unfold formula.not_free at hf,
+			unfold formula.free_subset at hf,
 			cases hf,
 			simp only [holds_eq],
 			simp only [h1 x hf_left, h1 y hf_right],
 		},
 		case formula.forall_ : x φ φ_ih V1 V2 h1
 		{
-			unfold formula.not_free at hf,
+			unfold formula.free_subset at hf,
 			simp only [holds_forall],
 			apply forall_congr, intros a,
 			apply φ_ih,
@@ -658,7 +658,7 @@ begin
 		},
 		case formula.def_ : name args V1 V2 h1
 		{
-			unfold formula.not_free at hf,
+			unfold formula.free_subset at hf,
 			simp only [holds_not_nil_def],
 			split_ifs,
 			{
@@ -716,7 +716,7 @@ begin
 			},
 			{
 				apply E_ih,
-				unfold formula.not_free, exact hf, exact h1,
+				unfold formula.free_subset, exact hf, exact h1,
 			}
 		},
 	},
