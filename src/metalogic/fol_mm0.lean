@@ -264,8 +264,7 @@ lemma function.update_list_zip
 	(h2 : n < l'.length)
 	(h3 : l.length ≤ l'.length)
 	(h4 : l.nodup) :
-	(function.update_list f (l.zip l')) (l.nth_le n h1) =
-		l'.nth_le n h2 :=
+	(function.update_list f (l.zip l')) (l.nth_le n h1) = l'.nth_le n h2 :=
 begin
 	have s1 : list.map prod.fst (l.zip l') = l,
 	exact list.map_fst_zip l l' h3,
