@@ -271,7 +271,8 @@ begin
 	exact list.map_fst_zip l l' h3,
 
 	have s2 : (list.map prod.fst (l.zip l')).nodup,
-	rewrite s1, exact h4,
+	rewrite s1,
+	exact h4,
 
 	have s3 : (l.nth_le n h1, l'.nth_le n h2) ∈ l.zip l',
 	exact list.nth_le_mem_zip l l' n h1 h2,
