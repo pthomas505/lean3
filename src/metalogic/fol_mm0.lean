@@ -8,11 +8,11 @@ set_option pp.parens true
 lemma aux_1
 	{α β : Type}
 	[decidable_eq α]
+	(g : α → β)
 	(f f' : α → α)
   (x : α)
-  (h1 : f' ∘ f = id)
-  (g : α → β)
-  (a : β) :
+  (a : β)
+  (h1 : f' ∘ f = id) :
   function.update (g ∘ f) x a = (function.update g (f x) a) ∘ f :=
 begin
 		apply funext, intros x',
@@ -784,7 +784,7 @@ begin
 		{
 			simp only [holds_forall],
 			apply forall_congr, intros a,
-			rewrite aux_1 σ.1 σ' x h2 V a,
+			rewrite aux_1 V σ.1 σ' x a h2,
 			apply φ_ih,
 		},
 		case formula.def_ : name args V
@@ -832,7 +832,7 @@ begin
 			unfold formula.subst at *,
 			simp only [holds_forall],
 			apply forall_congr, intros a,
-			rewrite aux_1 σ.1 σ' x h2 V a,
+			rewrite aux_1 V σ.1 σ' x a h2,
 			apply φ_ih,
 		},
 		case formula.def_ : name args
