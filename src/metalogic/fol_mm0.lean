@@ -233,15 +233,15 @@ end
 
 lemma list.nth_le_mem_zip
 	{α β : Type}
-  [decidable_eq α]
-	(n : ℕ)
-  (l : list α)
+	[decidable_eq α]
+	(l : list α)
 	(l' : list β)
-  (h1 : n < l.length)
-  (h2 : n < l'.length) :
-  ((l.nth_le n h1, l'.nth_le n h2) ∈ l.zip l') :=
+	(n : ℕ)
+	(h1 : n < l.length)
+	(h2 : n < l'.length) :
+	((l.nth_le n h1, l'.nth_le n h2) ∈ l.zip l') :=
 begin
-  have s1 : n < (l.zip l').length,
+	have s1 : n < (l.zip l').length,
 	simp only [list.length_zip, lt_min_iff],
 	exact and.intro h1 h2,
 
@@ -274,7 +274,7 @@ begin
 	rewrite s1, exact h4,
 
 	have s3 : (l.nth_le n h1, l'.nth_le n h2) ∈ l.zip l',
-	exact list.nth_le_mem_zip n l l' h1 h2,
+	exact list.nth_le_mem_zip l l' n h1 h2,
 
 	exact function.update_list_mem f (l.zip l') (l.nth_le n h1, l'.nth_le n h2) s2 s3,
 end
