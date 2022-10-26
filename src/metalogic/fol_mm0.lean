@@ -309,7 +309,7 @@ def not_free (Γ : list (var_name × meta_var_name)) (v : var_name) : formula �
 | (def_ name args) := ∀ (x : var_name), x ∈ args → ¬ x = v
 
 
--- φ.not_free S if and only if φ.free_var_set ⊆ S
+-- φ.free_subset S if and only if φ.free_var_set ⊆ S
 def formula.free_subset : formula → list var_name → Prop
 | (meta_var_ X) S := false
 | (not_ φ) S := φ.free_subset S
