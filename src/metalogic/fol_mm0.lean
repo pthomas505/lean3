@@ -299,7 +299,7 @@ inductive formula : Type
 open formula
 
 
--- If (v, X) ∈ Γ then v is not free in meta_var_ X.
+-- (v, X) ∈ Γ if and only if v is not free in meta_var_ X.
 def not_free (Γ : list (var_name × meta_var_name)) (v : var_name) : formula → Prop
 | (meta_var_ X) := (v, X) ∈ Γ
 | (not_ φ) := not_free φ
@@ -309,7 +309,7 @@ def not_free (Γ : list (var_name × meta_var_name)) (v : var_name) : formula �
 | (def_ name args) := ∀ (x : var_name), x ∈ args → ¬ x = v
 
 
--- φ.not_free S ↔ φ.free_var_set ⊆ S
+-- φ.not_free S if and only if φ.free_var_set ⊆ S
 def formula.not_free : formula → list var_name → Prop
 | (meta_var_ X) S := false
 | (not_ φ) S := φ.not_free S
