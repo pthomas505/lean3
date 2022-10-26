@@ -64,12 +64,12 @@ end
 lemma aux_3
 	{α β : Type}
 	[decidable_eq α]
+  (g : α → β)
   (f f' : α → α)
 	(x : α)
+  (a : β)
   (h1 : f' ∘ f = id)
-  (h2 : f ∘ f' = id)
-  (g : α → β)
-  (a : β) :
+  (h2 : f ∘ f' = id) :
   function.update (g ∘ f) (f' x) a = (function.update g x a) ∘ f :=
 begin
 	apply funext, intros x',
@@ -1026,7 +1026,7 @@ begin
 	unfold is_not_free,
 	simp only [holds_meta_var],
 	intros V a,
-	rewrite <- aux_3 σ' σ.1 v left right,
+	rewrite <- aux_3 V σ' σ.1 v a left right,
 	apply not_free_imp_is_not_free M E Γ',
 	exact H v X h1,
 	intros X' h2,
