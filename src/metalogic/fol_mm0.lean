@@ -349,8 +349,20 @@ structure definition_ : Type :=
 (nf : q.free_subset args)
 
 
-@[derive has_append]
+@[derive [has_append, has_mem definition_]]
 def env : Type := list definition_
+
+def env.nodup : env → Prop :=
+	list.pairwise (fun a b, a.name = b.name -> a.args.length = b.args.length -> false)
+
+def formula.scoped_in_env (E : env) : formula → Prop
+| (meta_var_ _) := true
+| (not_ φ) := φ.scoped_in_env
+| (imp_ φ ψ) := φ.scoped_in_env ∧ ψ.scoped_in_env
+| (eq_ _ _) := true
+| (forall_ _ φ) := φ.scoped_in_env
+| (def_ name args) :=
+	∃ (d : definition_), d ∈ E ∧ name = d.name ∧ args.length = d.args.length
 
 
 def exists_ (x : var_name) (φ : formula) : formula := not_ (forall_ x (not_ φ))
@@ -761,8 +773,39 @@ lemma ext_env_holds
 	(E E' : env)
 	(φ : formula)
 	(V : valuation D)
-	(h1 : ∃ E1, E' = E1 ++ E) :
-	holds D M E' φ V ↔ holds D M E φ V := sorry
+	(h1 : ∃ E1, E' = E1 ++ E)
+	(h2 : φ.scoped_in_env E)
+	(h3 : E'.nodup) :
+	holds D M E' φ V ↔ holds D M E φ V :=
+begin
+	induction φ,
+	case formula.meta_var_ : φ
+  { simp only [holds_meta_var], },
+  case formula.not_ : φ_ᾰ φ_ih
+  { admit },
+  case formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
+  { admit },
+  case formula.eq_ : φ_ᾰ φ_ᾰ_1
+  { admit },
+  case formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
+  { admit },
+  case formula.def_ : name args
+  {
+		apply exists.elim h1, clear h1, intros E1 h1,
+
+		unfold formula.scoped_in_env at h2,
+		apply exists.elim h2, clear h2, intros d h2, cases h2,
+
+		have s1 : d ∈ E',
+		rewrite h1,
+		simp only [list.mem_append],
+		apply or.intro_right,
+		exact h2_left,
+
+		sorry,
+	},
+end
+
 
 
 lemma lem_1
