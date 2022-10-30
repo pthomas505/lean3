@@ -826,7 +826,7 @@ begin
 end
 
 
-example
+lemma cons_env_holds
 	{D : Type}
 	(M : meta_valuation D)
 	(E E' : env)
@@ -908,31 +908,52 @@ lemma ext_env_holds
 	(h3 : E'.nodup) :
 	holds D M E' φ V ↔ holds D M E φ V :=
 begin
-	induction φ,
-	case formula.meta_var_ : φ
-  { simp only [holds_meta_var], },
-  case formula.not_ : φ_ᾰ φ_ih
+	induction φ generalizing V,
+	case formula.meta_var_ : φ V
   { admit },
-  case formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
+  case formula.not_ : φ_ᾰ φ_ih V
   { admit },
-  case formula.eq_ : φ_ᾰ φ_ᾰ_1
+  case formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1 V
   { admit },
-  case formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
+  case formula.eq_ : φ_ᾰ φ_ᾰ_1 V
   { admit },
-  case formula.def_ : name args
+  case formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih V
+  { admit },
+  case formula.def_ : name args V
   {
-		apply exists.elim h1, clear h1, intros E1 h1,
+		apply exists.elim h1, intros E1 a1, clear h1,
+		subst a1,
 
-		unfold formula.scoped_in_env at h2,
-		apply exists.elim h2, clear h2, intros d h2, cases h2,
-
-		have s1 : d ∈ E',
-		rewrite h1,
-		simp only [list.mem_append],
-		apply or.intro_right,
-		exact h2_left,
-
-		sorry,
+		induction E1,
+		case list.nil
+		{
+			simp only [list.nil_append],
+		},
+		case list.cons : E1_hd E1_tl E1_ih
+		{
+			simp only [list.cons_append, holds_not_nil_def],
+			split_ifs,
+			{
+				rewrite <- E1_ih,
+				{
+					sorry,
+				},
+				{
+					unfold env.nodup at h3,
+					simp at h3,
+					cases h3,
+					unfold env.nodup,
+					exact h3_right,
+				}
+			},
+			{
+				apply E1_ih,
+				unfold env.nodup at h3,
+				simp only [list.cons_append, list.pairwise_cons, list.mem_append] at h3,
+				cases h3,
+				exact h3_right,
+			}
+		},
 	},
 end
 
