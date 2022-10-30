@@ -909,16 +909,40 @@ lemma ext_env_holds
 	holds D M E' φ V ↔ holds D M E φ V :=
 begin
 	induction φ generalizing V,
-	case formula.meta_var_ : φ V
-  { admit },
-  case formula.not_ : φ_ᾰ φ_ih V
-  { admit },
-  case formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1 V
-  { admit },
-  case formula.eq_ : φ_ᾰ φ_ᾰ_1 V
-  { admit },
-  case formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih V
-  { admit },
+	case formula.meta_var_ : X V
+  {
+		simp only [holds_meta_var],
+	},
+  case formula.not_ : φ φ_ih V
+  {
+		simp only [holds_not],
+		apply not_congr,
+		unfold formula.scoped_in_env at h2,
+		apply φ_ih, exact h2,
+	},
+  case formula.imp_ : φ ψ φ_ih ψ_ih V
+  {
+		simp only [holds_imp],
+		unfold formula.scoped_in_env at h2,
+		cases h2,
+		apply imp_congr,
+		apply φ_ih,
+		exact h2_left,
+		apply ψ_ih,
+		exact h2_right,
+	},
+  case formula.eq_ : x y V
+  {
+		simp only [holds_eq],
+	},
+  case formula.forall_ : x φ φ_ih V
+  {
+		simp only [holds_forall],
+		unfold formula.scoped_in_env at h2,
+		apply forall_congr, intros a,
+		apply φ_ih,
+		exact h2,
+	},
   case formula.def_ : name args V
   {
 		apply exists.elim h1, intros E1 a1, clear h1,
