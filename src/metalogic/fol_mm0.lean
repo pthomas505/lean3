@@ -299,6 +299,14 @@ inductive formula : Type
 open formula
 
 
+def formula.meta_var_set : formula → finset meta_var_name
+| (meta_var_ X) := {X}
+| (not_ φ) := φ.meta_var_set
+| (imp_ φ ψ) := φ.meta_var_set ∪ ψ.meta_var_set
+| (eq_ x y) := ∅
+| (forall_ x φ) := φ.meta_var_set
+| (def_ name args) := ∅
+
 -- (v, X) ∈ Γ if and only if v is not free in meta_var_ X.
 def not_free (Γ : list (var_name × meta_var_name)) (v : var_name) : formula → Prop
 | (meta_var_ X) := (v, X) ∈ Γ
@@ -308,8 +316,10 @@ def not_free (Γ : list (var_name × meta_var_name)) (v : var_name) : formula �
 | (forall_ x φ) := x = v ∨ not_free φ
 | (def_ name args) := ∀ (x : var_name), x ∈ args → ¬ x = v
 
-
--- True if and only if all the free variables in the formula are in the list.
+/-
+True if and only if the formula has no meta variables and all the free
+variables in the formula are in the list.
+-/
 def formula.free_subset : formula → list var_name → Prop
 | (meta_var_ X) S := false
 | (not_ φ) S := φ.free_subset S
@@ -355,6 +365,11 @@ def env : Type := list definition_
 def env.nodup : env → Prop :=
 	list.pairwise (fun a b, a.name = b.name -> a.args.length = b.args.length -> false)
 
+
+/-
+True if and only if every definition in the formula
+is in the environment.
+-/
 def formula.scoped_in_env (E : env) : formula → Prop
 | (meta_var_ _) := true
 | (not_ φ) := φ.scoped_in_env
@@ -1000,7 +1015,6 @@ begin
 end
 
 
-
 lemma lem_1
 	{D : Type}
 	(V : valuation D)
@@ -1009,116 +1023,19 @@ lemma lem_1
 	(σ : instantiation)
 	(σ' : var_name → var_name)
 	(τ : meta_instantiation)
+	(φ : formula)
 	(h1 : σ.1 ∘ σ' = id)
 	(h2 : σ' ∘ σ.1 = id)
-	(h3 : ∃ E1, E' = E1 ++ E)
-	(φ : formula) :
+	(h3 : φ.scoped_in_env E)
+	(h4 : env.nodup E')
+	(h5 : ∃ E1, E' = E1 ++ E)
+	(h6 : ∀ (X : meta_var_name), X ∈ φ.meta_var_set → (τ X).scoped_in_env E') :
 	holds D
-		(fun (X : meta_var_name) (V' : valuation D), holds D M E' (τ X) (V' ∘ σ')) E φ (V ∘ σ.1) ↔
+		(fun (X' : meta_var_name) (V' : valuation D), holds D M E' (τ X') (V' ∘ σ'))
+	E φ (V ∘ σ.1) ↔
 	holds D M E (φ.subst σ τ) V :=
 begin
-	induction E generalizing φ V,
-	case list.nil
-  {
-		induction φ generalizing V,
-		case formula.meta_var_ : φ V
-		{
-			simp only [holds_meta_var],
-			unfold formula.subst,
-			rewrite function.comp.assoc V σ.1 σ',
-			rewrite h1,
-			rewrite function.comp.right_id V,
-			apply ext_env_holds, exact h3, sorry, sorry,
-		},
-		case formula.not_ : φ ih V
-		{
-			simp only [holds_not] at *,
-			unfold formula.subst,
-			rewrite ih,
-			simp only [holds_not],
-		},
-		case formula.imp_ : φ ψ φ_ih ψ_ih V
-		{
-			simp only [holds_imp] at *,
-			unfold formula.subst,
-			simp only [φ_ih, ψ_ih],
-			simp only [holds_imp],
-		},
-		case formula.eq_ : x y V
-		{
-			simp only [holds_eq] at *,
-			unfold formula.subst,
-			simp only [holds_eq],
-		},
-		case formula.forall_ : x φ φ_ih V
-		{
-			simp only [holds_forall],
-			apply forall_congr, intros a,
-			rewrite aux_1 V σ.1 σ' x a h2,
-			apply φ_ih,
-		},
-		case formula.def_ : name args V
-		{
-			simp only [holds_nil_def],
-			unfold formula.subst,
-			simp only [holds_nil_def],
-		},
-	},
-  case list.cons : E_hd E_tl E_ih
-  {
-		induction φ generalizing V,
-		case formula.meta_var_ : φ V
-		{
-			simp only [holds_meta_var],
-			unfold formula.subst,
-			rewrite function.comp.assoc V σ.1 σ',
-			rewrite h1,
-			rewrite function.comp.right_id V,
-			apply ext_env_holds, exact h3, sorry, sorry,
-		},
-		case formula.not_ : φ ih
-		{
-			simp only [holds_not] at *,
-			unfold formula.subst at *,
-			rewrite ih,
-			simp only [holds_not],
-		},
-		case formula.imp_ : φ ψ φ_ih ψ_ih
-		{
-			simp only [holds_imp] at *,
-			unfold formula.subst,
-			rewrite φ_ih, rewrite ψ_ih,
-			simp only [holds_imp],
-		},
-		case formula.eq_ : x y
-		{
-			simp only [holds_eq] at *,
-			unfold formula.subst,
-			simp only [holds_eq],
-		},
-		case formula.forall_ : x φ φ_ih
-		{
-			simp only [holds_forall],
-			unfold formula.subst at *,
-			simp only [holds_forall],
-			apply forall_congr, intros a,
-			rewrite aux_1 V σ.1 σ' x a h2,
-			apply φ_ih,
-		},
-		case formula.def_ : name args
-		{
-			have s1 : ∃ (E1 : env), E' = E1 ++ E_tl,
-			apply exists.elim h3, intros a h4,
-			apply exists.intro (a ++ [E_hd]),
-			simp only [list.append_assoc, list.singleton_append],
-			exact h4,
-
-			simp only [holds_not_nil_def] at *,
-			unfold formula.subst at *,
-			simp only [holds_not_nil_def] at *,
-			sorry,
-		},
-	},
+	sorry,
 end
 
 
@@ -1248,6 +1165,14 @@ begin
 		{
 			unfold not_free at *,
 			unfold is_not_free at *,
+			simp at φ_ih,
+			intros V a,
+			simp only [holds_not],
+			apply not_congr,
+			apply φ_ih,
+			exact H,
+			simp at E_ih,
+			intros h1,
 			sorry,
 		},
 		case formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
@@ -1395,6 +1320,8 @@ begin
   {
 		obtain ⟨σ', left, right⟩ := H_σ.2,
 		intros V,
+		sorry,
+/-
 		rewrite <- lem_1 V M E _ H_σ σ' H_τ left right,
 		apply H_ih_ᾰ,
 		intros v X h1,
@@ -1410,5 +1337,6 @@ begin
 		simp only [list.nil_append],
 		apply exists.intro list.nil,
 		simp only [list.nil_append],
+-/
 	},
 end
