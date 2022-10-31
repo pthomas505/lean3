@@ -370,12 +370,12 @@ def env.nodup : env → Prop :=
 True if and only if every definition in the formula
 is in the environment.
 -/
-def formula.all_def_in_env (E : env) : formula → Prop
+def formula.is_meta_var_or_all_def_in_env (E : env) : formula → Prop
 | (meta_var_ _) := true
-| (not_ φ) := φ.all_def_in_env
-| (imp_ φ ψ) := φ.all_def_in_env ∧ ψ.all_def_in_env
+| (not_ φ) := φ.is_meta_var_or_all_def_in_env
+| (imp_ φ ψ) := φ.is_meta_var_or_all_def_in_env ∧ ψ.is_meta_var_or_all_def_in_env
 | (eq_ _ _) := true
-| (forall_ _ φ) := φ.all_def_in_env
+| (forall_ _ φ) := φ.is_meta_var_or_all_def_in_env
 | (def_ name args) :=
 	∃ (d : definition_), d ∈ E ∧ name = d.name ∧ args.length = d.args.length
 
@@ -789,7 +789,7 @@ lemma ext_env_holds
 	(φ : formula)
 	(V : valuation D)
 	(h1 : ∃ E1, E' = E1 ++ E)
-	(h2 : φ.all_def_in_env E)
+	(h2 : φ.is_meta_var_or_all_def_in_env E)
 	(h3 : E'.nodup) :
 	holds D M E' φ V ↔ holds D M E φ V :=
 begin
@@ -802,13 +802,13 @@ begin
   {
 		simp only [holds_not],
 		apply not_congr,
-		unfold formula.all_def_in_env at h2,
+		unfold formula.is_meta_var_or_all_def_in_env at h2,
 		apply φ_ih, exact h2,
 	},
   case formula.imp_ : φ ψ φ_ih ψ_ih V
   {
 		simp only [holds_imp],
-		unfold formula.all_def_in_env at h2,
+		unfold formula.is_meta_var_or_all_def_in_env at h2,
 		cases h2,
 		apply imp_congr,
 		apply φ_ih,
@@ -823,7 +823,7 @@ begin
   case formula.forall_ : x φ φ_ih V
   {
 		simp only [holds_forall],
-		unfold formula.all_def_in_env at h2,
+		unfold formula.is_meta_var_or_all_def_in_env at h2,
 		apply forall_congr, intros a,
 		apply φ_ih,
 		exact h2,
@@ -845,7 +845,7 @@ begin
 			{
 				rewrite <- E1_ih,
 				{
-					unfold formula.all_def_in_env at h2,
+					unfold formula.is_meta_var_or_all_def_in_env at h2,
 					apply exists.elim h2, intros d a2, clear h2,
 					unfold env.nodup at h3,
 					simp at h3,
@@ -896,10 +896,10 @@ lemma lem_1
 	(φ : formula)
 	(h1 : σ.1 ∘ σ' = id)
 	(h2 : σ' ∘ σ.1 = id)
-	(h3 : φ.all_def_in_env E)
+	(h3 : φ.is_meta_var_or_all_def_in_env E)
 	(h4 : env.nodup E')
 	(h5 : ∃ E1, E' = E1 ++ E)
-	(h6 : ∀ (X : meta_var_name), X ∈ φ.meta_var_set → (τ X).all_def_in_env E') :
+	(h6 : ∀ (X : meta_var_name), X ∈ φ.meta_var_set → (τ X).is_meta_var_or_all_def_in_env E') :
 	holds D
 		(fun (X' : meta_var_name) (V' : valuation D), holds D M E' (τ X') (V' ∘ σ'))
 	E φ (V ∘ σ.1) ↔
