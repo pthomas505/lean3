@@ -320,12 +320,12 @@ def not_free (Γ : list (var_name × meta_var_name)) (v : var_name) : formula �
 True if and only if the formula has no meta variables and all the free
 variables in the formula are in the list.
 -/
-def formula.free_subset : formula → list var_name → Prop
+def formula.no_meta_var_and_all_free_in_set : formula → list var_name → Prop
 | (meta_var_ X) S := false
-| (not_ φ) S := φ.free_subset S
-| (imp_ φ ψ) S := φ.free_subset S ∧ ψ.free_subset S
+| (not_ φ) S := φ.no_meta_var_and_all_free_in_set S
+| (imp_ φ ψ) S := φ.no_meta_var_and_all_free_in_set S ∧ ψ.no_meta_var_and_all_free_in_set S
 | (eq_ x y) S := x ∈ S ∧ y ∈ S
-| (forall_ x φ) S := φ.free_subset (x :: S)
+| (forall_ x φ) S := φ.no_meta_var_and_all_free_in_set (x :: S)
 | (def_ name args) S := args ⊆ S
 
 
@@ -356,7 +356,7 @@ structure definition_ : Type :=
 (args : list var_name)
 (q : formula)
 (nodup : args.nodup)
-(nf : q.free_subset args)
+(nf : q.no_meta_var_and_all_free_in_set args)
 
 
 @[derive [has_append, has_mem definition_]]
@@ -370,12 +370,12 @@ def env.nodup : env → Prop :=
 True if and only if every definition in the formula
 is in the environment.
 -/
-def formula.scoped_in_env (E : env) : formula → Prop
+def formula.all_def_in_env (E : env) : formula → Prop
 | (meta_var_ _) := true
-| (not_ φ) := φ.scoped_in_env
-| (imp_ φ ψ) := φ.scoped_in_env ∧ ψ.scoped_in_env
+| (not_ φ) := φ.all_def_in_env
+| (imp_ φ ψ) := φ.all_def_in_env ∧ ψ.all_def_in_env
 | (eq_ _ _) := true
-| (forall_ _ φ) := φ.scoped_in_env
+| (forall_ _ φ) := φ.all_def_in_env
 | (def_ name args) :=
 	∃ (d : definition_), d ∈ E ∧ name = d.name ∧ args.length = d.args.length
 
@@ -573,7 +573,7 @@ example
 	(V1 V2 : valuation D)
 	(φ : formula)
 	(S : list var_name)
-	(hf : φ.free_subset S)
+	(hf : φ.no_meta_var_and_all_free_in_set S)
 	(h1 : ∀ v ∈ S, V1 v = V2 v) :
 	holds D M E φ V1 ↔ holds D M E φ V2 :=
 begin
@@ -583,19 +583,19 @@ begin
 		induction φ generalizing S V1 V2,
 		case formula.meta_var_ : φ V1 V2 h1
 		{
-			unfold formula.free_subset at hf,
+			unfold formula.no_meta_var_and_all_free_in_set at hf,
 			contradiction,
 		},
 		case formula.not_ : φ φ_ih S V1 V2 hf h1
 		{
-			unfold formula.free_subset at hf,
+			unfold formula.no_meta_var_and_all_free_in_set at hf,
 			simp only [holds_not],
 			apply not_congr,
 			apply φ_ih S, exact hf, exact h1,
 		},
 		case formula.imp_ : φ ψ φ_ih ψ_ih S V1 V2 hf h1
 		{
-			unfold formula.free_subset at hf,
+			unfold formula.no_meta_var_and_all_free_in_set at hf,
 			cases hf,
 			simp only [holds_imp],
 			apply imp_congr,
@@ -608,14 +608,14 @@ begin
 		},
 		case formula.eq_ : x y V1 V2 h1
 		{
-			unfold formula.free_subset at hf,
+			unfold formula.no_meta_var_and_all_free_in_set at hf,
 			cases hf,
 			simp only [holds_eq],
 			simp only [h1 x hf_left, h1 y hf_right],
 		},
 		case formula.forall_ : x φ φ_ih S V1 V2 hf h1
 		{
-			unfold formula.free_subset at hf,
+			unfold formula.no_meta_var_and_all_free_in_set at hf,
 			simp only [holds_forall],
 			apply forall_congr, intros a,
 			apply φ_ih (x :: S),
@@ -644,7 +644,7 @@ begin
 		},
 		case formula.def_ : name args V1 V2 h1
 		{
-			unfold formula.free_subset at hf,
+			unfold formula.no_meta_var_and_all_free_in_set at hf,
 			simp only [holds_nil_def],
 		},
 	},
@@ -653,19 +653,19 @@ begin
 		induction φ generalizing S V1 V2,
 		case formula.meta_var_ : φ V1 V2 h1
 		{
-			unfold formula.free_subset at hf,
+			unfold formula.no_meta_var_and_all_free_in_set at hf,
 			contradiction,
 		},
 		case formula.not_ : φ φ_ih S V1 V2 hf h1
 		{
-			unfold formula.free_subset at hf,
+			unfold formula.no_meta_var_and_all_free_in_set at hf,
 			simp only [holds_not],
 			apply not_congr,
 			apply φ_ih S, exact hf, exact h1,
 		},
 		case formula.imp_ : φ ψ φ_ih ψ_ih S V1 V2 hf h1
 		{
-			unfold formula.free_subset at hf,
+			unfold formula.no_meta_var_and_all_free_in_set at hf,
 			cases hf,
 			simp only [holds_imp],
 			apply imp_congr,
@@ -679,14 +679,14 @@ begin
 		},
 		case formula.eq_ : x y V1 V2 h1
 		{
-			unfold formula.free_subset at hf,
+			unfold formula.no_meta_var_and_all_free_in_set at hf,
 			cases hf,
 			simp only [holds_eq],
 			simp only [h1 x hf_left, h1 y hf_right],
 		},
 		case formula.forall_ : x φ φ_ih S V1 V2 hf h1
 		{
-			unfold formula.free_subset at hf,
+			unfold formula.no_meta_var_and_all_free_in_set at hf,
 			simp only [holds_forall],
 			apply forall_congr, intros a,
 			apply φ_ih (x :: S),
@@ -715,7 +715,7 @@ begin
 		},
 		case formula.def_ : name args S V1 V2 hf h1
 		{
-			unfold formula.free_subset at hf,
+			unfold formula.no_meta_var_and_all_free_in_set at hf,
 			simp only [holds_not_nil_def],
 			split_ifs,
 			{
@@ -775,7 +775,7 @@ begin
 			},
 			{
 				apply E_ih,
-				unfold formula.free_subset, exact hf, exact h1,
+				unfold formula.no_meta_var_and_all_free_in_set, exact hf, exact h1,
 			}
 		},
 	},
@@ -789,7 +789,7 @@ lemma ext_env_holds
 	(φ : formula)
 	(V : valuation D)
 	(h1 : ∃ E1, E' = E1 ++ E)
-	(h2 : φ.scoped_in_env E)
+	(h2 : φ.all_def_in_env E)
 	(h3 : E'.nodup) :
 	holds D M E' φ V ↔ holds D M E φ V :=
 begin
@@ -802,13 +802,13 @@ begin
   {
 		simp only [holds_not],
 		apply not_congr,
-		unfold formula.scoped_in_env at h2,
+		unfold formula.all_def_in_env at h2,
 		apply φ_ih, exact h2,
 	},
   case formula.imp_ : φ ψ φ_ih ψ_ih V
   {
 		simp only [holds_imp],
-		unfold formula.scoped_in_env at h2,
+		unfold formula.all_def_in_env at h2,
 		cases h2,
 		apply imp_congr,
 		apply φ_ih,
@@ -823,7 +823,7 @@ begin
   case formula.forall_ : x φ φ_ih V
   {
 		simp only [holds_forall],
-		unfold formula.scoped_in_env at h2,
+		unfold formula.all_def_in_env at h2,
 		apply forall_congr, intros a,
 		apply φ_ih,
 		exact h2,
@@ -845,7 +845,7 @@ begin
 			{
 				rewrite <- E1_ih,
 				{
-					unfold formula.scoped_in_env at h2,
+					unfold formula.all_def_in_env at h2,
 					apply exists.elim h2, intros d a2, clear h2,
 					unfold env.nodup at h3,
 					simp at h3,
@@ -896,10 +896,10 @@ lemma lem_1
 	(φ : formula)
 	(h1 : σ.1 ∘ σ' = id)
 	(h2 : σ' ∘ σ.1 = id)
-	(h3 : φ.scoped_in_env E)
+	(h3 : φ.all_def_in_env E)
 	(h4 : env.nodup E')
 	(h5 : ∃ E1, E' = E1 ++ E)
-	(h6 : ∀ (X : meta_var_name), X ∈ φ.meta_var_set → (τ X).scoped_in_env E') :
+	(h6 : ∀ (X : meta_var_name), X ∈ φ.meta_var_set → (τ X).all_def_in_env E') :
 	holds D
 		(fun (X' : meta_var_name) (V' : valuation D), holds D M E' (τ X') (V' ∘ σ'))
 	E φ (V ∘ σ.1) ↔
