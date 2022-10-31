@@ -367,8 +367,8 @@ def env.nodup : env → Prop :=
 
 
 /-
-True if and only if every definition in the formula
-is in the environment.
+True if and only if the formula is a meta variable or every definition in the
+formula is defined in the environment.
 -/
 def formula.is_meta_var_or_all_def_in_env (E : env) : formula → Prop
 | (meta_var_ _) := true
