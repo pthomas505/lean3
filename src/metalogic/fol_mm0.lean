@@ -317,15 +317,15 @@ def not_free (Γ : list (var_name × meta_var_name)) (v : var_name) : formula �
 | (def_ name args) := ∀ (x : var_name), x ∈ args → ¬ x = v
 
 /-
-True if and only if the formula has no meta variables and all the free
-variables in the formula are in the list.
+True if and only if the formula has no meta variables and all the variables
+that occur free in the formula are in the list.
 -/
-def formula.no_meta_var_and_all_free_in_set : formula → list var_name → Prop
+def formula.no_meta_var_and_all_free_in_list : formula → list var_name → Prop
 | (meta_var_ X) S := false
-| (not_ φ) S := φ.no_meta_var_and_all_free_in_set S
-| (imp_ φ ψ) S := φ.no_meta_var_and_all_free_in_set S ∧ ψ.no_meta_var_and_all_free_in_set S
+| (not_ φ) S := φ.no_meta_var_and_all_free_in_list S
+| (imp_ φ ψ) S := φ.no_meta_var_and_all_free_in_list S ∧ ψ.no_meta_var_and_all_free_in_list S
 | (eq_ x y) S := x ∈ S ∧ y ∈ S
-| (forall_ x φ) S := φ.no_meta_var_and_all_free_in_set (x :: S)
+| (forall_ x φ) S := φ.no_meta_var_and_all_free_in_list (x :: S)
 | (def_ name args) S := args ⊆ S
 
 
@@ -356,7 +356,7 @@ structure definition_ : Type :=
 (args : list var_name)
 (q : formula)
 (nodup : args.nodup)
-(nf : q.no_meta_var_and_all_free_in_set args)
+(nf : q.no_meta_var_and_all_free_in_list args)
 
 
 @[derive [has_append, has_mem definition_]]
@@ -573,7 +573,7 @@ example
 	(V1 V2 : valuation D)
 	(φ : formula)
 	(S : list var_name)
-	(hf : φ.no_meta_var_and_all_free_in_set S)
+	(hf : φ.no_meta_var_and_all_free_in_list S)
 	(h1 : ∀ v ∈ S, V1 v = V2 v) :
 	holds D M E φ V1 ↔ holds D M E φ V2 :=
 begin
@@ -583,19 +583,19 @@ begin
 		induction φ generalizing S V1 V2,
 		case formula.meta_var_ : φ V1 V2 h1
 		{
-			unfold formula.no_meta_var_and_all_free_in_set at hf,
+			unfold formula.no_meta_var_and_all_free_in_list at hf,
 			contradiction,
 		},
 		case formula.not_ : φ φ_ih S V1 V2 hf h1
 		{
-			unfold formula.no_meta_var_and_all_free_in_set at hf,
+			unfold formula.no_meta_var_and_all_free_in_list at hf,
 			simp only [holds_not],
 			apply not_congr,
 			apply φ_ih S, exact hf, exact h1,
 		},
 		case formula.imp_ : φ ψ φ_ih ψ_ih S V1 V2 hf h1
 		{
-			unfold formula.no_meta_var_and_all_free_in_set at hf,
+			unfold formula.no_meta_var_and_all_free_in_list at hf,
 			cases hf,
 			simp only [holds_imp],
 			apply imp_congr,
@@ -608,14 +608,14 @@ begin
 		},
 		case formula.eq_ : x y V1 V2 h1
 		{
-			unfold formula.no_meta_var_and_all_free_in_set at hf,
+			unfold formula.no_meta_var_and_all_free_in_list at hf,
 			cases hf,
 			simp only [holds_eq],
 			simp only [h1 x hf_left, h1 y hf_right],
 		},
 		case formula.forall_ : x φ φ_ih S V1 V2 hf h1
 		{
-			unfold formula.no_meta_var_and_all_free_in_set at hf,
+			unfold formula.no_meta_var_and_all_free_in_list at hf,
 			simp only [holds_forall],
 			apply forall_congr, intros a,
 			apply φ_ih (x :: S),
@@ -644,7 +644,7 @@ begin
 		},
 		case formula.def_ : name args V1 V2 h1
 		{
-			unfold formula.no_meta_var_and_all_free_in_set at hf,
+			unfold formula.no_meta_var_and_all_free_in_list at hf,
 			simp only [holds_nil_def],
 		},
 	},
@@ -653,19 +653,19 @@ begin
 		induction φ generalizing S V1 V2,
 		case formula.meta_var_ : φ V1 V2 h1
 		{
-			unfold formula.no_meta_var_and_all_free_in_set at hf,
+			unfold formula.no_meta_var_and_all_free_in_list at hf,
 			contradiction,
 		},
 		case formula.not_ : φ φ_ih S V1 V2 hf h1
 		{
-			unfold formula.no_meta_var_and_all_free_in_set at hf,
+			unfold formula.no_meta_var_and_all_free_in_list at hf,
 			simp only [holds_not],
 			apply not_congr,
 			apply φ_ih S, exact hf, exact h1,
 		},
 		case formula.imp_ : φ ψ φ_ih ψ_ih S V1 V2 hf h1
 		{
-			unfold formula.no_meta_var_and_all_free_in_set at hf,
+			unfold formula.no_meta_var_and_all_free_in_list at hf,
 			cases hf,
 			simp only [holds_imp],
 			apply imp_congr,
@@ -679,14 +679,14 @@ begin
 		},
 		case formula.eq_ : x y V1 V2 h1
 		{
-			unfold formula.no_meta_var_and_all_free_in_set at hf,
+			unfold formula.no_meta_var_and_all_free_in_list at hf,
 			cases hf,
 			simp only [holds_eq],
 			simp only [h1 x hf_left, h1 y hf_right],
 		},
 		case formula.forall_ : x φ φ_ih S V1 V2 hf h1
 		{
-			unfold formula.no_meta_var_and_all_free_in_set at hf,
+			unfold formula.no_meta_var_and_all_free_in_list at hf,
 			simp only [holds_forall],
 			apply forall_congr, intros a,
 			apply φ_ih (x :: S),
@@ -715,7 +715,7 @@ begin
 		},
 		case formula.def_ : name args S V1 V2 hf h1
 		{
-			unfold formula.no_meta_var_and_all_free_in_set at hf,
+			unfold formula.no_meta_var_and_all_free_in_list at hf,
 			simp only [holds_not_nil_def],
 			split_ifs,
 			{
@@ -775,7 +775,7 @@ begin
 			},
 			{
 				apply E_ih,
-				unfold formula.no_meta_var_and_all_free_in_set, exact hf, exact h1,
+				unfold formula.no_meta_var_and_all_free_in_list, exact hf, exact h1,
 			}
 		},
 	},
