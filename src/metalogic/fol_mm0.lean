@@ -905,8 +905,8 @@ lemma lem_1
 	E φ (V ∘ σ.1) ↔
 	holds D M E (φ.subst σ τ) V :=
 begin
-	induction E generalizing φ,
-	case list.nil : φ h1 h2
+	induction E generalizing V φ,
+	case list.nil : V φ h1 h2
   {
 		induction φ generalizing V,
 		case formula.meta_var_ : X V
@@ -981,10 +981,10 @@ begin
 			simp only [holds_nil_def],
 		},
 	},
-  case list.cons : E_hd E_tl E_ih φ h1 h2
+  case list.cons : E_hd E_tl E_ih V φ h1 h2
   {
 		induction φ generalizing V,
-		case formula.meta_var_ : X V E_ih
+		case formula.meta_var_ : X V
 		{
 			unfold formula.subst,
 			simp only [holds_meta_var],
@@ -998,7 +998,7 @@ begin
 			simp only [finset.mem_singleton],
 			exact h5,
 		},
-		case formula.not_ : φ φ_ih V E_ih
+		case formula.not_ : φ φ_ih V
 		{
 			unfold formula.is_meta_var_or_all_def_in_env at h1,
 			unfold formula.meta_var_set at h2,
@@ -1008,9 +1008,8 @@ begin
 			apply φ_ih,
 			exact h1,
 			exact h2,
-			exact E_ih,
 		},
-		case formula.imp_ : φ ψ φ_ih ψ_ih V E_ih
+		case formula.imp_ : φ ψ φ_ih ψ_ih V
 		{
 			unfold formula.is_meta_var_or_all_def_in_env at h1,
 			cases h1,
@@ -1025,7 +1024,6 @@ begin
 				intros X h7,
 				apply h2,
 				apply or.intro_left, exact h7,
-				exact E_ih,
 			},
 			{
 				apply ψ_ih,
@@ -1033,15 +1031,14 @@ begin
 				intros X h7,
 				apply h2,
 				apply or.intro_right, exact h7,
-				exact E_ih,
 			}
 		},
-		case formula.eq_ : x y V E_ih
+		case formula.eq_ : x y V
 		{
 			unfold formula.subst,
 			simp only [holds_eq],
 		},
-		case formula.forall_ : x φ φ_ih V E_ih
+		case formula.forall_ : x φ φ_ih V
 		{
 			unfold formula.is_meta_var_or_all_def_in_env at h1,
 			unfold formula.meta_var_set at h2,
@@ -1052,12 +1049,11 @@ begin
 			specialize φ_ih h1 h2,
 			rewrite <- φ_ih,
 			rewrite aux_1 _ _ σ', exact h4,
-			intros h7 E_φ h8 h9,
-			specialize E_ih h7 E_φ h8 h9,
-			sorry,			
 		},
-		case formula.def_ : φ_ᾰ φ_ᾰ_1 V E_ih
-		{ admit },
+		case formula.def_ : name args V
+		{
+			sorry,
+		},
 	},
 end
 
