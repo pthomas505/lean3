@@ -1052,7 +1052,29 @@ begin
 		},
 		case formula.def_ : name args V
 		{
-			sorry,
+			unfold formula.is_meta_var_or_all_def_in_env at h1,
+			apply exists.elim h1, intros d a1, clear h1,
+			unfold formula.meta_var_set at h2,
+			unfold env.nodup at h5,
+			apply exists.elim h6, intros E1 a6, clear h6,
+			rewrite a6 at h5,
+
+			have s1 : (∃ (E1 : env), (E' = (E1 ++ E_tl))),
+			apply exists.intro (E1 ++ [E_hd]),
+			simp only [list.append_assoc, list.singleton_append],
+			exact a6,
+
+			specialize E_ih s1,
+
+			unfold formula.subst,
+			simp only [holds_not_nil_def, list.length_map, list.map_map],
+			split_ifs,
+			{
+				sorry,
+			},
+			{
+				sorry,
+			},
 		},
 	},
 end
