@@ -894,18 +894,95 @@ lemma lem_1
 	(σ' : var_name → var_name)
 	(τ : meta_instantiation)
 	(φ : formula)
-	(h1 : σ.1 ∘ σ' = id)
-	(h2 : σ' ∘ σ.1 = id)
-	(h3 : φ.is_meta_var_or_all_def_in_env E)
-	(h4 : env.nodup E')
-	(h5 : ∃ E1, E' = E1 ++ E)
-	(h6 : ∀ (X : meta_var_name), X ∈ φ.meta_var_set → (τ X).is_meta_var_or_all_def_in_env E') :
+	(h1 : φ.is_meta_var_or_all_def_in_env E)
+	(h2 : ∀ (X : meta_var_name), X ∈ φ.meta_var_set → (τ X).is_meta_var_or_all_def_in_env E)
+	(h3 : σ.1 ∘ σ' = id)
+	(h4 : σ' ∘ σ.1 = id)
+	(h5 : env.nodup E')
+	(h6 : ∃ E1, E' = E1 ++ E) :
 	holds D
 		(fun (X' : meta_var_name) (V' : valuation D), holds D M E' (τ X') (V' ∘ σ'))
 	E φ (V ∘ σ.1) ↔
 	holds D M E (φ.subst σ τ) V :=
 begin
-	sorry,
+	induction E generalizing φ,
+	case list.nil : φ h1 h2
+  {
+		induction φ generalizing V,
+		case formula.meta_var_ : X V
+		{
+			unfold formula.subst,
+			simp only [holds_meta_var],
+			rewrite function.comp.assoc,
+			rewrite h3,
+			simp only [function.comp.right_id],
+			apply ext_env_holds,
+			exact h6,
+			apply h2,
+			unfold formula.meta_var_set,
+			simp only [finset.mem_singleton],
+			exact h5,
+		},
+		case formula.not_ : φ φ_ih V
+		{
+			unfold formula.is_meta_var_or_all_def_in_env at h1,
+			unfold formula.meta_var_set at h2,
+			unfold formula.subst,
+			simp only [holds_not],
+			apply not_congr,
+			apply φ_ih,
+			exact h1,
+			exact h2,
+		},
+		case formula.imp_ : φ ψ φ_ih ψ_ih V
+		{
+			unfold formula.is_meta_var_or_all_def_in_env at h1,
+			cases h1,
+			unfold formula.meta_var_set at h2,
+			simp only [finset.mem_union] at h2,
+			unfold formula.subst,
+			simp only [holds_imp],
+			apply imp_congr,
+			{
+				apply φ_ih,
+				exact h1_left,
+				intros X h7,
+				apply h2,
+				apply or.intro_left, exact h7,
+			},
+			{
+				apply ψ_ih,
+				exact h1_right,
+				intros X h7,
+				apply h2,
+				apply or.intro_right, exact h7,
+			}
+		},
+		case formula.eq_ : x y V
+		{
+			unfold formula.subst,
+			simp only [holds_eq],
+		},
+		case formula.forall_ : x φ φ_ih V
+		{
+			unfold formula.is_meta_var_or_all_def_in_env at h1,
+			unfold formula.meta_var_set at h2,
+			unfold formula.subst,
+			simp only [holds_forall],
+			apply forall_congr,
+			intros a,
+			specialize φ_ih h1 h2,
+			rewrite <- φ_ih,
+			rewrite aux_1 _ _ σ', exact h4,
+		},
+		case formula.def_ : name args V
+		{
+			unfold formula.subst,
+			simp only [holds_nil_def],
+		},
+	},
+  case list.cons : E_hd E_tl E_ih φ h1 h2
+  { admit },
 end
 
 
