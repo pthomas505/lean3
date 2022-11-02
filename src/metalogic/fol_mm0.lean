@@ -982,7 +982,83 @@ begin
 		},
 	},
   case list.cons : E_hd E_tl E_ih φ h1 h2
-  { admit },
+  {
+		induction φ generalizing V,
+		case formula.meta_var_ : X V E_ih
+		{
+			unfold formula.subst,
+			simp only [holds_meta_var],
+			rewrite function.comp.assoc,
+			rewrite h3,
+			simp only [function.comp.right_id],
+			apply ext_env_holds,
+			exact h6,
+			apply h2,
+			unfold formula.meta_var_set,
+			simp only [finset.mem_singleton],
+			exact h5,
+		},
+		case formula.not_ : φ φ_ih V E_ih
+		{
+			unfold formula.is_meta_var_or_all_def_in_env at h1,
+			unfold formula.meta_var_set at h2,
+			unfold formula.subst,
+			simp only [holds_not],
+			apply not_congr,
+			apply φ_ih,
+			exact h1,
+			exact h2,
+			exact E_ih,
+		},
+		case formula.imp_ : φ ψ φ_ih ψ_ih V E_ih
+		{
+			unfold formula.is_meta_var_or_all_def_in_env at h1,
+			cases h1,
+			unfold formula.meta_var_set at h2,
+			simp only [finset.mem_union] at h2,
+			unfold formula.subst,
+			simp only [holds_imp],
+			apply imp_congr,
+			{
+				apply φ_ih,
+				exact h1_left,
+				intros X h7,
+				apply h2,
+				apply or.intro_left, exact h7,
+				exact E_ih,
+			},
+			{
+				apply ψ_ih,
+				exact h1_right,
+				intros X h7,
+				apply h2,
+				apply or.intro_right, exact h7,
+				exact E_ih,
+			}
+		},
+		case formula.eq_ : x y V E_ih
+		{
+			unfold formula.subst,
+			simp only [holds_eq],
+		},
+		case formula.forall_ : x φ φ_ih V E_ih
+		{
+			unfold formula.is_meta_var_or_all_def_in_env at h1,
+			unfold formula.meta_var_set at h2,
+			unfold formula.subst,
+			simp only [holds_forall],
+			apply forall_congr,
+			intros a,
+			specialize φ_ih h1 h2,
+			rewrite <- φ_ih,
+			rewrite aux_1 _ _ σ', exact h4,
+			intros h7 E_φ h8 h9,
+			specialize E_ih h7 E_φ h8 h9,
+			sorry,			
+		},
+		case formula.def_ : φ_ᾰ φ_ᾰ_1 V E_ih
+		{ admit },
+	},
 end
 
 
