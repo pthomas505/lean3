@@ -894,7 +894,7 @@ lemma lem_1
 	(σ' : var_name → var_name)
 	(τ : meta_instantiation)
 	(φ : formula)
-	(h1 : φ.is_meta_var_or_all_def_in_env E)
+	(h1 : φ.is_meta_var_or_all_def_in_env E')
 	(h2 : ∀ (X : meta_var_name), X ∈ φ.meta_var_set → (τ X).is_meta_var_or_all_def_in_env E)
 	(h3 : σ.1 ∘ σ' = id)
 	(h4 : σ' ∘ σ.1 = id)
@@ -1054,26 +1054,77 @@ begin
 		{
 			unfold formula.is_meta_var_or_all_def_in_env at h1,
 			apply exists.elim h1, intros d a1, clear h1,
-			unfold formula.meta_var_set at h2,
-			unfold env.nodup at h5,
-			apply exists.elim h6, intros E1 a6, clear h6,
-			rewrite a6 at h5,
+			cases a1,
+			cases a1_right,
+			
 
-			have s1 : (∃ (E1 : env), (E' = (E1 ++ E_tl))),
+			unfold formula.meta_var_set at h2,
+
+			apply exists.elim h6, intros E1 a6, clear h6,
+			subst a6,
+
+			squeeze_simp at a1_left,
+
+			unfold env.nodup at h5,
+			rewrite list.pairwise_append at h5,
+			simp only [list.pairwise_cons, list.mem_cons_iff, forall_eq_or_imp] at h5,
+			cases h5, cases h5_right, cases h5_right_left,
+
+			have s1 : (∃ (E1_1 : env), ((E1 ++ (E_hd :: E_tl)) = (E1_1 ++ E_tl))),
 			apply exists.intro (E1 ++ [E_hd]),
 			simp only [list.append_assoc, list.singleton_append],
-			exact a6,
 
 			specialize E_ih s1,
+			clear s1,
 
 			unfold formula.subst,
 			simp only [holds_not_nil_def, list.length_map, list.map_map],
 			split_ifs,
 			{
-				sorry,
+				cases a1_left,
+				{
+					cases h,
+					by_contradiction contra,
+					specialize h5_right_right d a1_left,
+					cases h5_right_right,
+					apply h5_right_right_left,
+					rewrite <- h_left,
+					rewrite a1_right_left,
+					rewrite <- h_right,
+					rewrite a1_right_right,
+				},
+				{
+					cases a1_left,
+					{
+						sorry,
+					},
+					{
+						cases h,
+						by_contradiction contra,
+						apply h5_right_left_left d a1_left,
+						rewrite <- h_left,
+						rewrite a1_right_left,
+						rewrite <- h_right,
+						rewrite a1_right_right,
+					}
+				}
 			},
 			{
-				sorry,
+				rewrite E_ih,
+				unfold formula.subst,
+				unfold formula.is_meta_var_or_all_def_in_env,
+				apply exists.intro d,
+				squeeze_simp,
+				split,
+				exact a1_left,
+				split,
+				exact a1_right_left,
+				exact a1_right_right,
+				unfold formula.meta_var_set,
+				intros X,
+				intros contra,
+				squeeze_simp at contra,
+				contradiction,
 			},
 		},
 	},
