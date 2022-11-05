@@ -1063,7 +1063,7 @@ begin
       apply exists.elim h6, intros E1 a6, clear h6,
       subst a6,
 
-      squeeze_simp at a1_left,
+      simp only [list.mem_append, list.mem_cons_iff] at a1_left,
 
       unfold env.nodup at h5,
       rewrite list.pairwise_append at h5,
@@ -1308,7 +1308,7 @@ begin
     },
     case formula.def_ : name args
     {
-      unfold not_free at H,
+      unfold not_free at *,
       unfold is_not_free at *,
       simp only [holds_not_nil_def, holds_meta_var] at *,
       specialize E_ih nf,
@@ -1319,7 +1319,8 @@ begin
       },
       {
         apply E_ih,
-        sorry,
+        unfold not_free,
+        exact H,
       }
     },
   },
