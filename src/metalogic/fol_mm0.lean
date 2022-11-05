@@ -436,6 +436,56 @@ inductive is_proof : list (var_name × meta_var_name) → list formula → formu
 -- Semantics
 
 
+lemma def_meta_var_set_is_empty
+  (φ : formula)
+  (l : list var_name)
+  (h1 : φ.no_meta_var_and_all_free_in_list l) :
+  φ.meta_var_set = ∅ :=
+begin
+  induction φ generalizing l,
+  case formula.meta_var_ : X
+  {
+    unfold formula.no_meta_var_and_all_free_in_list at h1,
+    contradiction,
+  },
+  case formula.not_ : φ φ_ih
+  {
+    unfold formula.no_meta_var_and_all_free_in_list at h1,
+    unfold formula.meta_var_set,
+    exact φ_ih l h1,
+  },
+  case formula.imp_ : φ ψ φ_ih ψ_ih
+  {
+    unfold formula.no_meta_var_and_all_free_in_list at h1,
+    cases h1,
+    unfold formula.meta_var_set,
+    specialize φ_ih l h1_left,
+    specialize ψ_ih l h1_right,
+    rewrite φ_ih,
+    rewrite ψ_ih,
+    simp only [finset.empty_union],
+  },
+  case formula.eq_ : x y
+  {
+    unfold formula.no_meta_var_and_all_free_in_list at h1,
+    unfold formula.meta_var_set,
+  },
+  case formula.forall_ : x φ φ_ih
+  {
+    unfold formula.no_meta_var_and_all_free_in_list at h1,
+    unfold formula.meta_var_set,
+    apply φ_ih (x :: l),
+    exact h1,
+  },
+  case formula.def_ : name args
+  {
+    unfold formula.no_meta_var_and_all_free_in_list at h1,
+    unfold formula.meta_var_set,
+  },
+end
+
+
+
 def valuation (D : Type) : Type := var_name → D
 def meta_valuation (D : Type) : Type := meta_var_name → valuation D → Prop
 
@@ -781,6 +831,129 @@ begin
   },
 end
 
+lemma blah
+  {D : Type}
+  (M1 M2 : meta_valuation D)
+  (E : env)
+  (V1 V2 : valuation D)
+  (φ : formula)
+  (S : list var_name)
+  (hf : φ.no_meta_var_and_all_free_in_list S)
+  (h1 : ∀ v ∈ S, V1 v = V2 v)
+  (h2 : ∀ (V : valuation D) (X ∈ φ.meta_var_set), M1 X V ↔ M2 X V) :
+  holds D M1 E φ V1 ↔ holds D M2 E φ V2 :=
+begin
+  sorry,
+end
+
+example
+  {D : Type}
+  (M1 M2 : meta_valuation D)
+  (E : env)
+  (V : valuation D)
+  (φ : formula)
+  (h1 : ∀ (V : valuation D) (X ∈ φ.meta_var_set), M1 X V ↔ M2 X V) :
+  holds D M1 E φ V ↔ holds D M2 E φ V :=
+begin
+  induction E generalizing φ M1 M2 V,
+  case list.nil : φ M1 M2 V h1
+  {
+    induction φ generalizing M1 M2 V,
+    case formula.meta_var_ : X M1 M2 h1
+    {
+      simp only [holds_meta_var],
+      apply h1,
+      unfold formula.meta_var_set,
+      simp only [finset.mem_singleton],
+    },
+    case formula.not_ : φ φ_ih M1 M2 h1
+    {
+      simp only [holds_not],
+      apply not_congr,
+      apply φ_ih,
+      apply h1,
+    },
+    case formula.imp_ : φ φ φ_ih ψ_ih M1 M2 h1
+    {
+      unfold formula.meta_var_set at h1,
+      simp only [finset.mem_union] at h1,
+      simp only [holds_imp],
+      apply imp_congr,
+      {
+        apply φ_ih,
+        intros X h2 h3,
+        apply h1,
+        apply or.intro_left, exact h3,
+      },
+      {
+        apply ψ_ih,
+        intros X h2 h3,
+        apply h1,
+        apply or.intro_right, exact h3,
+      }
+    },
+    case formula.eq_ : x y M1 M2 h1
+    {
+      simp only [holds_eq],
+    },
+    case formula.forall_ : x φ φ_ih M1 M2 h1
+    {
+      simp only [holds_forall],
+      apply forall_congr,
+      intros a,
+      apply φ_ih,
+      unfold formula.meta_var_set at h1, exact h1,
+    },
+    case formula.def_ : name args M1 M2 V h1
+    {
+      simp only [holds_nil_def],
+    },
+  },
+  case list.cons : E_hd E_tl E_ih φ M1 M2 V h1
+  {
+    induction φ generalizing M1 M2 V,
+    case formula.meta_var_ : X M1 M2 V h1
+    {
+      simp only [holds_meta_var],
+      apply h1,
+      unfold formula.meta_var_set,
+      simp only [finset.mem_singleton],
+    },
+    case formula.not_ : φ φ_ih M1 M2 V h1
+    {
+      simp only [holds_not],
+      apply not_congr,
+      apply φ_ih,
+      exact h1,
+    },
+    case formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1 M1 M2 V h1
+    { admit },
+    case formula.eq_ : φ_ᾰ φ_ᾰ_1 M1 M2 V h1
+    { admit },
+    case formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih M1 M2 V h1
+    { admit },
+    case formula.def_ : name args M1 M2 V h1
+    {
+      have s1 : E_hd.q.meta_var_set = ∅,
+      exact def_meta_var_set_is_empty E_hd.q E_hd.args E_hd.nf,
+
+      simp only [holds_not_nil_def] at *,
+      unfold formula.meta_var_set at *,
+      split_ifs,
+      {
+        apply E_ih,
+        rewrite s1,
+        exact h1,
+      },
+      {
+        apply E_ih,
+        unfold formula.meta_var_set,
+        exact h1,
+      }
+    },
+  },
+end
+
 
 lemma ext_env_holds
   {D : Type}
@@ -1096,7 +1269,13 @@ begin
         {
           cases a1_left,
           {
+            apply blah _ _ _ _ _ _ E_hd.args,
+            exact E_hd.nf,
             sorry,
+            have s1 : E_hd.q.meta_var_set = ∅,
+            exact def_meta_var_set_is_empty E_hd.q E_hd.args E_hd.nf,
+            rewrite s1,
+            squeeze_simp,
           },
           {
             cases h,
