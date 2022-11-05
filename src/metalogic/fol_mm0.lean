@@ -1131,7 +1131,7 @@ begin
 end
 
 
--- changing v does not_ cause the value of φ to change
+-- changing v does not cause the value of φ to change
 
 def is_not_free (D : Type) (M : meta_valuation D) (E : env) (v : var_name) (φ : formula) : Prop :=
   ∀ (V : valuation D) (a : D),
