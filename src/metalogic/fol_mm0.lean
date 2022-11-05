@@ -1251,24 +1251,61 @@ begin
     case formula.meta_var_ : φ
     {
       unfold not_free at H,
-      apply nf, exact H,
+      exact nf φ H,
     },
     case formula.not_ : φ φ_ih
     {
       unfold not_free at *,
       unfold is_not_free at *,
-      intros V a,
       simp only [holds_not],
+      intros V a,
       apply not_congr,
-      apply φ_ih,
-      exact H,
+      exact φ_ih H V a,
     },
     case formula.imp_ : φ ψ φ_ih ψ_ih
-    { admit },
-    case formula.eq_ : φ_ᾰ φ_ᾰ_1
-    { admit },
-    case formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
-    { admit },
+    {
+      unfold not_free at *,
+      unfold is_not_free at *,
+      simp only [holds_imp],
+      cases H,
+      intros V a,
+      apply imp_congr,
+      exact φ_ih H_left V a,
+      exact ψ_ih H_right V a,
+    },
+    case formula.eq_ : x y
+    {
+      unfold not_free at H,
+      unfold is_not_free at *,
+      simp only [holds_eq],
+      cases H,
+      intros V a,
+      simp only [function.update_noteq H_left, function.update_noteq H_right],
+    },
+    case formula.forall_ : x φ φ_ih
+    {
+      unfold is_not_free at *,
+      unfold not_free at *,
+      simp only [holds_forall],
+      intros V a,
+      apply forall_congr, intros a',
+      cases H,
+      {
+        rewrite H,
+        simp only [function.update_idem],
+      },
+      {
+        by_cases v = x,
+        {
+          rewrite h,
+          simp only [function.update_idem],
+        },
+        {
+          simp only [function.update_comm h],
+          apply φ_ih H,
+        }
+      }
+    },
     case formula.def_ : name args
     {
       unfold not_free at H,
@@ -1282,6 +1319,7 @@ begin
       },
       {
         apply E_ih,
+        sorry,
       }
     },
   },
