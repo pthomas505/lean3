@@ -1175,7 +1175,7 @@ lemma not_free_imp_is_not_free
   (nf : ∀ X, (v, X) ∈ Γ → is_not_free D M E v (meta_var_ X)) :
   is_not_free D M E v φ :=
 begin
-  induction E,
+  induction E generalizing φ,
   case list.nil
   {
     induction φ,
@@ -1257,17 +1257,13 @@ begin
     {
       unfold not_free at *,
       unfold is_not_free at *,
-      simp at φ_ih,
       intros V a,
       simp only [holds_not],
       apply not_congr,
       apply φ_ih,
       exact H,
-      simp at E_ih,
-      intros h1,
-      sorry,
     },
-    case formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
+    case formula.imp_ : φ ψ φ_ih ψ_ih
     { admit },
     case formula.eq_ : φ_ᾰ φ_ᾰ_1
     { admit },
