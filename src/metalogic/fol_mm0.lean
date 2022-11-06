@@ -1681,66 +1681,66 @@ example
   (Γ : list (var_name × meta_var_name))
   (Δ : list formula)
   (φ : formula)
-  (H : is_proof Γ Δ φ)
+  (H : is_proof E Γ Δ φ)
   (nf : ∀ v X, (v, X) ∈ Γ → is_not_free D M E v (meta_var_ X))
   (hyp : ∀ (φ ∈ Δ) V, holds D M E φ V) :
   ∀ (V : valuation D), holds D M E φ V :=
 begin
   induction H generalizing M,
-  case is_proof.hyp : H_Γ H_Δ H_φ H_ᾰ M nf hyp
+  case is_proof.hyp : H_E H_Γ H_Δ H_φ H_ᾰ M nf hyp
   {
     exact hyp H_φ H_ᾰ,
   },
-  case is_proof.mp : H_Γ H_Δ H_φ H_ψ H_ᾰ H_ᾰ_1 H_ih_ᾰ H_ih_ᾰ_1 M nf hyp
+  case is_proof.mp : H_E H_Γ H_Δ H_φ H_ψ H_ᾰ H_ᾰ_1 H_ih_ᾰ H_ih_ᾰ_1 M nf hyp
   {
     intros V,
     simp only [holds_imp] at *,
     apply H_ih_ᾰ_1 M nf hyp,
     apply H_ih_ᾰ M nf hyp,
   },
-  case is_proof.prop_1 : H_Γ H_Δ H_φ H_ψ M nf hyp
+  case is_proof.prop_1 : H_E H_Γ H_Δ H_φ H_ψ M nf hyp
   {
     simp only [holds_imp],
     intros V h1 h2, exact h1,
   },
-  case is_proof.prop_2 : H_Γ H_Δ H_φ H_ψ H_χ M nf hyp
+  case is_proof.prop_2 : H_E H_Γ H_Δ H_φ H_ψ H_χ M nf hyp
   {
     simp only [holds_imp],
     intros V h1 h2 h3,
     apply h1, exact h3, apply h2, exact h3,
   },
-  case is_proof.prop_3 : H_Γ H_Δ H_φ H_ψ M nf hyp
+  case is_proof.prop_3 : H_E H_Γ H_Δ H_φ H_ψ M nf hyp
   {
     simp only [holds_imp, holds_not],
     intros V h1 h2,
     by_contradiction,
     exact h1 h h2,
   },
-  case is_proof.gen : H_Γ H_Δ H_φ H_x H_ᾰ H_ih M nf hyp
+  case is_proof.gen : H_E H_Γ H_Δ H_φ H_x H_ᾰ H_ih M nf hyp
   {
     simp only [holds_forall],
     intros V a,
     apply H_ih M nf hyp,
   },
-  case is_proof.pred_1 : H_Γ H_Δ H_φ H_ψ H_x M nf hyp
+  case is_proof.pred_1 : H_E H_Γ H_Δ H_φ H_ψ H_x M nf hyp
   {
     simp only [holds_imp, holds_forall],
     intros V h1 h2 a,
     apply h1,
     apply h2,
   },
-  case is_proof.pred_2 : H_Γ H_Δ H_φ H_x H_ᾰ M nf hyp
+  case is_proof.pred_2 : H_E H_Γ H_Δ H_φ H_x H_ᾰ M nf hyp
   {
-    have s1 : is_not_free D M E H_x H_φ,
-    apply not_free_imp_is_not_free M E H_Γ H_x H_φ H_ᾰ,
-    intros X h2, exact nf H_x X h2,
+    have s1 : is_not_free D M H_E H_x H_φ,
+    apply not_free_imp_is_not_free M H_E H_Γ H_x H_φ H_ᾰ,
+    intros X h2, apply nf, exact h2,
 
     simp only [holds_imp, holds_forall],
     intros V h2 a,
     unfold is_not_free at s1,
     rewrite <- s1, exact h2,
   },
-  case is_proof.eq_1 : H_Γ H_Δ H_x H_y H_ᾰ M nf hyp
+  case is_proof.eq_1 : H_E H_Γ H_Δ H_x H_y H_ᾰ M nf hyp
   {
     unfold exists_,
     simp only [holds_not, holds_forall, holds_eq, not_forall],
@@ -1752,7 +1752,7 @@ begin
     apply function.update_noteq,
     symmetry, exact H_ᾰ,
   },
-  case is_proof.eq_2 : H_Γ H_Δ H_x H_y H_z M nf hyp
+  case is_proof.eq_2 : H_E H_Γ H_Δ H_x H_y H_z M nf hyp
   {
     simp only [holds_imp, holds_eq],
     intros V h1 h2,
@@ -1761,7 +1761,7 @@ begin
     exact h1,
     exact h2,
   },
-  case is_proof.thm : H_Γ H_Γ' H_Δ H_Δ' H_φ H_σ H_τ H_ᾰ H_ᾰ_1 H_ᾰ_2 H_ih_ᾰ H_ih_ᾰ_1 M nf hyp
+  case is_proof.thm : H_E H_Γ H_Γ' H_Δ H_Δ' H_φ H_σ H_τ H_ᾰ H_ᾰ_1 H_ᾰ_2 H_ih_ᾰ H_ih_ᾰ_1 M nf hyp
   {
     obtain ⟨σ', left, right⟩ := H_σ.2,
     intros V,
@@ -1784,4 +1784,6 @@ begin
     simp only [list.nil_append],
 -/
   },
+  case is_proof.conv : H_E H_Γ H_Δ H_φ H_φ' H_ᾰ H_ᾰ_1 H_ih M nf hyp
+  { admit },
 end
