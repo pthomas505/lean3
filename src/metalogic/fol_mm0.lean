@@ -511,14 +511,9 @@ inductive is_proof : env → list (var_name × meta_var_name) → list formula �
   is_proof E Γ' Δ' (φ.subst σ τ)
 
 | unfold (E : env) (Γ : list (var_name × meta_var_name)) (Δ : list formula)
-  (d : definition_) (name : def_name) (args : list var_name)
-  (prop : ∃ (σ' : var_name → var_name),
-    (function.update_list id (list.zip d.args args)) ∘ σ' = id ∧
-      σ' ∘ (function.update_list id (list.zip d.args args)) = id) : 
-  let val := (function.update_list id (list.zip d.args args)) in
-  E.nodup → d ∈ E → name = d.name → args.length = d.args.length →
-  is_proof E Γ Δ (def_ name args) →
-  is_proof E Γ Δ (d.q.subst {val := val, property := prop} meta_var_)
+  (d : definition_) (φ : formula) :
+  d ∈ E → E.nodup →
+  is_proof E Γ Δ φ → is_proof E Γ Δ (φ.unfold d)
 
 
 -- Semantics
@@ -1402,7 +1397,7 @@ begin
             have s2 : E_hd.q.meta_var_set = ∅,
             exact def_meta_var_set_is_empty E_hd.q E_hd.args E_hd.nf,
             rewrite s2,
-            squeeze_simp,
+            simp only [finset.not_mem_empty, is_empty.forall_iff, forall_forall_const, implies_true_iff],
           },
           {
             cases h,
