@@ -280,6 +280,21 @@ begin
 end
 
 
+lemma function.update_list_mem_ext
+  {α β : Type}
+  [decidable_eq α]
+  (f g : α → β)
+  (l l' : list α)
+  (x : α)
+  (h1 : l.length ≤ l'.length)
+  (h2 : x ∈ l) :
+  function.update_list f (l.zip (list.map f l')) x =
+    function.update_list g (l.zip (list.map f l')) x :=
+begin
+  sorry
+end
+
+
 -- Syntax
 
 
@@ -1271,11 +1286,14 @@ begin
           {
             apply blah _ _ _ _ _ _ E_hd.args,
             exact E_hd.nf,
-            sorry,
+            intros v h',
+            apply function.update_list_mem_ext,
+            cases h,
+            rewrite h_right, exact h',
             have s1 : E_hd.q.meta_var_set = ∅,
             exact def_meta_var_set_is_empty E_hd.q E_hd.args E_hd.nf,
             rewrite s1,
-            squeeze_simp,
+            simp only [finset.not_mem_empty, is_empty.forall_iff, forall_forall_const, implies_true_iff],
           },
           {
             cases h,
