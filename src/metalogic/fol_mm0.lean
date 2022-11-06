@@ -642,7 +642,7 @@ begin
 end
 
 
-example
+lemma holds_valuation_ext
   {D : Type}
   (M : meta_valuation D)
   (E : env)
@@ -857,22 +857,7 @@ begin
   },
 end
 
-lemma blah
-  {D : Type}
-  (M1 M2 : meta_valuation D)
-  (E : env)
-  (V1 V2 : valuation D)
-  (φ : formula)
-  (S : list var_name)
-  (hf : φ.no_meta_var_and_all_free_in_list S)
-  (h1 : ∀ v ∈ S, V1 v = V2 v)
-  (h2 : ∀ (V : valuation D) (X ∈ φ.meta_var_set), M1 X V ↔ M2 X V) :
-  holds D M1 E φ V1 ↔ holds D M2 E φ V2 :=
-begin
-  sorry,
-end
-
-example
+lemma holds_meta_valuation_ext
   {D : Type}
   (M1 M2 : meta_valuation D)
   (E : env)
@@ -952,12 +937,37 @@ begin
       apply φ_ih,
       exact h1,
     },
-    case formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1 M1 M2 V h1
-    { admit },
-    case formula.eq_ : φ_ᾰ φ_ᾰ_1 M1 M2 V h1
-    { admit },
-    case formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih M1 M2 V h1
-    { admit },
+    case formula.imp_ : φ ψ φ_ih ψ_ih M1 M2 V h1
+    {
+      unfold formula.meta_var_set at h1,
+      simp only [finset.mem_union] at h1,
+      simp only [holds_imp],
+      apply imp_congr,
+      {
+        apply φ_ih,
+        intros X h2 h3,
+        apply h1,
+        apply or.intro_left, exact h3,
+      },
+      {
+        apply ψ_ih,
+        intros X h2 h3,
+        apply h1,
+        apply or.intro_right, exact h3,
+      }
+    },
+    case formula.eq_ : x y M1 M2 V h1
+    {
+      simp only [holds_eq],
+    },
+    case formula.forall_ : x φ φ_ih M1 M2 V h1
+    {
+      simp only [holds_forall],
+      apply forall_congr,
+      intros a,
+      apply φ_ih,
+      unfold formula.meta_var_set at h1, exact h1,
+    },
     case formula.def_ : name args M1 M2 V h1
     {
       have s1 : E_hd.q.meta_var_set = ∅,
@@ -978,6 +988,28 @@ begin
       }
     },
   },
+end
+
+
+lemma blah
+  {D : Type}
+  (M1 M2 : meta_valuation D)
+  (E : env)
+  (V1 V2 : valuation D)
+  (φ : formula)
+  (S : list var_name)
+  (hf : φ.no_meta_var_and_all_free_in_list S)
+  (h1 : ∀ v ∈ S, V1 v = V2 v)
+  (h2 : ∀ (V : valuation D) (X ∈ φ.meta_var_set), M1 X V ↔ M2 X V) :
+  holds D M1 E φ V1 ↔ holds D M2 E φ V2 :=
+begin
+  have s1 : (holds D M1 E φ V1 ↔ holds D M1 E φ V2),
+  apply holds_valuation_ext M1 E V1 V2 φ S,
+  exact hf, exact h1,
+  rewrite s1,
+
+  apply holds_meta_valuation_ext,
+  exact h2,
 end
 
 
