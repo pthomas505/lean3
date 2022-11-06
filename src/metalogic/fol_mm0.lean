@@ -306,6 +306,44 @@ begin
 end
 
 
+lemma function.update_list_update
+  {α β : Type}
+  [decidable_eq α]
+  (f g : α → β)
+  (l l' : list α)
+  (v : α)
+  (a : β)
+  (x : α)
+  (h1 : l.length = l'.length)
+  (h2 : x ∈ l)
+  (h3 : l.nodup)
+  (h4 : ∀ (x : α), (x ∈ l') → (¬(x = v))) :
+  function.update_list f (l.zip (list.map f l')) x =
+    function.update_list (function.update f v a) (l.zip (list.map (function.update f v a) l')) x :=
+begin
+  have s1 : ∃ (n : ℕ) (h : n < l.length), list.nth_le l n h = x,
+  apply list.nth_le_of_mem h2,
+  apply exists.elim s1, intros n h, clear s1,
+  apply exists.elim h, intros h' h'', clear h,
+  rewrite <- h'',
+
+  have s2 : n < (list.map f l').length, squeeze_simp, rewrite <- h1, exact h',
+
+  rewrite function.update_list_zip f l (list.map f l') n h' s2,
+  rewrite <- function.update_list_zip (function.update f v a) l (list.map f l') n h' s2,
+  congr' 2,
+  rewrite list.map_congr,
+  intros y h5, specialize h4 y h5,
+  simp only [function.update_noteq h4],
+  squeeze_simp,
+  rewrite h1,
+  exact h3,
+  squeeze_simp,
+  rewrite h1,
+  exact h3,
+end
+
+
 -- Syntax
 
 
@@ -1559,7 +1597,15 @@ begin
       intros V a,
       split_ifs,
       {
-        sorry,
+        apply holds_valuation_ext M E_tl _ _ E_hd.q E_hd.args,
+        exact E_hd.nf,
+        intros x h1,
+        apply function.update_list_update V (function.update V v a),
+        cases h,
+        rewrite h_right,
+        exact h1,
+        exact E_hd.nodup,
+        exact H,
       },
       {
         apply E_ih,
