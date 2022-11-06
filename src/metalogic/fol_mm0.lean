@@ -447,54 +447,78 @@ def formula.is_meta_var_or_all_def_in_env (E : env) : formula → Prop
 def exists_ (x : var_name) (φ : formula) : formula := not_ (forall_ x (not_ φ))
 
 
+def formula.unfold (d : definition_) : formula → formula
+| (meta_var_ X) := meta_var_ X
+| (not_ φ) := not_ φ.unfold
+| (imp_ φ ψ) := imp_ φ.unfold ψ.unfold
+| (eq_ x y) := eq_ x y
+| (forall_ x φ) := forall_ x φ.unfold
+| (def_ name args) :=
+  let val := function.update_list id (list.zip d.args args) in
+  if name = d.name ∧ args.length = d.args.length
+  then d.q.subst {val := val, property := sorry} meta_var_
+  else (def_ name args)
+
+
 -- (v, X) ∈ Γ if and only if v is not free in meta_var_ X.
-inductive is_proof : list (var_name × meta_var_name) → list formula → formula → Prop
-| hyp (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+-- Δ is a list of hypotheses.
+inductive is_proof : env → list (var_name × meta_var_name) → list formula → formula → Prop
+| hyp (E : env) (Γ : list (var_name × meta_var_name)) (Δ : list formula)
   {φ : formula} :
-  φ ∈ Δ → is_proof Γ Δ φ
+  φ ∈ Δ → is_proof E Γ Δ φ
 
-| mp (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+| mp (E : env) (Γ : list (var_name × meta_var_name)) (Δ : list formula)
   {φ ψ : formula} :
-  is_proof Γ Δ φ → is_proof Γ Δ (φ.imp_ ψ) → is_proof Γ Δ ψ
+  is_proof E Γ Δ φ → is_proof E Γ Δ (φ.imp_ ψ) → is_proof E Γ Δ ψ
 
-| prop_1 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+| prop_1 (E : env) (Γ : list (var_name × meta_var_name)) (Δ : list formula)
   {φ ψ : formula} :
-  is_proof Γ Δ (φ.imp_ (ψ.imp_ φ))
+  is_proof E Γ Δ (φ.imp_ (ψ.imp_ φ))
 
-| prop_2 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+| prop_2 (E : env) (Γ : list (var_name × meta_var_name)) (Δ : list formula)
   {φ ψ χ : formula} :
-  is_proof Γ Δ ((φ.imp_ (ψ.imp_ χ)).imp_ ((φ.imp_ ψ).imp_ (φ.imp_ χ)))
+  is_proof E Γ Δ ((φ.imp_ (ψ.imp_ χ)).imp_ ((φ.imp_ ψ).imp_ (φ.imp_ χ)))
 
-| prop_3 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+| prop_3 (E : env) (Γ : list (var_name × meta_var_name)) (Δ : list formula)
   {φ ψ : formula} :
-  is_proof Γ Δ (((not_ φ).imp_ (not_ ψ)).imp_ (ψ.imp_ φ))
+  is_proof E Γ Δ (((not_ φ).imp_ (not_ ψ)).imp_ (ψ.imp_ φ))
 
-| gen (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+| gen (E : env) (Γ : list (var_name × meta_var_name)) (Δ : list formula)
   {φ : formula} {x : var_name} :
-  is_proof Γ Δ φ → is_proof Γ Δ (forall_ x φ)
+  is_proof E Γ Δ φ → is_proof E Γ Δ (forall_ x φ)
 
-| pred_1 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+| pred_1 (E : env) (Γ : list (var_name × meta_var_name)) (Δ : list formula)
   {φ ψ : formula} {x : var_name} :
-  is_proof Γ Δ ((forall_ x (φ.imp_ ψ)).imp_ ((forall_ x φ).imp_ (forall_ x ψ)))
+  is_proof E Γ Δ ((forall_ x (φ.imp_ ψ)).imp_ ((forall_ x φ).imp_ (forall_ x ψ)))
 
-| pred_2 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+| pred_2 (E : env) (Γ : list (var_name × meta_var_name)) (Δ : list formula)
   {φ : formula} {x : var_name} :
-  not_free Γ x φ → is_proof Γ Δ (φ.imp_ (forall_ x φ))
+  not_free Γ x φ → is_proof E Γ Δ (φ.imp_ (forall_ x φ))
 
-| eq_1 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+| eq_1 (E : env) (Γ : list (var_name × meta_var_name)) (Δ : list formula)
   {x y : var_name} :
-  x ≠ y → is_proof Γ Δ (exists_ x (eq_ x y))
+  x ≠ y → is_proof E Γ Δ (exists_ x (eq_ x y))
 
-| eq_2 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+| eq_2 (E : env) (Γ : list (var_name × meta_var_name)) (Δ : list formula)
   {x y z : var_name} :
-  is_proof Γ Δ ((eq_ x y).imp_ ((eq_ x z).imp_ (eq_ y z)))
+  is_proof E Γ Δ ((eq_ x y).imp_ ((eq_ x z).imp_ (eq_ y z)))
 
-| thm (Γ Γ' : list (var_name × meta_var_name)) (Δ Δ' : list formula)
+| thm (E : env) (Γ Γ' : list (var_name × meta_var_name)) (Δ Δ' : list formula)
   {φ : formula} {σ : instantiation} {τ : meta_instantiation} :
-  is_proof Γ Δ φ →
+  is_proof E Γ Δ φ →
   (∀ (x : var_name) (X : meta_var_name), (x, X) ∈ Γ → not_free Γ' (σ.1 x) (τ X)) →
-  (∀ (ψ : formula), ψ ∈ Δ → is_proof Γ' Δ' (ψ.subst σ τ)) →
-  is_proof Γ' Δ' (φ.subst σ τ)
+  (∀ (ψ : formula), ψ ∈ Δ → is_proof E Γ' Δ' (ψ.subst σ τ)) →
+  is_proof E Γ' Δ' (φ.subst σ τ)
+
+| unfold (E : env) (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+  (d : definition_) (name : def_name) (args : list var_name)
+  (prop : ∃ (σ' : var_name → var_name),
+    (function.update_list id (list.zip d.args args)) ∘ σ' = id ∧
+      σ' ∘ (function.update_list id (list.zip d.args args)) = id) : 
+  let val := (function.update_list id (list.zip d.args args)) in
+  E.nodup → d ∈ E → name = d.name → args.length = d.args.length →
+  is_proof E Γ Δ (def_ name args) →
+  is_proof E Γ Δ (d.q.subst {val := val, property := prop} meta_var_)
 
 
 -- Semantics
