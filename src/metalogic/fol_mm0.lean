@@ -447,17 +447,27 @@ def formula.is_meta_var_or_all_def_in_env (E : env) : formula → Prop
 def exists_ (x : var_name) (φ : formula) : formula := not_ (forall_ x (not_ φ))
 
 
-def formula.unfold (d : definition_) : formula → formula
-| (meta_var_ X) := meta_var_ X
-| (not_ φ) := not_ φ.unfold
-| (imp_ φ ψ) := imp_ φ.unfold ψ.unfold
-| (eq_ x y) := eq_ x y
-| (forall_ x φ) := forall_ x φ.unfold
-| (def_ name args) :=
-  let val := function.update_list id (list.zip d.args args) in
-  if name = d.name ∧ args.length = d.args.length
-  then d.q.subst {val := val, property := sorry} meta_var_
-  else (def_ name args)
+inductive is_conv : env → formula → formula → Prop
+| conv_refl (E : env) (φ : formula) : is_conv E φ φ
+
+| conv_symm (E : env) (φ φ' : formula) :
+  is_conv E φ φ' → is_conv E φ' φ
+
+| conv_trans (E : env) (φ φ' φ'' : formula) :
+  is_conv E φ φ' → is_conv E φ' φ'' → is_conv E φ φ''
+
+| conv_not (E : env) (φ φ' : formula) :
+  is_conv E φ φ' → is_conv E (not_ φ) (not_ φ')
+
+| conv_imp (E : env) (φ φ' ψ ψ' : formula) :
+  is_conv E φ φ' → is_conv E ψ ψ' →  is_conv E (imp_ φ ψ) (imp_ φ' ψ')
+
+| conv_forall (E : env) (x : var_name) (φ φ' : formula) :
+  is_conv E φ φ' → is_conv E (forall_ x φ) (forall_ x φ')
+
+| conv_unfold (E : env) (d : definition_) (σ : instantiation) :
+  (d ∈ E) → E.nodup →
+  is_conv E (def_ d.name (d.args.map σ.1)) (d.q.subst σ meta_var_)
 
 
 -- (v, X) ∈ Γ if and only if v is not free in meta_var_ X.
@@ -510,10 +520,9 @@ inductive is_proof : env → list (var_name × meta_var_name) → list formula �
   (∀ (ψ : formula), ψ ∈ Δ → is_proof E Γ' Δ' (ψ.subst σ τ)) →
   is_proof E Γ' Δ' (φ.subst σ τ)
 
-| unfold (E : env) (Γ : list (var_name × meta_var_name)) (Δ : list formula)
-  (d : definition_) (φ : formula) :
-  d ∈ E → E.nodup →
-  is_proof E Γ Δ φ → is_proof E Γ Δ (φ.unfold d)
+| conv (E : env) (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+  (φ φ' : formula) :
+  is_proof E Γ Δ φ → is_conv E φ φ' → is_proof E Γ Δ φ'
 
 
 -- Semantics
