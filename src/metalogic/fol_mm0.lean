@@ -286,12 +286,23 @@ lemma function.update_list_mem_ext
   (f g : α → β)
   (l l' : list α)
   (x : α)
-  (h1 : l.length ≤ l'.length)
-  (h2 : x ∈ l) :
+  (h1 : l.length = l'.length)
+  (h2 : x ∈ l)
+  (h3 : l.nodup) :
   function.update_list f (l.zip (list.map f l')) x =
     function.update_list g (l.zip (list.map f l')) x :=
 begin
-  sorry
+  have s1 : ∃ (n : ℕ) (h : n < l.length), list.nth_le l n h = x,
+  exact list.nth_le_of_mem h2,
+  apply exists.elim s1, intros n h, clear s1,
+  apply exists.elim h, intros h' h'', clear h,
+  rewrite <- h'',
+  have s2 : n < (list.map f l').length, squeeze_simp, rewrite <- h1, exact h',
+  rewrite function.update_list_zip f l (list.map f l') n h' s2,
+  rewrite <- function.update_list_zip g l (list.map f l') n h' s2,
+  squeeze_simp, rewrite h1,
+  exact h3,
+  squeeze_simp, rewrite h1, exact h3,
 end
 
 
@@ -1292,8 +1303,12 @@ begin
             rewrite h_right, exact h',
             have s1 : E_hd.q.meta_var_set = ∅,
             exact def_meta_var_set_is_empty E_hd.q E_hd.args E_hd.nf,
-            rewrite s1,
-            simp only [finset.not_mem_empty, is_empty.forall_iff, forall_forall_const, implies_true_iff],
+            exact E_hd.nodup,
+
+            have s2 : E_hd.q.meta_var_set = ∅,
+            exact def_meta_var_set_is_empty E_hd.q E_hd.args E_hd.nf,
+            rewrite s2,
+            squeeze_simp,
           },
           {
             cases h,
