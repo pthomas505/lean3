@@ -475,6 +475,7 @@ inductive is_conv : env → formula → formula → Prop
 inductive is_proof : env → list (var_name × meta_var_name) → list formula → formula → Prop
 | hyp (E : env) (Γ : list (var_name × meta_var_name)) (Δ : list formula)
   {φ : formula} :
+  φ.is_meta_var_or_all_def_in_env E →
   φ ∈ Δ → is_proof E Γ Δ φ
 
 | mp (E : env) (Γ : list (var_name × meta_var_name)) (Δ : list formula)
@@ -483,14 +484,21 @@ inductive is_proof : env → list (var_name × meta_var_name) → list formula �
 
 | prop_1 (E : env) (Γ : list (var_name × meta_var_name)) (Δ : list formula)
   {φ ψ : formula} :
+  φ.is_meta_var_or_all_def_in_env E →
+  ψ.is_meta_var_or_all_def_in_env E →
   is_proof E Γ Δ (φ.imp_ (ψ.imp_ φ))
 
 | prop_2 (E : env) (Γ : list (var_name × meta_var_name)) (Δ : list formula)
   {φ ψ χ : formula} :
+  φ.is_meta_var_or_all_def_in_env E →
+  ψ.is_meta_var_or_all_def_in_env E →
+  χ.is_meta_var_or_all_def_in_env E →
   is_proof E Γ Δ ((φ.imp_ (ψ.imp_ χ)).imp_ ((φ.imp_ ψ).imp_ (φ.imp_ χ)))
 
 | prop_3 (E : env) (Γ : list (var_name × meta_var_name)) (Δ : list formula)
   {φ ψ : formula} :
+  φ.is_meta_var_or_all_def_in_env E →
+  ψ.is_meta_var_or_all_def_in_env E →
   is_proof E Γ Δ (((not_ φ).imp_ (not_ ψ)).imp_ (ψ.imp_ φ))
 
 | gen (E : env) (Γ : list (var_name × meta_var_name)) (Δ : list formula)
@@ -499,10 +507,13 @@ inductive is_proof : env → list (var_name × meta_var_name) → list formula �
 
 | pred_1 (E : env) (Γ : list (var_name × meta_var_name)) (Δ : list formula)
   {φ ψ : formula} {x : var_name} :
+  φ.is_meta_var_or_all_def_in_env E →
+  ψ.is_meta_var_or_all_def_in_env E →
   is_proof E Γ Δ ((forall_ x (φ.imp_ ψ)).imp_ ((forall_ x φ).imp_ (forall_ x ψ)))
 
 | pred_2 (E : env) (Γ : list (var_name × meta_var_name)) (Δ : list formula)
   {φ : formula} {x : var_name} :
+  φ.is_meta_var_or_all_def_in_env E →
   not_free Γ x φ → is_proof E Γ Δ (φ.imp_ (forall_ x φ))
 
 | eq_1 (E : env) (Γ : list (var_name × meta_var_name)) (Δ : list formula)
@@ -522,6 +533,7 @@ inductive is_proof : env → list (var_name × meta_var_name) → list formula �
 
 | conv (E : env) (Γ : list (var_name × meta_var_name)) (Δ : list formula)
   (φ φ' : formula) :
+  φ'.is_meta_var_or_all_def_in_env E →
   is_proof E Γ Δ φ → is_conv E φ φ' → is_proof E Γ Δ φ'
 
 
@@ -1674,6 +1686,169 @@ begin
 end
 
 
+lemma lem_3
+  (E : env)
+  (σ : instantiation)
+  (τ : meta_instantiation)
+  (φ : formula)
+  (h1 : φ.is_meta_var_or_all_def_in_env E)
+  (h2 : ∀ (X : meta_var_name), X ∈ φ.meta_var_set → (τ X).is_meta_var_or_all_def_in_env E) :
+  (φ.subst σ τ).is_meta_var_or_all_def_in_env E :=
+begin
+  induction φ,
+  case formula.meta_var_ : X
+  {
+    unfold formula.subst,
+    apply h2,
+    unfold formula.meta_var_set,
+    simp only [finset.mem_singleton],
+  },
+  case formula.not_ : φ φ_ih
+  {
+    unfold formula.subst,
+    unfold formula.is_meta_var_or_all_def_in_env at *,
+    exact φ_ih h1 h2,
+  },
+  case formula.imp_ : φ ψ φ_ih ψ_ih
+  {
+    unfold formula.subst,
+    unfold formula.is_meta_var_or_all_def_in_env at *,
+    cases h1,
+    unfold formula.meta_var_set at h2,
+    simp only [finset.mem_union] at h2,
+    split,
+    apply φ_ih h1_left,
+    intros x a1,
+    apply h2,
+    apply or.intro_left,
+    exact a1,
+
+    apply ψ_ih h1_right,
+    intros x a1,
+    apply h2,
+    apply or.intro_right,
+    exact a1,
+  },
+  case formula.eq_ : x y
+  {
+    unfold formula.subst,
+  },
+  case formula.forall_ : x φ φ_ih
+  {
+    unfold formula.subst,
+    unfold formula.is_meta_var_or_all_def_in_env at *,
+    unfold formula.meta_var_set at h2,
+    apply φ_ih h1 h2,
+  },
+  case formula.def_ : name args
+  {
+    unfold formula.subst,
+    unfold formula.is_meta_var_or_all_def_in_env at *,
+    unfold formula.meta_var_set at h2,
+    simp only [list.length_map],
+    exact h1,
+  },
+end
+
+lemma lem_4
+  (E : env)
+  (Γ : list (var_name × meta_var_name))
+  (Δ : list formula)
+  (φ : formula)
+  (H : is_proof E Γ Δ φ) :
+  φ.is_meta_var_or_all_def_in_env E :=
+begin
+  induction H,
+  case is_proof.hyp : H_E H_Γ H_Δ H_φ H_ᾰ H_ᾰ_1
+  { assumption, },
+  case is_proof.mp : H_E H_Γ H_Δ H_φ H_ψ H_ᾰ H_ᾰ_1 H_ih_ᾰ H_ih_ᾰ_1
+  {
+    unfold formula.is_meta_var_or_all_def_in_env at H_ih_ᾰ_1,
+    cases H_ih_ᾰ_1,
+    assumption,
+  },
+  case is_proof.prop_1 : H_E H_Γ H_Δ H_φ H_ψ H_ᾰ H_ᾰ_1
+  {
+    unfold formula.is_meta_var_or_all_def_in_env,
+    split,
+    assumption,
+    split,
+    assumption,
+    assumption,
+  },
+  case is_proof.prop_2 : H_E H_Γ H_Δ H_φ H_ψ H_χ H_ᾰ H_ᾰ_1 H_ᾰ_2
+  {
+    unfold formula.is_meta_var_or_all_def_in_env,
+    split,
+    split,
+    assumption,
+    split,
+    assumption,
+    assumption,
+    split,
+    split,
+    assumption,
+    assumption,
+    split,
+    assumption,
+    assumption,
+  },
+  case is_proof.prop_3 : H_E H_Γ H_Δ H_φ H_ψ H_ᾰ H_ᾰ_1
+  {
+    unfold formula.is_meta_var_or_all_def_in_env,
+    split,
+    split,
+    assumption,
+    assumption,
+    split,
+    assumption,
+    assumption,
+  },
+  case is_proof.gen : H_E H_Γ H_Δ H_φ H_x H_ᾰ H_ih
+  {
+    unfold formula.is_meta_var_or_all_def_in_env,
+    exact H_ih,
+  },
+  case is_proof.pred_1 : H_E H_Γ H_Δ H_φ H_ψ H_x H_ᾰ H_ᾰ_1
+  {
+    unfold formula.is_meta_var_or_all_def_in_env,
+    split,
+    split,
+    assumption,
+    assumption,
+    split,
+    assumption,
+    assumption,
+  },
+  case is_proof.pred_2 : H_E H_Γ H_Δ H_φ H_x H_ᾰ H_ᾰ_1
+  {
+    unfold formula.is_meta_var_or_all_def_in_env,
+    split,
+    assumption,
+    assumption,
+  },
+  case is_proof.eq_1 : H_E H_Γ H_Δ H_x H_y H_ᾰ
+  {
+    unfold exists_,
+  },
+  case is_proof.eq_2 : H_E H_Γ H_Δ H_x H_y H_z
+  {
+    unfold formula.is_meta_var_or_all_def_in_env,
+    simp only [and_self],
+  },
+  case is_proof.thm : H_E H_Γ H_Γ' H_Δ H_Δ' H_φ H_σ H_τ H_ᾰ H_ᾰ_1 H_ᾰ_2 H_ih_ᾰ H_ih_ᾰ_1
+  {
+    apply lem_3 H_E H_σ,
+    assumption,
+    sorry,
+  },
+  case is_proof.conv : H_E H_Γ H_Δ H_φ H_φ' H_ᾰ H_ᾰ_1 H_ᾰ_2 H_ih
+  {
+    assumption,
+  },
+end
+
+
 example
   (D : Type)
   (M : meta_valuation D)
@@ -1792,4 +1967,22 @@ begin
   },
   case is_proof.conv : H_E H_Γ H_Δ H_φ H_φ' H_ᾰ H_ᾰ_1 H_ih M nf hyp
   { admit },
+end
+
+
+example
+  (D : Type)
+  (M : meta_valuation D)
+  (E : env)
+  (Γ : list (var_name × meta_var_name))
+  (Δ : list formula)
+  (φ : formula)
+  (H : is_proof E Γ Δ φ)
+  (h1 : E.nodup)
+  (nf : ∀ v X, (v, X) ∈ Γ → is_not_free D M E v (meta_var_ X))
+  (hyp : ∀ (φ ∈ Δ) V, holds D M E φ V) :
+  ∀ (V : valuation D), holds D M E φ V :=
+begin
+  induction H generalizing M,
+  pretty_cases,
 end
