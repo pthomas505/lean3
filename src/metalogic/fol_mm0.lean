@@ -1682,21 +1682,20 @@ example
   (Δ : list formula)
   (φ : formula)
   (H : is_proof E Γ Δ φ)
+  (h1 : E.nodup)
   (nf : ∀ v X, (v, X) ∈ Γ → is_not_free D M E v (meta_var_ X))
   (hyp : ∀ (φ ∈ Δ) V, holds D M E φ V) :
   ∀ (V : valuation D), holds D M E φ V :=
 begin
   induction H generalizing M,
   case is_proof.hyp : H_E H_Γ H_Δ H_φ H_ᾰ M nf hyp
-  {
-    exact hyp H_φ H_ᾰ,
-  },
+  { exact hyp H_φ H_ᾰ, },
   case is_proof.mp : H_E H_Γ H_Δ H_φ H_ψ H_ᾰ H_ᾰ_1 H_ih_ᾰ H_ih_ᾰ_1 M nf hyp
   {
     intros V,
     simp only [holds_imp] at *,
-    apply H_ih_ᾰ_1 M nf hyp,
-    apply H_ih_ᾰ M nf hyp,
+    apply H_ih_ᾰ_1 h1 M nf hyp,
+    apply H_ih_ᾰ h1 M nf hyp,
   },
   case is_proof.prop_1 : H_E H_Γ H_Δ H_φ H_ψ M nf hyp
   {
@@ -1720,7 +1719,7 @@ begin
   {
     simp only [holds_forall],
     intros V a,
-    apply H_ih M nf hyp,
+    apply H_ih h1 M nf hyp,
   },
   case is_proof.pred_1 : H_E H_Γ H_Δ H_φ H_ψ H_x M nf hyp
   {
@@ -1766,11 +1765,11 @@ begin
     obtain ⟨σ', left, right⟩ := H_σ.2,
     intros V,
     rewrite <- lem_1 V M H_E _ H_σ σ' H_τ,
-    apply H_ih_ᾰ,
+    apply H_ih_ᾰ h1,
     intros v X h1,
     exact lem_2 M H_E H_Γ H_Γ' H_σ σ' H_τ left right nf H_ᾰ_1 v X h1,
     intros φ h2 V',
-    specialize H_ih_ᾰ_1 φ h2 M nf hyp (V' ∘ σ'),
+    specialize H_ih_ᾰ_1 φ h2 h1 M nf hyp (V' ∘ σ'),
     rewrite <- lem_1 (V' ∘ σ') M H_E H_E H_σ σ' H_τ φ at H_ih_ᾰ_1,
     rewrite function.comp.assoc at H_ih_ᾰ_1,
     rewrite right at H_ih_ᾰ_1,
@@ -1780,14 +1779,14 @@ begin
     sorry,
     exact left,
     exact right,
-    sorry,
+    exact h1,
     apply exists.intro list.nil,
     simp only [list.nil_append],
     sorry,
     sorry,
     exact left,
     exact right,
-    sorry,
+    exact h1,
     apply exists.intro list.nil,
     simp only [list.nil_append],
   },
