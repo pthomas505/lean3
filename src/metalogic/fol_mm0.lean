@@ -526,6 +526,7 @@ inductive is_proof : env → list (var_name × meta_var_name) → list formula �
 
 | thm (E : env) (Γ Γ' : list (var_name × meta_var_name)) (Δ Δ' : list formula)
   {φ : formula} {σ : instantiation} {τ : meta_instantiation} :
+  ∀ (X : meta_var_name), X ∈ φ.meta_var_set → (τ X).is_meta_var_or_all_def_in_env E →
   is_proof E Γ Δ φ →
   (∀ (x : var_name) (X : meta_var_name), (x, X) ∈ Γ → not_free Γ' (σ.1 x) (τ X)) →
   (∀ (ψ : formula), ψ ∈ Δ → is_proof E Γ' Δ' (ψ.subst σ τ)) →
@@ -1863,8 +1864,10 @@ example
   ∀ (V : valuation D), holds D M E φ V :=
 begin
   induction H generalizing M,
-  case is_proof.hyp : H_E H_Γ H_Δ H_φ H_ᾰ M nf hyp
-  { exact hyp H_φ H_ᾰ, },
+  case is_proof.hyp : H_E H_Γ H_Δ H_φ H_ᾰ H_ᾰ_1 M nf hyp
+  { intros V,
+    exact hyp H_φ H_ᾰ_1 V,
+  },
   case is_proof.mp : H_E H_Γ H_Δ H_φ H_ψ H_ᾰ H_ᾰ_1 H_ih_ᾰ H_ih_ᾰ_1 M nf hyp
   {
     intros V,
@@ -1872,18 +1875,18 @@ begin
     apply H_ih_ᾰ_1 h1 M nf hyp,
     apply H_ih_ᾰ h1 M nf hyp,
   },
-  case is_proof.prop_1 : H_E H_Γ H_Δ H_φ H_ψ M nf hyp
+  case is_proof.prop_1 : H_E H_Γ H_Δ H_φ H_ψ H_ᾰ H_ᾰ_1 M nf hyp
   {
     simp only [holds_imp],
     intros V h1 h2, exact h1,
   },
-  case is_proof.prop_2 : H_E H_Γ H_Δ H_φ H_ψ H_χ M nf hyp
+  case is_proof.prop_2 : H_E H_Γ H_Δ H_φ H_ψ H_χ H_ᾰ H_ᾰ_1 H_ᾰ_2 M nf hyp
   {
     simp only [holds_imp],
     intros V h1 h2 h3,
     apply h1, exact h3, apply h2, exact h3,
   },
-  case is_proof.prop_3 : H_E H_Γ H_Δ H_φ H_ψ M nf hyp
+  case is_proof.prop_3 : H_E H_Γ H_Δ H_φ H_ψ H_ᾰ H_ᾰ_1 M nf hyp
   {
     simp only [holds_imp, holds_not],
     intros V h1 h2,
@@ -1896,17 +1899,17 @@ begin
     intros V a,
     apply H_ih h1 M nf hyp,
   },
-  case is_proof.pred_1 : H_E H_Γ H_Δ H_φ H_ψ H_x M nf hyp
+  case is_proof.pred_1 : H_E H_Γ H_Δ H_φ H_ψ H_x H_ᾰ H_ᾰ_1 M nf hyp
   {
     simp only [holds_imp, holds_forall],
     intros V h1 h2 a,
     apply h1,
     apply h2,
   },
-  case is_proof.pred_2 : H_E H_Γ H_Δ H_φ H_x H_ᾰ M nf hyp
+  case is_proof.pred_2 : H_E H_Γ H_Δ H_φ H_x H_ᾰ H_ᾰ_1 M nf hyp
   {
     have s1 : is_not_free D M H_E H_x H_φ,
-    apply not_free_imp_is_not_free M H_E H_Γ H_x H_φ H_ᾰ,
+    apply not_free_imp_is_not_free M H_E H_Γ H_x H_φ H_ᾰ_1,
     intros X h2, apply nf, exact h2,
 
     simp only [holds_imp, holds_forall],
@@ -1935,14 +1938,14 @@ begin
     exact h1,
     exact h2,
   },
-  case is_proof.thm : H_E H_Γ H_Γ' H_Δ H_Δ' H_φ H_σ H_τ H_ᾰ H_ᾰ_1 H_ᾰ_2 H_ih_ᾰ H_ih_ᾰ_1 M nf hyp
+  case is_proof.thm : H_E H_Γ H_Γ' H_Δ H_Δ' H_φ H_σ H_τ H_X H_ᾰ H_ᾰ_1 H_ᾰ_2 H_ᾰ_3 H_ᾰ_4 H_ih_ᾰ H_ih_ᾰ_1 M nf hyp
   {
     obtain ⟨σ', left, right⟩ := H_σ.2,
     intros V,
     rewrite <- lem_1 V M H_E _ H_σ σ' H_τ,
     apply H_ih_ᾰ h1,
     intros v X h1,
-    exact lem_2 M H_E H_Γ H_Γ' H_σ σ' H_τ left right nf H_ᾰ_1 v X h1,
+    exact lem_2 M H_E H_Γ H_Γ' H_σ σ' H_τ left right nf H_ᾰ_3 v X h1,
     intros φ h2 V',
     specialize H_ih_ᾰ_1 φ h2 h1 M nf hyp (V' ∘ σ'),
     rewrite <- lem_1 (V' ∘ σ') M H_E H_E H_σ σ' H_τ φ at H_ih_ᾰ_1,
@@ -1965,24 +1968,6 @@ begin
     apply exists.intro list.nil,
     simp only [list.nil_append],
   },
-  case is_proof.conv : H_E H_Γ H_Δ H_φ H_φ' H_ᾰ H_ᾰ_1 H_ih M nf hyp
+  case is_proof.conv : H_E H_Γ H_Δ H_φ H_φ' H_ᾰ H_ᾰ_1 H_ᾰ_2 H_ih M nf hyp
   { admit },
-end
-
-
-example
-  (D : Type)
-  (M : meta_valuation D)
-  (E : env)
-  (Γ : list (var_name × meta_var_name))
-  (Δ : list formula)
-  (φ : formula)
-  (H : is_proof E Γ Δ φ)
-  (h1 : E.nodup)
-  (nf : ∀ v X, (v, X) ∈ Γ → is_not_free D M E v (meta_var_ X))
-  (hyp : ∀ (φ ∈ Δ) V, holds D M E φ V) :
-  ∀ (V : valuation D), holds D M E φ V :=
-begin
-  induction H generalizing M,
-  pretty_cases,
 end
