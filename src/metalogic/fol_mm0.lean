@@ -1841,7 +1841,7 @@ begin
   {
     apply lem_3 H_E H_σ,
     assumption,
-    sorry,
+    apply H_ᾰ,
   },
   case is_proof.conv : H_E H_Γ H_Δ H_φ H_φ' H_ᾰ H_ᾰ_1 H_ᾰ_2 H_ih
   {
