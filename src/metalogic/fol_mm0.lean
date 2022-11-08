@@ -526,10 +526,10 @@ inductive is_proof : env → list (var_name × meta_var_name) → list formula �
 
 | thm (E : env) (Γ Γ' : list (var_name × meta_var_name)) (Δ Δ' : list formula)
   {φ : formula} {σ : instantiation} {τ : meta_instantiation} :
-  ∀ (X : meta_var_name), X ∈ φ.meta_var_set → (τ X).is_meta_var_or_all_def_in_env E →
-  is_proof E Γ Δ φ →
+  (∀ (ψ : formula) (X : meta_var_name), X ∈ ψ.meta_var_set → (τ X).is_meta_var_or_all_def_in_env E) →
   (∀ (x : var_name) (X : meta_var_name), (x, X) ∈ Γ → not_free Γ' (σ.1 x) (τ X)) →
   (∀ (ψ : formula), ψ ∈ Δ → is_proof E Γ' Δ' (ψ.subst σ τ)) →
+  is_proof E Γ Δ φ →
   is_proof E Γ' Δ' (φ.subst σ τ)
 
 | conv (E : env) (Γ : list (var_name × meta_var_name)) (Δ : list formula)
@@ -1860,7 +1860,7 @@ example
   (H : is_proof E Γ Δ φ)
   (h1 : E.nodup)
   (nf : ∀ v X, (v, X) ∈ Γ → is_not_free D M E v (meta_var_ X))
-  (hyp : ∀ (φ ∈ Δ) V, holds D M E φ V) :
+  (hyp : ∀ (ψ ∈ Δ) V, holds D M E ψ V) :
   ∀ (V : valuation D), holds D M E φ V :=
 begin
   induction H generalizing M,
@@ -1938,30 +1938,30 @@ begin
     exact h1,
     exact h2,
   },
-  case is_proof.thm : H_E H_Γ H_Γ' H_Δ H_Δ' H_φ H_σ H_τ H_X H_ᾰ H_ᾰ_1 H_ᾰ_2 H_ᾰ_3 H_ᾰ_4 H_ih_ᾰ H_ih_ᾰ_1 M nf hyp
+  case is_proof.thm : H_E H_Γ H_Γ' H_Δ H_Δ' H_φ H_σ H_τ H_ᾰ H_ᾰ_1 H_ᾰ_2 H_ᾰ_3 H_ih_ᾰ H_ih_ᾰ_1 M nf hyp
   {
     obtain ⟨σ', left, right⟩ := H_σ.2,
     intros V,
     rewrite <- lem_1 V M H_E _ H_σ σ' H_τ,
-    apply H_ih_ᾰ h1,
+    apply H_ih_ᾰ_1 h1,
     intros v X h1,
-    exact lem_2 M H_E H_Γ H_Γ' H_σ σ' H_τ left right nf H_ᾰ_3 v X h1,
+    exact lem_2 M H_E H_Γ H_Γ' H_σ σ' H_τ left right nf H_ᾰ_1 v X h1,
     intros φ h2 V',
-    specialize H_ih_ᾰ_1 φ h2 h1 M nf hyp (V' ∘ σ'),
-    rewrite <- lem_1 (V' ∘ σ') M H_E H_E H_σ σ' H_τ φ at H_ih_ᾰ_1,
-    rewrite function.comp.assoc at H_ih_ᾰ_1,
-    rewrite right at H_ih_ᾰ_1,
-    simp only [function.comp.right_id] at H_ih_ᾰ_1,
-    exact H_ih_ᾰ_1,
+    specialize H_ih_ᾰ φ h2 h1 M nf hyp (V' ∘ σ'),
+    rewrite <- lem_1 (V' ∘ σ') M H_E H_E H_σ σ' H_τ φ at H_ih_ᾰ,
+    rewrite function.comp.assoc at H_ih_ᾰ,
+    rewrite right at H_ih_ᾰ,
+    simp only [function.comp.right_id] at H_ih_ᾰ,
+    exact H_ih_ᾰ,
     sorry,
-    sorry,
+    intros X h3, apply H_ᾰ φ, exact h3,
     exact left,
     exact right,
     exact h1,
     apply exists.intro list.nil,
     simp only [list.nil_append],
     sorry,
-    sorry,
+    intros X h3, apply H_ᾰ H_φ, exact h3,
     exact left,
     exact right,
     exact h1,
