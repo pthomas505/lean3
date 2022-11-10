@@ -526,7 +526,7 @@ inductive is_proof : env → list (var_name × meta_var_name) → list formula �
 
 | thm (E : env) (Γ Γ' : list (var_name × meta_var_name)) (Δ Δ' : list formula)
   {φ : formula} {σ : instantiation} {τ : meta_instantiation} :
-  (∀ (ψ : formula) (X : meta_var_name), X ∈ ψ.meta_var_set → (τ X).is_meta_var_or_all_def_in_env E) →
+  (∀ (X : meta_var_name), X ∈ φ.meta_var_set → (τ X).is_meta_var_or_all_def_in_env E) →
   (∀ (x : var_name) (X : meta_var_name), (x, X) ∈ Γ → not_free Γ' (σ.1 x) (τ X)) →
   (∀ (ψ : formula), ψ ∈ Δ → is_proof E Γ' Δ' (ψ.subst σ τ)) →
   is_proof E Γ Δ φ →
@@ -1954,14 +1954,14 @@ begin
     simp only [function.comp.right_id] at H_ih_ᾰ,
     exact H_ih_ᾰ,
     sorry,
-    intros X h3, apply H_ᾰ φ, exact h3,
+    sorry,
     exact left,
     exact right,
     exact h1,
     apply exists.intro list.nil,
     simp only [list.nil_append],
     sorry,
-    intros X h3, apply H_ᾰ H_φ, exact h3,
+    sorry,
     exact left,
     exact right,
     exact h1,
