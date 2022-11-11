@@ -1928,6 +1928,58 @@ begin
 end
 
 
+lemma lem_5
+  (E : env)
+  (σ : instantiation)
+  (τ : meta_instantiation)
+  (φ : formula)
+  (h1 : (φ.subst σ τ).is_meta_var_or_all_def_in_env E) :
+  φ.is_meta_var_or_all_def_in_env E :=
+begin
+  induction φ,
+  case formula.meta_var_ : X
+  {
+    unfold formula.subst at h1,
+  },
+  case formula.not_ : φ φ_ih
+  {
+    unfold formula.subst at h1,
+    unfold formula.is_meta_var_or_all_def_in_env at *,
+    exact φ_ih h1,
+  },
+  case formula.imp_ : φ ψ φ_ih ψ_ih
+  {
+    unfold formula.subst at h1,
+    cases h1,
+    unfold formula.is_meta_var_or_all_def_in_env at *,
+    split,
+    {
+      exact φ_ih h1_left,
+    },
+    {
+      exact ψ_ih h1_right,
+    },
+  },
+  case formula.eq_ : x y
+  {
+    unfold formula.subst at h1,
+  },
+  case formula.forall_ : x φ φ_ih
+  {
+    unfold formula.subst at h1,
+    unfold formula.is_meta_var_or_all_def_in_env at *,
+    exact φ_ih h1,
+  },
+  case formula.def_ : name args
+  {
+    unfold formula.subst at h1,
+    unfold formula.is_meta_var_or_all_def_in_env at *,
+    simp only [list.length_map] at h1,
+    exact h1,
+  },
+end
+
+
 example
   (D : Type)
   (M : meta_valuation D)
@@ -1993,9 +2045,12 @@ begin
       },
     },
     {
+      specialize H3 φ b,
+
       sorry,
     },
     {
+      intros X a1,
       sorry,
     },
   },
