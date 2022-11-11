@@ -981,6 +981,7 @@ begin
   },
 end
 
+
 lemma holds_meta_valuation_ext
   {D : Type}
   (M1 M2 : meta_valuation D)
@@ -994,21 +995,20 @@ begin
   case list.nil : φ M1 M2 V h1
   {
     induction φ generalizing M1 M2 V,
-    case formula.meta_var_ : X M1 M2 h1
+    case formula.meta_var_ : X M1 M2 V h1
     {
       simp only [holds_meta_var],
       apply h1,
       unfold formula.meta_var_set,
       simp only [finset.mem_singleton],
     },
-    case formula.not_ : φ φ_ih M1 M2 h1
+    case formula.not_ : φ φ_ih M1 M2 V h1
     {
       simp only [holds_not],
       apply not_congr,
-      apply φ_ih,
-      apply h1,
+      exact φ_ih M1 M2 V h1,
     },
-    case formula.imp_ : φ φ φ_ih ψ_ih M1 M2 h1
+    case formula.imp_ : φ φ φ_ih ψ_ih M1 M2 V h1
     {
       unfold formula.meta_var_set at h1,
       simp only [finset.mem_union] at h1,
@@ -1029,11 +1029,11 @@ begin
         exact h3,
       }
     },
-    case formula.eq_ : x y M1 M2 h1
+    case formula.eq_ : x y M1 M2 V h1
     {
       simp only [holds_eq],
     },
-    case formula.forall_ : x φ φ_ih M1 M2 h1
+    case formula.forall_ : x φ φ_ih M1 M2 V h1
     {
       simp only [holds_forall],
       apply forall_congr,
@@ -1120,28 +1120,6 @@ begin
 end
 
 
-lemma blah
-  {D : Type}
-  (M1 M2 : meta_valuation D)
-  (E : env)
-  (V1 V2 : valuation D)
-  (φ : formula)
-  (S : list var_name)
-  (hf : φ.no_meta_var_and_all_free_in_list S)
-  (h1 : ∀ v ∈ S, V1 v = V2 v)
-  (h2 : ∀ (V : valuation D) (X ∈ φ.meta_var_set), M1 X V ↔ M2 X V) :
-  holds D M1 E φ V1 ↔ holds D M2 E φ V2 :=
-begin
-  have s1 : (holds D M1 E φ V1 ↔ holds D M1 E φ V2),
-  apply holds_valuation_ext M1 E V1 V2 φ S,
-  exact hf, exact h1,
-  rewrite s1,
-
-  apply holds_meta_valuation_ext,
-  exact h2,
-end
-
-
 lemma ext_env_holds
   {D : Type}
   (M : meta_valuation D)
@@ -1163,7 +1141,7 @@ begin
     simp only [holds_not],
     apply not_congr,
     unfold formula.is_meta_var_or_all_def_in_env at h2,
-    apply φ_ih, exact h2,
+    exact φ_ih h2 V,
   },
   case formula.imp_ : φ ψ φ_ih ψ_ih V
   {
@@ -1171,10 +1149,12 @@ begin
     unfold formula.is_meta_var_or_all_def_in_env at h2,
     cases h2,
     apply imp_congr,
-    apply φ_ih,
-    exact h2_left,
-    apply ψ_ih,
-    exact h2_right,
+    {
+     exact φ_ih h2_left V,
+    },
+    {
+      exact ψ_ih h2_right V,
+    }
   },
   case formula.eq_ : x y V
   {
@@ -1185,8 +1165,7 @@ begin
     simp only [holds_forall],
     unfold formula.is_meta_var_or_all_def_in_env at h2,
     apply forall_congr, intros a,
-    apply φ_ih,
-    exact h2,
+    exact φ_ih h2 (function.update V x a),
   },
   case formula.def_ : name args V
   {
@@ -1208,22 +1187,28 @@ begin
           unfold formula.is_meta_var_or_all_def_in_env at h2,
           apply exists.elim h2, intros d a2, clear h2,
           unfold env.nodup at h3,
-          simp at h3,
+          simp only [list.cons_append, list.pairwise_cons, list.mem_append] at h3,
           cases h3,
           cases h,
           rewrite h_left at a2,
           rewrite h_right at a2,
           by_contradiction,
           apply h3_left d,
-          apply or.intro_right,
-          cases a2,
-          exact a2_left,
-          cases a2,
-          cases a2_right,
-          exact a2_right_left,
-          cases a2,
-          cases a2_right,
-          exact a2_right_right,
+          {
+            apply or.intro_right,
+            cases a2,
+            exact a2_left,
+          },
+          {
+            cases a2,
+            cases a2_right,
+            exact a2_right_left,
+          },
+          {
+            cases a2,
+            cases a2_right,
+            exact a2_right_right,
+          }
         },
         {
           unfold env.nodup at h3,
@@ -1277,11 +1262,17 @@ begin
       rewrite h3,
       simp only [function.comp.right_id],
       apply ext_env_holds,
-      exact h6,
-      apply h2,
-      unfold formula.meta_var_set,
-      simp only [finset.mem_singleton],
-      exact h5,
+      {
+        exact h6,
+      },
+      {
+        apply h2,
+        unfold formula.meta_var_set,
+        simp only [finset.mem_singleton],
+      },
+      {
+        exact h5,
+      },
     },
     case formula.not_ : φ φ_ih V
     {
@@ -1290,9 +1281,7 @@ begin
       unfold formula.subst,
       simp only [holds_not],
       apply not_congr,
-      apply φ_ih,
-      exact h1,
-      exact h2,
+      exact φ_ih h1 h2 V,
     },
     case formula.imp_ : φ ψ φ_ih ψ_ih V
     {
@@ -1305,18 +1294,28 @@ begin
       apply imp_congr,
       {
         apply φ_ih,
-        exact h1_left,
-        intros X h7,
-        apply h2,
-        apply or.intro_left, exact h7,
+        {
+          exact h1_left,
+        },
+        {
+          intros X h7,
+          apply h2,
+          apply or.intro_left,
+          exact h7,
+        }
       },
       {
         apply ψ_ih,
-        exact h1_right,
-        intros X h7,
-        apply h2,
-        apply or.intro_right, exact h7,
-      }
+        {
+          exact h1_right,
+        },
+        {
+          intros X h7,
+          apply h2,
+          apply or.intro_right,
+          exact h7,
+        },
+      },
     },
     case formula.eq_ : x y V
     {
@@ -1333,7 +1332,8 @@ begin
       intros a,
       specialize φ_ih h1 h2,
       rewrite <- φ_ih,
-      rewrite aux_1 _ _ σ', exact h4,
+      rewrite aux_1 _ _ σ',
+      exact h4,
     },
     case formula.def_ : name args V
     {
@@ -1352,11 +1352,17 @@ begin
       rewrite h3,
       simp only [function.comp.right_id],
       apply ext_env_holds,
-      exact h6,
-      apply h2,
-      unfold formula.meta_var_set,
-      simp only [finset.mem_singleton],
-      exact h5,
+      {
+        exact h6,
+      },
+      {
+        apply h2,
+        unfold formula.meta_var_set,
+        simp only [finset.mem_singleton],
+      },
+      {
+        exact h5,
+      },
     },
     case formula.not_ : φ φ_ih V
     {
@@ -1365,9 +1371,7 @@ begin
       unfold formula.subst,
       simp only [holds_not],
       apply not_congr,
-      apply φ_ih,
-      exact h1,
-      exact h2,
+      exact φ_ih h1 h2 V,
     },
     case formula.imp_ : φ ψ φ_ih ψ_ih V
     {
@@ -1380,17 +1384,26 @@ begin
       apply imp_congr,
       {
         apply φ_ih,
-        exact h1_left,
-        intros X h7,
-        apply h2,
-        apply or.intro_left, exact h7,
+        {
+          exact h1_left,
+        },
+        {
+          intros X h7,
+          apply h2,
+          apply or.intro_left,exact h7,
+        },
       },
       {
         apply ψ_ih,
-        exact h1_right,
-        intros X h7,
-        apply h2,
-        apply or.intro_right, exact h7,
+        {
+          exact h1_right,
+        },
+        {
+          intros X h7,
+          apply h2,
+          apply or.intro_right,
+          exact h7,
+        },
       }
     },
     case formula.eq_ : x y V
@@ -1413,14 +1426,13 @@ begin
     case formula.def_ : name args V
     {
       unfold formula.is_meta_var_or_all_def_in_env at h1,
-      apply exists.elim h1, intros d a1, clear h1,
+      apply exists.elim h1, intros d a1,
       cases a1,
       cases a1_right,
-      
 
       unfold formula.meta_var_set at h2,
 
-      apply exists.elim h6, intros E1 a6, clear h6,
+      apply exists.elim h6, intros E1 a6,
       subst a6,
 
       simp only [list.mem_append, list.mem_cons_iff] at a1_left,
@@ -1428,7 +1440,9 @@ begin
       unfold env.nodup at h5,
       rewrite list.pairwise_append at h5,
       simp only [list.pairwise_cons, list.mem_cons_iff, forall_eq_or_imp] at h5,
-      cases h5, cases h5_right, cases h5_right_left,
+      cases h5,
+      cases h5_right,
+      cases h5_right_left,
 
       have s1 : (∃ (E1_1 : env), ((E1 ++ (E_hd :: E_tl)) = (E1_1 ++ E_tl))),
       apply exists.intro (E1 ++ [E_hd]),
@@ -1448,56 +1462,105 @@ begin
           specialize h5_right_right d a1_left,
           cases h5_right_right,
           apply h5_right_right_left,
-          rewrite <- h_left,
-          rewrite a1_right_left,
-          rewrite <- h_right,
-          rewrite a1_right_right,
+          {
+            rewrite <- h_left,
+            rewrite a1_right_left,
+          },
+          {
+            rewrite <- h_right,
+            rewrite a1_right_right,
+          }
         },
         {
           cases a1_left,
           {
-            apply blah _ _ _ _ _ _ E_hd.args,
-            exact E_hd.nf,
-            intros v h',
-            apply function.update_list_mem_ext,
             cases h,
-            rewrite h_right, exact h',
-            have s1 : E_hd.q.meta_var_set = ∅,
-            exact def_meta_var_set_is_empty E_hd.q E_hd.args E_hd.nf,
-            exact E_hd.nodup,
+            rewrite holds_valuation_ext
+              (fun (X' : meta_var_name) (V' : valuation D),
+                holds D M (E1 ++ (E_hd :: E_tl)) (τ X') (V' ∘ σ'))
+                E_tl
+                (function.update_list (V ∘ σ.val) (E_hd.args.zip (list.map (V ∘ σ.val) args)))
+                (function.update_list V (E_hd.args.zip (list.map (V ∘ σ.val) args)))
+                E_hd.q
+                E_hd.args,
+            {
+              have s2 : E_hd.q.meta_var_set = ∅,
+              exact def_meta_var_set_is_empty E_hd.q E_hd.args E_hd.nf,
 
-            have s2 : E_hd.q.meta_var_set = ∅,
-            exact def_meta_var_set_is_empty E_hd.q E_hd.args E_hd.nf,
-            rewrite s2,
-            simp only [finset.not_mem_empty, is_empty.forall_iff, forall_forall_const, implies_true_iff],
+              rewrite holds_meta_valuation_ext
+                (fun (X' : meta_var_name) (V' : valuation D),
+                  holds D M (E1 ++ (E_hd :: E_tl)) (τ X') (V' ∘ σ'))
+                M
+                E_tl
+                (function.update_list V (E_hd.args.zip (list.map (V ∘ σ.val) args)))
+                E_hd.q,
+                intros V' X' a2,
+                rewrite s2 at a2,
+                simp only [finset.not_mem_empty] at a2,
+                contradiction,
+            },
+            {
+              exact E_hd.nf,
+            },
+            {
+              intros v h',
+              apply function.update_list_mem_ext,
+              {
+                rewrite h_right,
+              },
+              {
+                exact h',
+              },
+              {
+                exact E_hd.nodup,
+              },
+            },
           },
           {
             cases h,
             by_contradiction contra,
             apply h5_right_left_left d a1_left,
-            rewrite <- h_left,
-            rewrite a1_right_left,
-            rewrite <- h_right,
-            rewrite a1_right_right,
+            {
+              rewrite <- h_left,
+              rewrite a1_right_left,
+            },
+            {
+              rewrite <- h_right,
+              rewrite a1_right_right,
+            },
           }
         }
       },
       {
         rewrite E_ih,
-        unfold formula.subst,
-        unfold formula.is_meta_var_or_all_def_in_env,
-        apply exists.intro d,
-        simp only [list.mem_append, list.mem_cons_iff],
-        split,
-        exact a1_left,
-        split,
-        exact a1_right_left,
-        exact a1_right_right,
-        unfold formula.meta_var_set,
-        intros X,
-        intros contra,
-        simp only [finset.not_mem_empty] at contra,
-        contradiction,
+        {
+          unfold formula.subst,
+        },
+        {
+          unfold formula.is_meta_var_or_all_def_in_env,
+          apply exists.intro d,
+          simp only [list.mem_append, list.mem_cons_iff],
+          split,
+          {
+            exact a1_left,
+          },
+          {
+            split,
+            {
+              exact a1_right_left,
+            },
+            {
+              exact a1_right_right,
+            },
+          },
+        },
+        {
+          unfold formula.meta_var_set,
+          intros X,
+          intros contra,
+          simp only [finset.not_mem_empty] at contra,
+          contradiction,
+        },
       },
     },
   },
