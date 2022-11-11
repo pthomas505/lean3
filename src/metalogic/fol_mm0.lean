@@ -2148,9 +2148,12 @@ begin
   {
     simp only [holds_forall],
     apply forall_congr, intros a,
+    exact h1_ih (function.update V h1_x a),
   },
   case is_conv.conv_unfold : h1_E h1_d h1_σ h1_ᾰ h1_ᾰ_1
-  { admit },
+  {
+    sorry,
+  },
 end
 
 
@@ -2169,25 +2172,80 @@ example
 begin
   induction H generalizing M,
   case is_proof.hyp : H_Γ H_Δ H_φ H_ᾰ H_ᾰ_1 M nf hyp
-  { admit },
+  {
+    intros V,
+    exact hyp H_φ H_ᾰ_1 V,
+  },
   case is_proof.mp : H_Γ H_Δ H_φ H_ψ H_ᾰ H_ᾰ_1 H_ih_ᾰ H_ih_ᾰ_1 M nf hyp
-  { admit },
+  {
+    intros V,
+    simp only [holds_imp] at *,
+    apply H_ih_ᾰ_1 M nf hyp,
+    apply H_ih_ᾰ M nf hyp,
+  },
   case is_proof.prop_1 : H_Γ H_Δ H_φ H_ψ H_ᾰ H_ᾰ_1 M nf hyp
-  { admit },
+  {
+    simp only [holds_imp],
+    intros V h1 h2, exact h1,
+  },
   case is_proof.prop_2 : H_Γ H_Δ H_φ H_ψ H_χ H_ᾰ H_ᾰ_1 H_ᾰ_2 M nf hyp
-  { admit },
+  {
+    simp only [holds_imp],
+    intros V h1 h2 h3,
+    apply h1, exact h3, apply h2, exact h3,
+  },
   case is_proof.prop_3 : H_Γ H_Δ H_φ H_ψ H_ᾰ H_ᾰ_1 M nf hyp
-  { admit },
+  {
+    simp only [holds_imp, holds_not],
+    intros V h1 h2,
+    by_contradiction,
+    exact h1 h h2,
+  },
   case is_proof.gen : H_Γ H_Δ H_φ H_x H_ᾰ H_ih M nf hyp
-  { admit },
+  {
+    simp only [holds_forall],
+    intros V a,
+    apply H_ih M nf hyp,
+  },
   case is_proof.pred_1 : H_Γ H_Δ H_φ H_ψ H_x H_ᾰ H_ᾰ_1 M nf hyp
-  { admit },
+  {
+    simp only [holds_imp, holds_forall],
+    intros V h1 h2 a,
+    apply h1,
+    apply h2,
+  },
   case is_proof.pred_2 : H_Γ H_Δ H_φ H_x H_ᾰ H_ᾰ_1 M nf hyp
-  { admit },
+  {
+    have s1 : is_not_free D M E H_x H_φ,
+    apply not_free_imp_is_not_free M E H_Γ H_x H_φ H_ᾰ_1,
+    intros X h2, apply nf, exact h2,
+
+    simp only [holds_imp, holds_forall],
+    intros V h2 a,
+    unfold is_not_free at s1,
+    rewrite <- s1, exact h2,
+  },
   case is_proof.eq_1 : H_Γ H_Δ H_x H_y H_ᾰ M nf hyp
-  { admit },
+  {
+    unfold exists_,
+    simp only [holds_not, holds_forall, holds_eq, not_forall],
+    intros V,
+    push_neg,
+    simp only [function.update_same],
+    apply exists.intro (V H_y),
+    symmetry,
+    apply function.update_noteq,
+    symmetry, exact H_ᾰ,
+  },
   case is_proof.eq_2 : H_Γ H_Δ H_x H_y H_z M nf hyp
-  { admit },
+  {
+    simp only [holds_imp, holds_eq],
+    intros V h1 h2,
+    transitivity V H_x,
+    symmetry,
+    exact h1,
+    exact h2,
+  },
   case is_proof.thm : Γ Γ' Δ Δ' φ σ τ H1 H2 H3 H4 IH1 IH2 M nf hyp
   {
     dsimp only at *,
