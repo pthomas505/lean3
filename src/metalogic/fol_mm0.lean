@@ -1974,7 +1974,7 @@ begin
         apply IH2,
         {
           intros v X a1,
-          sorry,
+          exact lem_2 M E Γ_1 Γ' σ σ' τ left right nf H2 v X a1,
         },
         {
           sorry,
