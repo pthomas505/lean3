@@ -1879,17 +1879,20 @@ begin
     unfold formula.meta_var_set at h2,
     simp only [finset.mem_union] at h2,
     split,
-    apply φ_ih h1_left,
-    intros x a1,
-    apply h2,
-    apply or.intro_left,
-    exact a1,
-
-    apply ψ_ih h1_right,
-    intros x a1,
-    apply h2,
-    apply or.intro_right,
-    exact a1,
+    {
+      apply φ_ih h1_left,
+      intros x a1,
+      apply h2,
+      apply or.intro_left,
+      exact a1,
+    },
+    {
+      apply ψ_ih h1_right,
+      intros x a1,
+      apply h2,
+      apply or.intro_right,
+      exact a1,
+    },
   },
   case formula.eq_ : x y
   {
