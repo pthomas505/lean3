@@ -336,7 +336,7 @@ lemma function.update_list_update
   (h1 : l.length = l'.length)
   (h2 : x ∈ l)
   (h3 : l.nodup)
-  (h4 : ∀ (x : α), (x ∈ l') → (¬(x = v))) :
+  (h4 : ∀ (x' : α), (x' ∈ l') → (¬(x' = v))) :
   function.update_list f (l.zip (list.map f l')) x =
     function.update_list (function.update f v a) (l.zip (list.map (function.update f v a) l')) x :=
 begin
