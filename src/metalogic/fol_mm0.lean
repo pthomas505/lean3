@@ -1967,16 +1967,28 @@ begin
     dsimp only at *,
     obtain ⟨σ', left, right⟩ := σ.2,
     have IH1' := fun φ b M d e V, (lem_1' _ _ _ _ _ _ _ _ _ left right h1).2 (IH1 φ b M d e V),
-    intros V,
-    rewrite <- lem_1' _ _ _ _ _ _ _ _ _ left right h1,
-    apply IH2,
-    intros v X a1,
-    sorry,
-    sorry,
-    apply lem_4 E Γ_1 Δ_1 φ_1 H4,
-    exact H1,
-    sorry,
-    sorry,
+    {
+      intros V,
+      rewrite <- lem_1' _ _ _ _ _ _ _ _ _ left right h1,
+      {
+        apply IH2,
+        intros v X a1,
+        sorry,
+        sorry,
+      },
+      {
+        exact lem_4 E Γ_1 Δ_1 φ_1 H4,
+      },
+      {
+        exact H1,
+      },
+    },
+    {
+      sorry,
+    },
+    {
+      sorry,
+    },
   },
   case is_proof.conv : H_Γ H_Δ H_φ H_φ' H_ᾰ H_ᾰ_1 H_ᾰ_2 H_ih M nf hyp
   { admit },
