@@ -1838,9 +1838,13 @@ begin
   intros V a,
   rewrite <- aux_3 V σ' σ.1 v a left right,
   apply not_free_imp_is_not_free M E Γ',
-  exact H v X h1,
-  intros X' h2,
-  exact nf (σ.1 v) X' h2,
+  {
+    exact H v X h1,
+  },
+  {
+    intros X' h2,
+    exact nf (σ.1 v) X' h2,
+  },
 end
 
 
