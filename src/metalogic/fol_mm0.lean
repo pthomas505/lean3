@@ -1977,7 +1977,12 @@ begin
           exact lem_2 M E Γ_1 Γ' σ σ' τ left right nf H2 v X a1,
         },
         {
-          sorry,
+          intros ψ a1 V',
+          specialize IH1' ψ a1 M nf hyp (V' ∘ σ'),
+          rewrite function.comp.assoc at IH1',
+          rewrite right at IH1',
+          simp only [function.comp.right_id] at IH1',
+          exact IH1',
         },
       },
       {
