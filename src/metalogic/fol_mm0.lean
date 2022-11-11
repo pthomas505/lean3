@@ -576,9 +576,6 @@ inductive is_proof
   is_proof Γ Δ φ → is_conv E φ φ' → is_proof Γ Δ φ'
 
 
--- Semantics
-
-
 lemma def_meta_var_set_is_empty
   (φ : formula)
   (l : list var_name)
@@ -627,6 +624,8 @@ begin
   },
 end
 
+
+-- Semantics
 
 
 def valuation (D : Type) : Type := var_name → D
