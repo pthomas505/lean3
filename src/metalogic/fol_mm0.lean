@@ -968,10 +968,14 @@ begin
           (function.update_list V2 (E_hd.args.zip (list.map V2 args))) E_hd.nf s1,
       },
       {
-        apply E_ih,
-        unfold formula.no_meta_var_and_all_free_in_list,
-        exact hf,
-        exact h1,
+        apply E_ih S,
+        {
+          unfold formula.no_meta_var_and_all_free_in_list,
+          exact hf,
+        },
+        {
+          exact h1,
+        }
       }
     },
   },
