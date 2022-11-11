@@ -2102,6 +2102,19 @@ begin
 end
 
 
+lemma lem_7
+  (D : Type)
+  (M : meta_valuation D)
+  (E : env)
+  (φ φ' : formula)
+  (V : valuation D)
+  (h1 : is_conv E φ φ') :
+  holds D M E φ V ↔ holds D M E φ' V :=
+begin
+  sorry,
+end
+
+
 example
   (D : Type)
   (M : meta_valuation D)
@@ -2180,6 +2193,13 @@ begin
       exact a1,
     },
   },
-  case is_proof.conv : H_Γ H_Δ H_φ H_φ' H_ᾰ H_ᾰ_1 H_ᾰ_2 H_ih M nf hyp
-  { admit },
+  case is_proof.conv : Γ Δ φ φ' H1 H2 H3 ih M nf hyp
+  {
+    intros V,
+    rewrite <- lem_7 D M E φ φ',
+    apply ih,
+    exact nf,
+    exact hyp,
+    exact H3,
+  },
 end
