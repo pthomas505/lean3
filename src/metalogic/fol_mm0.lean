@@ -1972,9 +1972,13 @@ begin
       rewrite <- lem_1' _ _ _ _ _ _ _ _ _ left right h1,
       {
         apply IH2,
-        intros v X a1,
-        sorry,
-        sorry,
+        {
+          intros v X a1,
+          sorry,
+        },
+        {
+          sorry,
+        },
       },
       {
         exact lem_4 E Γ_1 Δ_1 φ_1 H4,
