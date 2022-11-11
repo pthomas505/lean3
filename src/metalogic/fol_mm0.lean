@@ -341,25 +341,42 @@ lemma function.update_list_update
     function.update_list (function.update f v a) (l.zip (list.map (function.update f v a) l')) x :=
 begin
   have s1 : ∃ (n : ℕ) (h : n < l.length), list.nth_le l n h = x,
-  apply list.nth_le_of_mem h2,
-  apply exists.elim s1, intros n h, clear s1,
-  apply exists.elim h, intros h' h'', clear h,
+  exact list.nth_le_of_mem h2,
+
+  apply exists.elim s1, intros n h,
+  apply exists.elim h, intros h' h'',
   rewrite <- h'',
 
-  have s2 : n < (list.map f l').length, squeeze_simp, rewrite <- h1, exact h',
+  have s2 : n < (list.map f l').length,
+  simp only [list.length_map],
+  rewrite <- h1,
+  exact h',
 
   rewrite function.update_list_zip f l (list.map f l') n h' s2,
-  rewrite <- function.update_list_zip (function.update f v a) l (list.map f l') n h' s2,
-  congr' 2,
-  rewrite list.map_congr,
-  intros y h5, specialize h4 y h5,
-  simp only [function.update_noteq h4],
-  squeeze_simp,
-  rewrite h1,
-  exact h3,
-  squeeze_simp,
-  rewrite h1,
-  exact h3,
+  {
+    rewrite <- function.update_list_zip (function.update f v a) l (list.map f l') n h' s2,
+    {
+      congr' 2,
+      rewrite list.map_congr,
+      intros y h5,
+      rewrite function.update_noteq,
+      exact h4 y h5,
+    },
+    {
+      simp only [list.length_map],
+      rewrite h1,
+    },
+    {
+      exact h3,
+    },
+  },
+  {
+    simp only [list.length_map],
+    rewrite h1,
+  },
+  {
+    exact h3,
+  },
 end
 
 
