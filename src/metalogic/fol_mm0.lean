@@ -2111,7 +2111,46 @@ lemma lem_7
   (h1 : is_conv E φ φ') :
   holds D M E φ V ↔ holds D M E φ' V :=
 begin
-  sorry,
+  induction h1 generalizing V,
+  case is_conv.conv_refl : h1_E h1_φ V
+  {
+    refl,
+  },
+  case is_conv.conv_symm : h1_E h1_φ h1_φ' h1_ᾰ h1_ih V
+  {
+    symmetry,
+    exact h1_ih V,
+  },
+  case is_conv.conv_trans : h1_E h1_φ h1_φ' h1_φ'' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  {
+    transitivity (holds D M h1_E h1_φ' V),
+    exact h1_ih_ᾰ V,
+    exact h1_ih_ᾰ_1 V,
+  },
+  case is_conv.conv_not : h1_E h1_φ h1_φ' h1_ᾰ h1_ih
+  {
+    simp only [holds_not],
+    apply not_congr,
+    exact h1_ih V,
+  },
+  case is_conv.conv_imp : h1_E h1_φ h1_φ' h1_ψ h1_ψ' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  {
+    simp only [holds_imp],
+    apply imp_congr,
+    {
+      exact h1_ih_ᾰ V,
+    },
+    {
+      exact h1_ih_ᾰ_1 V,
+    }
+  },
+  case is_conv.conv_forall : h1_E h1_x h1_φ h1_φ' h1_ᾰ h1_ih
+  {
+    simp only [holds_forall],
+    apply forall_congr, intros a,
+  },
+  case is_conv.conv_unfold : h1_E h1_d h1_σ h1_ᾰ h1_ᾰ_1
+  { admit },
 end
 
 
