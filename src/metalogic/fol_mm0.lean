@@ -2039,6 +2039,20 @@ begin
 end
 
 
+lemma lem_6
+  (E : env)
+  (σ : instantiation)
+  (τ : meta_instantiation)
+  (φ : formula)
+  (X : meta_var_name)
+  (h1 : (φ.subst σ τ).is_meta_var_or_all_def_in_env E)
+  (h2 : X ∈ φ.meta_var_set) :
+  (τ X).is_meta_var_or_all_def_in_env E :=
+begin
+  sorry,
+end
+
+
 example
   (D : Type)
   (M : meta_valuation D)
@@ -2110,8 +2124,11 @@ begin
     },
     {
       intros X a1,
-      apply H1,
-      sorry,
+      apply lem_6 E σ τ,
+      apply lem_4 E Γ' Δ',
+      apply H3,
+      apply b,
+      exact a1,
     },
   },
   case is_proof.conv : H_Γ H_Δ H_φ H_φ' H_ᾰ H_ᾰ_1 H_ᾰ_2 H_ih M nf hyp
