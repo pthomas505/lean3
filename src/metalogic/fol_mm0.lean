@@ -1661,8 +1661,12 @@ begin
       cases H,
       intros V a,
       apply imp_congr,
-      exact φ_ih H_left V a,
-      exact ψ_ih H_right V a,
+      {
+        exact φ_ih H_left V a,
+      },
+      {
+        exact ψ_ih H_right V a,
+      },
     },
     case formula.eq_ : x y
     {
@@ -1693,7 +1697,7 @@ begin
         },
         {
           simp only [function.update_comm h],
-          apply φ_ih H,
+          exact φ_ih H (function.update V x a') a,
         }
       }
     },
@@ -1730,8 +1734,12 @@ begin
       cases H,
       intros V a,
       apply imp_congr,
-      exact φ_ih H_left V a,
-      exact ψ_ih H_right V a,
+      {
+        exact φ_ih H_left V a,
+      },
+      {
+        exact ψ_ih H_right V a,
+      },
     },
     case formula.eq_ : x y
     {
@@ -1762,7 +1770,7 @@ begin
         },
         {
           simp only [function.update_comm h],
-          apply φ_ih H,
+          exact φ_ih H (function.update V x a') a,
         }
       }
     },
@@ -1776,14 +1784,26 @@ begin
       split_ifs,
       {
         apply holds_valuation_ext M E_tl _ _ E_hd.q E_hd.args,
-        exact E_hd.nf,
-        intros x h1,
-        apply function.update_list_update V (function.update V v a),
-        cases h,
-        rewrite h_right,
-        exact h1,
-        exact E_hd.nodup,
-        exact H,
+        {
+          exact E_hd.nf,
+        },
+        {
+          intros x h1,
+          apply function.update_list_update V (function.update V v a),
+          {
+            cases h,
+            rewrite h_right,
+          },
+          {
+            exact h1,
+          },
+          {
+            exact E_hd.nodup,
+          },
+          {
+            exact H,
+          },
+        },
       },
       {
         apply E_ih,
