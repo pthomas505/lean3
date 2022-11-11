@@ -1018,13 +1018,15 @@ begin
         apply φ_ih,
         intros X h2 h3,
         apply h1,
-        apply or.intro_left, exact h3,
+        apply or.intro_left,
+        exact h3,
       },
       {
         apply ψ_ih,
         intros X h2 h3,
         apply h1,
-        apply or.intro_right, exact h3,
+        apply or.intro_right,
+        exact h3,
       }
     },
     case formula.eq_ : x y M1 M2 h1
@@ -1037,7 +1039,8 @@ begin
       apply forall_congr,
       intros a,
       apply φ_ih,
-      unfold formula.meta_var_set at h1, exact h1,
+      unfold formula.meta_var_set at h1,
+      exact h1,
     },
     case formula.def_ : name args M1 M2 V h1
     {
@@ -1071,13 +1074,15 @@ begin
         apply φ_ih,
         intros X h2 h3,
         apply h1,
-        apply or.intro_left, exact h3,
+        apply or.intro_left,
+        exact h3,
       },
       {
         apply ψ_ih,
         intros X h2 h3,
         apply h1,
-        apply or.intro_right, exact h3,
+        apply or.intro_right,
+        exact h3,
       }
     },
     case formula.eq_ : x y M1 M2 V h1
