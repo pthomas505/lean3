@@ -2049,7 +2049,56 @@ lemma lem_6
   (h2 : X ∈ φ.meta_var_set) :
   (τ X).is_meta_var_or_all_def_in_env E :=
 begin
-  sorry,
+  induction φ,
+  case formula.meta_var_ : X'
+  {
+    unfold formula.subst at *,
+    unfold formula.meta_var_set at h2,
+    simp only [finset.mem_singleton] at h2,
+    subst h2,
+    exact h1,
+  },
+  case formula.not_ : φ φ_ih
+  {
+    unfold formula.subst at *,
+    unfold formula.meta_var_set at h2,
+    unfold formula.is_meta_var_or_all_def_in_env at *,
+    exact φ_ih h1 h2,
+  },
+  case formula.imp_ : φ ψ φ_ih ψ_ih
+  {
+    unfold formula.subst at *,
+    unfold formula.meta_var_set at h2,
+    unfold formula.is_meta_var_or_all_def_in_env at *,
+    cases h1,
+    simp only [finset.mem_union] at h2,
+    cases h2,
+    {
+      exact φ_ih h1_left h2,
+    },
+    {
+      exact ψ_ih h1_right h2,
+    }
+  },
+  case formula.eq_ : x y
+  {
+    unfold formula.meta_var_set at h2,
+    simp only [finset.not_mem_empty] at h2,
+    contradiction,
+  },
+  case formula.forall_ : x φ φ_ih
+  {
+    unfold formula.subst at *,
+    unfold formula.meta_var_set at h2,
+    unfold formula.is_meta_var_or_all_def_in_env at *,
+    exact φ_ih h1 h2,
+  },
+  case formula.def_ : name args
+  {
+    unfold formula.meta_var_set at h2,
+    simp only [finset.not_mem_empty] at h2,
+    contradiction,
+  },
 end
 
 
