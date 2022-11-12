@@ -2191,7 +2191,12 @@ begin
           contradiction,
         },
         {
-          sorry,
+          have s1 : env.nodup h1_E_tl,
+          unfold env.nodup,
+          exact h1_ᾰ_1_right,
+
+          specialize h1_E_ih h1_ᾰ s1,
+          rewrite h1_E_ih,
         }
       }
     },
