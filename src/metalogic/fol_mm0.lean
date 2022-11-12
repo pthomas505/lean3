@@ -483,27 +483,26 @@ def formula.is_meta_var_or_all_def_in_env (E : env) : formula → Prop
 def exists_ (x : var_name) (φ : formula) : formula := not_ (forall_ x (not_ φ))
 
 
-inductive is_conv : env → formula → formula → Prop
-| conv_refl (E : env) (φ : formula) : is_conv E φ φ
+inductive is_conv (E : env) : formula → formula → Prop
+| conv_refl (φ : formula) : is_conv φ φ
 
-| conv_symm (E : env) (φ φ' : formula) :
-  is_conv E φ φ' → is_conv E φ' φ
+| conv_symm (φ φ' : formula) :
+  is_conv φ φ' → is_conv φ' φ
 
-| conv_trans (E : env) (φ φ' φ'' : formula) :
-  is_conv E φ φ' → is_conv E φ' φ'' → is_conv E φ φ''
+| conv_trans (φ φ' φ'' : formula) :
+  is_conv φ φ' → is_conv φ' φ'' → is_conv φ φ''
 
-| conv_not (E : env) (φ φ' : formula) :
-  is_conv E φ φ' → is_conv E (not_ φ) (not_ φ')
+| conv_not (φ φ' : formula) :
+  is_conv φ φ' → is_conv (not_ φ) (not_ φ')
 
-| conv_imp (E : env) (φ φ' ψ ψ' : formula) :
-  is_conv E φ φ' → is_conv E ψ ψ' →  is_conv E (imp_ φ ψ) (imp_ φ' ψ')
+| conv_imp (φ φ' ψ ψ' : formula) :
+  is_conv φ φ' → is_conv ψ ψ' →  is_conv (imp_ φ ψ) (imp_ φ' ψ')
 
-| conv_forall (E : env) (x : var_name) (φ φ' : formula) :
-  is_conv E φ φ' → is_conv E (forall_ x φ) (forall_ x φ')
+| conv_forall (x : var_name) (φ φ' : formula) :
+  is_conv φ φ' → is_conv (forall_ x φ) (forall_ x φ')
 
-| conv_unfold (E : env) (d : definition_) (σ : instantiation) :
-  (d ∈ E) → E.nodup →
-  is_conv E (def_ d.name (d.args.map σ.1)) (d.q.subst σ meta_var_)
+| conv_unfold (d : definition_) (σ : instantiation) :
+  is_conv (def_ d.name (d.args.map σ.1)) (d.q.subst σ meta_var_)
 
 
 -- (v, X) ∈ Γ if and only if v is not free in meta_var_ X.
@@ -2108,111 +2107,25 @@ lemma lem_7
   (E : env)
   (φ φ' : formula)
   (V : valuation D)
-  (h1 : is_conv E φ φ') :
+  (h1 : E.nodup)
+  (h2 : is_conv E φ φ') :
   holds D M E φ V ↔ holds D M E φ' V :=
 begin
-  induction h1 generalizing V,
-  case is_conv.conv_refl : h1_E h1_φ V
-  {
-    refl,
-  },
-  case is_conv.conv_symm : h1_E h1_φ h1_φ' h1_ᾰ h1_ih V
-  {
-    symmetry,
-    exact h1_ih V,
-  },
-  case is_conv.conv_trans : h1_E h1_φ h1_φ' h1_φ'' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
-  {
-    transitivity (holds D M h1_E h1_φ' V),
-    exact h1_ih_ᾰ V,
-    exact h1_ih_ᾰ_1 V,
-  },
-  case is_conv.conv_not : h1_E h1_φ h1_φ' h1_ᾰ h1_ih
-  {
-    simp only [holds_not],
-    apply not_congr,
-    exact h1_ih V,
-  },
-  case is_conv.conv_imp : h1_E h1_φ h1_φ' h1_ψ h1_ψ' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
-  {
-    simp only [holds_imp],
-    apply imp_congr,
-    {
-      exact h1_ih_ᾰ V,
-    },
-    {
-      exact h1_ih_ᾰ_1 V,
-    }
-  },
-  case is_conv.conv_forall : h1_E h1_x h1_φ h1_φ' h1_ᾰ h1_ih
-  {
-    simp only [holds_forall],
-    apply forall_congr, intros a,
-    exact h1_ih (function.update V h1_x a),
-  },
-  case is_conv.conv_unfold : h1_E h1_d h1_σ h1_ᾰ h1_ᾰ_1
-  {
-    induction h1_E,
-    case list.nil
-    {
-      simp only [list.not_mem_nil] at h1_ᾰ,
-      contradiction,
-    },
-    case list.cons : h1_E_hd h1_E_tl h1_E_ih
-    {
-      simp only [list.mem_cons_iff] at h1_ᾰ,
-
-
-      simp only [holds_not_nil_def, list.length_map, list.map_map],
-      split_ifs,
-      {
-        unfold env.nodup at h1_ᾰ_1,
-        simp only [list.pairwise_cons] at h1_ᾰ_1,
-        cases h1_ᾰ_1,
-
-        cases h,
-
-        cases h1_ᾰ,
-        {
-          sorry,
-        },
-        {
-          specialize h1_ᾰ_1_left h1_d h1_ᾰ,
-          exfalso,
-          apply h1_ᾰ_1_left,
-          rewrite h_left,
-          rewrite h_right,
-        },
-      },
-      {
-        cases h1_ᾰ,
-        {
-          subst h1_ᾰ,
-          simp only [eq_self_iff_true, and_self, not_true] at h,
-          contradiction,
-        },
-        {
-          have s1 : env.nodup h1_E_tl,
-          unfold env.nodup at h1_ᾰ_1,
-          simp only [list.pairwise_cons] at h1_ᾰ_1,
-          cases h1_ᾰ_1,
-          unfold env.nodup,
-          exact h1_ᾰ_1_right,
-
-          specialize h1_E_ih h1_ᾰ s1,
-          rewrite h1_E_ih,
-
-          rewrite <- ext_env_holds,
-          apply exists.intro [h1_E_hd],
-          simp only [list.singleton_append],
-
-          sorry,
-
-          exact h1_ᾰ_1,
-        }
-      }
-    },
-  },
+  induction h2 generalizing V,
+  case is_conv.conv_refl : h2 V
+  { admit },
+  case is_conv.conv_symm : h2_φ h2_φ' h2_ᾰ h2_ih V
+  { admit },
+  case is_conv.conv_trans : h2_φ h2_φ' h2_φ'' h2_ᾰ h2_ᾰ_1 h2_ih_ᾰ h2_ih_ᾰ_1 V
+  { admit },
+  case is_conv.conv_not : h2_φ h2_φ' h2_ᾰ h2_ih V
+  { admit },
+  case is_conv.conv_imp : h2_φ h2_φ' h2_ψ h2_ψ' h2_ᾰ h2_ᾰ_1 h2_ih_ᾰ h2_ih_ᾰ_1 V
+  { admit },
+  case is_conv.conv_forall : h2_x h2_φ h2_φ' h2_ᾰ h2_ih V
+  { admit },
+  case is_conv.conv_unfold : h2_d h2_σ V
+  { admit },
 end
 
 
@@ -2356,6 +2269,7 @@ begin
     apply ih,
     exact nf,
     exact hyp,
+    exact h1,
     exact H3,
   },
 end
