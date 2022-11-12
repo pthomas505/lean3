@@ -2101,6 +2101,84 @@ begin
 end
 
 
+example
+  {D : Type}
+  (M : meta_valuation D)
+  (E : env)
+  (d : definition_)
+  (args : list var_name)
+  (V : valuation D)
+  (h1 : E.nodup)
+  (h2 : d ∈ E)
+  (h3 : args.length = d.args.length) :
+  holds D M E (def_ d.name args) V ↔
+    holds D M E d.q (function.update_list V (list.zip d.args (list.map V args))) :=
+begin
+  induction E,
+  case list.nil
+  {
+    simp only [list.not_mem_nil] at h2,
+    contradiction,
+  },
+  case list.cons : hd tl ih
+  {
+    simp only [list.mem_cons_iff] at h2,
+
+    simp only [holds_not_nil_def],
+    split_ifs,
+    {
+      unfold env.nodup at h1,
+      simp only [list.pairwise_cons] at h1,
+      cases h1,
+
+      cases h,
+
+      cases h2,
+      {
+        sorry,
+      },
+      {
+        specialize h1_left d h2,
+        exfalso,
+        apply h1_left,
+        rewrite h_left,
+        rewrite <- h3,
+        rewrite h_right,
+      },
+    },
+    {
+      cases h2,
+      {
+        subst h2,
+        simp only [eq_self_iff_true, true_and] at h,
+        exfalso,
+        apply h,
+        exact h3,
+      },
+      {
+        have s1 : env.nodup tl,
+        unfold env.nodup at h1,
+        simp only [list.pairwise_cons] at h1,
+        cases h1,
+        unfold env.nodup,
+        exact h1_right,
+
+        specialize ih s1 h2,
+        rewrite ih,
+
+        rewrite <- ext_env_holds,
+        apply exists.intro [hd],
+        simp only [list.singleton_append],
+
+        sorry,
+
+        exact h1,
+      }
+    }
+  },
+end
+
+
 lemma lem_7
   (D : Type)
   (M : meta_valuation D)
