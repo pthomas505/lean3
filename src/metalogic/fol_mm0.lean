@@ -2160,16 +2160,30 @@ begin
     },
     case list.cons : h1_E_hd h1_E_tl h1_E_ih
     {
+      simp only [list.mem_cons_iff] at h1_ᾰ,
+
+      unfold env.nodup at h1_ᾰ_1,
+      simp only [list.pairwise_cons] at h1_ᾰ_1,
+      cases h1_ᾰ_1,
+
       simp only [holds_not_nil_def, list.length_map, list.map_map],
       split_ifs,
       {
-        sorry,
+        cases h,
+
+        cases h1_ᾰ,
+        {
+          sorry,
+        },
+        {
+          specialize h1_ᾰ_1_left h1_d h1_ᾰ,
+          exfalso,
+          apply h1_ᾰ_1_left,
+          rewrite h_left,
+          rewrite h_right,
+        },
       },
       {
-        rewrite ext_env_holds M h1_E_tl (h1_E_hd :: h1_E_tl),
-        apply h1_E_ih,
-
-        simp only [list.mem_cons_iff] at h1_ᾰ,
         cases h1_ᾰ,
         {
           subst h1_ᾰ,
@@ -2177,21 +2191,8 @@ begin
           contradiction,
         },
         {
-          exact h1_ᾰ,
-        },
-
-        unfold env.nodup at h1_ᾰ_1,
-        simp only [list.pairwise_cons] at h1_ᾰ_1,
-        cases h1_ᾰ_1,
-        unfold env.nodup,
-        exact h1_ᾰ_1_right,
-
-        apply exists.intro [h1_E_hd],
-        simp only [list.singleton_append],
-
-        sorry,
-
-        exact h1_ᾰ_1,
+          sorry,
+        }
       }
     },
   },
