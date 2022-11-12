@@ -2162,13 +2162,14 @@ begin
     {
       simp only [list.mem_cons_iff] at h1_ᾰ,
 
-      unfold env.nodup at h1_ᾰ_1,
-      simp only [list.pairwise_cons] at h1_ᾰ_1,
-      cases h1_ᾰ_1,
 
       simp only [holds_not_nil_def, list.length_map, list.map_map],
       split_ifs,
       {
+        unfold env.nodup at h1_ᾰ_1,
+        simp only [list.pairwise_cons] at h1_ᾰ_1,
+        cases h1_ᾰ_1,
+
         cases h,
 
         cases h1_ᾰ,
@@ -2192,11 +2193,22 @@ begin
         },
         {
           have s1 : env.nodup h1_E_tl,
+          unfold env.nodup at h1_ᾰ_1,
+          simp only [list.pairwise_cons] at h1_ᾰ_1,
+          cases h1_ᾰ_1,
           unfold env.nodup,
           exact h1_ᾰ_1_right,
 
           specialize h1_E_ih h1_ᾰ s1,
           rewrite h1_E_ih,
+
+          rewrite <- ext_env_holds,
+          apply exists.intro [h1_E_hd],
+          simp only [list.singleton_append],
+
+          sorry,
+
+          exact h1_ᾰ_1,
         }
       }
     },
