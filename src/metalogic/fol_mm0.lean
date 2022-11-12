@@ -2127,17 +2127,28 @@ begin
     simp only [holds_not_nil_def],
     split_ifs,
     {
-      unfold env.nodup at h1,
-      simp only [list.pairwise_cons] at h1,
-      cases h1,
-
       cases h,
 
       cases h2,
       {
-        sorry,
+        rewrite h2,
+        rewrite <- ext_env_holds,
+        {
+          apply exists.intro [hd],
+          simp only [list.singleton_append],
+        },
+        {
+          sorry,
+        },
+        {
+          exact h1,
+        }
       },
       {
+        unfold env.nodup at h1,
+        simp only [list.pairwise_cons] at h1,
+        cases h1,
+
         specialize h1_left d h2,
         exfalso,
         apply h1_left,
@@ -2167,12 +2178,16 @@ begin
         rewrite ih,
 
         rewrite <- ext_env_holds,
-        apply exists.intro [hd],
-        simp only [list.singleton_append],
-
-        sorry,
-
-        exact h1,
+        {
+          apply exists.intro [hd],
+          simp only [list.singleton_append],
+        },
+        {
+          sorry,
+        },
+        {
+          exact h1,
+        }
       }
     }
   },
