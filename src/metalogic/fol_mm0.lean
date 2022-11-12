@@ -2152,7 +2152,48 @@ begin
   },
   case is_conv.conv_unfold : h1_E h1_d h1_σ h1_ᾰ h1_ᾰ_1
   {
-    sorry,
+    induction h1_E,
+    case list.nil
+    {
+      simp only [list.not_mem_nil] at h1_ᾰ,
+      contradiction,
+    },
+    case list.cons : h1_E_hd h1_E_tl h1_E_ih
+    {
+      simp only [holds_not_nil_def, list.length_map, list.map_map],
+      split_ifs,
+      {
+        sorry,
+      },
+      {
+        rewrite ext_env_holds M h1_E_tl (h1_E_hd :: h1_E_tl),
+        apply h1_E_ih,
+
+        simp only [list.mem_cons_iff] at h1_ᾰ,
+        cases h1_ᾰ,
+        {
+          subst h1_ᾰ,
+          simp only [eq_self_iff_true, and_self, not_true] at h,
+          contradiction,
+        },
+        {
+          exact h1_ᾰ,
+        },
+
+        unfold env.nodup at h1_ᾰ_1,
+        simp only [list.pairwise_cons] at h1_ᾰ_1,
+        cases h1_ᾰ_1,
+        unfold env.nodup,
+        exact h1_ᾰ_1_right,
+
+        apply exists.intro [h1_E_hd],
+        simp only [list.singleton_append],
+
+        sorry,
+
+        exact h1_ᾰ_1,
+      }
+    },
   },
 end
 
