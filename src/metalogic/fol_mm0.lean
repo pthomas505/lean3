@@ -480,6 +480,14 @@ def formula.is_meta_var_or_all_def_in_env (E : env) : formula → Prop
   ∃ (d : definition_), d ∈ E ∧ name = d.name ∧ args.length = d.args.length
 
 
+def env.well_formed : env → Prop
+| list.nil := true
+| (d :: E) :=
+    (∀ (d' : definition_), d' ∈ E → d.name = d'.name -> d.args.length = d'.args.length -> false)
+    ∧ d.q.is_meta_var_or_all_def_in_env E
+    ∧ env.well_formed E
+
+
 def exists_ (x : var_name) (φ : formula) : formula := not_ (forall_ x (not_ φ))
 
 
