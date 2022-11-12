@@ -2138,6 +2138,7 @@ begin
           simp only [list.singleton_append],
         },
         {
+          rewrite <- h2,
           sorry,
         },
         {
