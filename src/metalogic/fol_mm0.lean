@@ -399,14 +399,6 @@ inductive formula : Type
 open formula
 
 
-def formula.meta_var_set : formula → finset meta_var_name
-| (meta_var_ X) := {X}
-| (not_ φ) := φ.meta_var_set
-| (imp_ φ ψ) := φ.meta_var_set ∪ ψ.meta_var_set
-| (eq_ x y) := ∅
-| (forall_ x φ) := φ.meta_var_set
-| (def_ name args) := ∅
-
 -- (v, X) ∈ Γ if and only if v is not free in meta_var_ X.
 def not_free (Γ : list (var_name × meta_var_name)) (v : var_name) : formula → Prop
 | (meta_var_ X) := (v, X) ∈ Γ
@@ -415,6 +407,16 @@ def not_free (Γ : list (var_name × meta_var_name)) (v : var_name) : formula �
 | (eq_ x y) := x ≠ v ∧ y ≠ v
 | (forall_ x φ) := x = v ∨ not_free φ
 | (def_ name args) := ∀ (x : var_name), x ∈ args → ¬ x = v
+
+
+def formula.meta_var_set : formula → finset meta_var_name
+| (meta_var_ X) := {X}
+| (not_ φ) := φ.meta_var_set
+| (imp_ φ ψ) := φ.meta_var_set ∪ ψ.meta_var_set
+| (eq_ x y) := ∅
+| (forall_ x φ) := φ.meta_var_set
+| (def_ name args) := ∅
+
 
 /-
 True if and only if the formula has no meta variables and all the variables
@@ -427,6 +429,55 @@ def formula.no_meta_var_and_all_free_in_list : formula → list var_name → Pro
 | (eq_ x y) S := x ∈ S ∧ y ∈ S
 | (forall_ x φ) S := φ.no_meta_var_and_all_free_in_list (x :: S)
 | (def_ name args) S := args ⊆ S
+
+
+lemma no_meta_var_imp_meta_var_set_is_empty
+  (φ : formula)
+  (l : list var_name)
+  (h1 : φ.no_meta_var_and_all_free_in_list l) :
+  φ.meta_var_set = ∅ :=
+begin
+  induction φ generalizing l,
+  case formula.meta_var_ : X
+  {
+    unfold formula.no_meta_var_and_all_free_in_list at h1,
+    contradiction,
+  },
+  case formula.not_ : φ φ_ih
+  {
+    unfold formula.no_meta_var_and_all_free_in_list at h1,
+    unfold formula.meta_var_set,
+    exact φ_ih l h1,
+  },
+  case formula.imp_ : φ ψ φ_ih ψ_ih
+  {
+    unfold formula.no_meta_var_and_all_free_in_list at h1,
+    cases h1,
+    unfold formula.meta_var_set,
+    specialize φ_ih l h1_left,
+    specialize ψ_ih l h1_right,
+    rewrite φ_ih,
+    rewrite ψ_ih,
+    simp only [finset.empty_union],
+  },
+  case formula.eq_ : x y
+  {
+    unfold formula.no_meta_var_and_all_free_in_list at h1,
+    unfold formula.meta_var_set,
+  },
+  case formula.forall_ : x φ φ_ih
+  {
+    unfold formula.no_meta_var_and_all_free_in_list at h1,
+    unfold formula.meta_var_set,
+    apply φ_ih (x :: l),
+    exact h1,
+  },
+  case formula.def_ : name args
+  {
+    unfold formula.no_meta_var_and_all_free_in_list at h1,
+    unfold formula.meta_var_set,
+  },
+end
 
 
 /-
@@ -462,8 +513,9 @@ structure definition_ : Type :=
 @[derive [has_append, has_mem definition_]]
 def env : Type := list definition_
 
-def env.nodup : env → Prop :=
-  list.pairwise (fun a b, a.name = b.name -> a.args.length = b.args.length -> false)
+
+def env.nodup_ : env → Prop :=
+  list.pairwise (fun (d1 d2 : definition_), d1.name = d2.name -> d1.args.length = d2.args.length -> false)
 
 
 /-
@@ -488,7 +540,34 @@ def env.well_formed : env → Prop
     ∧ env.well_formed E
 
 
-def exists_ (x : var_name) (φ : formula) : formula := not_ (forall_ x (not_ φ))
+lemma env_well_formed_imp_nodup
+  (E : env)
+  (h1 : E.well_formed) :
+  E.nodup_ :=
+begin
+  induction E,
+  case list.nil
+  {
+    unfold env.nodup_,
+    simp only [list.pairwise.nil],
+  },
+  case list.cons : hd tl ih
+  {
+    unfold env.well_formed at h1,
+    cases h1,
+    cases h1_right,
+    unfold env.nodup_ at ih,
+    unfold env.nodup_,
+    simp only [list.pairwise_cons],
+    split,
+    {
+      exact h1_left,
+    },
+    {
+      exact ih h1_right_right,
+    },
+  },
+end
 
 
 inductive is_conv (E : env) : formula → formula → Prop
@@ -511,6 +590,9 @@ inductive is_conv (E : env) : formula → formula → Prop
 
 | conv_unfold (d : definition_) (σ : instantiation) :
   is_conv (def_ d.name (d.args.map σ.1)) (d.q.subst σ meta_var_)
+
+
+def exists_ (x : var_name) (φ : formula) : formula := not_ (forall_ x (not_ φ))
 
 
 -- (v, X) ∈ Γ if and only if v is not free in meta_var_ X.
@@ -581,55 +663,6 @@ inductive is_proof
   (φ φ' : formula) :
   φ'.is_meta_var_or_all_def_in_env E →
   is_proof Γ Δ φ → is_conv E φ φ' → is_proof Γ Δ φ'
-
-
-lemma def_meta_var_set_is_empty
-  (φ : formula)
-  (l : list var_name)
-  (h1 : φ.no_meta_var_and_all_free_in_list l) :
-  φ.meta_var_set = ∅ :=
-begin
-  induction φ generalizing l,
-  case formula.meta_var_ : X
-  {
-    unfold formula.no_meta_var_and_all_free_in_list at h1,
-    contradiction,
-  },
-  case formula.not_ : φ φ_ih
-  {
-    unfold formula.no_meta_var_and_all_free_in_list at h1,
-    unfold formula.meta_var_set,
-    exact φ_ih l h1,
-  },
-  case formula.imp_ : φ ψ φ_ih ψ_ih
-  {
-    unfold formula.no_meta_var_and_all_free_in_list at h1,
-    cases h1,
-    unfold formula.meta_var_set,
-    specialize φ_ih l h1_left,
-    specialize ψ_ih l h1_right,
-    rewrite φ_ih,
-    rewrite ψ_ih,
-    simp only [finset.empty_union],
-  },
-  case formula.eq_ : x y
-  {
-    unfold formula.no_meta_var_and_all_free_in_list at h1,
-    unfold formula.meta_var_set,
-  },
-  case formula.forall_ : x φ φ_ih
-  {
-    unfold formula.no_meta_var_and_all_free_in_list at h1,
-    unfold formula.meta_var_set,
-    apply φ_ih (x :: l),
-    exact h1,
-  },
-  case formula.def_ : name args
-  {
-    unfold formula.no_meta_var_and_all_free_in_list at h1,
-    unfold formula.meta_var_set,
-  },
-end
 
 
 -- Semantics
@@ -1107,7 +1140,7 @@ begin
     case formula.def_ : name args M1 M2 V h1
     {
       have s1 : E_hd.q.meta_var_set = ∅,
-      exact def_meta_var_set_is_empty E_hd.q E_hd.args E_hd.nf,
+      exact no_meta_var_imp_meta_var_set_is_empty E_hd.q E_hd.args E_hd.nf,
 
       simp only [holds_not_nil_def] at *,
       unfold formula.meta_var_set at *,
@@ -1135,7 +1168,7 @@ lemma ext_env_holds
   (V : valuation D)
   (h1 : ∃ E1, E' = E1 ++ E)
   (h2 : φ.is_meta_var_or_all_def_in_env E)
-  (h3 : E'.nodup) :
+  (h3 : E'.nodup_) :
   holds D M E' φ V ↔ holds D M E φ V :=
 begin
   induction φ generalizing V,
@@ -1193,7 +1226,7 @@ begin
         {
           unfold formula.is_meta_var_or_all_def_in_env at h2,
           apply exists.elim h2, intros d a2, clear h2,
-          unfold env.nodup at h3,
+          unfold env.nodup_ at h3,
           simp only [list.cons_append, list.pairwise_cons, list.mem_append] at h3,
           cases h3,
           cases h,
@@ -1218,16 +1251,16 @@ begin
           }
         },
         {
-          unfold env.nodup at h3,
+          unfold env.nodup_ at h3,
           simp at h3,
           cases h3,
-          unfold env.nodup,
+          unfold env.nodup_,
           exact h3_right,
         }
       },
       {
         apply E1_ih,
-        unfold env.nodup at h3,
+        unfold env.nodup_ at h3,
         simp only [list.cons_append, list.pairwise_cons, list.mem_append] at h3,
         cases h3,
         exact h3_right,
@@ -1250,7 +1283,7 @@ lemma lem_1
   (h2 : ∀ (X : meta_var_name), X ∈ φ.meta_var_set → (τ X).is_meta_var_or_all_def_in_env E)
   (h3 : σ.1 ∘ σ' = id)
   (h4 : σ' ∘ σ.1 = id)
-  (h5 : env.nodup E')
+  (h5 : E'.nodup_)
   (h6 : ∃ E1, E' = E1 ++ E) :
   holds D
     (fun (X' : meta_var_name) (V' : valuation D), holds D M E' (τ X') (V' ∘ σ'))
@@ -1444,7 +1477,7 @@ begin
 
       simp only [list.mem_append, list.mem_cons_iff] at a1_left,
 
-      unfold env.nodup at h5,
+      unfold env.nodup_ at h5,
       rewrite list.pairwise_append at h5,
       simp only [list.pairwise_cons, list.mem_cons_iff, forall_eq_or_imp] at h5,
       cases h5,
@@ -1492,7 +1525,7 @@ begin
                 E_hd.args,
             {
               have s2 : E_hd.q.meta_var_set = ∅,
-              exact def_meta_var_set_is_empty E_hd.q E_hd.args E_hd.nf,
+              exact no_meta_var_imp_meta_var_set_is_empty E_hd.q E_hd.args E_hd.nf,
 
               rewrite holds_meta_valuation_ext
                 (fun (X' : meta_var_name) (V' : valuation D),
@@ -1586,7 +1619,7 @@ lemma lem_1'
   (h2 : ∀ (X : meta_var_name), X ∈ φ.meta_var_set → (τ X).is_meta_var_or_all_def_in_env E)
   (h3 : σ.1 ∘ σ' = id)
   (h4 : σ' ∘ σ.1 = id)
-  (h5 : env.nodup E) :
+  (h5 : env.nodup_ E) :
   holds D
     (fun (X' : meta_var_name) (V' : valuation D), holds D M E (τ X') (V' ∘ σ'))
   E φ (V ∘ σ.1) ↔
@@ -2116,7 +2149,7 @@ example
   (d : definition_)
   (args : list var_name)
   (V : valuation D)
-  (h1 : E.nodup)
+  (h1 : E.nodup_)
   (h2 : d ∈ E)
   (h3 : args.length = d.args.length) :
   holds D M E (def_ d.name args) V ↔
@@ -2154,7 +2187,7 @@ begin
         }
       },
       {
-        unfold env.nodup at h1,
+        unfold env.nodup_ at h1,
         simp only [list.pairwise_cons] at h1,
         cases h1,
 
@@ -2176,11 +2209,11 @@ begin
         exact h3,
       },
       {
-        have s1 : env.nodup tl,
-        unfold env.nodup at h1,
+        have s1 : env.nodup_ tl,
+        unfold env.nodup_ at h1,
         simp only [list.pairwise_cons] at h1,
         cases h1,
-        unfold env.nodup,
+        unfold env.nodup_,
         exact h1_right,
 
         specialize ih s1 h2,
@@ -2209,7 +2242,7 @@ lemma lem_7
   (E : env)
   (φ φ' : formula)
   (V : valuation D)
-  (h1 : E.nodup)
+  (h1 : E.nodup_)
   (h2 : is_conv E φ φ') :
   holds D M E φ V ↔ holds D M E φ' V :=
 begin
@@ -2239,7 +2272,7 @@ example
   (Δ : list formula)
   (φ : formula)
   (H : is_proof E Γ Δ φ)
-  (h1 : E.nodup)
+  (h1 : E.nodup_)
   (nf : ∀ v X, (v, X) ∈ Γ → is_not_free D M E v (meta_var_ X))
   (hyp : ∀ (ψ ∈ Δ) (V : valuation D), holds D M E ψ V) :
   ∀ (V : valuation D), holds D M E φ V :=
