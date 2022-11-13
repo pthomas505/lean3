@@ -2149,7 +2149,7 @@ example
   (d : definition_)
   (args : list var_name)
   (V : valuation D)
-  (h1 : E.nodup_)
+  (h1 : E.well_formed)
   (h2 : d ∈ E)
   (h3 : args.length = d.args.length) :
   holds D M E (def_ d.name args) V ↔
@@ -2183,11 +2183,12 @@ begin
           sorry,
         },
         {
+          apply env_well_formed_imp_nodup,
           exact h1,
         }
       },
       {
-        unfold env.nodup_ at h1,
+        unfold env.well_formed at h1,
         simp only [list.pairwise_cons] at h1,
         cases h1,
 
@@ -2209,12 +2210,11 @@ begin
         exact h3,
       },
       {
-        have s1 : env.nodup_ tl,
-        unfold env.nodup_ at h1,
-        simp only [list.pairwise_cons] at h1,
+        have s1 : env.well_formed tl,
+        unfold env.well_formed at h1,
         cases h1,
-        unfold env.nodup_,
-        exact h1_right,
+        cases h1_right,
+        exact h1_right_right,
 
         specialize ih s1 h2,
         rewrite ih,
@@ -2228,6 +2228,7 @@ begin
           sorry,
         },
         {
+          apply env_well_formed_imp_nodup,
           exact h1,
         }
       }
