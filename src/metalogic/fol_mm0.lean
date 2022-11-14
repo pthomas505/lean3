@@ -380,6 +380,35 @@ begin
 end
 
 
+lemma function.update_list_mem_list
+  {α β : Type}
+  [decidable_eq α]
+  (f : α → β)
+  (g : α → α)
+  (l : list α)
+  (x : α)
+  (h1 : x ∈ l)
+  (h2 : l.nodup) :
+  (function.update_list f (l.zip (list.map (f ∘ g) l)) x = f (g x)) :=
+begin
+  have s1 : ∃ (n : ℕ) (h2 : n < l.length), l.nth_le n h2 = x,
+  exact list.nth_le_of_mem h1,
+
+  apply exists.elim s1,
+  intros n a1,
+  apply exists.elim a1,
+  intros a2 a3,
+  rewrite <- a3,
+  rewrite function.update_list_zip f l _ n,
+  squeeze_simp,
+  squeeze_simp,
+  exact a2,
+  squeeze_simp,
+  exact h2,
+end
+
+
+
 -- Syntax
 
 
@@ -2469,6 +2498,7 @@ begin
     (function.update_list V (d.args.zip (list.map V (list.map σ.val d.args)))) (V ∘ σ.val)
     d.q d.args d.nf,
     simp only [list.map_map, function.comp_app],
+    extract_goal,
     sorry,
     apply def_in_env_imp_is_meta_var_or_all_def_in_env, exact h1, exact h2,
     unfold formula.is_meta_var_or_all_def_in_env,
