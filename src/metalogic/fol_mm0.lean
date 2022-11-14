@@ -757,6 +757,7 @@ inductive is_conv (E : env) : formula → formula → Prop
   is_conv φ φ' → is_conv (forall_ x φ) (forall_ x φ')
 
 | conv_unfold (d : definition_) (σ : instantiation) :
+  d ∈ E →
   is_conv (def_ d.name (d.args.map σ.1)) (d.q.subst σ meta_var_)
 
 
@@ -2310,7 +2311,7 @@ begin
 end
 
 
-example
+lemma lem_8
   {D : Type}
   (M : meta_valuation D)
   (E : env)
@@ -2418,7 +2419,7 @@ lemma lem_7
   (E : env)
   (φ φ' : formula)
   (V : valuation D)
-  (h1 : E.nodup_)
+  (h1 : E.well_formed)
   (h2 : is_conv E φ φ') :
   holds D M E φ V ↔ holds D M E φ' V :=
 begin
@@ -2448,7 +2449,7 @@ example
   (Δ : list formula)
   (φ : formula)
   (H : is_proof E Γ Δ φ)
-  (h1 : E.nodup_)
+  (h1 : E.well_formed)
   (nf : ∀ v X, (v, X) ∈ Γ → is_not_free D M E v (meta_var_ X))
   (hyp : ∀ (ψ ∈ Δ) (V : valuation D), holds D M E ψ V) :
   ∀ (V : valuation D), holds D M E φ V :=
@@ -2533,10 +2534,12 @@ begin
   {
     dsimp only at *,
     obtain ⟨σ', left, right⟩ := σ.2,
-    have IH1' := fun φ b M d e V, (lem_1' _ _ _ _ _ _ _ _ _ left right h1).2 (IH1 φ b M d e V),
+    have s1 : E.nodup_,
+    apply env_well_formed_imp_nodup E h1,
+    have IH1' := fun φ b M d e V, (lem_1' _ _ _ _ _ _ _ _ _ left right s1).2 (IH1 φ b M d e V),
     {
       intros V,
-      rewrite <- lem_1' _ _ _ _ _ _ _ _ _ left right h1,
+      rewrite <- lem_1' _ _ _ _ _ _ _ _ _ left right s1,
       {
         apply IH2,
         {
