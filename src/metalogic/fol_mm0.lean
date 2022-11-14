@@ -400,13 +400,12 @@ begin
   intros a2 a3,
   rewrite <- a3,
   rewrite function.update_list_zip f l _ n,
-  squeeze_simp,
-  squeeze_simp,
+  simp only [list.nth_le_map'],
+  simp only [list.length_map],
   exact a2,
-  squeeze_simp,
+  simp only [list.length_map],
   exact h2,
 end
-
 
 
 -- Syntax
@@ -2469,17 +2468,43 @@ lemma lem_7
 begin
   induction h2 generalizing V,
   case is_conv.conv_refl : h2 V
-  { admit },
-  case is_conv.conv_symm : h2_φ h2_φ' h2_ᾰ h2_ih V
-  { admit },
+  {
+    refl,
+  },
+  case is_conv.conv_symm : φ φ' h2 ih V
+  {
+    symmetry,
+    apply ih,
+  },
   case is_conv.conv_trans : h2_φ h2_φ' h2_φ'' h2_ᾰ h2_ᾰ_1 h2_ih_ᾰ h2_ih_ᾰ_1 V
-  { admit },
+  {
+    transitivity (holds D M E h2_φ' V),
+    exact h2_ih_ᾰ V,
+    exact h2_ih_ᾰ_1 V,
+  },
   case is_conv.conv_not : h2_φ h2_φ' h2_ᾰ h2_ih V
-  { admit },
+  {
+    simp only [holds_not],
+    apply not_congr,
+    exact h2_ih V,
+  },
   case is_conv.conv_imp : h2_φ h2_φ' h2_ψ h2_ψ' h2_ᾰ h2_ᾰ_1 h2_ih_ᾰ h2_ih_ᾰ_1 V
-  { admit },
+  {
+    simp only [holds_imp],
+    apply imp_congr,
+    {
+      exact h2_ih_ᾰ V,
+    },
+    {
+      exact h2_ih_ᾰ_1 V,
+    }
+  },
   case is_conv.conv_forall : h2_x h2_φ h2_φ' h2_ᾰ h2_ih V
-  { admit },
+  {
+    simp only [holds_forall],
+    apply forall_congr, intros a,
+    exact h2_ih (function.update V h2_x a),
+  },
   case is_conv.conv_unfold : d σ h2 V
   {
     obtain ⟨σ', left, right⟩ := σ.2,
@@ -2498,8 +2523,8 @@ begin
     (function.update_list V (d.args.zip (list.map V (list.map σ.val d.args)))) (V ∘ σ.val)
     d.q d.args d.nf,
     simp only [list.map_map, function.comp_app],
-    extract_goal,
-    sorry,
+    intros v h3,
+    apply function.update_list_mem_list, exact h3, exact d.nodup,
     apply def_in_env_imp_is_meta_var_or_all_def_in_env, exact h1, exact h2,
     unfold formula.is_meta_var_or_all_def_in_env,
     simp only [implies_true_iff],
