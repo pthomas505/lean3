@@ -570,7 +570,7 @@ begin
 end
 
 
-example
+lemma is_meta_var_or_all_def_in_env_ext
   (E E' : env)
   (φ : formula)
   (h1 : ∃ E1, E' = E1 ++ E)
@@ -695,6 +695,44 @@ begin
           exact a2_right,
         },
       }
+    },
+  },
+end
+
+
+lemma def_in_env_imp_is_meta_var_or_all_def_in_env
+  (E : env)
+  (d : definition_)
+  (h1 : E.well_formed)
+  (h2 : d ∈ E) :
+  d.q.is_meta_var_or_all_def_in_env E :=
+begin
+  induction E,
+  case list.nil
+  {
+    simp only [list.not_mem_nil] at h2,
+    contradiction,
+  },
+  case list.cons : hd tl ih
+  {
+    unfold env.well_formed at h1,
+    cases h1,
+    cases h1_right,
+
+    apply is_meta_var_or_all_def_in_env_ext tl (hd :: tl),
+    {
+      apply exists.intro [hd],
+      simp only [list.singleton_append],
+    },
+    {
+      cases h2,
+      {
+        rewrite h2,
+        exact h1_right_left,
+      },
+      {
+        apply ih h1_right_right h2,
+      },
     },
   },
 end
@@ -2360,7 +2398,9 @@ begin
           unfold env.well_formed at h1,
           cases h1,
           cases h1_right,
-          sorry,
+          apply def_in_env_imp_is_meta_var_or_all_def_in_env,
+          exact h1_right_right,
+          exact h2,
         },
         {
           apply env_well_formed_imp_nodup,
