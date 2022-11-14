@@ -2436,10 +2436,8 @@ begin
   { admit },
   case is_conv.conv_forall : h2_x h2_φ h2_φ' h2_ᾰ h2_ih V
   { admit },
-  case is_conv.conv_unfold : d σ V
-  {
-
-  },
+  case is_conv.conv_unfold : d σ h2 V
+  { admit },
 end
 
 
