@@ -570,6 +570,136 @@ begin
 end
 
 
+example
+  (E E' : env)
+  (φ : formula)
+  (h1 : ∃ E1, E' = E1 ++ E)
+  (h2 : φ.is_meta_var_or_all_def_in_env E) :
+  φ.is_meta_var_or_all_def_in_env E' :=
+begin
+  induction E generalizing φ,
+  case list.nil : φ h2
+  {
+    induction φ,
+    case formula.meta_var_ : X
+    {
+      unfold formula.is_meta_var_or_all_def_in_env,
+    },
+    case formula.not_ : φ φ_ih
+    {
+      unfold formula.is_meta_var_or_all_def_in_env at *,
+      exact φ_ih h2,
+    },
+    case formula.imp_ : φ ψ φ_ih ψ_ih
+    {
+      unfold formula.is_meta_var_or_all_def_in_env at *,
+      cases h2,
+      split,
+      {
+        exact φ_ih h2_left,
+      },
+      {
+        exact ψ_ih h2_right,
+      }
+    },
+    case formula.eq_ : x y
+    {
+      unfold formula.is_meta_var_or_all_def_in_env,
+    },
+    case formula.forall_ : x φ φ_ih
+    {
+      unfold formula.is_meta_var_or_all_def_in_env at *,
+      exact φ_ih h2,
+    },
+    case formula.def_ : name args
+    {
+      unfold formula.is_meta_var_or_all_def_in_env at h2,
+      simp only [list.not_mem_nil, false_and, exists_false] at h2,
+      contradiction,
+    },
+  },
+  case list.cons : E_hd E_tl E_ih φ h2
+  {
+    induction φ,
+    case formula.meta_var_ : X
+    {
+      unfold formula.is_meta_var_or_all_def_in_env,
+    },
+    case formula.not_ : φ φ_ih
+    {
+      unfold formula.is_meta_var_or_all_def_in_env at *,
+      exact φ_ih h2,
+    },
+    case formula.imp_ : φ ψ φ_ih ψ_ih
+    {
+      unfold formula.is_meta_var_or_all_def_in_env at *,
+      cases h2,
+      split,
+      {
+        exact φ_ih h2_left,
+      },
+      {
+        exact ψ_ih h2_right,
+      }
+    },
+    case formula.eq_ : x y
+    {
+      unfold formula.is_meta_var_or_all_def_in_env,
+    },
+    case formula.forall_ : x φ φ_ih
+    {
+      unfold formula.is_meta_var_or_all_def_in_env at *,
+      exact φ_ih h2,
+    },
+    case formula.def_ : name args
+    {
+      apply exists.elim h1,
+      intros E1 a1,
+
+      unfold formula.is_meta_var_or_all_def_in_env at h2,
+      apply exists.elim h2,
+      intros d a2,
+
+      cases a2,
+      cases a2_left,
+      {
+        unfold formula.is_meta_var_or_all_def_in_env,
+        apply exists.intro E_hd,
+        rewrite a1,
+        split,
+        {
+          simp only [list.mem_append, list.mem_cons_iff, eq_self_iff_true, true_or, or_true],
+        },
+        {
+          rewrite <- a2_left,
+          exact a2_right,
+        },
+      },
+      {
+        have s1 : (∃ (E1 : env), (E' = (E1 ++ E_tl))),
+        apply exists.intro (E1 ++ [E_hd]),
+        simp only [list.append_assoc, list.singleton_append],
+        exact a1,
+
+        specialize E_ih s1,
+
+        apply E_ih,
+
+        unfold formula.is_meta_var_or_all_def_in_env,
+        apply exists.intro d,
+        split,
+        {
+          exact a2_left,
+        },
+        {
+          exact a2_right,
+        },
+      }
+    },
+  },
+end
+
+
 inductive is_conv (E : env) : formula → formula → Prop
 | conv_refl (φ : formula) : is_conv φ φ
 
@@ -2179,8 +2309,10 @@ begin
           simp only [list.singleton_append],
         },
         {
-          rewrite <- h2,
-          sorry,
+          unfold env.well_formed at h1,
+          cases h1,
+          cases h1_right,
+          exact h1_right_left,
         },
         {
           apply env_well_formed_imp_nodup,
@@ -2225,6 +2357,9 @@ begin
           simp only [list.singleton_append],
         },
         {
+          unfold env.well_formed at h1,
+          cases h1,
+          cases h1_right,
           sorry,
         },
         {
