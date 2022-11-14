@@ -1329,6 +1329,21 @@ begin
 end
 
 
+lemma holds_meta_valuation_ext'
+  {D : Type}
+  (M1 M2 : meta_valuation D)
+  (E : env)
+  (V : valuation D)
+  (φ : formula)
+  (h1 : φ.meta_var_set = ∅) :
+  holds D M1 E φ V ↔ holds D M2 E φ V :=
+begin
+  apply holds_meta_valuation_ext,
+  rewrite h1,
+  simp only [finset.not_mem_empty, is_empty.forall_iff, forall_forall_const, implies_true_iff],
+end
+
+
 lemma ext_env_holds
   {D : Type}
   (M : meta_valuation D)
@@ -2437,7 +2452,31 @@ begin
   case is_conv.conv_forall : h2_x h2_φ h2_φ' h2_ᾰ h2_ih V
   { admit },
   case is_conv.conv_unfold : d σ h2 V
-  { admit },
+  {
+    obtain ⟨σ', left, right⟩ := σ.2,
+
+    rewrite lem_8 M E d (list.map σ.val d.args) V h1 h2,
+
+    rewrite <- lem_1' V M E σ σ' meta_var_ d.q,
+
+    have s1 : holds D (fun (X' : meta_var_name) (V' : valuation D), holds D M E (meta_var_ X') (V' ∘ σ')) E d.q (V ∘ σ.val)
+      ↔ holds D M E d.q (V ∘ σ.val),
+    apply holds_meta_valuation_ext',
+    apply no_meta_var_imp_meta_var_set_is_empty d.q d.args d.nf,
+
+    rewrite s1,
+    apply holds_valuation_ext M E
+    (function.update_list V (d.args.zip (list.map V (list.map σ.val d.args)))) (V ∘ σ.val)
+    d.q d.args d.nf,
+    simp only [list.map_map, function.comp_app],
+    sorry,
+    apply def_in_env_imp_is_meta_var_or_all_def_in_env, exact h1, exact h2,
+    unfold formula.is_meta_var_or_all_def_in_env,
+    simp only [implies_true_iff],
+    exact left, exact right,
+    apply env_well_formed_imp_nodup, exact h1,
+    simp only [list.length_map],
+  },
 end
 
 
