@@ -94,40 +94,13 @@ def function.update_list
 #eval function.update_list (fun (n : ℕ), n) [(0,1), (3,2), (0,2)] 0
 
 
-lemma function.update_list_comp
-  {α β γ : Type}
-  [decidable_eq α]
-  (g : β → γ)
-  (f : α → β)
-  (l : list (α × β)) :
-  g ∘ function.update_list f l =
-    function.update_list (g ∘ f) (list.map (fun (i : α × β), (i.fst, g i.snd)) l) :=
-begin
-  induction l,
-  case list.nil
-  {
-    unfold function.update_list,
-    unfold list.map,
-    unfold function.update_list,
-  },
-  case list.cons : hd tl ih
-  {
-    unfold function.update_list,
-    unfold list.map,
-    unfold function.update_list,
-    rewrite aux_3,
-    rewrite ih,
-  },
-end
-
-
-lemma function.update_list_noteq
+lemma function.update_list_not_mem
   {α β : Type}
   [decidable_eq α]
   (f : α → β)
   (l : list (α × β))
   (x : α)
-  (h1 : ∀ (p : α × β), p ∈ l → ¬ x = p.fst) :
+  (h1 : x ∉ list.map prod.fst l) :
   function.update_list f l x = f x :=
 begin
   induction l,
@@ -137,18 +110,16 @@ begin
   },
   case list.cons : hd tl ih
   {
-    have s1 : ¬ x = hd.fst,
-    apply h1,
-    simp only [list.mem_cons_iff, eq_self_iff_true, true_or],
+    simp only [list.map, list.mem_cons_iff, list.mem_map, prod.exists,
+      exists_and_distrib_right, exists_eq_right] at h1,
+    push_neg at h1,
+    cases h1,
 
     unfold function.update_list,
-    simp only [function.update_noteq s1],
+    simp only [function.update_noteq h1_left],
     apply ih,
-    intros p h2,
-    apply h1,
-    simp only [list.mem_cons_iff],
-    apply or.intro_right,
-    exact h2,
+    simp only [list.mem_map, prod.exists, exists_and_distrib_right, exists_eq_right, not_exists],
+    exact h1_right,
   },
 end
 
@@ -413,28 +384,32 @@ begin
 end
 
 
-example
-  {α β : Type}
+
+
+lemma function.update_list_comp
+  {α β γ : Type}
   [decidable_eq α]
+  (g : β → γ)
   (f : α → β)
-  (l : list α)
-  (l' : list β)
-  (x : α)
-  (h1 : x ∉ l) :
-  (function.update_list f (l.zip l') x = f x) :=
+  (l : list (α × β)) :
+  g ∘ function.update_list f l =
+    function.update_list (g ∘ f) (list.map (fun (i : α × β), (i.fst, g i.snd)) l) :=
 begin
-  apply function.update_list_noteq,
-  intros p h2,
-
-  have s1 : p.fst ∈ l ∧ p.snd ∈ l',
-  cases p,
-  apply list.mem_zip h2,
-
-  cases s1,
-  intro contra,
-  apply h1,
-  rewrite contra,
-  exact s1_left,
+  induction l,
+  case list.nil
+  {
+    unfold function.update_list,
+    unfold list.map,
+    unfold function.update_list,
+  },
+  case list.cons : hd tl ih
+  {
+    unfold function.update_list,
+    unfold list.map,
+    unfold function.update_list,
+    rewrite aux_3,
+    rewrite ih,
+  },
 end
 
 
