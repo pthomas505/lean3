@@ -13,33 +13,34 @@ lemma aux_1
   (x : α)
   (a : β)
   (h1 : f' ∘ f = id) :
-  function.update (g ∘ f) x a = (function.update g (f x) a) ∘ f :=
+  (function.update g (f x) a) ∘ f = function.update (g ∘ f) x a :=
 begin
-    apply funext, intros x',
-    unfold function.comp,
-    unfold function.update,
-    simp only [eq_rec_constant, dite_eq_ite],
-    apply if_congr,
-    {
-      split,
-      {
-        apply congr_arg,
-      },
-      {
-        apply function.left_inverse.injective,
-        exact congr_fun h1,
-      },
-    },
-    {
-      refl,
-    },
-    {
-      refl,
-    }
+    apply function.update_comp_eq_of_injective,
+    apply function.left_inverse.injective,
+    exact congr_fun h1,
 end
 
 
 lemma aux_2
+  {α β : Type}
+  [decidable_eq α]
+  (g : α → β)
+  (f f' : α → α)
+  (x : α)
+  (a : β)
+  (h1 : f' ∘ f = id)
+  (h2 : f ∘ f' = id) :
+  (function.update g x a) ∘ f = function.update (g ∘ f) (f' x) a :=
+begin
+  rewrite <- aux_1 g f f' _ a h1,
+  congr,
+  rewrite <- function.comp_app f f' x,
+  rewrite h2,
+  exact id.def x,
+end
+
+
+lemma aux_3
   {α β γ : Type}
   [decidable_eq α]
   (g : β → γ)
@@ -47,7 +48,7 @@ lemma aux_2
   (x : α)
   (a : β) :
   g ∘ function.update f x a = function.update (g ∘ f) x (g a) :=
-begin
+begin  
   apply funext, intros x',
   unfold function.comp,
   by_cases x' = x,
@@ -57,41 +58,6 @@ begin
   },
   {
     simp only [function.update_noteq h],
-  }
-end
-
-
-lemma aux_3
-  {α β : Type}
-  [decidable_eq α]
-  (g : α → β)
-  (f f' : α → α)
-  (x : α)
-  (a : β)
-  (h1 : f' ∘ f = id)
-  (h2 : f ∘ f' = id) :
-  function.update (g ∘ f) (f' x) a = (function.update g x a) ∘ f :=
-begin
-  apply funext, intros x',
-  unfold function.comp,
-  unfold function.update,
-  simp only [eq_rec_constant, dite_eq_ite],
-  congr' 1,
-  simp only [eq_iff_iff],
-  split,
-  {
-    intros h3,
-    rewrite h3,
-    rewrite <- function.comp_app f f' x,
-    rewrite h2,
-    simp only [id.def],
-  },
-  {
-    intros h3,
-    rewrite <- h3,
-    rewrite <- function.comp_app f' f x',
-    rewrite h1,
-    simp only [id.def],
   }
 end
 
@@ -149,7 +115,7 @@ begin
     unfold function.update_list,
     unfold list.map,
     unfold function.update_list,
-    rewrite aux_2,
+    rewrite aux_3,
     rewrite ih,
   },
 end
@@ -2088,7 +2054,7 @@ begin
   unfold is_not_free,
   simp only [holds_meta_var],
   intros V a,
-  rewrite <- aux_3 V σ' σ.1 v a left right,
+  rewrite aux_2 V σ' σ.1 v a left right,
   apply not_free_imp_is_not_free M E Γ',
   {
     exact H v X h1,
