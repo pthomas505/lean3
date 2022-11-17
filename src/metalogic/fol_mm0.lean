@@ -125,7 +125,7 @@ begin
     },
     {
       have s1 : ¬ x.fst = hd.fst,
-      by_contradiction contra,
+      intro contra,
       apply h1_left x.snd,
       rewrite <- contra,
       simp only [prod.mk.eta],
@@ -135,6 +135,23 @@ begin
       exact ih h1_right h2,
     }
   },
+end
+
+
+lemma function.update_list_nth_le
+  {α β : Type}
+  [decidable_eq α]
+  (f : α → β)
+  (l : list (α × β))
+  (n : ℕ)
+  (h1 : n < l.length)
+  (h2 : list.nodup (list.map prod.fst l)) :
+  function.update_list f l (l.nth_le n h1).fst = (l.nth_le n h1).snd :=
+begin
+  have s1 : l.nth_le n h1 ∈ l,
+  exact list.nth_le_mem l n h1,
+
+  exact function.update_list_mem f l (list.nth_le l n h1) h2 s1,
 end
 
 
