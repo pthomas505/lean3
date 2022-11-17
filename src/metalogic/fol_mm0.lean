@@ -374,6 +374,70 @@ begin
 end
 
 
+example
+  {α β : Type}
+  [decidable_eq α]
+  (f : α → α)
+  (l : list α)
+  (x : α)
+  (h1 : x ∈ l) :
+  (function.update_list f (l.zip (list.map f l)) x = f x) :=
+begin
+  induction l,
+  case list.nil
+  {
+    simp only [list.not_mem_nil] at h1,
+    contradiction,
+  },
+  case list.cons : hd tl ih
+  {
+    simp only [list.mem_cons_iff] at h1,
+    simp only [list.map, list.zip_cons_cons],
+    unfold function.update_list,
+    by_cases x = hd,
+    {
+      rewrite h,
+      simp only [function.update_same],
+    },
+    {
+      cases h1,
+      {
+        contradiction,
+      },
+      {
+        simp only [function.update_noteq h],
+        exact ih h1,
+      }
+    }
+  },
+end
+
+
+example
+  {α β : Type}
+  [decidable_eq α]
+  (f : α → β)
+  (l : list α)
+  (l' : list β)
+  (x : α)
+  (h1 : x ∉ l) :
+  (function.update_list f (l.zip l') x = f x) :=
+begin
+  apply function.update_list_noteq,
+  intros p h2,
+
+  have s1 : p.fst ∈ l ∧ p.snd ∈ l',
+  cases p,
+  apply list.mem_zip h2,
+
+  cases s1,
+  intro contra,
+  apply h1,
+  rewrite contra,
+  exact s1_left,
+end
+
+
 -- Syntax
 
 
