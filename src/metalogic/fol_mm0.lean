@@ -70,16 +70,16 @@ lemma aux_4
   (h1 : ∀ (y : α), y ≠ x → f y = g y) :
   function.update f x (g x) = g :=
 begin
-  apply funext, intros a,
-  unfold function.update,
-  simp only [eq_rec_constant, dite_eq_ite],
-  split_ifs,
+  apply funext, intros x',
+  by_cases x' = x,
   {
     rewrite h,
+    simp only [function.update_same],
   },
   {
-    exact h1 a h,
-  }
+    simp only [function.update_noteq h],
+    exact h1 x' h,
+  },
 end
 
 
@@ -184,6 +184,7 @@ begin
   },
 end
 
+--
 
 lemma list.nth_le_mem_zip
   {α β : Type}
