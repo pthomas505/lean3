@@ -138,23 +138,6 @@ begin
 end
 
 
-lemma function.update_list_nth_le
-  {α β : Type}
-  [decidable_eq α]
-  (f : α → β)
-  (l : list (α × β))
-  (n : ℕ)
-  (h1 : n < l.length)
-  (h2 : list.nodup (list.map prod.fst l)) :
-  function.update_list f l (l.nth_le n h1).fst = (l.nth_le n h1).snd :=
-begin
-  have s1 : l.nth_le n h1 ∈ l,
-  exact list.nth_le_mem l n h1,
-
-  exact function.update_list_mem f l (list.nth_le l n h1) h2 s1,
-end
-
-
 lemma function.update_list_not_mem
   {α β : Type}
   [decidable_eq α]
@@ -360,45 +343,6 @@ begin
   exact a2,
   simp only [list.length_map],
   exact h2,
-end
-
-
-example
-  {α β : Type}
-  [decidable_eq α]
-  (f : α → α)
-  (l : list α)
-  (x : α)
-  (h1 : x ∈ l) :
-  (function.update_list f (l.zip (list.map f l)) x = f x) :=
-begin
-  induction l,
-  case list.nil
-  {
-    simp only [list.not_mem_nil] at h1,
-    contradiction,
-  },
-  case list.cons : hd tl ih
-  {
-    simp only [list.mem_cons_iff] at h1,
-    simp only [list.map, list.zip_cons_cons],
-    unfold function.update_list,
-    by_cases x = hd,
-    {
-      rewrite h,
-      simp only [function.update_same],
-    },
-    {
-      cases h1,
-      {
-        contradiction,
-      },
-      {
-        simp only [function.update_noteq h],
-        exact ih h1,
-      }
-    }
-  },
 end
 
 
