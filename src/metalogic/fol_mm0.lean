@@ -181,7 +181,13 @@ lemma list.nth_le_mem_zip
 begin
   have s1 : n < (l1.zip l2).length,
   simp only [list.length_zip, lt_min_iff],
-  exact and.intro h1 h2,
+  split,
+  {
+    exact h1,
+  },
+  {
+    exact h2,
+  },
 
   have s2 : (l1.nth_le n h1, l2.nth_le n h2) = (l1.zip l2).nth_le n s1,
   simp only [list.nth_le_zip],
@@ -191,6 +197,7 @@ begin
 end
 
 
+-- TODO: Remove h3.
 lemma function.update_list_nth_le_zip
   {α β : Type}
   [decidable_eq α]
@@ -222,44 +229,97 @@ lemma function.update_list_mem_ext
   {α β : Type}
   [decidable_eq α]
   (f g : α → β)
+  (l : list (α × β))
+  (x : α)
+  (h1 : x ∈ list.map prod.fst l) :
+  function.update_list f l x = function.update_list g l x :=
+begin
+  induction l,
+  case list.nil
+  {
+    simp only [list.map_nil, list.not_mem_nil] at h1,
+    contradiction,
+  },
+  case list.cons : hd tl ih
+  {
+    simp only [list.map, list.mem_cons_iff] at h1,
+    unfold function.update_list,
+    by_cases x = hd.fst,
+    {
+      rewrite h,
+      simp only [function.update_same],
+    },
+    {
+      simp only [function.update_noteq h],
+      cases h1,
+      {
+        contradiction,
+      },
+      {
+        exact ih h1,
+      }
+    },
+  },
+end
+
+
+lemma list.mem_map_fst_zip
+  {α β : Type}
+  [decidable_eq α]
+  (l1 : list α)
+  (l2 : list β)
+  (x : α)
+  (h1 : l1.length ≤ l2.length)
+  (h2 : x ∈ l1) :
+  (x ∈ list.map prod.fst (l1.zip l2)) :=
+begin
+  have s1 : ∃ (n : ℕ) (h : n < l1.length), list.nth_le l1 n h = x,
+  exact list.nth_le_of_mem h2,
+
+  apply exists.elim s1,
+  intros n a1,
+  apply exists.elim a1,
+  intros a2 a3,
+  clear s1 a1,
+
+  have s2 : l1.length < l2.length ∨ l1.length = l2.length,
+  apply lt_or_eq_of_le h1,
+
+  have s3 : n < l2.length,
+  cases s2,
+  {
+    transitivity l1.length,
+    exact a2,
+    exact s2,
+  },
+  {
+    rewrite <- s2,
+    exact a2,
+  },
+
+  simp only [list.mem_map, prod.exists, exists_and_distrib_right, exists_eq_right],
+  apply exists.intro (l2.nth_le n s3),
+  rewrite <- a3,
+  apply list.nth_le_mem_zip,
+end
+
+
+lemma function.update_list_mem_ext'
+  {α β : Type}
+  [decidable_eq α]
+  (f g : α → β)
   (l l' : list α)
   (x : α)
-  (h1 : l.length = l'.length)
-  (h2 : x ∈ l)
-  (h3 : l.nodup) :
+  (h1 : l.length ≤ l'.length)
+  (h2 : x ∈ l) :
   function.update_list f (l.zip (list.map f l')) x =
     function.update_list g (l.zip (list.map f l')) x :=
 begin
-  have s1 : ∃ (n : ℕ) (h : n < l.length), list.nth_le l n h = x,
-  exact list.nth_le_of_mem h2,
-
-  apply exists.elim s1, intros n h,
-  apply exists.elim h, intros h' h'',
-  rewrite <- h'',
-
-  have s2 : n < (list.map f l').length,
+  apply function.update_list_mem_ext,
+  apply list.mem_map_fst_zip,
   simp only [list.length_map],
-  rewrite <- h1,
-  exact h',
-
-  rewrite function.update_list_nth_le_zip f l (list.map f l') n h' s2,
-  {
-    rewrite <- function.update_list_nth_le_zip g l (list.map f l') n h' s2,
-    {
-      simp only [list.length_map],
-      rewrite h1,
-    },
-    {
-      exact h3,
-    }
-  },
-  {
-    simp only [list.length_map],
-    rewrite h1,
-  },
-  {
-    exact h3,
-  },
+  exact h1,
+  exact h2,
 end
 
 
@@ -1721,15 +1781,12 @@ begin
             },
             {
               intros v h',
-              apply function.update_list_mem_ext,
+              apply function.update_list_mem_ext',
               {
                 rewrite h_right,
               },
               {
                 exact h',
-              },
-              {
-                exact E_hd.nodup,
               },
             },
           },
