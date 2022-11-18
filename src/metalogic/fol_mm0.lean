@@ -172,18 +172,18 @@ end
 lemma list.nth_le_mem_zip
   {α β : Type}
   [decidable_eq α]
-  (l : list α)
-  (l' : list β)
+  (l1 : list α)
+  (l2 : list β)
   (n : ℕ)
-  (h1 : n < l.length)
-  (h2 : n < l'.length) :
-  ((l.nth_le n h1, l'.nth_le n h2) ∈ l.zip l') :=
+  (h1 : n < l1.length)
+  (h2 : n < l2.length) :
+  ((l1.nth_le n h1, l2.nth_le n h2) ∈ l1.zip l2) :=
 begin
-  have s1 : n < (l.zip l').length,
+  have s1 : n < (l1.zip l2).length,
   simp only [list.length_zip, lt_min_iff],
   exact and.intro h1 h2,
 
-  have s2 : (l.nth_le n h1, l'.nth_le n h2) = (l.zip l').nth_le n s1,
+  have s2 : (l1.nth_le n h1, l2.nth_le n h2) = (l1.zip l2).nth_le n s1,
   simp only [list.nth_le_zip],
 
   rewrite s2,
@@ -191,30 +191,30 @@ begin
 end
 
 
-lemma function.update_list_zip
+lemma function.update_list_nth_le_zip
   {α β : Type}
   [decidable_eq α]
   (f : α → β)
-  (l : list α)
-  (l' : list β)
+  (l1 : list α)
+  (l2 : list β)
   (n : ℕ)
-  (h1 : n < l.length)
-  (h2 : n < l'.length)
-  (h3 : l.length ≤ l'.length)
-  (h4 : l.nodup) :
-  (function.update_list f (l.zip l')) (l.nth_le n h1) = l'.nth_le n h2 :=
+  (h1 : n < l1.length)
+  (h2 : n < l2.length)
+  (h3 : l1.length ≤ l2.length)
+  (h4 : l1.nodup) :
+  (function.update_list f (l1.zip l2)) (l1.nth_le n h1) = l2.nth_le n h2 :=
 begin
-  have s1 : list.map prod.fst (l.zip l') = l,
-  exact list.map_fst_zip l l' h3,
+  have s1 : list.map prod.fst (l1.zip l2) = l1,
+  exact list.map_fst_zip l1 l2 h3,
 
-  have s2 : (list.map prod.fst (l.zip l')).nodup,
+  have s2 : (list.map prod.fst (l1.zip l2)).nodup,
   rewrite s1,
   exact h4,
 
-  have s3 : (l.nth_le n h1, l'.nth_le n h2) ∈ l.zip l',
-  exact list.nth_le_mem_zip l l' n h1 h2,
+  have s3 : (l1.nth_le n h1, l2.nth_le n h2) ∈ l1.zip l2,
+  exact list.nth_le_mem_zip l1 l2 n h1 h2,
 
-  exact function.update_list_mem f (l.zip l') (l.nth_le n h1, l'.nth_le n h2) s2 s3,
+  exact function.update_list_mem f (l1.zip l2) (l1.nth_le n h1, l2.nth_le n h2) s2 s3,
 end
 
 
@@ -242,9 +242,9 @@ begin
   rewrite <- h1,
   exact h',
 
-  rewrite function.update_list_zip f l (list.map f l') n h' s2,
+  rewrite function.update_list_nth_le_zip f l (list.map f l') n h' s2,
   {
-    rewrite <- function.update_list_zip g l (list.map f l') n h' s2,
+    rewrite <- function.update_list_nth_le_zip g l (list.map f l') n h' s2,
     {
       simp only [list.length_map],
       rewrite h1,
@@ -290,9 +290,9 @@ begin
   rewrite <- h1,
   exact h',
 
-  rewrite function.update_list_zip f l (list.map f l') n h' s2,
+  rewrite function.update_list_nth_le_zip f l (list.map f l') n h' s2,
   {
-    rewrite <- function.update_list_zip (function.update f v a) l (list.map f l') n h' s2,
+    rewrite <- function.update_list_nth_le_zip (function.update f v a) l (list.map f l') n h' s2,
     {
       congr' 2,
       rewrite list.map_congr,
@@ -337,7 +337,7 @@ begin
   apply exists.elim a1,
   intros a2 a3,
   rewrite <- a3,
-  rewrite function.update_list_zip f l _ n,
+  rewrite function.update_list_nth_le_zip f l _ n,
   simp only [list.nth_le_map'],
   simp only [list.length_map],
   exact a2,
@@ -1145,11 +1145,11 @@ begin
 
           have s6 : (function.update_list V1 (E_hd.args.zip (list.map V1 args)) (E_hd.args.nth_le n h4) =
             (list.map V1 args).nth_le n s3),
-          exact function.update_list_zip V1 E_hd.args (list.map V1 args) n h4 s3 s2 E_hd.nodup,
+          exact function.update_list_nth_le_zip V1 E_hd.args (list.map V1 args) n h4 s3 s2 E_hd.nodup,
 
           have s7 : (function.update_list V2 (E_hd.args.zip (list.map V2 args)) (E_hd.args.nth_le n h4) =
             (list.map V2 args).nth_le n s5),
-          exact function.update_list_zip V2 E_hd.args (list.map V2 args) n h4 s5 s4 E_hd.nodup,
+          exact function.update_list_nth_le_zip V2 E_hd.args (list.map V2 args) n h4 s5 s4 E_hd.nodup,
 
           have s8 : n < args.length,
           rewrite h_right,
