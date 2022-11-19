@@ -330,7 +330,34 @@ begin
   },
 end
 
+
+lemma function.update_list_comp
+  {α β γ : Type}
+  [decidable_eq α]
+  (f : α → β)
+  (g : β → γ)
+  (l : list (α × β)) :
+  g ∘ function.update_list f l =
+    function.update_list (g ∘ f) (list.map (fun (i : α × β), (i.fst, g i.snd)) l) :=
+begin
+  induction l,
+  case list.nil
+  {
+    unfold list.map,
+    unfold function.update_list,
+  },
+  case list.cons : hd tl ih
+  {
+    unfold list.map,
+    unfold function.update_list,
+    rewrite aux_3,
+    rewrite ih,
+  },
+end
+
+
 --
+
 
 -- TODO: Remove h3.
 lemma function.update_list_nth_le_zip
@@ -411,33 +438,6 @@ begin
   },
   {
     exact h3,
-  },
-end
-
-
-lemma function.update_list_comp
-  {α β γ : Type}
-  [decidable_eq α]
-  (g : β → γ)
-  (f : α → β)
-  (l : list (α × β)) :
-  g ∘ function.update_list f l =
-    function.update_list (g ∘ f) (list.map (fun (i : α × β), (i.fst, g i.snd)) l) :=
-begin
-  induction l,
-  case list.nil
-  {
-    unfold function.update_list,
-    unfold list.map,
-    unfold function.update_list,
-  },
-  case list.cons : hd tl ih
-  {
-    unfold function.update_list,
-    unfold list.map,
-    unfold function.update_list,
-    rewrite aux_3,
-    rewrite ih,
   },
 end
 
