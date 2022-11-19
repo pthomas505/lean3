@@ -387,58 +387,43 @@ begin
 end
 
 
+lemma function.update_list_zip_map_eq
+  {α β : Type}
+  [decidable_eq α]
+  (f g h : α → β)
+  (l1 l2 : list α)
+  (x : α)
+  (h1 : l1.length ≤ l2.length)
+  (h2 : x ∈ l1)
+  (h3 : ∀ (v : α), v ∈ l2 → f v = g v) :
+  function.update_list f (l1.zip (list.map f l2)) x =
+    function.update_list h (l1.zip (list.map g l2)) x :=
+begin
+  rewrite function.update_list_zip_map_mem_ext f h l1 l2 x h1 h2,
+  congr' 2,
+  rewrite list.map_eq_map_iff,
+  exact h3,
+end
+
+
 lemma function.update_list_update
   {α β : Type}
   [decidable_eq α]
   (f g : α → β)
-  (l l' : list α)
+  (l1 l2 : list α)
   (v : α)
   (a : β)
   (x : α)
-  (h1 : l.length = l'.length)
-  (h2 : x ∈ l)
-  (h3 : l.nodup)
-  (h4 : ∀ (x' : α), (x' ∈ l') → (¬(x' = v))) :
-  function.update_list f (l.zip (list.map f l')) x =
-    function.update_list (function.update f v a) (l.zip (list.map (function.update f v a) l')) x :=
+  (h1 : l1.length ≤ l2.length)
+  (h2 : x ∈ l1)
+  (h3 : ∀ (x' : α), x' ∈ l2 → ¬ x' = v) :
+  function.update_list f (l1.zip (list.map f l2)) x =
+    function.update_list g (l1.zip (list.map (function.update f v a) l2)) x :=
 begin
-  have s1 : ∃ (n : ℕ) (h : n < l.length), list.nth_le l n h = x,
-  exact list.nth_le_of_mem h2,
-
-  apply exists.elim s1, intros n h,
-  apply exists.elim h, intros h' h'',
-  rewrite <- h'',
-
-  have s2 : n < (list.map f l').length,
-  simp only [list.length_map],
-  rewrite <- h1,
-  exact h',
-
-  rewrite function.update_list_nth_le_zip f l (list.map f l') n h' s2,
-  {
-    rewrite <- function.update_list_nth_le_zip (function.update f v a) l (list.map f l') n h' s2,
-    {
-      congr' 2,
-      rewrite list.map_congr,
-      intros y h5,
-      rewrite function.update_noteq,
-      exact h4 y h5,
-    },
-    {
-      simp only [list.length_map],
-      rewrite h1,
-    },
-    {
-      exact h3,
-    },
-  },
-  {
-    simp only [list.length_map],
-    rewrite h1,
-  },
-  {
-    exact h3,
-  },
+  apply function.update_list_zip_map_eq f (function.update f v a) g l1 l2 x h1 h2,
+  intros x' h,
+  specialize h3 x' h,
+  simp only [function.update_noteq h3],  
 end
 
 
@@ -2079,9 +2064,6 @@ begin
           },
           {
             exact h1,
-          },
-          {
-            exact E_hd.nodup,
           },
           {
             exact H,
