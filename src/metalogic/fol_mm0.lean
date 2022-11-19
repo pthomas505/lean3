@@ -244,6 +244,44 @@ begin
 end
 
 
+lemma function.update_list_mem_ext
+  {α β : Type}
+  [decidable_eq α]
+  (f g : α → β)
+  (l : list (α × β))
+  (x : α)
+  (h1 : x ∈ list.map prod.fst l) :
+  function.update_list f l x = function.update_list g l x :=
+begin
+  induction l,
+  case list.nil
+  {
+    simp only [list.map_nil, list.not_mem_nil] at h1,
+    contradiction,
+  },
+  case list.cons : hd tl ih
+  {
+    simp only [list.map, list.mem_cons_iff] at h1,
+    unfold function.update_list,
+    by_cases x = hd.fst,
+    {
+      rewrite h,
+      simp only [function.update_same],
+    },
+    {
+      simp only [function.update_noteq h],
+      cases h1,
+      {
+        contradiction,
+      },
+      {
+        exact ih h1,
+      }
+    },
+  },
+end
+
+
 lemma function.update_list_not_mem
   {α β : Type}
   [decidable_eq α]
@@ -303,42 +341,6 @@ begin
 end
 
 
-lemma function.update_list_mem_ext
-  {α β : Type}
-  [decidable_eq α]
-  (f g : α → β)
-  (l : list (α × β))
-  (x : α)
-  (h1 : x ∈ list.map prod.fst l) :
-  function.update_list f l x = function.update_list g l x :=
-begin
-  induction l,
-  case list.nil
-  {
-    simp only [list.map_nil, list.not_mem_nil] at h1,
-    contradiction,
-  },
-  case list.cons : hd tl ih
-  {
-    simp only [list.map, list.mem_cons_iff] at h1,
-    unfold function.update_list,
-    by_cases x = hd.fst,
-    {
-      rewrite h,
-      simp only [function.update_same],
-    },
-    {
-      simp only [function.update_noteq h],
-      cases h1,
-      {
-        contradiction,
-      },
-      {
-        exact ih h1,
-      }
-    },
-  },
-end
 
 
 lemma function.update_list_mem_ext'
