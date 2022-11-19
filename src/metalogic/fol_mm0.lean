@@ -103,11 +103,9 @@ begin
     exact h2,
   },
 
-  have s2 : (l1.nth_le n h1, l2.nth_le n h2) = (l1.zip l2).nth_le n s1,
-  simp only [list.nth_le_zip],
-
-  rewrite s2,
+  rewrite <- list.nth_le_zip,
   apply list.nth_le_mem,
+  exact s1,
 end
 
 
@@ -202,6 +200,45 @@ begin
 
       simp only [function.update_noteq s1],
       exact ih h1_right h2,
+    }
+  },
+end
+
+
+lemma function.update_list_zip_map_mem
+  {α β : Type}
+  [decidable_eq α]
+  (f g : α → β)
+  (l : list α)
+  (x : α)
+  (h1 : x ∈ l) :
+  function.update_list f (l.zip (list.map g l)) x = g x :=
+begin
+  induction l,
+  case list.nil
+  {
+    simp only [list.not_mem_nil] at h1,
+    contradiction,
+  },
+  case list.cons : hd tl ih
+  {
+    simp only [list.mem_cons_iff] at h1,
+    simp only [list.map, list.zip_cons_cons],
+    unfold function.update_list,
+    by_cases x = hd,
+    {
+      rewrite h,
+      simp only [function.update_same],
+    },
+    {
+      cases h1,
+      {
+        contradiction,
+      },
+      {
+        simp only [function.update_noteq h],
+        exact ih h1,
+      }
     }
   },
 end
@@ -304,8 +341,6 @@ begin
 end
 
 
-
-
 lemma function.update_list_mem_ext'
   {α β : Type}
   [decidable_eq α]
@@ -377,34 +412,6 @@ begin
   {
     exact h3,
   },
-end
-
-
-lemma function.update_list_mem_list
-  {α β : Type}
-  [decidable_eq α]
-  (f : α → β)
-  (g : α → α)
-  (l : list α)
-  (x : α)
-  (h1 : x ∈ l)
-  (h2 : l.nodup) :
-  (function.update_list f (l.zip (list.map (f ∘ g) l)) x = f (g x)) :=
-begin
-  have s1 : ∃ (n : ℕ) (h2 : n < l.length), l.nth_le n h2 = x,
-  exact list.nth_le_of_mem h1,
-
-  apply exists.elim s1,
-  intros n a1,
-  apply exists.elim a1,
-  intros a2 a3,
-  rewrite <- a3,
-  rewrite function.update_list_nth_le_zip f l _ n,
-  simp only [list.nth_le_map'],
-  simp only [list.length_map],
-  exact a2,
-  simp only [list.length_map],
-  exact h2,
 end
 
 
@@ -2548,7 +2555,7 @@ begin
     d.q d.args d.nf,
     simp only [list.map_map, function.comp_app],
     intros v h3,
-    apply function.update_list_mem_list, exact h3, exact d.nodup,
+    apply function.update_list_zip_map_mem, exact h3,
     apply def_in_env_imp_is_meta_var_or_all_def_in_env, exact h1, exact h2,
     unfold formula.is_meta_var_or_all_def_in_env,
     simp only [implies_true_iff],
