@@ -32,7 +32,7 @@ lemma aux_2
   (h2 : f ∘ f' = id) :
   (function.update g x a) ∘ f = function.update (g ∘ f) (f' x) a :=
 begin
-  rewrite <- aux_1 g f f' _ a h1,
+  rewrite <- aux_1 g f f' (f' x) a h1,
   congr,
   rewrite <- function.comp_app f f' x,
   rewrite h2,
@@ -41,33 +41,11 @@ end
 
 
 lemma aux_3
-  {α β γ : Type}
-  [decidable_eq α]
-  (g : β → γ)
-  (f : α → β)
-  (x : α)
-  (a : β) :
-  g ∘ function.update f x a = function.update (g ∘ f) x (g a) :=
-begin  
-  apply funext, intros x',
-  unfold function.comp,
-  by_cases x' = x,
-  {
-    rewrite h,
-    simp only [function.update_same],
-  },
-  {
-    simp only [function.update_noteq h],
-  }
-end
-
-
-lemma aux_4
   {α β : Type}
   [decidable_eq α]
   (f g : α → β)
   (x : α)
-  (h1 : ∀ (y : α), y ≠ x → f y = g y) :
+  (h1 : ∀ (y : α), ¬ y = x → f y = g y) :
   function.update f x (g x) = g :=
 begin
   apply funext, intros x',
@@ -350,7 +328,7 @@ begin
   {
     unfold list.map,
     unfold function.update_list,
-    rewrite aux_3,
+    rewrite function.comp_update,
     rewrite ih,
   },
 end
@@ -1880,7 +1858,7 @@ begin
   split,
   {
     intros h1 V V' h2,
-    rewrite <- aux_4 V V' v h2,
+    rewrite <- aux_3 V V' v h2,
     apply h1,
   },
   {
