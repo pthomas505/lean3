@@ -81,9 +81,11 @@ begin
     exact h2,
   },
 
-  rewrite <- list.nth_le_zip,
-  apply list.nth_le_mem,
-  exact s1,
+  have s2 : (list.zip l1 l2).nth_le n s1 = (l1.nth_le n h1, l2.nth_le n h2),
+  apply list.nth_le_zip,
+
+  rewrite <- s2,
+  exact (list.zip l1 l2).nth_le_mem n s1,
 end
 
 
