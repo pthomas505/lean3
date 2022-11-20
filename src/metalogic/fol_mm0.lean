@@ -132,6 +132,54 @@ begin
 end
 
 
+lemma list.map_fst_zip_is_prefix
+  {α β : Type}
+  (l1 : list α)
+  (l2 : list β) :
+  list.map prod.fst (l1.zip l2) <+: l1 :=
+begin
+  induction l1 generalizing l2,
+  case list.nil : l2
+  {
+    simp only [list.zip_nil_left, list.map_nil],
+  },
+  case list.cons : l1_hd l1_tl l1_ih l2
+  {
+    induction l2,
+    case list.nil
+    {
+      unfold list.is_prefix,
+      apply exists.intro (l1_hd :: l1_tl),
+      simp only [list.zip_nil_right, list.map_nil, list.nil_append, eq_self_iff_true, and_self],
+    },
+    case list.cons : l2_hd l2_tl l2_ih
+    {
+      simp at *,
+      specialize l1_ih l2_tl,
+      rewrite list.prefix_cons_inj,
+      exact l1_ih,
+    },
+  },
+end
+
+
+lemma list.map_fst_zip_nodup
+  {α β : Type}
+  (l1 : list α)
+  (l2 : list β)
+  (h1 : l1.nodup) :
+  (list.map prod.fst (l1.zip l2)).nodup :=
+begin
+  have s1 : list.map prod.fst (l1.zip l2) <+: l1,
+  apply list.map_fst_zip_is_prefix,
+
+  have s2 : list.map prod.fst (l1.zip l2) <+ l1,
+  apply list.is_prefix.sublist s1,
+
+  exact list.nodup.sublist s2 h1,
+end
+
+
 def function.update_list
   {α β : Type}
   [decidable_eq α]
@@ -338,10 +386,6 @@ begin
 end
 
 
---
-
-
--- TODO: Remove h3.
 lemma function.update_list_nth_le_zip
   {α β : Type}
   [decidable_eq α]
@@ -351,21 +395,16 @@ lemma function.update_list_nth_le_zip
   (n : ℕ)
   (h1 : n < l1.length)
   (h2 : n < l2.length)
-  (h3 : l1.length ≤ l2.length)
-  (h4 : l1.nodup) :
+  (h3 : l1.nodup) :
   (function.update_list f (l1.zip l2)) (l1.nth_le n h1) = l2.nth_le n h2 :=
 begin
-  have s1 : list.map prod.fst (l1.zip l2) = l1,
-  exact list.map_fst_zip l1 l2 h3,
+  have s1 : (list.map prod.fst (l1.zip l2)).nodup,
+  apply list.map_fst_zip_nodup l1 l2 h3,
 
-  have s2 : (list.map prod.fst (l1.zip l2)).nodup,
-  rewrite s1,
-  exact h4,
-
-  have s3 : (l1.nth_le n h1, l2.nth_le n h2) ∈ l1.zip l2,
+  have s2 : (l1.nth_le n h1, l2.nth_le n h2) ∈ l1.zip l2,
   exact list.nth_le_mem_zip l1 l2 n h1 h2,
 
-  exact function.update_list_mem f (l1.zip l2) (l1.nth_le n h1, l2.nth_le n h2) s2 s3,
+  exact function.update_list_mem f (l1.zip l2) (l1.nth_le n h1, l2.nth_le n h2) s1 s2,
 end
 
 
@@ -1181,11 +1220,11 @@ begin
 
           have s6 : (function.update_list V1 (E_hd.args.zip (list.map V1 args)) (E_hd.args.nth_le n h4) =
             (list.map V1 args).nth_le n s3),
-          exact function.update_list_nth_le_zip V1 E_hd.args (list.map V1 args) n h4 s3 s2 E_hd.nodup,
+          exact function.update_list_nth_le_zip V1 E_hd.args (list.map V1 args) n h4 s3 E_hd.nodup,
 
           have s7 : (function.update_list V2 (E_hd.args.zip (list.map V2 args)) (E_hd.args.nth_le n h4) =
             (list.map V2 args).nth_le n s5),
-          exact function.update_list_nth_le_zip V2 E_hd.args (list.map V2 args) n h4 s5 s4 E_hd.nodup,
+          exact function.update_list_nth_le_zip V2 E_hd.args (list.map V2 args) n h4 s5 E_hd.nodup,
 
           have s8 : n < args.length,
           rewrite h_right,
