@@ -154,10 +154,9 @@ begin
     },
     case list.cons : l2_hd l2_tl l2_ih
     {
-      simp at *,
-      specialize l1_ih l2_tl,
+      simp only [list.map, list.zip_cons_cons],
       rewrite list.prefix_cons_inj,
-      exact l1_ih,
+      exact l1_ih l2_tl,
     },
   },
 end
