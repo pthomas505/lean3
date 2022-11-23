@@ -317,6 +317,7 @@ begin
   case list.cons : hd tl ih
   {
     simp only [list.mem_cons_iff] at h1,
+
     simp only [list.map, list.zip_cons_cons],
     unfold function.update_list,
     by_cases x = hd,
@@ -406,7 +407,7 @@ lemma function.update_list_nth_le_zip
   (function.update_list f (l1.zip l2)) (l1.nth_le n h1) = l2.nth_le n h2 :=
 begin
   have s1 : (list.map prod.fst (l1.zip l2)).nodup,
-  apply list.map_fst_zip_nodup l1 l2 h3,
+  exact list.map_fst_zip_nodup l1 l2 h3,
 
   have s2 : (l1.nth_le n h1, l2.nth_le n h2) ∈ l1.zip l2,
   exact list.nth_le_mem_zip l1 l2 n h1 h2,
