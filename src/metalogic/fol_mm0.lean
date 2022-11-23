@@ -214,6 +214,8 @@ begin
       exists_and_distrib_right, exists_eq_right, not_exists] at h1,
     cases h1,
 
+    simp only [list.mem_cons_iff] at h2,
+
     unfold function.update_list,
     cases h2,
     {
