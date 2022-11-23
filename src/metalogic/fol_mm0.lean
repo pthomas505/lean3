@@ -205,7 +205,6 @@ begin
   induction l,
   case list.nil
   {
-    unfold function.update_list,
     simp only [list.not_mem_nil] at h2,
     contradiction,
   },
