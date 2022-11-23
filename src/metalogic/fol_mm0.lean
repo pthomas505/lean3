@@ -105,30 +105,34 @@ begin
   exact list.nth_le_of_mem h2,
 
   apply exists.elim s1,
-  intros n a1,
-  apply exists.elim a1,
-  intros a2 a3,
-  clear s1 a1,
+  intros n s1_1,
+  apply exists.elim s1_1,
+  intros s1_1_1 s1_1_2,
+  clear s1 s1_1,
 
   have s2 : l1.length < l2.length ∨ l1.length = l2.length,
-  apply lt_or_eq_of_le h1,
+  exact lt_or_eq_of_le h1,
 
   have s3 : n < l2.length,
   cases s2,
   {
     transitivity l1.length,
-    exact a2,
-    exact s2,
+    {
+      exact s1_1_1,
+    },
+    {
+      exact s2,
+    },
   },
   {
     rewrite <- s2,
-    exact a2,
+    exact s1_1_1,
   },
 
   simp only [list.mem_map, prod.exists, exists_and_distrib_right, exists_eq_right],
   apply exists.intro (l2.nth_le n s3),
-  rewrite <- a3,
-  apply list.nth_le_mem_zip,
+  rewrite <- s1_1_2,
+  exact list.nth_le_mem_zip l1 l2 n s1_1_1 s3,
 end
 
 
