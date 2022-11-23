@@ -424,7 +424,7 @@ lemma function.update_list_zip_map_eq
   (x : α)
   (h1 : l1.length ≤ l2.length)
   (h2 : x ∈ l1)
-  (h3 : ∀ (v : α), v ∈ l2 → f v = g v) :
+  (h3 : ∀ (y : α), y ∈ l2 → f y = g y) :
   function.update_list f (l1.zip (list.map f l2)) x =
     function.update_list h (l1.zip (list.map g l2)) x :=
 begin
@@ -445,13 +445,13 @@ lemma function.update_list_update
   (x : α)
   (h1 : l1.length ≤ l2.length)
   (h2 : x ∈ l1)
-  (h3 : ∀ (x' : α), x' ∈ l2 → ¬ x' = v) :
+  (h3 : ∀ (y : α), y ∈ l2 → ¬ y = v) :
   function.update_list f (l1.zip (list.map f l2)) x =
     function.update_list g (l1.zip (list.map (function.update f v a) l2)) x :=
 begin
   apply function.update_list_zip_map_eq f (function.update f v a) g l1 l2 x h1 h2,
-  intros x' a1,
-  specialize h3 x' a1,
+  intros y a1,
+  specialize h3 y a1,
   simp only [function.update_noteq h3],  
 end
 
