@@ -175,7 +175,7 @@ lemma list.map_fst_zip_nodup
 begin
   have s1 : list.map prod.fst (l1.zip l2) <+ l1,
   apply list.is_prefix.sublist,
-  apply list.map_fst_zip_is_prefix,
+  exact l1.map_fst_zip_is_prefix l2,
 
   exact list.nodup.sublist s1 h1,
 end
