@@ -50,15 +50,15 @@ lemma aux_3
   (h1 : ∀ (y : α), ¬ y = x → f y = g y) :
   function.update f x (g x) = g :=
 begin
-  apply funext, intros x',
-  by_cases x' = x,
+  apply funext, intros y,
+  by_cases c1 : y = x,
   {
-    rewrite h,
+    rewrite c1,
     simp only [function.update_same],
   },
   {
-    simp only [function.update_noteq h],
-    exact h1 x' h,
+    simp only [function.update_noteq c1],
+    exact h1 y c1,
   },
 end
 
@@ -257,13 +257,13 @@ begin
     simp only [list.map, list.mem_cons_iff] at h1,
 
     unfold function.update_list,
-    by_cases x = hd.fst,
+    by_cases c1 : x = hd.fst,
     {
-      rewrite h,
+      rewrite c1,
       simp only [function.update_same],
     },
     {
-      simp only [function.update_noteq h],
+      simp only [function.update_noteq c1],
       cases h1,
       {
         contradiction,
@@ -320,9 +320,9 @@ begin
 
     simp only [list.map, list.zip_cons_cons],
     unfold function.update_list,
-    by_cases x = hd,
+    by_cases c1 : x = hd,
     {
-      rewrite h,
+      rewrite c1,
       simp only [function.update_same],
     },
     {
@@ -331,7 +331,7 @@ begin
         contradiction,
       },
       {
-        simp only [function.update_noteq h],
+        simp only [function.update_noteq c1],
         exact ih h1,
       }
     }
