@@ -255,6 +255,7 @@ begin
   case list.cons : hd tl ih
   {
     simp only [list.map, list.mem_cons_iff] at h1,
+
     unfold function.update_list,
     by_cases x = hd.fst,
     {
@@ -288,9 +289,13 @@ lemma function.update_list_zip_map_mem_ext
 begin
   apply function.update_list_mem_ext,
   apply list.mem_map_fst_zip,
-  simp only [list.length_map],
-  exact h1,
-  exact h2,
+  {
+    simp only [list.length_map],
+    exact h1,
+  },
+  {
+    exact h2,
+  },
 end
 
 
