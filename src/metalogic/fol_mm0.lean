@@ -450,8 +450,8 @@ lemma function.update_list_update
     function.update_list g (l1.zip (list.map (function.update f v a) l2)) x :=
 begin
   apply function.update_list_zip_map_eq f (function.update f v a) g l1 l2 x h1 h2,
-  intros x' h,
-  specialize h3 x' h,
+  intros x' a1,
+  specialize h3 x' a1,
   simp only [function.update_noteq h3],  
 end
 
