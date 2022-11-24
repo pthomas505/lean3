@@ -590,7 +590,7 @@ def env : Type := list definition_
 
 
 def env.nodup_ : env → Prop :=
-  list.pairwise (fun (d1 d2 : definition_), d1.name = d2.name -> d1.args.length = d2.args.length -> false)
+  list.pairwise (fun (d1 d2 : definition_), d1.name = d2.name → d1.args.length = d2.args.length → false)
 
 
 /-
