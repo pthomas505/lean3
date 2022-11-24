@@ -650,7 +650,7 @@ end
 lemma is_meta_var_or_all_def_in_env_ext
   (E E' : env)
   (φ : formula)
-  (h1 : ∃ E1, E' = E1 ++ E)
+  (h1 : ∃ (E1 : env), E' = E1 ++ E)
   (h2 : φ.is_meta_var_or_all_def_in_env E) :
   φ.is_meta_var_or_all_def_in_env E' :=
 begin
