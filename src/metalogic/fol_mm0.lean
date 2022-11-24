@@ -530,11 +530,9 @@ begin
     unfold formula.no_meta_var_and_all_free_in_list at h1,
     cases h1,
     unfold formula.meta_var_set,
-    specialize φ_ih l h1_left,
-    specialize ψ_ih l h1_right,
-    rewrite φ_ih,
-    rewrite ψ_ih,
-    simp only [finset.empty_union],
+    rewrite φ_ih l h1_left,
+    rewrite ψ_ih l h1_right,
+    exact finset.empty_union ∅,
   },
   case formula.eq_ : x y l h1
   {
