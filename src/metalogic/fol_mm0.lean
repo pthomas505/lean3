@@ -514,18 +514,18 @@ lemma no_meta_var_imp_meta_var_set_is_empty
   φ.meta_var_set = ∅ :=
 begin
   induction φ generalizing l,
-  case formula.meta_var_ : X
+  case formula.meta_var_ : X l h1
   {
     unfold formula.no_meta_var_and_all_free_in_list at h1,
     contradiction,
   },
-  case formula.not_ : φ φ_ih
+  case formula.not_ : φ φ_ih l h1
   {
     unfold formula.no_meta_var_and_all_free_in_list at h1,
     unfold formula.meta_var_set,
     exact φ_ih l h1,
   },
-  case formula.imp_ : φ ψ φ_ih ψ_ih
+  case formula.imp_ : φ ψ φ_ih ψ_ih l h1
   {
     unfold formula.no_meta_var_and_all_free_in_list at h1,
     cases h1,
@@ -536,19 +536,18 @@ begin
     rewrite ψ_ih,
     simp only [finset.empty_union],
   },
-  case formula.eq_ : x y
+  case formula.eq_ : x y l h1
   {
     unfold formula.no_meta_var_and_all_free_in_list at h1,
     unfold formula.meta_var_set,
   },
-  case formula.forall_ : x φ φ_ih
+  case formula.forall_ : x args φ_ih l h1
   {
     unfold formula.no_meta_var_and_all_free_in_list at h1,
     unfold formula.meta_var_set,
-    apply φ_ih (x :: l),
-    exact h1,
+    exact φ_ih (x :: l) h1,
   },
-  case formula.def_ : name args
+  case formula.def_ : name args l h1
   {
     unfold formula.no_meta_var_and_all_free_in_list at h1,
     unfold formula.meta_var_set,
