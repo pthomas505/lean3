@@ -631,7 +631,9 @@ begin
     unfold env.well_formed at h1,
     cases h1,
     cases h1_right,
+
     unfold env.nodup_ at ih,
+
     unfold env.nodup_,
     simp only [list.pairwise_cons],
     split,
