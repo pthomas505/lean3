@@ -1070,8 +1070,19 @@ begin
       apply not_congr,
       exact φ_ih S V1 V2 hf h1,
     },
-    case formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1 S V1 V2 hf h1
-    { admit },
+    case formula.imp_ : φ ψ φ_ih ψ_ih S V1 V2 hf h1
+    {
+      unfold formula.no_meta_var_and_all_free_in_list at hf,
+      cases hf,
+      simp only [holds_imp],
+      apply imp_congr,
+      {
+        exact φ_ih S V1 V2 hf_left h1,
+      },
+      {
+        exact ψ_ih S V1 V2 hf_right h1,
+      }
+    },
     case formula.eq_ : φ_ᾰ φ_ᾰ_1 S V1 V2 hf h1
     { admit },
     case formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih S V1 V2 hf h1
