@@ -1051,7 +1051,7 @@ lemma holds_valuation_ext
   (φ : formula)
   (S : list var_name)
   (hf : φ.no_meta_var_and_all_free_in_list S)
-  (h1 : ∀ v ∈ S, V1 v = V2 v) :
+  (h1 : ∀ (v : var_name), v ∈ S → V1 v = V2 v) :
   holds D M E φ V1 ↔ holds D M E φ V2 :=
 begin
   induction E generalizing S φ V1 V2,
