@@ -1043,6 +1043,52 @@ end
 
 --
 
+lemma holds_valuation_ext'
+  {D : Type}
+  (M : meta_valuation D)
+  (E : env)
+  (V1 V2 : valuation D)
+  (φ : formula)
+  (S : list var_name)
+  (hf : φ.no_meta_var_and_all_free_in_list S)
+  (h1 : ∀ (v : var_name), v ∈ S → V1 v = V2 v) :
+  holds D M E φ V1 ↔ holds D M E φ V2 :=
+begin
+  induction E generalizing S φ V1 V2,
+  case list.nil : S φ V1 V2 hf h1
+  {
+    induction φ generalizing S V1 V2,
+    case formula.meta_var_ : φ S V1 V2 hf h1
+    { admit },
+    case formula.not_ : φ_ᾰ φ_ih S V1 V2 hf h1
+    { admit },
+    case formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1 S V1 V2 hf h1
+    { admit },
+    case formula.eq_ : φ_ᾰ φ_ᾰ_1 S V1 V2 hf h1
+    { admit },
+    case formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih S V1 V2 hf h1
+    { admit },
+    case formula.def_ : φ_ᾰ φ_ᾰ_1 S V1 V2 hf h1
+    { admit },
+  },
+  case list.cons : E_hd E_tl E_ih S φ V1 V2 hf h1
+  {
+    induction φ generalizing S V1 V2,
+    case formula.meta_var_ : φ S V1 V2 hf h1
+    { admit },
+    case formula.not_ : φ_ᾰ φ_ih S V1 V2 hf h1
+    { admit },
+    case formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1 S V1 V2 hf h1
+    { admit },
+    case formula.eq_ : φ_ᾰ φ_ᾰ_1 S V1 V2 hf h1
+    { admit },
+    case formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih S V1 V2 hf h1
+    { admit },
+    case formula.def_ : φ_ᾰ φ_ᾰ_1 S V1 V2 hf h1
+    { admit },
+  },
+end
+
 lemma holds_valuation_ext
   {D : Type}
   (M : meta_valuation D)
