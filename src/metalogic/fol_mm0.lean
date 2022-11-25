@@ -1102,13 +1102,13 @@ begin
       },
       {
         intros v h2,
-        by_cases v = x,
+        by_cases c1 : v = x,
         {
-          rewrite h,
+          rewrite c1,
           simp only [function.update_same],
         },
         {
-          simp only [function.update_noteq h],
+          simp only [function.update_noteq c1],
           simp only [list.mem_cons_iff] at h2,
           cases h2,
           {
@@ -1173,13 +1173,13 @@ begin
       },
       {
         intros v h2,
-        by_cases v = x,
+        by_cases c1 : v = x,
         {
-          rewrite h,
+          rewrite c1,
           simp only [function.update_same],
         },
         {
-          simp only [function.update_noteq h],
+          simp only [function.update_noteq c1],
           simp only [list.mem_cons_iff] at h2,
           cases h2,
           {
