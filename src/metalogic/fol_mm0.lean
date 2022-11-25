@@ -1045,61 +1045,17 @@ end
 
 example
   {α β : Type}
-  {D : Type}
-  (l1 l2 S : list var_name)
-  (f g : valuation D)
-  (h1 : ∀ (v : var_name), (v ∈ S) → (f v = g v))
-  (hf : (l1 ⊆ S))
-  (h_right : l1.length = l2.length) :
-  ∀ (v : var_name), (v ∈ l2) →
-    (function.update_list f (l2.zip (list.map f l1)) v =
-     function.update_list g (l2.zip (list.map g l1)) v) :=
+  [decidable_eq α]
+  (l1 l2 S : list α)
+  (f g : α → β)
+  (h1 : ∀ (v : α), (v ∈ S) → (f v = g v))
+  (hf : (l2 ⊆ S))
+  (h_right : l2.length = l1.length) :
+  ∀ (v : α), (v ∈ l1) →
+    (function.update_list f (l1.zip (list.map f l2)) v =
+     function.update_list g (l1.zip (list.map g l2)) v) :=
 begin
-  intros v h2,
-  simp only [list.mem_iff_nth_le] at h2,
-  apply exists.elim h2, intros n h3,
-  apply exists.elim h3, intros h4 h5,
-  rewrite <- h5,
-
-  have s2 : d.args.length ≤ (list.map V1 args).length,
-  simp only [list.length_map],
-  rewrite h_right,
-
-  have s3 : n < (list.map V1 args).length,
-  simp only [list.length_map],
-  rewrite h_right,
-  exact h4,
-
-  have s4 : d.args.length ≤ (list.map V2 args).length,
-  simp only [list.length_map],
-  rewrite h_right,
-
-  have s5 : n < (list.map V2 args).length,
-  simp only [list.length_map],
-  rewrite h_right,
-  exact h4,
-
-  have s6 : (function.update_list V1 (d.args.zip (list.map V1 args)) (d.args.nth_le n h4) =
-    (list.map V1 args).nth_le n s3),
-  exact function.update_list_nth_le_zip V1 d.args (list.map V1 args) n h4 s3 d.nodup,
-
-  have s7 : (function.update_list V2 (d.args.zip (list.map V2 args)) (d.args.nth_le n h4) =
-    (list.map V2 args).nth_le n s5),
-  exact function.update_list_nth_le_zip V2 d.args (list.map V2 args) n h4 s5 d.nodup,
-
-  have s8 : n < args.length,
-  rewrite h_right,
-  exact h4,
-
-  have s9 : (args.nth_le n s8) ∈ args,
-  exact list.nth_le_mem args n s8,
-
-  rewrite s6,
-  rewrite s7,
-  simp only [list.nth_le_map'],
-  apply h1,
-
-  apply set.mem_of_subset_of_mem hf s9,
+  sorry,
 end
 
 
