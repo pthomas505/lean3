@@ -1119,8 +1119,11 @@ begin
         },
       },
     },
-    case formula.def_ : φ_ᾰ φ_ᾰ_1 S V1 V2 hf h1
-    { admit },
+    case formula.def_ : name args S V1 V2 hf h1
+    {
+      unfold formula.no_meta_var_and_all_free_in_list at hf,
+      simp only [holds_nil_def],
+    },
   },
   case list.cons : E_hd E_tl E_ih S φ V1 V2 hf h1
   {
