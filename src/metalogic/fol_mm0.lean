@@ -644,7 +644,6 @@ begin
   },
 end
 
---
 
 lemma is_meta_var_or_all_def_in_env_ext
   (E E' : env)
@@ -807,12 +806,13 @@ begin
         exact h1_right_left,
       },
       {
-        apply ih h1_right_right h2,
+        exact ih h1_right_right h2,
       },
     },
   },
 end
 
+--
 
 inductive is_conv (E : env) : formula → formula → Prop
 | conv_refl (φ : formula) : is_conv φ φ
