@@ -1128,14 +1128,38 @@ begin
   case list.cons : E_hd E_tl E_ih S φ V1 V2 hf h1
   {
     induction φ generalizing S V1 V2,
-    case formula.meta_var_ : φ S V1 V2 hf h1
-    { admit },
-    case formula.not_ : φ_ᾰ φ_ih S V1 V2 hf h1
-    { admit },
-    case formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1 S V1 V2 hf h1
-    { admit },
-    case formula.eq_ : φ_ᾰ φ_ᾰ_1 S V1 V2 hf h1
-    { admit },
+    case formula.meta_var_ : X S V1 V2 hf h1
+    {
+      unfold formula.no_meta_var_and_all_free_in_list at hf,
+      contradiction,
+    },
+    case formula.not_ : φ φ_ih S V1 V2 hf h1
+    {
+      unfold formula.no_meta_var_and_all_free_in_list at hf,
+      simp only [holds_not],
+      apply not_congr,
+      exact φ_ih S V1 V2 hf h1,
+    },
+    case formula.imp_ : φ ψ φ_ih ψ_ih S V1 V2 hf h1
+    {
+      unfold formula.no_meta_var_and_all_free_in_list at hf,
+      cases hf,
+      simp only [holds_imp],
+      apply imp_congr,
+      {
+        exact φ_ih S V1 V2 hf_left h1,
+      },
+      {
+        exact ψ_ih S V1 V2 hf_right h1,
+      }
+    },
+    case formula.eq_ : x y S V1 V2 hf h1
+    {
+      unfold formula.no_meta_var_and_all_free_in_list at hf,
+      cases hf,
+      simp only [holds_eq],
+      simp only [h1 x hf_left, h1 y hf_right],
+    },
     case formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih S V1 V2 hf h1
     { admit },
     case formula.def_ : φ_ᾰ φ_ᾰ_1 S V1 V2 hf h1
