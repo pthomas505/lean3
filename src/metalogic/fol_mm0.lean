@@ -1058,10 +1058,18 @@ begin
   case list.nil : S φ V1 V2 hf h1
   {
     induction φ generalizing S V1 V2,
-    case formula.meta_var_ : φ S V1 V2 hf h1
-    { admit },
-    case formula.not_ : φ_ᾰ φ_ih S V1 V2 hf h1
-    { admit },
+    case formula.meta_var_ : X S V1 V2 hf h1
+    {
+      unfold formula.no_meta_var_and_all_free_in_list at hf,
+      contradiction,
+    },
+    case formula.not_ : φ φ_ih S V1 V2 hf h1
+    {
+      unfold formula.no_meta_var_and_all_free_in_list at hf,
+      simp only [holds_not],
+      apply not_congr,
+      exact φ_ih S V1 V2 hf h1,
+    },
     case formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1 S V1 V2 hf h1
     { admit },
     case formula.eq_ : φ_ᾰ φ_ᾰ_1 S V1 V2 hf h1
