@@ -1049,8 +1049,8 @@ example
   (l1 l2 : list α)
   (f g : α → β)
   (x : α)
-  (h1 : ∀ (y : α), y ∈ l2 → (f y = g y))
-  (h2 : l1.length = l2.length)
+  (h1 : l1.length = l2.length)
+  (h2 : ∀ (y : α), y ∈ l2 → (f y = g y))
   (h3 : x ∈ l1) :
   function.update_list f (l1.zip (list.map f l2)) x =
     function.update_list g (l1.zip (list.map g l2)) x :=
