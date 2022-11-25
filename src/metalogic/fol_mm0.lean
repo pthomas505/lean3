@@ -1160,8 +1160,35 @@ begin
       simp only [holds_eq],
       simp only [h1 x hf_left, h1 y hf_right],
     },
-    case formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih S V1 V2 hf h1
-    { admit },
+    case formula.forall_ : x φ φ_ih S V1 V2 hf h1
+    {
+      unfold formula.no_meta_var_and_all_free_in_list at hf,
+      simp only [holds_forall],
+      apply forall_congr, intros a,
+      apply φ_ih (x :: S),
+      {
+        exact hf,
+      },
+      {
+        intros v h2,
+        by_cases v = x,
+        {
+          rewrite h,
+          simp only [function.update_same],
+        },
+        {
+          simp only [function.update_noteq h],
+          simp only [list.mem_cons_iff] at h2,
+          cases h2,
+          {
+            contradiction,
+          },
+          {
+            exact h1 v h2,
+          }
+        },
+      },
+    },
     case formula.def_ : φ_ᾰ φ_ᾰ_1 S V1 V2 hf h1
     { admit },
   },
