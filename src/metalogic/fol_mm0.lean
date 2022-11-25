@@ -1043,6 +1043,67 @@ end
 
 --
 
+example
+  {α β : Type}
+  {D : Type}
+  (d : definition_)
+  (args S : list var_name)
+  (V1 V2 : valuation D)
+  (h1 : ∀ (v : var_name), (v ∈ S) → (V1 v = V2 v))
+  (hf : (args ⊆ S))
+  (h_right : (args.length = d.args.length)) :
+  ∀ (v : var_name), (v ∈ d.args) →
+    (function.update_list V1 (d.args.zip (list.map V1 args)) v =
+     function.update_list V2 (d.args.zip (list.map V2 args)) v) :=
+begin
+  intros v h2,
+  simp only [list.mem_iff_nth_le] at h2,
+  apply exists.elim h2, intros n h3,
+  apply exists.elim h3, intros h4 h5,
+  rewrite <- h5,
+
+  have s2 : d.args.length ≤ (list.map V1 args).length,
+  simp only [list.length_map],
+  rewrite h_right,
+
+  have s3 : n < (list.map V1 args).length,
+  simp only [list.length_map],
+  rewrite h_right,
+  exact h4,
+
+  have s4 : d.args.length ≤ (list.map V2 args).length,
+  simp only [list.length_map],
+  rewrite h_right,
+
+  have s5 : n < (list.map V2 args).length,
+  simp only [list.length_map],
+  rewrite h_right,
+  exact h4,
+
+  have s6 : (function.update_list V1 (d.args.zip (list.map V1 args)) (d.args.nth_le n h4) =
+    (list.map V1 args).nth_le n s3),
+  exact function.update_list_nth_le_zip V1 d.args (list.map V1 args) n h4 s3 d.nodup,
+
+  have s7 : (function.update_list V2 (d.args.zip (list.map V2 args)) (d.args.nth_le n h4) =
+    (list.map V2 args).nth_le n s5),
+  exact function.update_list_nth_le_zip V2 d.args (list.map V2 args) n h4 s5 d.nodup,
+
+  have s8 : n < args.length,
+  rewrite h_right,
+  exact h4,
+
+  have s9 : (args.nth_le n s8) ∈ args,
+  exact list.nth_le_mem args n s8,
+
+  rewrite s6,
+  rewrite s7,
+  simp only [list.nth_le_map'],
+  apply h1,
+
+  apply set.mem_of_subset_of_mem hf s9,
+end
+
+
 lemma holds_valuation_ext
   {D : Type}
   (M : meta_valuation D)
@@ -1204,6 +1265,7 @@ begin
             (function.update_list V1 (E_hd.args.zip (list.map V1 args)) v =
               function.update_list V2 (E_hd.args.zip (list.map V2 args)) v),
         {
+          extract_goal,
           intros v h2,
           simp only [list.mem_iff_nth_le] at h2,
           apply exists.elim h2, intros n h3,
