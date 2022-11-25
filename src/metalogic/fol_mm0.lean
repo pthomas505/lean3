@@ -644,6 +644,7 @@ begin
   },
 end
 
+--
 
 lemma is_meta_var_or_all_def_in_env_ext
   (E E' : env)
@@ -729,32 +730,32 @@ begin
     case formula.def_ : name args
     {
       apply exists.elim h1,
-      intros E1 a1,
+      intros E1 h1_1,
 
       unfold formula.is_meta_var_or_all_def_in_env at h2,
       apply exists.elim h2,
-      intros d a2,
+      intros d h2_1,
 
-      cases a2,
-      cases a2_left,
+      cases h2_1,
+      cases h2_1_left,
       {
         unfold formula.is_meta_var_or_all_def_in_env,
         apply exists.intro E_hd,
-        rewrite a1,
+        rewrite h1_1,
         split,
         {
           simp only [list.mem_append, list.mem_cons_iff, eq_self_iff_true, true_or, or_true],
         },
         {
-          rewrite <- a2_left,
-          exact a2_right,
+          rewrite <- h2_1_left,
+          exact h2_1_right,
         },
       },
       {
         have s1 : (∃ (E1 : env), (E' = (E1 ++ E_tl))),
         apply exists.intro (E1 ++ [E_hd]),
         simp only [list.append_assoc, list.singleton_append],
-        exact a1,
+        exact h1_1,
 
         specialize E_ih s1,
 
@@ -764,10 +765,10 @@ begin
         apply exists.intro d,
         split,
         {
-          exact a2_left,
+          exact h2_1_left,
         },
         {
-          exact a2_right,
+          exact h2_1_right,
         },
       }
     },
