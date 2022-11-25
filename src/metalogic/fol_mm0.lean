@@ -1189,7 +1189,7 @@ begin
         },
       },
     },
-    case formula.def_ : φ_ᾰ φ_ᾰ_1 S V1 V2 hf h1
+    case formula.def_ : name args S V1 V2 hf h1
     { admit },
   },
 end
