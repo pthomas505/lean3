@@ -1046,14 +1046,14 @@ end
 example
   {α β : Type}
   [decidable_eq α]
-  (l1 l2 S : list α)
+  (l1 l2 : list α)
   (f g : α → β)
-  (h1 : ∀ (v : α), (v ∈ S) → (f v = g v))
-  (hf : (l2 ⊆ S))
-  (h_right : l2.length = l1.length) :
-  ∀ (v : α), (v ∈ l1) →
-    (function.update_list f (l1.zip (list.map f l2)) v =
-     function.update_list g (l1.zip (list.map g l2)) v) :=
+  (x : α)
+  (h1 : ∀ (y : α), y ∈ l2 → (f y = g y))
+  (h2 : l1.length = l2.length)
+  (h3 : x ∈ l1) :
+  function.update_list f (l1.zip (list.map f l2)) x =
+    function.update_list g (l1.zip (list.map g l2)) x :=
 begin
   sorry,
 end
