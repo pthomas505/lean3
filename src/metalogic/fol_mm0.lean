@@ -812,7 +812,6 @@ begin
   },
 end
 
---
 
 inductive is_conv (E : env) : formula → formula → Prop
 | conv_refl (φ : formula) : is_conv φ φ
@@ -1042,6 +1041,7 @@ begin
   unfold holds, unfold holds', simp only [option.elim],
 end
 
+--
 
 lemma holds_valuation_ext
   {D : Type}
