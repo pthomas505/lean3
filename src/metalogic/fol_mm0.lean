@@ -1101,7 +1101,7 @@ begin
         exact hf,
       },
       {
-        intros v h2,
+        intros v a1,
         by_cases c1 : v = x,
         {
           rewrite c1,
@@ -1109,13 +1109,13 @@ begin
         },
         {
           simp only [function.update_noteq c1],
-          simp only [list.mem_cons_iff] at h2,
-          cases h2,
+          simp only [list.mem_cons_iff] at a1,
+          cases a1,
           {
             contradiction,
           },
           {
-            exact h1 v h2,
+            exact h1 v a1,
           }
         },
       },
@@ -1172,7 +1172,7 @@ begin
         exact hf,
       },
       {
-        intros v h2,
+        intros v a1,
         by_cases c1 : v = x,
         {
           rewrite c1,
@@ -1180,13 +1180,13 @@ begin
         },
         {
           simp only [function.update_noteq c1],
-          simp only [list.mem_cons_iff] at h2,
-          cases h2,
+          simp only [list.mem_cons_iff] at a1,
+          cases a1,
           {
             contradiction,
           },
           {
-            exact h1 v h2,
+            exact h1 v a1,
           }
         },
       },
