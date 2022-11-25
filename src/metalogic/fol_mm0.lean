@@ -1088,7 +1088,8 @@ begin
       unfold formula.no_meta_var_and_all_free_in_list at hf,
       cases hf,
       simp only [holds_eq],
-      simp only [h1 x hf_left, h1 y hf_right],
+      rewrite h1 x hf_left,
+      rewrite h1 y hf_right,
     },
     case formula.forall_ : x φ φ_ih S V1 V2 hf h1
     {
@@ -1158,7 +1159,8 @@ begin
       unfold formula.no_meta_var_and_all_free_in_list at hf,
       cases hf,
       simp only [holds_eq],
-      simp only [h1 x hf_left, h1 y hf_right],
+      rewrite h1 x hf_left,
+      rewrite h1 y hf_right,
     },
     case formula.forall_ : x φ φ_ih S V1 V2 hf h1
     {
