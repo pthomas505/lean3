@@ -1047,14 +1047,14 @@ example
   {α β : Type}
   {D : Type}
   (d : definition_)
-  (args S : list var_name)
-  (V1 V2 : valuation D)
-  (h1 : ∀ (v : var_name), (v ∈ S) → (V1 v = V2 v))
-  (hf : (args ⊆ S))
-  (h_right : (args.length = d.args.length)) :
+  (l1 S : list var_name)
+  (f g : valuation D)
+  (h1 : ∀ (v : var_name), (v ∈ S) → (f v = g v))
+  (hf : (l1 ⊆ S))
+  (h_right : l1.length = d.args.length) :
   ∀ (v : var_name), (v ∈ d.args) →
-    (function.update_list V1 (d.args.zip (list.map V1 args)) v =
-     function.update_list V2 (d.args.zip (list.map V2 args)) v) :=
+    (function.update_list f (d.args.zip (list.map f l1)) v =
+     function.update_list g (d.args.zip (list.map g l1)) v) :=
 begin
   intros v h2,
   simp only [list.mem_iff_nth_le] at h2,
