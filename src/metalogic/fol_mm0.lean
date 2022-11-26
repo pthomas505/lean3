@@ -91,51 +91,6 @@ begin
 end
 
 
-lemma list.mem_map_fst_zip
-  {α β : Type}
-  [decidable_eq α]
-  (l1 : list α)
-  (l2 : list β)
-  (x : α)
-  (h1 : l1.length ≤ l2.length)
-  (h2 : x ∈ l1) :
-  (x ∈ list.map prod.fst (l1.zip l2)) :=
-begin
-  have s1 : ∃ (n : ℕ) (h : n < l1.length), list.nth_le l1 n h = x,
-  exact list.nth_le_of_mem h2,
-
-  apply exists.elim s1,
-  intros n s1_1,
-  apply exists.elim s1_1,
-  intros s1_1_1 s1_1_2,
-  clear s1 s1_1,
-
-  have s2 : l1.length < l2.length ∨ l1.length = l2.length,
-  exact lt_or_eq_of_le h1,
-
-  have s3 : n < l2.length,
-  cases s2,
-  {
-    transitivity l1.length,
-    {
-      exact s1_1_1,
-    },
-    {
-      exact s2,
-    },
-  },
-  {
-    rewrite <- s2,
-    exact s1_1_1,
-  },
-
-  simp only [list.mem_map, prod.exists, exists_and_distrib_right, exists_eq_right],
-  apply exists.intro (l2.nth_le n s3),
-  rewrite <- s1_1_2,
-  exact list.nth_le_mem_zip l1 l2 n s1_1_1 s3,
-end
-
-
 lemma list.map_fst_zip_is_prefix
   {α β : Type}
   (l1 : list α)
