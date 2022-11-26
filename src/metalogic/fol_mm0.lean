@@ -1443,7 +1443,7 @@ begin
       {
         cases h,
 
-        by_contradiction,
+        exfalso,
         apply h3_left a,
         {
           apply or.intro_right,
