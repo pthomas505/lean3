@@ -1015,7 +1015,6 @@ begin
   unfold holds, unfold holds', simp only [option.elim],
 end
 
---
 
 lemma holds_valuation_ext
   {D : Type}
@@ -1208,6 +1207,7 @@ begin
   },
 end
 
+--
 
 lemma holds_meta_valuation_ext
   {D : Type}
