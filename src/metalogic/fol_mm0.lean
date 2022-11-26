@@ -1207,9 +1207,8 @@ begin
   },
 end
 
---
 
-lemma holds_meta_valuation_ext_aux
+lemma holds_meta_valuation_ext
   {D : Type}
   (M1 M2 : meta_valuation D)
   (E : env)
@@ -1348,7 +1347,7 @@ begin
 end
 
 
-lemma holds_meta_valuation_ext
+lemma holds_meta_valuation_ext_no_meta_var
   {D : Type}
   (M1 M2 : meta_valuation D)
   (E : env)
@@ -1357,11 +1356,12 @@ lemma holds_meta_valuation_ext
   (h1 : φ.meta_var_set = ∅) :
   holds D M1 E φ V ↔ holds D M2 E φ V :=
 begin
-  apply holds_meta_valuation_ext_aux,
+  apply holds_meta_valuation_ext,
   rewrite h1,
   simp only [finset.not_mem_empty, is_empty.forall_iff, forall_forall_const, implies_true_iff],
 end
 
+--
 
 lemma ext_env_holds
   {D : Type}
@@ -1730,7 +1730,7 @@ begin
               have s2 : E_hd.q.meta_var_set = ∅,
               exact no_meta_var_imp_meta_var_set_is_empty E_hd.q E_hd.args E_hd.nf,
 
-              rewrite holds_meta_valuation_ext_aux
+              rewrite holds_meta_valuation_ext
                 (fun (X' : meta_var_name) (V' : valuation D),
                   holds D M (E1 ++ (E_hd :: E_tl)) (τ X') (V' ∘ σ'))
                 M
@@ -2501,7 +2501,7 @@ begin
 
     have s1 : holds D (fun (X' : meta_var_name) (V' : valuation D), holds D M E (meta_var_ X') (V' ∘ σ')) E d.q (V ∘ σ.val)
       ↔ holds D M E d.q (V ∘ σ.val),
-    apply holds_meta_valuation_ext,
+    apply holds_meta_valuation_ext_no_meta_var,
     apply no_meta_var_imp_meta_var_set_is_empty d.q d.args d.nf,
 
     rewrite s1,
