@@ -276,7 +276,7 @@ begin
 end
 
 
-lemma function.update_list_mem_zip_ext
+lemma function.update_list_zip_mem_ext
   {α β : Type}
   [decidable_eq α]
   (f g : α → β)
@@ -288,56 +288,54 @@ lemma function.update_list_mem_zip_ext
   function.update_list f (l1.zip l2) x =
     function.update_list g (l1.zip l2) x :=
 begin
-  have s1 : list.map prod.fst (l1.zip l2) = l1,
-  exact list.map_fst_zip l1 l2 h1,
-
-  apply function.update_list_mem_ext,
-  rewrite s1,
-  exact h2,
-end
-
-
-lemma function.update_list_mem_zip_map_ext
-  {α β : Type}
-  [decidable_eq α]
-  (l1 l2 : list α)
-  (f g : α → β)
-  (x : α)
-  (h1 : l1.length ≤ l2.length)
-  (h2 : ∀ (y : α), y ∈ l2 → (f y = g y))
-  (h3 : x ∈ l1) :
-  function.update_list f (l1.zip (list.map f l2)) x =
-    function.update_list g (l1.zip (list.map g l2)) x :=
-begin
-  have s1 : list.map f l2 = list.map g l2,
-  rewrite list.map_eq_map_iff,
+  have s1 : x ∈ list.map prod.fst (l1.zip l2),
+  rewrite list.map_fst_zip l1 l2 h1,
   exact h2,
 
-  have s2 : l1.length ≤ (list.map g l2).length,
-  simp only [list.length_map],
-  exact h1,
-
-  rewrite s1,
-  exact function.update_list_mem_zip_ext f g l1 (list.map g l2) x s2 h3,
+  exact function.update_list_mem_ext f g (list.zip l1 l2) x s1,
 end
 
 
 lemma function.update_list_zip_map_mem_ext
   {α β : Type}
   [decidable_eq α]
-  (f g : α → β)
   (l1 l2 : list α)
+  (f g h : α → β)
   (x : α)
   (h1 : l1.length ≤ l2.length)
   (h2 : x ∈ l1) :
-  function.update_list f (l1.zip (list.map f l2)) x =
-    function.update_list g (l1.zip (list.map f l2)) x :=
+  function.update_list f (l1.zip (list.map h l2)) x =
+    function.update_list g (l1.zip (list.map h l2)) x :=
 begin
-  have s1 : l1.length ≤ (list.map f l2).length,
-  simp only [list.length_map],
+  apply function.update_list_zip_mem_ext,
+  {
+    simp only [list.length_map],
+    exact h1,
+  },
+  {
+    exact h2,
+  },
+end
+
+
+lemma function.update_list_zip_map_mem_ext'
+  {α β : Type}
+  [decidable_eq α]
+  (l1 l2 : list α)
+  (f g h h' : α → β)
+  (x : α)
+  (h1 : ∀ (y : α), y ∈ l2 → h y = h' y)
+  (h2 : l1.length ≤ l2.length)
+  (h3 : x ∈ l1) :
+  function.update_list f (l1.zip (list.map h l2)) x =
+    function.update_list g (l1.zip (list.map h' l2)) x :=
+begin
+  have s1 : list.map h l2 = list.map h' l2,
+  rewrite list.map_eq_map_iff,
   exact h1,
 
-  exact function.update_list_mem_zip_ext f g l1 (list.map f l2) x s1 h2,
+  rewrite s1,
+  exact function.update_list_zip_map_mem_ext l1 l2 f g h' x h2 h3,
 end
 
 
@@ -411,6 +409,28 @@ begin
 end
 
 
+lemma function.update_list_nth_le_zip
+  {α β : Type}
+  [decidable_eq α]
+  (f : α → β)
+  (l1 : list α)
+  (l2 : list β)
+  (n : ℕ)
+  (h1 : n < l1.length)
+  (h2 : n < l2.length)
+  (h3 : l1.nodup) :
+  (function.update_list f (l1.zip l2)) (l1.nth_le n h1) = l2.nth_le n h2 :=
+begin
+  have s1 : (list.map prod.fst (l1.zip l2)).nodup,
+  exact list.map_fst_zip_nodup l1 l2 h3,
+
+  have s2 : (l1.nth_le n h1, l2.nth_le n h2) ∈ l1.zip l2,
+  exact list.nth_le_mem_zip l1 l2 n h1 h2,
+
+  exact function.update_list_mem f (l1.zip l2) (l1.nth_le n h1, l2.nth_le n h2) s1 s2,
+end
+
+
 lemma function.update_list_comp
   {α β γ : Type}
   [decidable_eq α]
@@ -436,47 +456,6 @@ begin
 end
 
 
-lemma function.update_list_nth_le_zip
-  {α β : Type}
-  [decidable_eq α]
-  (f : α → β)
-  (l1 : list α)
-  (l2 : list β)
-  (n : ℕ)
-  (h1 : n < l1.length)
-  (h2 : n < l2.length)
-  (h3 : l1.nodup) :
-  (function.update_list f (l1.zip l2)) (l1.nth_le n h1) = l2.nth_le n h2 :=
-begin
-  have s1 : (list.map prod.fst (l1.zip l2)).nodup,
-  exact list.map_fst_zip_nodup l1 l2 h3,
-
-  have s2 : (l1.nth_le n h1, l2.nth_le n h2) ∈ l1.zip l2,
-  exact list.nth_le_mem_zip l1 l2 n h1 h2,
-
-  exact function.update_list_mem f (l1.zip l2) (l1.nth_le n h1, l2.nth_le n h2) s1 s2,
-end
-
-
-lemma function.update_list_zip_map_eq
-  {α β : Type}
-  [decidable_eq α]
-  (f g h : α → β)
-  (l1 l2 : list α)
-  (x : α)
-  (h1 : l1.length ≤ l2.length)
-  (h2 : x ∈ l1)
-  (h3 : ∀ (y : α), y ∈ l2 → f y = g y) :
-  function.update_list f (l1.zip (list.map f l2)) x =
-    function.update_list h (l1.zip (list.map g l2)) x :=
-begin
-  rewrite function.update_list_zip_map_mem_ext f h l1 l2 x h1 h2,
-  congr' 2,
-  rewrite list.map_eq_map_iff,
-  exact h3,
-end
-
-
 lemma function.update_list_update
   {α β : Type}
   [decidable_eq α]
@@ -485,16 +464,17 @@ lemma function.update_list_update
   (v : α)
   (a : β)
   (x : α)
-  (h1 : l1.length ≤ l2.length)
-  (h2 : x ∈ l1)
-  (h3 : ∀ (y : α), y ∈ l2 → ¬ y = v) :
-  function.update_list f (l1.zip (list.map f l2)) x =
-    function.update_list g (l1.zip (list.map (function.update f v a) l2)) x :=
+  (h1 : ∀ (y : α), y ∈ l2 → ¬ y = v)
+  (h2 : l1.length ≤ l2.length)
+  (h3 : x ∈ l1) :
+  function.update_list g (l1.zip (list.map (function.update f v a) l2)) x =
+    function.update_list f (l1.zip (list.map f l2)) x:=
 begin
-  apply function.update_list_zip_map_eq f (function.update f v a) g l1 l2 x h1 h2,
+  have s1 : ∀ (y : α), y ∈ l2 → function.update f v a y = f y,
   intros y a1,
-  specialize h3 y a1,
-  simp only [function.update_noteq h3],  
+  exact function.update_noteq (h1 y a1) a f,
+
+  exact function.update_list_zip_map_mem_ext' l1 l2 g f (function.update f v a) f x s1 h2 h3,
 end
 
 
@@ -2131,16 +2111,17 @@ begin
         },
         {
           intros x h1,
+          symmetry,
           apply function.update_list_update V (function.update V v a),
+          {
+            exact H,
+          },
           {
             cases h,
             rewrite h_right,
           },
           {
             exact h1,
-          },
-          {
-            exact H,
           },
         },
       },
