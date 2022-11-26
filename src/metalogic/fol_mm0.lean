@@ -1214,7 +1214,7 @@ lemma holds_meta_valuation_ext
   (E : env)
   (V : valuation D)
   (φ : formula)
-  (h1 : ∀ (V : valuation D) (X ∈ φ.meta_var_set), M1 X V ↔ M2 X V) :
+  (h1 : ∀ (V : valuation D) (X : meta_var_name), X ∈ φ.meta_var_set → (M1 X V ↔ M2 X V)) :
   holds D M1 E φ V ↔ holds D M2 E φ V :=
 begin
   induction E generalizing φ M1 M2 V,
