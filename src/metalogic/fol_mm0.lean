@@ -1414,7 +1414,18 @@ begin
   case formula.def_ : name args V
   {
     apply exists.elim h1,
-    intros E1 h1_1, clear h1,
+    intros E1 h1_1,
+    clear h1,
+
+    unfold formula.is_meta_var_or_all_def_in_env at h2,
+    apply exists.elim h2,
+    intros a h2_1,
+    cases h2_1,
+    cases h2_1_right,
+    clear h2,
+
+    unfold env.nodup_ at h3,
+
     subst h1_1,
 
     induction E1,
@@ -1424,50 +1435,31 @@ begin
     },
     case list.cons : E1_hd E1_tl E1_ih
     {
+      simp only [list.cons_append, list.pairwise_cons, list.mem_append] at h3,
+      cases h3,
+
       simp only [list.cons_append, holds_not_nil_def],
       split_ifs,
       {
-        rewrite <- E1_ih,
+        cases h,
+
+        by_contradiction,
+        apply h3_left a,
         {
-          unfold formula.is_meta_var_or_all_def_in_env at h2,
-          apply exists.elim h2, intros d a2, clear h2,
-          unfold env.nodup_ at h3,
-          simp only [list.cons_append, list.pairwise_cons, list.mem_append] at h3,
-          cases h3,
-          cases h,
-          rewrite h_left at a2,
-          rewrite h_right at a2,
-          by_contradiction,
-          apply h3_left d,
-          {
-            apply or.intro_right,
-            cases a2,
-            exact a2_left,
-          },
-          {
-            cases a2,
-            cases a2_right,
-            exact a2_right_left,
-          },
-          {
-            cases a2,
-            cases a2_right,
-            exact a2_right_right,
-          }
+          apply or.intro_right,
+          exact h2_1_left,
         },
         {
-          unfold env.nodup_ at h3,
-          simp at h3,
-          cases h3,
-          unfold env.nodup_,
-          exact h3_right,
-        }
+          rewrite <- h2_1_right_left,
+          rewrite h_left,
+        },
+        {
+          rewrite <- h2_1_right_right,
+          rewrite h_right,
+        },
       },
       {
         apply E1_ih,
-        unfold env.nodup_ at h3,
-        simp only [list.cons_append, list.pairwise_cons, list.mem_append] at h3,
-        cases h3,
         exact h3_right,
       }
     },
