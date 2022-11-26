@@ -1381,19 +1381,19 @@ begin
   },
   case formula.not_ : φ φ_ih V
   {
+    unfold formula.is_meta_var_or_all_def_in_env at h2,
     simp only [holds_not],
     apply not_congr,
-    unfold formula.is_meta_var_or_all_def_in_env at h2,
     exact φ_ih h2 V,
   },
   case formula.imp_ : φ ψ φ_ih ψ_ih V
   {
-    simp only [holds_imp],
     unfold formula.is_meta_var_or_all_def_in_env at h2,
     cases h2,
+    simp only [holds_imp],
     apply imp_congr,
     {
-     exact φ_ih h2_left V,
+      exact φ_ih h2_left V,
     },
     {
       exact ψ_ih h2_right V,
@@ -1405,15 +1405,17 @@ begin
   },
   case formula.forall_ : x φ φ_ih V
   {
-    simp only [holds_forall],
     unfold formula.is_meta_var_or_all_def_in_env at h2,
-    apply forall_congr, intros a,
+    simp only [holds_forall],
+    apply forall_congr,
+    intros a,
     exact φ_ih h2 (function.update V x a),
   },
   case formula.def_ : name args V
   {
-    apply exists.elim h1, intros E1 a1, clear h1,
-    subst a1,
+    apply exists.elim h1,
+    intros E1 h1_1, clear h1,
+    subst h1_1,
 
     induction E1,
     case list.nil
