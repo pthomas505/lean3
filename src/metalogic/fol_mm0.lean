@@ -1224,18 +1224,20 @@ begin
     induction φ generalizing M1 M2 V,
     case formula.meta_var_ : X M1 M2 V h1
     {
+      unfold formula.meta_var_set at h1,
+      simp only [finset.mem_singleton] at h1,
       simp only [holds_meta_var],
-      apply h1,
-      unfold formula.meta_var_set,
-      simp only [finset.mem_singleton],
+      apply h1 V X,
+      refl,
     },
     case formula.not_ : φ φ_ih M1 M2 V h1
     {
+      unfold formula.meta_var_set at h1,
       simp only [holds_not],
       apply not_congr,
       exact φ_ih M1 M2 V h1,
     },
-    case formula.imp_ : φ φ φ_ih ψ_ih M1 M2 V h1
+    case formula.imp_ : φ ψ φ_ih ψ_ih M1 M2 V h1
     {
       unfold formula.meta_var_set at h1,
       simp only [finset.mem_union] at h1,
@@ -1243,17 +1245,17 @@ begin
       apply imp_congr,
       {
         apply φ_ih,
-        intros X h2 h3,
+        intros V' X a1,
         apply h1,
         apply or.intro_left,
-        exact h3,
+        exact a1,
       },
       {
         apply ψ_ih,
-        intros X h2 h3,
+        intros V' X a1,
         apply h1,
         apply or.intro_right,
-        exact h3,
+        exact a1,
       }
     },
     case formula.eq_ : x y M1 M2 V h1
@@ -1262,12 +1264,11 @@ begin
     },
     case formula.forall_ : x φ φ_ih M1 M2 V h1
     {
+      unfold formula.meta_var_set at h1,
       simp only [holds_forall],
       apply forall_congr,
       intros a,
-      apply φ_ih,
-      unfold formula.meta_var_set at h1,
-      exact h1,
+      exact φ_ih M1 M2 (function.update V x a) h1,
     },
     case formula.def_ : name args M1 M2 V h1
     {
@@ -1279,17 +1280,18 @@ begin
     induction φ generalizing M1 M2 V,
     case formula.meta_var_ : X M1 M2 V h1
     {
+      unfold formula.meta_var_set at h1,
+      simp only [finset.mem_singleton] at h1,
       simp only [holds_meta_var],
-      apply h1,
-      unfold formula.meta_var_set,
-      simp only [finset.mem_singleton],
+      apply h1 V X,
+      refl,
     },
     case formula.not_ : φ φ_ih M1 M2 V h1
     {
+      unfold formula.meta_var_set at h1,
       simp only [holds_not],
       apply not_congr,
-      apply φ_ih,
-      exact h1,
+      exact φ_ih M1 M2 V h1,
     },
     case formula.imp_ : φ ψ φ_ih ψ_ih M1 M2 V h1
     {
@@ -1299,17 +1301,17 @@ begin
       apply imp_congr,
       {
         apply φ_ih,
-        intros X h2 h3,
+        intros V' X a1,
         apply h1,
         apply or.intro_left,
-        exact h3,
+        exact a1,
       },
       {
         apply ψ_ih,
-        intros X h2 h3,
+        intros V' X a1,
         apply h1,
         apply or.intro_right,
-        exact h3,
+        exact a1,
       }
     },
     case formula.eq_ : x y M1 M2 V h1
@@ -1318,11 +1320,11 @@ begin
     },
     case formula.forall_ : x φ φ_ih M1 M2 V h1
     {
+      unfold formula.meta_var_set at h1,
       simp only [holds_forall],
       apply forall_congr,
       intros a,
-      apply φ_ih,
-      unfold formula.meta_var_set at h1, exact h1,
+      exact φ_ih M1 M2 (function.update V x a) h1,
     },
     case formula.def_ : name args M1 M2 V h1
     {
