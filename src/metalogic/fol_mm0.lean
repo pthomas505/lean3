@@ -192,6 +192,36 @@ begin
 end
 
 
+lemma function.update_list_not_mem
+  {α β : Type}
+  [decidable_eq α]
+  (f : α → β)
+  (l : list (α × β))
+  (x : α)
+  (h1 : x ∉ list.map prod.fst l) :
+  function.update_list f l x = f x :=
+begin
+  induction l,
+  case list.nil
+  {
+    unfold function.update_list,
+  },
+  case list.cons : hd tl ih
+  {
+    simp only [list.map, list.mem_cons_iff, list.mem_map, prod.exists,
+      exists_and_distrib_right, exists_eq_right] at h1,
+    push_neg at h1,
+    cases h1,
+
+    unfold function.update_list,
+    simp only [function.update_noteq h1_left],
+    apply ih,
+    simp only [list.mem_map, prod.exists, exists_and_distrib_right, exists_eq_right, not_exists],
+    exact h1_right,
+  },
+end
+
+
 lemma function.update_list_mem_ext
   {α β : Type}
   [decidable_eq α]
@@ -327,36 +357,6 @@ begin
         exact ih h1,
       }
     }
-  },
-end
-
-
-lemma function.update_list_not_mem
-  {α β : Type}
-  [decidable_eq α]
-  (f : α → β)
-  (l : list (α × β))
-  (x : α)
-  (h1 : x ∉ list.map prod.fst l) :
-  function.update_list f l x = f x :=
-begin
-  induction l,
-  case list.nil
-  {
-    unfold function.update_list,
-  },
-  case list.cons : hd tl ih
-  {
-    simp only [list.map, list.mem_cons_iff, list.mem_map, prod.exists,
-      exists_and_distrib_right, exists_eq_right] at h1,
-    push_neg at h1,
-    cases h1,
-
-    unfold function.update_list,
-    simp only [function.update_noteq h1_left],
-    apply ih,
-    simp only [list.mem_map, prod.exists, exists_and_distrib_right, exists_eq_right, not_exists],
-    exact h1_right,
   },
 end
 
