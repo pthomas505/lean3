@@ -262,7 +262,7 @@ lemma function.update_list_zip_map_mem_ext
   function.update_list f (l1.zip (list.map h l2)) x =
     function.update_list g (l1.zip (list.map h l2)) x :=
 begin
-  have s1 : (l1.length ≤ (list.map h l2).length),
+  have s1 : l1.length ≤ (list.map h l2).length,
   simp only [list.length_map],
   exact h1,
 
