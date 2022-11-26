@@ -1369,7 +1369,7 @@ lemma ext_env_holds
   (E E' : env)
   (φ : formula)
   (V : valuation D)
-  (h1 : ∃ E1, E' = E1 ++ E)
+  (h1 : ∃ (E1 : env), E' = E1 ++ E)
   (h2 : φ.is_meta_var_or_all_def_in_env E)
   (h3 : E'.nodup_) :
   holds D M E' φ V ↔ holds D M E φ V :=
