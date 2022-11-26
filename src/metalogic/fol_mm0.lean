@@ -1328,21 +1328,20 @@ begin
     },
     case formula.def_ : name args M1 M2 V h1
     {
-      have s1 : E_hd.q.meta_var_set = ∅,
-      exact no_meta_var_imp_meta_var_set_is_empty E_hd.q E_hd.args E_hd.nf,
-
-      simp only [holds_not_nil_def] at *,
-      unfold formula.meta_var_set at *,
+      simp only [holds_not_nil_def],
       split_ifs,
       {
+        have s1 : E_hd.q.meta_var_set = ∅,
+        exact no_meta_var_imp_meta_var_set_is_empty E_hd.q E_hd.args E_hd.nf,
+
         apply E_ih,
         rewrite s1,
-        exact h1,
+        simp only [finset.not_mem_empty, is_empty.forall_iff, forall_forall_const, implies_true_iff],
       },
       {
         apply E_ih,
         unfold formula.meta_var_set,
-        exact h1,
+        simp only [finset.not_mem_empty, is_empty.forall_iff, forall_forall_const, implies_true_iff],
       }
     },
   },
