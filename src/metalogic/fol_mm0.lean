@@ -406,6 +406,28 @@ begin
 end
 
 
+lemma function.update_list_update
+  {α β : Type}
+  [decidable_eq α]
+  (f g : α → β)
+  (l1 l2 : list α)
+  (v : α)
+  (a : β)
+  (x : α)
+  (h1 : ∀ (y : α), y ∈ l2 → ¬ y = v)
+  (h2 : l1.length ≤ l2.length)
+  (h3 : x ∈ l1) :
+  function.update_list g (l1.zip (list.map (function.update f v a) l2)) x =
+    function.update_list f (l1.zip (list.map f l2)) x:=
+begin
+  have s1 : ∀ (y : α), y ∈ l2 → function.update f v a y = f y,
+  intros y a1,
+  exact function.update_noteq (h1 y a1) a f,
+
+  exact function.update_list_zip_map_mem_ext' l1 l2 g f (function.update f v a) f x s1 h2 h3,
+end
+
+
 lemma function.update_list_nth_le_zip
   {α β : Type}
   [decidable_eq α]
@@ -450,28 +472,6 @@ begin
     rewrite function.comp_update,
     rewrite ih,
   },
-end
-
-
-lemma function.update_list_update
-  {α β : Type}
-  [decidable_eq α]
-  (f g : α → β)
-  (l1 l2 : list α)
-  (v : α)
-  (a : β)
-  (x : α)
-  (h1 : ∀ (y : α), y ∈ l2 → ¬ y = v)
-  (h2 : l1.length ≤ l2.length)
-  (h3 : x ∈ l1) :
-  function.update_list g (l1.zip (list.map (function.update f v a) l2)) x =
-    function.update_list f (l1.zip (list.map f l2)) x:=
-begin
-  have s1 : ∀ (y : α), y ∈ l2 → function.update f v a y = f y,
-  intros y a1,
-  exact function.update_noteq (h1 y a1) a f,
-
-  exact function.update_list_zip_map_mem_ext' l1 l2 g f (function.update f v a) f x s1 h2 h3,
 end
 
 
