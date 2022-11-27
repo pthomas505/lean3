@@ -1649,16 +1649,17 @@ begin
     case formula.def_ : name args V
     {
       unfold formula.is_meta_var_or_all_def_in_env at h1,
-      apply exists.elim h1, intros d a1,
-      cases a1,
-      cases a1_right,
+      apply exists.elim h1,
+      intros a h1_1,
+      cases h1_1,
+      cases h1_1_right,
 
-      unfold formula.meta_var_set at h2,
+      apply exists.elim h6,
+      intros E1 h6_1,
 
-      apply exists.elim h6, intros E1 a6,
-      subst a6,
+      subst h6_1,
 
-      simp only [list.mem_append, list.mem_cons_iff] at a1_left,
+      simp only [list.mem_append, list.mem_cons_iff] at h1_1_left,
 
       unfold env.nodup_ at h5,
       rewrite list.pairwise_append at h5,
@@ -1678,24 +1679,24 @@ begin
       simp only [holds_not_nil_def, list.length_map, list.map_map],
       split_ifs,
       {
-        cases a1_left,
+        cases h1_1_left,
         {
           cases h,
           by_contradiction contra,
-          specialize h5_right_right d a1_left,
+          specialize h5_right_right a h1_1_left,
           cases h5_right_right,
           apply h5_right_right_left,
           {
             rewrite <- h_left,
-            rewrite a1_right_left,
+            rewrite h1_1_right_left,
           },
           {
             rewrite <- h_right,
-            rewrite a1_right_right,
+            rewrite h1_1_right_right,
           }
         },
         {
-          cases a1_left,
+          cases h1_1_left,
           {
             cases h,
             rewrite holds_valuation_ext
@@ -1739,14 +1740,14 @@ begin
           {
             cases h,
             by_contradiction contra,
-            apply h5_right_left_left d a1_left,
+            apply h5_right_left_left a h1_1_left,
             {
               rewrite <- h_left,
-              rewrite a1_right_left,
+              rewrite h1_1_right_left,
             },
             {
               rewrite <- h_right,
-              rewrite a1_right_right,
+              rewrite h1_1_right_right,
             },
           }
         }
@@ -1758,19 +1759,19 @@ begin
         },
         {
           unfold formula.is_meta_var_or_all_def_in_env,
-          apply exists.intro d,
+          apply exists.intro a,
           simp only [list.mem_append, list.mem_cons_iff],
           split,
           {
-            exact a1_left,
+            exact h1_1_left,
           },
           {
             split,
             {
-              exact a1_right_left,
+              exact h1_1_right_left,
             },
             {
-              exact a1_right_right,
+              exact h1_1_right_right,
             },
           },
         },
