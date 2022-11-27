@@ -1467,7 +1467,7 @@ begin
 end
 
 
-lemma lem_1
+lemma holds_subst_aux
   {D : Type}
   (V : valuation D)
   (M : meta_valuation D)
@@ -1800,7 +1800,7 @@ begin
   },
 end
 
-lemma lem_1'
+lemma holds_subst
   {D : Type}
   (V : valuation D)
   (M : meta_valuation D)
@@ -1819,7 +1819,7 @@ lemma lem_1'
   E φ (V ∘ σ.1) ↔
   holds D M E (φ.subst σ τ) V :=
 begin
-  apply lem_1 V M E E σ σ' τ φ h1 h2 h3 h4 h5,
+  apply holds_subst_aux V M E E σ σ' τ φ h1 h2 h3 h4 h5,
   apply exists.intro list.nil,
   simp only [list.nil_append],
 end
@@ -2491,7 +2491,7 @@ begin
 
     rewrite lem_8 M E d (list.map σ.val d.args) V h1 h2,
 
-    rewrite <- lem_1' V M E σ σ' meta_var_ d.q,
+    rewrite <- holds_subst V M E σ σ' meta_var_ d.q,
 
     have s1 : holds D (fun (X' : meta_var_name) (V' : valuation D), holds D M E (meta_var_ X') (V' ∘ σ')) E d.q (V ∘ σ.val)
       ↔ holds D M E d.q (V ∘ σ.val),
@@ -2610,10 +2610,10 @@ begin
     obtain ⟨σ', left, right⟩ := σ.2,
     have s1 : E.nodup_,
     apply env_well_formed_imp_nodup E h1,
-    have IH1' := fun φ b M d e V, (lem_1' _ _ _ _ _ _ _ _ _ left right s1).2 (IH1 φ b M d e V),
+    have IH1' := fun φ b M d e V, (holds_subst _ _ _ _ _ _ _ _ _ left right s1).2 (IH1 φ b M d e V),
     {
       intros V,
-      rewrite <- lem_1' _ _ _ _ _ _ _ _ _ left right s1,
+      rewrite <- holds_subst _ _ _ _ _ _ _ _ _ left right s1,
       {
         apply IH2,
         {
