@@ -1363,7 +1363,7 @@ end
 
 --
 
-lemma ext_env_holds
+lemma holds_env_ext
   {D : Type}
   (M : meta_valuation D)
   (E E' : env)
@@ -1498,7 +1498,7 @@ begin
       rewrite function.comp.assoc,
       rewrite h3,
       simp only [function.comp.right_id],
-      apply ext_env_holds,
+      apply holds_env_ext,
       {
         exact h6,
       },
@@ -1588,7 +1588,7 @@ begin
       rewrite function.comp.assoc,
       rewrite h3,
       simp only [function.comp.right_id],
-      apply ext_env_holds,
+      apply holds_env_ext,
       {
         exact h6,
       },
@@ -2365,7 +2365,7 @@ begin
       cases h2,
       {
         rewrite h2,
-        rewrite <- ext_env_holds,
+        rewrite <- holds_env_ext,
         {
           apply exists.intro [hd],
           simp only [list.singleton_append],
@@ -2413,7 +2413,7 @@ begin
         specialize ih s1 h2,
         rewrite ih,
 
-        rewrite <- ext_env_holds,
+        rewrite <- holds_env_ext,
         {
           apply exists.intro [hd],
           simp only [list.singleton_append],
