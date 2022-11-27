@@ -1574,28 +1574,24 @@ begin
     induction φ generalizing V,
     case formula.meta_var_ : X V
     {
+      unfold formula.meta_var_set at h2,
+      simp only [finset.mem_singleton, forall_eq] at h2,
+
       unfold formula.subst,
       simp only [holds_meta_var],
+
       rewrite function.comp.assoc,
       rewrite h3,
-      simp only [function.comp.right_id],
-      apply holds_env_ext,
-      {
-        exact h6,
-      },
-      {
-        apply h2,
-        unfold formula.meta_var_set,
-        simp only [finset.mem_singleton],
-      },
-      {
-        exact h5,
-      },
+      rewrite function.comp.right_id,
+
+      exact holds_env_ext M (E_hd :: E_tl) E' (τ X) V h6 h2 h5,
     },
     case formula.not_ : φ φ_ih V
     {
       unfold formula.is_meta_var_or_all_def_in_env at h1,
+
       unfold formula.meta_var_set at h2,
+
       unfold formula.subst,
       simp only [holds_not],
       apply not_congr,
@@ -1605,34 +1601,31 @@ begin
     {
       unfold formula.is_meta_var_or_all_def_in_env at h1,
       cases h1,
+
       unfold formula.meta_var_set at h2,
       simp only [finset.mem_union] at h2,
+
       unfold formula.subst,
       simp only [holds_imp],
       apply imp_congr,
       {
-        apply φ_ih,
+        apply φ_ih h1_left,
         {
-          exact h1_left,
-        },
-        {
-          intros X h7,
+          intros X a1,
           apply h2,
-          apply or.intro_left,exact h7,
-        },
+          apply or.intro_left,
+          exact a1,
+        }
       },
       {
-        apply ψ_ih,
+        apply ψ_ih h1_right,
         {
-          exact h1_right,
-        },
-        {
-          intros X h7,
+          intros X a1,
           apply h2,
           apply or.intro_right,
-          exact h7,
+          exact a1,
         },
-      }
+      },
     },
     case formula.eq_ : x y V
     {
@@ -1642,14 +1635,16 @@ begin
     case formula.forall_ : x φ φ_ih V
     {
       unfold formula.is_meta_var_or_all_def_in_env at h1,
+
       unfold formula.meta_var_set at h2,
+
       unfold formula.subst,
       simp only [holds_forall],
       apply forall_congr,
       intros a,
-      specialize φ_ih h1 h2,
-      rewrite <- φ_ih,
-      rewrite aux_1 _ _ σ', exact h4,
+
+      rewrite <- aux_1 V σ.val σ' x a h4,
+      exact φ_ih h1 h2 (function.update V (σ.val x) a),
     },
     case formula.def_ : name args V
     {
