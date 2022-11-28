@@ -1676,6 +1676,54 @@ begin
 end
 
 
+example
+  (σ : instantiation)
+  (τ : meta_instantiation)
+  (φ : formula) :
+  formula.subst σ τ φ = formula.subst id_instantiation τ (formula.subst σ meta_var_ φ) :=
+begin
+  induction φ,
+  case formula.meta_var_ : X
+  {
+    unfold formula.subst,
+  },
+  case formula.not_ : φ φ_ih
+  {
+    unfold formula.subst,
+    congr,
+    exact φ_ih,
+  },
+  case formula.imp_ : φ ψ φ_ih ψ_ih
+  {
+    unfold formula.subst,
+    congr,
+    {
+      exact φ_ih,
+    },
+    {
+      exact ψ_ih,
+    }
+  },
+  case formula.eq_ : x y
+  {
+    unfold formula.subst,
+    congr,
+  },
+  case formula.forall_ : x φ φ_ih
+  {
+    unfold formula.subst,
+    congr,
+    exact φ_ih,
+  },
+  case formula.def_ : name args
+  {
+    unfold formula.subst,
+    unfold id_instantiation,
+    simp only [list.map_map, function.comp.left_id, eq_self_iff_true, and_self],
+  },
+end
+
+
 lemma holds_subst_aux
   {D : Type}
   (V : valuation D)
