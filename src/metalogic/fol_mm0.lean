@@ -1562,7 +1562,7 @@ begin
         have s1 : E_hd.q.meta_var_set = ∅,
         exact no_meta_var_imp_meta_var_set_is_empty E_hd.q E_hd.args E_hd.nf,
 
-        rewrite holds_valuation_ext M _
+        rewrite holds_valuation_ext M E_tl
           (function.update_list V (E_hd.args.zip (list.map (V ∘ σ.val) args)))
           (function.update_list (V ∘ σ.val) (E_hd.args.zip (list.map (V ∘ σ.val) args)))
           E_hd.q E_hd.args E_hd.nf,
