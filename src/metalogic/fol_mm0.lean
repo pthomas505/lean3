@@ -1735,7 +1735,96 @@ example
   E φ (V ∘ σ.1) ↔
   holds D M E (φ.subst σ τ) V :=
 begin
-  sorry
+  induction φ generalizing V,
+  case formula.meta_var_ : X V
+  {
+    cases h2,
+    unfold formula.subst,
+    simp only [holds_meta_var],
+    rewrite function.comp.assoc,
+    rewrite h2_left,
+    rewrite function.comp.right_id,
+  },
+  case formula.not_ : φ φ_ih V
+  { admit },
+  case formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1 V
+  { admit },
+  case formula.eq_ : φ_ᾰ φ_ᾰ_1 V
+  { admit },
+  case formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih V
+  { admit },
+  case formula.def_ : name args V
+  {
+    induction E,
+    case list.nil
+    {
+      unfold formula.is_meta_var_or_all_def_in_env at h1,
+      simp only [list.not_mem_nil, false_and, exists_false] at h1,
+      contradiction,
+    },
+    case list.cons : E_hd E_tl E_ih
+    {
+      have s1 : E_hd.q.meta_var_set = ∅,
+      exact no_meta_var_imp_meta_var_set_is_empty E_hd.q E_hd.args E_hd.nf,
+
+      unfold formula.subst,
+      simp only [holds_meta_var, holds_not_nil_def, list.length_map, list.map_map],
+      split_ifs,
+      {
+        cases h,
+
+        rewrite holds_valuation_ext
+          M E_tl
+          (function.update_list V (E_hd.args.zip (list.map (V ∘ σ.val) args)))
+          (function.update_list (V ∘ σ.val) (E_hd.args.zip (list.map (V ∘ σ.val) args)))
+          E_hd.q E_hd.args E_hd.nf,
+        {
+          apply holds_meta_valuation_ext,
+          rewrite s1,
+          simp only [finset.not_mem_empty, is_empty.forall_iff, forall_forall_const, implies_true_iff],
+        },
+        {
+          intros v a1,
+          apply function.update_list_zip_map_mem_ext,
+          {
+            rewrite h_right,
+          },
+          {
+            exact a1,
+          }
+        },
+      },
+      {
+        unfold formula.is_meta_var_or_all_def_in_env at h1,
+        apply exists.elim h1,
+        intros d h1_1,
+        clear h1,
+        cases h1_1,
+        simp only [list.mem_cons_iff] at h1_1_left,
+
+        cases h1_1_left,
+        {
+          rewrite <- h1_1_left at h,
+          exfalso,
+          apply h,
+          exact h1_1_right,
+        },
+        {
+          unfold formula.subst at E_ih,
+          apply E_ih,
+          unfold formula.is_meta_var_or_all_def_in_env,
+          apply exists.intro d,
+          split,
+          {
+            exact h1_1_left,
+          },
+          {
+            exact h1_1_right,
+          }
+        },
+      }
+    },
+  },
 end
 
 
