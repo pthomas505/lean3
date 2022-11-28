@@ -1620,11 +1620,7 @@ example
   (M : meta_valuation D)
   (E : env)
   (τ : meta_instantiation)
-  (φ : formula)
---  (h1 : φ.is_meta_var_or_all_def_in_env E)
---  (h2 : ∀ (X : meta_var_name), X ∈ φ.meta_var_set → (τ X).is_meta_var_or_all_def_in_env E)
-  -- (h3 : E.nodup_)
-  :
+  (φ : formula) :
   (holds D (fun (X' : meta_var_name), holds D M E (τ X')) E φ V
     ↔ holds D M E (formula.subst id_instantiation τ φ) V) :=
 begin
@@ -1636,7 +1632,6 @@ begin
   },
   case formula.not_ : φ φ_ih V
   {
-  --  unfold formula.is_meta_var_or_all_def_in_env at h1,
     unfold formula.subst,
     simp only [holds_not],
     apply not_congr,
@@ -1644,9 +1639,6 @@ begin
   },
   case formula.imp_ : φ ψ φ_ih ψ_ih V
   {
-   -- unfold formula.is_meta_var_or_all_def_in_env at h1,
-    --cases h1,
-
     unfold formula.subst,
     simp only [holds_imp],
     apply imp_congr,
