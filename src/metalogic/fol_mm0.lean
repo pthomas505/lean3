@@ -1478,8 +1478,8 @@ example
   (h1 : φ.is_meta_var_or_all_def_in_env E)
   (h2 : σ.1 ∘ σ' = id ∧ σ' ∘ σ.1 = id)
   (h3 : E.nodup_) :
-  holds D (fun (X' : meta_var_name) (V' : valuation D), holds D M E (meta_var_ X') (V' ∘ σ')) E φ (V ∘ σ.1) ↔
-    holds D M E (φ.subst σ meta_var_) V :=
+  (holds D (fun (X' : meta_var_name) (V' : valuation D), M X' (V' ∘ σ')) E φ (V ∘ σ.val)
+    ↔ holds D M E (formula.subst σ meta_var_ φ) V) :=
 begin
   induction φ generalizing V,
   case formula.meta_var_ : X V
@@ -1492,13 +1492,43 @@ begin
     rewrite function.comp.right_id,
   },
   case formula.not_ : φ φ_ih V
-  { admit },
-  case formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1 V
-  { admit },
-  case formula.eq_ : φ_ᾰ φ_ᾰ_1 V
-  { admit },
-  case formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih V
-  { admit },
+  {
+    unfold formula.is_meta_var_or_all_def_in_env at h1,
+    unfold formula.subst,
+    simp only [holds_not],
+    apply not_congr,
+    exact φ_ih h1 V,
+  },
+  case formula.imp_ : φ ψ φ_ih ψ_ih V
+  {
+    unfold formula.is_meta_var_or_all_def_in_env at h1,
+    cases h1,
+    unfold formula.subst,
+    simp only [holds_imp],
+    apply imp_congr,
+    {
+      exact φ_ih h1_left V,
+    },
+    {
+      exact ψ_ih h1_right V,
+    }
+  },
+  case formula.eq_ : x y V
+  {
+    unfold formula.subst,
+    simp only [holds_eq],
+  },
+  case formula.forall_ : x φ φ_ih V
+  {
+    unfold formula.is_meta_var_or_all_def_in_env at h1,
+    cases h2,
+    unfold formula.subst,
+    simp only [holds_forall],
+    apply forall_congr,
+    intros a,
+    rewrite <- aux_1 V σ.val σ' x a h2_right,
+    exact φ_ih h1 (function.update V (σ.val x) a),
+  },
   case formula.def_ : name args V
   {
     induction E,
@@ -1511,7 +1541,6 @@ begin
     case list.cons : E_hd E_tl E_ih
     {
       unfold formula.subst at E_ih,
-      simp only [holds_meta_var] at E_ih,
 
       unfold formula.is_meta_var_or_all_def_in_env at h1,
       apply exists.elim h1,
