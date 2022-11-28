@@ -1476,8 +1476,7 @@ example
   (σ' : var_name → var_name)
   (φ : formula)
   (h1 : φ.is_meta_var_or_all_def_in_env E)
-  (h2 : σ.1 ∘ σ' = id ∧ σ' ∘ σ.1 = id)
-  (h3 : E.nodup_) :
+  (h2 : σ.1 ∘ σ' = id ∧ σ' ∘ σ.1 = id) :
   (holds D (fun (X' : meta_var_name) (V' : valuation D), M X' (V' ∘ σ')) E φ (V ∘ σ.val)
     ↔ holds D M E (formula.subst σ meta_var_ φ) V) :=
 begin
@@ -1590,12 +1589,8 @@ begin
           exact h1_1_right,
         },
         {
-          unfold env.nodup_ at h3,
-          simp only [list.pairwise_cons] at h3,
-          cases h3,
-
           unfold formula.subst at E_ih,
-          apply E_ih h3_right,
+          apply E_ih,
           unfold formula.is_meta_var_or_all_def_in_env,
           apply exists.intro d,
           split,
@@ -1722,6 +1717,28 @@ begin
     simp only [list.map_map, function.comp.left_id, eq_self_iff_true, and_self],
   },
 end
+
+
+example
+  {D : Type}
+  (V : valuation D)
+  (M : meta_valuation D)
+  (E : env)
+  (σ : instantiation)
+  (σ' : var_name → var_name)
+  (τ : meta_instantiation)
+  (φ : formula)
+  (h1 : φ.is_meta_var_or_all_def_in_env E)
+  (h2 : ∀ (X : meta_var_name), X ∈ φ.meta_var_set → (τ X).is_meta_var_or_all_def_in_env E)
+  (h3 : σ.1 ∘ σ' = id ∧  σ' ∘ σ.1 = id) :
+  holds D
+    (fun (X' : meta_var_name) (V' : valuation D), holds D M E (τ X') (V' ∘ σ'))
+  E φ (V ∘ σ.1) ↔
+  holds D M E (φ.subst σ τ) V :=
+begin
+  sorry
+end
+
 
 
 lemma holds_subst_aux
