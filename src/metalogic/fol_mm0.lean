@@ -1746,13 +1746,43 @@ begin
     rewrite function.comp.right_id,
   },
   case formula.not_ : φ φ_ih V
-  { admit },
-  case formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1 V
-  { admit },
-  case formula.eq_ : φ_ᾰ φ_ᾰ_1 V
-  { admit },
-  case formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih V
-  { admit },
+  {
+    unfold formula.is_meta_var_or_all_def_in_env at h1,
+    unfold formula.subst,
+    simp only [holds_not],
+    apply not_congr,
+    exact φ_ih h1 V,
+  },
+  case formula.imp_ : φ ψ φ_ih ψ_ih V
+  {
+    unfold formula.is_meta_var_or_all_def_in_env at h1,
+    cases h1,
+    unfold formula.subst,
+    simp only [holds_imp],
+    apply imp_congr,
+    {
+      exact φ_ih h1_left V,
+    },
+    {
+      exact ψ_ih h1_right V,
+    }
+  },
+  case formula.eq_ : x y V
+  {
+    unfold formula.subst,
+    simp only [holds_eq],
+  },
+  case formula.forall_ : x φ φ_ih V
+  {
+    unfold formula.is_meta_var_or_all_def_in_env at h1,
+    cases h2,
+    unfold formula.subst,
+    simp only [holds_forall],
+    apply forall_congr,
+    intros a,
+    rewrite <- aux_1 V σ.val σ' x a h2_right,
+    exact φ_ih h1 (function.update V (σ.val x) a),
+  },
   case formula.def_ : name args V
   {
     induction E,
@@ -1811,7 +1841,11 @@ begin
         },
         {
           unfold formula.subst at E_ih,
-          apply E_ih,
+          rewrite <- E_ih,
+          apply holds_meta_valuation_ext,
+          unfold formula.meta_var_set,
+          simp only [finset.not_mem_empty, is_empty.forall_iff, forall_forall_const, implies_true_iff],
+
           unfold formula.is_meta_var_or_all_def_in_env,
           apply exists.intro d,
           split,
@@ -1826,7 +1860,6 @@ begin
     },
   },
 end
-
 
 
 lemma holds_subst_aux
