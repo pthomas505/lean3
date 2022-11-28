@@ -1729,8 +1729,7 @@ example
   (τ : meta_instantiation)
   (φ : formula)
   (h1 : φ.is_meta_var_or_all_def_in_env E)
-  (h2 : ∀ (X : meta_var_name), X ∈ φ.meta_var_set → (τ X).is_meta_var_or_all_def_in_env E)
-  (h3 : σ.1 ∘ σ' = id ∧  σ' ∘ σ.1 = id) :
+  (h2 : σ.1 ∘ σ' = id ∧  σ' ∘ σ.1 = id) :
   holds D
     (fun (X' : meta_var_name) (V' : valuation D), holds D M E (τ X') (V' ∘ σ'))
   E φ (V ∘ σ.1) ↔
