@@ -1730,10 +1730,8 @@ example
   (φ : formula)
   (h1 : φ.is_meta_var_or_all_def_in_env E)
   (h2 : σ.1 ∘ σ' = id ∧ σ' ∘ σ.1 = id) :
-  holds D
-    (fun (X' : meta_var_name) (V' : valuation D), holds D M E (τ X') (V' ∘ σ'))
-  E φ (V ∘ σ.1) ↔
-  holds D M E (φ.subst σ τ) V :=
+  holds D (fun (X' : meta_var_name) (V' : valuation D), holds D M E (τ X') (V' ∘ σ')) E φ (V ∘ σ.1) ↔
+    holds D M E (φ.subst σ τ) V :=
 begin
   induction φ generalizing V,
   case formula.meta_var_ : X V
