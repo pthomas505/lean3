@@ -1467,6 +1467,109 @@ begin
 end
 
 
+example
+  {D : Type}
+  (V : valuation D)
+  (M : meta_valuation D)
+  (E : env)
+  (σ : instantiation)
+  (σ' : var_name → var_name)
+  (φ : formula)
+  (h1 : φ.is_meta_var_or_all_def_in_env E)
+  (h2 : σ.1 ∘ σ' = id ∧ σ' ∘ σ.1 = id)
+  (h3 : E.nodup_) :
+  holds D (fun (X' : meta_var_name) (V' : valuation D), holds D M E (meta_var_ X') (V' ∘ σ')) E φ (V ∘ σ.1) ↔
+    holds D M E (φ.subst σ meta_var_) V :=
+begin
+  induction φ generalizing V,
+  case formula.meta_var_ : X V
+  {
+    cases h2,
+    unfold formula.subst,
+    simp only [holds_meta_var],
+    rewrite function.comp.assoc,
+    rewrite h2_left,
+    rewrite function.comp.right_id,
+  },
+  case formula.not_ : φ φ_ih V
+  { admit },
+  case formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1 V
+  { admit },
+  case formula.eq_ : φ_ᾰ φ_ᾰ_1 V
+  { admit },
+  case formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih V
+  { admit },
+  case formula.def_ : name args V
+  {
+    induction E,
+    case list.nil
+    {
+      unfold formula.is_meta_var_or_all_def_in_env at h1,
+      simp only [list.not_mem_nil, false_and, exists_false] at h1,
+      contradiction,
+    },
+    case list.cons : E_hd E_tl E_ih
+    {
+      unfold formula.subst at E_ih,
+      simp only [holds_meta_var] at E_ih,
+
+      unfold formula.is_meta_var_or_all_def_in_env at h1,
+      apply exists.elim h1,
+      intros d h1_1,
+      clear h1,
+      cases h1_1,
+      simp only [list.mem_cons_iff] at h1_1_left,
+
+      unfold env.nodup_ at h3,
+      simp only [list.pairwise_cons] at h3,
+      cases h3,
+
+      unfold formula.subst,
+      simp only [holds_meta_var, holds_not_nil_def, list.length_map, list.map_map],
+      split_ifs,
+      {
+        cases h,
+
+        have s1 : E_hd.q.meta_var_set = ∅,
+        exact no_meta_var_imp_meta_var_set_is_empty E_hd.q E_hd.args E_hd.nf,
+
+        rewrite holds_valuation_ext M _
+          (function.update_list V (E_hd.args.zip (list.map (V ∘ σ.val) args)))
+          (function.update_list (V ∘ σ.val) (E_hd.args.zip (list.map (V ∘ σ.val) args)))
+          E_hd.q E_hd.args E_hd.nf,
+        rewrite holds_meta_valuation_ext,
+        rewrite s1,
+        simp only [finset.not_mem_empty, is_empty.forall_iff, forall_forall_const, implies_true_iff],
+        intros v a1,
+        apply function.update_list_zip_map_mem_ext,
+        rewrite h_right,
+        exact a1,
+      },
+      {
+        apply E_ih,
+        exact h3_right,
+        cases h1_1_left,
+        {
+          rewrite <- h1_1_left at h,
+          contradiction,
+        },
+        {
+          unfold formula.is_meta_var_or_all_def_in_env,
+          apply exists.intro d,
+          split,
+          {
+            exact h1_1_left,
+          },
+          {
+            exact h1_1_right,
+          }
+        },
+      }
+    },
+  },
+end
+
+
 lemma holds_subst_aux
   {D : Type}
   (V : valuation D)
