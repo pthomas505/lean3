@@ -1540,25 +1540,14 @@ begin
     },
     case list.cons : E_hd E_tl E_ih
     {
-      unfold formula.is_meta_var_or_all_def_in_env at h1,
-      apply exists.elim h1,
-      intros d h1_1,
-      clear h1,
-      cases h1_1,
-      simp only [list.mem_cons_iff] at h1_1_left,
-
-      unfold env.nodup_ at h3,
-      simp only [list.pairwise_cons] at h3,
-      cases h3,
+      have s1 : E_hd.q.meta_var_set = ∅,
+      exact no_meta_var_imp_meta_var_set_is_empty E_hd.q E_hd.args E_hd.nf,
 
       unfold formula.subst,
       simp only [holds_meta_var, holds_not_nil_def, list.length_map, list.map_map],
       split_ifs,
       {
         cases h,
-
-        have s1 : E_hd.q.meta_var_set = ∅,
-        exact no_meta_var_imp_meta_var_set_is_empty E_hd.q E_hd.args E_hd.nf,
 
         rewrite holds_valuation_ext
           M E_tl
@@ -1586,6 +1575,13 @@ begin
         },
       },
       {
+        unfold formula.is_meta_var_or_all_def_in_env at h1,
+        apply exists.elim h1,
+        intros d h1_1,
+        clear h1,
+        cases h1_1,
+        simp only [list.mem_cons_iff] at h1_1_left,
+
         cases h1_1_left,
         {
           rewrite <- h1_1_left at h,
@@ -1594,6 +1590,10 @@ begin
           exact h1_1_right,
         },
         {
+          unfold env.nodup_ at h3,
+          simp only [list.pairwise_cons] at h3,
+          cases h3,
+
           unfold formula.subst at E_ih,
           apply E_ih h3_right,
           unfold formula.is_meta_var_or_all_def_in_env,
