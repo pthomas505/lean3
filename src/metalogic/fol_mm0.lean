@@ -1827,10 +1827,7 @@ begin
         apply holds_valuation_ext M E_tl
           (function.update_list V (E_hd.args.zip (list.map V args)))
           (function.update_list (function.update V v a) (E_hd.args.zip (list.map (function.update V v a) args)))
-          E_hd.q E_hd.args,
-        {
-          exact E_hd.nf,
-        },
+          E_hd.q E_hd.args E_hd.nf,
         {
           intros v' a1,
           symmetry,
