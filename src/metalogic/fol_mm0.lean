@@ -1602,7 +1602,7 @@ begin
             exact h1_1_right,
           }
         },
-      }
+      },
     },
   },
 end
@@ -1628,15 +1628,15 @@ begin
   unfold is_not_free,
   split,
   {
-    intros h1 V V' h2,
-    rewrite <- aux_3 V V' v h2,
-    apply h1,
+    intros a1 V V' a2,
+    rewrite <- aux_3 V V' v a2,
+    apply a1,
   },
   {
-    intros h1 V a,
-    apply h1,
-    intros a' h2,
-    simp only [function.update_noteq h2],
+    intros a1 V a,
+    apply a1,
+    intros a' a2,
+    simp only [function.update_noteq a2],
   }
 end
 
