@@ -1610,11 +1610,15 @@ end
 
 -- changing v does not cause the value of φ to change
 
-def is_not_free (D : Type) (M : meta_valuation D) (E : env) (v : var_name) (φ : formula) : Prop :=
-  ∀ (V : valuation D) (a : D),
-  holds D M E φ V ↔ holds D M E φ (function.update V v a)
+def is_not_free
+  (D : Type)
+  (M : meta_valuation D)
+  (E : env)
+  (v : var_name)
+  (φ : formula) : Prop :=
+  ∀ (V : valuation D) (a : D), holds D M E φ V ↔ holds D M E φ (function.update V v a)
 
-theorem is_not_free_equiv
+lemma is_not_free_equiv
   {D : Type}
   (M : meta_valuation D)
   (E : env)
