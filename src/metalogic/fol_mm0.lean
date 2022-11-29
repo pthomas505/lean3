@@ -1672,8 +1672,10 @@ begin
     },
     case formula.not_ : φ φ_ih
     {
-      unfold not_free at *,
+      unfold not_free at h1,
+
       unfold is_not_free at *,
+
       simp only [holds_not],
       intros V a,
       apply not_congr,
@@ -1681,10 +1683,12 @@ begin
     },
     case formula.imp_ : φ ψ φ_ih ψ_ih
     {
-      unfold not_free at *,
-      unfold is_not_free at *,
-      simp only [holds_imp],
+      unfold not_free at h1,
       cases h1,
+
+      unfold is_not_free at *,
+
+      simp only [holds_imp],
       intros V a,
       apply imp_congr,
       {
@@ -1697,40 +1701,43 @@ begin
     case formula.eq_ : x y
     {
       unfold not_free at h1,
-      unfold is_not_free at *,
-      simp only [holds_eq],
       cases h1,
+
+      unfold is_not_free at *,
+
+      simp only [holds_eq],
       intros V a,
       simp only [function.update_noteq h1_left, function.update_noteq h1_right],
     },
     case formula.forall_ : x φ φ_ih
     {
+      unfold not_free at h1,
+
       unfold is_not_free at *,
-      unfold not_free at *,
+
       simp only [holds_forall],
       intros V a,
-      apply forall_congr, intros a',
+      apply forall_congr,
+      intros a',
       cases h1,
       {
         rewrite h1,
         simp only [function.update_idem],
       },
       {
-        by_cases v = x,
+        by_cases c1 : v = x,
         {
-          rewrite h,
+          rewrite c1,
           simp only [function.update_idem],
         },
         {
-          simp only [function.update_comm h],
+          simp only [function.update_comm c1],
           exact φ_ih h1 (function.update V x a') a,
         }
       }
     },
     case formula.def_ : name args
     {
-      unfold is_not_free at *,
-      unfold not_free at *,
       intros V a,
       simp only [holds_nil_def],
     },
