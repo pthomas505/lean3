@@ -448,8 +448,10 @@ inductive formula : Type
 
 open formula
 
-
--- (v, X) ∈ Γ if and only if v is not free in meta_var_ X.
+/-
+(v, X) ∈ Γ if and only if v is not free in meta_var_ X.
+not_free Γ v φ = v is not free in φ in the context Γ
+-/
 def not_free (Γ : list (var_name × meta_var_name)) (v : var_name) : formula → Prop
 | (meta_var_ X) := (v, X) ∈ Γ
 | (not_ φ) := not_free φ
@@ -1617,6 +1619,7 @@ def is_not_free
   (v : var_name)
   (φ : formula) : Prop :=
   ∀ (V : valuation D) (a : D), holds D M E φ V ↔ holds D M E φ (function.update V v a)
+
 
 lemma is_not_free_equiv
   {D : Type}
