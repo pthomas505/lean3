@@ -448,6 +448,7 @@ inductive formula : Type
 
 open formula
 
+
 /-
 (v, X) ∈ Γ if and only if v is not free in meta_var_ X.
 not_free Γ v φ = v is not free in φ in the context Γ
