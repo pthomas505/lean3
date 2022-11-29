@@ -1630,7 +1630,7 @@ begin
   {
     intros a1 V V' a2,
     rewrite <- aux_3 V V' v a2,
-    apply a1,
+    exact a1 V (V' v),
   },
   {
     intros a1 V a,
