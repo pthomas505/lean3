@@ -1818,22 +1818,25 @@ begin
     },
     case formula.def_ : name args
     {
-      unfold not_free at *,
       unfold is_not_free at *,
+
       simp only [holds_not_nil_def, holds_meta_var] at *,
-      specialize E_ih h2,
       intros V a,
       split_ifs,
       {
-        apply holds_valuation_ext M E_tl _ _ E_hd.q E_hd.args,
+        apply holds_valuation_ext M E_tl
+          (function.update_list V (E_hd.args.zip (list.map V args)))
+          (function.update_list (function.update V v a) (E_hd.args.zip (list.map (function.update V v a) args)))
+          E_hd.q E_hd.args,
         {
           exact E_hd.nf,
         },
         {
-          intros x a1,
+          intros v' a1,
           symmetry,
           apply function.update_list_update V (function.update V v a),
           {
+            unfold not_free at h1,
             exact h1,
           },
           {
@@ -1846,9 +1849,7 @@ begin
         },
       },
       {
-        apply E_ih,
-        unfold not_free,
-        exact h1,
+        exact E_ih h2 (def_ name args) h1 V a,
       }
     },
   },
