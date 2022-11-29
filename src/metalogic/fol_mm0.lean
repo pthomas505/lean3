@@ -1611,8 +1611,9 @@ begin
 end
 
 
--- changing v does not cause the value of φ to change
-
+/-
+  Changing v does not cause the value of φ to change.
+-/
 def is_not_free
   (D : Type)
   (M : meta_valuation D)
@@ -1622,7 +1623,7 @@ def is_not_free
   ∀ (V : valuation D) (a : D), holds D M E φ V ↔ holds D M E φ (function.update V v a)
 
 
-lemma is_not_free_equiv
+example
   {D : Type}
   (M : meta_valuation D)
   (E : env)
