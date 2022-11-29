@@ -1657,8 +1657,8 @@ lemma not_free_imp_is_not_free
   (Γ : list (var_name × meta_var_name))
   (v : var_name)
   (φ : formula)
-  (H : not_free Γ v φ)
-  (nf : ∀ X, (v, X) ∈ Γ → is_not_free D M E v (meta_var_ X)) :
+  (h1 : not_free Γ v φ)
+  (h2 : ∀ (X : meta_var_name), (v, X) ∈ Γ → is_not_free D M E v (meta_var_ X)) :
   is_not_free D M E v φ :=
 begin
   induction E generalizing φ,
@@ -1667,8 +1667,8 @@ begin
     induction φ,
     case formula.meta_var_ : φ
     {
-      unfold not_free at H,
-      exact nf φ H,
+      unfold not_free at h1,
+      exact h2 φ h1,
     },
     case formula.not_ : φ φ_ih
     {
@@ -1677,31 +1677,31 @@ begin
       simp only [holds_not],
       intros V a,
       apply not_congr,
-      exact φ_ih H V a,
+      exact φ_ih h1 V a,
     },
     case formula.imp_ : φ ψ φ_ih ψ_ih
     {
       unfold not_free at *,
       unfold is_not_free at *,
       simp only [holds_imp],
-      cases H,
+      cases h1,
       intros V a,
       apply imp_congr,
       {
-        exact φ_ih H_left V a,
+        exact φ_ih h1_left V a,
       },
       {
-        exact ψ_ih H_right V a,
+        exact ψ_ih h1_right V a,
       },
     },
     case formula.eq_ : x y
     {
-      unfold not_free at H,
+      unfold not_free at h1,
       unfold is_not_free at *,
       simp only [holds_eq],
-      cases H,
+      cases h1,
       intros V a,
-      simp only [function.update_noteq H_left, function.update_noteq H_right],
+      simp only [function.update_noteq h1_left, function.update_noteq h1_right],
     },
     case formula.forall_ : x φ φ_ih
     {
@@ -1710,9 +1710,9 @@ begin
       simp only [holds_forall],
       intros V a,
       apply forall_congr, intros a',
-      cases H,
+      cases h1,
       {
-        rewrite H,
+        rewrite h1,
         simp only [function.update_idem],
       },
       {
@@ -1723,7 +1723,7 @@ begin
         },
         {
           simp only [function.update_comm h],
-          exact φ_ih H (function.update V x a') a,
+          exact φ_ih h1 (function.update V x a') a,
         }
       }
     },
@@ -1740,8 +1740,8 @@ begin
     induction φ,
     case formula.meta_var_ : φ
     {
-      unfold not_free at H,
-      exact nf φ H,
+      unfold not_free at h1,
+      exact h2 φ h1,
     },
     case formula.not_ : φ φ_ih
     {
@@ -1750,31 +1750,31 @@ begin
       simp only [holds_not],
       intros V a,
       apply not_congr,
-      exact φ_ih H V a,
+      exact φ_ih h1 V a,
     },
     case formula.imp_ : φ ψ φ_ih ψ_ih
     {
       unfold not_free at *,
       unfold is_not_free at *,
       simp only [holds_imp],
-      cases H,
+      cases h1,
       intros V a,
       apply imp_congr,
       {
-        exact φ_ih H_left V a,
+        exact φ_ih h1_left V a,
       },
       {
-        exact ψ_ih H_right V a,
+        exact ψ_ih h1_right V a,
       },
     },
     case formula.eq_ : x y
     {
-      unfold not_free at H,
+      unfold not_free at h1,
       unfold is_not_free at *,
       simp only [holds_eq],
-      cases H,
+      cases h1,
       intros V a,
-      simp only [function.update_noteq H_left, function.update_noteq H_right],
+      simp only [function.update_noteq h1_left, function.update_noteq h1_right],
     },
     case formula.forall_ : x φ φ_ih
     {
@@ -1783,9 +1783,9 @@ begin
       simp only [holds_forall],
       intros V a,
       apply forall_congr, intros a',
-      cases H,
+      cases h1,
       {
-        rewrite H,
+        rewrite h1,
         simp only [function.update_idem],
       },
       {
@@ -1796,7 +1796,7 @@ begin
         },
         {
           simp only [function.update_comm h],
-          exact φ_ih H (function.update V x a') a,
+          exact φ_ih h1 (function.update V x a') a,
         }
       }
     },
@@ -1805,7 +1805,7 @@ begin
       unfold not_free at *,
       unfold is_not_free at *,
       simp only [holds_not_nil_def, holds_meta_var] at *,
-      specialize E_ih nf,
+      specialize E_ih h2,
       intros V a,
       split_ifs,
       {
@@ -1814,25 +1814,25 @@ begin
           exact E_hd.nf,
         },
         {
-          intros x h1,
+          intros x a1,
           symmetry,
           apply function.update_list_update V (function.update V v a),
           {
-            exact H,
+            exact h1,
           },
           {
             cases h,
             rewrite h_right,
           },
           {
-            exact h1,
+            exact a1,
           },
         },
       },
       {
         apply E_ih,
         unfold not_free,
-        exact H,
+        exact h1,
       }
     },
   },
