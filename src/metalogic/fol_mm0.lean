@@ -1775,7 +1775,6 @@ begin
   },
 end
 
---
 
 lemma lem_1
   {D : Type}
@@ -1887,8 +1886,9 @@ begin
   },
 end
 
+--
 
-lemma lem_4
+lemma lem_3
   (E : env)
   (Γ : list (var_name × meta_var_name))
   (Δ : list formula)
@@ -2369,13 +2369,13 @@ begin
         },
       },
       {
-        exact lem_4 E Γ_1 Δ_1 φ_1 H4,
+        exact lem_3 E Γ_1 Δ_1 φ_1 H4,
       },
     },
     {
       specialize H3 φ b,
       apply lem_5 E σ τ,
-      exact lem_4 E Γ' Δ' (formula.subst σ τ φ) H3,
+      exact lem_3 E Γ' Δ' (formula.subst σ τ φ) H3,
     },
   },
   case is_proof.conv : Γ Δ φ φ' H1 H2 H3 ih M nf hyp
