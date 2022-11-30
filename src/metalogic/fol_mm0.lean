@@ -1364,7 +1364,6 @@ begin
   simp only [finset.not_mem_empty, is_empty.forall_iff, forall_forall_const, implies_true_iff],
 end
 
---
 
 lemma holds_env_ext
   {D : Type}
@@ -1462,8 +1461,7 @@ begin
         },
       },
       {
-        apply E1_ih,
-        exact h3_right,
+        exact E1_ih h3_right,
       }
     },
   },
