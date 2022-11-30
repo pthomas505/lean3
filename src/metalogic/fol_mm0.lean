@@ -1650,6 +1650,133 @@ begin
 end
 
 
+lemma not_free_imp_is_not_free'
+  {D : Type}
+  (M : meta_valuation D)
+  (E : env)
+  (Γ : list (var_name × meta_var_name))
+  (v : var_name)
+  (φ : formula)
+  (h1 : not_free Γ v φ)
+  (h2 : ∀ (X : meta_var_name), (v, X) ∈ Γ → is_not_free D M E v (meta_var_ X)) :
+  is_not_free D M E v φ :=
+begin
+  induction φ,
+  case formula.meta_var_ : X
+  {
+    unfold not_free at h1,
+    exact h2 X h1,
+  },
+  case formula.not_ : φ φ_ih
+  {
+    unfold not_free at h1,
+
+    unfold is_not_free at *,
+
+    simp only [holds_not],
+    intros V a,
+    apply not_congr,
+    exact φ_ih h1 V a,
+  },
+  case formula.imp_ : φ ψ φ_ih ψ_ih
+  {
+    unfold not_free at h1,
+    cases h1,
+
+    unfold is_not_free at *,
+
+    simp only [holds_imp],
+    intros V a,
+    apply imp_congr,
+    {
+      exact φ_ih h1_left V a,
+    },
+    {
+      exact ψ_ih h1_right V a,
+    },
+  },
+  case formula.eq_ : x y
+  {
+      unfold not_free at h1,
+      cases h1,
+
+      unfold is_not_free at *,
+
+      simp only [holds_eq],
+      intros V a,
+      simp only [function.update_noteq h1_left, function.update_noteq h1_right],
+  },
+  case formula.forall_ : x φ φ_ih
+  {
+      unfold not_free at h1,
+
+      unfold is_not_free at *,
+
+      simp only [holds_forall],
+      intros V a,
+      apply forall_congr,
+      intros a',
+      cases h1,
+      {
+        rewrite h1,
+        simp only [function.update_idem],
+      },
+      {
+        by_cases c1 : v = x,
+        {
+          rewrite c1,
+          simp only [function.update_idem],
+        },
+        {
+          simp only [function.update_comm c1],
+          exact φ_ih h1 (function.update V x a') a,
+        }
+      }
+  },
+  case formula.def_ : name args
+  {
+    induction E,
+    case list.nil
+    {
+      intros V a,
+      simp only [holds_nil_def],
+    },
+    case list.cons : E_hd E_tl E_ih
+    {
+      unfold is_not_free at *,
+
+      simp only [holds_not_nil_def, holds_meta_var] at *,
+      intros V a,
+      split_ifs,
+      {
+        apply holds_valuation_ext M E_tl
+          (function.update_list V (E_hd.args.zip (list.map V args)))
+          (function.update_list (function.update V v a) (E_hd.args.zip (list.map (function.update V v a) args)))
+          E_hd.q E_hd.args E_hd.nf,
+        {
+          intros v' a1,
+          symmetry,
+          apply function.update_list_update V (function.update V v a),
+          {
+            unfold not_free at h1,
+            exact h1,
+          },
+          {
+            cases h,
+            rewrite h_right,
+          },
+          {
+            exact a1,
+          },
+        },
+      },
+      {
+        exact E_ih h2 V a,
+      }
+    },
+  },
+end
+
 lemma not_free_imp_is_not_free
   {D : Type}
   (M : meta_valuation D)
