@@ -1785,27 +1785,27 @@ lemma lem_2
   (σ : instantiation)
   (σ' : var_name → var_name)
   (τ : meta_instantiation)
-  (left : ((σ.1 ∘ σ') = id))
-  (right : ((σ' ∘ σ.1) = id))
-  (nf : ∀ (v : var_name) (X : meta_var_name), ((v, X) ∈ Γ') → is_not_free D M E v (meta_var_ X))
-  (H : ∀ (v : var_name) (X : meta_var_name), ((v, X) ∈ Γ) → not_free Γ' (σ.1 v) (τ X)) :
+  (h1 : σ.1 ∘ σ' = id ∧ σ' ∘ σ.1 = id)
+  (h2 : ∀ (v : var_name) (X : meta_var_name), ((v, X) ∈ Γ') → is_not_free D M E v (meta_var_ X))
+  (h3 : ∀ (v : var_name) (X : meta_var_name), ((v, X) ∈ Γ) → not_free Γ' (σ.1 v) (τ X)) :
   ∀ (v : var_name) (X : meta_var_name),
-    ((v, X) ∈ Γ) →
+    (v, X) ∈ Γ →
       is_not_free D (fun (X : meta_var_name) (V' : valuation D), holds D M E (τ X) (V' ∘ σ'))
         E v (meta_var_ X) :=
 begin
-  intros v X h1,
+  cases h1,
+  intros v X a1,
   unfold is_not_free,
   simp only [holds_meta_var],
   intros V a,
-  rewrite aux_2 V σ' σ.1 v a left right,
+  rewrite aux_2 V σ' σ.1 v a h1_left h1_right,
   apply not_free_imp_is_not_free M E Γ',
   {
-    exact H v X h1,
+    exact h3 v X a1,
   },
   {
-    intros X' h2,
-    exact nf (σ.1 v) X' h2,
+    intros X' a2,
+    exact h2 (σ.1 v) X' a2,
   },
 end
 
@@ -2347,7 +2347,7 @@ begin
         apply IH2,
         {
           intros v X a1,
-          exact lem_2 M E Γ_1 Γ' σ σ' τ left right nf H2 v X a1,
+          exact lem_2 M E Γ_1 Γ' σ σ' τ (and.intro left right) nf H2 v X a1,
         },
         {
           intros ψ a1 V',
