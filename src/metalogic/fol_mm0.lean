@@ -1809,7 +1809,7 @@ begin
 end
 
 
-lemma lem_2
+lemma lem_2_a
   (E : env)
   (σ : instantiation)
   (τ : meta_instantiation)
@@ -1887,6 +1887,66 @@ begin
 end
 
 
+lemma lem_2_b
+  (E : env)
+  (σ : instantiation)
+  (τ : meta_instantiation)
+  (φ : formula)
+  (h1 : (φ.subst σ τ).is_meta_var_or_all_def_in_env E) :
+  φ.is_meta_var_or_all_def_in_env E :=
+begin
+  induction φ,
+  case formula.meta_var_ : X
+  {
+    unfold formula.subst at h1,
+  },
+  case formula.not_ : φ φ_ih
+  {
+    unfold formula.subst at h1,
+    unfold formula.is_meta_var_or_all_def_in_env at h1,
+
+    unfold formula.is_meta_var_or_all_def_in_env,
+    exact φ_ih h1,
+  },
+  case formula.imp_ : φ ψ φ_ih ψ_ih
+  {
+    unfold formula.subst at h1,
+    unfold formula.is_meta_var_or_all_def_in_env at h1,
+
+    cases h1,
+    unfold formula.is_meta_var_or_all_def_in_env,
+    split,
+    {
+      exact φ_ih h1_left,
+    },
+    {
+      exact ψ_ih h1_right,
+    },
+  },
+  case formula.eq_ : x y
+  {
+    unfold formula.subst at h1,
+  },
+  case formula.forall_ : x φ φ_ih
+  {
+    unfold formula.subst at h1,
+    unfold formula.is_meta_var_or_all_def_in_env at h1,
+
+    unfold formula.is_meta_var_or_all_def_in_env,
+    exact φ_ih h1,
+  },
+  case formula.def_ : name args
+  {
+    unfold formula.subst at h1,
+    unfold formula.is_meta_var_or_all_def_in_env at h1,
+    simp only [list.length_map] at h1,
+
+    unfold formula.is_meta_var_or_all_def_in_env,
+    exact h1,
+  },
+end
+
+
 lemma lem_3
   (E : env)
   (Γ : list (var_name × meta_var_name))
@@ -1947,7 +2007,7 @@ begin
   },
   case is_proof.thm : h1_Γ h1_Γ' h1_Δ h1_Δ' h1_φ h1_σ h1_τ h1_1 h1_2 h1_3 h1_4 h1_ih_1 h1_ih_2
   {
-    exact lem_2 E h1_σ h1_τ h1_φ h1_ih_2 h1_1,
+    exact lem_2_a E h1_σ h1_τ h1_φ h1_ih_2 h1_1,
   },
   case is_proof.conv : h1_Γ h1_Δ h1_φ h1_φ' h1_1 h1_2 h1_3 h1_ih
   {
@@ -1956,65 +2016,6 @@ begin
 end
 
 --
-
-lemma lem_4
-  (E : env)
-  (σ : instantiation)
-  (τ : meta_instantiation)
-  (φ : formula)
-  (h1 : (φ.subst σ τ).is_meta_var_or_all_def_in_env E) :
-  φ.is_meta_var_or_all_def_in_env E :=
-begin
-  induction φ,
-  case formula.meta_var_ : X
-  {
-    unfold formula.subst at h1,
-  },
-  case formula.not_ : φ φ_ih
-  {
-    unfold formula.subst at h1,
-    unfold formula.is_meta_var_or_all_def_in_env at h1,
-
-    unfold formula.is_meta_var_or_all_def_in_env,
-    exact φ_ih h1,
-  },
-  case formula.imp_ : φ ψ φ_ih ψ_ih
-  {
-    unfold formula.subst at h1,
-    unfold formula.is_meta_var_or_all_def_in_env at h1,
-
-    cases h1,
-    unfold formula.is_meta_var_or_all_def_in_env,
-    split,
-    {
-      exact φ_ih h1_left,
-    },
-    {
-      exact ψ_ih h1_right,
-    },
-  },
-  case formula.eq_ : x y
-  {
-    unfold formula.subst at h1,
-  },
-  case formula.forall_ : x φ φ_ih
-  {
-    unfold formula.subst at h1,
-    unfold formula.is_meta_var_or_all_def_in_env at h1,
-
-    unfold formula.is_meta_var_or_all_def_in_env,
-    exact φ_ih h1,
-  },
-  case formula.def_ : name args
-  {
-    unfold formula.subst at h1,
-    unfold formula.is_meta_var_or_all_def_in_env at h1,
-    simp only [list.length_map] at h1,
-
-    unfold formula.is_meta_var_or_all_def_in_env,
-    exact h1,
-  },
-end
 
 
 lemma lem_6
@@ -2380,7 +2381,7 @@ begin
     },
     {
       specialize H3 φ b,
-      apply lem_4 E σ τ,
+      apply lem_2_b E σ τ,
       exact lem_3 E Γ' Δ' (formula.subst σ τ φ) H3,
     },
   },
