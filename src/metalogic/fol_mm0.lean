@@ -2048,7 +2048,8 @@ begin
       cases h2,
       {
         rewrite h2,
-        rewrite <- holds_env_ext,
+        symmetry,
+        apply holds_env_ext,
         {
           apply exists.intro [hd],
           simp only [list.singleton_append],
@@ -2060,8 +2061,7 @@ begin
           exact h1_right_left,
         },
         {
-          apply env_well_formed_imp_nodup,
-          exact h1,
+          exact env_well_formed_imp_nodup (hd :: tl) h1,
         }
       },
       {
@@ -2069,9 +2069,8 @@ begin
         simp only [list.pairwise_cons] at h1,
         cases h1,
 
-        specialize h1_left d h2,
         exfalso,
-        apply h1_left,
+        apply h1_left d h2,
         rewrite h_left,
         rewrite <- h3,
         rewrite h_right,
