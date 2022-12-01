@@ -1886,9 +1886,8 @@ begin
   },
 end
 
---
 
-lemma lem_3'
+lemma lem_3
   (E : env)
   (Γ : list (var_name × meta_var_name))
   (Δ : list formula)
@@ -1956,77 +1955,7 @@ begin
   },
 end
 
-
-lemma lem_3
-  (E : env)
-  (Γ : list (var_name × meta_var_name))
-  (Δ : list formula)
-  (φ : formula)
-  (H : is_proof E Γ Δ φ) :
-  φ.is_meta_var_or_all_def_in_env E :=
-begin
-  induction H,
-  case is_proof.hyp : H_Γ H_Δ H_φ H_ᾰ H_ᾰ_1
-  {
-    exact H_ᾰ,
-  },
-  case is_proof.mp : H_Γ H_Δ H_φ H_ψ H_ᾰ H_ᾰ_1 H_ih_ᾰ H_ih_ᾰ_1
-  {
-    unfold formula.is_meta_var_or_all_def_in_env at *,
-    cases H_ih_ᾰ_1,
-    exact H_ih_ᾰ_1_right,
-  },
-  case is_proof.prop_1 : H_Γ H_Δ H_φ H_ψ H_ᾰ H_ᾰ_1
-  {
-    unfold formula.is_meta_var_or_all_def_in_env at *,
-    repeat {split <|> assumption},
-  },
-  case is_proof.prop_2 : H_Γ H_Δ H_φ H_ψ H_χ H_ᾰ H_ᾰ_1 H_ᾰ_2
-  {
-    unfold formula.is_meta_var_or_all_def_in_env at *,
-    repeat {split <|> assumption},
-  },
-  case is_proof.prop_3 : H_Γ H_Δ H_φ H_ψ H_ᾰ H_ᾰ_1
-  {
-    unfold formula.is_meta_var_or_all_def_in_env at *,
-    repeat {split <|> assumption},
-  },
-  case is_proof.gen : H_Γ H_Δ H_φ H_x H_ᾰ H_ih
-  {
-    unfold formula.is_meta_var_or_all_def_in_env at *,
-    assumption,
-  },
-  case is_proof.pred_1 : H_Γ H_Δ H_φ H_ψ H_x H_ᾰ H_ᾰ_1
-  {
-    unfold formula.is_meta_var_or_all_def_in_env at *,
-    repeat {split <|> assumption},
-  },
-  case is_proof.pred_2 : H_Γ H_Δ H_φ H_x H_ᾰ H_ᾰ_1
-  {
-    unfold formula.is_meta_var_or_all_def_in_env at *,
-    repeat {split <|> assumption},
-  },
-  case is_proof.eq_1 : H_Γ H_Δ H_x H_y H_ᾰ
-  {
-    unfold exists_,
-  },
-  case is_proof.eq_2 : H_Γ H_Δ H_x H_y H_z
-  {
-    unfold formula.is_meta_var_or_all_def_in_env at *,
-    simp only [and_self],
-  },
-  case is_proof.thm : H_Γ H_Γ' H_Δ H_Δ' H_φ H_σ H_τ H_ᾰ H_ᾰ_1 H_ᾰ_2 H_ᾰ_3 H_ih_ᾰ H_ih_ᾰ_1
-  {
-    apply lem_2 E H_σ,
-    assumption,
-    apply H_ᾰ,
-  },
-  case is_proof.conv : H_Γ H_Δ H_φ H_φ' H_ᾰ H_ᾰ_1 H_ᾰ_2 H_ih
-  {
-    assumption,
-  },
-end
-
+--
 
 lemma lem_5
   (E : env)
