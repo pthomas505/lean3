@@ -1897,29 +1897,29 @@ lemma lem_3'
   φ.is_meta_var_or_all_def_in_env E :=
 begin
   induction h1,
-  case is_proof.hyp : h1_Γ h1_Δ h1_φ h1_ᾰ h1_ᾰ_1
+  case is_proof.hyp : h1_Γ h1_Δ h1_φ h1_1 h1_2
   { admit },
-  case is_proof.mp : h1_Γ h1_Δ h1_φ h1_ψ h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  case is_proof.mp : h1_Γ h1_Δ h1_φ h1_ψ h1_1 h1_2 h1_ih_1 h1_ih_2
   { admit },
-  case is_proof.prop_1 : h1_Γ h1_Δ h1_φ h1_ψ h1_ᾰ h1_ᾰ_1
+  case is_proof.prop_1 : h1_Γ h1_Δ h1_φ h1_ψ h1_1 h1_2
   { admit },
-  case is_proof.prop_2 : h1_Γ h1_Δ h1_φ h1_ψ h1_χ h1_ᾰ h1_ᾰ_1 h1_ᾰ_2
+  case is_proof.prop_2 : h1_Γ h1_Δ h1_φ h1_ψ h1_χ h1_1 h1_2 h1_3
   { admit },
-  case is_proof.prop_3 : h1_Γ h1_Δ h1_φ h1_ψ h1_ᾰ h1_ᾰ_1
+  case is_proof.prop_3 : h1_Γ h1_Δ h1_φ h1_ψ h1_1 h1_2
   { admit },
-  case is_proof.gen : h1_Γ h1_Δ h1_φ h1_x h1_ᾰ h1_ih
+  case is_proof.gen : h1_Γ h1_Δ h1_φ h1_x h1_1 h1_ih
   { admit },
-  case is_proof.pred_1 : h1_Γ h1_Δ h1_φ h1_ψ h1_x h1_ᾰ h1_ᾰ_1
+  case is_proof.pred_1 : h1_Γ h1_Δ h1_φ h1_ψ h1_x h1_1 h1_2
   { admit },
-  case is_proof.pred_2 : h1_Γ h1_Δ h1_φ h1_x h1_ᾰ h1_ᾰ_1
+  case is_proof.pred_2 : h1_Γ h1_Δ h1_φ h1_x h1_1 h1_2
   { admit },
-  case is_proof.eq_1 : h1_Γ h1_Δ h1_x h1_y h1_ᾰ
+  case is_proof.eq_1 : h1_Γ h1_Δ h1_x h1_y h1_1
   { admit },
   case is_proof.eq_2 : h1_Γ h1_Δ h1_x h1_y h1_z
   { admit },
-  case is_proof.thm : h1_Γ h1_Γ' h1_Δ h1_Δ' h1_φ h1_σ h1_τ h1_ᾰ h1_ᾰ_1 h1_ᾰ_2 h1_ᾰ_3 h1_ih_ᾰ h1_ih_ᾰ_1
+  case is_proof.thm : h1_Γ h1_Γ' h1_Δ h1_Δ' h1_φ h1_σ h1_τ h1_1 h1_2 h1_3 h1_4 h1_ih_1 h1_ih_2
   { admit },
-  case is_proof.conv : h1_Γ h1_Δ h1_φ h1_φ' h1_ᾰ h1_ᾰ_1 h1_ᾰ_2 h1_ih
+  case is_proof.conv : h1_Γ h1_Δ h1_φ h1_φ' h1_1 h1_2 h1_3 h1_ih
   { admit },
 end
 
