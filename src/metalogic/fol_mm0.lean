@@ -1898,29 +1898,62 @@ lemma lem_3'
 begin
   induction h1,
   case is_proof.hyp : h1_Γ h1_Δ h1_φ h1_1 h1_2
-  { admit },
+  {
+    exact h1_1,
+  },
   case is_proof.mp : h1_Γ h1_Δ h1_φ h1_ψ h1_1 h1_2 h1_ih_1 h1_ih_2
-  { admit },
+  {
+    unfold formula.is_meta_var_or_all_def_in_env at h1_ih_2,
+    cases h1_ih_2,
+    exact h1_ih_2_right,
+  },
   case is_proof.prop_1 : h1_Γ h1_Δ h1_φ h1_ψ h1_1 h1_2
-  { admit },
+  {
+    unfold formula.is_meta_var_or_all_def_in_env at *,
+    repeat {split <|> assumption},
+  },
   case is_proof.prop_2 : h1_Γ h1_Δ h1_φ h1_ψ h1_χ h1_1 h1_2 h1_3
-  { admit },
+  {
+    unfold formula.is_meta_var_or_all_def_in_env at *,
+    repeat {split <|> assumption},
+  },
   case is_proof.prop_3 : h1_Γ h1_Δ h1_φ h1_ψ h1_1 h1_2
-  { admit },
+  {
+    unfold formula.is_meta_var_or_all_def_in_env at *,
+    repeat {split <|> assumption},
+  },
   case is_proof.gen : h1_Γ h1_Δ h1_φ h1_x h1_1 h1_ih
-  { admit },
+  {
+    unfold formula.is_meta_var_or_all_def_in_env at *,
+    repeat {split <|> assumption},
+  },
   case is_proof.pred_1 : h1_Γ h1_Δ h1_φ h1_ψ h1_x h1_1 h1_2
-  { admit },
+  {
+    unfold formula.is_meta_var_or_all_def_in_env at *,
+    repeat {split <|> assumption},
+  },
   case is_proof.pred_2 : h1_Γ h1_Δ h1_φ h1_x h1_1 h1_2
-  { admit },
+  {
+    unfold formula.is_meta_var_or_all_def_in_env at *,
+    repeat {split <|> assumption},
+  },
   case is_proof.eq_1 : h1_Γ h1_Δ h1_x h1_y h1_1
-  { admit },
+  {
+    unfold exists_,
+  },
   case is_proof.eq_2 : h1_Γ h1_Δ h1_x h1_y h1_z
-  { admit },
+  {
+    unfold formula.is_meta_var_or_all_def_in_env,
+    simp only [and_self],
+  },
   case is_proof.thm : h1_Γ h1_Γ' h1_Δ h1_Δ' h1_φ h1_σ h1_τ h1_1 h1_2 h1_3 h1_4 h1_ih_1 h1_ih_2
-  { admit },
+  {
+    exact lem_2 E h1_σ h1_τ h1_φ h1_ih_2 h1_1,
+  },
   case is_proof.conv : h1_Γ h1_Δ h1_φ h1_φ' h1_1 h1_2 h1_3 h1_ih
-  { admit },
+  {
+    exact h1_1,
+  },
 end
 
 
