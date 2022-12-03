@@ -1414,6 +1414,71 @@ example
   {D : Type}
   (M : meta_valuation D)
   (E E' : env)
+  (name : var_name)
+  (args : list var_name)
+  (V : valuation D)
+  (h1 : ∃ (E1 : env), E' = E1 ++ E)
+  (h2 : E'.nodup_)
+  (h3 : holds D M E (def_ name args) V) :
+  holds D M E' (def_ name args) V :=
+begin
+  apply exists.elim h1,
+  intros E1 h1_1,
+  clear h1,
+
+  unfold env.nodup_ at h2,
+
+  subst h1_1,
+
+  induction E1,
+  case list.nil
+  {
+    simp only [list.nil_append],
+    exact h3,
+  },
+  case list.cons : E1_hd E1_tl E1_ih
+  {
+    simp only [list.cons_append, list.pairwise_cons, list.mem_append] at h2,
+    cases h2,
+
+    specialize E1_ih h2_right,
+
+    simp only [list.cons_append, holds_not_nil_def],
+    split_ifs,
+    {
+      have s1 : ∃ (d : definition_), d ∈ (E1_tl ++ E) ∧ name = d.name ∧ args.length = d.args.length,
+      exact holds_def_imp_ex_def M (E1_tl ++ E) V name args E1_ih,
+
+      apply exists.elim s1,
+      intros d s1_1,
+      cases s1_1,
+      simp only [list.mem_append] at s1_1_left,
+      cases s1_1_right,
+
+      cases h,
+      exfalso,
+      apply h2_left d s1_1_left,
+      {
+        rewrite <- h_left,
+        exact s1_1_right_left,
+      },
+      {
+        rewrite <- h_right,
+        exact s1_1_right_right,
+      }
+    },
+    {
+      exact E1_ih,
+    }
+  },
+
+end
+
+
+example
+  {D : Type}
+  (M : meta_valuation D)
+  (E E' : env)
   (φ : formula)
   (V : valuation D)
   (h1 : ∃ (E1 : env), E' = E1 ++ E)
@@ -1421,68 +1486,7 @@ example
   (h3 : holds D M E φ V) :
   holds D M E' φ V :=
 begin
-  induction φ generalizing V,
-  case formula.meta_var_ : φ V h3
-  {
-    sorry,
-  },
-  case formula.not_ : φ_ᾰ φ_ih V h3
-  { admit },
-  case formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1 V h3
-  { admit },
-  case formula.eq_ : φ_ᾰ φ_ᾰ_1 V h3
-  { admit },
-  case formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih V h3
-  { admit },
-  case formula.def_ : name args V h3
-  {
-    apply exists.elim h1,
-    intros E1 h1_1,
-    clear h1,
-
-    unfold env.nodup_ at h2,
-
-    subst h1_1,
-
-    induction E1,
-    case list.nil
-    { admit },
-    case list.cons : E1_hd E1_tl E1_ih
-    {
-      simp only [list.cons_append, list.pairwise_cons, list.mem_append] at h2,
-      cases h2,
-
-      specialize E1_ih h2_right,
-
-      simp only [list.cons_append, holds_not_nil_def],
-      split_ifs,
-      {
-        have s1 : ∃ (d : definition_), d ∈ (E1_tl ++ E) ∧ name = d.name ∧ args.length = d.args.length,
-        exact holds_def_imp_ex_def M (E1_tl ++ E) V name args E1_ih,
-
-        apply exists.elim s1,
-        intros d s1_1,
-        cases s1_1,
-        simp only [list.mem_append] at s1_1_left,
-        cases s1_1_right,
-
-        cases h,
-        exfalso,
-        apply h2_left d s1_1_left,
-        {
-          rewrite <- h_left,
-          exact s1_1_right_left,
-        },
-        {
-          rewrite <- h_right,
-          exact s1_1_right_right,
-        }
-      },
-      {
-        exact E1_ih,
-      }
-    },
-  },
+  sorry,
 end
 
 
