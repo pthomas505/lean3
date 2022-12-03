@@ -2210,6 +2210,33 @@ begin
 end
 
 
+lemma holds_conv'
+  {D : Type}
+  (M : meta_valuation D)
+  (E : env)
+  (φ φ' : formula)
+  (V : valuation D)
+  (h1 : E.well_formed)
+  (h2 : is_conv E φ φ') :
+  holds D M E φ V ↔ holds D M E φ' V :=
+begin
+  induction h2 generalizing V,
+  case is_conv.conv_refl : h2 V
+  { admit },
+  case is_conv.conv_symm : h2_φ h2_φ' h2_ᾰ h2_ih V
+  { admit },
+  case is_conv.conv_trans : h2_φ h2_φ' h2_φ'' h2_ᾰ h2_ᾰ_1 h2_ih_ᾰ h2_ih_ᾰ_1 V
+  { admit },
+  case is_conv.conv_not : h2_φ h2_φ' h2_ᾰ h2_ih V
+  { admit },
+  case is_conv.conv_imp : h2_φ h2_φ' h2_ψ h2_ψ' h2_ᾰ h2_ᾰ_1 h2_ih_ᾰ h2_ih_ᾰ_1 V
+  { admit },
+  case is_conv.conv_forall : h2_x h2_φ h2_φ' h2_ᾰ h2_ih V
+  { admit },
+  case is_conv.conv_unfold : h2_d h2_σ h2_ᾰ V
+  { admit },
+end
+
 lemma holds_conv
   {D : Type}
   (M : meta_valuation D)
