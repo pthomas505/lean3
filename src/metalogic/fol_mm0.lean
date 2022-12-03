@@ -1471,22 +1471,6 @@ begin
       exact E1_ih,
     }
   },
-
-end
-
-
-example
-  {D : Type}
-  (M : meta_valuation D)
-  (E E' : env)
-  (φ : formula)
-  (V : valuation D)
-  (h1 : ∃ (E1 : env), E' = E1 ++ E)
-  (h2 : E'.nodup_)
-  (h3 : holds D M E φ V) :
-  holds D M E' φ V :=
-begin
-  sorry,
 end
 
 
