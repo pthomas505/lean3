@@ -2290,6 +2290,47 @@ begin
 end
 
 
+theorem soundness'
+  {D : Type}
+  (M : meta_valuation D)
+  (E : env)
+  (Γ : list (var_name × meta_var_name))
+  (Δ : list formula)
+  (φ : formula)
+  (h1 : is_proof E Γ Δ φ)
+  (h2 : E.well_formed)
+  (nf : ∀ v X, (v, X) ∈ Γ → is_not_free D M E v (meta_var_ X))
+  (hyp : ∀ (ψ ∈ Δ) (V : valuation D), holds D M E ψ V) :
+  ∀ (V : valuation D), holds D M E φ V :=
+begin
+  induction h1 generalizing M,
+  case is_proof.hyp : h1_Γ h1_Δ h1_φ h1_ᾰ h1_ᾰ_1 M nf hyp
+  { admit },
+  case is_proof.mp : h1_Γ h1_Δ h1_φ h1_ψ h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1 M nf hyp
+  { admit },
+  case is_proof.prop_1 : h1_Γ h1_Δ h1_φ h1_ψ h1_ᾰ h1_ᾰ_1 M nf hyp
+  { admit },
+  case is_proof.prop_2 : h1_Γ h1_Δ h1_φ h1_ψ h1_χ h1_ᾰ h1_ᾰ_1 h1_ᾰ_2 M nf hyp
+  { admit },
+  case is_proof.prop_3 : h1_Γ h1_Δ h1_φ h1_ψ h1_ᾰ h1_ᾰ_1 M nf hyp
+  { admit },
+  case is_proof.gen : h1_Γ h1_Δ h1_φ h1_x h1_ᾰ h1_ih M nf hyp
+  { admit },
+  case is_proof.pred_1 : h1_Γ h1_Δ h1_φ h1_ψ h1_x h1_ᾰ h1_ᾰ_1 M nf hyp
+  { admit },
+  case is_proof.pred_2 : h1_Γ h1_Δ h1_φ h1_x h1_ᾰ h1_ᾰ_1 M nf hyp
+  { admit },
+  case is_proof.eq_1 : h1_Γ h1_Δ h1_x h1_y h1_ᾰ M nf hyp
+  { admit },
+  case is_proof.eq_2 : h1_Γ h1_Δ h1_x h1_y h1_z M nf hyp
+  { admit },
+  case is_proof.thm : h1_Γ h1_Γ' h1_Δ h1_Δ' h1_φ h1_σ h1_τ h1_ᾰ h1_ᾰ_1 h1_ᾰ_2 h1_ᾰ_3 h1_ih_ᾰ h1_ih_ᾰ_1 M nf hyp
+  { admit },
+  case is_proof.conv : h1_Γ h1_Δ h1_φ h1_φ' h1_ᾰ h1_ᾰ_1 h1_ᾰ_2 h1_ih M nf hyp
+  { admit },
+end
+
+
 theorem soundness
   {D : Type}
   (M : meta_valuation D)
