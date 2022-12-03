@@ -2283,6 +2283,9 @@ begin
 
     apply holds_valuation_ext M E (function.update_list V (d.args.zip (list.map V (list.map σ.val d.args))))
       (V ∘ σ.val) d.q d.args d.nf,
+    intros v a2,
+    simp only [list.map_map, function.comp_app],
+    exact function.update_list_zip_map_mem V (V ∘ σ.val) d.args v a2,
   },
 end
 
