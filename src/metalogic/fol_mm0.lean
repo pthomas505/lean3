@@ -2148,87 +2148,62 @@ begin
   },
   case list.cons : hd tl ih
   {
+    have s1 : env.nodup_ (hd :: tl),
+    exact env_well_formed_imp_nodup (hd :: tl) h1,
+
+    unfold env.well_formed at h1,
+    cases h1,
+    cases h1_right,
+
     simp only [list.mem_cons_iff] at h2,
+
+    have s2 : ∃ (E1 : env), ((hd :: tl) = (E1 ++ tl)),
+    apply exists.intro [hd],
+    simp only [list.singleton_append, eq_self_iff_true, and_self],
 
     simp only [holds_not_nil_def],
     split_ifs,
     {
-      cases h,
-
       cases h2,
       {
         rewrite h2,
-        apply holds_env_ext,
-        {
-          apply exists.intro [hd],
-          simp only [list.singleton_append],
-        },
-        {
-          unfold env.well_formed at h1,
-          cases h1,
-          cases h1_right,
-          exact h1_right_left,
-        },
-        {
-          exact env_well_formed_imp_nodup (hd :: tl) h1,
-        }
+        exact holds_env_ext M tl (hd :: tl) hd.q (function.update_list V (hd.args.zip (list.map V args))) s2 h1_right_left s1,
       },
       {
-        unfold env.well_formed at h1,
-        simp only [list.pairwise_cons] at h1,
-        cases h1,
+        cases h,
 
         cases h3,
 
-        have s1 : hd.name = d.name,
+        have s3 : hd.name = d.name,
         rewrite <- h_left,
         exact h3_left,
 
-        have s2 : hd.args.length = d.args.length,
+        have s4 : hd.args.length = d.args.length,
         rewrite <- h_right,
         exact h3_right,
 
         exfalso,
-        exact h1_left d h2 s1 s2,
+        exact h1_left d h2 s3 s4,
       },
     },
     {
       cases h2,
       {
+        simp only [not_and] at h,
+        rewrite <- h2 at h,
+
         cases h3,
 
-        subst h2,
-        simp only [not_and] at h,
         exfalso,
-        apply h h3_left h3_right,
+        exact h h3_left h3_right,
       },
       {
-        have s1 : env.well_formed tl,
-        unfold env.well_formed at h1,
-        cases h1,
-        cases h1_right,
-        exact h1_right_right,
-
-        specialize ih s1 h2,
+        specialize ih h1_right_right h2,
         rewrite <- ih,
 
-        rewrite holds_env_ext,
-        {
-          apply exists.intro [hd],
-          simp only [list.singleton_append],
-        },
-        {
-          unfold env.well_formed at h1,
-          cases h1,
-          cases h1_right,
-          apply def_in_env_imp_is_meta_var_or_all_def_in_env,
-          exact h1_right_right,
-          exact h2,
-        },
-        {
-          apply env_well_formed_imp_nodup,
-          exact h1,
-        }
+        exact holds_env_ext M tl (hd :: tl) d.q (function.update_list V (d.args.zip (list.map V args))) s2
+  (def_in_env_imp_is_meta_var_or_all_def_in_env tl d h1_right_right h2)
+  s1,
       }
     }
   },
