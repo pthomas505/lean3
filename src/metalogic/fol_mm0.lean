@@ -2281,8 +2281,8 @@ begin
       (fun (X' : meta_var_name) (V' : valuation D), holds D M E (meta_var_ X') (V' ∘ σ'))
         M E (V ∘ σ.val) d.q s3,
 
-    have s4 : function.update_list V (d.args.zip (list.map V (list.map σ.val d.args))) = V ∘ σ.val,
-
+    apply holds_valuation_ext M E (function.update_list V (d.args.zip (list.map V (list.map σ.val d.args))))
+      (V ∘ σ.val) d.q d.args d.nf,
   },
 end
 
