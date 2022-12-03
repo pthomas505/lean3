@@ -2304,8 +2304,10 @@ theorem soundness'
   ∀ (V : valuation D), holds D M E φ V :=
 begin
   induction h1 generalizing M,
-  case is_proof.hyp : h1_Γ h1_Δ h1_φ h1_ᾰ h1_ᾰ_1 M nf hyp
-  { admit },
+  case is_proof.hyp : h1_Γ h1_Δ h1_φ h1_1 h1_2 M nf hyp
+  {
+    exact hyp h1_φ h1_2,
+  },
   case is_proof.mp : h1_Γ h1_Δ h1_φ h1_ψ h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1 M nf hyp
   { admit },
   case is_proof.prop_1 : h1_Γ h1_Δ h1_φ h1_ψ h1_ᾰ h1_ᾰ_1 M nf hyp
