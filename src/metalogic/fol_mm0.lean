@@ -2222,18 +2222,45 @@ lemma holds_conv'
 begin
   induction h2 generalizing V,
   case is_conv.conv_refl : h2 V
-  { admit },
-  case is_conv.conv_symm : h2_φ h2_φ' h2_ᾰ h2_ih V
-  { admit },
-  case is_conv.conv_trans : h2_φ h2_φ' h2_φ'' h2_ᾰ h2_ᾰ_1 h2_ih_ᾰ h2_ih_ᾰ_1 V
-  { admit },
-  case is_conv.conv_not : h2_φ h2_φ' h2_ᾰ h2_ih V
-  { admit },
-  case is_conv.conv_imp : h2_φ h2_φ' h2_ψ h2_ψ' h2_ᾰ h2_ᾰ_1 h2_ih_ᾰ h2_ih_ᾰ_1 V
-  { admit },
-  case is_conv.conv_forall : h2_x h2_φ h2_φ' h2_ᾰ h2_ih V
-  { admit },
-  case is_conv.conv_unfold : h2_d h2_σ h2_ᾰ V
+  {
+    refl,
+  },
+  case is_conv.conv_symm : h2_φ h2_φ' h2_1 h2_ih V
+  {
+    symmetry,
+    exact h2_ih V,
+  },
+  case is_conv.conv_trans : h2_φ h2_φ' h2_φ'' h2_1 h2_2 h2_ih_1 h2_ih_2 V
+  {
+    transitivity (holds D M E h2_φ' V),
+    exact h2_ih_1 V,
+    exact h2_ih_2 V,
+  },
+  case is_conv.conv_not : h2_φ h2_φ' h2_1 h2_ih V
+  {
+    simp only [holds_not],
+    apply not_congr,
+    exact h2_ih V,
+  },
+  case is_conv.conv_imp : h2_φ h2_φ' h2_ψ h2_ψ' h2_1 h2_2 h2_ih_1 h2_ih_2 V
+  {
+    simp only [holds_imp],
+    apply imp_congr,
+    {
+      exact h2_ih_1 V,
+    },
+    {
+      exact h2_ih_2 V,
+    }
+  },
+  case is_conv.conv_forall : h2_x h2_φ h2_φ' h2_1 h2_ih V
+  {
+    simp only [holds_forall],
+    apply forall_congr,
+    intros a,
+    exact h2_ih (function.update V h2_x a),
+  },
+  case is_conv.conv_unfold : h2_d h2_σ h2_1 V
   { admit },
 end
 
@@ -2442,7 +2469,7 @@ begin
   case is_proof.conv : Γ Δ φ φ' H1 H2 H3 ih M nf hyp
   {
     intros V,
-    rewrite <- holds_conv D M E φ φ',
+    rewrite <- holds_conv M E φ φ',
     apply ih,
     exact nf,
     exact hyp,
