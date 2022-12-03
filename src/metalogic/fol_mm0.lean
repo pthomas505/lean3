@@ -2262,8 +2262,9 @@ begin
   },
   case is_conv.conv_unfold : d σ h2 V
   {
-    obtain ⟨σ', left, right⟩ := σ.2,
+    obtain ⟨σ', a1⟩ := σ.2,
 
+    rewrite <- holds_subst,
   },
 end
 
