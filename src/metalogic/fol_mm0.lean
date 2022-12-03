@@ -2260,9 +2260,9 @@ begin
     intros a,
     exact h2_ih (function.update V h2_x a),
   },
-  case is_conv.conv_unfold : h2_d h2_σ h2_1 V
+  case is_conv.conv_unfold : d σ h2 V
   {
-    obtain ⟨σ', left, right⟩ := h2_σ.2,
+    obtain ⟨σ', left, right⟩ := σ.2,
 
   },
 end
