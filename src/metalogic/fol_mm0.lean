@@ -2290,8 +2290,8 @@ begin
 end
 
 
-example
-  (D : Type)
+theorem soundness
+  {D : Type}
   (M : meta_valuation D)
   (E : env)
   (Γ : list (var_name × meta_var_name))
