@@ -2264,7 +2264,22 @@ begin
   {
     obtain ⟨σ', a1⟩ := σ.2,
 
-    rewrite <- holds_subst,
+    have s1 : formula.is_meta_var_or_all_def_in_env E d.q,
+    exact def_in_env_imp_is_meta_var_or_all_def_in_env E d h1 h2,
+
+    rewrite <- holds_subst V M E σ σ' meta_var_ d.q s1 a1,
+
+    have s2 : ((d.name = d.name) ∧ ((list.map σ.val d.args).length = d.args.length)),
+    simp only [eq_self_iff_true, list.length_map, and_self],
+
+    rewrite <- lem_4 M E d d.name (list.map σ.val d.args) V h1 h2 s2,
+
+    have s3 : d.q.meta_var_set = ∅,
+    exact no_meta_var_imp_meta_var_set_is_empty d.q d.args d.nf,
+
+    rewrite holds_meta_valuation_ext_no_meta_var
+      (fun (X' : meta_var_name) (V' : valuation D), holds D M E (meta_var_ X') (V' ∘ σ'))
+      M E (V ∘ σ.val) d.q s3,
   },
 end
 
