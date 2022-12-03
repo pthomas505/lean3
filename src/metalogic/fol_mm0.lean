@@ -2126,7 +2126,7 @@ end
 
 --
 
-lemma lem_8
+lemma lem_4
   {D : Type}
   (M : meta_valuation D)
   (E : env)
@@ -2227,7 +2227,7 @@ begin
 end
 
 
-lemma lem_7
+lemma holds_conv
   (D : Type)
   (M : meta_valuation D)
   (E : env)
@@ -2280,7 +2280,7 @@ begin
   {
     obtain ⟨σ', left, right⟩ := σ.2,
 
-    rewrite lem_8 M E d (list.map σ.val d.args) V h1 h2,
+    rewrite lem_4 M E d (list.map σ.val d.args) V h1 h2,
 
     rewrite <- holds_subst V M E σ σ' meta_var_ d.q,
 
@@ -2432,7 +2432,7 @@ begin
   case is_proof.conv : Γ Δ φ φ' H1 H2 H3 ih M nf hyp
   {
     intros V,
-    rewrite <- lem_7 D M E φ φ',
+    rewrite <- holds_conv D M E φ φ',
     apply ih,
     exact nf,
     exact hyp,
