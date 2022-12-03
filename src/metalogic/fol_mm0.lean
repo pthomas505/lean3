@@ -2131,13 +2131,14 @@ lemma lem_4
   (M : meta_valuation D)
   (E : env)
   (d : definition_)
+  (name : var_name)
   (args : list var_name)
   (V : valuation D)
   (h1 : E.well_formed)
   (h2 : d ∈ E)
-  (h3 : args.length = d.args.length) :
-  holds D M E (def_ d.name args) V ↔
-    holds D M E d.q (function.update_list V (list.zip d.args (list.map V args))) :=
+  (h3 : name = d.name ∧ args.length = d.args.length) :
+  holds D M E d.q (function.update_list V (list.zip d.args (list.map V args)))
+    ↔ holds D M E (def_ name args) V :=
 begin
   induction E,
   case list.nil
@@ -2157,7 +2158,6 @@ begin
       cases h2,
       {
         rewrite h2,
-        symmetry,
         apply holds_env_ext,
         {
           apply exists.intro [hd],
@@ -2178,21 +2178,29 @@ begin
         simp only [list.pairwise_cons] at h1,
         cases h1,
 
+        cases h3,
+
+        have s1 : hd.name = d.name,
+        rewrite <- h_left,
+        exact h3_left,
+
+        have s2 : hd.args.length = d.args.length,
+        rewrite <- h_right,
+        exact h3_right,
+
         exfalso,
-        apply h1_left d h2,
-        rewrite h_left,
-        rewrite <- h3,
-        rewrite h_right,
+        exact h1_left d h2 s1 s2,
       },
     },
     {
       cases h2,
       {
+        cases h3,
+
         subst h2,
-        simp only [eq_self_iff_true, true_and] at h,
+        simp only [not_and] at h,
         exfalso,
-        apply h,
-        exact h3,
+        apply h h3_left h3_right,
       },
       {
         have s1 : env.well_formed tl,
@@ -2202,9 +2210,9 @@ begin
         exact h1_right_right,
 
         specialize ih s1 h2,
-        rewrite ih,
+        rewrite <- ih,
 
-        rewrite <- holds_env_ext,
+        rewrite holds_env_ext,
         {
           apply exists.intro [hd],
           simp only [list.singleton_append],
@@ -2280,7 +2288,7 @@ begin
   {
     obtain ⟨σ', left, right⟩ := σ.2,
 
-    rewrite lem_4 M E d (list.map σ.val d.args) V h1 h2,
+    rewrite <- lem_4 M E d d.name (list.map σ.val d.args) V h1 h2,
 
     rewrite <- holds_subst V M E σ σ' meta_var_ d.q,
 
@@ -2300,7 +2308,7 @@ begin
     split,
     exact left,
     exact right,
-    simp only [list.length_map],
+    simp only [eq_self_iff_true, list.length_map, and_self],
   },
 end
 
