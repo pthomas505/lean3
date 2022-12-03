@@ -2261,7 +2261,10 @@ begin
     exact h2_ih (function.update V h2_x a),
   },
   case is_conv.conv_unfold : h2_d h2_σ h2_1 V
-  { admit },
+  {
+    obtain ⟨σ', left, right⟩ := h2_σ.2,
+
+  },
 end
 
 lemma holds_conv
