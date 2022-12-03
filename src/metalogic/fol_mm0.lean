@@ -2210,7 +2210,7 @@ begin
 end
 
 
-lemma holds_conv'
+lemma holds_conv
   {D : Type}
   (M : meta_valuation D)
   (E : env)
@@ -2286,83 +2286,6 @@ begin
     intros v a2,
     simp only [list.map_map, function.comp_app],
     exact function.update_list_zip_map_mem V (V ∘ σ.val) d.args v a2,
-  },
-end
-
-lemma holds_conv
-  {D : Type}
-  (M : meta_valuation D)
-  (E : env)
-  (φ φ' : formula)
-  (V : valuation D)
-  (h1 : E.well_formed)
-  (h2 : is_conv E φ φ') :
-  holds D M E φ V ↔ holds D M E φ' V :=
-begin
-  induction h2 generalizing V,
-  case is_conv.conv_refl : h2 V
-  {
-    refl,
-  },
-  case is_conv.conv_symm : φ φ' h2 ih V
-  {
-    symmetry,
-    apply ih,
-  },
-  case is_conv.conv_trans : h2_φ h2_φ' h2_φ'' h2_ᾰ h2_ᾰ_1 h2_ih_ᾰ h2_ih_ᾰ_1 V
-  {
-    transitivity (holds D M E h2_φ' V),
-    exact h2_ih_ᾰ V,
-    exact h2_ih_ᾰ_1 V,
-  },
-  case is_conv.conv_not : h2_φ h2_φ' h2_ᾰ h2_ih V
-  {
-    simp only [holds_not],
-    apply not_congr,
-    exact h2_ih V,
-  },
-  case is_conv.conv_imp : h2_φ h2_φ' h2_ψ h2_ψ' h2_ᾰ h2_ᾰ_1 h2_ih_ᾰ h2_ih_ᾰ_1 V
-  {
-    simp only [holds_imp],
-    apply imp_congr,
-    {
-      exact h2_ih_ᾰ V,
-    },
-    {
-      exact h2_ih_ᾰ_1 V,
-    }
-  },
-  case is_conv.conv_forall : h2_x h2_φ h2_φ' h2_ᾰ h2_ih V
-  {
-    simp only [holds_forall],
-    apply forall_congr, intros a,
-    exact h2_ih (function.update V h2_x a),
-  },
-  case is_conv.conv_unfold : d σ h2 V
-  {
-    obtain ⟨σ', left, right⟩ := σ.2,
-
-    rewrite <- lem_4 M E d d.name (list.map σ.val d.args) V h1 h2,
-
-    rewrite <- holds_subst V M E σ σ' meta_var_ d.q,
-
-    have s1 : holds D (fun (X' : meta_var_name) (V' : valuation D), holds D M E (meta_var_ X') (V' ∘ σ')) E d.q (V ∘ σ.val)
-      ↔ holds D M E d.q (V ∘ σ.val),
-    apply holds_meta_valuation_ext_no_meta_var,
-    apply no_meta_var_imp_meta_var_set_is_empty d.q d.args d.nf,
-
-    rewrite s1,
-    apply holds_valuation_ext M E
-    (function.update_list V (d.args.zip (list.map V (list.map σ.val d.args)))) (V ∘ σ.val)
-    d.q d.args d.nf,
-    simp only [list.map_map, function.comp_app],
-    intros v h3,
-    apply function.update_list_zip_map_mem, exact h3,
-    apply def_in_env_imp_is_meta_var_or_all_def_in_env, exact h1, exact h2,
-    split,
-    exact left,
-    exact right,
-    simp only [eq_self_iff_true, list.length_map, and_self],
   },
 end
 
