@@ -2211,7 +2211,7 @@ end
 
 
 lemma holds_conv
-  (D : Type)
+  {D : Type}
   (M : meta_valuation D)
   (E : env)
   (φ φ' : formula)
