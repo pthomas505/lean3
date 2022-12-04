@@ -2363,9 +2363,7 @@ begin
     intros V,
     apply exists.intro (V h1_y),
     symmetry,
-    apply function.update_noteq,
-    symmetry,
-    exact h1_1,
+    exact function.update_noteq h1_1 (V h1_y) V,
   },
   case is_proof.eq_2 : h1_Γ h1_Δ h1_x h1_y h1_z M nf hyp
   { admit },
