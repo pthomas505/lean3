@@ -2390,14 +2390,15 @@ begin
 
     have s3 : ∀ (φ : formula), (φ ∈ h1_Δ) → ∀ (M : meta_valuation D), (∀ (v : var_name) (X : meta_var_name), ((v, X) ∈ h1_Γ') → is_not_free D M E v (meta_var_ X)) → (∀ (ψ : formula), (ψ ∈ h1_Δ') → ∀ (V : valuation D), holds D M E ψ V) → ∀ (V : valuation D), holds D (λ (X' : meta_var_name) (V' : valuation D), holds D M E (h1_τ X') (V' ∘ σ')) E φ (V ∘ h1_σ.val),
     intros φ' a2 M' a3 a4 V,
-    specialize h1_ih_1 φ' a2 M' a3 a4 V,
-    rewrite holds_subst,
-    exact h1_ih_1,
+    rewrite holds_subst V M' E h1_σ σ' h1_τ φ' _ a1,
+    {
+      exact h1_ih_1 φ' a2 M' a3 a4 V,
+    },
+    {
     apply lem_2_b E h1_σ h1_τ,
     apply lem_3 E h1_Γ' h1_Δ' (formula.subst h1_σ h1_τ φ'),
-    apply h1_3,
-    exact a2,
-    exact a1,
+    exact h1_3 φ' a2,
+    },
 
     intros V,
     rewrite <- holds_subst V M E h1_σ σ' h1_τ h1_φ s2 a1,
