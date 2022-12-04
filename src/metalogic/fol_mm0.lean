@@ -2407,7 +2407,7 @@ begin
         (fun (X' : meta_var_name) (V' : valuation D), holds D M E (h1_τ X') (V' ∘ σ')) E ψ (V'' ∘ h1_σ.val),
       intros V'',
       rewrite holds_subst V'' M E h1_σ σ' h1_τ ψ s2 a1,
-      apply h1_ih_1 ψ a2 M nf hyp,
+      exact h1_ih_1 ψ a2 M nf hyp V'',
 
       specialize s3 (V' ∘ σ'),
       rewrite function.comp.assoc at s3,
