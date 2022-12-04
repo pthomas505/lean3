@@ -2382,6 +2382,8 @@ begin
   {
     obtain ⟨σ', a1⟩ := h1_σ.2,
 
+    dsimp only at h1_ih_1,
+
     have s1 : ∀ (φ : formula),
       (φ ∈ h1_Δ)
         → ∀ (M : meta_valuation D),
