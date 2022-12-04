@@ -2380,37 +2380,38 @@ begin
   },
   case is_proof.thm : h1_Γ h1_Γ' h1_Δ h1_Δ' h1_φ h1_σ h1_τ h1_1 h1_2 h1_3 h1_4 h1_ih_1 h1_ih_2 M nf hyp
   {
-    dsimp only at *,
-    obtain ⟨σ', left, right⟩ := σ.2,
+    obtain ⟨σ', a1⟩ := h1_σ.2,
+
     have s1 : E.nodup_,
-    apply env_well_formed_imp_nodup E h1,
-    have IH1' := fun φ b M d e V, (holds_subst _ _ _ _ _ _ _ _ (and.intro left right)).2 (IH1 φ b M d e V),
+    exact env_well_formed_imp_nodup E h2,
+
+    have IH1' := fun φ b M d e V, (holds_subst _ _ _ _ _ _ _ _ a1).2 (h1_ih_1 φ b M d e V),
     {
       intros V,
-      rewrite <- holds_subst _ _ _ _ _ _ _ _ (and.intro left right),
+      rewrite <- holds_subst _ _ _ _ _ _ _ _ a1,
       {
-        apply IH2,
+        apply h1_ih_2,
         {
-          intros v X a1,
-          exact lem_1 M E Γ_1 Γ' σ σ' τ (and.intro left right) nf H2 v X a1,
+          intros v X a2,
+          apply lem_1 M E h1_Γ h1_Γ' h1_σ σ' h1_τ a1 nf h1_2 v X a2,
         },
         {
-          intros ψ a1 V',
-          specialize IH1' ψ a1 M nf hyp (V' ∘ σ'),
+          intros ψ a2 V',
+          specialize IH1' ψ a2 M nf hyp (V' ∘ σ'),
           rewrite function.comp.assoc at IH1',
-          rewrite right at IH1',
+          rewrite a1.right at IH1',
           simp only [function.comp.right_id] at IH1',
           exact IH1',
         },
       },
       {
-        exact lem_3 E Γ_1 Δ_1 φ_1 H4,
+        exact lem_3 E h1_Γ h1_Δ h1_φ h1_4,
       },
     },
     {
-      specialize H3 φ b,
-      apply lem_2_b E σ τ,
-      exact lem_3 E Γ' Δ' (formula.subst σ τ φ) H3,
+      specialize h1_3 φ b,
+      apply lem_2_b E h1_σ h1_τ,
+      exact lem_3 E h1_Γ' h1_Δ' (formula.subst h1_σ h1_τ φ) h1_3,
     },
   },
   case is_proof.conv : h1_Γ h1_Δ h1_φ h1_φ' h1_1 h1_2 h1_3 h1_ih M nf hyp
