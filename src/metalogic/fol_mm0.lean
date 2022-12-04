@@ -2320,8 +2320,12 @@ begin
     intros V a1 a2,
     exact a1,
   },
-  case is_proof.prop_2 : h1_Γ h1_Δ h1_φ h1_ψ h1_χ h1_ᾰ h1_ᾰ_1 h1_ᾰ_2 M nf hyp
-  { admit },
+  case is_proof.prop_2 : h1_Γ h1_Δ h1_φ h1_ψ h1_χ h1_1 h1_2 h1_3 M nf hyp
+  {
+    simp only [holds_imp],
+    intros V a1 a2 a3,
+    exact a1 a3 (a2 a3),
+  },
   case is_proof.prop_3 : h1_Γ h1_Δ h1_φ h1_ψ h1_ᾰ h1_ᾰ_1 M nf hyp
   { admit },
   case is_proof.gen : h1_Γ h1_Δ h1_φ h1_x h1_ᾰ h1_ih M nf hyp
