@@ -438,6 +438,7 @@ abbreviation meta_var_name := string
 abbreviation def_name := string
 
 
+@[derive decidable_eq]
 inductive formula : Type
 | meta_var_ : meta_var_name → formula
 | not_ : formula → formula
@@ -884,6 +885,49 @@ inductive is_proof
   (φ φ' : formula) :
   φ'.is_meta_var_or_all_def_in_env E →
   is_proof Γ Δ φ → is_conv E φ φ' → is_proof Γ Δ φ'
+
+
+structure proof (E : env) : Type :=
+(Γ : list (var_name × meta_var_name))
+(Δ : list formula)
+(φ : formula)
+(h : is_proof E Γ Δ φ)
+
+inductive step : Type
+| mp : ℕ → ℕ → step
+
+def dguard (p : Prop) [decidable p] : option (plift p) :=
+if h : p then pure (plift.up h) else failure
+
+open step
+
+def check_step (E : env) :
+list (proof E) → step → option (list (proof E))
+
+-- modus ponens
+-- |- φ & |- (φ -> ψ) => |- ψ
+| proof_list (mp minor_index major_index) := do
+  (proof.mk Γ_1 Δ_1 φ_1 h_1) <- proof_list.nth minor_index,
+  (proof.mk Γ_2 Δ_2 (imp_ φ_2 ψ_2) h_2) <- proof_list.nth major_index | none,
+
+  (plift.up h_Γ) <- dguard (Γ_1 = Γ_2),
+  (plift.up h_Δ) <- dguard (Δ_1 = Δ_2),
+  (plift.up h_φ) <- dguard (φ_1 = φ_2),
+
+  let t1 : is_proof E Γ_2 Δ_2 ψ_2 :=
+  begin
+    have s1 : is_proof E Γ_2 Δ_2 φ_1,
+    rewrite <- h_Γ,
+    rewrite <- h_Δ,
+    exact h_1,
+
+    have s2 : is_proof E Γ_2 Δ_2 (φ_1.imp_ ψ_2),
+    rewrite h_φ,
+    exact h_2,
+
+    exact is_proof.mp Γ_2 Δ_2 φ_1 ψ_2 s1 s2,
+  end,
+  return (proof_list.append [(proof.mk Γ_2 Δ_2 ψ_2 t1)])
 
 
 -- Semantics
