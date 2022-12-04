@@ -2359,15 +2359,13 @@ begin
   case is_proof.eq_1 : h1_Γ h1_Δ h1_x h1_y h1_1 M nf hyp
   {
     unfold exists_,
-
-    simp only [holds_not, holds_forall, holds_eq, not_forall],
+    simp only [holds_not, holds_forall, holds_eq, function.update_same, not_forall, not_not],
     intros V,
-    push_neg,
-    simp only [function.update_same],
     apply exists.intro (V h1_y),
     symmetry,
     apply function.update_noteq,
-    symmetry, exact h1_1,
+    symmetry,
+    exact h1_1,
   },
   case is_proof.eq_2 : h1_Γ h1_Δ h1_x h1_y h1_z M nf hyp
   { admit },
