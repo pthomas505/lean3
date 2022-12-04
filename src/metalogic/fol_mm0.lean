@@ -2384,26 +2384,6 @@ begin
 
     dsimp only at h1_ih_1,
 
-    have s1 : ∀ (φ : formula),
-      (φ ∈ h1_Δ)
-        → ∀ (M : meta_valuation D),
-          (∀ (v : var_name) (X : meta_var_name), ((v, X) ∈ h1_Γ')
-            → is_not_free D M E v (meta_var_ X))
-              → (∀ (ψ : formula), (ψ ∈ h1_Δ')
-                → ∀ (V : valuation D), holds D M E ψ V)
-                  → ∀ (V : valuation D), holds D (fun (X' : meta_var_name) (V' : valuation D),
-                    holds D M E (h1_τ X') (V' ∘ σ')) E φ (V ∘ h1_σ.val),
-    intros φ' a2 M' a3 a4 V,
-    rewrite holds_subst V M' E h1_σ σ' h1_τ φ' _ a1,
-    {
-      exact h1_ih_1 φ' a2 M' a3 a4 V,
-    },
-    {
-      apply lem_2_b E h1_σ h1_τ,
-      apply lem_3 E h1_Γ' h1_Δ' (formula.subst h1_σ h1_τ φ'),
-      exact h1_3 φ' a2,
-    },
-
     have s2 : formula.is_meta_var_or_all_def_in_env E h1_φ,
     exact lem_3 E h1_Γ h1_Δ h1_φ h1_4,
 
@@ -2417,11 +2397,21 @@ begin
     },
     {
       intros ψ a2 V',
-      specialize s1 ψ a2 M nf hyp (V' ∘ σ'),
-      rewrite function.comp.assoc at s1,
-      rewrite a1.right at s1,
-      simp only [function.comp.right_id] at s1,
-      exact s1,
+
+      have s3 : ∀ V, holds D (λ (X' : meta_var_name) (V' : valuation D), holds D M E (h1_τ X') (V' ∘ σ')) E ψ (V ∘ h1_σ.val),
+      intros V'',
+      rewrite holds_subst,
+      apply h1_ih_1 ψ a2 M nf hyp,
+      apply lem_2_b E h1_σ h1_τ,
+      apply lem_3 E h1_Γ' h1_Δ' (formula.subst h1_σ h1_τ ψ),
+      exact h1_3 ψ a2,
+      exact a1,
+
+      specialize s3 (V' ∘ σ'),
+      rewrite function.comp.assoc at s3,
+      rewrite a1.right at s3,
+      simp only [function.comp.right_id] at s3,
+      exact s3,
     },
   },
   case is_proof.conv : h1_Γ h1_Δ h1_φ h1_φ' h1_1 h1_2 h1_3 h1_ih M nf hyp
