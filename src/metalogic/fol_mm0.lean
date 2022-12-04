@@ -2378,7 +2378,7 @@ begin
       exact a2,
     }
   },
-  case is_proof.thm : h1_Γ h1_Γ' h1_Δ h1_Δ' h1_φ h1_σ h1_τ h1_ᾰ h1_ᾰ_1 h1_ᾰ_2 h1_ᾰ_3 h1_ih_ᾰ h1_ih_ᾰ_1 M nf hyp
+  case is_proof.thm : h1_Γ h1_Γ' h1_Δ h1_Δ' h1_φ h1_σ h1_τ h1_1 h1_2 h1_3 h1_4 h1_ih_1 h1_ih_2 M nf hyp
   { admit },
   case is_proof.conv : h1_Γ h1_Δ h1_φ h1_φ' h1_ᾰ h1_ᾰ_1 h1_ᾰ_2 h1_ih M nf hyp
   { admit },
