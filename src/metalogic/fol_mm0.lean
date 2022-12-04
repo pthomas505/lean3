@@ -2345,8 +2345,17 @@ begin
     intros V a1 a2 a,
     exact a1 a (a2 a),
   },
-  case is_proof.pred_2 : h1_Γ h1_Δ h1_φ h1_x h1_ᾰ h1_ᾰ_1 M nf hyp
-  { admit },
+  case is_proof.pred_2 : h1_Γ h1_Δ h1_φ h1_x h1_1 h1_2 M nf hyp
+  {
+    have s1 : is_not_free D M E h1_x h1_φ,
+    exact not_free_imp_is_not_free M E h1_Γ h1_x h1_φ h1_2 (nf h1_x),
+
+    simp only [holds_imp, holds_forall],
+    intros V a1 a,
+    unfold is_not_free at s1,
+    rewrite <- s1 V a,
+    exact a1,
+  },
   case is_proof.eq_1 : h1_Γ h1_Δ h1_x h1_y h1_ᾰ M nf hyp
   { admit },
   case is_proof.eq_2 : h1_Γ h1_Δ h1_x h1_y h1_z M nf hyp
