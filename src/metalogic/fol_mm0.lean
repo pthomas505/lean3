@@ -866,7 +866,7 @@ inductive is_proof
 
 | eq_1 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
   (x y : var_name) :
-  x ≠ y → is_proof Γ Δ (exists_ x (eq_ x y))
+  y ≠ x → is_proof Γ Δ (exists_ x (eq_ x y))
 
 | eq_2 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
   (x y z : var_name) :
