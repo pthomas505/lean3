@@ -2380,8 +2380,16 @@ begin
   },
   case is_proof.thm : h1_Γ h1_Γ' h1_Δ h1_Δ' h1_φ h1_σ h1_τ h1_1 h1_2 h1_3 h1_4 h1_ih_1 h1_ih_2 M nf hyp
   { admit },
-  case is_proof.conv : h1_Γ h1_Δ h1_φ h1_φ' h1_ᾰ h1_ᾰ_1 h1_ᾰ_2 h1_ih M nf hyp
-  { admit },
+  case is_proof.conv : h1_Γ h1_Δ h1_φ h1_φ' h1_1 h1_2 h1_3 h1_ih M nf hyp
+  {
+    intros V,
+
+    have s1 : holds D M E h1_φ V,
+    exact h1_ih M nf hyp V,
+
+    rewrite <- holds_conv M E h1_φ h1_φ' V h2 h1_3,
+    exact s1,
+  },
 end
 
 
@@ -2463,7 +2471,7 @@ begin
     apply exists.intro (V H_y),
     symmetry,
     apply function.update_noteq,
-    symmetry, exact H_ᾰ,
+    exact H_ᾰ,
   },
   case is_proof.eq_2 : H_Γ H_Δ H_x H_y H_z M nf hyp
   {
