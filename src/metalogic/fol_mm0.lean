@@ -2403,8 +2403,9 @@ begin
       apply lem_3 E h1_Γ' h1_Δ' (formula.subst h1_σ h1_τ ψ),
       exact h1_3 ψ a2,
 
-      have s3 : ∀ (V'' : valuation D), holds D
-        (fun (X' : meta_var_name) (V' : valuation D), holds D M E (h1_τ X') (V' ∘ σ')) E ψ (V'' ∘ h1_σ.val),
+      have s3 : ∀ (V'' : valuation D),
+        holds D (fun (X' : meta_var_name) (V' : valuation D), holds D M E (h1_τ X') (V' ∘ σ'))
+          E ψ (V'' ∘ h1_σ.val),
       intros V'',
       rewrite holds_subst V'' M E h1_σ σ' h1_τ ψ s2 a1,
       exact h1_ih_1 ψ a2 M nf hyp V'',
