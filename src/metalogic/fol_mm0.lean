@@ -2340,7 +2340,11 @@ begin
     exact h1_ih M nf hyp (function.update V h1_x a),
   },
   case is_proof.pred_1 : h1_Γ h1_Δ h1_φ h1_ψ h1_x h1_1 h1_2 M nf hyp
-  { admit },
+  {
+    simp only [holds_imp, holds_forall],
+    intros V a1 a2 a,
+    exact a1 a (a2 a),
+  },
   case is_proof.pred_2 : h1_Γ h1_Δ h1_φ h1_x h1_ᾰ h1_ᾰ_1 M nf hyp
   { admit },
   case is_proof.eq_1 : h1_Γ h1_Δ h1_x h1_y h1_ᾰ M nf hyp
