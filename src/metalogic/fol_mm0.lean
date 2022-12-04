@@ -2388,7 +2388,15 @@ begin
     have s2 : formula.is_meta_var_or_all_def_in_env E h1_φ,
     exact lem_3 E h1_Γ h1_Δ h1_φ h1_4,
 
-    have s3 : ∀ (φ : formula), (φ ∈ h1_Δ) → ∀ (M : meta_valuation D), (∀ (v : var_name) (X : meta_var_name), ((v, X) ∈ h1_Γ') → is_not_free D M E v (meta_var_ X)) → (∀ (ψ : formula), (ψ ∈ h1_Δ') → ∀ (V : valuation D), holds D M E ψ V) → ∀ (V : valuation D), holds D (λ (X' : meta_var_name) (V' : valuation D), holds D M E (h1_τ X') (V' ∘ σ')) E φ (V ∘ h1_σ.val),
+    have s3 : ∀ (φ : formula),
+      (φ ∈ h1_Δ)
+        → ∀ (M : meta_valuation D),
+          (∀ (v : var_name) (X : meta_var_name), ((v, X) ∈ h1_Γ')
+            → is_not_free D M E v (meta_var_ X))
+              → (∀ (ψ : formula), (ψ ∈ h1_Δ')
+                → ∀ (V : valuation D), holds D M E ψ V)
+                  → ∀ (V : valuation D), holds D (fun (X' : meta_var_name) (V' : valuation D),
+                    holds D M E (h1_τ X') (V' ∘ σ')) E φ (V ∘ h1_σ.val),
     intros φ' a2 M' a3 a4 V,
     rewrite holds_subst V M' E h1_σ σ' h1_τ φ' _ a1,
     {
