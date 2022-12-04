@@ -2333,9 +2333,13 @@ begin
     by_contradiction contra,
     exact a1 contra a2,
   },
-  case is_proof.gen : h1_Γ h1_Δ h1_φ h1_x h1_ᾰ h1_ih M nf hyp
-  { admit },
-  case is_proof.pred_1 : h1_Γ h1_Δ h1_φ h1_ψ h1_x h1_ᾰ h1_ᾰ_1 M nf hyp
+  case is_proof.gen : h1_Γ h1_Δ h1_φ h1_x h1_1 h1_ih M nf hyp
+  {
+    simp only [holds_forall],
+    intros V a,
+    exact h1_ih M nf hyp (function.update V h1_x a),
+  },
+  case is_proof.pred_1 : h1_Γ h1_Δ h1_φ h1_ψ h1_x h1_1 h1_2 M nf hyp
   { admit },
   case is_proof.pred_2 : h1_Γ h1_Δ h1_φ h1_x h1_ᾰ h1_ᾰ_1 M nf hyp
   { admit },
