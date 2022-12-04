@@ -2366,7 +2366,18 @@ begin
     exact function.update_noteq h1_1 (V h1_y) V,
   },
   case is_proof.eq_2 : h1_Γ h1_Δ h1_x h1_y h1_z M nf hyp
-  { admit },
+  {
+    simp only [holds_imp, holds_eq],
+    intros V a1 a2,
+    transitivity V h1_x,
+    {
+      symmetry,
+      exact a1,
+    },
+    {
+      exact a2,
+    }
+  },
   case is_proof.thm : h1_Γ h1_Γ' h1_Δ h1_Δ' h1_φ h1_σ h1_τ h1_ᾰ h1_ᾰ_1 h1_ᾰ_2 h1_ᾰ_3 h1_ih_ᾰ h1_ih_ᾰ_1 M nf hyp
   { admit },
   case is_proof.conv : h1_Γ h1_Δ h1_φ h1_φ' h1_ᾰ h1_ᾰ_1 h1_ᾰ_2 h1_ih M nf hyp
