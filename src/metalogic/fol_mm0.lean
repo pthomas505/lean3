@@ -903,7 +903,8 @@ structure proof_env : Type :=
 
 def represents (E : env) (S : proof_env) : Prop :=
 E.to_finset = S.definition_map.values.to_finset ∧
-∀ (T : theorem_), T ∈ S.theorem_map.values → is_proof E T.Γ T.Δ T.φ
+∀ (name : string) (T : theorem_),
+  (sigma.mk name T) ∈ S.theorem_map.entries → is_proof E T.Γ T.Δ T.φ
 
 structure context : Type :=
 (S : proof_env)
@@ -937,7 +938,33 @@ def check_step (C : context) : step → option context
 
   let t1 : ∃ (E' : env), E'.well_formed ∧ represents E' S' :=
   begin
+    apply exists.elim C.h1,
+    intros E h1_1,
+    cases h1_1,
+
+    have s1 : (sigma.mk major_name (theorem_.mk Γ_1 Δ_1 φ_1)) ∈ C.S.theorem_map.entries,
+    rewrite <- hash_map.find_iff C.S.theorem_map,
     sorry,
+
+    apply exists.intro E,
+    split,
+    {
+      exact h1_1_left,
+    },
+    {
+      unfold represents at h1_1_right,
+      cases h1_1_right,
+
+      unfold represents,
+      split,
+      {
+        rewrite h1_1_right_left,
+      },
+      {
+        intros T a1,
+        sorry,
+      }
+    }
   end,
 
   return {S := S', h1 := t1}
