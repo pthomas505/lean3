@@ -1,3 +1,4 @@
+import data.hash_map
 import logic.function.basic
 import tactic
 
@@ -553,6 +554,7 @@ def formula.subst (σ : instantiation) (τ : meta_instantiation) : formula → f
 | (def_ name args) := def_ name (list.map σ.1 args)
 
 
+@[derive decidable_eq]
 structure definition_ : Type :=
 (name : string)
 (args : list var_name)
@@ -887,47 +889,58 @@ inductive is_proof
   is_proof Γ Δ φ → is_conv E φ φ' → is_proof Γ Δ φ'
 
 
-structure proof (E : env) : Type :=
+def hash_map.values {α β : Type} [decidable_eq α] (m : hash_map α (fun _, β)) : list β :=
+m.entries.map sigma.snd
+
+structure theorem_ : Type :=
 (Γ : list (var_name × meta_var_name))
 (Δ : list formula)
 (φ : formula)
-(h : is_proof E Γ Δ φ)
+
+structure proof_env : Type :=
+(definition_map : hash_map string (fun _, definition_))
+(theorem_map : hash_map string (fun _, theorem_))
+
+def represents (E : env) (S : proof_env) : Prop :=
+E.to_finset = S.definition_map.values.to_finset ∧
+∀ (T : theorem_), T ∈ S.theorem_map.values → is_proof E T.Γ T.Δ T.φ
+
+structure context : Type :=
+(S : proof_env)
+(h1 : ∃ (E : env), E.well_formed ∧ represents E S)
+
 
 inductive step : Type
-| mp : ℕ → ℕ → step
+| mp : string → string → string → step
 
 def dguard (p : Prop) [decidable p] : option (plift p) :=
 if h : p then pure (plift.up h) else failure
 
 open step
 
-def check_step (E : env) :
-list (proof E) → step → option (list (proof E))
+def check_step (C : context) : step → option context
 
--- modus ponens
--- |- φ & |- (φ -> ψ) => |- ψ
-| proof_list (mp minor_index major_index) := do
-  (proof.mk Γ_1 Δ_1 φ_1 h_1) <- proof_list.nth minor_index,
-  (proof.mk Γ_2 Δ_2 (imp_ φ_2 ψ_2) h_2) <- proof_list.nth major_index | none,
+| (mp name major_name minor_name) := do
+  (theorem_.mk Γ_1 Δ_1 φ_1) <- C.S.theorem_map.find major_name,
+  (theorem_.mk Γ_2 Δ_2 (imp_ φ_2 ψ_2)) <- C.S.theorem_map.find minor_name | none,
 
   (plift.up h_Γ) <- dguard (Γ_1 = Γ_2),
   (plift.up h_Δ) <- dguard (Δ_1 = Δ_2),
   (plift.up h_φ) <- dguard (φ_1 = φ_2),
 
-  let t1 : is_proof E Γ_2 Δ_2 ψ_2 :=
+  let T' := theorem_.mk Γ_2 Δ_2 ψ_2,
+  let S' : proof_env :=
+  {
+    theorem_map := C.S.theorem_map.insert name T',
+    definition_map :=  C.S.definition_map
+  },
+
+  let t1 : ∃ (E' : env), E'.well_formed ∧ represents E' S' :=
   begin
-    have s1 : is_proof E Γ_2 Δ_2 φ_1,
-    rewrite <- h_Γ,
-    rewrite <- h_Δ,
-    exact h_1,
-
-    have s2 : is_proof E Γ_2 Δ_2 (φ_1.imp_ ψ_2),
-    rewrite h_φ,
-    exact h_2,
-
-    exact is_proof.mp Γ_2 Δ_2 φ_1 ψ_2 s1 s2,
+    sorry,
   end,
-  return (proof_list.append [(proof.mk Γ_2 Δ_2 ψ_2 t1)])
+
+  return {S := S', h1 := t1}
 
 
 -- Semantics
