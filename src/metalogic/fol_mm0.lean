@@ -921,9 +921,9 @@ open step
 
 def check_step (C : context) : step → option context
 
-| (mp name major_name minor_name) := do
-  (theorem_.mk Γ_1 Δ_1 φ_1) <- C.S.theorem_map.find major_name,
-  (theorem_.mk Γ_2 Δ_2 (imp_ φ_2 ψ_2)) <- C.S.theorem_map.find minor_name | none,
+| (mp name minor_name major_name) := do
+  (theorem_.mk Γ_1 Δ_1 φ_1) <- C.S.theorem_map.find minor_name,
+  (theorem_.mk Γ_2 Δ_2 (imp_ φ_2 ψ_2)) <- C.S.theorem_map.find major_name | none,
 
   (plift.up h_Γ) <- dguard (Γ_1 = Γ_2),
   (plift.up h_Δ) <- dguard (Δ_1 = Δ_2),
