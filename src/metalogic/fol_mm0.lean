@@ -900,7 +900,12 @@ structure proof_env : Type :=
 
 
 inductive step : Type
+| hyp : ℕ → step
 | mp : ℕ → ℕ → step
+| prop_1 : ℕ → ℕ → step
+| prop_2 : ℕ → ℕ → ℕ → step
+| prop_3 : ℕ → ℕ → step
+
 
 open step
 
@@ -912,12 +917,30 @@ def check_step
   (local_proof_list : list formula) :
   step → option formula
 
+| (hyp index) := Δ.nth index
+
 | (mp minor_index major_index) := do
   φ_minor <- local_proof_list.nth minor_index,
   (imp_ φ_major ψ_major) <- local_proof_list.nth major_index | none,
   if φ_minor = φ_major
   then some ψ_major
   else none
+
+| (prop_1 φ_index ψ_index) := do
+  φ <- local_proof_list.nth φ_index,
+  ψ <- local_proof_list.nth ψ_index,
+  (φ.imp_ (ψ.imp_ φ))
+
+| (prop_2 φ_index ψ_index χ_index) := do
+  φ <- local_proof_list.nth φ_index,
+  ψ <- local_proof_list.nth ψ_index,
+  χ <- local_proof_list.nth χ_index,
+  ((φ.imp_ (ψ.imp_ χ)).imp_ ((φ.imp_ ψ).imp_ (φ.imp_ χ)))
+
+| (prop_3 φ_index ψ_index) := do
+  φ <- local_proof_list.nth φ_index,
+  ψ <- local_proof_list.nth ψ_index,
+  (((not_ φ).imp_ (not_ ψ)).imp_ (ψ.imp_ φ))
 
 
 def check_step_list
