@@ -908,16 +908,27 @@ open step
 def check_step
   (Γ : list (var_name × meta_var_name))
   (Δ : list formula)
-  (global_proofs : proof_env)
-  (local_proofs : list formula) :
+  (global_proof_list : proof_env)
+  (local_proof_list : list formula) :
   step → option formula
 
 | (mp minor_index major_index) := do
-  φ_minor <- local_proofs.nth minor_index,
-  (imp_ φ_major ψ_major) <- local_proofs.nth major_index | none,
+  φ_minor <- local_proof_list.nth minor_index,
+  (imp_ φ_major ψ_major) <- local_proof_list.nth major_index | none,
   if φ_minor = φ_major
   then some ψ_major
   else none
+
+
+def check_step_list
+  (Γ : list (var_name × meta_var_name))
+  (Δ : list formula)
+  (global_proof_list : proof_env) :
+  list formula → list step → option formula
+| local_proof_list [] := local_proof_list.last'
+| local_proof_list (step :: step_list) := do
+  local_proof <- check_step Γ Δ global_proof_list local_proof_list step,
+  check_step_list (local_proof_list ++ [local_proof]) step_list
 
 
 -- Semantics
