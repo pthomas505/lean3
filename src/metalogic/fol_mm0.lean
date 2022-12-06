@@ -889,9 +889,6 @@ inductive is_proof
   is_proof Γ Δ φ → is_conv E φ φ' → is_proof Γ Δ φ'
 
 
-def hash_map.values {α β : Type} [decidable_eq α] (m : hash_map α (fun _, β)) : list β :=
-m.entries.map sigma.snd
-
 structure theorem_ : Type :=
 (Γ : list (var_name × meta_var_name))
 (Δ : list formula)
@@ -901,73 +898,26 @@ structure proof_env : Type :=
 (definition_map : hash_map string (fun _, definition_))
 (theorem_map : hash_map string (fun _, theorem_))
 
-def represents (E : env) (S : proof_env) : Prop :=
-E.to_finset = S.definition_map.values.to_finset ∧
-∀ (name : string) (T : theorem_),
-  (sigma.mk name T) ∈ S.theorem_map.entries → is_proof E T.Γ T.Δ T.φ
-
-structure context : Type :=
-(S : proof_env)
-(h1 : ∃ (E : env), E.well_formed ∧ represents E S)
-
 
 inductive step : Type
-| mp : string → string → string → step
-
-def dguard (p : Prop) [decidable p] : option (plift p) :=
-if h : p then pure (plift.up h) else failure
+| mp : ℕ → ℕ → step
 
 open step
 
-def check_step (C : context) : step → option context
 
-| (mp name minor_name major_name) := do
-  (theorem_.mk Γ_1 Δ_1 φ_1) <- C.S.theorem_map.find minor_name,
-  (theorem_.mk Γ_2 Δ_2 (imp_ φ_2 ψ_2)) <- C.S.theorem_map.find major_name | none,
+def check_step
+  (Γ : list (var_name × meta_var_name))
+  (Δ : list formula)
+  (global_proofs : proof_env)
+  (local_proofs : list formula) :
+  step → option formula
 
-  (plift.up h_Γ) <- dguard (Γ_1 = Γ_2),
-  (plift.up h_Δ) <- dguard (Δ_1 = Δ_2),
-  (plift.up h_φ) <- dguard (φ_1 = φ_2),
-
-  let T' := theorem_.mk Γ_2 Δ_2 ψ_2,
-  let S' : proof_env :=
-  {
-    theorem_map := C.S.theorem_map.insert name T',
-    definition_map :=  C.S.definition_map
-  },
-
-  let t1 : ∃ (E' : env), E'.well_formed ∧ represents E' S' :=
-  begin
-    apply exists.elim C.h1,
-    intros E h1_1,
-    cases h1_1,
-
-    have s1 : (sigma.mk major_name (theorem_.mk Γ_1 Δ_1 φ_1)) ∈ C.S.theorem_map.entries,
-    rewrite <- hash_map.find_iff C.S.theorem_map,
-    sorry,
-
-    apply exists.intro E,
-    split,
-    {
-      exact h1_1_left,
-    },
-    {
-      unfold represents at h1_1_right,
-      cases h1_1_right,
-
-      unfold represents,
-      split,
-      {
-        rewrite h1_1_right_left,
-      },
-      {
-        intros T a1,
-        sorry,
-      }
-    }
-  end,
-
-  return {S := S', h1 := t1}
+| (mp minor_index major_index) := do
+  φ_minor <- local_proofs.nth minor_index,
+  (imp_ φ_major ψ_major) <- local_proofs.nth major_index | none,
+  if φ_minor = φ_major
+  then some ψ_major
+  else none
 
 
 -- Semantics
