@@ -909,28 +909,28 @@ structure proof_env : Type :=
 (theorem_map : hash_map string (fun _, theorem_))
 
 
-inductive step : Type
-| hyp : ℕ → step
-| mp : ℕ → ℕ → step
-| prop_1 : ℕ → ℕ → step
-| prop_2 : ℕ → ℕ → ℕ → step
-| prop_3 : ℕ → ℕ → step
-| gen : ℕ → var_name → step
-| pred_1 : ℕ → ℕ → var_name → step
-| pred_2 : ℕ → var_name → step
-| eq_1 : var_name → var_name → step
-| eq_2 : var_name → var_name → var_name → step
+inductive proof_step : Type
+| hyp : ℕ → proof_step
+| mp : ℕ → ℕ → proof_step
+| prop_1 : ℕ → ℕ → proof_step
+| prop_2 : ℕ → ℕ → ℕ → proof_step
+| prop_3 : ℕ → ℕ → proof_step
+| gen : ℕ → var_name → proof_step
+| pred_1 : ℕ → ℕ → var_name → proof_step
+| pred_2 : ℕ → var_name → proof_step
+| eq_1 : var_name → var_name → proof_step
+| eq_2 : var_name → var_name → var_name → proof_step
 
 
-open step
+open proof_step
 
 
-def check_step
+def check_proof_step
   (Γ : list (var_name × meta_var_name))
   (Δ : list formula)
   (global_proof_list : proof_env)
   (local_proof_list : list formula) :
-  step → option formula
+  proof_step → option formula
 
 | (hyp index) := Δ.nth index
 
@@ -981,15 +981,15 @@ def check_step
   ((eq_ x y).imp_ ((eq_ x z).imp_ (eq_ y z)))
 
 
-def check_step_list
+def check_proof_step_list
   (Γ : list (var_name × meta_var_name))
   (Δ : list formula)
   (global_proof_list : proof_env) :
-  list formula → list step → option formula
+  list formula → list proof_step → option formula
 | local_proof_list [] := local_proof_list.last'
-| local_proof_list (step :: step_list) := do
-  local_proof <- check_step Γ Δ global_proof_list local_proof_list step,
-  check_step_list (local_proof_list ++ [local_proof]) step_list
+| local_proof_list (proof_step :: proof_step_list) := do
+  local_proof <- check_proof_step Γ Δ global_proof_list local_proof_list proof_step,
+  check_proof_step_list (local_proof_list ++ [local_proof]) proof_step_list
 
 
 -- Semantics
