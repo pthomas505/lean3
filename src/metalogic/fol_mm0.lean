@@ -463,7 +463,8 @@ def not_free (Γ : list (var_name × meta_var_name)) (v : var_name) : formula �
 | (forall_ x φ) := x = v ∨ not_free φ
 | (def_ name args) := ∀ (x : var_name), x ∈ args → ¬ x = v
 
-instance not_free.decidable
+
+instance
   (Γ : list (var_name × meta_var_name))
   (v : var_name)
   (φ : formula) :
@@ -481,13 +482,25 @@ begin
     exact φ_ih,
   },
   case formula.imp_ : φ ψ φ_ih ψ_ih
-  { admit },
-  case formula.eq_ : φ_ᾰ φ_ᾰ_1
-  { admit },
-  case formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
-  { admit },
-  case formula.def_ : φ_ᾰ φ_ᾰ_1
-  { admit },
+  {
+    unfold not_free,
+    sorry,
+  },
+  case formula.eq_ : x y
+  {
+    unfold not_free,
+    apply and.decidable,
+  },
+  case formula.forall_ : x φ φ_ih
+  {
+    unfold not_free,
+    sorry,
+  },
+  case formula.def_ : name args
+  {
+    unfold not_free,
+    sorry,
+  },
 end
 
 
