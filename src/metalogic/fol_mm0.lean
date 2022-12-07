@@ -470,11 +470,17 @@ instance not_free.decidable
   decidable (not_free Γ v φ) :=
 begin
   induction φ,
-  case formula.meta_var_ : φ
-  { admit },
-  case formula.not_ : φ_ᾰ φ_ih
-  { admit },
-  case formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
+  case formula.meta_var_ : X
+  {
+    unfold not_free,
+    apply list.decidable_mem,
+  },
+  case formula.not_ : φ φ_ih
+  {
+    unfold not_free,
+    exact φ_ih,
+  },
+  case formula.imp_ : φ ψ φ_ih ψ_ih
   { admit },
   case formula.eq_ : φ_ᾰ φ_ᾰ_1
   { admit },
