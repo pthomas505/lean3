@@ -905,6 +905,11 @@ inductive step : Type
 | prop_1 : ℕ → ℕ → step
 | prop_2 : ℕ → ℕ → ℕ → step
 | prop_3 : ℕ → ℕ → step
+| gen : ℕ → var_name → step
+| pred_1 : ℕ → ℕ → var_name → step
+| pred_2 : ℕ → var_name → step
+| eq_1 : var_name → var_name → step
+| eq_2 : var_name → var_name → var_name → step
 
 
 open step
@@ -941,6 +946,29 @@ def check_step
   φ <- local_proof_list.nth φ_index,
   ψ <- local_proof_list.nth ψ_index,
   (((not_ φ).imp_ (not_ ψ)).imp_ (ψ.imp_ φ))
+
+| (gen φ_index x) := do
+  φ <- local_proof_list.nth φ_index,
+  (forall_ x φ)
+
+| (pred_1 φ_index ψ_index x) := do
+  φ <- local_proof_list.nth φ_index,
+  ψ <- local_proof_list.nth ψ_index,
+  ((forall_ x (φ.imp_ ψ)).imp_ ((forall_ x φ).imp_ (forall_ x ψ)))
+
+| (pred_2 φ_index x) := do
+  φ <- local_proof_list.nth φ_index,
+  if not_free Γ x φ
+  then (φ.imp_ (forall_ x φ))
+  else none
+
+| (eq_1 x y) := do
+  if y ≠ x
+  then (exists_ x (eq_ x y))
+  else none
+
+| (eq_2 x y z) := do
+  ((eq_ x y).imp_ ((eq_ x z).imp_ (eq_ y z)))
 
 
 def check_step_list
