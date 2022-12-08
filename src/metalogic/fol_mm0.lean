@@ -997,14 +997,16 @@ inductive conv_step
 | symm_conv : conv_step → conv_step
 | trans_conv : formula → conv_step → conv_step → conv_step
 | conv_not : conv_step → conv_step
+| conv_imp : conv_step → conv_step → conv_step
 
 open conv_step
 
 def check_conv : conv_step → formula → formula → bool
-| refl_conv p q := p = q
-| (symm_conv step) p q := check_conv step q p
-| (trans_conv r step1 step2) p q := check_conv step1 p q ∧ check_conv step2 q r
-| (conv_not step) (not_ p) (not_ q) := check_conv step p q
+| refl_conv φ φ' := φ = φ'
+| (symm_conv step) φ φ' := check_conv step φ' φ
+| (trans_conv φ' step1 step2) φ φ'' := check_conv step1 φ φ' ∧ check_conv step2 φ' φ''
+| (conv_not step) (not_ φ) (not_ φ') := check_conv step φ φ'
+| (conv_imp step1 step2) (imp_ φ ψ) (imp_ φ' ψ') := check_conv step1 φ φ' ∧ check_conv step2 ψ ψ'
 | _ _ _ := false
 
 
