@@ -826,6 +826,44 @@ inductive is_conv (E : env) : formula → formula → Prop
   is_conv (def_ d.name (d.args.map σ.1)) (d.q.subst σ meta_var_)
 
 
+inductive conv_step
+| refl_conv : conv_step
+| symm_conv : conv_step → conv_step
+| trans_conv : formula → conv_step → conv_step → conv_step
+| conv_not : conv_step → conv_step
+| conv_imp : conv_step → conv_step → conv_step
+| conv_forall : conv_step → conv_step
+| conv_unfold : definition_ → instantiation → conv_step
+
+open conv_step
+
+def check_conv_step
+  (definition_map : hash_map string (fun _, definition_)) :
+  conv_step → formula → formula → bool
+
+| refl_conv φ φ' := φ = φ'
+
+| (symm_conv step) φ φ' := check_conv_step step φ' φ
+
+| (trans_conv φ' step_1 step_2) φ φ'' :=
+    check_conv_step step_1 φ φ' ∧ check_conv_step step_2 φ' φ''
+
+| (conv_not step) (not_ φ) (not_ φ') := check_conv_step step φ φ'
+
+| (conv_imp step_1 step_2) (imp_ φ ψ) (imp_ φ' ψ') :=
+    check_conv_step step_1 φ φ' ∧ check_conv_step step_2 ψ ψ'
+
+| (conv_forall step) (forall_ x φ) (forall_ x' φ') :=
+    x = x' ∧ check_conv_step step φ φ'
+
+| (conv_unfold d σ) φ φ' :=
+    d ∈ definition_map.entries.map sigma.snd ∧
+    φ = (def_ d.name (d.args.map σ.1)) ∧
+    φ' = (d.q.subst σ meta_var_)
+
+| _ _ _ := false
+
+
 def exists_ (x : var_name) (φ : formula) : formula := not_ (forall_ x (not_ φ))
 
 
@@ -920,6 +958,7 @@ inductive proof_step : Type
 | pred_2 : ℕ → var_name → proof_step
 | eq_1 : var_name → var_name → proof_step
 | eq_2 : var_name → var_name → var_name → proof_step
+| conv : ℕ → formula → conv_step → proof_step
 
 
 open proof_step
@@ -980,6 +1019,12 @@ def check_proof_step
 | (eq_2 x y z) := do
   ((eq_ x y).imp_ ((eq_ x z).imp_ (eq_ y z)))
 
+| (conv φ_index φ' step) := do
+  φ <- local_proof_list.nth φ_index,
+  if check_conv_step global_proof_list.definition_map step φ φ'
+  then φ'
+  else none
+
 
 def check_proof_step_list
   (Γ : list (var_name × meta_var_name))
@@ -990,44 +1035,6 @@ def check_proof_step_list
 | local_proof_list (proof_step :: proof_step_list) := do
   local_proof <- check_proof_step Γ Δ global_proof_list local_proof_list proof_step,
   check_proof_step_list (local_proof_list ++ [local_proof]) proof_step_list
-
-
-inductive conv_step
-| refl_conv : conv_step
-| symm_conv : conv_step → conv_step
-| trans_conv : formula → conv_step → conv_step → conv_step
-| conv_not : conv_step → conv_step
-| conv_imp : conv_step → conv_step → conv_step
-| conv_forall : conv_step → conv_step
-| conv_unfold : definition_ → instantiation → conv_step
-
-open conv_step
-
-def check_conv_step
-  (definition_map : hash_map string (fun _, definition_)) :
-  conv_step → formula → formula → bool
-
-| refl_conv φ φ' := φ = φ'
-
-| (symm_conv step) φ φ' := check_conv_step step φ' φ
-
-| (trans_conv φ' step_1 step_2) φ φ'' :=
-    check_conv_step step_1 φ φ' ∧ check_conv_step step_2 φ' φ''
-
-| (conv_not step) (not_ φ) (not_ φ') := check_conv_step step φ φ'
-
-| (conv_imp step_1 step_2) (imp_ φ ψ) (imp_ φ' ψ') :=
-    check_conv_step step_1 φ φ' ∧ check_conv_step step_2 ψ ψ'
-
-| (conv_forall step) (forall_ x φ) (forall_ x' φ') :=
-    x = x' ∧ check_conv_step step φ φ'
-
-| (conv_unfold d σ) φ φ' :=
-    d ∈ definition_map.entries.map sigma.snd ∧
-    φ = (def_ d.name (d.args.map σ.1)) ∧
-    φ' = (d.q.subst σ meta_var_)
-
-| _ _ _ := false
 
 
 -- Semantics
