@@ -998,15 +998,20 @@ inductive conv_step
 | trans_conv : formula → conv_step → conv_step → conv_step
 | conv_not : conv_step → conv_step
 | conv_imp : conv_step → conv_step → conv_step
+| conv_forall : conv_step → conv_step
+| conv_unfold : definition_ → instantiation → conv_step
 
 open conv_step
 
-def check_conv_step : conv_step → formula → formula → bool
+def check_conv_step (definition_map : hash_map string (fun _, definition_)) :
+  conv_step → formula → formula → bool
 | refl_conv φ φ' := φ = φ'
 | (symm_conv step) φ φ' := check_conv_step step φ' φ
 | (trans_conv φ' step_1 step_2) φ φ'' := check_conv_step step_1 φ φ' ∧ check_conv_step step_2 φ' φ''
 | (conv_not step) (not_ φ) (not_ φ') := check_conv_step step φ φ'
 | (conv_imp step_1 step_2) (imp_ φ ψ) (imp_ φ' ψ') := check_conv_step step_1 φ φ' ∧ check_conv_step step_2 ψ ψ'
+| (conv_forall step) (forall_ x φ) (forall_ x' φ') := x = x' ∧ check_conv_step step φ φ'
+| (conv_unfold d σ) φ φ' := φ = (def_ d.name (d.args.map σ.1)) ∧ φ' = (d.q.subst σ meta_var_)
 | _ _ _ := false
 
 
