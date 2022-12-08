@@ -1001,12 +1001,12 @@ inductive conv_step
 
 open conv_step
 
-def check_conv : conv_step → formula → formula → bool
+def check_conv_step : conv_step → formula → formula → bool
 | refl_conv φ φ' := φ = φ'
-| (symm_conv step) φ φ' := check_conv step φ' φ
-| (trans_conv φ' step1 step2) φ φ'' := check_conv step1 φ φ' ∧ check_conv step2 φ' φ''
-| (conv_not step) (not_ φ) (not_ φ') := check_conv step φ φ'
-| (conv_imp step1 step2) (imp_ φ ψ) (imp_ φ' ψ') := check_conv step1 φ φ' ∧ check_conv step2 ψ ψ'
+| (symm_conv step) φ φ' := check_conv_step step φ' φ
+| (trans_conv φ' step_1 step_2) φ φ'' := check_conv_step step_1 φ φ' ∧ check_conv_step step_2 φ' φ''
+| (conv_not step) (not_ φ) (not_ φ') := check_conv_step step φ φ'
+| (conv_imp step_1 step_2) (imp_ φ ψ) (imp_ φ' ψ') := check_conv_step step_1 φ φ' ∧ check_conv_step step_2 ψ ψ'
 | _ _ _ := false
 
 
