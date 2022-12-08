@@ -1003,7 +1003,8 @@ inductive conv_step
 
 open conv_step
 
-def check_conv_step (definition_map : hash_map string (fun _, definition_)) :
+def check_conv_step
+  (definition_map : hash_map string (fun _, definition_)) :
   conv_step → formula → formula → bool
 
 | refl_conv φ φ' := φ = φ'
