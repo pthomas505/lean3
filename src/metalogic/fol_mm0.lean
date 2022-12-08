@@ -816,7 +816,7 @@ inductive is_conv (E : env) : formula → formula → Prop
   is_conv φ φ' → is_conv (not_ φ) (not_ φ')
 
 | conv_imp (φ φ' ψ ψ' : formula) :
-  is_conv φ φ' → is_conv ψ ψ' →  is_conv (imp_ φ ψ) (imp_ φ' ψ')
+  is_conv φ φ' → is_conv ψ ψ' → is_conv (imp_ φ ψ) (imp_ φ' ψ')
 
 | conv_forall (x : var_name) (φ φ' : formula) :
   is_conv φ φ' → is_conv (forall_ x φ) (forall_ x φ')
