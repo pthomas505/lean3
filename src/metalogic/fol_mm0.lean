@@ -837,6 +837,7 @@ inductive conv_step
 
 open conv_step
 
+
 def check_conv_step
   (definition_map : hash_map string (fun _, definition_)) :
   conv_step → formula → formula → bool
@@ -959,7 +960,6 @@ inductive proof_step : Type
 | eq_1 : var_name → var_name → proof_step
 | eq_2 : var_name → var_name → var_name → proof_step
 | conv : ℕ → formula → conv_step → proof_step
-
 
 open proof_step
 
