@@ -966,10 +966,11 @@ open proof_step
 
 
 instance
-  (σ : instantiation)
-  (τ : meta_instantiation)
-  (l1 l2 : list formula) :
-  decidable (l1.map (formula.subst σ τ) ⊆ l2) :=
+  (α : Type)
+  [decidable_eq α]
+  (f : α → α)
+  (l1 l2 : list α) :
+  decidable (l1.map f ⊆ l2) :=
 begin
   induction l1,
   case list.nil
