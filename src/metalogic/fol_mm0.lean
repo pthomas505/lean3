@@ -968,16 +968,16 @@ open proof_step
 instance
   (σ : instantiation)
   (τ : meta_instantiation)
-  (Δ Δ' : list formula) :
-  decidable ((list.map (formula.subst σ τ) Δ') ⊆ Δ) :=
+  (l1 l2 : list formula) :
+  decidable (l1.map (formula.subst σ τ) ⊆ l2) :=
 begin
-  induction Δ',
+  induction l1,
   case list.nil
   {
     simp only [list.map_nil, list.nil_subset],
     exact decidable.true,
   },
-  case list.cons : Δ'_hd Δ'_tl Δ'_ih
+  case list.cons : hd tl ih
   {
     resetI,
     simp only [list.map, list.cons_subset],
