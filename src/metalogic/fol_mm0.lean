@@ -564,6 +564,27 @@ def formula.subst (σ : instantiation) (τ : meta_instantiation) : formula → f
 | (def_ name args) := def_ name (list.map σ.1 args)
 
 
+instance
+  (σ : instantiation)
+  (τ : meta_instantiation)
+  (Δ Δ' : list formula) :
+  decidable ((list.map (formula.subst σ τ) Δ') ⊆ Δ) :=
+begin
+  induction Δ',
+  case list.nil
+  {
+    simp only [list.map_nil, list.nil_subset],
+    exact decidable.true,
+  },
+  case list.cons : Δ'_hd Δ'_tl Δ'_ih
+  {
+    resetI,
+    simp only [list.map, list.cons_subset],
+    apply and.decidable,
+  },
+end
+
+
 @[derive decidable_eq]
 structure definition_ : Type :=
 (name : string)
@@ -959,6 +980,7 @@ inductive proof_step : Type
 | pred_2 : ℕ → var_name → proof_step
 | eq_1 : var_name → var_name → proof_step
 | eq_2 : var_name → var_name → var_name → proof_step
+| thm : string → instantiation → meta_instantiation → proof_step
 | conv : ℕ → formula → conv_step → proof_step
 
 open proof_step
@@ -1011,13 +1033,21 @@ def check_proof_step
   then (φ.imp_ (forall_ x φ))
   else none
 
-| (eq_1 x y) := do
+| (eq_1 x y) :=
   if y ≠ x
   then (exists_ x (eq_ x y))
   else none
 
-| (eq_2 x y z) := do
+| (eq_2 x y z) :=
   ((eq_ x y).imp_ ((eq_ x z).imp_ (eq_ y z)))
+
+| (thm name σ τ) := do
+  (theorem_.mk Γ' Δ' φ') <- global_proof_list.theorem_map.find name,
+  if
+    (Γ'.all (fun (p : (var_name × meta_var_name)), not_free Γ (σ.1 p.fst) (τ p.snd)))
+    ∧ Δ'.map (formula.subst σ τ) ⊆ Δ
+  then φ'.subst σ τ
+  else none
 
 | (conv φ_index φ' step) := do
   φ <- local_proof_list.nth φ_index,
