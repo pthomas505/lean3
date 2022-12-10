@@ -564,27 +564,6 @@ def formula.subst (σ : instantiation) (τ : meta_instantiation) : formula → f
 | (def_ name args) := def_ name (list.map σ.1 args)
 
 
-instance
-  (σ : instantiation)
-  (τ : meta_instantiation)
-  (Δ Δ' : list formula) :
-  decidable ((list.map (formula.subst σ τ) Δ') ⊆ Δ) :=
-begin
-  induction Δ',
-  case list.nil
-  {
-    simp only [list.map_nil, list.nil_subset],
-    exact decidable.true,
-  },
-  case list.cons : Δ'_hd Δ'_tl Δ'_ih
-  {
-    resetI,
-    simp only [list.map, list.cons_subset],
-    apply and.decidable,
-  },
-end
-
-
 @[derive decidable_eq]
 structure definition_ : Type :=
 (name : string)
@@ -984,6 +963,27 @@ inductive proof_step : Type
 | conv : ℕ → formula → conv_step → proof_step
 
 open proof_step
+
+
+instance
+  (σ : instantiation)
+  (τ : meta_instantiation)
+  (Δ Δ' : list formula) :
+  decidable ((list.map (formula.subst σ τ) Δ') ⊆ Δ) :=
+begin
+  induction Δ',
+  case list.nil
+  {
+    simp only [list.map_nil, list.nil_subset],
+    exact decidable.true,
+  },
+  case list.cons : Δ'_hd Δ'_tl Δ'_ih
+  {
+    resetI,
+    simp only [list.map, list.cons_subset],
+    apply and.decidable,
+  },
+end
 
 
 def check_proof_step
