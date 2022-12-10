@@ -1045,7 +1045,7 @@ def check_proof_step
   (theorem_.mk Γ' Δ' φ') <- global_proof_list.theorem_map.find name,
   if
     (Γ'.all (fun (p : (var_name × meta_var_name)), not_free Γ (σ.1 p.fst) (τ p.snd)))
-    ∧ Δ'.map (formula.subst σ τ) ⊆ Δ
+    ∧ Δ'.map (formula.subst σ τ) ⊆ local_proof_list
   then φ'.subst σ τ
   else none
 
