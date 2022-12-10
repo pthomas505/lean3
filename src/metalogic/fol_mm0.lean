@@ -972,18 +972,7 @@ instance
   (l1 l2 : list α) :
   decidable (l1.map f ⊆ l2) :=
 begin
-  induction l1,
-  case list.nil
-  {
-    simp only [list.map_nil, list.nil_subset],
-    exact decidable.true,
-  },
-  case list.cons : hd tl ih
-  {
-    resetI,
-    simp only [list.map, list.cons_subset],
-    apply and.decidable,
-  },
+  exact list.decidable_ball (fun (x : α), (x ∈ l2)) (list.map f l1),
 end
 
 
