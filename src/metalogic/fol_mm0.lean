@@ -432,7 +432,7 @@ end
 
 
 def list.option_to_option_list {α : Type} [decidable_eq α] (l : list (option α)) : option (list α) :=
-  if none ∈ l then none else l.reduce_option
+  if none ∈ l then none else some l.reduce_option
 
 
 -- Syntax
@@ -837,36 +837,39 @@ inductive conv_step
 | conv_not : conv_step → conv_step
 | conv_imp : conv_step → conv_step → conv_step
 | conv_forall : conv_step → conv_step
-| conv_unfold : definition_ → instantiation → conv_step
+| conv_unfold : string → instantiation → conv_step
 
 open conv_step
 
 
 def check_conv_step
   (definition_map : hash_map string (fun _, definition_)) :
-  conv_step → formula → formula → bool
+  conv_step → formula → formula → option unit
 
-| refl_conv φ φ' := φ = φ'
+| refl_conv φ φ' := guard (φ = φ')
 
 | (symm_conv step) φ φ' := check_conv_step step φ' φ
 
-| (trans_conv φ' step_1 step_2) φ φ'' :=
-    check_conv_step step_1 φ φ' ∧ check_conv_step step_2 φ' φ''
+| (trans_conv φ' step_1 step_2) φ φ'' := do
+  check_conv_step step_1 φ φ',
+  check_conv_step step_2 φ' φ''
 
 | (conv_not step) (not_ φ) (not_ φ') := check_conv_step step φ φ'
 
-| (conv_imp step_1 step_2) (imp_ φ ψ) (imp_ φ' ψ') :=
-    check_conv_step step_1 φ φ' ∧ check_conv_step step_2 ψ ψ'
+| (conv_imp step_1 step_2) (imp_ φ ψ) (imp_ φ' ψ') := do
+  check_conv_step step_1 φ φ',
+  check_conv_step step_2 ψ ψ'
 
-| (conv_forall step) (forall_ x φ) (forall_ x' φ') :=
-    x = x' ∧ check_conv_step step φ φ'
+| (conv_forall step) (forall_ x φ) (forall_ x' φ') := do
+  check_conv_step step φ φ',
+  guard (x = x')
 
-| (conv_unfold d σ) φ φ' :=
-    d ∈ definition_map.entries.map sigma.snd ∧
-    φ = (def_ d.name (d.args.map σ.1)) ∧
-    φ' = (d.q.subst σ meta_var_)
+| (conv_unfold name σ) φ φ' := do
+  d <- definition_map.find name,
+  guard (φ = (def_ d.name (d.args.map σ.1))),
+  guard (φ' = (d.q.subst σ meta_var_))
 
-| _ _ _ := false
+| _ _ _ := none
 
 
 def exists_ (x : var_name) (φ : formula) : formula := not_ (forall_ x (not_ φ))
@@ -1047,9 +1050,8 @@ def check_proof_step
 
 | (conv φ_index φ' step) := do
   φ <- local_proof_list.nth φ_index,
-  if check_conv_step global_proof_list.definition_map step φ φ'
-  then φ'
-  else none
+  check_conv_step global_proof_list.definition_map step φ φ',
+  pure φ'
 
 
 def check_proof_step_list
