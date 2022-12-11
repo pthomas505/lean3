@@ -990,6 +990,8 @@ def prop_2 : formula := (((meta_var_ "φ").imp_ ((meta_var_ "ψ").imp_ (meta_var
 def prop_3 : formula := (((not_ (meta_var_ "φ")).imp_ (not_ (meta_var_ "ψ"))).imp_ ((meta_var_ "ψ").imp_ (meta_var_ "φ")))
 
 def gen : formula := (forall_ "x" (meta_var_ "φ"))
+
+def pred_1 : formula := ((forall_ x (φ.imp_ ψ)).imp_ ((forall_ x φ).imp_ (forall_ x ψ)))
 /-
 (meta_var_ "φ")
 (meta_var_ "ψ")
