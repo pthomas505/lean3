@@ -2551,9 +2551,9 @@ def check_proof_step_list
   (global_theorem_map : theorem_map) :
   list formula → list proof_step → option formula
 | local_proof_list [] := local_proof_list.last'
-| local_proof_list (proof_step :: proof_step_list) := do
-  local_proof <- check_proof_step Γ Δ global_definition_map global_theorem_map local_proof_list proof_step,
-  check_proof_step_list (local_proof_list ++ [local_proof]) proof_step_list
+| local_proof_list (current_proof_step :: remaining_proof_step_list) := do
+  local_proof <- check_proof_step Γ Δ global_definition_map global_theorem_map local_proof_list current_proof_step,
+  check_proof_step_list (local_proof_list ++ [local_proof]) remaining_proof_step_list
 
 
 structure proof : Type :=
@@ -2567,11 +2567,11 @@ def check_all_proofs_aux
   (global_definition_map : definition_map) :
   theorem_map → list proof → option theorem_map
 | global_theorem_map [] := some global_theorem_map
-| global_theorem_map (proof :: proof_step_list) := do
-  φ <- check_proof_step_list proof.Γ proof.Δ global_definition_map global_theorem_map [] proof.step_list,
-  let t : theorem_ := {Γ := proof.Γ, Δ := proof.Δ, φ := φ,},
-  let theorem_map' := global_theorem_map.insert proof.name t,
-  some theorem_map'
+| global_theorem_map (current_proof :: remaining_proof_list) := do
+  φ <- check_proof_step_list current_proof.Γ current_proof.Δ global_definition_map global_theorem_map [] current_proof.step_list,
+  let t : theorem_ := {Γ := current_proof.Γ, Δ := current_proof.Δ, φ := φ,},
+  let theorem_map' := global_theorem_map.insert current_proof.name t,
+  check_all_proofs_aux theorem_map' remaining_proof_list
 
 
 def check_all_proofs
