@@ -1134,6 +1134,26 @@ def check_proof_step_list
   local_proof <- check_proof_step Γ Δ global_proof_list local_proof_list proof_step,
   check_proof_step_list (local_proof_list ++ [local_proof]) proof_step_list
 
+structure proof : Type :=
+  (Γ : list (var_name × meta_var_name))
+  (Δ : list formula)
+  (step_list : list proof_step)
+  (name : string)
+
+def check_all_proofs_aux : proof_env → list proof → option proof_env
+| global_proof_list [] := global_proof_list
+| global_proof_list (proof :: proof_step_list) := do
+  φ <- check_proof_step_list proof.Γ proof.Δ global_proof_list [] proof.step_list,
+  let t : theorem_ := {Γ := proof.Γ, Δ := proof.Δ, φ := φ,},
+  let theorem_map' := global_proof_list.theorem_map.insert proof.name t,
+  some {theorem_map := theorem_map', definition_map := global_proof_list.definition_map}
+
+def check_all_proofs
+  (axiom_list : proof_env)
+  (proof_list : list proof) :
+  option proof_env :=
+  check_all_proofs_aux axiom_list proof_list
+
 
 -- Semantics
 
