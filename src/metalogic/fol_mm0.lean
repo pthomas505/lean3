@@ -2520,6 +2520,7 @@ begin
   exact list.decidable_ball (fun (x : α), (x ∈ l2)) (list.map f l1),
 end
 
+
 def check_proof_step
   (Γ : list (var_name × meta_var_name))
   (Δ : list formula)
