@@ -2497,8 +2497,8 @@ def check_conv_step
 
 | (conv_unfold name σ) φ φ' := do
   d <- global_definition_map.find name,
-  guard (φ = (def_ d.name (d.args.map σ.1))),
-  guard (φ' = (d.q.subst σ meta_var_))
+  guard (φ = def_ d.name (d.args.map σ.1)),
+  guard (φ' = d.q.subst σ meta_var_)
 
 | _ _ _ := none
 
