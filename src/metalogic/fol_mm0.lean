@@ -973,6 +973,60 @@ begin
 end
 
 
+def check_proof_step
+  (Γ : list (var_name × meta_var_name))
+  (Δ : list formula)
+  (global_proof_list : proof_env)
+  (local_proof_list : list formula) :
+  proof_step → option formula
+
+| (thm name hyp_index_list σ τ) := do
+  (theorem_.mk Γ' Δ' φ') <- global_proof_list.theorem_map.find name,
+  Δ <- (hyp_index_list.map (fun (i : ℕ), local_proof_list.nth i)).option_to_option_list,
+
+  if
+    (Γ'.all (fun (p : (var_name × meta_var_name)), not_free Γ (σ.1 p.fst) (τ p.snd)))
+    ∧ Δ'.map (formula.subst σ τ) = Δ
+  then φ'.subst σ τ
+  else none
+
+| (conv φ_index φ' step) := do
+  φ <- local_proof_list.nth φ_index,
+  check_conv_step global_proof_list.definition_map step φ φ',
+  pure φ'
+
+
+def check_proof_step_list
+  (Γ : list (var_name × meta_var_name))
+  (Δ : list formula)
+  (global_proof_list : proof_env) :
+  list formula → list proof_step → option formula
+| local_proof_list [] := local_proof_list.last'
+| local_proof_list (proof_step :: proof_step_list) := do
+  local_proof <- check_proof_step Γ Δ global_proof_list local_proof_list proof_step,
+  check_proof_step_list (local_proof_list ++ [local_proof]) proof_step_list
+
+structure proof : Type :=
+  (Γ : list (var_name × meta_var_name))
+  (Δ : list formula)
+  (step_list : list proof_step)
+  (name : string)
+
+def check_all_proofs_aux : proof_env → list proof → option proof_env
+| global_proof_list [] := global_proof_list
+| global_proof_list (proof :: proof_step_list) := do
+  φ <- check_proof_step_list proof.Γ proof.Δ global_proof_list [] proof.step_list,
+  let t : theorem_ := {Γ := proof.Γ, Δ := proof.Δ, φ := φ,},
+  let theorem_map' := global_proof_list.theorem_map.insert proof.name t,
+  some {theorem_map := theorem_map', definition_map := global_proof_list.definition_map}
+
+def check_all_proofs
+  (axiom_list : proof_env)
+  (proof_list : list proof) :
+  option proof_env :=
+  check_all_proofs_aux axiom_list proof_list
+
+
 def hyp_Γ : list (var_name × meta_var_name) := []
 def hyp_Δ : list formula := [(meta_var_ "φ")]
 def hyp : formula := (meta_var_ "φ")
@@ -1041,60 +1095,6 @@ def fol_axiom_map : hash_map string (fun _, theorem_) :=
     ].map prod.to_sigma
   )
   string.hash
-
-
-def check_proof_step
-  (Γ : list (var_name × meta_var_name))
-  (Δ : list formula)
-  (global_proof_list : proof_env)
-  (local_proof_list : list formula) :
-  proof_step → option formula
-
-| (thm name hyp_index_list σ τ) := do
-  (theorem_.mk Γ' Δ' φ') <- global_proof_list.theorem_map.find name,
-  Δ <- (hyp_index_list.map (fun (i : ℕ), local_proof_list.nth i)).option_to_option_list,
-
-  if
-    (Γ'.all (fun (p : (var_name × meta_var_name)), not_free Γ (σ.1 p.fst) (τ p.snd)))
-    ∧ Δ'.map (formula.subst σ τ) = Δ
-  then φ'.subst σ τ
-  else none
-
-| (conv φ_index φ' step) := do
-  φ <- local_proof_list.nth φ_index,
-  check_conv_step global_proof_list.definition_map step φ φ',
-  pure φ'
-
-
-def check_proof_step_list
-  (Γ : list (var_name × meta_var_name))
-  (Δ : list formula)
-  (global_proof_list : proof_env) :
-  list formula → list proof_step → option formula
-| local_proof_list [] := local_proof_list.last'
-| local_proof_list (proof_step :: proof_step_list) := do
-  local_proof <- check_proof_step Γ Δ global_proof_list local_proof_list proof_step,
-  check_proof_step_list (local_proof_list ++ [local_proof]) proof_step_list
-
-structure proof : Type :=
-  (Γ : list (var_name × meta_var_name))
-  (Δ : list formula)
-  (step_list : list proof_step)
-  (name : string)
-
-def check_all_proofs_aux : proof_env → list proof → option proof_env
-| global_proof_list [] := global_proof_list
-| global_proof_list (proof :: proof_step_list) := do
-  φ <- check_proof_step_list proof.Γ proof.Δ global_proof_list [] proof.step_list,
-  let t : theorem_ := {Γ := proof.Γ, Δ := proof.Δ, φ := φ,},
-  let theorem_map' := global_proof_list.theorem_map.insert proof.name t,
-  some {theorem_map := theorem_map', definition_map := global_proof_list.definition_map}
-
-def check_all_proofs
-  (axiom_list : proof_env)
-  (proof_list : list proof) :
-  option proof_env :=
-  check_all_proofs_aux axiom_list proof_list
 
 
 -- Semantics
