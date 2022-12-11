@@ -830,48 +830,6 @@ inductive is_conv (E : env) : formula → formula → Prop
   is_conv (def_ d.name (d.args.map σ.1)) (d.q.subst σ meta_var_)
 
 
-inductive conv_step
-| refl_conv : conv_step
-| symm_conv : conv_step → conv_step
-| trans_conv : formula → conv_step → conv_step → conv_step
-| conv_not : conv_step → conv_step
-| conv_imp : conv_step → conv_step → conv_step
-| conv_forall : conv_step → conv_step
-| conv_unfold : string → instantiation → conv_step
-
-open conv_step
-
-
-def check_conv_step
-  (definition_map : hash_map string (fun _, definition_)) :
-  conv_step → formula → formula → option unit
-
-| refl_conv φ φ' := guard (φ = φ')
-
-| (symm_conv step) φ φ' := check_conv_step step φ' φ
-
-| (trans_conv φ' step_1 step_2) φ φ'' := do
-  check_conv_step step_1 φ φ',
-  check_conv_step step_2 φ' φ''
-
-| (conv_not step) (not_ φ) (not_ φ') := check_conv_step step φ φ'
-
-| (conv_imp step_1 step_2) (imp_ φ ψ) (imp_ φ' ψ') := do
-  check_conv_step step_1 φ φ',
-  check_conv_step step_2 ψ ψ'
-
-| (conv_forall step) (forall_ x φ) (forall_ x' φ') := do
-  check_conv_step step φ φ',
-  guard (x = x')
-
-| (conv_unfold name σ) φ φ' := do
-  d <- definition_map.find name,
-  guard (φ = (def_ d.name (d.args.map σ.1))),
-  guard (φ' = (d.q.subst σ meta_var_))
-
-| _ _ _ := none
-
-
 def exists_ (x : var_name) (φ : formula) : formula := not_ (forall_ x (not_ φ))
 
 
@@ -943,158 +901,6 @@ inductive is_proof
   (φ φ' : formula) :
   φ'.is_meta_var_or_all_def_in_env E →
   is_proof Γ Δ φ → is_conv E φ φ' → is_proof Γ Δ φ'
-
-
-structure theorem_ : Type :=
-(Γ : list (var_name × meta_var_name))
-(Δ : list formula)
-(φ : formula)
-
-structure proof_env : Type :=
-(definition_map : hash_map string (fun _, definition_))
-(theorem_map : hash_map string (fun _, theorem_))
-
-
-inductive proof_step : Type
-| thm : string → list ℕ → instantiation → meta_instantiation → proof_step
-| conv : ℕ → formula → conv_step → proof_step
-
-open proof_step
-
-
-instance
-  (α : Type)
-  [decidable_eq α]
-  (f : α → α)
-  (l1 l2 : list α) :
-  decidable (l1.map f ⊆ l2) :=
-begin
-  exact list.decidable_ball (fun (x : α), (x ∈ l2)) (list.map f l1),
-end
-
-
-def check_proof_step
-  (Γ : list (var_name × meta_var_name))
-  (Δ : list formula)
-  (global_proof_list : proof_env)
-  (local_proof_list : list formula) :
-  proof_step → option formula
-
-| (thm name hyp_index_list σ τ) := do
-  (theorem_.mk Γ' Δ' φ') <- global_proof_list.theorem_map.find name,
-  Δ <- (hyp_index_list.map (fun (i : ℕ), local_proof_list.nth i)).option_to_option_list,
-
-  if
-    (Γ'.all (fun (p : (var_name × meta_var_name)), not_free Γ (σ.1 p.fst) (τ p.snd)))
-    ∧ Δ'.map (formula.subst σ τ) = Δ
-  then φ'.subst σ τ
-  else none
-
-| (conv φ_index φ' step) := do
-  φ <- local_proof_list.nth φ_index,
-  check_conv_step global_proof_list.definition_map step φ φ',
-  pure φ'
-
-
-def check_proof_step_list
-  (Γ : list (var_name × meta_var_name))
-  (Δ : list formula)
-  (global_proof_list : proof_env) :
-  list formula → list proof_step → option formula
-| local_proof_list [] := local_proof_list.last'
-| local_proof_list (proof_step :: proof_step_list) := do
-  local_proof <- check_proof_step Γ Δ global_proof_list local_proof_list proof_step,
-  check_proof_step_list (local_proof_list ++ [local_proof]) proof_step_list
-
-structure proof : Type :=
-  (Γ : list (var_name × meta_var_name))
-  (Δ : list formula)
-  (step_list : list proof_step)
-  (name : string)
-
-def check_all_proofs_aux : proof_env → list proof → option proof_env
-| global_proof_list [] := global_proof_list
-| global_proof_list (proof :: proof_step_list) := do
-  φ <- check_proof_step_list proof.Γ proof.Δ global_proof_list [] proof.step_list,
-  let t : theorem_ := {Γ := proof.Γ, Δ := proof.Δ, φ := φ,},
-  let theorem_map' := global_proof_list.theorem_map.insert proof.name t,
-  some {theorem_map := theorem_map', definition_map := global_proof_list.definition_map}
-
-def check_all_proofs
-  (axiom_list : proof_env)
-  (proof_list : list proof) :
-  option proof_env :=
-  check_all_proofs_aux axiom_list proof_list
-
-
-def hyp_Γ : list (var_name × meta_var_name) := []
-def hyp_Δ : list formula := [(meta_var_ "φ")]
-def hyp : formula := (meta_var_ "φ")
-def hyp_axiom : theorem_ := { Γ := hyp_Γ, Δ := hyp_Δ, φ := hyp }
-
-def mp_Γ : list (var_name × meta_var_name) := []
-def mp_Δ : list formula := [((meta_var_ "φ").imp_ (meta_var_ "ψ")), (meta_var_ "φ")]
-def mp : formula := (meta_var_ "ψ")
-def mp_axiom : theorem_ := { Γ := mp_Γ, Δ := mp_Δ, φ := mp }
-
-def prop_1_Γ : list (var_name × meta_var_name) := []
-def prop_1_Δ : list formula := []
-def prop_1 : formula := ((meta_var_ "φ").imp_ ((meta_var_ "ψ").imp_ (meta_var_ "φ")))
-def prop_1_axiom : theorem_ := { Γ := prop_1_Γ, Δ := prop_1_Δ, φ := prop_1 }
-
-def prop_2_Γ : list (var_name × meta_var_name) := []
-def prop_2_Δ : list formula := []
-def prop_2 : formula := (((meta_var_ "φ").imp_ ((meta_var_ "ψ").imp_ (meta_var_ "χ"))).imp_ (((meta_var_ "φ").imp_ (meta_var_ "ψ")).imp_ ((meta_var_ "φ").imp_ (meta_var_ "χ"))))
-def prop_2_axiom : theorem_ := { Γ := prop_2_Γ, Δ := prop_2_Δ, φ := prop_2 }
-
-def prop_3_Γ : list (var_name × meta_var_name) := []
-def prop_3_Δ : list formula := []
-def prop_3 : formula := (((not_ (meta_var_ "φ")).imp_ (not_ (meta_var_ "ψ"))).imp_ ((meta_var_ "ψ").imp_ (meta_var_ "φ")))
-def prop_3_axiom : theorem_ := { Γ := prop_3_Γ, Δ := prop_3_Δ, φ := prop_3 }
-
-def gen_Γ : list (var_name × meta_var_name) := []
-def gen_Δ : list formula := []
-def gen : formula := (forall_ "x" (meta_var_ "φ"))
-def gen_axiom : theorem_ := { Γ := gen_Γ, Δ := gen_Δ, φ := gen }
-
-def pred_1_Γ : list (var_name × meta_var_name) := []
-def pred_1_Δ : list formula := []
-def pred_1 : formula := ((forall_ "x" ((meta_var_ "φ").imp_ (meta_var_ "ψ"))).imp_ ((forall_ "x" (meta_var_ "φ")).imp_ (forall_ "x" (meta_var_ "ψ"))))
-def pred_1_axiom : theorem_ := { Γ := pred_1_Γ, Δ := pred_1_Δ, φ := pred_1 }
-
-def pred_2_Γ : list (var_name × meta_var_name) := [("x", "φ")]
-def pred_2_Δ : list formula := []
-def pred_2 : formula := ((meta_var_ "φ").imp_ (forall_ "x" (meta_var_ "φ")))
-def pred_2_axiom : theorem_ := { Γ := pred_2_Γ, Δ := pred_2_Δ, φ := pred_2 }
-
-def eq_1_Γ : list (var_name × meta_var_name) := []
-def eq_1_Δ : list formula := [not_ (eq_ "y" "x")]
-def eq_1 : formula := (exists_ "x" (eq_ "x" "y"))
-def eq_1_axiom : theorem_ := { Γ := eq_1_Γ, Δ := eq_1_Δ, φ := eq_1 }
-
-def eq_2_Γ : list (var_name × meta_var_name) := []
-def eq_2_Δ : list formula := []
-def eq_2 : formula := ((eq_ "x" "y").imp_ ((eq_ "x" "z").imp_ (eq_ "y" "z")))
-def eq_2_axiom : theorem_ := { Γ := eq_2_Γ, Δ := eq_2_Δ, φ := eq_2 }
-
-
-def fol_axiom_map : hash_map string (fun _, theorem_) :=
-  hash_map.of_list
-  (
-    [
-    ("hyp", hyp_axiom),
-    ("mp", mp_axiom),
-    ("prop_1", prop_1_axiom),
-    ("prop_2", prop_2_axiom),
-    ("prop_3", prop_3_axiom),
-    ("gen", gen_axiom),
-    ("pred_1", pred_1_axiom),
-    ("pred_2", pred_2_axiom),
-    ("eq_1", eq_1_axiom),
-    ("eq_2", eq_2_axiom)
-    ].map prod.to_sigma
-  )
-  string.hash
 
 
 -- Semantics
@@ -2639,3 +2445,203 @@ begin
     exact s1,
   },
 end
+
+
+-- proof checker
+
+
+inductive conv_step
+| refl_conv : conv_step
+| symm_conv : conv_step → conv_step
+| trans_conv : formula → conv_step → conv_step → conv_step
+| conv_not : conv_step → conv_step
+| conv_imp : conv_step → conv_step → conv_step
+| conv_forall : conv_step → conv_step
+| conv_unfold : string → instantiation → conv_step
+
+open conv_step
+
+
+def check_conv_step
+  (definition_map : hash_map string (fun _, definition_)) :
+  conv_step → formula → formula → option unit
+
+| refl_conv φ φ' := guard (φ = φ')
+
+| (symm_conv step) φ φ' := check_conv_step step φ' φ
+
+| (trans_conv φ' step_1 step_2) φ φ'' := do
+  check_conv_step step_1 φ φ',
+  check_conv_step step_2 φ' φ''
+
+| (conv_not step) (not_ φ) (not_ φ') := check_conv_step step φ φ'
+
+| (conv_imp step_1 step_2) (imp_ φ ψ) (imp_ φ' ψ') := do
+  check_conv_step step_1 φ φ',
+  check_conv_step step_2 ψ ψ'
+
+| (conv_forall step) (forall_ x φ) (forall_ x' φ') := do
+  check_conv_step step φ φ',
+  guard (x = x')
+
+| (conv_unfold name σ) φ φ' := do
+  d <- definition_map.find name,
+  guard (φ = (def_ d.name (d.args.map σ.1))),
+  guard (φ' = (d.q.subst σ meta_var_))
+
+| _ _ _ := none
+
+
+structure theorem_ : Type :=
+(Γ : list (var_name × meta_var_name))
+(Δ : list formula)
+(φ : formula)
+
+
+structure proof_env : Type :=
+(definition_map : hash_map string (fun _, definition_))
+(theorem_map : hash_map string (fun _, theorem_))
+
+
+inductive proof_step : Type
+| thm : string → list ℕ → instantiation → meta_instantiation → proof_step
+| conv : ℕ → formula → conv_step → proof_step
+
+open proof_step
+
+
+instance
+  (α : Type)
+  [decidable_eq α]
+  (f : α → α)
+  (l1 l2 : list α) :
+  decidable (l1.map f ⊆ l2) :=
+begin
+  exact list.decidable_ball (fun (x : α), (x ∈ l2)) (list.map f l1),
+end
+
+def check_proof_step
+  (Γ : list (var_name × meta_var_name))
+  (Δ : list formula)
+  (global_proof_list : proof_env)
+  (local_proof_list : list formula) :
+  proof_step → option formula
+
+| (thm name hyp_index_list σ τ) := do
+  (theorem_.mk Γ' Δ' φ') <- global_proof_list.theorem_map.find name,
+  Δ <- (hyp_index_list.map (fun (i : ℕ), local_proof_list.nth i)).option_to_option_list,
+
+  if
+    (Γ'.all (fun (p : (var_name × meta_var_name)), not_free Γ (σ.1 p.fst) (τ p.snd)))
+    ∧ Δ'.map (formula.subst σ τ) = Δ
+  then φ'.subst σ τ
+  else none
+
+| (conv φ_index φ' step) := do
+  φ <- local_proof_list.nth φ_index,
+  check_conv_step global_proof_list.definition_map step φ φ',
+  pure φ'
+
+
+def check_proof_step_list
+  (Γ : list (var_name × meta_var_name))
+  (Δ : list formula)
+  (global_proof_list : proof_env) :
+  list formula → list proof_step → option formula
+| local_proof_list [] := local_proof_list.last'
+| local_proof_list (proof_step :: proof_step_list) := do
+  local_proof <- check_proof_step Γ Δ global_proof_list local_proof_list proof_step,
+  check_proof_step_list (local_proof_list ++ [local_proof]) proof_step_list
+
+
+structure proof : Type :=
+  (Γ : list (var_name × meta_var_name))
+  (Δ : list formula)
+  (step_list : list proof_step)
+  (name : string)
+
+
+def check_all_proofs_aux : proof_env → list proof → option proof_env
+| global_proof_list [] := global_proof_list
+| global_proof_list (proof :: proof_step_list) := do
+  φ <- check_proof_step_list proof.Γ proof.Δ global_proof_list [] proof.step_list,
+  let t : theorem_ := {Γ := proof.Γ, Δ := proof.Δ, φ := φ,},
+  let theorem_map' := global_proof_list.theorem_map.insert proof.name t,
+  some {theorem_map := theorem_map', definition_map := global_proof_list.definition_map}
+
+
+def check_all_proofs
+  (axiom_list : proof_env)
+  (proof_list : list proof) :
+  option proof_env :=
+  check_all_proofs_aux axiom_list proof_list
+
+
+def hyp_Γ : list (var_name × meta_var_name) := []
+def hyp_Δ : list formula := [(meta_var_ "φ")]
+def hyp : formula := (meta_var_ "φ")
+def hyp_axiom : theorem_ := { Γ := hyp_Γ, Δ := hyp_Δ, φ := hyp }
+
+def mp_Γ : list (var_name × meta_var_name) := []
+def mp_Δ : list formula := [((meta_var_ "φ").imp_ (meta_var_ "ψ")), (meta_var_ "φ")]
+def mp : formula := (meta_var_ "ψ")
+def mp_axiom : theorem_ := { Γ := mp_Γ, Δ := mp_Δ, φ := mp }
+
+def prop_1_Γ : list (var_name × meta_var_name) := []
+def prop_1_Δ : list formula := []
+def prop_1 : formula := ((meta_var_ "φ").imp_ ((meta_var_ "ψ").imp_ (meta_var_ "φ")))
+def prop_1_axiom : theorem_ := { Γ := prop_1_Γ, Δ := prop_1_Δ, φ := prop_1 }
+
+def prop_2_Γ : list (var_name × meta_var_name) := []
+def prop_2_Δ : list formula := []
+def prop_2 : formula := (((meta_var_ "φ").imp_ ((meta_var_ "ψ").imp_ (meta_var_ "χ"))).imp_ (((meta_var_ "φ").imp_ (meta_var_ "ψ")).imp_ ((meta_var_ "φ").imp_ (meta_var_ "χ"))))
+def prop_2_axiom : theorem_ := { Γ := prop_2_Γ, Δ := prop_2_Δ, φ := prop_2 }
+
+def prop_3_Γ : list (var_name × meta_var_name) := []
+def prop_3_Δ : list formula := []
+def prop_3 : formula := (((not_ (meta_var_ "φ")).imp_ (not_ (meta_var_ "ψ"))).imp_ ((meta_var_ "ψ").imp_ (meta_var_ "φ")))
+def prop_3_axiom : theorem_ := { Γ := prop_3_Γ, Δ := prop_3_Δ, φ := prop_3 }
+
+def gen_Γ : list (var_name × meta_var_name) := []
+def gen_Δ : list formula := []
+def gen : formula := (forall_ "x" (meta_var_ "φ"))
+def gen_axiom : theorem_ := { Γ := gen_Γ, Δ := gen_Δ, φ := gen }
+
+def pred_1_Γ : list (var_name × meta_var_name) := []
+def pred_1_Δ : list formula := []
+def pred_1 : formula := ((forall_ "x" ((meta_var_ "φ").imp_ (meta_var_ "ψ"))).imp_ ((forall_ "x" (meta_var_ "φ")).imp_ (forall_ "x" (meta_var_ "ψ"))))
+def pred_1_axiom : theorem_ := { Γ := pred_1_Γ, Δ := pred_1_Δ, φ := pred_1 }
+
+def pred_2_Γ : list (var_name × meta_var_name) := [("x", "φ")]
+def pred_2_Δ : list formula := []
+def pred_2 : formula := ((meta_var_ "φ").imp_ (forall_ "x" (meta_var_ "φ")))
+def pred_2_axiom : theorem_ := { Γ := pred_2_Γ, Δ := pred_2_Δ, φ := pred_2 }
+
+def eq_1_Γ : list (var_name × meta_var_name) := []
+def eq_1_Δ : list formula := [not_ (eq_ "y" "x")]
+def eq_1 : formula := (exists_ "x" (eq_ "x" "y"))
+def eq_1_axiom : theorem_ := { Γ := eq_1_Γ, Δ := eq_1_Δ, φ := eq_1 }
+
+def eq_2_Γ : list (var_name × meta_var_name) := []
+def eq_2_Δ : list formula := []
+def eq_2 : formula := ((eq_ "x" "y").imp_ ((eq_ "x" "z").imp_ (eq_ "y" "z")))
+def eq_2_axiom : theorem_ := { Γ := eq_2_Γ, Δ := eq_2_Δ, φ := eq_2 }
+
+
+def fol_axiom_map : hash_map string (fun _, theorem_) :=
+  hash_map.of_list
+  (
+    [
+    ("hyp", hyp_axiom),
+    ("mp", mp_axiom),
+    ("prop_1", prop_1_axiom),
+    ("prop_2", prop_2_axiom),
+    ("prop_3", prop_3_axiom),
+    ("gen", gen_axiom),
+    ("pred_1", pred_1_axiom),
+    ("pred_2", pred_2_axiom),
+    ("eq_1", eq_1_axiom),
+    ("eq_2", eq_2_axiom)
+    ].map prod.to_sigma
+  )
+  string.hash
