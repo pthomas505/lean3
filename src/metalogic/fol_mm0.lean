@@ -1006,6 +1006,8 @@ def pred_2_Γ : list (var_name × meta_var_name) := [("x", "φ")]
 def pred_2_Δ : list formula := []
 def pred_2 : formula := ((meta_var_ "φ").imp_ (forall_ "x" (meta_var_ "φ")))
 
+def eq_1_Γ : list (var_name × meta_var_name) := []
+def eq_1_Δ : list formula := [not_ (eq_ "y" "x")]
 def eq_1 : formula := (exists_ "x" (eq_ "x" "y"))
 
 def eq_2 : formula := ((eq_ "x" "y").imp_ ((eq_ "x" "z").imp_ (eq_ "y" "z")))
