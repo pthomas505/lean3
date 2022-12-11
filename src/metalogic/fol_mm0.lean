@@ -982,6 +982,11 @@ begin
   exact list.decidable_ball (fun (x : α), (x ∈ l2)) (list.map f l1),
 end
 
+
+def mp_Γ : list (var_name × meta_var_name) := []
+def mp_Δ : list formula := [((meta_var_ "φ").imp_ (meta_var_ "ψ")), (meta_var_ "φ")]
+def mp : formula := (meta_var_ "ψ")
+
 def prop_1_Γ : list (var_name × meta_var_name) := []
 def prop_1_Δ : list formula := []
 def prop_1 : formula := ((meta_var_ "φ").imp_ ((meta_var_ "ψ").imp_ (meta_var_ "φ")))
