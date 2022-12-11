@@ -431,6 +431,10 @@ begin
 end
 
 
+def list.option_to_option_list {α : Type} [decidable_eq α] (l : list (option α)) : option (list α) :=
+  if none ∈ l then none else l.reduce_option
+
+
 -- Syntax
 
 
@@ -959,7 +963,7 @@ inductive proof_step : Type
 | pred_2 : ℕ → var_name → proof_step
 | eq_1 : var_name → var_name → proof_step
 | eq_2 : var_name → var_name → var_name → proof_step
-| thm : string → instantiation → meta_instantiation → proof_step
+| thm : string → list ℕ → instantiation → meta_instantiation → proof_step
 | conv : ℕ → formula → conv_step → proof_step
 
 open proof_step
@@ -1031,11 +1035,13 @@ def check_proof_step
 | (eq_2 x y z) :=
   ((eq_ x y).imp_ ((eq_ x z).imp_ (eq_ y z)))
 
-| (thm name σ τ) := do
+| (thm name hyp_index_list σ τ) := do
   (theorem_.mk Γ' Δ' φ') <- global_proof_list.theorem_map.find name,
+  Δ <- (hyp_index_list.map (fun (i : ℕ), local_proof_list.nth i)).option_to_option_list,
+
   if
     (Γ'.all (fun (p : (var_name × meta_var_name)), not_free Γ (σ.1 p.fst) (τ p.snd)))
-    ∧ Δ'.map (formula.subst σ τ) ⊆ local_proof_list
+    ∧ Δ'.map (formula.subst σ τ) = Δ
   then φ'.subst σ τ
   else none
 
