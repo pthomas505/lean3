@@ -1010,6 +1010,8 @@ def eq_1_Γ : list (var_name × meta_var_name) := []
 def eq_1_Δ : list formula := [not_ (eq_ "y" "x")]
 def eq_1 : formula := (exists_ "x" (eq_ "x" "y"))
 
+def eq_2_Γ : list (var_name × meta_var_name) := []
+def eq_2_Δ : list formula := []
 def eq_2 : formula := ((eq_ "x" "y").imp_ ((eq_ "x" "z").imp_ (eq_ "y" "z")))
 
 /-
