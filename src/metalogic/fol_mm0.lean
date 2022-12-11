@@ -2447,7 +2447,7 @@ begin
 end
 
 
--- proof checker
+-- Proof Checker
 
 
 inductive conv_step
