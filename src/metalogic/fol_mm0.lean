@@ -983,6 +983,10 @@ begin
 end
 
 
+def hyp_Γ : list (var_name × meta_var_name) := []
+def hyp_Δ : list formula := [(meta_var_ "φ")]
+def hyp : formula := (meta_var_ "φ")
+
 def mp_Γ : list (var_name × meta_var_name) := []
 def mp_Δ : list formula := [((meta_var_ "φ").imp_ (meta_var_ "ψ")), (meta_var_ "φ")]
 def mp : formula := (meta_var_ "ψ")
