@@ -2450,6 +2450,17 @@ end
 -- Proof Checker
 
 
+def definition_map : Type := hash_map string (fun _, definition_)
+
+
+structure theorem_ : Type :=
+(Γ : list (var_name × meta_var_name))
+(Δ : list formula)
+(φ : formula)
+
+def theorem_map : Type := hash_map string (fun _, theorem_)
+
+
 inductive conv_step
 | refl_conv : conv_step
 | symm_conv : conv_step → conv_step
@@ -2461,8 +2472,6 @@ inductive conv_step
 
 open conv_step
 
-
-def definition_map : Type := hash_map string (fun _, definition_)
 
 def check_conv_step
   (global_definition_map : definition_map) :
@@ -2492,14 +2501,6 @@ def check_conv_step
   guard (φ' = (d.q.subst σ meta_var_))
 
 | _ _ _ := none
-
-
-structure theorem_ : Type :=
-(Γ : list (var_name × meta_var_name))
-(Δ : list formula)
-(φ : formula)
-
-def theorem_map : Type := hash_map string (fun _, theorem_)
 
 
 inductive proof_step : Type
@@ -2561,7 +2562,9 @@ structure proof : Type :=
   (name : string)
 
 
-def check_all_proofs_aux (global_definition_map : definition_map) : theorem_map → list proof → option theorem_map
+def check_all_proofs_aux
+  (global_definition_map : definition_map) :
+  theorem_map → list proof → option theorem_map
 | global_theorem_map [] := some global_theorem_map
 | global_theorem_map (proof :: proof_step_list) := do
   φ <- check_proof_step_list proof.Γ proof.Δ global_definition_map global_theorem_map [] proof.step_list,
@@ -2576,6 +2579,9 @@ def check_all_proofs
   (proof_list : list proof) :
   option theorem_map :=
   check_all_proofs_aux global_definition_map axiom_map proof_list
+
+
+-- First Order Logic Axiom Schemes
 
 
 def hyp_Γ : list (var_name × meta_var_name) := []
