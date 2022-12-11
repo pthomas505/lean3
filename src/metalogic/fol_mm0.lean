@@ -2462,8 +2462,10 @@ inductive conv_step
 open conv_step
 
 
+def definition_map : Type := hash_map string (fun _, definition_)
+
 def check_conv_step
-  (definition_map : hash_map string (fun _, definition_)) :
+  (global_definition_map : definition_map) :
   conv_step → formula → formula → option unit
 
 | refl_conv φ φ' := guard (φ = φ')
@@ -2485,7 +2487,7 @@ def check_conv_step
   guard (x = x')
 
 | (conv_unfold name σ) φ φ' := do
-  d <- definition_map.find name,
+  d <- global_definition_map.find name,
   guard (φ = (def_ d.name (d.args.map σ.1))),
   guard (φ' = (d.q.subst σ meta_var_))
 
@@ -2497,10 +2499,7 @@ structure theorem_ : Type :=
 (Δ : list formula)
 (φ : formula)
 
-
-structure proof_env : Type :=
-(definition_map : hash_map string (fun _, definition_))
-(theorem_map : hash_map string (fun _, theorem_))
+def theorem_map : Type := hash_map string (fun _, theorem_)
 
 
 inductive proof_step : Type
@@ -2523,14 +2522,14 @@ end
 def check_proof_step
   (Γ : list (var_name × meta_var_name))
   (Δ : list formula)
-  (global_proof_list : proof_env)
+  (global_definition_map : definition_map)
+  (global_theorem_map : theorem_map)
   (local_proof_list : list formula) :
   proof_step → option formula
 
 | (thm name hyp_index_list σ τ) := do
-  (theorem_.mk Γ' Δ' φ') <- global_proof_list.theorem_map.find name,
+  (theorem_.mk Γ' Δ' φ') <- global_theorem_map.find name,
   Δ <- (hyp_index_list.map (fun (i : ℕ), local_proof_list.nth i)).option_to_option_list,
-
   if
     (Γ'.all (fun (p : (var_name × meta_var_name)), not_free Γ (σ.1 p.fst) (τ p.snd)))
     ∧ Δ'.map (formula.subst σ τ) = Δ
@@ -2539,18 +2538,19 @@ def check_proof_step
 
 | (conv φ_index φ' step) := do
   φ <- local_proof_list.nth φ_index,
-  check_conv_step global_proof_list.definition_map step φ φ',
+  check_conv_step global_definition_map step φ φ',
   pure φ'
 
 
 def check_proof_step_list
   (Γ : list (var_name × meta_var_name))
   (Δ : list formula)
-  (global_proof_list : proof_env) :
+  (global_definition_map : definition_map)
+  (global_theorem_map : theorem_map) :
   list formula → list proof_step → option formula
 | local_proof_list [] := local_proof_list.last'
 | local_proof_list (proof_step :: proof_step_list) := do
-  local_proof <- check_proof_step Γ Δ global_proof_list local_proof_list proof_step,
+  local_proof <- check_proof_step Γ Δ global_definition_map global_theorem_map local_proof_list proof_step,
   check_proof_step_list (local_proof_list ++ [local_proof]) proof_step_list
 
 
@@ -2561,20 +2561,21 @@ structure proof : Type :=
   (name : string)
 
 
-def check_all_proofs_aux : proof_env → list proof → option proof_env
-| global_proof_list [] := global_proof_list
-| global_proof_list (proof :: proof_step_list) := do
-  φ <- check_proof_step_list proof.Γ proof.Δ global_proof_list [] proof.step_list,
+def check_all_proofs_aux (global_definition_map : definition_map) : theorem_map → list proof → option theorem_map
+| global_theorem_map [] := some global_theorem_map
+| global_theorem_map (proof :: proof_step_list) := do
+  φ <- check_proof_step_list proof.Γ proof.Δ global_definition_map global_theorem_map [] proof.step_list,
   let t : theorem_ := {Γ := proof.Γ, Δ := proof.Δ, φ := φ,},
-  let theorem_map' := global_proof_list.theorem_map.insert proof.name t,
-  some {theorem_map := theorem_map', definition_map := global_proof_list.definition_map}
+  let theorem_map' := global_theorem_map.insert proof.name t,
+  some theorem_map'
 
 
 def check_all_proofs
-  (axiom_list : proof_env)
+  (global_definition_map : definition_map)
+  (axiom_map : theorem_map)
   (proof_list : list proof) :
-  option proof_env :=
-  check_all_proofs_aux axiom_list proof_list
+  option theorem_map :=
+  check_all_proofs_aux global_definition_map axiom_map proof_list
 
 
 def hyp_Γ : list (var_name × meta_var_name) := []
