@@ -956,16 +956,6 @@ structure proof_env : Type :=
 
 
 inductive proof_step : Type
-| hyp : ℕ → proof_step
-| mp : ℕ → ℕ → proof_step
-| prop_1 : ℕ → ℕ → proof_step
-| prop_2 : ℕ → ℕ → ℕ → proof_step
-| prop_3 : ℕ → ℕ → proof_step
-| gen : ℕ → var_name → proof_step
-| pred_1 : ℕ → ℕ → var_name → proof_step
-| pred_2 : ℕ → var_name → proof_step
-| eq_1 : var_name → var_name → proof_step
-| eq_2 : var_name → var_name → var_name → proof_step
 | thm : string → list ℕ → instantiation → meta_instantiation → proof_step
 | conv : ℕ → formula → conv_step → proof_step
 
@@ -1059,54 +1049,6 @@ def check_proof_step
   (global_proof_list : proof_env)
   (local_proof_list : list formula) :
   proof_step → option formula
-
-| (hyp index) := Δ.nth index
-
-| (mp minor_index major_index) := do
-  φ_minor <- local_proof_list.nth minor_index,
-  (imp_ φ_major ψ_major) <- local_proof_list.nth major_index | none,
-  if φ_minor = φ_major
-  then some ψ_major
-  else none
-
-| (prop_1 φ_index ψ_index) := do
-  φ <- local_proof_list.nth φ_index,
-  ψ <- local_proof_list.nth ψ_index,
-  (φ.imp_ (ψ.imp_ φ))
-
-| (prop_2 φ_index ψ_index χ_index) := do
-  φ <- local_proof_list.nth φ_index,
-  ψ <- local_proof_list.nth ψ_index,
-  χ <- local_proof_list.nth χ_index,
-  ((φ.imp_ (ψ.imp_ χ)).imp_ ((φ.imp_ ψ).imp_ (φ.imp_ χ)))
-
-| (prop_3 φ_index ψ_index) := do
-  φ <- local_proof_list.nth φ_index,
-  ψ <- local_proof_list.nth ψ_index,
-  (((not_ φ).imp_ (not_ ψ)).imp_ (ψ.imp_ φ))
-
-| (gen φ_index x) := do
-  φ <- local_proof_list.nth φ_index,
-  (forall_ x φ)
-
-| (pred_1 φ_index ψ_index x) := do
-  φ <- local_proof_list.nth φ_index,
-  ψ <- local_proof_list.nth ψ_index,
-  ((forall_ x (φ.imp_ ψ)).imp_ ((forall_ x φ).imp_ (forall_ x ψ)))
-
-| (pred_2 φ_index x) := do
-  φ <- local_proof_list.nth φ_index,
-  if not_free Γ x φ
-  then (φ.imp_ (forall_ x φ))
-  else none
-
-| (eq_1 x y) :=
-  if y ≠ x
-  then (exists_ x (eq_ x y))
-  else none
-
-| (eq_2 x y z) :=
-  ((eq_ x y).imp_ ((eq_ x z).imp_ (eq_ y z)))
 
 | (thm name hyp_index_list σ τ) := do
   (theorem_.mk Γ' Δ' φ') <- global_proof_list.theorem_map.find name,
