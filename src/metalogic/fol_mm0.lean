@@ -994,6 +994,11 @@ def gen : formula := (forall_ "x" (meta_var_ "φ"))
 def pred_1 : formula := ((forall_ "x" ((meta_var_ "φ").imp_ (meta_var_ "ψ"))).imp_ ((forall_ "x" (meta_var_ "φ")).imp_ (forall_ "x" (meta_var_ "ψ"))))
 
 def pred_2 : formula := ((meta_var_ "φ").imp_ (forall_ "x" (meta_var_ "φ")))
+
+def eq_1 : formula := (exists_ "x" (eq_ "x" "y"))
+
+def eq_2 : formula := ((eq_ "x" "y").imp_ ((eq_ "x" "z").imp_ (eq_ "y" "z")))
+
 /-
 (meta_var_ "φ")
 (meta_var_ "ψ")
