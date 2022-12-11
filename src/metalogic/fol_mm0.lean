@@ -986,34 +986,42 @@ end
 def hyp_Γ : list (var_name × meta_var_name) := []
 def hyp_Δ : list formula := [(meta_var_ "φ")]
 def hyp : formula := (meta_var_ "φ")
+def hyp_axiom : theorem_ := { Γ := hyp_Γ, Δ := hyp_Δ, φ := hyp }
 
 def mp_Γ : list (var_name × meta_var_name) := []
 def mp_Δ : list formula := [((meta_var_ "φ").imp_ (meta_var_ "ψ")), (meta_var_ "φ")]
 def mp : formula := (meta_var_ "ψ")
+def mp_axiom : theorem_ := { Γ := mp_Γ, Δ := mp_Δ, φ := mp }
 
 def prop_1_Γ : list (var_name × meta_var_name) := []
 def prop_1_Δ : list formula := []
 def prop_1 : formula := ((meta_var_ "φ").imp_ ((meta_var_ "ψ").imp_ (meta_var_ "φ")))
+def prop_1_axiom : theorem_ := { Γ := prop_1_Γ, Δ := prop_1_Δ, φ := prop_1 }
 
 def prop_2_Γ : list (var_name × meta_var_name) := []
 def prop_2_Δ : list formula := []
 def prop_2 : formula := (((meta_var_ "φ").imp_ ((meta_var_ "ψ").imp_ (meta_var_ "χ"))).imp_ (((meta_var_ "φ").imp_ (meta_var_ "ψ")).imp_ ((meta_var_ "φ").imp_ (meta_var_ "χ"))))
+def prop_2_axiom : theorem_ := { Γ := prop_2_Γ, Δ := prop_2_Δ, φ := prop_2 }
 
 def prop_3_Γ : list (var_name × meta_var_name) := []
 def prop_3_Δ : list formula := []
 def prop_3 : formula := (((not_ (meta_var_ "φ")).imp_ (not_ (meta_var_ "ψ"))).imp_ ((meta_var_ "ψ").imp_ (meta_var_ "φ")))
+def prop_3_axiom : theorem_ := { Γ := prop_3_Γ, Δ := prop_3_Δ, φ := prop_3 }
 
 def gen_Γ : list (var_name × meta_var_name) := []
 def gen_Δ : list formula := []
 def gen : formula := (forall_ "x" (meta_var_ "φ"))
+def gen_axiom : theorem_ := { Γ := gen_Γ, Δ := gen_Δ, φ := gen }
 
 def pred_1_Γ : list (var_name × meta_var_name) := []
 def pred_1_Δ : list formula := []
 def pred_1 : formula := ((forall_ "x" ((meta_var_ "φ").imp_ (meta_var_ "ψ"))).imp_ ((forall_ "x" (meta_var_ "φ")).imp_ (forall_ "x" (meta_var_ "ψ"))))
+def pred_1_axiom : theorem_ := { Γ := pred_1_Γ, Δ := pred_1_Δ, φ := pred_1 }
 
 def pred_2_Γ : list (var_name × meta_var_name) := [("x", "φ")]
 def pred_2_Δ : list formula := []
 def pred_2 : formula := ((meta_var_ "φ").imp_ (forall_ "x" (meta_var_ "φ")))
+def pred_2_axiom : theorem_ := { Γ := pred_2_Γ, Δ := pred_2_Δ, φ := pred_1 }
 
 def eq_1_Γ : list (var_name × meta_var_name) := []
 def eq_1_Δ : list formula := [not_ (eq_ "y" "x")]
@@ -1023,11 +1031,7 @@ def eq_2_Γ : list (var_name × meta_var_name) := []
 def eq_2_Δ : list formula := []
 def eq_2 : formula := ((eq_ "x" "y").imp_ ((eq_ "x" "z").imp_ (eq_ "y" "z")))
 
-/-
-(meta_var_ "φ")
-(meta_var_ "ψ")
-(meta_var_ "χ")
--/
+def fol_axiom_map : 
 
 def check_proof_step
   (Γ : list (var_name × meta_var_name))
