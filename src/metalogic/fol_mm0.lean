@@ -1021,15 +1021,17 @@ def pred_1_axiom : theorem_ := { Γ := pred_1_Γ, Δ := pred_1_Δ, φ := pred_1 
 def pred_2_Γ : list (var_name × meta_var_name) := [("x", "φ")]
 def pred_2_Δ : list formula := []
 def pred_2 : formula := ((meta_var_ "φ").imp_ (forall_ "x" (meta_var_ "φ")))
-def pred_2_axiom : theorem_ := { Γ := pred_2_Γ, Δ := pred_2_Δ, φ := pred_1 }
+def pred_2_axiom : theorem_ := { Γ := pred_2_Γ, Δ := pred_2_Δ, φ := pred_2 }
 
 def eq_1_Γ : list (var_name × meta_var_name) := []
 def eq_1_Δ : list formula := [not_ (eq_ "y" "x")]
 def eq_1 : formula := (exists_ "x" (eq_ "x" "y"))
+def eq_1_axiom : theorem_ := { Γ := eq_1_Γ, Δ := eq_1_Δ, φ := eq_1 }
 
 def eq_2_Γ : list (var_name × meta_var_name) := []
 def eq_2_Δ : list formula := []
 def eq_2 : formula := ((eq_ "x" "y").imp_ ((eq_ "x" "z").imp_ (eq_ "y" "z")))
+def eq_2_axiom : theorem_ := { Γ := eq_2_Γ, Δ := eq_2_Δ, φ := eq_2 }
 
 def fol_axiom_map : 
 
