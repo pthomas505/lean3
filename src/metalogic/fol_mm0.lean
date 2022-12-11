@@ -982,15 +982,24 @@ begin
   exact list.decidable_ball (fun (x : α), (x ∈ l2)) (list.map f l1),
 end
 
-
+def prop_1_Γ : list (var_name × meta_var_name) := []
+def prop_1_Δ : list formula := []
 def prop_1 : formula := ((meta_var_ "φ").imp_ ((meta_var_ "ψ").imp_ (meta_var_ "φ")))
 
+def prop_2_Γ : list (var_name × meta_var_name) := []
+def prop_2_Δ : list formula := []
 def prop_2 : formula := (((meta_var_ "φ").imp_ ((meta_var_ "ψ").imp_ (meta_var_ "χ"))).imp_ (((meta_var_ "φ").imp_ (meta_var_ "ψ")).imp_ ((meta_var_ "φ").imp_ (meta_var_ "χ"))))
 
+def prop_3_Γ : list (var_name × meta_var_name) := []
+def prop_3_Δ : list formula := []
 def prop_3 : formula := (((not_ (meta_var_ "φ")).imp_ (not_ (meta_var_ "ψ"))).imp_ ((meta_var_ "ψ").imp_ (meta_var_ "φ")))
 
+def gen_Γ : list (var_name × meta_var_name) := []
+def gen_Δ : list formula := []
 def gen : formula := (forall_ "x" (meta_var_ "φ"))
 
+def pred_1_Γ : list (var_name × meta_var_name) := []
+def pred_1_Δ : list formula := []
 def pred_1 : formula := ((forall_ "x" ((meta_var_ "φ").imp_ (meta_var_ "ψ"))).imp_ ((forall_ "x" (meta_var_ "φ")).imp_ (forall_ "x" (meta_var_ "ψ"))))
 
 def pred_2 : formula := ((meta_var_ "φ").imp_ (forall_ "x" (meta_var_ "φ")))
