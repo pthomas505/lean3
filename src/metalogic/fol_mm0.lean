@@ -983,6 +983,15 @@ begin
 end
 
 
+def prop_1 : formula := ((meta_var_ "φ").imp_ ((meta_var_ "ψ").imp_ (meta_var_ "φ")))
+
+def prop_2 : formula := (((meta_var_ "φ").imp_ ((meta_var_ "ψ").imp_ (meta_var_ "χ"))).imp_ (((meta_var_ "φ").imp_ (meta_var_ "ψ")).imp_ ((meta_var_ "φ").imp_ (meta_var_ "χ"))))
+/-
+(meta_var_ "φ")
+(meta_var_ "ψ")
+(meta_var_ "χ")
+-/
+
 def check_proof_step
   (Γ : list (var_name × meta_var_name))
   (Δ : list formula)
