@@ -2642,10 +2642,11 @@ def gen_axiom : theorem_ := {
   φ := (forall_ "x" (meta_var_ "φ"))
 }
 
-def pred_1_Γ : list (var_name × meta_var_name) := []
-def pred_1_Δ : list formula := []
-def pred_1 : formula := ((forall_ "x" ((meta_var_ "φ").imp_ (meta_var_ "ψ"))).imp_ ((forall_ "x" (meta_var_ "φ")).imp_ (forall_ "x" (meta_var_ "ψ"))))
-def pred_1_axiom : theorem_ := { Γ := pred_1_Γ, Δ := pred_1_Δ, φ := pred_1 }
+def pred_1_axiom : theorem_ := {
+  Γ := [],
+  Δ := [],
+  φ := ((forall_ "x" ((meta_var_ "φ").imp_ (meta_var_ "ψ"))).imp_ ((forall_ "x" (meta_var_ "φ")).imp_ (forall_ "x" (meta_var_ "ψ"))))
+}
 
 def pred_2_Γ : list (var_name × meta_var_name) := [("x", "φ")]
 def pred_2_Δ : list formula := []
