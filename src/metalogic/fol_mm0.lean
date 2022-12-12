@@ -2624,10 +2624,11 @@ def prop_1_axiom : theorem_ := {
   φ := ((meta_var_ "φ").imp_ ((meta_var_ "ψ").imp_ (meta_var_ "φ")))
 }
 
-def prop_2_Γ : list (var_name × meta_var_name) := []
-def prop_2_Δ : list formula := []
-def prop_2 : formula := (((meta_var_ "φ").imp_ ((meta_var_ "ψ").imp_ (meta_var_ "χ"))).imp_ (((meta_var_ "φ").imp_ (meta_var_ "ψ")).imp_ ((meta_var_ "φ").imp_ (meta_var_ "χ"))))
-def prop_2_axiom : theorem_ := { Γ := prop_2_Γ, Δ := prop_2_Δ, φ := prop_2 }
+def prop_2_axiom : theorem_ := {
+  Γ := [],
+  Δ := [],
+  φ := (((meta_var_ "φ").imp_ ((meta_var_ "ψ").imp_ (meta_var_ "χ"))).imp_ (((meta_var_ "φ").imp_ (meta_var_ "ψ")).imp_ ((meta_var_ "φ").imp_ (meta_var_ "χ"))))
+}
 
 def prop_3_Γ : list (var_name × meta_var_name) := []
 def prop_3_Δ : list formula := []
