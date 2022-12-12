@@ -2504,6 +2504,7 @@ def check_conv_step
 
 
 inductive proof_step : Type
+| hyp : ℕ → proof_step
 | thm : string → list ℕ → instantiation → meta_instantiation → proof_step
 | conv : ℕ → formula → conv_step → proof_step
 
@@ -2528,6 +2529,8 @@ def check_proof_step
   (global_theorem_map : theorem_map)
   (local_proof_list : list formula) :
   proof_step → option formula
+
+| (hyp index) := Δ.nth index
 
 | (thm name hyp_index_list σ τ) := do
   (theorem_.mk Γ' Δ' φ') <- global_theorem_map.find name,
