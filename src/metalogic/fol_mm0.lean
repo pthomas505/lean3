@@ -2453,6 +2453,25 @@ end
 def definition_map : Type := hash_map string (fun _, definition_)
 
 
+def formula.is_meta_var_or_all_def_in_map (m : definition_map) : formula → option unit
+
+| (meta_var_ _) := some ()
+
+| (not_ φ) := φ.is_meta_var_or_all_def_in_map
+
+| (imp_ φ ψ) := do
+  φ.is_meta_var_or_all_def_in_map,
+  ψ.is_meta_var_or_all_def_in_map
+
+| (eq_ _ _) := some ()
+
+| (forall_ _ φ) := φ.is_meta_var_or_all_def_in_map
+
+| (def_ name args) := do
+  d <- m.find name,
+  guard (args.length = d.args.length)
+
+
 structure theorem_ : Type :=
 (Γ : list (var_name × meta_var_name))
 (Δ : list formula)
