@@ -2630,10 +2630,11 @@ def prop_2_axiom : theorem_ := {
   φ := (((meta_var_ "φ").imp_ ((meta_var_ "ψ").imp_ (meta_var_ "χ"))).imp_ (((meta_var_ "φ").imp_ (meta_var_ "ψ")).imp_ ((meta_var_ "φ").imp_ (meta_var_ "χ"))))
 }
 
-def prop_3_Γ : list (var_name × meta_var_name) := []
-def prop_3_Δ : list formula := []
-def prop_3 : formula := (((not_ (meta_var_ "φ")).imp_ (not_ (meta_var_ "ψ"))).imp_ ((meta_var_ "ψ").imp_ (meta_var_ "φ")))
-def prop_3_axiom : theorem_ := { Γ := prop_3_Γ, Δ := prop_3_Δ, φ := prop_3 }
+def prop_3_axiom : theorem_ := {
+  Γ := [],
+  Δ := [],
+  φ := (((not_ (meta_var_ "φ")).imp_ (not_ (meta_var_ "ψ"))).imp_ ((meta_var_ "ψ").imp_ (meta_var_ "φ")))
+}
 
 def gen_Γ : list (var_name × meta_var_name) := []
 def gen_Δ : list formula := []
