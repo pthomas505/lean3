@@ -2618,7 +2618,8 @@ def check_command
   (global_theorem_map : theorem_map) :
   command_ → option (definition_map × theorem_map)
 
-| (add_definition d) :=
+| (add_definition d) := do
+  d.q.is_meta_var_or_all_def_in_map global_definition_map,
   if ¬ global_definition_map.contains d.name
   then some (global_definition_map.insert d.name d, global_theorem_map)
   else none
