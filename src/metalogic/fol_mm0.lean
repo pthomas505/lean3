@@ -2604,23 +2604,25 @@ def check_proof_list
   check_proof_list_aux global_definition_map axiom_map proof_list
 
 
--- First Order Logic Axiom Schemes
+-- First Order Logic
 
+def hyp_axiom : theorem_ := {
+  Γ := [],
+  Δ := [(meta_var_ "φ")],
+  φ := (meta_var_ "φ")
+}
 
-def hyp_Γ : list (var_name × meta_var_name) := []
-def hyp_Δ : list formula := [(meta_var_ "φ")]
-def hyp : formula := (meta_var_ "φ")
-def hyp_axiom : theorem_ := { Γ := hyp_Γ, Δ := hyp_Δ, φ := hyp }
+def mp_axiom : theorem_ := {
+  Γ := [],
+  Δ := [((meta_var_ "φ").imp_ (meta_var_ "ψ")), (meta_var_ "φ")],
+  φ := (meta_var_ "ψ")
+}
 
-def mp_Γ : list (var_name × meta_var_name) := []
-def mp_Δ : list formula := [((meta_var_ "φ").imp_ (meta_var_ "ψ")), (meta_var_ "φ")]
-def mp : formula := (meta_var_ "ψ")
-def mp_axiom : theorem_ := { Γ := mp_Γ, Δ := mp_Δ, φ := mp }
-
-def prop_1_Γ : list (var_name × meta_var_name) := []
-def prop_1_Δ : list formula := []
-def prop_1 : formula := ((meta_var_ "φ").imp_ ((meta_var_ "ψ").imp_ (meta_var_ "φ")))
-def prop_1_axiom : theorem_ := { Γ := prop_1_Γ, Δ := prop_1_Δ, φ := prop_1 }
+def prop_1_axiom : theorem_ := {
+  Γ := [],
+  Δ := [],
+  φ := ((meta_var_ "φ").imp_ ((meta_var_ "ψ").imp_ (meta_var_ "φ")))
+}
 
 def prop_2_Γ : list (var_name × meta_var_name) := []
 def prop_2_Δ : list formula := []
