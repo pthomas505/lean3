@@ -2654,10 +2654,11 @@ def pred_2_axiom : theorem_ := {
   φ := ((meta_var_ "φ").imp_ (forall_ "x" (meta_var_ "φ")))
 }
 
-def eq_1_Γ : list (var_name × meta_var_name) := []
-def eq_1_Δ : list formula := [not_ (eq_ "y" "x")]
-def eq_1 : formula := (exists_ "x" (eq_ "x" "y"))
-def eq_1_axiom : theorem_ := { Γ := eq_1_Γ, Δ := eq_1_Δ, φ := eq_1 }
+def eq_1_axiom : theorem_ := {
+  Γ := [],
+  Δ := [not_ (eq_ "y" "x")],
+  φ := (exists_ "x" (eq_ "x" "y")),
+}
 
 def eq_2_Γ : list (var_name × meta_var_name) := []
 def eq_2_Δ : list formula := []
