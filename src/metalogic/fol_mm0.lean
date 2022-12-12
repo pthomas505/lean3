@@ -2636,6 +2636,13 @@ def check_command_list_aux :
   check_command_list_aux global_definition_map' global_theorem_map' remaining_command_list
 
 
+def check_command_list
+  (axiom_map : theorem_map)
+  (command_list : list command_) :
+  option (definition_map × theorem_map) :=
+  check_command_list_aux (mk_hash_map string.hash) axiom_map command_list
+
+
 -- First Order Logic
 
 def hyp_axiom : theorem_ := {
