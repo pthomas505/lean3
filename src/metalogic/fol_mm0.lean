@@ -2625,7 +2625,9 @@ def check_command
   else none
 
 | (add_proof P) := do
+  (P.Δ.map (formula.is_meta_var_or_all_def_in_map global_definition_map)).option_to_option_list,
   T <- check_proof global_definition_map global_theorem_map P,
+  T.φ.is_meta_var_or_all_def_in_map global_definition_map,
   some (global_definition_map, global_theorem_map.insert P.name T)
 
 
