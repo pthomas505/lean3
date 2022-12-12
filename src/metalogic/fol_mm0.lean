@@ -2604,6 +2604,28 @@ def check_proof_list
   check_proof_list_aux global_definition_map axiom_map proof_list
 
 
+inductive command_ : Type
+| add_definition : definition_ → command_
+| add_proof : proof → command_
+
+open command_
+
+
+def check_command
+  (global_definition_map : definition_map)
+  (global_theorem_map : theorem_map) :
+  command_ → option (definition_map × theorem_map)
+
+| (add_definition d) :=
+  if ¬ global_definition_map.contains d.name
+  then some (global_definition_map.insert d.name d, global_theorem_map)
+  else none
+
+| (add_proof P) := do
+  T <- check_proof global_definition_map global_theorem_map P,
+  some (global_definition_map, global_theorem_map.insert P.name T)
+
+
 -- First Order Logic
 
 def hyp_axiom : theorem_ := {
