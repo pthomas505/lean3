@@ -2584,26 +2584,6 @@ def check_proof
   some {Γ := P.Γ, Δ := P.Δ, φ := φ}
 
 
-def check_proof_list_aux
-  (global_definition_map : definition_map) :
-  theorem_map → list proof → option theorem_map
-
-| global_theorem_map [] := some global_theorem_map
-
-| global_theorem_map (current_proof :: remaining_proof_list) := do
-  T <- check_proof global_definition_map global_theorem_map current_proof,
-  let global_theorem_map' := global_theorem_map.insert current_proof.name T,
-  check_proof_list_aux global_theorem_map' remaining_proof_list
-
-
-def check_proof_list
-  (global_definition_map : definition_map)
-  (axiom_map : theorem_map)
-  (proof_list : list proof) :
-  option theorem_map :=
-  check_proof_list_aux global_definition_map axiom_map proof_list
-
-
 inductive command_ : Type
 | add_definition : definition_ → command_
 | add_proof : proof → command_
