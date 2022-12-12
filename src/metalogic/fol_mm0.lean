@@ -2626,6 +2626,16 @@ def check_command
   some (global_definition_map, global_theorem_map.insert P.name T)
 
 
+def check_command_list_aux :
+  definition_map → theorem_map → list command_ → option (definition_map × theorem_map)
+
+| global_definition_map global_theorem_map [] := some (global_definition_map, global_theorem_map)
+
+| global_definition_map global_theorem_map (current_command :: remaining_command_list) := do
+  (global_definition_map', global_theorem_map') <- check_command global_definition_map global_theorem_map current_command,
+  check_command_list_aux global_definition_map' global_theorem_map' remaining_command_list
+
+
 -- First Order Logic
 
 def hyp_axiom : theorem_ := {
