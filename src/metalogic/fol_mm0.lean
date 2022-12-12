@@ -2544,16 +2544,28 @@ def check_proof_step
   pure φ'
 
 
-def check_proof_step_list
+def check_proof_step_list_aux
   (Γ : list (var_name × meta_var_name))
   (Δ : list formula)
   (global_definition_map : definition_map)
   (global_theorem_map : theorem_map) :
   list formula → list proof_step → option formula
+
 | local_proof_list [] := local_proof_list.last'
+
 | local_proof_list (current_proof_step :: remaining_proof_step_list) := do
   local_proof <- check_proof_step Γ Δ global_definition_map global_theorem_map local_proof_list current_proof_step,
-  check_proof_step_list (local_proof_list ++ [local_proof]) remaining_proof_step_list
+  check_proof_step_list_aux (local_proof_list ++ [local_proof]) remaining_proof_step_list
+
+
+def check_proof_step_list
+  (Γ : list (var_name × meta_var_name))
+  (Δ : list formula)
+  (global_definition_map : definition_map)
+  (global_theorem_map : theorem_map)
+  (proof_step_list : list proof_step) :
+  option formula :=
+  check_proof_step_list_aux Γ Δ global_definition_map global_theorem_map [] proof_step_list
 
 
 structure proof : Type :=
@@ -2563,23 +2575,33 @@ structure proof : Type :=
   (name : string)
 
 
-def check_all_proofs_aux
+def check_proof
+  (global_definition_map : definition_map)
+  (global_theorem_map : theorem_map)
+  (P : proof) :
+  option theorem_ := do
+  φ <- check_proof_step_list P.Γ P.Δ global_definition_map global_theorem_map P.step_list,
+  some {Γ := P.Γ, Δ := P.Δ, φ := φ}
+
+
+def check_proof_list_aux
   (global_definition_map : definition_map) :
   theorem_map → list proof → option theorem_map
+
 | global_theorem_map [] := some global_theorem_map
+
 | global_theorem_map (current_proof :: remaining_proof_list) := do
-  φ <- check_proof_step_list current_proof.Γ current_proof.Δ global_definition_map global_theorem_map [] current_proof.step_list,
-  let t : theorem_ := {Γ := current_proof.Γ, Δ := current_proof.Δ, φ := φ,},
-  let theorem_map' := global_theorem_map.insert current_proof.name t,
-  check_all_proofs_aux theorem_map' remaining_proof_list
+  t <- check_proof global_definition_map global_theorem_map current_proof,
+  let global_theorem_map' := global_theorem_map.insert current_proof.name t,
+  check_proof_list_aux global_theorem_map' remaining_proof_list
 
 
-def check_all_proofs
+def check_proof_list
   (global_definition_map : definition_map)
   (axiom_map : theorem_map)
   (proof_list : list proof) :
   option theorem_map :=
-  check_all_proofs_aux global_definition_map axiom_map proof_list
+  check_proof_list_aux global_definition_map axiom_map proof_list
 
 
 -- First Order Logic Axiom Schemes
