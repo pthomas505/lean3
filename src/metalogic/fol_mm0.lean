@@ -2591,8 +2591,8 @@ def check_proof_list_aux
 | global_theorem_map [] := some global_theorem_map
 
 | global_theorem_map (current_proof :: remaining_proof_list) := do
-  t <- check_proof global_definition_map global_theorem_map current_proof,
-  let global_theorem_map' := global_theorem_map.insert current_proof.name t,
+  T <- check_proof global_definition_map global_theorem_map current_proof,
+  let global_theorem_map' := global_theorem_map.insert current_proof.name T,
   check_proof_list_aux global_theorem_map' remaining_proof_list
 
 
