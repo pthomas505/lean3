@@ -2636,10 +2636,11 @@ def prop_3_axiom : theorem_ := {
   φ := (((not_ (meta_var_ "φ")).imp_ (not_ (meta_var_ "ψ"))).imp_ ((meta_var_ "ψ").imp_ (meta_var_ "φ")))
 }
 
-def gen_Γ : list (var_name × meta_var_name) := []
-def gen_Δ : list formula := []
-def gen : formula := (forall_ "x" (meta_var_ "φ"))
-def gen_axiom : theorem_ := { Γ := gen_Γ, Δ := gen_Δ, φ := gen }
+def gen_axiom : theorem_ := {
+  Γ := [],
+  Δ := [],
+  φ := (forall_ "x" (meta_var_ "φ"))
+}
 
 def pred_1_Γ : list (var_name × meta_var_name) := []
 def pred_1_Δ : list formula := []
