@@ -2628,11 +2628,6 @@ def check_command_list
 
 -- First Order Logic
 
-def hyp_axiom : theorem_ := {
-  Γ := [],
-  Δ := [(meta_var_ "φ")],
-  φ := (meta_var_ "φ")
-}
 
 def mp_axiom : theorem_ := {
   Γ := [],
@@ -2692,7 +2687,6 @@ def fol_axiom_map : hash_map string (fun _, theorem_) :=
   hash_map.of_list
   (
     [
-    ("hyp", hyp_axiom),
     ("mp", mp_axiom),
     ("prop_1", prop_1_axiom),
     ("prop_2", prop_2_axiom),
