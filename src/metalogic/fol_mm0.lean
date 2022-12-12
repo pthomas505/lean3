@@ -2660,11 +2660,11 @@ def eq_1_axiom : theorem_ := {
   φ := (exists_ "x" (eq_ "x" "y")),
 }
 
-def eq_2_Γ : list (var_name × meta_var_name) := []
-def eq_2_Δ : list formula := []
-def eq_2 : formula := ((eq_ "x" "y").imp_ ((eq_ "x" "z").imp_ (eq_ "y" "z")))
-def eq_2_axiom : theorem_ := { Γ := eq_2_Γ, Δ := eq_2_Δ, φ := eq_2 }
-
+def eq_2_axiom : theorem_ := {
+  Γ := [],
+  Δ := [],
+  φ := ((eq_ "x" "y").imp_ ((eq_ "x" "z").imp_ (eq_ "y" "z")))
+}
 
 def fol_axiom_map : hash_map string (fun _, theorem_) :=
   hash_map.of_list
