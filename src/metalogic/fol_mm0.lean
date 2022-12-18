@@ -440,12 +440,14 @@ def list.option_to_option_list {α : Type} [decidable_eq α] (l : list (option �
 
 abbreviation var_name := string
 abbreviation meta_var_name := string
+abbreviation pred_name := string
 abbreviation def_name := string
 
 
 @[derive decidable_eq]
 inductive formula : Type
 | meta_var_ : meta_var_name → formula
+| pred_ : pred_name → list var_name → formula
 | not_ : formula → formula
 | imp_ : formula → formula → formula
 | eq_ : var_name → var_name → formula
@@ -461,11 +463,12 @@ not_free Γ v φ = v is not free in φ in the context Γ
 -/
 def not_free (Γ : list (var_name × meta_var_name)) (v : var_name) : formula → Prop
 | (meta_var_ X) := (v, X) ∈ Γ
+| (pred_ name args) := v ∉ args
 | (not_ φ) := not_free φ
 | (imp_ φ ψ) := not_free φ ∧ not_free ψ
 | (eq_ x y) := x ≠ v ∧ y ≠ v
 | (forall_ x φ) := x = v ∨ not_free φ
-| (def_ name args) := ∀ (x : var_name), x ∈ args → ¬ x = v
+| (def_ name args) := v ∉ args
 
 
 instance
@@ -480,6 +483,7 @@ end
 
 def formula.meta_var_set : formula → finset meta_var_name
 | (meta_var_ X) := {X}
+| (pred_ name args) := ∅
 | (not_ φ) := φ.meta_var_set
 | (imp_ φ ψ) := φ.meta_var_set ∪ ψ.meta_var_set
 | (eq_ x y) := ∅
@@ -493,6 +497,7 @@ that occur free in the formula are in the list.
 -/
 def formula.no_meta_var_and_all_free_in_list : formula → list var_name → Prop
 | (meta_var_ X) S := false
+| (pred_ name args) S := args ⊆ S
 | (not_ φ) S := φ.no_meta_var_and_all_free_in_list S
 | (imp_ φ ψ) S := φ.no_meta_var_and_all_free_in_list S ∧ ψ.no_meta_var_and_all_free_in_list S
 | (eq_ x y) S := x ∈ S ∧ y ∈ S
@@ -511,6 +516,10 @@ begin
   {
     unfold formula.no_meta_var_and_all_free_in_list at h1,
     contradiction,
+  },
+  case formula.pred_ : name args l h1
+  {
+    unfold formula.meta_var_set,
   },
   case formula.not_ : φ φ_ih l h1
   {
@@ -561,6 +570,7 @@ def meta_instantiation : Type := meta_var_name → formula
 
 def formula.subst (σ : instantiation) (τ : meta_instantiation) : formula → formula
 | (meta_var_ X) := τ X
+| (pred_ name args) := pred_ name (list.map σ.1 args)
 | (not_ φ) := not_ φ.subst
 | (imp_ φ ψ) := imp_ φ.subst ψ.subst
 | (eq_ x y) := eq_ (σ.1 x) (σ.1 y)
@@ -591,6 +601,7 @@ formula is defined in the environment.
 -/
 def formula.is_meta_var_or_all_def_in_env (E : env) : formula → Prop
 | (meta_var_ _) := true
+| (pred_ name args) := true
 | (not_ φ) := φ.is_meta_var_or_all_def_in_env
 | (imp_ φ ψ) := φ.is_meta_var_or_all_def_in_env ∧ ψ.is_meta_var_or_all_def_in_env
 | (eq_ _ _) := true
@@ -654,6 +665,10 @@ begin
     {
       unfold formula.is_meta_var_or_all_def_in_env,
     },
+    case formula.pred_ : name args
+    {
+      unfold formula.is_meta_var_or_all_def_in_env,
+    },
     case formula.not_ : φ φ_ih
     {
       unfold formula.is_meta_var_or_all_def_in_env at *,
@@ -691,6 +706,10 @@ begin
   {
     induction φ,
     case formula.meta_var_ : X
+    {
+      unfold formula.is_meta_var_or_all_def_in_env,
+    },
+    case formula.pred_ : name args
     {
       unfold formula.is_meta_var_or_all_def_in_env,
     },
@@ -906,12 +925,15 @@ inductive is_proof
 -- Semantics
 
 
+def pred_interpretation (D : Type) : Type := pred_name → list D → Prop
+
 def valuation (D : Type) : Type := var_name → D
 def meta_valuation (D : Type) : Type := meta_var_name → valuation D → Prop
 
 /-
 def holds (D : Type) : meta_valuation D → env → formula → valuation D → Prop
 | M E (meta_var_ X) V := M X V
+| M E (pred_ name args) V := P name (list.map V args)
 | M E (not_ φ) V := ¬ holds M E φ V
 | M E (imp_ φ ψ) V := holds M E φ V → holds M E ψ V
 | M E (eq_ x y) V := V x = V y
@@ -930,11 +952,13 @@ so it needs to be broken into this pair of mutually recursive definitions.
 
 def holds'
   (D : Type)
+  (P : pred_interpretation D)
   (M : meta_valuation D)
   (holds : formula → valuation D → Prop)
   (d : option definition_) :
   formula → valuation D → Prop
 | (meta_var_ X) V := M X V
+| (pred_ name args) V := P name (list.map V args)
 | (not_ φ) V := ¬ holds' φ V
 | (imp_ φ ψ) V := holds' φ V → holds' ψ V
 | (eq_ x y) V := V x = V y
@@ -952,10 +976,11 @@ def holds'
 
 def holds
   (D : Type)
+  (P : pred_interpretation D)
   (M : meta_valuation D) :
   env → formula → valuation D → Prop
-| [] := holds' D M (fun _ _, false) option.none
-| (d :: E) := holds' D M (holds E) (option.some d)
+| [] := holds' D P M (fun _ _, false) option.none
+| (d :: E) := holds' D P M (holds E) (option.some d)
 
 
 /-
@@ -966,11 +991,23 @@ is equivalent to the version that Lean is unable to determine is decreasing.
 @[simp]
 lemma holds_meta_var
   {D : Type}
+  (P : pred_interpretation D)
   (M : meta_valuation D)
   (E : env)
   (X : meta_var_name)
   (V : valuation D) :
-  holds D M E (meta_var_ X) V ↔ M X V := by {cases E; refl}
+  holds D P M E (meta_var_ X) V ↔ M X V := by {cases E; refl}
+
+@[simp]
+lemma holds_pred
+  {D : Type}
+  (P : pred_interpretation D)
+  (M : meta_valuation D)
+  (E : env)
+  (name : pred_name)
+  (args : list var_name)
+  (V : valuation D) :
+  holds D P M E (pred_ name args) V ↔ P name (list.map V args) := by {cases E; refl}
 
 @[simp]
 lemma holds_not
