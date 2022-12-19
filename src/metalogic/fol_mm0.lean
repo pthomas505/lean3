@@ -1036,44 +1036,48 @@ lemma holds_imp
 @[simp]
 lemma holds_eq
   {D : Type}
+  (P : pred_interpretation D)
   (M : meta_valuation D)
   (E : env)
   (x y : var_name)
   (V : valuation D) :
-  holds D M E (eq_ x y) V ↔ V x = V y := by {cases E; refl}
+  holds D P M E (eq_ x y) V ↔ V x = V y := by {cases E; refl}
 
 @[simp]
 lemma holds_forall
   {D : Type}
+  (P : pred_interpretation D)
   (M : meta_valuation D)
   (E : env)
   (φ : formula)
   (x : var_name)
   (V : valuation D) :
-  holds D M E (forall_ x φ) V ↔ ∀ (a : D), holds D M E φ (function.update V x a) := by {cases E; refl}
+  holds D P M E (forall_ x φ) V ↔ ∀ (a : D), holds D P M E φ (function.update V x a) := by {cases E; refl}
 
 @[simp]
 lemma holds_nil_def
   {D : Type}
+  (P : pred_interpretation D)
   (M : meta_valuation D)
   (name : def_name)
   (args : list var_name)
   (V : valuation D) :
-  holds D M [] (def_ name args) V ↔ false := by {refl}
+  holds D P M [] (def_ name args) V ↔ false := by {refl}
 
 @[simp]
 lemma holds_not_nil_def
   {D : Type}
+  (P : pred_interpretation D)
   (M : meta_valuation D)
   (d : definition_)
   (E : env)
   (name : def_name)
   (args : list var_name)
   (V : valuation D) :
-  holds D M (d :: E) (def_ name args) V ↔
+  holds D P M (d :: E) (def_ name args) V ↔
     if name = d.name ∧ args.length = d.args.length
-    then holds D M E d.q (function.update_list V (list.zip d.args (list.map V args)))
-    else holds D M E (def_ name args) V :=
+    then holds D P M E d.q (function.update_list V (list.zip d.args (list.map V args)))
+    else holds D P M E (def_ name args) V :=
 begin
   unfold holds, unfold holds', simp only [option.elim],
 end
@@ -1081,6 +1085,7 @@ end
 
 lemma holds_valuation_ext
   {D : Type}
+  (P : pred_interpretation D)
   (M : meta_valuation D)
   (E : env)
   (V1 V2 : valuation D)
@@ -1088,7 +1093,7 @@ lemma holds_valuation_ext
   (S : list var_name)
   (h1 : φ.no_meta_var_and_all_free_in_list S)
   (h2 : ∀ (v : var_name), v ∈ S → V1 v = V2 v) :
-  holds D M E φ V1 ↔ holds D M E φ V2 :=
+  holds D P M E φ V1 ↔ holds D P M E φ V2 :=
 begin
   induction E generalizing S φ V1 V2,
   case list.nil : S φ V1 V2 h1 h2
