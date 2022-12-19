@@ -931,18 +931,22 @@ def valuation (D : Type) : Type := var_name → D
 def meta_valuation (D : Type) : Type := meta_var_name → valuation D → Prop
 
 /-
-def holds (D : Type) : meta_valuation D → env → formula → valuation D → Prop
-| M E (meta_var_ X) V := M X V
-| M E (pred_ name args) V := P name (list.map V args)
-| M E (not_ φ) V := ¬ holds M E φ V
-| M E (imp_ φ ψ) V := holds M E φ V → holds M E ψ V
-| M E (eq_ x y) V := V x = V y
-| M E (forall_ x φ) V := ∀ (a : D), holds M E φ (function.update V x a)
-| M [] (def_ _ _) V := false
-| M (d :: E) (def_ name args) V :=
+def holds
+  (D : Type)
+  (P : pred_interpretation D)
+  (M : meta_valuation D) :
+  env → formula → valuation D → Prop
+| E (meta_var_ X) V := M X V
+| E (pred_ name args) V := P name (list.map V args)
+| E (not_ φ) V := ¬ holds E φ V
+| E (imp_ φ ψ) V := holds E φ V → holds E ψ V
+| E (eq_ x y) V := V x = V y
+| E (forall_ x φ) V := ∀ (a : D), holds E φ (function.update V x a)
+| [] (def_ _ _) V := false
+| (d :: E) (def_ name args) V :=
     if name = d.name ∧ args.length = d.args.length
-    then holds M E d.q (function.update_list V (list.zip d.args (list.map V args)))
-    else holds M E (def_ name args) V
+    then holds E d.q (function.update_list V (list.zip d.args (list.map V args)))
+    else holds E (def_ name args) V
 -/
 
 /-
