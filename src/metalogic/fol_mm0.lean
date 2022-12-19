@@ -1016,20 +1016,22 @@ lemma holds_pred
 @[simp]
 lemma holds_not
   {D : Type}
+  (P : pred_interpretation D)
   (M : meta_valuation D)
   (E : env)
   (φ : formula)
   (V : valuation D) :
-  holds D M E (not_ φ) V ↔ ¬ holds D M E φ V := by {cases E; refl}
+  holds D P M E (not_ φ) V ↔ ¬ holds D P M E φ V := by {cases E; refl}
 
 @[simp]
 lemma holds_imp
   {D : Type}
+  (P : pred_interpretation D)
   (M : meta_valuation D)
   (E : env)
   (φ ψ : formula)
   (V : valuation D) :
-  holds D M E (imp_ φ ψ) V ↔ holds D M E φ V → holds D M E ψ V := by {cases E; refl}
+  holds D P M E (imp_ φ ψ) V ↔ holds D P M E φ V → holds D P M E ψ V := by {cases E; refl}
 
 @[simp]
 lemma holds_eq
