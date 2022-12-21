@@ -1099,7 +1099,6 @@ begin
   case list.nil : S φ V1 V2 h1 h2
   {
     induction φ generalizing S V1 V2,
-    pretty_cases,
     case formula.meta_var_ : X S V1 V2 h1 h2
     {
       unfold formula.no_meta_var_and_all_free_in_list at h1,
@@ -1114,9 +1113,9 @@ begin
       apply list.map_congr,
       intros x a1,
       apply h2,
-      sorry,
+      exact h1 a1,
 
-      sorry,
+      rewrite s1,
     },
     case formula.not_ : φ φ_ih S V1 V2 h1 h2
     {
