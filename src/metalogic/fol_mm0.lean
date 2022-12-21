@@ -1188,6 +1188,19 @@ begin
       unfold formula.no_meta_var_and_all_free_in_list at h1,
       contradiction,
     },
+    case formula.pred_ : name args S V1 V2 h1 h2
+    {
+      unfold formula.no_meta_var_and_all_free_in_list at h1,
+      simp only [holds_pred],
+
+      have s1 : list.map V1 args = list.map V2 args,
+      apply list.map_congr,
+      intros x a1,
+      apply h2,
+      exact h1 a1,
+
+      rewrite s1,
+    },
     case formula.not_ : φ φ_ih S V1 V2 h1 h2
     {
       unfold formula.no_meta_var_and_all_free_in_list at h1,
