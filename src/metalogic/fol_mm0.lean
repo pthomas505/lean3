@@ -1515,12 +1515,13 @@ end
 
 lemma holds_def_imp_ex_def
   {D : Type}
+  (P : pred_interpretation D)
   (M : meta_valuation D)
   (E : env)
   (V : valuation D)
   (name : var_name)
   (args : list var_name)
-  (h1 : holds D M E (def_ name args) V) :
+  (h1 : holds D P M E (def_ name args) V) :
   ∃ (d : definition_), d ∈ E ∧ name = d.name ∧ args.length = d.args.length :=
 begin
   induction E,
