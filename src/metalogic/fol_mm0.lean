@@ -2639,6 +2639,8 @@ def formula.is_meta_var_or_all_def_in_map (m : definition_map) : formula → opt
 
 | (meta_var_ _) := some ()
 
+| (pred_ _ _) := some ()
+
 | (not_ φ) := φ.is_meta_var_or_all_def_in_map
 
 | (imp_ φ ψ) := do
