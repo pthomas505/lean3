@@ -1884,23 +1884,25 @@ end
 -/
 def is_not_free
   (D : Type)
+  (P : pred_interpretation D)
   (M : meta_valuation D)
   (E : env)
   (v : var_name)
   (φ : formula) : Prop :=
-  ∀ (V : valuation D) (a : D), holds D M E φ V ↔ holds D M E φ (function.update V v a)
+  ∀ (V : valuation D) (a : D), holds D P M E φ V ↔ holds D P M E φ (function.update V v a)
 
 
 example
   {D : Type}
+  (P : pred_interpretation D)
   (M : meta_valuation D)
   (E : env)
   (v : var_name)
   (φ : formula) :
-  is_not_free D M E v φ ↔
+  is_not_free D P M E v φ ↔
     ∀ (V V' : valuation D),
       (∀ (y : var_name), (y ≠ v → (V y = V' y))) →
-        (holds D M E φ V ↔ holds D M E φ V') :=
+        (holds D P M E φ V ↔ holds D P M E φ V') :=
 begin
   unfold is_not_free,
   split,
