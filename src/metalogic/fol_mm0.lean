@@ -1561,6 +1561,7 @@ end
 
 example
   {D : Type}
+  (P : pred_interpretation D)
   (M : meta_valuation D)
   (E E' : env)
   (name : var_name)
@@ -1568,8 +1569,8 @@ example
   (V : valuation D)
   (h1 : ∃ (E1 : env), E' = E1 ++ E)
   (h2 : E'.nodup_)
-  (h3 : holds D M E (def_ name args) V) :
-  holds D M E' (def_ name args) V :=
+  (h3 : holds D P M E (def_ name args) V) :
+  holds D P M E' (def_ name args) V :=
 begin
   apply exists.elim h1,
   intros E1 h1_1,
@@ -1596,7 +1597,7 @@ begin
     split_ifs,
     {
       have s1 : ∃ (d : definition_), d ∈ (E1_tl ++ E) ∧ name = d.name ∧ args.length = d.args.length,
-      exact holds_def_imp_ex_def M (E1_tl ++ E) V name args E1_ih,
+      exact holds_def_imp_ex_def P M (E1_tl ++ E) V name args E1_ih,
 
       apply exists.elim s1,
       intros d s1_1,
