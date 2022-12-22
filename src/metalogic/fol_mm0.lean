@@ -1351,12 +1351,13 @@ end
 
 lemma holds_meta_valuation_ext
   {D : Type}
+  (P : pred_interpretation D)
   (M1 M2 : meta_valuation D)
   (E : env)
   (V : valuation D)
   (φ : formula)
   (h1 : ∀ (V' : valuation D) (X : meta_var_name), X ∈ φ.meta_var_set → (M1 X V' ↔ M2 X V')) :
-  holds D M1 E φ V ↔ holds D M2 E φ V :=
+  holds D P M1 E φ V ↔ holds D P M2 E φ V :=
 begin
   induction E generalizing φ M1 M2 V,
   case list.nil : φ M1 M2 V h1
@@ -1369,6 +1370,10 @@ begin
       simp only [holds_meta_var],
       apply h1 V X,
       refl,
+    },
+    case formula.pred_ : name args M1 M2 V h1
+    {
+      simp only [holds_pred],
     },
     case formula.not_ : φ φ_ih M1 M2 V h1
     {
@@ -1432,6 +1437,10 @@ begin
       simp only [holds_not],
       apply not_congr,
       exact φ_ih M1 M2 V h1,
+    },
+    case formula.pred_ : name args M1 M2 V h1
+    {
+      simp only [holds_pred],
     },
     case formula.imp_ : φ ψ φ_ih ψ_ih M1 M2 V h1
     {
