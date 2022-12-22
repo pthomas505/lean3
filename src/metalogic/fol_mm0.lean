@@ -2125,6 +2125,10 @@ begin
     unfold formula.subst,
     exact h2,
   },
+  case formula.pred_ : name args
+  {
+    unfold formula.subst,
+  },
   case formula.not_ : φ φ_ih
   {
     unfold formula.is_meta_var_or_all_def_in_env at h1,
