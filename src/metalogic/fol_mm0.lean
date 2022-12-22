@@ -1821,7 +1821,7 @@ begin
         cases h,
 
         rewrite holds_valuation_ext
-          M E_tl
+          P M E_tl
           (function.update_list V (E_hd.args.zip (list.map (V ∘ σ.val) args)))
           (function.update_list (V ∘ σ.val) (E_hd.args.zip (list.map (V ∘ σ.val) args)))
           E_hd.q E_hd.args E_hd.nf,
