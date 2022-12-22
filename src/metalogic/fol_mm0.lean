@@ -505,6 +505,153 @@ def formula.no_meta_var_and_all_free_in_list : formula → list var_name → Pro
 | (def_ name args) S := args ⊆ S
 
 
+example
+  (φ : formula)
+  (S T : list var_name)
+  (h1 : S ⊆ T)
+  (h2 : φ.no_meta_var_and_all_free_in_list S) :
+  φ.no_meta_var_and_all_free_in_list T :=
+begin
+  induction φ generalizing S T,
+  case formula.meta_var_ : X S T h1 h2
+  {
+    unfold formula.no_meta_var_and_all_free_in_list at h2,
+    contradiction,
+  },
+  case formula.pred_ : name args S T h1 h2
+  {
+    unfold formula.no_meta_var_and_all_free_in_list at h2,
+    unfold formula.no_meta_var_and_all_free_in_list,
+    exact set.subset.trans h2 h1,
+  },
+  case formula.not_ : φ φ_ih S T h1 h2
+  {
+    unfold formula.no_meta_var_and_all_free_in_list at h2,
+    unfold formula.no_meta_var_and_all_free_in_list,
+    exact φ_ih S T h1 h2,
+  },
+  case formula.imp_ : φ ψ φ_ih ψ_ih S T h1 h2
+  {
+    unfold formula.no_meta_var_and_all_free_in_list at h2,
+    cases h2,
+    unfold formula.no_meta_var_and_all_free_in_list,
+    split,
+    {
+      exact φ_ih S T h1 h2_left,
+    },
+    {
+      exact ψ_ih S T h1 h2_right,
+    }
+  },
+  case formula.eq_ : x y S T h1 h2
+  {
+    unfold formula.no_meta_var_and_all_free_in_list at h2,
+    cases h2,
+    unfold formula.no_meta_var_and_all_free_in_list,
+    split,
+    {
+      exact h1 h2_left,
+    },
+    {
+      exact h1 h2_right,
+    }
+  },
+  case formula.forall_ : x φ φ_ih S T h1 h2
+  {
+    unfold formula.no_meta_var_and_all_free_in_list at h2,
+    unfold formula.no_meta_var_and_all_free_in_list,
+    apply φ_ih (x :: S),
+    {
+      exact list.cons_subset_cons x h1,
+    },
+    {
+      exact h2
+    }
+  },
+  case formula.def_ : name args S T h1 h2
+  {
+    unfold formula.no_meta_var_and_all_free_in_list at h2,
+    unfold formula.no_meta_var_and_all_free_in_list,
+    exact set.subset.trans h2 h1,
+  },
+end
+
+
+def formula.no_meta_var_free_var_list : formula → list var_name
+| (meta_var_ X) := ∅
+| (pred_ name args) := args
+| (not_ φ) := φ.no_meta_var_free_var_list
+| (imp_ φ ψ) := φ.no_meta_var_free_var_list ∪ ψ.no_meta_var_free_var_list
+| (eq_ x y) := {x, y}
+| (forall_ x φ) := φ.no_meta_var_free_var_list \ {x}
+| (def_ name args) := args
+
+
+example
+  (φ : formula)
+  (h1 : φ.meta_var_set = ∅):
+  φ.no_meta_var_and_all_free_in_list φ.no_meta_var_free_var_list :=
+begin
+  induction φ,
+  case formula.meta_var_ : X
+  {
+    unfold formula.meta_var_set at h1,
+    simp only [finset.singleton_ne_empty] at h1,
+    contradiction,
+  },
+  case formula.pred_ : name args
+  {
+    unfold formula.no_meta_var_free_var_list,
+    unfold formula.no_meta_var_and_all_free_in_list,
+    exact list.subset.refl args,
+  },
+  case formula.not_ : φ φ_ih
+  {
+    unfold formula.meta_var_set at h1,
+
+    unfold formula.no_meta_var_free_var_list,
+    unfold formula.no_meta_var_and_all_free_in_list,
+    exact φ_ih h1,
+  },
+  case formula.imp_ : φ ψ φ_ih ψ_ih
+  {
+    unfold formula.meta_var_set at h1,
+
+    unfold formula.no_meta_var_free_var_list,
+    unfold formula.no_meta_var_and_all_free_in_list,
+    sorry,
+  },
+  case formula.eq_ : x y
+  {
+    unfold formula.no_meta_var_free_var_list,
+    unfold formula.no_meta_var_and_all_free_in_list,
+    split,
+    {
+      simp only [list.mem_insert_iff, eq_self_iff_true, true_or],
+    },
+    {
+      simp only [list.mem_insert_iff],
+      apply or.intro_right,
+      exact list.mem_cons_self y list.nil,
+    }
+  },
+  case formula.forall_ : x φ φ_ih
+  {
+    unfold formula.meta_var_set at h1,
+
+    unfold formula.no_meta_var_free_var_list,
+    unfold formula.no_meta_var_and_all_free_in_list,
+    sorry,
+  },
+  case formula.def_ : name args
+  {
+    unfold formula.no_meta_var_free_var_list,
+    unfold formula.no_meta_var_and_all_free_in_list,
+    exact list.subset.refl args,
+  },
+end
+
+
 lemma no_meta_var_imp_meta_var_set_is_empty
   (φ : formula)
   (l : list var_name)
