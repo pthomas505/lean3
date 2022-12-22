@@ -2324,6 +2324,7 @@ end
 
 lemma lem_4
   {D : Type}
+  (P : pred_interpretation D)
   (M : meta_valuation D)
   (E : env)
   (d : definition_)
@@ -2333,8 +2334,8 @@ lemma lem_4
   (h1 : E.well_formed)
   (h2 : d ∈ E)
   (h3 : name = d.name ∧ args.length = d.args.length) :
-  holds D M E d.q (function.update_list V (list.zip d.args (list.map V args)))
-    ↔ holds D M E (def_ name args) V :=
+  holds D P M E d.q (function.update_list V (list.zip d.args (list.map V args)))
+    ↔ holds D P M E (def_ name args) V :=
 begin
   induction E,
   case list.nil
@@ -2363,7 +2364,7 @@ begin
       cases h2,
       {
         rewrite h2,
-        exact holds_env_ext M tl (hd :: tl) hd.q (function.update_list V (hd.args.zip (list.map V args))) s2 h1_right_left s1,
+        exact holds_env_ext P M tl (hd :: tl) hd.q (function.update_list V (hd.args.zip (list.map V args))) s2 h1_right_left s1,
       },
       {
         cases h,
@@ -2397,7 +2398,7 @@ begin
         specialize ih h1_right_right h2,
         rewrite <- ih,
 
-        exact holds_env_ext M tl (hd :: tl) d.q (function.update_list V (d.args.zip (list.map V args))) s2
+        exact holds_env_ext P M tl (hd :: tl) d.q (function.update_list V (d.args.zip (list.map V args))) s2
   (def_in_env_imp_is_meta_var_or_all_def_in_env tl d h1_right_right h2)
   s1,
       }
@@ -2408,13 +2409,14 @@ end
 
 lemma holds_conv
   {D : Type}
+  (P : pred_interpretation D)
   (M : meta_valuation D)
   (E : env)
   (φ φ' : formula)
   (V : valuation D)
   (h1 : E.well_formed)
   (h2 : is_conv E φ φ') :
-  holds D M E φ V ↔ holds D M E φ' V :=
+  holds D P M E φ V ↔ holds D P M E φ' V :=
 begin
   induction h2 generalizing V,
   case is_conv.conv_refl : h2 V
@@ -2428,7 +2430,7 @@ begin
   },
   case is_conv.conv_trans : h2_φ h2_φ' h2_φ'' h2_1 h2_2 h2_ih_1 h2_ih_2 V
   {
-    transitivity (holds D M E h2_φ' V),
+    transitivity (holds D P M E h2_φ' V),
     exact h2_ih_1 V,
     exact h2_ih_2 V,
   },
@@ -2463,21 +2465,21 @@ begin
     have s1 : formula.is_meta_var_or_all_def_in_env E d.q,
     exact def_in_env_imp_is_meta_var_or_all_def_in_env E d h1 h2,
 
-    rewrite <- holds_subst V M E σ σ' meta_var_ d.q s1 a1,
+    rewrite <- holds_subst P V M E σ σ' meta_var_ d.q s1 a1,
 
     have s2 : ((d.name = d.name) ∧ ((list.map σ.val d.args).length = d.args.length)),
     simp only [eq_self_iff_true, list.length_map, and_self],
 
-    rewrite <- lem_4 M E d d.name (list.map σ.val d.args) V h1 h2 s2,
+    rewrite <- lem_4 P M E d d.name (list.map σ.val d.args) V h1 h2 s2,
 
     have s3 : d.q.meta_var_set = ∅,
     exact no_meta_var_imp_meta_var_set_is_empty d.q d.args d.nf,
 
-    rewrite holds_meta_valuation_ext_no_meta_var
-      (fun (X' : meta_var_name) (V' : valuation D), holds D M E (meta_var_ X') (V' ∘ σ'))
+    rewrite holds_meta_valuation_ext_no_meta_var P
+      (fun (X' : meta_var_name) (V' : valuation D), holds D P M E (meta_var_ X') (V' ∘ σ'))
         M E (V ∘ σ.val) d.q s3,
 
-    apply holds_valuation_ext M E (function.update_list V (d.args.zip (list.map V (list.map σ.val d.args))))
+    apply holds_valuation_ext P M E (function.update_list V (d.args.zip (list.map V (list.map σ.val d.args))))
       (V ∘ σ.val) d.q d.args d.nf,
     intros v a2,
     simp only [list.map_map, function.comp_app],
