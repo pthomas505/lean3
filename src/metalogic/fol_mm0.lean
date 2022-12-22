@@ -2075,6 +2075,7 @@ end
 
 lemma lem_1
   {D : Type}
+  (P : pred_interpretation D)
   (M : meta_valuation D)
   (E : env)
   (Γ Γ' : list (var_name × meta_var_name))
@@ -2082,11 +2083,11 @@ lemma lem_1
   (σ' : var_name → var_name)
   (τ : meta_instantiation)
   (h1 : σ.1 ∘ σ' = id ∧ σ' ∘ σ.1 = id)
-  (h2 : ∀ (v : var_name) (X : meta_var_name), ((v, X) ∈ Γ') → is_not_free D M E v (meta_var_ X))
+  (h2 : ∀ (v : var_name) (X : meta_var_name), ((v, X) ∈ Γ') → is_not_free D P M E v (meta_var_ X))
   (h3 : ∀ (v : var_name) (X : meta_var_name), ((v, X) ∈ Γ) → not_free Γ' (σ.1 v) (τ X)) :
   ∀ (v : var_name) (X : meta_var_name),
     (v, X) ∈ Γ →
-      is_not_free D (fun (X : meta_var_name) (V' : valuation D), holds D M E (τ X) (V' ∘ σ'))
+      is_not_free D P (fun (X : meta_var_name) (V' : valuation D), holds D P M E (τ X) (V' ∘ σ'))
         E v (meta_var_ X) :=
 begin
   cases h1,
@@ -2095,7 +2096,7 @@ begin
   simp only [holds_meta_var],
   intros V a,
   rewrite aux_2 V σ' σ.1 v a h1_left h1_right,
-  apply not_free_imp_is_not_free M E Γ',
+  apply not_free_imp_is_not_free P M E Γ',
   {
     exact h3 v X a1,
   },
