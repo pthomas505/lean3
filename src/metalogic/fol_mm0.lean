@@ -406,31 +406,6 @@ begin
 end
 
 
-lemma function.update_list_comp
-  {α β γ : Type}
-  [decidable_eq α]
-  (f : α → β)
-  (g : β → γ)
-  (l : list (α × β)) :
-  g ∘ function.update_list f l =
-    function.update_list (g ∘ f) (list.map (fun (i : α × β), (i.fst, g i.snd)) l) :=
-begin
-  induction l,
-  case list.nil
-  {
-    unfold list.map,
-    unfold function.update_list,
-  },
-  case list.cons : hd tl ih
-  {
-    unfold list.map,
-    unfold function.update_list,
-    rewrite function.comp_update,
-    rewrite ih,
-  },
-end
-
-
 def list.option_to_option_list {α : Type} [decidable_eq α] (l : list (option α)) : option (list α) :=
   if none ∈ l then none else some l.reduce_option
 
