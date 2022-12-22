@@ -1734,6 +1734,7 @@ end
 
 lemma holds_subst
   {D : Type}
+  (P : pred_interpretation D)
   (V : valuation D)
   (M : meta_valuation D)
   (E : env)
@@ -1743,8 +1744,8 @@ lemma holds_subst
   (φ : formula)
   (h1 : φ.is_meta_var_or_all_def_in_env E)
   (h2 : σ.1 ∘ σ' = id ∧ σ' ∘ σ.1 = id) :
-  holds D (fun (X' : meta_var_name) (V' : valuation D), holds D M E (τ X') (V' ∘ σ')) E φ (V ∘ σ.1) ↔
-    holds D M E (φ.subst σ τ) V :=
+  holds D P (fun (X' : meta_var_name) (V' : valuation D), holds D P M E (τ X') (V' ∘ σ')) E φ (V ∘ σ.1) ↔
+    holds D P M E (φ.subst σ τ) V :=
 begin
   induction φ generalizing V,
   case formula.meta_var_ : X V
@@ -1755,6 +1756,11 @@ begin
     rewrite function.comp.assoc,
     rewrite h2_left,
     rewrite function.comp.right_id,
+  },
+  case formula.pred_ : name args V
+  {
+    unfold formula.subst,
+    simp only [holds_pred, list.map_map],
   },
   case formula.not_ : φ φ_ih V
   {
