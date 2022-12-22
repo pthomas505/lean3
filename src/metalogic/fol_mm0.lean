@@ -1499,12 +1499,13 @@ end
 
 lemma holds_meta_valuation_ext_no_meta_var
   {D : Type}
+  (P : pred_interpretation D)
   (M1 M2 : meta_valuation D)
   (E : env)
   (V : valuation D)
   (φ : formula)
   (h1 : φ.meta_var_set = ∅) :
-  holds D M1 E φ V ↔ holds D M2 E φ V :=
+  holds D P M1 E φ V ↔ holds D P M2 E φ V :=
 begin
   apply holds_meta_valuation_ext,
   rewrite h1,
