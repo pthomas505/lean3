@@ -2202,6 +2202,10 @@ begin
   {
     unfold formula.subst at h1,
   },
+  case formula.pred_ : name args
+  {
+    unfold formula.subst at h1,
+  },
   case formula.not_ : φ φ_ih
   {
     unfold formula.subst at h1,
