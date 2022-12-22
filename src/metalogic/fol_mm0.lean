@@ -1626,6 +1626,7 @@ end
 
 lemma holds_env_ext
   {D : Type}
+  (P : pred_interpretation D)
   (M : meta_valuation D)
   (E E' : env)
   (φ : formula)
@@ -1633,12 +1634,16 @@ lemma holds_env_ext
   (h1 : ∃ (E1 : env), E' = E1 ++ E)
   (h2 : φ.is_meta_var_or_all_def_in_env E)
   (h3 : E'.nodup_) :
-  holds D M E' φ V ↔ holds D M E φ V :=
+  holds D P M E' φ V ↔ holds D P M E φ V :=
 begin
   induction φ generalizing V,
   case formula.meta_var_ : X V
   {
     simp only [holds_meta_var],
+  },
+  case formula.pred_ : name args V
+  {
+    simp only [holds_pred],
   },
   case formula.not_ : φ φ_ih V
   {
