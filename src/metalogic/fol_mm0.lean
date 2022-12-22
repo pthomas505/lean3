@@ -1922,20 +1922,42 @@ end
 
 lemma not_free_imp_is_not_free
   {D : Type}
+  (P : pred_interpretation D)
   (M : meta_valuation D)
   (E : env)
   (Γ : list (var_name × meta_var_name))
   (v : var_name)
   (φ : formula)
   (h1 : not_free Γ v φ)
-  (h2 : ∀ (X : meta_var_name), (v, X) ∈ Γ → is_not_free D M E v (meta_var_ X)) :
-  is_not_free D M E v φ :=
+  (h2 : ∀ (X : meta_var_name), (v, X) ∈ Γ → is_not_free D P M E v (meta_var_ X)) :
+  is_not_free D P M E v φ :=
 begin
   induction φ,
   case formula.meta_var_ : X
   {
     unfold not_free at h1,
     exact h2 X h1,
+  },
+  case formula.pred_ : name args
+  {
+    unfold not_free at h1,
+
+    unfold is_not_free at *,
+
+    simp only [holds_pred],
+    intros V a,
+
+    have s1 : list.map (function.update V v a) args = list.map V args,
+    apply list.map_congr,
+    intros x a1,
+    have s2 : ¬ x = v,
+    intros contra,
+    apply h1,
+    rewrite <- contra,
+    exact a1,
+    simp only [function.update_noteq s2],
+
+    rewrite s1,
   },
   case formula.not_ : φ φ_ih
   {
@@ -1967,41 +1989,41 @@ begin
   },
   case formula.eq_ : x y
   {
-      unfold not_free at h1,
-      cases h1,
+    unfold not_free at h1,
+    cases h1,
 
-      unfold is_not_free at *,
+    unfold is_not_free at *,
 
-      simp only [holds_eq],
-      intros V a,
-      simp only [function.update_noteq h1_left, function.update_noteq h1_right],
+    simp only [holds_eq],
+    intros V a,
+    simp only [function.update_noteq h1_left, function.update_noteq h1_right],
   },
   case formula.forall_ : x φ φ_ih
   {
-      unfold not_free at h1,
+    unfold not_free at h1,
 
-      unfold is_not_free at *,
+    unfold is_not_free at *,
 
-      simp only [holds_forall],
-      intros V a,
-      apply forall_congr,
-      intros a',
-      cases h1,
+    simp only [holds_forall],
+    intros V a,
+    apply forall_congr,
+    intros a',
+    cases h1,
+    {
+      rewrite h1,
+      simp only [function.update_idem],
+    },
+    {
+      by_cases c1 : v = x,
       {
-        rewrite h1,
+        rewrite c1,
         simp only [function.update_idem],
       },
       {
-        by_cases c1 : v = x,
-        {
-          rewrite c1,
-          simp only [function.update_idem],
-        },
-        {
-          simp only [function.update_comm c1],
-          exact φ_ih h1 (function.update V x a') a,
-        }
+        simp only [function.update_comm c1],
+        exact φ_ih h1 (function.update V x a') a,
       }
+    }
   },
   case formula.def_ : name args
   {
@@ -2019,7 +2041,7 @@ begin
       intros V a,
       split_ifs,
       {
-        apply holds_valuation_ext M E_tl
+        apply holds_valuation_ext P M E_tl
           (function.update_list V (E_hd.args.zip (list.map V args)))
           (function.update_list (function.update V v a) (E_hd.args.zip (list.map (function.update V v a) args)))
           E_hd.q E_hd.args E_hd.nf,
@@ -2029,7 +2051,10 @@ begin
           apply function.update_list_update V (function.update V v a),
           {
             unfold not_free at h1,
-            exact h1,
+            intros y a2 contra,
+            apply h1,
+            rewrite <- contra,
+            exact a2,
           },
           {
             cases h,
