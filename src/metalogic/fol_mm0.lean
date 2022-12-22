@@ -2490,6 +2490,7 @@ end
 
 example
   {D : Type}
+  (P : pred_interpretation D)
   (M : meta_valuation D)
   (E : env)
   (Γ : list (var_name × meta_var_name))
@@ -2497,9 +2498,9 @@ example
   (φ : formula)
   (h1 : is_proof E Γ Δ φ)
   (h2 : E.well_formed)
-  (nf : ∀ v X, (v, X) ∈ Γ → is_not_free D M E v (meta_var_ X))
-  (hyp : ∀ (ψ ∈ Δ) (V : valuation D), holds D M E ψ V) :
-  ∀ (V : valuation D), holds D M E φ V :=
+  (nf : ∀ v X, (v, X) ∈ Γ → is_not_free D P M E v (meta_var_ X))
+  (hyp : ∀ (ψ ∈ Δ) (V : valuation D), holds D P M E ψ V) :
+  ∀ (V : valuation D), holds D P M E φ V :=
 begin
   induction h1 generalizing M,
   case is_proof.hyp : h1_Γ h1_Δ h1_φ h1_1 h1_2 M nf hyp
@@ -2545,8 +2546,8 @@ begin
   },
   case is_proof.pred_2 : h1_Γ h1_Δ h1_φ h1_x h1_1 h1_2 M nf hyp
   {
-    have s1 : is_not_free D M E h1_x h1_φ,
-    exact not_free_imp_is_not_free M E h1_Γ h1_x h1_φ h1_2 (nf h1_x),
+    have s1 : is_not_free D P M E h1_x h1_φ,
+    exact not_free_imp_is_not_free P M E h1_Γ h1_x h1_φ h1_2 (nf h1_x),
 
     simp only [holds_imp, holds_forall],
     intros V a1 a,
@@ -2586,12 +2587,12 @@ begin
     exact lem_3 E h1_Γ h1_Δ h1_φ h1_4,
 
     intros V,
-    rewrite <- holds_subst V M E h1_σ σ' h1_τ h1_φ s1 a1,
+    rewrite <- holds_subst P V M E h1_σ σ' h1_τ h1_φ s1 a1,
 
     apply h1_ih_2,
     {
       intros v X a2,
-      exact lem_1 M E h1_Γ h1_Γ' h1_σ σ' h1_τ a1 nf h1_2 v X a2,
+      exact lem_1 P M E h1_Γ h1_Γ' h1_σ σ' h1_τ a1 nf h1_2 v X a2,
     },
     {
       intros ψ a2 V',
@@ -2602,10 +2603,10 @@ begin
       exact h1_3 ψ a2,
 
       have s3 : ∀ (V'' : valuation D),
-        holds D (fun (X' : meta_var_name) (V' : valuation D), holds D M E (h1_τ X') (V' ∘ σ'))
+        holds D P (fun (X' : meta_var_name) (V' : valuation D), holds D P M E (h1_τ X') (V' ∘ σ'))
           E ψ (V'' ∘ h1_σ.val),
       intros V'',
-      rewrite holds_subst V'' M E h1_σ σ' h1_τ ψ s2 a1,
+      rewrite holds_subst P V'' M E h1_σ σ' h1_τ ψ s2 a1,
       exact h1_ih_1 ψ a2 M nf hyp V'',
 
       specialize s3 (V' ∘ σ'),
@@ -2619,10 +2620,10 @@ begin
   {
     intros V,
 
-    have s1 : holds D M E h1_φ V,
+    have s1 : holds D P M E h1_φ V,
     exact h1_ih M nf hyp V,
 
-    rewrite <- holds_conv M E h1_φ h1_φ' V h2 h1_3,
+    rewrite <- holds_conv P M E h1_φ h1_φ' V h2 h1_3,
     exact s1,
   },
 end
