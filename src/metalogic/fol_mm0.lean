@@ -2321,7 +2321,6 @@ begin
   },
 end
 
---
 
 lemma lem_4
   {D : Type}
