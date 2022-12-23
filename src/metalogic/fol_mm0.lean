@@ -1018,7 +1018,7 @@ def holds'
     option.elim
       false
       (
-        fun d : definition_,
+        fun (d : definition_),
         if name = d.name ∧ args.length = d.args.length
         then holds d.q (function.update_list V (list.zip d.args (list.map V args)))
         else holds (def_ name args) V
