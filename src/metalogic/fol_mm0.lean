@@ -1735,13 +1735,13 @@ end
 lemma holds_subst
   {D : Type}
   (P : pred_interpretation D)
-  (V : valuation D)
   (M : meta_valuation D)
   (E : env)
   (σ : instantiation)
   (σ' : var_name → var_name)
   (τ : meta_instantiation)
   (φ : formula)
+  (V : valuation D)
   (h1 : φ.is_meta_var_or_all_def_in_env E)
   (h2 : σ.1 ∘ σ' = id ∧ σ' ∘ σ.1 = id) :
   holds D P (fun (X' : meta_var_name) (V' : valuation D), holds D P M E (τ X') (V' ∘ σ')) E φ (V ∘ σ.1) ↔
@@ -2465,7 +2465,7 @@ begin
     have s1 : formula.is_meta_var_or_all_def_in_env E d.q,
     exact def_in_env_imp_is_meta_var_or_all_def_in_env E d h1 h2,
 
-    rewrite <- holds_subst P V M E σ σ' meta_var_ d.q s1 a1,
+    rewrite <- holds_subst P M E σ σ' meta_var_ d.q V s1 a1,
 
     have s2 : ((d.name = d.name) ∧ ((list.map σ.val d.args).length = d.args.length)),
     simp only [eq_self_iff_true, list.length_map, and_self],
@@ -2587,7 +2587,7 @@ begin
     exact lem_3 E h1_Γ h1_Δ h1_φ h1_4,
 
     intros V,
-    rewrite <- holds_subst P V M E h1_σ σ' h1_τ h1_φ s1 a1,
+    rewrite <- holds_subst P M E h1_σ σ' h1_τ h1_φ V s1 a1,
 
     apply h1_ih_2,
     {
@@ -2606,7 +2606,7 @@ begin
         holds D P (fun (X' : meta_var_name) (V' : valuation D), holds D P M E (h1_τ X') (V' ∘ σ'))
           E ψ (V'' ∘ h1_σ.val),
       intros V'',
-      rewrite holds_subst P V'' M E h1_σ σ' h1_τ ψ s2 a1,
+      rewrite holds_subst P M E h1_σ σ' h1_τ ψ V'' s2 a1,
       exact h1_ih_1 ψ a2 M nf hyp V'',
 
       specialize s3 (V' ∘ σ'),
