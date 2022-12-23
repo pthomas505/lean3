@@ -16,11 +16,11 @@ lemma aux_1
   (h1 : f' ∘ f = id) :
   (function.update g (f x) a) ∘ f = function.update (g ∘ f) x a :=
 begin
-    have s1 : function.left_inverse f' f,
-    exact congr_fun h1,
+  have s1 : function.left_inverse f' f,
+  exact congr_fun h1,
 
-    apply function.update_comp_eq_of_injective,
-    exact function.left_inverse.injective s1,
+  apply function.update_comp_eq_of_injective,
+  exact function.left_inverse.injective s1,
 end
 
 
