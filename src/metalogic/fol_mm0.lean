@@ -2488,7 +2488,7 @@ begin
 end
 
 
-example
+theorem holds_is_proof
   {D : Type}
   (P : pred_interpretation D)
   (M : meta_valuation D)
