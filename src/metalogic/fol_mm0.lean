@@ -2906,3 +2906,26 @@ def fol_axiom_map : hash_map string (fun _, theorem_) :=
     ].map prod.to_sigma
   )
   string.hash
+
+
+-----
+
+
+@[derive decidable_eq]
+inductive fol_formula : Type
+| pred_ : pred_name → list var_name → fol_formula
+| not_ : fol_formula → fol_formula
+| imp_ : fol_formula → fol_formula → fol_formula
+| eq_ : var_name → var_name → fol_formula
+| forall_ : var_name → fol_formula → fol_formula
+
+
+def formula.to_fol_formula (M : meta_var_name → fol_formula) : formula → fol_formula
+| (meta_var_ X) := M X
+| (pred_ name args) := fol_formula.pred_ name args
+| (not_ φ) := fol_formula.not_ φ.to_fol_formula
+| (imp_ φ ψ) := fol_formula.imp_ φ.to_fol_formula ψ.to_fol_formula
+| (eq_ x y) := fol_formula.eq_ x y
+| (forall_ x φ) := fol_formula.forall_ x φ.to_fol_formula
+| (def_ name args) := fol_formula.pred_ name args
+
