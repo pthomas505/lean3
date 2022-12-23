@@ -2936,3 +2936,36 @@ def fol_not_free (v : var_name) : fol_formula → Prop
 | (fol_formula.imp_ φ ψ) := fol_not_free φ ∧ fol_not_free ψ
 | (fol_formula.eq_ x y) := x ≠ v ∧ y ≠ v
 | (fol_formula.forall_ x φ) := x = v ∨ fol_not_free φ
+
+
+def fol_formula_exists_ (x : var_name) (φ : fol_formula) : fol_formula := fol_formula.not_ (fol_formula.forall_ x (fol_formula.not_ φ))
+
+
+inductive fol_is_proof : fol_formula → Prop
+
+| mp (φ ψ : fol_formula) :
+  fol_is_proof φ → fol_is_proof (φ.imp_ ψ) → fol_is_proof ψ
+
+| prop_1 (φ ψ : fol_formula) :
+  fol_is_proof (φ.imp_ (ψ.imp_ φ))
+
+| prop_2 (φ ψ χ : fol_formula) :
+  fol_is_proof ((φ.imp_ (ψ.imp_ χ)).imp_ ((φ.imp_ ψ).imp_ (φ.imp_ χ)))
+
+| prop_3 (φ ψ : fol_formula) :
+  fol_is_proof (((fol_formula.not_ φ).imp_ (fol_formula.not_ ψ)).imp_ (ψ.imp_ φ))
+
+| gen (φ : fol_formula) (x : var_name) :
+  fol_is_proof φ → fol_is_proof (fol_formula.forall_ x φ)
+
+| pred_1 (φ ψ : fol_formula) (x : var_name) :
+  fol_is_proof ((fol_formula.forall_ x (φ.imp_ ψ)).imp_ ((fol_formula.forall_ x φ).imp_ (fol_formula.forall_ x ψ)))
+
+| pred_2 (φ : fol_formula) (x : var_name) :
+  fol_not_free x φ → fol_is_proof (φ.imp_ (fol_formula.forall_ x φ))
+
+| eq_1 (x y : var_name) :
+  y ≠ x → fol_is_proof (fol_formula_exists_ x (fol_formula.eq_ x y))
+
+| eq_2 (x y z : var_name) :
+  fol_is_proof ((fol_formula.eq_ x y).imp_ ((fol_formula.eq_ x z).imp_ (fol_formula.eq_ y z)))
