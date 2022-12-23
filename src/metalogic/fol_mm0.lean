@@ -1901,7 +1901,7 @@ example
   (φ : formula) :
   is_not_free D P M E v φ ↔
     ∀ (V V' : valuation D),
-      (∀ (y : var_name), (y ≠ v → (V y = V' y))) →
+      (∀ (y : var_name), (¬ y = v) → (V y = V' y)) →
         (holds D P M E φ V ↔ holds D P M E φ V') :=
 begin
   unfold is_not_free,
