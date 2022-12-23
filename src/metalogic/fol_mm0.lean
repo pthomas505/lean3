@@ -1311,7 +1311,7 @@ begin
       simp only [holds_not_nil_def],
       split_ifs,
       {
-        have s1 : ∀ (v : var_name), (v ∈ E_hd.args) →
+        have s1 : ∀ (v : var_name), v ∈ E_hd.args →
           function.update_list V1 (E_hd.args.zip (list.map V1 args)) v =
             function.update_list V2 (E_hd.args.zip (list.map V2 args)) v,
         {
@@ -2083,8 +2083,8 @@ lemma lem_1
   (σ' : var_name → var_name)
   (τ : meta_instantiation)
   (h1 : σ.1 ∘ σ' = id ∧ σ' ∘ σ.1 = id)
-  (h2 : ∀ (v : var_name) (X : meta_var_name), ((v, X) ∈ Γ') → is_not_free D P M E v (meta_var_ X))
-  (h3 : ∀ (v : var_name) (X : meta_var_name), ((v, X) ∈ Γ) → not_free Γ' (σ.1 v) (τ X)) :
+  (h2 : ∀ (v : var_name) (X : meta_var_name), (v, X) ∈ Γ' → is_not_free D P M E v (meta_var_ X))
+  (h3 : ∀ (v : var_name) (X : meta_var_name), (v, X) ∈ Γ → not_free Γ' (σ.1 v) (τ X)) :
   ∀ (v : var_name) (X : meta_var_name),
     (v, X) ∈ Γ →
       is_not_free D P (fun (X : meta_var_name) (V' : valuation D), holds D P M E (τ X) (V' ∘ σ'))
@@ -2498,7 +2498,7 @@ example
   (φ : formula)
   (h1 : is_proof E Γ Δ φ)
   (h2 : E.well_formed)
-  (nf : ∀ v X, (v, X) ∈ Γ → is_not_free D P M E v (meta_var_ X))
+  (nf : ∀ (v : var_name) (X : meta_var_name), (v, X) ∈ Γ → is_not_free D P M E v (meta_var_ X))
   (hyp : ∀ (ψ ∈ Δ) (V : valuation D), holds D P M E ψ V) :
   ∀ (V : valuation D), holds D P M E φ V :=
 begin
