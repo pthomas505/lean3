@@ -811,7 +811,7 @@ begin
         },
       },
       {
-        have s1 : (∃ (E1 : env), (E' = (E1 ++ E_tl))),
+        have s1 : ∃ (E1 : env), E' = E1 ++ E_tl,
         apply exists.intro (E1 ++ [E_hd]),
         simp only [list.append_assoc, list.singleton_append],
         exact h1_1,
