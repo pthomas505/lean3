@@ -2499,13 +2499,14 @@ example
   (h1 : is_proof E Γ Δ φ)
   (h2 : E.well_formed)
   (nf : ∀ (v : var_name) (X : meta_var_name), (v, X) ∈ Γ → is_not_free D P M E v (meta_var_ X))
-  (hyp : ∀ (ψ ∈ Δ) (V : valuation D), holds D P M E ψ V) :
+  (hyp : ∀ (ψ : formula) (V : valuation D), ψ ∈ Δ → holds D P M E ψ V) :
   ∀ (V : valuation D), holds D P M E φ V :=
 begin
   induction h1 generalizing M,
   case is_proof.hyp : h1_Γ h1_Δ h1_φ h1_1 h1_2 M nf hyp
   {
-    exact hyp h1_φ h1_2,
+    intros V,
+    exact hyp h1_φ V h1_2,
   },
   case is_proof.mp : h1_Γ h1_Δ h1_φ h1_ψ h1_1 h1_2 h1_ih_1 h1_ih_2 M nf hyp
   {
@@ -2595,7 +2596,7 @@ begin
       exact lem_1 P M E h1_Γ h1_Γ' h1_σ σ' h1_τ a1 nf h1_2 v X a2,
     },
     {
-      intros ψ a2 V',
+      intros ψ V' a2,
 
       have s2 : formula.is_meta_var_or_all_def_in_env E ψ,
       apply lem_2_b E h1_σ h1_τ,
