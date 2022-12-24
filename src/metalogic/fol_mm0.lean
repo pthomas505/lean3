@@ -3061,8 +3061,11 @@ begin
   {
     apply fol_is_proof.prop_3,
   },
-  case is_proof.gen : h1_Γ h1_Δ h1_φ h1_x h1_ᾰ h1_ih
-  { admit },
+  case is_proof.gen : h1_Γ h1_Δ h1_φ h1_x h1_1 h1_ih
+  {
+    apply fol_is_proof.gen,
+    exact h1_ih h2 h3,
+  },
   case is_proof.pred_1 : h1_Γ h1_Δ h1_φ h1_ψ h1_x h1_ᾰ h1_ᾰ_1
   { admit },
   case is_proof.pred_2 : h1_Γ h1_Δ h1_φ h1_x h1_ᾰ h1_ᾰ_1
