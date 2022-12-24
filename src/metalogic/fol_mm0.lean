@@ -2952,15 +2952,15 @@ example
   formula.to_fol_formula M (fol_formula.to_formula φ) = φ :=
 begin
   induction φ,
-  case fol_formula.pred_ : φ_ᾰ φ_ᾰ_1
+  case fol_formula.pred_ : name args
   { admit },
-  case fol_formula.not_ : φ_ᾰ φ_ih
+  case fol_formula.not_ : φ φ_ih
   { admit },
-  case fol_formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
+  case fol_formula.imp_ : φ ψ φ_ih ψ_ih
   { admit },
-  case fol_formula.eq_ : φ_ᾰ φ_ᾰ_1
+  case fol_formula.eq_ : x y
   { admit },
-  case fol_formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
+  case fol_formula.forall_ : x φ φ_ih
   { admit },
 end
 
