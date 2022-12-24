@@ -3097,8 +3097,24 @@ begin
       unfold fol_not_free,
       exact h1_φ_ih h1_1 h1_2,
     },
-    case formula.imp_ : h1_φ_ᾰ h1_φ_ᾰ_1 h1_φ_ih_ᾰ h1_φ_ih_ᾰ_1
-    { admit },
+    case formula.imp_ : h1_φ h1_ψ h1_φ_ih h1_ψ_ih
+    {
+      unfold formula.is_meta_var_or_all_def_in_env at h1_1,
+      cases h1_1,
+
+      unfold not_free at h1_2,
+      cases h1_2,
+
+      unfold formula.to_fol_formula,
+      unfold fol_not_free,
+      split,
+      {
+        exact h1_φ_ih h1_1_left h1_2_left,
+      },
+      {
+        exact h1_ψ_ih h1_1_right h1_2_right,
+      }
+    },
     case formula.eq_ : h1_φ_ᾰ h1_φ_ᾰ_1
     { admit },
     case formula.forall_ : h1_φ_ᾰ h1_φ_ᾰ_1 h1_φ_ih
