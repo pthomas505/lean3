@@ -2973,3 +2973,15 @@ inductive fol_is_proof : fol_formula → Prop
 
 | eq_2 (x y z : var_name) :
   fol_is_proof ((fol_formula.eq_ x y).imp_ ((fol_formula.eq_ x z).imp_ (fol_formula.eq_ y z)))
+
+
+theorem conservative
+  (E : env)
+  (Γ : list (var_name × meta_var_name))
+  (Δ : list formula)
+  (φ : formula)
+  (M : meta_var_name → fol_formula)
+  (h1 : is_proof E Γ Δ φ)
+  (h2 : ∀ (x : var_name) (X : meta_var_name), (x, X) ∈ Γ → fol_not_free x (M X))
+  (h3 : ∀ (ψ : formula), ψ ∈ Δ → fol_is_proof (formula.to_fol_formula M ψ)) :
+  fol_is_proof (formula.to_fol_formula M φ) := sorry
