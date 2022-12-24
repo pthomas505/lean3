@@ -3030,4 +3030,7 @@ theorem conservative
   (h1 : is_proof E Γ Δ φ)
   (h2 : ∀ (x : var_name) (X : meta_var_name), (x, X) ∈ Γ → fol_not_free x (M X))
   (h3 : ∀ (ψ : formula), ψ ∈ Δ → fol_is_proof (formula.to_fol_formula M ψ)) :
-  fol_is_proof (formula.to_fol_formula M φ) := sorry
+  fol_is_proof (formula.to_fol_formula M φ) :=
+begin
+
+end
