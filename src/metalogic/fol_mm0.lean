@@ -2951,7 +2951,17 @@ example
   (M : meta_var_name → fol_formula) :
   formula.to_fol_formula M (fol_formula.to_formula φ) = φ :=
 begin
-  sorry
+  induction φ,
+  case fol_formula.pred_ : φ_ᾰ φ_ᾰ_1
+  { admit },
+  case fol_formula.not_ : φ_ᾰ φ_ih
+  { admit },
+  case fol_formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
+  { admit },
+  case fol_formula.eq_ : φ_ᾰ φ_ᾰ_1
+  { admit },
+  case fol_formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
+  { admit },
 end
 
 
