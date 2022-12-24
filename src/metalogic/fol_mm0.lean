@@ -2938,7 +2938,11 @@ def fol_not_free (v : var_name) : fol_formula → Prop
 | (fol_formula.forall_ x φ) := x = v ∨ fol_not_free φ
 
 
-def fol_formula_exists_ (x : var_name) (φ : fol_formula) : fol_formula := fol_formula.not_ (fol_formula.forall_ x (fol_formula.not_ φ))
+def fol_formula_exists_
+  (x : var_name)
+  (φ : fol_formula) :
+  fol_formula :=
+  fol_formula.not_ (fol_formula.forall_ x (fol_formula.not_ φ))
 
 
 inductive fol_is_proof : fol_formula → Prop
