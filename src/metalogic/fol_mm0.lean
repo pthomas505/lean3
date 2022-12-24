@@ -3053,10 +3053,14 @@ begin
   {
     apply fol_is_proof.prop_1,
   },
-  case is_proof.prop_2 : h1_Γ h1_Δ h1_φ h1_ψ h1_χ h1_ᾰ h1_ᾰ_1 h1_ᾰ_2
-  { admit },
-  case is_proof.prop_3 : h1_Γ h1_Δ h1_φ h1_ψ h1_ᾰ h1_ᾰ_1
-  { admit },
+  case is_proof.prop_2 : h1_Γ h1_Δ h1_φ h1_ψ h1_χ h1_1 h1_2 h1_3
+  {
+    apply fol_is_proof.prop_2,
+  },
+  case is_proof.prop_3 : h1_Γ h1_Δ h1_φ h1_ψ h1_1 h1_2
+  {
+    apply fol_is_proof.prop_3,
+  },
   case is_proof.gen : h1_Γ h1_Δ h1_φ h1_x h1_ᾰ h1_ih
   { admit },
   case is_proof.pred_1 : h1_Γ h1_Δ h1_φ h1_ψ h1_x h1_ᾰ h1_ᾰ_1
