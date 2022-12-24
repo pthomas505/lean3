@@ -3033,9 +3033,11 @@ theorem conservative
   fol_is_proof (formula.to_fol_formula M φ) :=
 begin
   induction h1,
-  case is_proof.hyp : h1_Γ h1_Δ h1_φ h1_ᾰ h1_ᾰ_1
-  { admit },
-  case is_proof.mp : h1_Γ h1_Δ h1_φ h1_ψ h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  case is_proof.hyp : h1_Γ h1_Δ h1_φ h1_1 h1_2
+  {
+    exact h3 h1_φ h1_2,
+  },
+  case is_proof.mp : h1_Γ h1_Δ h1_φ h1_ψ h1_1 h1_2 h1_ih_1 h1_ih_2
   { admit },
   case is_proof.prop_1 : h1_Γ h1_Δ h1_φ h1_ψ h1_ᾰ h1_ᾰ_1
   { admit },
