@@ -2930,6 +2930,14 @@ def formula.to_fol_formula (M : meta_var_name → fol_formula) : formula → fol
 | (def_ name args) := fol_formula.pred_ name args
 
 
+def fol_formula.to_formula : fol_formula → formula
+| (fol_formula.pred_ name args) := formula.pred_ name args
+| (fol_formula.not_ φ) := formula.not_ φ.to_formula
+| (fol_formula.imp_ φ ψ) := formula.imp_ φ.to_formula ψ.to_formula
+| (fol_formula.eq_ x y) := formula.eq_ x y
+| (fol_formula.forall_ x φ) := formula.forall_ x φ.to_formula
+
+
 def fol_not_free (v : var_name) : fol_formula → Prop
 | (fol_formula.pred_ name args) := v ∉ args
 | (fol_formula.not_ φ) := fol_not_free φ
