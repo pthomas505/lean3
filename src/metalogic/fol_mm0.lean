@@ -2953,15 +2953,34 @@ example
 begin
   induction φ,
   case fol_formula.pred_ : name args
-  { admit },
+  {
+    unfold fol_formula.to_formula,
+    unfold formula.to_fol_formula,
+  },
   case fol_formula.not_ : φ φ_ih
-  { admit },
+  {
+    unfold fol_formula.to_formula,
+    unfold formula.to_fol_formula,
+    rewrite φ_ih,
+  },
   case fol_formula.imp_ : φ ψ φ_ih ψ_ih
-  { admit },
+  {
+    unfold fol_formula.to_formula,
+    unfold formula.to_fol_formula,
+    rewrite φ_ih,
+    rewrite ψ_ih,
+  },
   case fol_formula.eq_ : x y
-  { admit },
+  {
+    unfold fol_formula.to_formula,
+    unfold formula.to_fol_formula,
+  },
   case fol_formula.forall_ : x φ φ_ih
-  { admit },
+  {
+    unfold fol_formula.to_formula,
+    unfold formula.to_fol_formula,
+    rewrite φ_ih,
+  },
 end
 
 
