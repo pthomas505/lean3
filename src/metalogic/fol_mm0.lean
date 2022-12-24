@@ -3038,7 +3038,17 @@ begin
     exact h3 h1_φ h1_2,
   },
   case is_proof.mp : h1_Γ h1_Δ h1_φ h1_ψ h1_1 h1_2 h1_ih_1 h1_ih_2
-  { admit },
+  {
+    unfold formula.to_fol_formula at h1_ih_2,
+
+    apply fol_is_proof.mp (formula.to_fol_formula M h1_φ) (formula.to_fol_formula M h1_ψ),
+    {
+      exact h1_ih_1 h2 h3,
+    },
+    {
+      exact h1_ih_2 h2 h3,
+    }
+  },
   case is_proof.prop_1 : h1_Γ h1_Δ h1_φ h1_ψ h1_ᾰ h1_ᾰ_1
   { admit },
   case is_proof.prop_2 : h1_Γ h1_Δ h1_φ h1_ψ h1_χ h1_ᾰ h1_ᾰ_1 h1_ᾰ_2
