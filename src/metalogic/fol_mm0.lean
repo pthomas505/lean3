@@ -2946,6 +2946,15 @@ def fol_not_free (v : var_name) : fol_formula → Prop
 | (fol_formula.forall_ x φ) := x = v ∨ fol_not_free φ
 
 
+example
+  (φ : fol_formula)
+  (M : meta_var_name → fol_formula) :
+  formula.to_fol_formula M (fol_formula.to_formula φ) = φ :=
+begin
+  sorry
+end
+
+
 def fol_formula_exists_
   (x : var_name)
   (φ : fol_formula) :
