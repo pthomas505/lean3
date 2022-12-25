@@ -3115,8 +3115,14 @@ begin
         exact h1_ψ_ih h1_1_right h1_2_right,
       }
     },
-    case formula.eq_ : h1_φ_ᾰ h1_φ_ᾰ_1
-    { admit },
+    case formula.eq_ : h1_x h1_y
+    {
+      unfold not_free at h1_2,
+
+      unfold formula.to_fol_formula,
+      unfold fol_not_free,
+      exact h1_2,
+    },
     case formula.forall_ : h1_φ_ᾰ h1_φ_ᾰ_1 h1_φ_ih
     { admit },
     case formula.def_ : h1_φ_ᾰ h1_φ_ᾰ_1
