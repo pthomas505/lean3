@@ -3159,7 +3159,16 @@ begin
     apply fol_is_proof.eq_2,
   },
   case is_proof.thm : h1_Γ h1_Γ' h1_Δ h1_Δ' h1_φ h1_σ h1_τ h1_1 h1_2 h1_3 h1_4 h1_ih_1 h1_ih_2
-  { admit },
-  case is_proof.conv : h1_Γ h1_Δ h1_φ h1_φ' h1_ᾰ h1_ᾰ_1 h1_ᾰ_2 h1_ih
-  { admit },
+  {
+    dsimp at *,
+    apply h1_ih_1,
+    sorry,
+    exact h2,
+    exact h3,
+  },
+  case is_proof.conv : h1_Γ h1_Δ h1_φ h1_φ' h1_1 h1_2 h1_3 h1_ih
+  {
+    specialize h1_ih h2 h3,
+    sorry,
+  },
 end
