@@ -3073,7 +3073,7 @@ begin
   case is_proof.pred_2 : h1_Γ h1_Δ h1_φ h1_x h1_1 h1_2
   {
     apply fol_is_proof.pred_2,
-    induction h1_φ,
+    induction h1_φ generalizing h1_x,
     case formula.meta_var_ : X
     {
       unfold not_free at h1_2,
@@ -3095,7 +3095,7 @@ begin
 
       unfold formula.to_fol_formula,
       unfold fol_not_free,
-      exact h1_φ_ih h1_1 h1_2,
+      exact h1_φ_ih h1_1 h1_x h1_2,
     },
     case formula.imp_ : h1_φ h1_ψ h1_φ_ih h1_ψ_ih
     {
@@ -3109,10 +3109,10 @@ begin
       unfold fol_not_free,
       split,
       {
-        exact h1_φ_ih h1_1_left h1_2_left,
+        exact h1_φ_ih h1_1_left h1_x h1_2_left,
       },
       {
-        exact h1_ψ_ih h1_1_right h1_2_right,
+        exact h1_ψ_ih h1_1_right h1_x h1_2_right,
       }
     },
     case formula.eq_ : h1_x h1_y
@@ -3123,8 +3123,23 @@ begin
       unfold fol_not_free,
       exact h1_2,
     },
-    case formula.forall_ : h1_φ_ᾰ h1_φ_ᾰ_1 h1_φ_ih
-    { admit },
+    case formula.forall_ : h1_x h1_φ h1_φ_ih
+    {
+      unfold formula.is_meta_var_or_all_def_in_env at h1_1,
+      unfold not_free at h1_2,
+
+      unfold formula.to_fol_formula,
+      unfold fol_not_free,
+      cases h1_2,
+      {
+        apply or.intro_left,
+        exact h1_2,
+      },
+      {
+        apply or.intro_right,
+        exact h1_φ_ih h1_1 h1_x h1_2,
+      }
+    },
     case formula.def_ : h1_φ_ᾰ h1_φ_ᾰ_1
     { admit },
   },
