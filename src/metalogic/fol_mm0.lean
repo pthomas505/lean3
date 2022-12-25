@@ -3080,7 +3080,7 @@ begin
 
       exact h2 h1_x X h1_2,
     },
-    case formula.pred_ : name args
+    case formula.pred_ : h1_name h1_args
     {
       unfold not_free at h1_2,
 
@@ -3140,8 +3140,14 @@ begin
         exact h1_φ_ih h1_1 h1_x h1_2,
       }
     },
-    case formula.def_ : h1_φ_ᾰ h1_φ_ᾰ_1
-    { admit },
+    case formula.def_ : h1_name h1_args
+    {
+      unfold not_free at h1_2,
+
+      unfold formula.to_fol_formula,
+      unfold fol_not_free,
+      exact h1_2,
+    },
   },
   case is_proof.eq_1 : h1_Γ h1_Δ h1_x h1_y h1_ᾰ
   { admit },
