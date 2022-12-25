@@ -3149,8 +3149,11 @@ begin
       exact h1_2,
     },
   },
-  case is_proof.eq_1 : h1_Γ h1_Δ h1_x h1_y h1_ᾰ
-  { admit },
+  case is_proof.eq_1 : h1_Γ h1_Δ h1_x h1_y h1_1
+  {
+    apply fol_is_proof.eq_1,
+    exact h1_1,
+  },
   case is_proof.eq_2 : h1_Γ h1_Δ h1_x h1_y h1_z
   { admit },
   case is_proof.thm : h1_Γ h1_Γ' h1_Δ h1_Δ' h1_φ h1_σ h1_τ h1_ᾰ h1_ᾰ_1 h1_ᾰ_2 h1_ᾰ_3 h1_ih_ᾰ h1_ih_ᾰ_1
