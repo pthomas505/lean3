@@ -3045,6 +3045,34 @@ example
   fol.not_free v (mm0.formula.to_fol_formula M φ) :=
 begin
   induction φ generalizing v,
+  case mm0.formula.meta_var_ : φ v h1
+  { admit },
+  case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1 v h1
+  { admit },
+  case mm0.formula.not_ : φ_ᾰ φ_ih v h1
+  { admit },
+  case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1 v h1
+  { admit },
+  case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1 v h1
+  { admit },
+  case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih v h1
+  { admit },
+  case mm0.formula.def_ : φ_ᾰ φ_ᾰ_1 v h1
+  { admit },
+end
+
+
+example
+  (M : mm0.meta_var_name → fol.formula)
+  (Γ : list (mm0.var_name × mm0.meta_var_name))
+  (v : mm0.var_name)
+  (φ : mm0.formula)
+  (h1 : mm0.not_free Γ v φ)
+  (h2 : ∀ (x : mm0.var_name) (X : mm0.meta_var_name),
+    ((x, X) ∈ Γ) → fol.not_free x (M X)) :
+  fol.not_free v (mm0.formula.to_fol_formula M φ) :=
+begin
+  induction φ generalizing v,
   case mm0.formula.meta_var_ : X x h1
   {
     unfold mm0.not_free at h1,
