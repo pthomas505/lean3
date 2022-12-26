@@ -2990,6 +2990,17 @@ inductive is_proof : formula → Prop
 
 
 example
+  (σ : instantiation)
+  (φ : formula)
+  (x : var_name)
+  (h1 : not_free x φ) :
+  not_free (σ.val x) (formula.subst σ φ) :=
+begin
+  admit,
+end
+
+
+example
   (φ : formula)
   (σ : instantiation)
   (h1 : is_proof φ) :
@@ -3011,8 +3022,12 @@ begin
   { admit },
   case fol.is_proof.pred_1 : h1_φ h1_ψ h1_x
   { admit },
-  case fol.is_proof.pred_2 : h1_φ h1_x h1_ᾰ
-  { admit },
+  case fol.is_proof.pred_2 : h1_φ h1_x h1_1
+  {
+    unfold formula.subst,
+    apply is_proof.pred_2,
+    sorry,
+  },
   case fol.is_proof.eq_1 : h1_x h1_y h1_ᾰ
   { admit },
   case fol.is_proof.eq_2 : h1_x h1_y h1_z
