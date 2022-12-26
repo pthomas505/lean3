@@ -3051,13 +3051,13 @@ begin
     unfold mm0.formula.to_fol_formula,
     exact h2 v X h1,
   },
-  case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1
+  case mm0.formula.pred_ : name args
   { admit },
-  case mm0.formula.not_ : φ_ᾰ φ_ih
+  case mm0.formula.not_ : φ φ_ih
   { admit },
-  case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
+  case mm0.formula.imp_ : φ ψ φ_ih ψ_ih
   { admit },
-  case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1
+  case mm0.formula.eq_ : x y
   { admit },
   case mm0.formula.forall_ : x φ φ_ih
   {
@@ -3074,7 +3074,7 @@ begin
       exact φ_ih h1,
     }
   },
-  case mm0.formula.def_ : φ_ᾰ φ_ᾰ_1
+  case mm0.formula.def_ : name args
   { admit },
 end
 
