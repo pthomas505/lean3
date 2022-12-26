@@ -2997,7 +2997,10 @@ example
 begin
   induction h1,
   case fol.is_proof.mp : h1_φ h1_ψ h1_1 h1_2 h1_ih_1 h1_ih_2
-  { admit },
+  {
+    unfold formula.subst at h1_ih_2,
+    apply is_proof.mp (formula.subst σ h1_φ) (formula.subst σ h1_ψ) h1_ih_1 h1_ih_2,
+  },
   case fol.is_proof.prop_1 : h1_φ h1_ψ
   { admit },
   case fol.is_proof.prop_2 : h1_φ h1_ψ h1_χ
