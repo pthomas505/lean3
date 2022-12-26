@@ -3012,11 +3012,31 @@ begin
     unfold mm0.formula.to_fol_formula,
   },
   case mm0.formula.pred_ : name args M
-  { admit },
-  case mm0.formula.not_ : φ_ᾰ φ_ih M
-  { admit },
-  case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1 M
-  { admit },
+  {
+    unfold mm0.formula.subst,
+    unfold mm0.formula.to_fol_formula,
+    sorry,
+  },
+  case mm0.formula.not_ : φ φ_ih M
+  {
+    unfold mm0.formula.subst,
+    unfold mm0.formula.to_fol_formula,
+    simp only,
+    apply φ_ih,
+  },
+  case mm0.formula.imp_ : φ ψ φ_ih ψ_ih M
+  {
+    unfold mm0.formula.subst,
+    unfold mm0.formula.to_fol_formula,
+    simp only,
+    split,
+    {
+      apply φ_ih,
+    },
+    {
+      apply ψ_ih,
+    }
+  },
   case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1 M
   { admit },
   case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih M
