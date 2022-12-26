@@ -3003,10 +3003,10 @@ example
   (τ : mm0.meta_instantiation) :
   mm0.formula.to_fol_formula M (mm0.formula.subst σ τ φ) =
     mm0.formula.to_fol_formula
-      (fun (X' : mm0.meta_var_name), mm0.formula.to_fol_formula M (τ X')) φ :=
+      (fun (X : mm0.meta_var_name), mm0.formula.to_fol_formula M (τ X)) φ :=
 begin
   induction φ generalizing M,
-  case mm0.formula.meta_var_ : φ M
+  case mm0.formula.meta_var_ : X M
   { admit },
   case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1 M
   { admit },
