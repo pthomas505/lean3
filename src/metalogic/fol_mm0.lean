@@ -2996,9 +2996,17 @@ example
   (h1 : not_free x φ) :
   not_free (σ.val x) (formula.subst σ φ) :=
 begin
+  obtain ⟨σ', a1⟩ := σ.2,
   induction φ,
-  case fol.formula.pred_ : φ_ᾰ φ_ᾰ_1
-  { admit },
+  case fol.formula.pred_ : name args
+  {
+    unfold not_free at h1,
+    unfold formula.subst,
+    unfold not_free,
+    intros contra,
+    apply h1,
+    sorry,
+  },
   case fol.formula.not_ : φ_ᾰ φ_ih
   { admit },
   case fol.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
@@ -3072,7 +3080,8 @@ example
   (φ : mm0.formula)
   (M : mm0.meta_var_name → fol.formula)
   (σ : mm0.instantiation)
-  (τ : mm0.meta_instantiation) :
+  (τ : mm0.meta_instantiation)
+  (h1 : σ.val = id) :
   mm0.formula.to_fol_formula M (mm0.formula.subst σ τ φ) =
     mm0.formula.to_fol_formula
       (fun (X : mm0.meta_var_name), mm0.formula.to_fol_formula M (τ X)) φ :=
@@ -3087,7 +3096,9 @@ begin
   {
     unfold mm0.formula.subst,
     unfold mm0.formula.to_fol_formula,
-    sorry,
+    congr,
+    rewrite h1,
+    simp only [list.map_id],
   },
   case mm0.formula.not_ : φ φ_ih M
   {
@@ -3113,17 +3124,31 @@ begin
   {
     unfold mm0.formula.subst,
     unfold mm0.formula.to_fol_formula,
-    sorry,
+    rewrite h1,
+    simp only [id.def, eq_self_iff_true, and_self],
   },
   case mm0.formula.forall_ : x φ φ_ih M
   {
     unfold mm0.formula.subst,
     unfold mm0.formula.to_fol_formula,
     simp only,
-    sorry,
+    split,
+    {
+      rewrite h1,
+      simp only [id.def],
+    },
+    {
+      apply φ_ih,
+    }
   },
-  case mm0.formula.def_ : φ_ᾰ φ_ᾰ_1 M
-  { admit },
+  case mm0.formula.def_ : name args M
+  {
+    unfold mm0.formula.subst,
+    unfold mm0.formula.to_fol_formula,
+    congr,
+    rewrite h1,
+    simp only [list.map_id],
+  },
 end
 
 
