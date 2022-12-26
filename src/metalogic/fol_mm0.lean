@@ -3059,7 +3059,12 @@ begin
     exact h1,
   },
   case mm0.formula.not_ : φ φ_ih
-  { admit },
+  {
+    unfold mm0.not_free at h1,
+    unfold mm0.formula.to_fol_formula,
+    unfold fol.not_free,
+    exact φ_ih h1,
+  },
   case mm0.formula.imp_ : φ ψ φ_ih ψ_ih
   { admit },
   case mm0.formula.eq_ : x y
