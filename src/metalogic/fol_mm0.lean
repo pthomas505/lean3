@@ -2995,7 +2995,25 @@ example
   (h1 : is_proof φ) :
   is_proof (φ.subst σ) :=
 begin
-  sorry,
+  induction h1,
+  case fol.is_proof.mp : h1_φ h1_ψ h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  { admit },
+  case fol.is_proof.prop_1 : h1_φ h1_ψ
+  { admit },
+  case fol.is_proof.prop_2 : h1_φ h1_ψ h1_χ
+  { admit },
+  case fol.is_proof.prop_3 : h1_φ h1_ψ
+  { admit },
+  case fol.is_proof.gen : h1_φ h1_x h1_ᾰ h1_ih
+  { admit },
+  case fol.is_proof.pred_1 : h1_φ h1_ψ h1_x
+  { admit },
+  case fol.is_proof.pred_2 : h1_φ h1_x h1_ᾰ
+  { admit },
+  case fol.is_proof.eq_1 : h1_x h1_y h1_ᾰ
+  { admit },
+  case fol.is_proof.eq_2 : h1_x h1_y h1_z
+  { admit },
 end
 
 
