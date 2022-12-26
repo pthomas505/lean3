@@ -3087,13 +3087,13 @@ begin
   {
     apply fol.is_proof.pred_2,
     induction h1_φ generalizing h1_x,
-    case formula.meta_var_ : X
+    case mm0.formula.meta_var_ : X
     {
       unfold mm0.not_free at h1_2,
 
       exact h2 h1_x X h1_2,
     },
-    case formula.pred_ : h1_name h1_args
+    case mm0.formula.pred_ : h1_name h1_args
     {
       unfold mm0.not_free at h1_2,
 
@@ -3101,7 +3101,7 @@ begin
       unfold fol.not_free,
       exact h1_2,
     },
-    case formula.not_ : h1_φ h1_φ_ih
+    case mm0.formula.not_ : h1_φ h1_φ_ih
     {
       unfold mm0.formula.is_meta_var_or_all_def_in_env at h1_1,
       unfold mm0.not_free at h1_2,
@@ -3110,7 +3110,7 @@ begin
       unfold fol.not_free,
       exact h1_φ_ih h1_1 h1_x h1_2,
     },
-    case formula.imp_ : h1_φ h1_ψ h1_φ_ih h1_ψ_ih
+    case mm0.formula.imp_ : h1_φ h1_ψ h1_φ_ih h1_ψ_ih
     {
       unfold mm0.formula.is_meta_var_or_all_def_in_env at h1_1,
       cases h1_1,
@@ -3128,7 +3128,7 @@ begin
         exact h1_ψ_ih h1_1_right h1_x h1_2_right,
       }
     },
-    case formula.eq_ : h1_x h1_y
+    case mm0.formula.eq_ : h1_x h1_y
     {
       unfold mm0.not_free at h1_2,
 
@@ -3136,7 +3136,7 @@ begin
       unfold fol.not_free,
       exact h1_2,
     },
-    case formula.forall_ : h1_x h1_φ h1_φ_ih
+    case mm0.formula.forall_ : h1_x h1_φ h1_φ_ih
     {
       unfold mm0.formula.is_meta_var_or_all_def_in_env at h1_1,
       unfold mm0.not_free at h1_2,
@@ -3153,7 +3153,7 @@ begin
         exact h1_φ_ih h1_1 h1_x h1_2,
       }
     },
-    case formula.def_ : h1_name h1_args
+    case mm0.formula.def_ : h1_name h1_args
     {
       unfold mm0.not_free at h1_2,
 
