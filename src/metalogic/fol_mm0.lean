@@ -3081,7 +3081,12 @@ begin
     }
   },
   case mm0.formula.eq_ : x y
-  { admit },
+  {
+    unfold mm0.not_free at h1,
+    unfold mm0.formula.to_fol_formula,
+    unfold fol.not_free,
+    exact h1,
+  },
   case mm0.formula.forall_ : x φ φ_ih
   {
     unfold mm0.not_free at h1,
