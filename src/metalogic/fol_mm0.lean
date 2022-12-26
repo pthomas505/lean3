@@ -3034,7 +3034,7 @@ begin
 end
 
 
-example
+lemma mm0_not_free_imp_fol_not_free
   (M : mm0.meta_var_name → fol.formula)
   (Γ : list (mm0.var_name × mm0.meta_var_name))
   (v : mm0.var_name)
@@ -3164,81 +3164,7 @@ begin
   case is_proof.pred_2 : h1_Γ h1_Δ h1_φ h1_x h1_1 h1_2
   {
     apply fol.is_proof.pred_2,
-    induction h1_φ generalizing h1_x,
-    case mm0.formula.meta_var_ : X
-    {
-      unfold mm0.not_free at h1_2,
-
-      exact h2 h1_x X h1_2,
-    },
-    case mm0.formula.pred_ : h1_name h1_args
-    {
-      unfold mm0.not_free at h1_2,
-
-      unfold mm0.formula.to_fol_formula,
-      unfold fol.not_free,
-      exact h1_2,
-    },
-    case mm0.formula.not_ : h1_φ h1_φ_ih
-    {
-      unfold mm0.formula.is_meta_var_or_all_def_in_env at h1_1,
-      unfold mm0.not_free at h1_2,
-
-      unfold mm0.formula.to_fol_formula,
-      unfold fol.not_free,
-      exact h1_φ_ih h1_1 h1_x h1_2,
-    },
-    case mm0.formula.imp_ : h1_φ h1_ψ h1_φ_ih h1_ψ_ih
-    {
-      unfold mm0.formula.is_meta_var_or_all_def_in_env at h1_1,
-      cases h1_1,
-
-      unfold mm0.not_free at h1_2,
-      cases h1_2,
-
-      unfold mm0.formula.to_fol_formula,
-      unfold fol.not_free,
-      split,
-      {
-        exact h1_φ_ih h1_1_left h1_x h1_2_left,
-      },
-      {
-        exact h1_ψ_ih h1_1_right h1_x h1_2_right,
-      }
-    },
-    case mm0.formula.eq_ : h1_x h1_y
-    {
-      unfold mm0.not_free at h1_2,
-
-      unfold mm0.formula.to_fol_formula,
-      unfold fol.not_free,
-      exact h1_2,
-    },
-    case mm0.formula.forall_ : h1_x h1_φ h1_φ_ih
-    {
-      unfold mm0.formula.is_meta_var_or_all_def_in_env at h1_1,
-      unfold mm0.not_free at h1_2,
-
-      unfold mm0.formula.to_fol_formula,
-      unfold fol.not_free,
-      cases h1_2,
-      {
-        apply or.intro_left,
-        exact h1_2,
-      },
-      {
-        apply or.intro_right,
-        exact h1_φ_ih h1_1 h1_x h1_2,
-      }
-    },
-    case mm0.formula.def_ : h1_name h1_args
-    {
-      unfold mm0.not_free at h1_2,
-
-      unfold mm0.formula.to_fol_formula,
-      unfold fol.not_free,
-      exact h1_2,
-    },
+    exact mm0_not_free_imp_fol_not_free M h1_Γ h1_x h1_φ h1_2 h2,
   },
   case is_proof.eq_1 : h1_Γ h1_Δ h1_x h1_y h1_1
   {
