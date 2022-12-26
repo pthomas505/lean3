@@ -2998,13 +2998,28 @@ def fol.formula.to_mm0_formula : fol.formula → mm0.formula
 
 example
   (φ : mm0.formula)
-  (M M' : mm0.meta_var_name → fol.formula)
+  (M : mm0.meta_var_name → fol.formula)
   (σ : mm0.instantiation)
   (τ : mm0.meta_instantiation) :
   mm0.formula.to_fol_formula M (mm0.formula.subst σ τ φ) =
-  mm0.formula.to_fol_formula M' φ :=
+    mm0.formula.to_fol_formula
+      (fun (X' : mm0.meta_var_name), mm0.formula.to_fol_formula M (τ X')) φ :=
 begin
-  sorry
+  induction φ generalizing M,
+  case mm0.formula.meta_var_ : φ M
+  { admit },
+  case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1 M
+  { admit },
+  case mm0.formula.not_ : φ_ᾰ φ_ih M
+  { admit },
+  case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1 M
+  { admit },
+  case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1 M
+  { admit },
+  case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih M
+  { admit },
+  case mm0.formula.def_ : φ_ᾰ φ_ᾰ_1 M
+  { admit },
 end
 
 
