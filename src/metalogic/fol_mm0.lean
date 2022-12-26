@@ -3038,13 +3038,13 @@ example
   (M : mm0.meta_var_name → fol.formula)
   (Γ : list (mm0.var_name × mm0.meta_var_name))
   (φ : mm0.formula)
-  (x : mm0.var_name)
-  (h1 : mm0.not_free Γ x φ)
+  (v : mm0.var_name)
+  (h1 : mm0.not_free Γ v φ)
   (h2 : ∀ (x : mm0.var_name) (X : mm0.meta_var_name),
     ((x, X) ∈ Γ) → fol.not_free x (M X)) :
-  fol.not_free x (mm0.formula.to_fol_formula M φ) :=
+  fol.not_free v (mm0.formula.to_fol_formula M φ) :=
 begin
-  induction φ generalizing x,
+  induction φ generalizing v,
   case mm0.formula.meta_var_ : X x h1
   {
     unfold mm0.not_free at h1,
