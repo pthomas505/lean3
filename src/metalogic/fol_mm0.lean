@@ -2940,6 +2940,22 @@ def not_free (v : var_name) : formula → Prop
 | (forall_ x φ) := x = v ∨ not_free φ
 
 
+/-
+A substitution mapping.
+A mapping of each variable name to another name.
+-/
+def instantiation :=
+  {σ : var_name → var_name // ∃ (σ' : var_name → var_name), σ ∘ σ' = id ∧ σ' ∘ σ = id}
+
+
+def formula.subst (σ : instantiation) : formula → formula
+| (pred_ name args) := pred_ name (list.map σ.1 args)
+| (not_ φ) := not_ φ.subst
+| (imp_ φ ψ) := imp_ φ.subst ψ.subst
+| (eq_ x y) := eq_ (σ.1 x) (σ.1 y)
+| (forall_ x φ) := forall_ (σ.1 x) φ.subst
+
+
 def exists_ (x : var_name) (φ : formula) : formula := not_ (forall_ x (not_ φ))
 
 
@@ -2971,6 +2987,16 @@ inductive is_proof : formula → Prop
 
 | eq_2 (x y z : var_name) :
   is_proof ((eq_ x y).imp_ ((eq_ x z).imp_ (eq_ y z)))
+
+
+example
+  (φ : formula)
+  (σ : instantiation)
+  (h1 : is_proof φ) :
+  is_proof (φ.subst σ) :=
+begin
+  sorry,
+end
 
 
 end fol
@@ -3043,8 +3069,13 @@ begin
     unfold mm0.formula.to_fol_formula,
     sorry,
   },
-  case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih M
-  { admit },
+  case mm0.formula.forall_ : x φ φ_ih M
+  {
+    unfold mm0.formula.subst,
+    unfold mm0.formula.to_fol_formula,
+    simp only,
+    sorry,
+  },
   case mm0.formula.def_ : φ_ᾰ φ_ᾰ_1 M
   { admit },
 end
