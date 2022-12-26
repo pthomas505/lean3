@@ -2997,6 +2997,18 @@ def fol.formula.to_mm0_formula : fol.formula → mm0.formula
 
 
 example
+  (φ : mm0.formula)
+  (M M' : mm0.meta_var_name → fol.formula)
+  (σ : mm0.instantiation)
+  (τ : mm0.meta_instantiation) :
+  mm0.formula.to_fol_formula M (mm0.formula.subst σ τ φ) =
+  mm0.formula.to_fol_formula M' φ :=
+begin
+  sorry
+end
+
+
+example
   (φ : fol.formula)
   (M : mm0.meta_var_name → fol.formula) :
   mm0.formula.to_fol_formula M (fol.formula.to_mm0_formula φ) = φ :=
