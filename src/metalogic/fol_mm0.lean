@@ -3045,8 +3045,12 @@ example
   fol.not_free v (mm0.formula.to_fol_formula M φ) :=
 begin
   induction φ,
-  case mm0.formula.meta_var_ : φ
-  { admit },
+  case mm0.formula.meta_var_ : X
+  {
+    unfold mm0.not_free at h1,
+    unfold mm0.formula.to_fol_formula,
+    exact h2 v X h1,
+  },
   case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1
   { admit },
   case mm0.formula.not_ : φ_ᾰ φ_ih
