@@ -3037,6 +3037,84 @@ end
 example
   (E : mm0.env)
   (M : mm0.meta_var_name → fol.formula)
+  (Γ : list (mm0.var_name × mm0.meta_var_name))
+  (φ : mm0.formula)
+  (x : mm0.var_name)
+  (h1 : mm0.not_free Γ x φ)
+  (h2 : ∀ (x : mm0.var_name) (X : mm0.meta_var_name),
+    ((x, X) ∈ Γ) → fol.not_free x (M X)) :
+  fol.not_free x (mm0.formula.to_fol_formula M φ) :=
+begin
+  induction φ generalizing x,
+  case mm0.formula.meta_var_ : X x h1
+  {
+    unfold mm0.not_free at h1,
+    unfold mm0.formula.to_fol_formula,
+    exact h2 x X h1,
+  },
+  case mm0.formula.pred_ : name args x h1
+  {
+    unfold mm0.not_free at h1,
+    unfold mm0.formula.to_fol_formula,
+    unfold fol.not_free,
+    exact h1,
+  },
+  case mm0.formula.not_ : φ φ_ih x h1
+  {
+    unfold mm0.not_free at h1,
+    unfold mm0.formula.to_fol_formula,
+    unfold fol.not_free,
+    exact φ_ih x h1,
+  },
+  case mm0.formula.imp_ : φ ψ φ_ih ψ_ih x h1
+  {
+    unfold mm0.not_free at h1,
+    cases h1,
+
+    unfold mm0.formula.to_fol_formula,
+    unfold fol.not_free,
+    split,
+    {
+      exact φ_ih x h1_left,
+    },
+    {
+      exact ψ_ih x h1_right,
+    }
+  },
+  case mm0.formula.eq_ : x y x' h1
+  {
+    unfold mm0.not_free at h1,
+    unfold mm0.formula.to_fol_formula,
+    unfold fol.not_free,
+    exact h1,
+  },
+  case mm0.formula.forall_ : x φ φ_ih x' h1
+  {
+    unfold mm0.not_free at h1,
+    unfold mm0.formula.to_fol_formula,
+    unfold fol.not_free,
+    cases h1,
+    {
+      apply or.intro_left,
+      exact h1,
+    },
+    {
+      apply or.intro_right,
+      exact φ_ih x' h1,
+    }
+  },
+  case mm0.formula.def_ : name args x h1
+  {
+    unfold mm0.not_free at h1,
+    unfold mm0.formula.to_fol_formula,
+    unfold fol.not_free,
+    exact h1,
+  },
+end
+
+example
+  (E : mm0.env)
+  (M : mm0.meta_var_name → fol.formula)
   (h1_Γ : list (mm0.var_name × mm0.meta_var_name))
   (h1_φ : mm0.formula)
   (h1_x : mm0.var_name)
