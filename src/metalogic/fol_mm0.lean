@@ -3007,8 +3007,11 @@ example
 begin
   induction φ generalizing M,
   case mm0.formula.meta_var_ : X M
-  { admit },
-  case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1 M
+  {
+    unfold mm0.formula.subst,
+    unfold mm0.formula.to_fol_formula,
+  },
+  case mm0.formula.pred_ : name args M
   { admit },
   case mm0.formula.not_ : φ_ᾰ φ_ih M
   { admit },
