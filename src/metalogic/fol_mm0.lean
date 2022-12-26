@@ -2996,7 +2996,17 @@ example
   (h1 : not_free x φ) :
   not_free (σ.val x) (formula.subst σ φ) :=
 begin
-  admit,
+  induction φ,
+  case fol.formula.pred_ : φ_ᾰ φ_ᾰ_1
+  { admit },
+  case fol.formula.not_ : φ_ᾰ φ_ih
+  { admit },
+  case fol.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
+  { admit },
+  case fol.formula.eq_ : φ_ᾰ φ_ᾰ_1
+  { admit },
+  case fol.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
+  { admit },
 end
 
 
