@@ -413,6 +413,9 @@ def list.option_to_option_list {α : Type} [decidable_eq α] (l : list (option �
 -- Syntax
 
 
+namespace mm0
+
+
 abbreviation var_name := string
 abbreviation meta_var_name := string
 abbreviation pred_name := string
@@ -2908,129 +2911,139 @@ def fol_axiom_map : hash_map string (fun _, theorem_) :=
   string.hash
 
 
------
+end mm0
+
+
+namespace fol
+
+
+abbreviation var_name := string
+abbreviation pred_name := string
 
 
 @[derive decidable_eq]
-inductive fol_formula : Type
-| pred_ : pred_name → list var_name → fol_formula
-| not_ : fol_formula → fol_formula
-| imp_ : fol_formula → fol_formula → fol_formula
-| eq_ : var_name → var_name → fol_formula
-| forall_ : var_name → fol_formula → fol_formula
+inductive formula : Type
+| pred_ : pred_name → list var_name → formula
+| not_ : formula → formula
+| imp_ : formula → formula → formula
+| eq_ : var_name → var_name → formula
+| forall_ : var_name → formula → formula
+
+open formula
 
 
-def formula.to_fol_formula (M : meta_var_name → fol_formula) : formula → fol_formula
-| (meta_var_ X) := M X
-| (pred_ name args) := fol_formula.pred_ name args
-| (not_ φ) := fol_formula.not_ φ.to_fol_formula
-| (imp_ φ ψ) := fol_formula.imp_ φ.to_fol_formula ψ.to_fol_formula
-| (eq_ x y) := fol_formula.eq_ x y
-| (forall_ x φ) := fol_formula.forall_ x φ.to_fol_formula
-| (def_ name args) := fol_formula.pred_ name args
+def not_free (v : var_name) : formula → Prop
+| (pred_ name args) := v ∉ args
+| (not_ φ) := not_free φ
+| (imp_ φ ψ) := not_free φ ∧ not_free ψ
+| (eq_ x y) := x ≠ v ∧ y ≠ v
+| (forall_ x φ) := x = v ∨ not_free φ
 
 
-def fol_formula.to_formula : fol_formula → formula
-| (fol_formula.pred_ name args) := formula.pred_ name args
-| (fol_formula.not_ φ) := formula.not_ φ.to_formula
-| (fol_formula.imp_ φ ψ) := formula.imp_ φ.to_formula ψ.to_formula
-| (fol_formula.eq_ x y) := formula.eq_ x y
-| (fol_formula.forall_ x φ) := formula.forall_ x φ.to_formula
+def exists_ (x : var_name) (φ : formula) : formula := not_ (forall_ x (not_ φ))
 
 
-def fol_not_free (v : var_name) : fol_formula → Prop
-| (fol_formula.pred_ name args) := v ∉ args
-| (fol_formula.not_ φ) := fol_not_free φ
-| (fol_formula.imp_ φ ψ) := fol_not_free φ ∧ fol_not_free ψ
-| (fol_formula.eq_ x y) := x ≠ v ∧ y ≠ v
-| (fol_formula.forall_ x φ) := x = v ∨ fol_not_free φ
+inductive is_proof : formula → Prop
+
+| mp (φ ψ : formula) :
+  is_proof φ → is_proof (φ.imp_ ψ) → is_proof ψ
+
+| prop_1 (φ ψ : formula) :
+  is_proof (φ.imp_ (ψ.imp_ φ))
+
+| prop_2 (φ ψ χ : formula) :
+  is_proof ((φ.imp_ (ψ.imp_ χ)).imp_ ((φ.imp_ ψ).imp_ (φ.imp_ χ)))
+
+| prop_3 (φ ψ : formula) :
+  is_proof (((not_ φ).imp_ (not_ ψ)).imp_ (ψ.imp_ φ))
+
+| gen (φ : formula) (x : var_name) :
+  is_proof φ → is_proof (forall_ x φ)
+
+| pred_1 (φ ψ : formula) (x : var_name) :
+  is_proof ((forall_ x (φ.imp_ ψ)).imp_ ((forall_ x φ).imp_ (forall_ x ψ)))
+
+| pred_2 (φ : formula) (x : var_name) :
+  not_free x φ → is_proof (φ.imp_ (forall_ x φ))
+
+| eq_1 (x y : var_name) :
+  y ≠ x → is_proof (exists_ x (eq_ x y))
+
+| eq_2 (x y z : var_name) :
+  is_proof ((eq_ x y).imp_ ((eq_ x z).imp_ (eq_ y z)))
+
+
+end fol
+
+
+def mm0.formula.to_fol_formula
+  (M : mm0.meta_var_name → fol.formula) :
+  mm0.formula → fol.formula
+| (mm0.formula.meta_var_ X) := M X
+| (mm0.formula.pred_ name args) := fol.formula.pred_ name args
+| (mm0.formula.not_ φ) := fol.formula.not_ φ.to_fol_formula
+| (mm0.formula.imp_ φ ψ) := fol.formula.imp_ φ.to_fol_formula ψ.to_fol_formula
+| (mm0.formula.eq_ x y) := fol.formula.eq_ x y
+| (mm0.formula.forall_ x φ) := fol.formula.forall_ x φ.to_fol_formula
+| (mm0.formula.def_ name args) := fol.formula.pred_ name args
+
+
+def fol.formula.to_mm0_formula : fol.formula → mm0.formula
+| (fol.formula.pred_ name args) := mm0.formula.pred_ name args
+| (fol.formula.not_ φ) := mm0.formula.not_ φ.to_mm0_formula
+| (fol.formula.imp_ φ ψ) := mm0.formula.imp_ φ.to_mm0_formula ψ.to_mm0_formula
+| (fol.formula.eq_ x y) := mm0.formula.eq_ x y
+| (fol.formula.forall_ x φ) := mm0.formula.forall_ x φ.to_mm0_formula
 
 
 example
-  (φ : fol_formula)
-  (M : meta_var_name → fol_formula) :
-  formula.to_fol_formula M (fol_formula.to_formula φ) = φ :=
+  (φ : fol.formula)
+  (M : mm0.meta_var_name → fol.formula) :
+  mm0.formula.to_fol_formula M (fol.formula.to_mm0_formula φ) = φ :=
 begin
   induction φ,
-  case fol_formula.pred_ : name args
+  case fol.formula.pred_ : name args
   {
-    unfold fol_formula.to_formula,
-    unfold formula.to_fol_formula,
+    unfold fol.formula.to_mm0_formula,
+    unfold mm0.formula.to_fol_formula,
   },
-  case fol_formula.not_ : φ φ_ih
+  case fol.formula.not_ : φ φ_ih
   {
-    unfold fol_formula.to_formula,
-    unfold formula.to_fol_formula,
+    unfold fol.formula.to_mm0_formula,
+    unfold mm0.formula.to_fol_formula,
     rewrite φ_ih,
   },
-  case fol_formula.imp_ : φ ψ φ_ih ψ_ih
+  case fol.formula.imp_ : φ ψ φ_ih ψ_ih
   {
-    unfold fol_formula.to_formula,
-    unfold formula.to_fol_formula,
+    unfold fol.formula.to_mm0_formula,
+    unfold mm0.formula.to_fol_formula,
     rewrite φ_ih,
     rewrite ψ_ih,
   },
-  case fol_formula.eq_ : x y
+  case fol.formula.eq_ : x y
   {
-    unfold fol_formula.to_formula,
-    unfold formula.to_fol_formula,
+    unfold fol.formula.to_mm0_formula,
+    unfold mm0.formula.to_fol_formula,
   },
-  case fol_formula.forall_ : x φ φ_ih
+  case fol.formula.forall_ : x φ φ_ih
   {
-    unfold fol_formula.to_formula,
-    unfold formula.to_fol_formula,
+    unfold fol.formula.to_mm0_formula,
+    unfold mm0.formula.to_fol_formula,
     rewrite φ_ih,
   },
 end
 
 
-def fol_formula_exists_
-  (x : var_name)
-  (φ : fol_formula) :
-  fol_formula :=
-  fol_formula.not_ (fol_formula.forall_ x (fol_formula.not_ φ))
-
-
-inductive fol_is_proof : fol_formula → Prop
-
-| mp (φ ψ : fol_formula) :
-  fol_is_proof φ → fol_is_proof (φ.imp_ ψ) → fol_is_proof ψ
-
-| prop_1 (φ ψ : fol_formula) :
-  fol_is_proof (φ.imp_ (ψ.imp_ φ))
-
-| prop_2 (φ ψ χ : fol_formula) :
-  fol_is_proof ((φ.imp_ (ψ.imp_ χ)).imp_ ((φ.imp_ ψ).imp_ (φ.imp_ χ)))
-
-| prop_3 (φ ψ : fol_formula) :
-  fol_is_proof (((fol_formula.not_ φ).imp_ (fol_formula.not_ ψ)).imp_ (ψ.imp_ φ))
-
-| gen (φ : fol_formula) (x : var_name) :
-  fol_is_proof φ → fol_is_proof (fol_formula.forall_ x φ)
-
-| pred_1 (φ ψ : fol_formula) (x : var_name) :
-  fol_is_proof ((fol_formula.forall_ x (φ.imp_ ψ)).imp_ ((fol_formula.forall_ x φ).imp_ (fol_formula.forall_ x ψ)))
-
-| pred_2 (φ : fol_formula) (x : var_name) :
-  fol_not_free x φ → fol_is_proof (φ.imp_ (fol_formula.forall_ x φ))
-
-| eq_1 (x y : var_name) :
-  y ≠ x → fol_is_proof (fol_formula_exists_ x (fol_formula.eq_ x y))
-
-| eq_2 (x y z : var_name) :
-  fol_is_proof ((fol_formula.eq_ x y).imp_ ((fol_formula.eq_ x z).imp_ (fol_formula.eq_ y z)))
-
-
 theorem conservative
-  (E : env)
-  (Γ : list (var_name × meta_var_name))
-  (Δ : list formula)
-  (φ : formula)
-  (M : meta_var_name → fol_formula)
-  (h1 : is_proof E Γ Δ φ)
-  (h2 : ∀ (x : var_name) (X : meta_var_name), (x, X) ∈ Γ → fol_not_free x (M X))
-  (h3 : ∀ (ψ : formula), ψ ∈ Δ → fol_is_proof (formula.to_fol_formula M ψ)) :
-  fol_is_proof (formula.to_fol_formula M φ) :=
+  (E : mm0.env)
+  (Γ : list (mm0.var_name × mm0.meta_var_name))
+  (Δ : list mm0.formula)
+  (φ : mm0.formula)
+  (M : mm0.meta_var_name → fol.formula)
+  (h1 : mm0.is_proof E Γ Δ φ)
+  (h2 : ∀ (x : mm0.var_name) (X : mm0.meta_var_name), (x, X) ∈ Γ → fol.not_free x (M X))
+  (h3 : ∀ (ψ : mm0.formula), ψ ∈ Δ → fol.is_proof (mm0.formula.to_fol_formula M ψ)) :
+  fol.is_proof (mm0.formula.to_fol_formula M φ) :=
 begin
   induction h1,
   case is_proof.hyp : h1_Γ h1_Δ h1_φ h1_1 h1_2
@@ -3039,9 +3052,9 @@ begin
   },
   case is_proof.mp : h1_Γ h1_Δ h1_φ h1_ψ h1_1 h1_2 h1_ih_1 h1_ih_2
   {
-    unfold formula.to_fol_formula at h1_ih_2,
+    unfold mm0.formula.to_fol_formula at h1_ih_2,
 
-    apply fol_is_proof.mp (formula.to_fol_formula M h1_φ) (formula.to_fol_formula M h1_ψ),
+    apply fol.is_proof.mp (mm0.formula.to_fol_formula M h1_φ) (mm0.formula.to_fol_formula M h1_ψ),
     {
       exact h1_ih_1 h2 h3,
     },
@@ -3051,62 +3064,62 @@ begin
   },
   case is_proof.prop_1 : h1_Γ h1_Δ h1_φ h1_ψ h1_1 h1_2
   {
-    apply fol_is_proof.prop_1,
+    apply fol.is_proof.prop_1,
   },
   case is_proof.prop_2 : h1_Γ h1_Δ h1_φ h1_ψ h1_χ h1_1 h1_2 h1_3
   {
-    apply fol_is_proof.prop_2,
+    apply fol.is_proof.prop_2,
   },
   case is_proof.prop_3 : h1_Γ h1_Δ h1_φ h1_ψ h1_1 h1_2
   {
-    apply fol_is_proof.prop_3,
+    apply fol.is_proof.prop_3,
   },
   case is_proof.gen : h1_Γ h1_Δ h1_φ h1_x h1_1 h1_ih
   {
-    apply fol_is_proof.gen,
+    apply fol.is_proof.gen,
     exact h1_ih h2 h3,
   },
   case is_proof.pred_1 : h1_Γ h1_Δ h1_φ h1_ψ h1_x h1_1 h1_2
   {
-    apply fol_is_proof.pred_1,
+    apply fol.is_proof.pred_1,
   },
   case is_proof.pred_2 : h1_Γ h1_Δ h1_φ h1_x h1_1 h1_2
   {
-    apply fol_is_proof.pred_2,
+    apply fol.is_proof.pred_2,
     induction h1_φ generalizing h1_x,
     case formula.meta_var_ : X
     {
-      unfold not_free at h1_2,
+      unfold mm0.not_free at h1_2,
 
       exact h2 h1_x X h1_2,
     },
     case formula.pred_ : h1_name h1_args
     {
-      unfold not_free at h1_2,
+      unfold mm0.not_free at h1_2,
 
-      unfold formula.to_fol_formula,
-      unfold fol_not_free,
+      unfold mm0.formula.to_fol_formula,
+      unfold fol.not_free,
       exact h1_2,
     },
     case formula.not_ : h1_φ h1_φ_ih
     {
-      unfold formula.is_meta_var_or_all_def_in_env at h1_1,
-      unfold not_free at h1_2,
+      unfold mm0.formula.is_meta_var_or_all_def_in_env at h1_1,
+      unfold mm0.not_free at h1_2,
 
-      unfold formula.to_fol_formula,
-      unfold fol_not_free,
+      unfold mm0.formula.to_fol_formula,
+      unfold fol.not_free,
       exact h1_φ_ih h1_1 h1_x h1_2,
     },
     case formula.imp_ : h1_φ h1_ψ h1_φ_ih h1_ψ_ih
     {
-      unfold formula.is_meta_var_or_all_def_in_env at h1_1,
+      unfold mm0.formula.is_meta_var_or_all_def_in_env at h1_1,
       cases h1_1,
 
-      unfold not_free at h1_2,
+      unfold mm0.not_free at h1_2,
       cases h1_2,
 
-      unfold formula.to_fol_formula,
-      unfold fol_not_free,
+      unfold mm0.formula.to_fol_formula,
+      unfold fol.not_free,
       split,
       {
         exact h1_φ_ih h1_1_left h1_x h1_2_left,
@@ -3117,19 +3130,19 @@ begin
     },
     case formula.eq_ : h1_x h1_y
     {
-      unfold not_free at h1_2,
+      unfold mm0.not_free at h1_2,
 
-      unfold formula.to_fol_formula,
-      unfold fol_not_free,
+      unfold mm0.formula.to_fol_formula,
+      unfold fol.not_free,
       exact h1_2,
     },
     case formula.forall_ : h1_x h1_φ h1_φ_ih
     {
-      unfold formula.is_meta_var_or_all_def_in_env at h1_1,
-      unfold not_free at h1_2,
+      unfold mm0.formula.is_meta_var_or_all_def_in_env at h1_1,
+      unfold mm0.not_free at h1_2,
 
-      unfold formula.to_fol_formula,
-      unfold fol_not_free,
+      unfold mm0.formula.to_fol_formula,
+      unfold fol.not_free,
       cases h1_2,
       {
         apply or.intro_left,
@@ -3142,29 +3155,26 @@ begin
     },
     case formula.def_ : h1_name h1_args
     {
-      unfold not_free at h1_2,
+      unfold mm0.not_free at h1_2,
 
-      unfold formula.to_fol_formula,
-      unfold fol_not_free,
+      unfold mm0.formula.to_fol_formula,
+      unfold fol.not_free,
       exact h1_2,
     },
   },
   case is_proof.eq_1 : h1_Γ h1_Δ h1_x h1_y h1_1
   {
-    apply fol_is_proof.eq_1,
+    apply fol.is_proof.eq_1,
     exact h1_1,
   },
   case is_proof.eq_2 : h1_Γ h1_Δ h1_x h1_y h1_z
   {
-    apply fol_is_proof.eq_2,
+    apply fol.is_proof.eq_2,
   },
   case is_proof.thm : h1_Γ h1_Γ' h1_Δ h1_Δ' h1_φ h1_σ h1_τ h1_1 h1_2 h1_3 h1_4 h1_ih_1 h1_ih_2
   {
     dsimp at *,
-    apply h1_ih_1,
     sorry,
-    exact h2,
-    exact h3,
   },
   case is_proof.conv : h1_Γ h1_Δ h1_φ h1_φ' h1_1 h1_2 h1_3 h1_ih
   {
