@@ -3074,10 +3074,10 @@ begin
     unfold fol.not_free,
     split,
     {
-      exact φ_ih x h1_left,
+      exact φ_ih h1_left,
     },
     {
-      exact ψ_ih x h1_right,
+      exact ψ_ih h1_right,
     }
   },
   case mm0.formula.eq_ : x y
