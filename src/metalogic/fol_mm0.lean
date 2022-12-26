@@ -3037,8 +3037,12 @@ begin
       apply ψ_ih,
     }
   },
-  case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1 M
-  { admit },
+  case mm0.formula.eq_ : x y M
+  {
+    unfold mm0.formula.subst,
+    unfold mm0.formula.to_fol_formula,
+    sorry,
+  },
   case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih M
   { admit },
   case mm0.formula.def_ : φ_ᾰ φ_ᾰ_1 M
