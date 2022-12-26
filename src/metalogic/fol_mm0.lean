@@ -3037,8 +3037,8 @@ end
 example
   (M : mm0.meta_var_name → fol.formula)
   (Γ : list (mm0.var_name × mm0.meta_var_name))
-  (φ : mm0.formula)
   (v : mm0.var_name)
+  (φ : mm0.formula)
   (h1 : mm0.not_free Γ v φ)
   (h2 : ∀ (x : mm0.var_name) (X : mm0.meta_var_name),
     ((x, X) ∈ Γ) → fol.not_free x (M X)) :
