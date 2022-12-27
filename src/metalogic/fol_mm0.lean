@@ -3361,7 +3361,7 @@ begin
 end
 
 
-example
+lemma lem_1
   (φ : mm0.formula)
   (M : mm0.meta_var_name → fol.formula)
   (σ σ_inv : mm0.instantiation)
@@ -3389,9 +3389,7 @@ begin
   },
   case mm0.formula.pred_ : name args
   {
-    unfold mm0.formula.subst,
-    unfold mm0.formula.to_fol_formula,
-    unfold fol.formula.subst,
+    refl,
   },
   case mm0.formula.not_ : φ φ_ih
   {
@@ -3416,9 +3414,7 @@ begin
   },
   case mm0.formula.eq_ : x y
   {
-    unfold mm0.formula.subst,
-    unfold mm0.formula.to_fol_formula,
-    unfold fol.formula.subst,
+    refl,
   },
   case mm0.formula.forall_ : x φ φ_ih
   {
@@ -3430,9 +3426,7 @@ begin
   },
   case mm0.formula.def_ : name args
   {
-    unfold mm0.formula.subst,
-    unfold mm0.formula.to_fol_formula,
-    unfold fol.formula.subst,
+    refl,
   },
 end
 
@@ -3509,8 +3503,10 @@ begin
       ⟨h1_σ', begin apply exists.intro h1_σ.val, exact and.intro a1_right a1_left, end⟩,
 
     dsimp at *,
-
-    specialize h1_ih_2 (fol.formula.subst h1_σ_inv ∘ (mm0.formula.to_fol_formula M ∘ h1_τ)),
+    rewrite lem_1,
+    sorry,
+    sorry,
+    sorry,
     sorry,
   },
   case is_proof.conv : h1_Γ h1_Δ h1_φ h1_φ' h1_1 h1_2 h1_3 h1_ih
