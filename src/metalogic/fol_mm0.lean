@@ -3137,7 +3137,7 @@ begin
 end
 
 
-example
+lemma subst_inv
   (φ : formula)
   (σ : instantiation)
   (σ' : var_name → var_name)
@@ -3211,7 +3211,15 @@ example
 begin
   obtain ⟨σ', a1⟩ := σ.2,
   cases a1,
-  sorry,
+
+  let σ_inv : instantiation := ⟨σ', begin apply exists.intro σ.val, exact and.intro a1_right a1_left, end⟩,
+
+  have s1 : formula.subst σ_inv (formula.subst σ φ) = φ,
+  apply subst_inv,
+
+  rewrite <- s1,
+  apply is_proof_subst,
+  exact h1,
 end
 
 
