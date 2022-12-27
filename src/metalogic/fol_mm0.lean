@@ -3188,7 +3188,18 @@ begin
     }
   },
   case fol.formula.forall_ : x φ φ_ih
-  { admit },
+  {
+    unfold formula.subst,
+    congr,
+    {
+      rewrite <- function.comp_app σ_inv.val σ.val x,
+      rewrite a1_right,
+      simp only [id.def],
+    },
+    {
+      exact φ_ih,
+    }
+  },
 end
 
 
