@@ -3172,9 +3172,9 @@ begin
       exact ψ_ih,
     }
   },
-  case fol.formula.eq_ : φ_ᾰ φ_ᾰ_1
+  case fol.formula.eq_ : x y
   { admit },
-  case fol.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
+  case fol.formula.forall_ : x φ φ_ih
   { admit },
 end
 
