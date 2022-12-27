@@ -3248,19 +3248,15 @@ def fol.formula.to_mm0_formula : fol.formula → mm0.formula
 
 example
   (φ : mm0.formula)
-  (M : mm0.meta_var_name → fol.formula)
+  (M M' : mm0.meta_var_name → fol.formula)
   (σ : mm0.instantiation)
   (τ : mm0.meta_instantiation) :
   mm0.formula.to_fol_formula M (mm0.formula.subst σ τ φ) =
-    fol.formula.subst σ (mm0.formula.to_fol_formula (mm0.formula.to_fol_formula M ∘ τ) φ) :=
+    fol.formula.subst σ (mm0.formula.to_fol_formula M' φ) :=
 begin
   induction φ,
-  case mm0.formula.meta_var_ : X
-  {
-    unfold mm0.formula.to_fol_formula,
-    unfold mm0.formula.subst,
-    sorry,
-  },
+  case mm0.formula.meta_var_ : φ
+  { admit },
   case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1
   { admit },
   case mm0.formula.not_ : φ_ᾰ φ_ih
