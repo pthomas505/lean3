@@ -3097,15 +3097,26 @@ begin
     apply is_proof.mp (formula.subst σ h1_φ) (formula.subst σ h1_ψ) h1_ih_1 h1_ih_2,
   },
   case fol.is_proof.prop_1 : h1_φ h1_ψ
-  { admit },
+  {
+    apply is_proof.prop_1,
+  },
   case fol.is_proof.prop_2 : h1_φ h1_ψ h1_χ
-  { admit },
+  {
+    apply is_proof.prop_2,
+  },
   case fol.is_proof.prop_3 : h1_φ h1_ψ
-  { admit },
-  case fol.is_proof.gen : h1_φ h1_x h1_ᾰ h1_ih
-  { admit },
+  {
+    apply is_proof.prop_3,
+  },
+  case fol.is_proof.gen : h1_φ h1_x h1_1 h1_ih
+  {
+    apply is_proof.gen,
+    exact h1_ih,
+  },
   case fol.is_proof.pred_1 : h1_φ h1_ψ h1_x
-  { admit },
+  {
+    apply is_proof.pred_1,
+  },
   case fol.is_proof.pred_2 : h1_φ h1_x h1_1
   {
     unfold formula.subst,
