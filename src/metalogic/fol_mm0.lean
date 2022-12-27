@@ -2989,7 +2989,7 @@ inductive is_proof : formula → Prop
   is_proof ((eq_ x y).imp_ ((eq_ x z).imp_ (eq_ y z)))
 
 
-lemma blah_1
+lemma not_free_subst
   (σ : instantiation)
   (φ : formula)
   (v : var_name)
@@ -3101,7 +3101,7 @@ begin
   {
     unfold formula.subst,
     apply is_proof.pred_2,
-    sorry,
+    exact not_free_subst σ h1_φ h1_x h1_1,
   },
   case fol.is_proof.eq_1 : h1_x h1_y h1_ᾰ
   { admit },
