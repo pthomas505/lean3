@@ -3428,8 +3428,12 @@ begin
     congr,
     exact φ_ih,
   },
-  case mm0.formula.def_ : φ_ᾰ φ_ᾰ_1
-  { admit },
+  case mm0.formula.def_ : name args
+  {
+    unfold mm0.formula.subst,
+    unfold mm0.formula.to_fol_formula,
+    unfold fol.formula.subst,
+  },
 end
 
 
