@@ -3161,7 +3161,7 @@ begin
     congr,
     exact φ_ih,
   },
-  case fol.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
+  case fol.formula.imp_ : φ ψ φ_ih ψ_ih
   { admit },
   case fol.formula.eq_ : φ_ᾰ φ_ᾰ_1
   { admit },
