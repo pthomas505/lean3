@@ -3210,7 +3210,8 @@ begin
   obtain ⟨σ', a1⟩ := σ.2,
   cases a1,
 
-  let σ_inv : instantiation := ⟨σ', begin apply exists.intro σ.val, exact and.intro a1_right a1_left, end⟩,
+  let σ_inv : instantiation :=
+    ⟨σ', begin apply exists.intro σ.val, exact and.intro a1_right a1_left, end⟩,
 
   have s1 : formula.subst σ_inv (formula.subst σ φ) = φ,
   apply subst_inv φ σ σ_inv a1_left a1_right,
