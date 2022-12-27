@@ -3081,6 +3081,15 @@ lemma is_proof_subst
   (h1 : is_proof φ) :
   is_proof (φ.subst σ) :=
 begin
+  obtain ⟨σ', a1⟩ := σ.2,
+  cases a1,
+
+  have s1 : function.left_inverse σ' σ.val,
+  exact congr_fun a1_right,
+
+  have s2 : function.injective σ.val,
+  exact function.left_inverse.injective s1,
+
   induction h1,
   case fol.is_proof.mp : h1_φ h1_ψ h1_1 h1_2 h1_ih_1 h1_ih_2
   {
@@ -3103,10 +3112,17 @@ begin
     apply is_proof.pred_2,
     exact not_free_subst σ h1_φ h1_x h1_1,
   },
-  case fol.is_proof.eq_1 : h1_x h1_y h1_ᾰ
-  { admit },
+  case fol.is_proof.eq_1 : h1_x h1_y h1_1
+  {
+    apply is_proof.eq_1,
+    intros contra,
+    apply h1_1,
+    exact s2 contra,
+  },
   case fol.is_proof.eq_2 : h1_x h1_y h1_z
-  { admit },
+  {
+    apply is_proof.eq_2,
+  },
 end
 
 
