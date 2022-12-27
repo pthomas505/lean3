@@ -3177,7 +3177,9 @@ begin
     unfold formula.subst,
     congr,
     {
-      sorry,
+      rewrite <- function.comp_app σ_inv.val σ.val x,
+      rewrite a1_right,
+      simp only [id.def],
     },
     {
       sorry,
