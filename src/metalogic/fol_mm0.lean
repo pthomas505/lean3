@@ -3504,7 +3504,17 @@ begin
 
     dsimp at *,
     rewrite lem_1 h1_φ M h1_σ h1_σ_inv h1_τ a1_left a1_right,
-    sorry,
+    apply fol.is_proof_subst_left,
+    apply h1_ih_2,
+    {
+      intros,
+      simp only [function.comp_app],
+      sorry,
+    },
+    {
+      intros,
+      sorry,
+    }
   },
   case is_proof.conv : h1_Γ h1_Δ h1_φ h1_φ' h1_1 h1_2 h1_3 h1_ih
   {
