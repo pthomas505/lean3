@@ -3155,8 +3155,12 @@ begin
     rewrite a1_right,
     simp only [list.map_id],
   },
-  case fol.formula.not_ : φ_ᾰ φ_ih
-  { admit },
+  case fol.formula.not_ : φ φ_ih
+  {
+    unfold formula.subst,
+    congr,
+    exact φ_ih,
+  },
   case fol.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
   { admit },
   case fol.formula.eq_ : φ_ᾰ φ_ᾰ_1
