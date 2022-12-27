@@ -3137,6 +3137,26 @@ begin
 end
 
 
+example
+  (φ : formula)
+  (σ σ_inv : instantiation)
+  (h_inv_left : σ.val ∘ σ_inv.val = id)
+  (h_inv_right : σ_inv.val ∘ σ.val = id) :
+  formula.subst σ_inv (formula.subst σ φ) = φ :=
+begin
+  induction φ,
+  case fol.formula.pred_ : φ_ᾰ φ_ᾰ_1
+  { admit },
+  case fol.formula.not_ : φ_ᾰ φ_ih
+  { admit },
+  case fol.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
+  { admit },
+  case fol.formula.eq_ : φ_ᾰ φ_ᾰ_1
+  { admit },
+  case fol.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
+  { admit },
+end
+
 lemma subst_inv
   (φ : formula)
   (σ : instantiation)
@@ -3248,15 +3268,28 @@ def fol.formula.to_mm0_formula : fol.formula → mm0.formula
 
 example
   (φ : mm0.formula)
-  (M M' : mm0.meta_var_name → fol.formula)
+  (M : mm0.meta_var_name → fol.formula)
   (σ : mm0.instantiation)
   (τ : mm0.meta_instantiation) :
+  ∃ (M' : mm0.meta_var_name → fol.formula),
   mm0.formula.to_fol_formula M (mm0.formula.subst σ τ φ) =
     fol.formula.subst σ (mm0.formula.to_fol_formula M' φ) :=
 begin
+  obtain ⟨σ', a1⟩ := σ.2,
+  cases a1,
+
+  let σ_inv : fol.instantiation := ⟨σ', begin apply exists.intro σ.val, exact and.intro a1_right a1_left, end⟩,
+
   induction φ,
-  case mm0.formula.meta_var_ : φ
-  { admit },
+  case mm0.formula.meta_var_ : X
+  {
+    unfold mm0.formula.to_fol_formula,
+    unfold mm0.formula.subst,
+    apply exists.intro (fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M ∘ τ)),
+    simp,
+    symmetry,
+
+  },
   case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1
   { admit },
   case mm0.formula.not_ : φ_ᾰ φ_ih
