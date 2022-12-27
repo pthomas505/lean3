@@ -3290,7 +3290,7 @@ lemma mm0_not_free_imp_fol_not_free
   (φ : mm0.formula)
   (h1 : mm0.not_free Γ v φ)
   (h2 : ∀ (x : mm0.var_name) (X : mm0.meta_var_name),
-    ((x, X) ∈ Γ) → fol.not_free x (M X)) :
+    (x, X) ∈ Γ → fol.not_free x (M X)) :
   fol.not_free v (mm0.formula.to_fol_formula M φ) :=
 begin
   induction φ,
