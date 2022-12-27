@@ -3448,7 +3448,7 @@ theorem conservative
   (h3 : ∀ (ψ : mm0.formula), ψ ∈ Δ → fol.is_proof (mm0.formula.to_fol_formula M ψ)) :
   fol.is_proof (mm0.formula.to_fol_formula M φ) :=
 begin
-  induction h1,
+  induction h1 generalizing M,
   case is_proof.hyp : h1_Γ h1_Δ h1_φ h1_1 h1_2
   {
     exact h3 h1_φ h1_2,
@@ -3459,10 +3459,10 @@ begin
 
     apply fol.is_proof.mp (mm0.formula.to_fol_formula M h1_φ) (mm0.formula.to_fol_formula M h1_ψ),
     {
-      exact h1_ih_1 h2 h3,
+      exact h1_ih_1 M h2 h3,
     },
     {
-      exact h1_ih_2 h2 h3,
+      exact h1_ih_2 M h2 h3,
     }
   },
   case is_proof.prop_1 : h1_Γ h1_Δ h1_φ h1_ψ h1_1 h1_2
@@ -3480,7 +3480,7 @@ begin
   case is_proof.gen : h1_Γ h1_Δ h1_φ h1_x h1_1 h1_ih
   {
     apply fol.is_proof.gen,
-    exact h1_ih h2 h3,
+    exact h1_ih M h2 h3,
   },
   case is_proof.pred_1 : h1_Γ h1_Δ h1_φ h1_ψ h1_x h1_1 h1_2
   {
@@ -3502,12 +3502,20 @@ begin
   },
   case is_proof.thm : h1_Γ h1_Γ' h1_Δ h1_Δ' h1_φ h1_σ h1_τ h1_1 h1_2 h1_3 h1_4 h1_ih_1 h1_ih_2
   {
+    obtain ⟨h1_σ', a1⟩ := h1_σ.2,
+    cases a1,
+
+    let h1_σ_inv : mm0.instantiation :=
+      ⟨h1_σ', begin apply exists.intro h1_σ.val, exact and.intro a1_right a1_left, end⟩,
+
     dsimp at *,
+
+    specialize h1_ih_2 (fol.formula.subst h1_σ_inv ∘ (mm0.formula.to_fol_formula M ∘ h1_τ)),
     sorry,
   },
   case is_proof.conv : h1_Γ h1_Δ h1_φ h1_φ' h1_1 h1_2 h1_3 h1_ih
   {
-    specialize h1_ih h2 h3,
+    specialize h1_ih M h2 h3,
     sorry,
   },
 end
