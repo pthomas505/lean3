@@ -3173,7 +3173,16 @@ begin
     }
   },
   case fol.formula.eq_ : x y
-  { admit },
+  {
+    unfold formula.subst,
+    congr,
+    {
+      sorry,
+    },
+    {
+      sorry,
+    }
+  },
   case fol.formula.forall_ : x φ φ_ih
   { admit },
 end
