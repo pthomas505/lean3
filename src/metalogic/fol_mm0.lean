@@ -3507,12 +3507,12 @@ begin
     apply fol.is_proof_subst_left,
     apply h1_ih_2,
     {
-      intros,
+      intros x X a2,
       simp only [function.comp_app],
       sorry,
     },
     {
-      intros,
+      intros ψ a2,
       sorry,
     }
   },
