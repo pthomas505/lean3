@@ -3105,7 +3105,8 @@ begin
 end
 
 
-def exists_ (x : var_name) (φ : formula) : formula := not_ (forall_ x (not_ φ))
+def exists_ (x : var_name) (φ : formula) : formula :=
+  not_ (forall_ x (not_ φ))
 
 
 inductive is_proof : formula → Prop
