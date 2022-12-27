@@ -3145,17 +3145,60 @@ example
   formula.subst σ_inv (formula.subst σ φ) = φ :=
 begin
   induction φ,
-  case fol.formula.pred_ : φ_ᾰ φ_ᾰ_1
-  { admit },
-  case fol.formula.not_ : φ_ᾰ φ_ih
-  { admit },
-  case fol.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
-  { admit },
-  case fol.formula.eq_ : φ_ᾰ φ_ᾰ_1
-  { admit },
-  case fol.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
-  { admit },
+  case fol.formula.pred_ : name args
+  {
+    unfold formula.subst,
+    simp only [list.map_map, eq_self_iff_true, true_and],
+    rewrite h_inv_right,
+    simp only [list.map_id],
+  },
+  case fol.formula.not_ : φ φ_ih
+  {
+    unfold formula.subst,
+    congr,
+    exact φ_ih,
+  },
+  case fol.formula.imp_ : φ ψ φ_ih ψ_ih
+  {
+    unfold formula.subst,
+    congr,
+    {
+      exact φ_ih,
+    },
+    {
+      exact ψ_ih,
+    }
+  },
+  case fol.formula.eq_ : x y
+  {
+    unfold formula.subst,
+    congr,
+    {
+      rewrite <- function.comp_app σ_inv.val σ.val x,
+      rewrite h_inv_right,
+      simp only [id.def],
+    },
+    {
+      rewrite <- function.comp_app σ_inv.val σ.val y,
+      rewrite h_inv_right,
+      simp only [id.def],
+    }
+  },
+  case fol.formula.forall_ : x φ φ_ih
+  {
+    unfold formula.subst,
+    congr,
+    {
+      rewrite <- function.comp_app σ_inv.val σ.val x,
+      rewrite h_inv_right,
+      simp only [id.def],
+    },
+    {
+      exact φ_ih,
+    }
+  },
 end
+
 
 lemma subst_inv
   (φ : formula)
