@@ -3182,7 +3182,9 @@ begin
       simp only [id.def],
     },
     {
-      sorry,
+      rewrite <- function.comp_app σ_inv.val σ.val y,
+      rewrite a1_right,
+      simp only [id.def],
     }
   },
   case fol.formula.forall_ : x φ φ_ih
