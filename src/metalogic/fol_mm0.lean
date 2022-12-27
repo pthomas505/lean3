@@ -2989,14 +2989,22 @@ inductive is_proof : formula → Prop
   is_proof ((eq_ x y).imp_ ((eq_ x z).imp_ (eq_ y z)))
 
 
-example
+lemma blah_1
   (σ : instantiation)
   (φ : formula)
-  (x : var_name)
-  (h1 : not_free x φ) :
-  not_free (σ.val x) (formula.subst σ φ) :=
+  (v : var_name)
+  (h1 : not_free v φ) :
+  not_free (σ.val v) (formula.subst σ φ) :=
 begin
   obtain ⟨σ', a1⟩ := σ.2,
+  cases a1,
+
+  have s1 : function.left_inverse σ' σ.val,
+  exact congr_fun a1_right,
+
+  have s2 : function.injective σ.val,
+  exact function.left_inverse.injective s1,
+
   induction φ,
   case fol.formula.pred_ : name args
   {
@@ -3005,20 +3013,69 @@ begin
     unfold not_free,
     intros contra,
     apply h1,
-    sorry,
+    rewrite <- list.mem_map_of_injective s2,
+    exact contra,
   },
-  case fol.formula.not_ : φ_ᾰ φ_ih
-  { admit },
-  case fol.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
-  { admit },
-  case fol.formula.eq_ : φ_ᾰ φ_ᾰ_1
-  { admit },
-  case fol.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
-  { admit },
+  case fol.formula.not_ : φ φ_ih
+  {
+    unfold not_free at h1,
+    unfold formula.subst,
+    unfold not_free,
+    exact φ_ih h1,
+  },
+  case fol.formula.imp_ : φ ψ φ_ih ψ_ih
+  {
+    unfold not_free at h1,
+    cases h1,
+
+    unfold formula.subst,
+    unfold not_free,
+    split,
+    {
+      exact φ_ih h1_left,
+    },
+    {
+      exact ψ_ih h1_right,
+    }
+  },
+  case fol.formula.eq_ : x y
+  {
+    unfold not_free at h1,
+    cases h1,
+
+    unfold formula.subst,
+    unfold not_free,
+    split,
+    {
+      intros contra,
+      apply h1_left,
+      apply s2 contra,
+    },
+    {
+      intros contra,
+      apply h1_right,
+      apply s2 contra,
+    }
+  },
+  case fol.formula.forall_ : x φ φ_ih
+  {
+    unfold not_free at h1,
+    unfold formula.subst,
+    unfold not_free,
+    cases h1,
+    {
+      apply or.intro_left,
+      rewrite h1,
+    },
+    {
+      apply or.intro_right,
+      exact φ_ih h1,
+    }
+  },
 end
 
 
-example
+lemma is_proof_subst
   (φ : formula)
   (σ : instantiation)
   (h1 : is_proof φ) :
@@ -3077,6 +3134,36 @@ def fol.formula.to_mm0_formula : fol.formula → mm0.formula
 
 
 example
+  (φ : mm0.formula)
+  (M : mm0.meta_var_name → fol.formula)
+  (σ : mm0.instantiation)
+  (τ : mm0.meta_instantiation) :
+  mm0.formula.to_fol_formula M (mm0.formula.subst σ τ φ) =
+    fol.formula.subst σ (mm0.formula.to_fol_formula (mm0.formula.to_fol_formula M ∘ τ) φ) :=
+begin
+  induction φ,
+  case mm0.formula.meta_var_ : X
+  {
+    unfold mm0.formula.to_fol_formula,
+    unfold mm0.formula.subst,
+    sorry,
+  },
+  case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1
+  { admit },
+  case mm0.formula.not_ : φ_ᾰ φ_ih
+  { admit },
+  case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
+  { admit },
+  case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1
+  { admit },
+  case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
+  { admit },
+  case mm0.formula.def_ : φ_ᾰ φ_ᾰ_1
+  { admit },
+end
+
+
+lemma blah_3
   (φ : mm0.formula)
   (M : mm0.meta_var_name → fol.formula)
   (σ : mm0.instantiation)
