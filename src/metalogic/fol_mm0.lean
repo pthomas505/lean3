@@ -3503,10 +3503,7 @@ begin
       ⟨h1_σ', begin apply exists.intro h1_σ.val, exact and.intro a1_right a1_left, end⟩,
 
     dsimp at *,
-    rewrite lem_1,
-    sorry,
-    sorry,
-    sorry,
+    rewrite lem_1 h1_φ M h1_σ h1_σ_inv h1_τ a1_left a1_right,
     sorry,
   },
   case is_proof.conv : h1_Γ h1_Δ h1_φ h1_φ' h1_1 h1_2 h1_3 h1_ih
