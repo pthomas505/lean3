@@ -3364,28 +3364,28 @@ end
 example
   (φ : mm0.formula)
   (M : mm0.meta_var_name → fol.formula)
-  (σ : mm0.instantiation)
-  (τ : mm0.meta_instantiation) :
-  ∃ (M' : mm0.meta_var_name → fol.formula),
+  (σ σ_inv : mm0.instantiation)
+  (τ : mm0.meta_instantiation)
+  (h_inv_left : σ.val ∘ σ_inv.val = id)
+  (h_inv_right : σ_inv.val ∘ σ.val = id) :
   mm0.formula.to_fol_formula M (mm0.formula.subst σ τ φ) =
-    fol.formula.subst σ (mm0.formula.to_fol_formula M' φ) :=
+    fol.formula.subst σ
+      (mm0.formula.to_fol_formula (fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M ∘ τ)) φ) :=
 begin
-  obtain ⟨σ', a1⟩ := σ.2,
-  cases a1,
-
-  let σ_inv : fol.instantiation := ⟨σ', begin apply exists.intro σ.val, exact and.intro a1_right a1_left, end⟩,
-
   induction φ,
   case mm0.formula.meta_var_ : X
   {
     unfold mm0.formula.to_fol_formula,
     unfold mm0.formula.subst,
-    apply exists.intro (fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M ∘ τ)),
     simp only [function.comp_app],
     symmetry,
     apply fol.subst_inv,
-    exact a1_right,
-    exact a1_left,
+    {
+      exact h_inv_right,
+    },
+    {
+      exact h_inv_left,
+    }
   },
   case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1
   { admit },
