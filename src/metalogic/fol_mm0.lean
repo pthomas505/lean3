@@ -3375,8 +3375,8 @@ begin
   induction φ,
   case mm0.formula.meta_var_ : X
   {
-    unfold mm0.formula.to_fol_formula,
     unfold mm0.formula.subst,
+    unfold mm0.formula.to_fol_formula,
     simp only [function.comp_app],
     symmetry,
     apply fol.subst_inv,
@@ -3387,8 +3387,12 @@ begin
       exact h_inv_left,
     }
   },
-  case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1
-  { admit },
+  case mm0.formula.pred_ : name args
+  {
+    unfold mm0.formula.subst,
+    unfold mm0.formula.to_fol_formula,
+    unfold fol.formula.subst,
+  },
   case mm0.formula.not_ : φ_ᾰ φ_ih
   { admit },
   case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
