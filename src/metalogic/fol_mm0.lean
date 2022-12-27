@@ -3137,6 +3137,42 @@ begin
 end
 
 
+example
+  (φ : formula)
+  (σ : instantiation)
+  (σ' : var_name → var_name)
+  (a1_left : ((σ.val ∘ σ') = id))
+  (a1_right : ((σ' ∘ σ.val) = id)) :
+  let σ_inv : instantiation := ⟨σ', begin apply exists.intro σ.val, exact and.intro a1_right a1_left, end⟩
+  in (formula.subst σ_inv (formula.subst σ φ) = φ) :=
+begin
+  intros σ_inv,
+  induction φ,
+  case fol.formula.pred_ : φ_ᾰ φ_ᾰ_1
+  { admit },
+  case fol.formula.not_ : φ_ᾰ φ_ih
+  { admit },
+  case fol.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
+  { admit },
+  case fol.formula.eq_ : φ_ᾰ φ_ᾰ_1
+  { admit },
+  case fol.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
+  { admit },
+end
+
+
+example
+  (φ : formula)
+  (σ : instantiation)
+  (h1 : is_proof (φ.subst σ)) :
+  is_proof φ :=
+begin
+  obtain ⟨σ', a1⟩ := σ.2,
+  cases a1,
+  sorry,
+end
+
+
 end fol
 
 
