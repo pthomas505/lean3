@@ -3420,8 +3420,14 @@ begin
     unfold mm0.formula.to_fol_formula,
     unfold fol.formula.subst,
   },
-  case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
-  { admit },
+  case mm0.formula.forall_ : x φ φ_ih
+  {
+    unfold mm0.formula.subst,
+    unfold mm0.formula.to_fol_formula,
+    unfold fol.formula.subst,
+    congr,
+    exact φ_ih,
+  },
   case mm0.formula.def_ : φ_ᾰ φ_ᾰ_1
   { admit },
 end
