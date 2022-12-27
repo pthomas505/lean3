@@ -3148,8 +3148,13 @@ example
 begin
   intros σ_inv,
   induction φ,
-  case fol.formula.pred_ : φ_ᾰ φ_ᾰ_1
-  { admit },
+  case fol.formula.pred_ : name args
+  {
+    unfold formula.subst,
+    simp only [list.map_map, eq_self_iff_true, true_and],
+    rewrite a1_right,
+    simp only [list.map_id],
+  },
   case fol.formula.not_ : φ_ᾰ φ_ih
   { admit },
   case fol.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
