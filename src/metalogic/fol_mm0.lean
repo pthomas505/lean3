@@ -3162,7 +3162,16 @@ begin
     exact φ_ih,
   },
   case fol.formula.imp_ : φ ψ φ_ih ψ_ih
-  { admit },
+  {
+    unfold formula.subst,
+    congr,
+    {
+      exact φ_ih,
+    },
+    {
+      exact ψ_ih,
+    }
+  },
   case fol.formula.eq_ : φ_ᾰ φ_ᾰ_1
   { admit },
   case fol.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
