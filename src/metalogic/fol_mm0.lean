@@ -3529,7 +3529,6 @@ begin
   },
   case is_proof.conv : h1_Γ h1_Δ h1_φ h1_φ' h1_1 h1_2 h1_3 h1_ih
   {
-    specialize h1_ih M h2 h3,
     induction h1_3,
     case mm0.is_conv.conv_refl : h1_3
     { admit },
