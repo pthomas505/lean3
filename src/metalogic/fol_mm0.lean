@@ -3521,7 +3521,6 @@ begin
     },
     {
       intros ψ a2,
-      specialize h1_3 ψ a2,
       specialize h1_ih_1 ψ a2 M h2 h3,
       rewrite lem_1 ψ M h1_σ h1_σ_inv h1_τ a1_left a1_right at h1_ih_1,
       apply fol.is_proof_subst_right _ h1_σ,
