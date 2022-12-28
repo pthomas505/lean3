@@ -3508,11 +3508,20 @@ begin
     apply h1_ih_2,
     {
       intros x X a2,
+
+      have s1 : x = (h1_σ_inv.val ∘ h1_σ.val) x,
+      simp only [subtype.val_eq_coe],
+      rewrite a1_right,
+      simp only [id.def],
+
+      rewrite s1,
       simp only [function.comp_app],
-      sorry,
+      apply fol.not_free_subst h1_σ_inv,
+      exact mm0_not_free_imp_fol_not_free M h1_Γ' (h1_σ.val x) (h1_τ X) (h1_2 x X a2) h2,
     },
     {
       intros ψ a2,
+      specialize h1_3 ψ a2,
       sorry,
     }
   },
