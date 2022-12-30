@@ -3334,7 +3334,7 @@ def mm0.formula.to_fol_formula'
             let σ := classical.some h.right in
             mm0_formula_to_fol_formula (d.q.subst σ mm0.formula.meta_var_)
           else
-            fol.formula.false_
+            mm0_formula_to_fol_formula (mm0.formula.def_ name args)
       )
       d
 
