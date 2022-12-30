@@ -425,6 +425,7 @@ abbreviation def_name := string
 @[derive decidable_eq]
 inductive formula : Type
 | meta_var_ : meta_var_name → formula
+| false_ : formula
 | pred_ : pred_name → list var_name → formula
 | not_ : formula → formula
 | imp_ : formula → formula → formula
@@ -441,6 +442,7 @@ not_free Γ v φ = v is not free in φ in the context Γ
 -/
 def not_free (Γ : list (var_name × meta_var_name)) (v : var_name) : formula → Prop
 | (meta_var_ X) := (v, X) ∈ Γ
+| (false_) := true
 | (pred_ name args) := v ∉ args
 | (not_ φ) := not_free φ
 | (imp_ φ ψ) := not_free φ ∧ not_free ψ
@@ -461,6 +463,7 @@ end
 
 def formula.meta_var_set : formula → finset meta_var_name
 | (meta_var_ X) := {X}
+| (false_) := ∅
 | (pred_ name args) := ∅
 | (not_ φ) := φ.meta_var_set
 | (imp_ φ ψ) := φ.meta_var_set ∪ ψ.meta_var_set
@@ -475,6 +478,7 @@ that occur free in the formula are in the list.
 -/
 def formula.no_meta_var_and_all_free_in_list : formula → list var_name → Prop
 | (meta_var_ X) S := false
+| (false_) _ := true
 | (pred_ name args) S := args ⊆ S
 | (not_ φ) S := φ.no_meta_var_and_all_free_in_list S
 | (imp_ φ ψ) S := φ.no_meta_var_and_all_free_in_list S ∧ ψ.no_meta_var_and_all_free_in_list S
@@ -495,6 +499,10 @@ begin
   {
     unfold formula.no_meta_var_and_all_free_in_list at h2,
     contradiction,
+  },
+  case formula.false_ : S T h1 h2
+  {
+    unfold formula.no_meta_var_and_all_free_in_list,
   },
   case formula.pred_ : name args S T h1 h2
   {
@@ -567,6 +575,10 @@ begin
     unfold formula.no_meta_var_and_all_free_in_list at h1,
     contradiction,
   },
+  case formula.false_ : l h1
+  {
+    unfold formula.meta_var_set,
+  },
   case formula.pred_ : name args l h1
   {
     unfold formula.meta_var_set,
@@ -620,6 +632,7 @@ def meta_instantiation : Type := meta_var_name → formula
 
 def formula.subst (σ : instantiation) (τ : meta_instantiation) : formula → formula
 | (meta_var_ X) := τ X
+| (false_) := false_
 | (pred_ name args) := pred_ name (list.map σ.1 args)
 | (not_ φ) := not_ φ.subst
 | (imp_ φ ψ) := imp_ φ.subst ψ.subst
@@ -651,6 +664,7 @@ formula is defined in the environment.
 -/
 def formula.is_meta_var_or_all_def_in_env (E : env) : formula → Prop
 | (meta_var_ _) := true
+| (false_) := true
 | (pred_ name args) := true
 | (not_ φ) := φ.is_meta_var_or_all_def_in_env
 | (imp_ φ ψ) := φ.is_meta_var_or_all_def_in_env ∧ ψ.is_meta_var_or_all_def_in_env
@@ -715,6 +729,10 @@ begin
     {
       unfold formula.is_meta_var_or_all_def_in_env,
     },
+    case formula.false_
+    {
+      unfold formula.is_meta_var_or_all_def_in_env,
+    },
     case formula.pred_ : name args
     {
       unfold formula.is_meta_var_or_all_def_in_env,
@@ -756,6 +774,10 @@ begin
   {
     induction φ,
     case formula.meta_var_ : X
+    {
+      unfold formula.is_meta_var_or_all_def_in_env,
+    },
+    case formula.false_
     {
       unfold formula.is_meta_var_or_all_def_in_env,
     },
@@ -987,6 +1009,7 @@ def holds
   (M : meta_valuation D) :
   env → formula → valuation D → Prop
 | E (meta_var_ X) V := M X V
+| E (false_) _ := false
 | E (pred_ name args) V := P name (list.map V args)
 | E (not_ φ) V := ¬ holds E φ V
 | E (imp_ φ ψ) V := holds E φ V → holds E ψ V
@@ -1012,6 +1035,7 @@ def holds'
   (d : option definition_) :
   formula → valuation D → Prop
 | (meta_var_ X) V := M X V
+| (false_) _ := false
 | (pred_ name args) V := P name (list.map V args)
 | (not_ φ) V := ¬ holds' φ V
 | (imp_ φ ψ) V := holds' φ V → holds' ψ V
@@ -1051,6 +1075,15 @@ lemma holds_meta_var
   (X : meta_var_name)
   (V : valuation D) :
   holds D P M E (meta_var_ X) V ↔ M X V := by {cases E; refl}
+
+@[simp]
+lemma holds_false
+  {D : Type}
+  (P : pred_interpretation D)
+  (M : meta_valuation D)
+  (E : env)
+  (V : valuation D) :
+  holds D P M E false_ V ↔ false := by {cases E; refl}
 
 @[simp]
 lemma holds_pred
@@ -1154,6 +1187,10 @@ begin
       unfold formula.no_meta_var_and_all_free_in_list at h1,
       contradiction,
     },
+    case formula.false_ : S V1 V2 h1 h2
+    {
+      simp only [holds_false],
+    },
     case formula.pred_ : name args S V1 V2 h1 h2
     {
       unfold formula.no_meta_var_and_all_free_in_list at h1,
@@ -1237,6 +1274,10 @@ begin
     {
       unfold formula.no_meta_var_and_all_free_in_list at h1,
       contradiction,
+    },
+    case formula.false_ : S V1 V2 h1 h2
+    {
+      simp only [holds_false],
     },
     case formula.pred_ : name args S V1 V2 h1 h2
     {
@@ -1374,6 +1415,10 @@ begin
       apply h1 V X,
       refl,
     },
+    case formula.false_ : M1 M2 V h1
+    {
+      simp only [holds_false],
+    },
     case formula.pred_ : name args M1 M2 V h1
     {
       simp only [holds_pred],
@@ -1433,6 +1478,10 @@ begin
       simp only [holds_meta_var],
       apply h1 V X,
       refl,
+    },
+    case formula.false_ : M1 M2 V h1
+    {
+      simp only [holds_false],
     },
     case formula.not_ : φ φ_ih M1 M2 V h1
     {
@@ -1644,6 +1693,10 @@ begin
   {
     simp only [holds_meta_var],
   },
+  case formula.false_ : V
+  {
+    simp only [holds_false],
+  },
   case formula.pred_ : name args V
   {
     simp only [holds_pred],
@@ -1764,6 +1817,11 @@ begin
   {
     unfold formula.subst,
     simp only [holds_pred, list.map_map],
+  },
+  case formula.false_ : V
+  {
+    unfold formula.subst,
+    simp only [holds_false],
   },
   case formula.not_ : φ φ_ih V
   {
@@ -1940,6 +1998,11 @@ begin
   {
     unfold not_free at h1,
     exact h2 X h1,
+  },
+  case formula.false_
+  {
+    unfold is_not_free,
+    simp only [holds_false, iff_self, forall_2_true_iff],
   },
   case formula.pred_ : name args
   {
@@ -2128,6 +2191,10 @@ begin
     unfold formula.subst,
     exact h2,
   },
+  case formula.false_
+  {
+    unfold formula.subst,
+  },
   case formula.pred_ : name args
   {
     unfold formula.subst,
@@ -2204,6 +2271,10 @@ begin
   case formula.meta_var_ : X
   {
     unfold formula.subst at h1,
+  },
+  case formula.false_
+  {
+    unfold formula.is_meta_var_or_all_def_in_env,
   },
   case formula.pred_ : name args
   {
@@ -2643,6 +2714,8 @@ def formula.is_meta_var_or_all_def_in_map (m : definition_map) : formula → opt
 
 | (meta_var_ _) := some ()
 
+| (false_) := some ()
+
 | (pred_ _ _) := some ()
 
 | (not_ φ) := φ.is_meta_var_or_all_def_in_map
@@ -2923,6 +2996,7 @@ abbreviation pred_name := string
 
 @[derive decidable_eq]
 inductive formula : Type
+| false_ : formula
 | pred_ : pred_name → list var_name → formula
 | not_ : formula → formula
 | imp_ : formula → formula → formula
@@ -2941,6 +3015,7 @@ def instantiation :=
 
 
 def formula.subst (σ : instantiation) : formula → formula
+| (false_) := false_
 | (pred_ name args) := pred_ name (list.map σ.1 args)
 | (not_ φ) := not_ φ.subst
 | (imp_ φ ψ) := imp_ φ.subst ψ.subst
@@ -2956,6 +3031,10 @@ lemma subst_inv
   formula.subst σ_inv (formula.subst σ φ) = φ :=
 begin
   induction φ,
+  case fol.formula.false_
+  {
+    refl,
+  },
   case fol.formula.pred_ : name args
   {
     unfold formula.subst,
@@ -3012,6 +3091,7 @@ end
 
 
 def not_free (v : var_name) : formula → Prop
+| (false_) := true
 | (pred_ name args) := v ∉ args
 | (not_ φ) := not_free φ
 | (imp_ φ ψ) := not_free φ ∧ not_free ψ
@@ -3036,6 +3116,10 @@ begin
   exact function.left_inverse.injective s1,
 
   induction φ,
+  case fol.formula.false_
+  {
+    unfold formula.subst,
+  },
   case fol.formula.pred_ : name args
   {
     unfold not_free at h1,
@@ -3229,6 +3313,7 @@ def mm0.formula.to_fol_formula
   (M : mm0.meta_var_name → fol.formula) :
   mm0.formula → fol.formula
 | (mm0.formula.meta_var_ X) := M X
+| (mm0.formula.false_) := fol.formula.false_
 | (mm0.formula.pred_ name args) := fol.formula.pred_ name args
 | (mm0.formula.not_ φ) := fol.formula.not_ φ.to_fol_formula
 | (mm0.formula.imp_ φ ψ) := fol.formula.imp_ φ.to_fol_formula ψ.to_fol_formula
@@ -3238,6 +3323,7 @@ def mm0.formula.to_fol_formula
 
 
 def fol.formula.to_mm0_formula : fol.formula → mm0.formula
+| (fol.formula.false_) := mm0.formula.false_
 | (fol.formula.pred_ name args) := mm0.formula.pred_ name args
 | (fol.formula.not_ φ) := mm0.formula.not_ φ.to_mm0_formula
 | (fol.formula.imp_ φ ψ) := mm0.formula.imp_ φ.to_mm0_formula ψ.to_mm0_formula
@@ -3251,6 +3337,11 @@ example
   mm0.formula.to_fol_formula M (fol.formula.to_mm0_formula φ) = φ :=
 begin
   induction φ,
+  case fol.formula.false_
+  {
+    unfold fol.formula.to_mm0_formula,
+    unfold mm0.formula.to_fol_formula,
+  },
   case fol.formula.pred_ : name args
   {
     unfold fol.formula.to_mm0_formula,
@@ -3299,6 +3390,10 @@ begin
     unfold mm0.not_free at h1,
     unfold mm0.formula.to_fol_formula,
     exact h2 v X h1,
+  },
+  case mm0.formula.false_
+  {
+    unfold mm0.formula.to_fol_formula,
   },
   case mm0.formula.pred_ : name args
   {
@@ -3386,6 +3481,10 @@ begin
     {
       exact h_inv_left,
     }
+  },
+  case mm0.formula.false_
+  {
+    refl,
   },
   case mm0.formula.pred_ : name args
   {
