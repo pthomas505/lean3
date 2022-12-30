@@ -1483,16 +1483,16 @@ begin
     {
       simp only [holds_false],
     },
+    case formula.pred_ : name args M1 M2 V h1
+    {
+      simp only [holds_pred],
+    },
     case formula.not_ : φ φ_ih M1 M2 V h1
     {
       unfold formula.meta_var_set at h1,
       simp only [holds_not],
       apply not_congr,
       exact φ_ih M1 M2 V h1,
-    },
-    case formula.pred_ : name args M1 M2 V h1
-    {
-      simp only [holds_pred],
     },
     case formula.imp_ : φ ψ φ_ih ψ_ih M1 M2 V h1
     {
