@@ -3309,17 +3309,44 @@ end
 end fol
 
 
-def mm0.formula.to_fol_formula
-  (M : mm0.meta_var_name → fol.formula) :
+noncomputable
+def mm0.formula.to_fol_formula'
+  (M : mm0.meta_var_name → fol.formula)
+  (E : mm0.env)
+  (mm0_formula_to_fol_formula : mm0.formula → fol.formula)
+  (d : option mm0.definition_) :
   mm0.formula → fol.formula
 | (mm0.formula.meta_var_ X) := M X
 | (mm0.formula.false_) := fol.formula.false_
 | (mm0.formula.pred_ name args) := fol.formula.pred_ name args
-| (mm0.formula.not_ φ) := fol.formula.not_ φ.to_fol_formula
-| (mm0.formula.imp_ φ ψ) := fol.formula.imp_ φ.to_fol_formula ψ.to_fol_formula
+| (mm0.formula.not_ φ) := fol.formula.not_ φ.to_fol_formula'
+| (mm0.formula.imp_ φ ψ) := fol.formula.imp_ φ.to_fol_formula' ψ.to_fol_formula'
 | (mm0.formula.eq_ x y) := fol.formula.eq_ x y
-| (mm0.formula.forall_ x φ) := fol.formula.forall_ x φ.to_fol_formula
-| (mm0.formula.def_ name args) := fol.formula.pred_ name args
+| (mm0.formula.forall_ x φ) := fol.formula.forall_ x φ.to_fol_formula'
+| (mm0.formula.def_ name args) :=
+    option.elim
+      fol.formula.false_
+      (
+        fun (d : mm0.definition_),
+          by classical; exact
+          if h : name = d.name ∧ ∃ (σ : mm0.instantiation), d.args.map σ.1 = args
+          then
+            let σ := classical.some h.right in
+            mm0_formula_to_fol_formula (d.q.subst σ mm0.formula.meta_var_)
+          else
+            fol.formula.false_
+      )
+      d
+
+
+noncomputable
+def mm0.formula.to_fol_formula
+  (M : mm0.meta_var_name → fol.formula)
+  (E : mm0.env)
+  (d : option mm0.definition_) :
+  mm0.env → mm0.formula → fol.formula
+| [] := mm0.formula.to_fol_formula' M E (fun _, fol.formula.false_) option.none
+| (d :: E) := mm0.formula.to_fol_formula' M E (mm0.formula.to_fol_formula E) (option.some d)
 
 
 def fol.formula.to_mm0_formula : fol.formula → mm0.formula
