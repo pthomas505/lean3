@@ -3529,20 +3529,6 @@ begin
   },
   case is_proof.conv : h1_Γ h1_Δ h1_φ h1_φ' h1_1 h1_2 h1_3 h1_ih
   {
-    induction h1_3,
-    case mm0.is_conv.conv_refl : h1_3
-    { admit },
-    case mm0.is_conv.conv_symm : h1_3_φ h1_3_φ' h1_3_ᾰ h1_3_ih
-    { admit },
-    case mm0.is_conv.conv_trans : h1_3_φ h1_3_φ' h1_3_φ'' h1_3_ᾰ h1_3_ᾰ_1 h1_3_ih_ᾰ h1_3_ih_ᾰ_1
-    { admit },
-    case mm0.is_conv.conv_not : h1_3_φ h1_3_φ' h1_3_ᾰ h1_3_ih
-    { admit },
-    case mm0.is_conv.conv_imp : h1_3_φ h1_3_φ' h1_3_ψ h1_3_ψ' h1_3_ᾰ h1_3_ᾰ_1 h1_3_ih_ᾰ h1_3_ih_ᾰ_1
-    { admit },
-    case mm0.is_conv.conv_forall : h1_3_x h1_3_φ h1_3_φ' h1_3_ᾰ h1_3_ih
-    { admit },
-    case mm0.is_conv.conv_unfold : h1_3_d h1_3_σ h1_3_ᾰ
-    { admit },
+    sorry,
   },
 end
