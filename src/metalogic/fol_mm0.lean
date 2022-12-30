@@ -3312,7 +3312,6 @@ end fol
 noncomputable
 def mm0.formula.to_fol_formula'
   (M : mm0.meta_var_name → fol.formula)
-  (E : mm0.env)
   (mm0_formula_to_fol_formula : mm0.formula → fol.formula)
   (d : option mm0.definition_) :
   mm0.formula → fol.formula
@@ -3341,11 +3340,18 @@ def mm0.formula.to_fol_formula'
 
 noncomputable
 def mm0.formula.to_fol_formula
-  (M : mm0.meta_var_name → fol.formula)
-  (E : mm0.env) :
+  (M : mm0.meta_var_name → fol.formula) :
   mm0.env → mm0.formula → fol.formula
-| [] := mm0.formula.to_fol_formula' M E (fun _, fol.formula.false_) option.none
-| (d :: E) := mm0.formula.to_fol_formula' M E (mm0.formula.to_fol_formula E) (option.some d)
+| [] := mm0.formula.to_fol_formula' M (fun _, fol.formula.false_) option.none
+| (d :: E) := mm0.formula.to_fol_formula' M (mm0.formula.to_fol_formula E) (option.some d)
+
+
+@[simp]
+lemma meta_var_to_fol_formula
+  (M : mm0.meta_var_name → fol.formula)
+  (E : mm0.env)
+  (X : mm0.meta_var_name) :
+  mm0.formula.to_fol_formula M E (mm0.formula.meta_var_ X) = M X := by {cases E; refl}
 
 
 def fol.formula.to_mm0_formula : fol.formula → mm0.formula
