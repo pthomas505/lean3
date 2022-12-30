@@ -3342,8 +3342,7 @@ def mm0.formula.to_fol_formula'
 noncomputable
 def mm0.formula.to_fol_formula
   (M : mm0.meta_var_name → fol.formula)
-  (E : mm0.env)
-  (d : option mm0.definition_) :
+  (E : mm0.env) :
   mm0.env → mm0.formula → fol.formula
 | [] := mm0.formula.to_fol_formula' M E (fun _, fol.formula.false_) option.none
 | (d :: E) := mm0.formula.to_fol_formula' M E (mm0.formula.to_fol_formula E) (option.some d)
