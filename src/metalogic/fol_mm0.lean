@@ -3746,13 +3746,7 @@ begin
     case list.cons : E_hd E_tl E_ih
     {
       simp only [not_nil_def_to_fol_formula],
-      split_ifs,
-      {
-        sorry,
-      },
-      {
-        unfold fol.formula.subst at *,
-      }
+      sorry,
     },
   },
 end
