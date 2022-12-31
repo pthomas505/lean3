@@ -3566,35 +3566,36 @@ end
 lemma mm0_not_free_imp_fol_not_free
   (M : mm0.meta_var_name → fol.formula)
   (Γ : list (mm0.var_name × mm0.meta_var_name))
+  (E : mm0.env)
   (v : mm0.var_name)
   (φ : mm0.formula)
   (h1 : mm0.not_free Γ v φ)
   (h2 : ∀ (x : mm0.var_name) (X : mm0.meta_var_name),
     (x, X) ∈ Γ → fol.not_free x (M X)) :
-  fol.not_free v (mm0.formula.to_fol_formula M φ) :=
+  fol.not_free v (mm0.formula.to_fol_formula M E φ) :=
 begin
   induction φ,
   case mm0.formula.meta_var_ : X
   {
     unfold mm0.not_free at h1,
-    unfold mm0.formula.to_fol_formula,
+    simp only [meta_var_to_fol_formula],
     exact h2 v X h1,
   },
   case mm0.formula.false_
   {
-    unfold mm0.formula.to_fol_formula,
+    simp only [false_to_fol_formula],
   },
   case mm0.formula.pred_ : name args
   {
     unfold mm0.not_free at h1,
-    unfold mm0.formula.to_fol_formula,
+    simp only [pred_to_fol_formula],
     unfold fol.not_free,
     exact h1,
   },
   case mm0.formula.not_ : φ φ_ih
   {
     unfold mm0.not_free at h1,
-    unfold mm0.formula.to_fol_formula,
+    simp only [not_to_fol_formula],
     unfold fol.not_free,
     exact φ_ih h1,
   },
@@ -3603,7 +3604,7 @@ begin
     unfold mm0.not_free at h1,
     cases h1,
 
-    unfold mm0.formula.to_fol_formula,
+    simp only [imp_to_fol_formula],
     unfold fol.not_free,
     split,
     {
@@ -3616,14 +3617,14 @@ begin
   case mm0.formula.eq_ : x y
   {
     unfold mm0.not_free at h1,
-    unfold mm0.formula.to_fol_formula,
+    simp only [eq_to_fol_formula],
     unfold fol.not_free,
     exact h1,
   },
   case mm0.formula.forall_ : x φ φ_ih
   {
     unfold mm0.not_free at h1,
-    unfold mm0.formula.to_fol_formula,
+    simp only [forall_to_fol_formula],
     unfold fol.not_free,
     cases h1,
     {
@@ -3638,9 +3639,16 @@ begin
   case mm0.formula.def_ : name args
   {
     unfold mm0.not_free at h1,
-    unfold mm0.formula.to_fol_formula,
-    unfold fol.not_free,
-    exact h1,
+    cases E,
+    case list.nil
+    {
+      unfold mm0.formula.to_fol_formula,
+    },
+    case list.cons : E_hd E_tl
+    {
+      simp only [not_nil_def_to_fol_formula],
+      sorry,
+    },
   },
 end
 
