@@ -3744,7 +3744,16 @@ begin
       unfold fol.formula.subst,
     },
     case list.cons : E_hd E_tl E_ih
-    { admit },
+    {
+      simp only [not_nil_def_to_fol_formula],
+      split_ifs,
+      {
+        sorry,
+      },
+      {
+        unfold fol.formula.subst at *,
+      }
+    },
   },
 end
 
