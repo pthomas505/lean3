@@ -3647,7 +3647,13 @@ begin
     case list.cons : E_hd E_tl
     {
       simp only [not_nil_def_to_fol_formula],
-      sorry,
+      split_ifs,
+      {
+        sorry,
+      },
+      {
+        sorry,
+      }
     },
   },
 end
