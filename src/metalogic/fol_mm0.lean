@@ -3359,7 +3359,7 @@ def mm0.formula.to_fol_formula'
             let σ := classical.some h.right in
             mm0_formula_to_fol_formula (d.q.subst σ mm0.formula.meta_var_)
           else
-            mm0_formula_to_fol_formula (mm0.formula.def_ name args)
+            fol.formula.false_
       )
       d
 
@@ -3377,14 +3377,16 @@ lemma meta_var_to_fol_formula
   (M : mm0.meta_var_name → fol.formula)
   (E : mm0.env)
   (X : mm0.meta_var_name) :
-  mm0.formula.to_fol_formula M E (mm0.formula.meta_var_ X) = M X := by {cases E; refl}
+  mm0.formula.to_fol_formula M E (mm0.formula.meta_var_ X) =
+    M X := by {cases E; refl}
 
 
 @[simp]
 lemma false_to_fol_formula
   (M : mm0.meta_var_name → fol.formula)
   (E : mm0.env) :
-  mm0.formula.to_fol_formula M E mm0.formula.false_ = fol.formula.false_ := by {cases E; refl}
+  mm0.formula.to_fol_formula M E mm0.formula.false_ =
+    fol.formula.false_ := by {cases E; refl}
 
 
 @[simp]
@@ -3393,7 +3395,8 @@ lemma pred_to_fol_formula
   (E : mm0.env)
   (name : mm0.pred_name)
   (args : list mm0.var_name) :
-  mm0.formula.to_fol_formula M E (mm0.formula.pred_ name args) = fol.formula.pred_ name args := by {cases E; refl}
+  mm0.formula.to_fol_formula M E (mm0.formula.pred_ name args) =
+    fol.formula.pred_ name args := by {cases E; refl}
 
 
 @[simp]
@@ -3404,7 +3407,71 @@ lemma not_to_fol_formula
   mm0.formula.to_fol_formula M E (mm0.formula.not_ φ) =
     fol.formula.not_ (mm0.formula.to_fol_formula M E φ) :=
 begin
+  cases E,
+  case list.nil
+  {
+    unfold mm0.formula.to_fol_formula,
+    unfold mm0.formula.to_fol_formula',
+  },
+  case list.cons : E_hd E_tl
+  {
+    unfold mm0.formula.to_fol_formula,
+    unfold mm0.formula.to_fol_formula',
+  },
+end
 
+
+@[simp]
+lemma imp_to_fol_formula
+  (M : mm0.meta_var_name → fol.formula)
+  (E : mm0.env)
+  (φ ψ : mm0.formula) :
+  mm0.formula.to_fol_formula M E (mm0.formula.imp_ φ ψ) =
+    fol.formula.imp_ (mm0.formula.to_fol_formula M E φ) (mm0.formula.to_fol_formula M E ψ) :=
+begin
+  cases E,
+  case list.nil
+  {
+    unfold mm0.formula.to_fol_formula,
+    unfold mm0.formula.to_fol_formula',
+  },
+  case list.cons : E_hd E_tl
+  {
+    unfold mm0.formula.to_fol_formula,
+    unfold mm0.formula.to_fol_formula',
+  },
+end
+
+
+@[simp]
+lemma eq_to_fol_formula
+  (M : mm0.meta_var_name → fol.formula)
+  (E : mm0.env)
+  (x y : mm0.var_name) :
+  mm0.formula.to_fol_formula M E (mm0.formula.eq_ x y) =
+    fol.formula.eq_ x y := by {cases E; refl}
+
+
+@[simp]
+lemma forall_to_fol_formula
+  (M : mm0.meta_var_name → fol.formula)
+  (E : mm0.env)
+  (x : mm0.var_name)
+  (φ : mm0.formula) :
+  mm0.formula.to_fol_formula M E (mm0.formula.forall_ x φ) =
+    fol.formula.forall_ x (mm0.formula.to_fol_formula M E φ) :=
+begin
+  cases E,
+  case list.nil
+  {
+    unfold mm0.formula.to_fol_formula,
+    unfold mm0.formula.to_fol_formula',
+  },
+  case list.cons : E_hd E_tl
+  {
+    unfold mm0.formula.to_fol_formula,
+    unfold mm0.formula.to_fol_formula',
+  },
 end
 
 
