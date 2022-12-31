@@ -3309,6 +3309,32 @@ end
 end fol
 
 
+/-
+noncomputable
+def mm0.formula.to_fol_formula
+  (M : mm0.meta_var_name → fol.formula) :
+  mm0.env → mm0.formula → fol.formula
+| E (mm0.formula.meta_var_ X) := M X
+| E (mm0.formula.false_) := fol.formula.false_
+| E (mm0.formula.pred_ name args) := fol.formula.pred_ name args
+| E (mm0.formula.not_ φ) :=
+    fol.formula.not_ (mm0.formula.to_fol_formula E φ)
+| E (mm0.formula.imp_ φ ψ) :=
+    fol.formula.imp_ (mm0.formula.to_fol_formula E φ) (mm0.formula.to_fol_formula E ψ)
+| E (mm0.formula.eq_ x y) := fol.formula.eq_ x y
+| E (mm0.formula.forall_ x φ) :=
+    fol.formula.forall_ x (mm0.formula.to_fol_formula E φ)
+| [] (mm0.formula.def_ _ _) := fol.formula.false_
+| (d :: E) (mm0.formula.def_ name args) :=
+  by classical; exact
+  if h : name = d.name ∧ ∃ (σ : mm0.instantiation), d.args.map σ.1 = args
+  then
+    let σ := classical.some h.right in
+    mm0.formula.to_fol_formula E (d.q.subst σ mm0.formula.meta_var_)
+  else fol.formula.false_
+-/
+
+
 noncomputable
 def mm0.formula.to_fol_formula'
   (M : mm0.meta_var_name → fol.formula)
@@ -3352,6 +3378,34 @@ lemma meta_var_to_fol_formula
   (E : mm0.env)
   (X : mm0.meta_var_name) :
   mm0.formula.to_fol_formula M E (mm0.formula.meta_var_ X) = M X := by {cases E; refl}
+
+
+@[simp]
+lemma false_to_fol_formula
+  (M : mm0.meta_var_name → fol.formula)
+  (E : mm0.env) :
+  mm0.formula.to_fol_formula M E mm0.formula.false_ = fol.formula.false_ := by {cases E; refl}
+
+
+@[simp]
+lemma pred_to_fol_formula
+  (M : mm0.meta_var_name → fol.formula)
+  (E : mm0.env)
+  (name : mm0.pred_name)
+  (args : list mm0.var_name) :
+  mm0.formula.to_fol_formula M E (mm0.formula.pred_ name args) = fol.formula.pred_ name args := by {cases E; refl}
+
+
+@[simp]
+lemma not_to_fol_formula
+  (M : mm0.meta_var_name → fol.formula)
+  (E : mm0.env)
+  (φ : mm0.formula) :
+  mm0.formula.to_fol_formula M E (mm0.formula.not_ φ) =
+    fol.formula.not_ (mm0.formula.to_fol_formula M E φ) :=
+begin
+
+end
 
 
 def fol.formula.to_mm0_formula : fol.formula → mm0.formula
