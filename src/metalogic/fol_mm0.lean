@@ -3639,12 +3639,12 @@ begin
   case mm0.formula.def_ : name args
   {
     unfold mm0.not_free at h1,
-    cases E,
+    induction E,
     case list.nil
     {
       unfold mm0.formula.to_fol_formula,
     },
-    case list.cons : E_hd E_tl
+    case list.cons : E_hd E_tl E_ih
     {
       simp only [not_nil_def_to_fol_formula],
       split_ifs,
@@ -3737,7 +3737,14 @@ begin
   case mm0.formula.def_ : name args
   {
     unfold mm0.formula.subst,
-    sorry,
+    induction E,
+    case list.nil
+    {
+      simp only [nil_def_to_fol_formula],
+      unfold fol.formula.subst,
+    },
+    case list.cons : E_hd E_tl E_ih
+    { admit },
   },
 end
 
