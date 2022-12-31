@@ -3652,7 +3652,7 @@ begin
         sorry,
       },
       {
-        sorry,
+        unfold fol.not_free,
       }
     },
   },
