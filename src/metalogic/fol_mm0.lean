@@ -3516,43 +3516,49 @@ def fol.formula.to_mm0_formula : fol.formula → mm0.formula
 
 example
   (φ : fol.formula)
-  (M : mm0.meta_var_name → fol.formula) :
-  mm0.formula.to_fol_formula M (fol.formula.to_mm0_formula φ) = φ :=
+  (M : mm0.meta_var_name → fol.formula)
+  (E : mm0.env):
+  mm0.formula.to_fol_formula M E (fol.formula.to_mm0_formula φ) = φ :=
 begin
   induction φ,
   case fol.formula.false_
   {
     unfold fol.formula.to_mm0_formula,
-    unfold mm0.formula.to_fol_formula,
+    simp only [false_to_fol_formula],
   },
   case fol.formula.pred_ : name args
   {
     unfold fol.formula.to_mm0_formula,
-    unfold mm0.formula.to_fol_formula,
+    simp only [pred_to_fol_formula, eq_self_iff_true, and_self],
   },
   case fol.formula.not_ : φ φ_ih
   {
     unfold fol.formula.to_mm0_formula,
-    unfold mm0.formula.to_fol_formula,
-    rewrite φ_ih,
+    simp only [not_to_fol_formula],
+    exact φ_ih,
   },
   case fol.formula.imp_ : φ ψ φ_ih ψ_ih
   {
     unfold fol.formula.to_mm0_formula,
-    unfold mm0.formula.to_fol_formula,
-    rewrite φ_ih,
-    rewrite ψ_ih,
+    simp only [imp_to_fol_formula],
+    split,
+    {
+      exact φ_ih,
+    },
+    {
+      exact ψ_ih,
+    }
   },
   case fol.formula.eq_ : x y
   {
     unfold fol.formula.to_mm0_formula,
-    unfold mm0.formula.to_fol_formula,
+    simp only [eq_to_fol_formula, eq_self_iff_true, and_self],
   },
   case fol.formula.forall_ : x φ φ_ih
   {
     unfold fol.formula.to_mm0_formula,
-    unfold mm0.formula.to_fol_formula,
-    rewrite φ_ih,
+    simp only [forall_to_fol_formula, eq_self_iff_true, true_and],
+    exact φ_ih,
   },
 end
 
