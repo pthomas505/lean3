@@ -3563,6 +3563,79 @@ begin
 end
 
 
+lemma fol_not_free_imp_mm0_not_free
+  (Γ : list (mm0.var_name × mm0.meta_var_name))
+  (v : fol.var_name)
+  (φ : fol.formula)
+  (h1 : fol.not_free v φ) :
+  mm0.not_free Γ v (fol.formula.to_mm0_formula φ) :=
+begin
+  induction φ,
+  case fol.formula.false_
+  {
+    unfold fol.formula.to_mm0_formula,
+  },
+  case fol.formula.pred_ : name args
+  {
+    unfold fol.formula.to_mm0_formula,
+    exact h1,
+  },
+  case fol.formula.not_ : φ φ_ih
+  {
+    unfold fol.not_free at h1,
+
+    unfold fol.formula.to_mm0_formula,
+    exact φ_ih h1,
+  },
+  case fol.formula.imp_ : φ ψ φ_ih ψ_ih
+  {
+    unfold fol.not_free at h1,
+    cases h1,
+
+    unfold fol.formula.to_mm0_formula,
+    unfold mm0.not_free,
+    split,
+    {
+      exact φ_ih h1_left,
+    },
+    {
+      exact ψ_ih h1_right,
+    }
+  },
+  case fol.formula.eq_ : x y
+  {
+    unfold fol.not_free at h1,
+    cases h1,
+
+    unfold fol.formula.to_mm0_formula,
+    unfold mm0.not_free,
+    split,
+    {
+      exact h1_left,
+    },
+    {
+      exact h1_right,
+    }
+  },
+  case fol.formula.forall_ : x φ φ_ih
+  {
+    unfold fol.not_free at h1,
+
+    unfold fol.formula.to_mm0_formula,
+    unfold mm0.not_free,
+    cases h1,
+    {
+      apply or.intro_left,
+      exact h1,
+    },
+    {
+      apply or.intro_right,
+      exact φ_ih h1,
+    }
+  },
+end
+
+
 lemma mm0_not_free_imp_fol_not_free
   (M : mm0.meta_var_name → fol.formula)
   (Γ : list (mm0.var_name × mm0.meta_var_name))
@@ -3650,6 +3723,14 @@ begin
       split_ifs,
       {
         cases h,
+
+        apply exists.elim h_right,
+        intros σ h_right_1,
+
+        obtain s1 := E_hd.nf,
+
+        rewrite h_left at E_ih,
+        rewrite <- h_right_1 at E_ih,
         sorry,
       },
       {
