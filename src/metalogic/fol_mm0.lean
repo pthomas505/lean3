@@ -3475,6 +3475,15 @@ begin
 end
 
 
+@[simp]
+lemma nil_def_to_fol_formula
+  (M : mm0.meta_var_name → fol.formula)
+  (name : mm0.pred_name)
+  (args : list mm0.var_name) :
+  mm0.formula.to_fol_formula M [] (mm0.formula.def_ name args) =
+    fol.formula.false_ := by {refl}
+
+
 def fol.formula.to_mm0_formula : fol.formula → mm0.formula
 | (fol.formula.false_) := mm0.formula.false_
 | (fol.formula.pred_ name args) := mm0.formula.pred_ name args
