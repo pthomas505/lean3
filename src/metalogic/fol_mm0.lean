@@ -3727,10 +3727,6 @@ begin
         apply exists.elim h_right,
         intros σ h_right_1,
 
-        obtain s1 := E_hd.nf,
-
-        rewrite h_left at E_ih,
-        rewrite <- h_right_1 at E_ih,
         sorry,
       },
       {
