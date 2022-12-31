@@ -3484,6 +3484,27 @@ lemma nil_def_to_fol_formula
     fol.formula.false_ := by {refl}
 
 
+@[simp]
+lemma not_nil_def_to_fol_formula
+  (M : mm0.meta_var_name → fol.formula)
+  (d : mm0.definition_)
+  (E : mm0.env)
+  (name : mm0.pred_name)
+  (args : list mm0.var_name) :
+  mm0.formula.to_fol_formula M (d :: E) (mm0.formula.def_ name args) =
+  by classical; exact
+  if h : name = d.name ∧ ∃ (σ : mm0.instantiation), d.args.map σ.1 = args
+  then
+    let σ := classical.some h.right in
+    mm0.formula.to_fol_formula M E (d.q.subst σ mm0.formula.meta_var_)
+  else fol.formula.false_ :=
+begin
+  unfold mm0.formula.to_fol_formula,
+  unfold mm0.formula.to_fol_formula',
+  simp only [option.elim],
+end
+
+
 def fol.formula.to_mm0_formula : fol.formula → mm0.formula
 | (fol.formula.false_) := mm0.formula.false_
 | (fol.formula.pred_ name args) := mm0.formula.pred_ name args
