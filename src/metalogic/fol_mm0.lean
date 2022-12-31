@@ -3760,8 +3760,8 @@ theorem conservative
   (M : mm0.meta_var_name → fol.formula)
   (h1 : mm0.is_proof E Γ Δ φ)
   (h2 : ∀ (x : mm0.var_name) (X : mm0.meta_var_name), (x, X) ∈ Γ → fol.not_free x (M X))
-  (h3 : ∀ (ψ : mm0.formula), ψ ∈ Δ → fol.is_proof (mm0.formula.to_fol_formula M ψ)) :
-  fol.is_proof (mm0.formula.to_fol_formula M φ) :=
+  (h3 : ∀ (ψ : mm0.formula), ψ ∈ Δ → fol.is_proof (mm0.formula.to_fol_formula M E ψ)) :
+  fol.is_proof (mm0.formula.to_fol_formula M E φ) :=
 begin
   induction h1 generalizing M,
   case is_proof.hyp : h1_Γ h1_Δ h1_φ h1_1 h1_2
@@ -3770,9 +3770,9 @@ begin
   },
   case is_proof.mp : h1_Γ h1_Δ h1_φ h1_ψ h1_1 h1_2 h1_ih_1 h1_ih_2
   {
-    unfold mm0.formula.to_fol_formula at h1_ih_2,
+    simp only [imp_to_fol_formula] at h1_ih_2,
 
-    apply fol.is_proof.mp (mm0.formula.to_fol_formula M h1_φ) (mm0.formula.to_fol_formula M h1_ψ),
+    apply fol.is_proof.mp (mm0.formula.to_fol_formula M E h1_φ) (mm0.formula.to_fol_formula M E h1_ψ),
     {
       exact h1_ih_1 M h2 h3,
     },
@@ -3782,37 +3782,46 @@ begin
   },
   case is_proof.prop_1 : h1_Γ h1_Δ h1_φ h1_ψ h1_1 h1_2
   {
+    simp only [imp_to_fol_formula],
     apply fol.is_proof.prop_1,
   },
   case is_proof.prop_2 : h1_Γ h1_Δ h1_φ h1_ψ h1_χ h1_1 h1_2 h1_3
   {
+    simp only [imp_to_fol_formula],
     apply fol.is_proof.prop_2,
   },
   case is_proof.prop_3 : h1_Γ h1_Δ h1_φ h1_ψ h1_1 h1_2
   {
+    simp only [imp_to_fol_formula, not_to_fol_formula],
     apply fol.is_proof.prop_3,
   },
   case is_proof.gen : h1_Γ h1_Δ h1_φ h1_x h1_1 h1_ih
   {
+    simp only [forall_to_fol_formula],
     apply fol.is_proof.gen,
     exact h1_ih M h2 h3,
   },
   case is_proof.pred_1 : h1_Γ h1_Δ h1_φ h1_ψ h1_x h1_1 h1_2
   {
+    simp only [imp_to_fol_formula, forall_to_fol_formula],
     apply fol.is_proof.pred_1,
   },
   case is_proof.pred_2 : h1_Γ h1_Δ h1_φ h1_x h1_1 h1_2
   {
+    simp only [imp_to_fol_formula, forall_to_fol_formula],
     apply fol.is_proof.pred_2,
-    exact mm0_not_free_imp_fol_not_free M h1_Γ h1_x h1_φ h1_2 h2,
+    exact mm0_not_free_imp_fol_not_free M h1_Γ E h1_x h1_φ h1_2 h2,
   },
   case is_proof.eq_1 : h1_Γ h1_Δ h1_x h1_y h1_1
   {
+    unfold mm0.exists_,
+    simp only [not_to_fol_formula, forall_to_fol_formula, eq_to_fol_formula],
     apply fol.is_proof.eq_1,
     exact h1_1,
   },
   case is_proof.eq_2 : h1_Γ h1_Δ h1_x h1_y h1_z
   {
+    simp only [imp_to_fol_formula, eq_to_fol_formula],
     apply fol.is_proof.eq_2,
   },
   case is_proof.thm : h1_Γ h1_Γ' h1_Δ h1_Δ' h1_φ h1_σ h1_τ h1_1 h1_2 h1_3 h1_4 h1_ih_1 h1_ih_2
@@ -3824,7 +3833,7 @@ begin
       ⟨h1_σ', begin apply exists.intro h1_σ.val, exact and.intro a1_right a1_left, end⟩,
 
     dsimp at *,
-    rewrite lem_1 h1_φ M h1_σ h1_σ_inv h1_τ a1_left a1_right,
+    rewrite lem_1 h1_φ M E h1_σ h1_σ_inv h1_τ a1_left a1_right,
     apply fol.is_proof_subst_left,
     apply h1_ih_2,
     {
@@ -3838,12 +3847,12 @@ begin
       rewrite s1,
       simp only [function.comp_app],
       apply fol.not_free_subst h1_σ_inv,
-      exact mm0_not_free_imp_fol_not_free M h1_Γ' (h1_σ.val x) (h1_τ X) (h1_2 x X a2) h2,
+      exact mm0_not_free_imp_fol_not_free M h1_Γ' E (h1_σ.val x) (h1_τ X) (h1_2 x X a2) h2,
     },
     {
       intros ψ a2,
       specialize h1_ih_1 ψ a2 M h2 h3,
-      rewrite lem_1 ψ M h1_σ h1_σ_inv h1_τ a1_left a1_right at h1_ih_1,
+      rewrite lem_1 ψ M E h1_σ h1_σ_inv h1_τ a1_left a1_right at h1_ih_1,
       apply fol.is_proof_subst_right _ h1_σ,
       exact h1_ih_1,
     }
