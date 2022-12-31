@@ -3649,6 +3649,7 @@ begin
       simp only [not_nil_def_to_fol_formula],
       split_ifs,
       {
+        cases h,
         sorry,
       },
       {
@@ -3662,20 +3663,20 @@ end
 lemma lem_1
   (φ : mm0.formula)
   (M : mm0.meta_var_name → fol.formula)
+  (E : mm0.env)
   (σ σ_inv : mm0.instantiation)
   (τ : mm0.meta_instantiation)
   (h_inv_left : σ.val ∘ σ_inv.val = id)
   (h_inv_right : σ_inv.val ∘ σ.val = id) :
-  mm0.formula.to_fol_formula M (mm0.formula.subst σ τ φ) =
+  mm0.formula.to_fol_formula M E (mm0.formula.subst σ τ φ) =
     fol.formula.subst σ
-      (mm0.formula.to_fol_formula (fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M ∘ τ)) φ) :=
+      (mm0.formula.to_fol_formula (fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M E ∘ τ)) E φ) :=
 begin
   induction φ,
   case mm0.formula.meta_var_ : X
   {
     unfold mm0.formula.subst,
-    unfold mm0.formula.to_fol_formula,
-    simp only [function.comp_app],
+    simp only [meta_var_to_fol_formula, function.comp_app],
     symmetry,
     apply fol.subst_inv,
     {
@@ -3687,16 +3688,21 @@ begin
   },
   case mm0.formula.false_
   {
-    refl,
+    unfold mm0.formula.subst,
+    simp only [false_to_fol_formula],
+    unfold fol.formula.subst,
   },
   case mm0.formula.pred_ : name args
   {
+    unfold mm0.formula.subst,
+    simp only [subtype.val_eq_coe, pred_to_fol_formula],
+    unfold fol.formula.subst,
     refl,
   },
   case mm0.formula.not_ : φ φ_ih
   {
     unfold mm0.formula.subst,
-    unfold mm0.formula.to_fol_formula,
+    simp only [not_to_fol_formula],
     unfold fol.formula.subst,
     congr,
     exact φ_ih,
@@ -3704,7 +3710,7 @@ begin
   case mm0.formula.imp_ : φ ψ φ_ih ψ_ih
   {
     unfold mm0.formula.subst,
-    unfold mm0.formula.to_fol_formula,
+    simp only [imp_to_fol_formula],
     unfold fol.formula.subst,
     congr,
     {
@@ -3716,19 +3722,22 @@ begin
   },
   case mm0.formula.eq_ : x y
   {
-    refl,
+    unfold mm0.formula.subst,
+    simp only [eq_to_fol_formula],
+    unfold fol.formula.subst,
   },
   case mm0.formula.forall_ : x φ φ_ih
   {
     unfold mm0.formula.subst,
-    unfold mm0.formula.to_fol_formula,
+    simp only [subtype.val_eq_coe, forall_to_fol_formula],
     unfold fol.formula.subst,
     congr,
     exact φ_ih,
   },
   case mm0.formula.def_ : name args
   {
-    refl,
+    unfold mm0.formula.subst,
+    sorry,
   },
 end
 
