@@ -563,6 +563,91 @@ begin
 end
 
 
+example
+  (φ : formula)
+  (S : list var_name)
+  (v : var_name)
+  (Γ : list (var_name × meta_var_name))
+  (h1 : φ.no_meta_var_and_all_free_in_list S)
+  (h2 : v ∉ S) :
+  not_free Γ v φ :=
+begin
+  induction φ,
+  case mm0.formula.meta_var_ : X
+  {
+    unfold formula.no_meta_var_and_all_free_in_list at h1,
+    contradiction,
+  },
+  case mm0.formula.false_
+  {
+    unfold not_free,
+  },
+  case mm0.formula.pred_ : name args
+  {
+    unfold formula.no_meta_var_and_all_free_in_list at h1,
+    unfold not_free,
+    intros contra,
+    apply h2,
+    exact h1 contra,
+  },
+  case mm0.formula.not_ : φ φ_ih
+  {
+    unfold formula.no_meta_var_and_all_free_in_list at h1,
+    unfold not_free,
+    exact φ_ih h1,
+  },
+  case mm0.formula.imp_ : φ ψ φ_ih ψ_ih
+  {
+    unfold formula.no_meta_var_and_all_free_in_list at h1,
+    cases h1,
+
+    unfold not_free,
+    split,
+    {
+      exact φ_ih h1_left,
+    },
+    {
+      exact ψ_ih h1_right,
+    }
+  },
+  case mm0.formula.eq_ : x y
+  {
+    unfold formula.no_meta_var_and_all_free_in_list at h1,
+    cases h1,
+
+    unfold not_free,
+    split,
+    {
+      intros contra,
+      apply h2,
+      rewrite <- contra,
+      exact h1_left,
+    },
+    {
+      intros contra,
+      apply h2,
+      rewrite <- contra,
+      exact h1_right,
+    }
+  },
+  case mm0.formula.forall_ : x φ φ_ih
+  {
+    unfold formula.no_meta_var_and_all_free_in_list at h1,
+
+    unfold not_free,
+    sorry,
+  },
+  case mm0.formula.def_ : name args
+  {
+    unfold formula.no_meta_var_and_all_free_in_list at h1,
+    unfold not_free,
+    intros contra,
+    apply h2,
+    exact h1 contra,
+  },
+end
+
+
 lemma no_meta_var_imp_meta_var_set_is_empty
   (φ : formula)
   (l : list var_name)
@@ -3726,6 +3811,15 @@ begin
 
         apply exists.elim h_right,
         intros σ h_right_1,
+
+        subst h_left,
+        subst h_right_1,
+
+        obtain s1 := E_hd.nf,
+        dsimp,
+
+        have s2 : (mm0.formula.subst (classical.some h_right) mm0.formula.meta_var_ E_hd.q).no_meta_var_and_all_free_in_list (list.map σ.val E_hd.args),
+        sorry,
 
         sorry,
       },
