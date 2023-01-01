@@ -563,7 +563,7 @@ begin
 end
 
 
-example
+lemma all_free_in_list_and_not_in_list_imp_not_free
   (φ : formula)
   (S : list var_name)
   (v : var_name)
