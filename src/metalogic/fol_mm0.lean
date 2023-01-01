@@ -572,7 +572,7 @@ example
   (h2 : v ∉ S) :
   not_free Γ v φ :=
 begin
-  induction φ,
+  induction φ generalizing S,
   case mm0.formula.meta_var_ : X
   {
     unfold formula.no_meta_var_and_all_free_in_list at h1,
@@ -594,7 +594,7 @@ begin
   {
     unfold formula.no_meta_var_and_all_free_in_list at h1,
     unfold not_free,
-    exact φ_ih h1,
+    exact φ_ih S h1 h2,
   },
   case mm0.formula.imp_ : φ ψ φ_ih ψ_ih
   {
@@ -604,10 +604,10 @@ begin
     unfold not_free,
     split,
     {
-      exact φ_ih h1_left,
+      exact φ_ih S h1_left h2,
     },
     {
-      exact ψ_ih h1_right,
+      exact ψ_ih S h1_right h2,
     }
   },
   case mm0.formula.eq_ : x y
@@ -635,7 +635,27 @@ begin
     unfold formula.no_meta_var_and_all_free_in_list at h1,
 
     unfold not_free,
-    sorry,
+    by_cases c1 : x = v,
+    {
+      apply or.intro_left,
+      exact c1,
+    },
+    {
+      apply or.intro_right,
+      apply φ_ih (x :: S) h1,
+      simp only [list.mem_cons_iff],
+      push_neg,
+      split,
+      {
+        intros contra,
+        apply c1,
+        symmetry,
+        exact contra,
+      },
+      {
+        exact h2,
+      }
+    },
   },
   case mm0.formula.def_ : name args
   {
