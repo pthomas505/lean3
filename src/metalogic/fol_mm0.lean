@@ -3955,22 +3955,68 @@ begin
   case list.nil : φ h1
   {
     induction φ,
-    case mm0.formula.meta_var_ : φ
-    { admit },
+    case mm0.formula.meta_var_ : X
+    {
+      unfold mm0.not_free at h1,
+      simp only [meta_var_to_fol_formula],
+      exact h2 v X h1,
+    },
     case mm0.formula.false_
-    { admit },
-    case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1
-    { admit },
-    case mm0.formula.not_ : φ_ᾰ φ_ih
-    { admit },
-    case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
-    { admit },
-    case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1
-    { admit },
-    case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
-    { admit },
-    case mm0.formula.def_ : φ_ᾰ φ_ᾰ_1
-    { admit },
+    {
+      simp only [false_to_fol_formula],
+    },
+    case mm0.formula.pred_ : name args
+    {
+      simp only [pred_to_fol_formula],
+      exact h1,
+    },
+    case mm0.formula.not_ : φ φ_ih
+    {
+      unfold mm0.not_free at h1,
+      simp only [not_to_fol_formula],
+      unfold fol.not_free,
+      exact φ_ih h1,
+    },
+    case mm0.formula.imp_ : φ ψ φ_ih ψ_ih
+    {
+      unfold mm0.not_free at h1,
+      cases h1,
+      simp only [imp_to_fol_formula],
+      unfold fol.not_free,
+      split,
+      {
+        exact φ_ih h1_left,
+      },
+      {
+        exact ψ_ih h1_right,
+      }
+    },
+    case mm0.formula.eq_ : x y
+    {
+      unfold mm0.not_free at h1,
+      simp only [eq_to_fol_formula],
+      unfold fol.not_free,
+      exact h1,
+    },
+    case mm0.formula.forall_ : x φ φ_ih
+    {
+      unfold mm0.not_free at h1,
+      simp only [forall_to_fol_formula],
+      unfold fol.not_free,
+      cases h1,
+      {
+        apply or.intro_left,
+        exact h1,
+      },
+      {
+        apply or.intro_right,
+        exact φ_ih h1,
+      }
+    },
+    case mm0.formula.def_ : name args
+    {
+      simp only [nil_def_to_fol_formula],
+    },
   },
   case list.cons : E_hd E_tl E_ih φ h1
   {
