@@ -4103,6 +4103,44 @@ begin
 end
 
 
+example
+  (φ : mm0.formula)
+  (M : mm0.meta_var_name → fol.formula)
+  (E : mm0.env)
+  (σ σ_inv : mm0.instantiation)
+  (τ : mm0.meta_instantiation)
+  (h_inv_left : σ.val ∘ σ_inv.val = id)
+  (h_inv_right : σ_inv.val ∘ σ.val = id) :
+  mm0.formula.to_fol_formula M E (mm0.formula.subst σ τ φ) =
+    fol.formula.subst σ
+      (mm0.formula.to_fol_formula (fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M E ∘ τ)) E φ) :=
+begin
+  induction E generalizing φ,
+  case list.nil : φ
+  { admit },
+  case list.cons : E_hd E_tl E_ih φ
+  {
+    induction φ,
+    case mm0.formula.meta_var_ : φ
+    { admit },
+    case mm0.formula.false_
+    { admit },
+    case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1
+    { admit },
+    case mm0.formula.not_ : φ_ᾰ φ_ih
+    { admit },
+    case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
+    { admit },
+    case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1
+    { admit },
+    case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
+    { admit },
+    case mm0.formula.def_ : φ_ᾰ φ_ᾰ_1
+    { admit },
+  },
+end
+
+
 lemma lem_1
   (φ : mm0.formula)
   (M : mm0.meta_var_name → fol.formula)
