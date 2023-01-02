@@ -3315,14 +3315,56 @@ begin
     apply h1 v contra,
     refl,
   },
-  case fol.formula.not_ : φ_ᾰ φ_ih
-  { admit },
-  case fol.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
-  { admit },
-  case fol.formula.eq_ : φ_ᾰ φ_ᾰ_1
-  { admit },
-  case fol.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
-  { admit },
+  case fol.formula.not_ : φ φ_ih
+  {
+    unfold formula.subst at h1,
+    unfold not_free at *,
+    exact φ_ih h1,
+  },
+  case fol.formula.imp_ : φ ψ φ_ih ψ_ih
+  {
+    unfold formula.subst at h1,
+    unfold not_free at *,
+    cases h1,
+    split,
+    {
+      exact φ_ih h1_left,
+    },
+    {
+      exact ψ_ih h1_right,
+    }
+  },
+  case fol.formula.eq_ : x y
+  {
+    unfold formula.subst at h1,
+    unfold not_free at *,
+    cases h1,
+    split,
+    {
+      intros contra,
+      apply h1_left,
+      rewrite contra,
+    },
+    {
+      intros contra,
+      apply h1_right,
+      rewrite contra,
+    }
+  },
+  case fol.formula.forall_ : x φ φ_ih
+  {
+    unfold formula.subst at h1,
+    unfold not_free at *,
+    cases h1,
+    {
+      apply or.intro_left,
+      sorry,
+    },
+    {
+      apply or.intro_right,
+      exact φ_ih h1,
+    }
+  },
 end
 
 
@@ -3877,8 +3919,7 @@ begin
         intros a1,
         apply mm0.all_free_in_list_and_not_in_list_imp_not_free E_hd.q E_hd.args v Γ s2 a1,
 
-        obtain s4 := fol.not_free_subst σ (mm0.formula.to_fol_formula M E_tl (mm0.formula.def_ E_hd.name (list.map σ.val E_hd.args))) v E_ih,
-
+        apply fol.subst_not_free σ,
         sorry,
       },
       {
