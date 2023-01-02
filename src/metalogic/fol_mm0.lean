@@ -729,6 +729,21 @@ A mapping of each variable name to another name.
 def instantiation :=
   {σ : var_name → var_name // ∃ (σ' : var_name → var_name), σ ∘ σ' = id ∧ σ' ∘ σ = id}
 
+
+lemma instantiation_injective
+  (σ : instantiation):
+  function.injective σ.1 :=
+begin
+  obtain ⟨σ', a1⟩ := σ.2,
+  cases a1,
+
+  have s1 : function.left_inverse σ' σ.1,
+  exact congr_fun a1_right,
+
+  exact function.left_inverse.injective s1,
+end
+
+
 /-
 A meta substitution mapping.
 A mapping of each meta variable name to a formula.
@@ -3119,6 +3134,20 @@ def instantiation :=
   {σ : var_name → var_name // ∃ (σ' : var_name → var_name), σ ∘ σ' = id ∧ σ' ∘ σ = id}
 
 
+lemma instantiation_injective
+  (σ : instantiation):
+  function.injective σ.1 :=
+begin
+  obtain ⟨σ', a1⟩ := σ.2,
+  cases a1,
+
+  have s1 : function.left_inverse σ' σ.1,
+  exact congr_fun a1_right,
+
+  exact function.left_inverse.injective s1,
+end
+
+
 def formula.subst (σ : instantiation) : formula → formula
 | (false_) := false_
 | (pred_ name args) := pred_ name (list.map σ.1 args)
@@ -3358,7 +3387,7 @@ begin
     cases h1,
     {
       apply or.intro_left,
-      sorry,
+      exact instantiation_injective σ h1,
     },
     {
       apply or.intro_right,
