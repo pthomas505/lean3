@@ -4117,8 +4117,6 @@ example
 begin
   induction E generalizing φ,
   case list.nil : φ
-  { admit },
-  case list.cons : E_hd E_tl E_ih φ
   {
     induction φ,
     case mm0.formula.meta_var_ : φ
@@ -4137,6 +4135,38 @@ begin
     { admit },
     case mm0.formula.def_ : φ_ᾰ φ_ᾰ_1
     { admit },
+  },
+  case list.cons : E_hd E_tl E_ih φ
+  {
+    induction φ,
+    case mm0.formula.meta_var_ : φ
+    { admit },
+    case mm0.formula.false_
+    { admit },
+    case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1
+    { admit },
+    case mm0.formula.not_ : φ_ᾰ φ_ih
+    { admit },
+    case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
+    { admit },
+    case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1
+    { admit },
+    case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
+    { admit },
+    case mm0.formula.def_ : name args
+    {
+      simp only [not_nil_def_to_fol_formula],
+      split_ifs,
+      {
+        unfold mm0.formula.subst,
+        
+        sorry,
+      },
+      {
+        unfold mm0.formula.subst,
+        unfold fol.formula.subst,
+      }
+    },
   },
 end
 
