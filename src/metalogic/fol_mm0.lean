@@ -3953,7 +3953,25 @@ lemma mm0_not_free_imp_fol_not_free
 begin
   induction E generalizing φ,
   case list.nil : φ h1
-  { admit },
+  {
+    induction φ,
+    case mm0.formula.meta_var_ : φ
+    { admit },
+    case mm0.formula.false_
+    { admit },
+    case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1
+    { admit },
+    case mm0.formula.not_ : φ_ᾰ φ_ih
+    { admit },
+    case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
+    { admit },
+    case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1
+    { admit },
+    case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
+    { admit },
+    case mm0.formula.def_ : φ_ᾰ φ_ᾰ_1
+    { admit },
+  },
   case list.cons : E_hd E_tl E_ih φ h1
   {
     induction φ,
