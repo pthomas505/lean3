@@ -3979,15 +3979,12 @@ begin
         unfold mm0.not_free at h1,
 
         cases h,
-        obtain s1 := classical.some_spec h_right,
-
-        obtain s2 := E_hd.nf,
 
         apply E_ih,
         apply mm0.all_free_in_list_and_not_in_list_imp_not_free _ (list.map (classical.some h_right).val E_hd.args),
         apply mm0.no_meta_var_and_all_free_in_list_subst,
-        exact s2,
-        rewrite s1,
+        exact E_hd.nf,
+        rewrite classical.some_spec h_right,
         exact h1,
       },
       {
