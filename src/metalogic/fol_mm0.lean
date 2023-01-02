@@ -3976,17 +3976,19 @@ begin
       simp only [not_nil_def_to_fol_formula],
       split_ifs,
       {
+        unfold mm0.not_free at h1,
+
         cases h,
         obtain s1 := classical.some_spec h_right,
 
-        apply E_ih,
-        unfold mm0.not_free at h1,
-
         obtain s2 := E_hd.nf,
-        apply mm0.all_free_in_list_and_not_in_list_imp_not_free _ (list.map (classical.some h_right).val E_hd.args),
-        sorry,
 
-        sorry,
+        apply E_ih,
+        apply mm0.all_free_in_list_and_not_in_list_imp_not_free _ (list.map (classical.some h_right).val E_hd.args),
+        apply mm0.no_meta_var_and_all_free_in_list_subst,
+        exact s2,
+        rewrite s1,
+        exact h1,
       },
       {
         unfold fol.not_free,
