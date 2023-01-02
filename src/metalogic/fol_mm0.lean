@@ -730,6 +730,27 @@ def instantiation :=
   {σ : var_name → var_name // ∃ (σ' : var_name → var_name), σ ∘ σ' = id ∧ σ' ∘ σ = id}
 
 
+lemma instantiation.exists_inverse
+  (σ : instantiation) :
+  ∃ (σ_inv : instantiation),
+    σ.1 ∘ σ_inv.1 = id ∧ σ_inv.1 ∘ σ.1 = id :=
+begin
+  apply exists.elim σ.2,
+  intros σ' a1,
+  cases a1,
+  let σ_inv : instantiation :=
+    ⟨
+      σ',
+      begin
+        apply exists.intro σ.1,
+        exact and.intro a1_right a1_left,
+      end
+    ⟩,
+  apply exists.intro σ_inv,
+  exact and.intro a1_left a1_right,
+end
+
+
 lemma instantiation_injective
   (σ : instantiation):
   function.injective σ.1 :=
@@ -3855,100 +3876,41 @@ lemma mm0_not_free_imp_fol_not_free
     (x, X) ∈ Γ → fol.not_free x (M X)) :
   fol.not_free v (mm0.formula.to_fol_formula M E φ) :=
 begin
-  induction φ,
-  case mm0.formula.meta_var_ : X
+  induction E generalizing φ,
+  case list.nil : φ h1
+  { admit },
+  case list.cons : E_hd E_tl E_ih φ h1
   {
-    unfold mm0.not_free at h1,
-    simp only [meta_var_to_fol_formula],
-    exact h2 v X h1,
-  },
-  case mm0.formula.false_
-  {
-    simp only [false_to_fol_formula],
-  },
-  case mm0.formula.pred_ : name args
-  {
-    unfold mm0.not_free at h1,
-    simp only [pred_to_fol_formula],
-    unfold fol.not_free,
-    exact h1,
-  },
-  case mm0.formula.not_ : φ φ_ih
-  {
-    unfold mm0.not_free at h1,
-    simp only [not_to_fol_formula],
-    unfold fol.not_free,
-    exact φ_ih h1,
-  },
-  case mm0.formula.imp_ : φ ψ φ_ih ψ_ih
-  {
-    unfold mm0.not_free at h1,
-    cases h1,
-
-    simp only [imp_to_fol_formula],
-    unfold fol.not_free,
-    split,
-    {
-      exact φ_ih h1_left,
-    },
-    {
-      exact ψ_ih h1_right,
-    }
-  },
-  case mm0.formula.eq_ : x y
-  {
-    unfold mm0.not_free at h1,
-    simp only [eq_to_fol_formula],
-    unfold fol.not_free,
-    exact h1,
-  },
-  case mm0.formula.forall_ : x φ φ_ih
-  {
-    unfold mm0.not_free at h1,
-    simp only [forall_to_fol_formula],
-    unfold fol.not_free,
-    cases h1,
-    {
-      apply or.intro_left,
-      exact h1,
-    },
-    {
-      apply or.intro_right,
-      exact φ_ih h1,
-    }
-  },
-  case mm0.formula.def_ : name args
-  {
-    unfold mm0.not_free at h1,
-    induction E,
-    case list.nil
-    {
-      unfold mm0.formula.to_fol_formula,
-    },
-    case list.cons : E_hd E_tl E_ih
+    induction φ,
+    case mm0.formula.meta_var_ : φ
+    { admit },
+    case mm0.formula.false_
+    { admit },
+    case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1
+    { admit },
+    case mm0.formula.not_ : φ_ᾰ φ_ih
+    { admit },
+    case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
+    { admit },
+    case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1
+    { admit },
+    case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
+    { admit },
+    case mm0.formula.def_ : name args
     {
       simp only [not_nil_def_to_fol_formula],
       split_ifs,
       {
         cases h,
-
         obtain s1 := classical.some_spec h_right,
 
-        apply exists.elim h_right,
-        intros σ h_right_1,
-
-        subst h_left,
-        subst h_right_1,
+        apply E_ih,
+        unfold mm0.not_free at h1,
 
         obtain s2 := E_hd.nf,
-        dsimp,
+        apply mm0.all_free_in_list_and_not_in_list_imp_not_free _ (list.map (classical.some h_right).val E_hd.args),
+        sorry,
 
-  
-        have s3 : v ∉ E_hd.args → mm0.not_free Γ v E_hd.q,
-        intros a1,
-        apply mm0.all_free_in_list_and_not_in_list_imp_not_free E_hd.q E_hd.args v Γ s2 a1,
-
-        apply fol.subst_not_free σ,
         sorry,
       },
       {
