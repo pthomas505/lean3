@@ -782,7 +782,7 @@ def formula.subst (σ : instantiation) (τ : meta_instantiation) : formula → f
 | (def_ name args) := def_ name (list.map σ.1 args)
 
 
-example
+lemma no_meta_var_and_all_free_in_list_subst
   (φ : formula)
   (S : list var_name)
   (σ : instantiation)
@@ -790,23 +790,70 @@ example
   (h1 : φ.no_meta_var_and_all_free_in_list S) :
   (φ.subst σ τ).no_meta_var_and_all_free_in_list (S.map σ.1) :=
 begin
-  induction φ,
-  case mm0.formula.meta_var_ : φ
-  { admit },
+  induction φ generalizing S,
+  case mm0.formula.meta_var_ : X
+  {
+    unfold formula.no_meta_var_and_all_free_in_list at h1,
+    contradiction,
+  },
   case mm0.formula.false_
-  { admit },
-  case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1
-  { admit },
-  case mm0.formula.not_ : φ_ᾰ φ_ih
-  { admit },
-  case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
-  { admit },
-  case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1
-  { admit },
-  case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
-  { admit },
-  case mm0.formula.def_ : φ_ᾰ φ_ᾰ_1
-  { admit },
+  {
+    unfold formula.subst,
+  },
+  case mm0.formula.pred_ : name args
+  {
+    unfold formula.subst,
+    unfold formula.no_meta_var_and_all_free_in_list,
+    exact list.map_subset σ.val h1,
+  },
+  case mm0.formula.not_ : φ φ_ih
+  {
+    unfold formula.subst,
+    unfold formula.no_meta_var_and_all_free_in_list at *,
+    exact φ_ih S h1,
+  },
+  case mm0.formula.imp_ : φ ψ φ_ih ψ_ih
+  {
+    unfold formula.no_meta_var_and_all_free_in_list at h1,
+    cases h1,
+    unfold formula.subst,
+    unfold formula.no_meta_var_and_all_free_in_list,
+    split,
+    {
+      exact φ_ih S h1_left,
+    },
+    {
+      exact ψ_ih S h1_right,
+    }
+  },
+  case mm0.formula.eq_ : x y
+  {
+    unfold formula.no_meta_var_and_all_free_in_list at h1,
+    cases h1,
+    unfold formula.subst,
+    unfold formula.no_meta_var_and_all_free_in_list,
+    split,
+    {
+      exact list.mem_map_of_mem σ.val h1_left,
+    },
+    {
+      exact list.mem_map_of_mem σ.val h1_right,
+    }
+  },
+  case mm0.formula.forall_ : x φ φ_ih
+  {
+    unfold formula.no_meta_var_and_all_free_in_list at h1,
+    unfold formula.subst,
+    unfold formula.no_meta_var_and_all_free_in_list,
+    rewrite <- list.map_cons,
+    exact φ_ih (x :: S) h1,
+  },
+  case mm0.formula.def_ : name args
+  {
+    unfold formula.subst,
+    unfold formula.no_meta_var_and_all_free_in_list,
+    exact list.map_subset σ.val h1,
+  },
 end
 
 
