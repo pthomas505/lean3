@@ -4144,8 +4144,12 @@ begin
     { admit },
     case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
     { admit },
-    case mm0.formula.def_ : φ_ᾰ φ_ᾰ_1
-    { admit },
+    case mm0.formula.def_ : name args
+    {
+      unfold mm0.formula.subst,
+      simp only [nil_def_to_fol_formula],
+      unfold fol.formula.subst,
+    },
   },
   case list.cons : E_hd E_tl E_ih φ
   {
@@ -4170,10 +4174,15 @@ begin
       split_ifs,
       {
         cases h,
+        dsimp,
+        obtain s1 := classical.some_spec h_right,
+
         unfold mm0.formula.subst,
+
         sorry,
       },
       {
+        push_neg at h,
         unfold mm0.formula.subst,
         unfold fol.formula.subst,
         sorry,
