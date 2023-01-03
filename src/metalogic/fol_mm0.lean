@@ -4119,8 +4119,19 @@ begin
   case list.nil : φ
   {
     induction φ,
-    case mm0.formula.meta_var_ : φ
-    { admit },
+    case mm0.formula.meta_var_ : X
+    {
+      unfold mm0.formula.subst,
+      simp only [meta_var_to_fol_formula, function.comp_app],
+      symmetry,
+      apply fol.subst_inv,
+      {
+        exact h_inv_right,
+      },
+      {
+        exact h_inv_left,
+      }
+    },
     case mm0.formula.false_
     { admit },
     case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1
@@ -4158,13 +4169,14 @@ begin
       simp only [not_nil_def_to_fol_formula],
       split_ifs,
       {
+        cases h,
         unfold mm0.formula.subst,
-        
         sorry,
       },
       {
         unfold mm0.formula.subst,
         unfold fol.formula.subst,
+        sorry,
       }
     },
   },
