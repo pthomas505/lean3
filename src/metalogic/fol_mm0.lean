@@ -4358,15 +4358,15 @@ begin
       exact h1_ih_left,
     }
   },
-  case mm0.is_conv.conv_trans : h1_φ h1_φ' h1_φ'' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  case mm0.is_conv.conv_trans : h1_φ h1_φ' h1_φ'' h1_1 h1_2 h1_ih_1 h1_ih_1
   { admit },
-  case mm0.is_conv.conv_not : h1_φ h1_φ' h1_ᾰ h1_ih
+  case mm0.is_conv.conv_not : h1_φ h1_φ' h1_1 h1_ih
   { admit },
-  case mm0.is_conv.conv_imp : h1_φ h1_φ' h1_ψ h1_ψ' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  case mm0.is_conv.conv_imp : h1_φ h1_φ' h1_ψ h1_ψ' h1_1 h1_2 h1_ih_1 h1_ih_2
   { admit },
-  case mm0.is_conv.conv_forall : h1_x h1_φ h1_φ' h1_ᾰ h1_ih
+  case mm0.is_conv.conv_forall : h1_x h1_φ h1_φ' h1_1 h1_ih
   { admit },
-  case mm0.is_conv.conv_unfold : h1_d h1_σ h1_ᾰ
+  case mm0.is_conv.conv_unfold : h1_d h1_σ h1_1
   { admit },
 end
 
