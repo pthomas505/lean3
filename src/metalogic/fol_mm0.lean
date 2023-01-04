@@ -3240,6 +3240,25 @@ def formula.bind_var_set : formula → finset var_name
 | (forall_ x φ) := φ.free_var_set ∪ {x}
 
 
+def replace_var
+  (x v v' : var_name)
+  (binders : finset var_name) :
+  var_name :=
+  if x ∉ binders ∧ v = x then v' else x
+
+
+def replace (v v' : var_name) : finset var_name → formula → formula
+| _ false_ := false_
+| binders (pred_ name args) :=
+    pred_ name (list.map (fun (x : var_name), replace_var x v v' binders) args)
+| binders (not_ φ) := not_ (replace binders φ)
+| binders (imp_ φ ψ) := imp_ (replace binders φ) (replace binders ψ)
+| binders (eq_ x y) := eq_ (replace_var x v v' binders) (replace_var y v v' binders)
+| binders (forall_ x φ) := forall_ x (replace (binders ∪ {x}) φ)
+
+
+
+
 /-
 A substitution mapping.
 A mapping of each variable name to another name.
