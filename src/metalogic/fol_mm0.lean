@@ -3282,35 +3282,26 @@ inductive alpha_eqv : formula → formula → Prop
   alpha_eqv φ φ' → alpha_eqv φ' φ'' → alpha_eqv φ φ''
 
 
-def is_alpha_eqv_var : list (var_symbols × var_symbols) → var_symbols → var_symbols → Prop
-| [] x y := x = y
-| ((a, b) :: m) x y :=
-    if x = a
-    then b = y
-    else b ≠ y ∧ is_alpha_eqv_var m x y
+def is_alpha_eqv_var (l : list (var_name × var_name)) (x x' : var_name) :=
+if (x, x') ∉ l then x = x' else false
 
-def is_alpha_eqv_term : list (var_symbols × var_symbols) → term → term → Prop
-| m (var x) (var y) := is_alpha_eqv_var m x y
-| m (func n p t) (func n' p' t') :=
-    if h : n = n'
-    then begin subst h; exact ∀ i, is_alpha_eqv_term m (t i) (t' i) end
-    else false
-| _ _ _ := false
 
-def is_alpha_eqv : list (var_symbols × var_symbols) → formula → formula → Prop
-| m bottom bottom := true
-| m top top := true
-| m (pred n p t) (pred n' p' t') :=
-  if h : n = n'
-  then begin subst h; exact ∀ i, is_alpha_eqv_term m (t i) (t' i) end
-  else false
-| m (not p) (not p') := is_alpha_eqv m p p'
-| m (and p q) (and p' q') := is_alpha_eqv m p p' ∧ is_alpha_eqv m q q'
-| m (or p q) (or p' q') := is_alpha_eqv m p p' ∧ is_alpha_eqv m q q'
-| m (imp p q) (imp p' q') := is_alpha_eqv m p p' ∧ is_alpha_eqv m q q'
-| m (iff p q) (iff p' q') := is_alpha_eqv m p p' ∧ is_alpha_eqv m q q'
-| m (forall_ x p) (forall_ x' p') := is_alpha_eqv ((x,x')::m) p p'
-| m (exists_ x p) (exists_ x' p') := is_alpha_eqv ((x,x')::m) p p'
+def is_alpha_eqv_list
+  (l : list (var_name × var_name)) :
+  list var_name → list var_name → Prop
+| [] [] := true
+| (x :: xs) (x' :: xs') := is_alpha_eqv_var l x x' ∧ is_alpha_eqv_list xs xs'
+| _ _ := false
+
+
+def is_alpha_eqv : list (var_name × var_name) → formula → formula → Prop
+| _ false_ false_ := true
+| l (pred_ name args) (pred_ name' args') :=
+    name = name' ∧ is_alpha_eqv_list l args args'
+| l (not_ φ) (not_ φ') := is_alpha_eqv l φ φ'
+| l (imp_ φ ψ) (imp_ φ' ψ') := is_alpha_eqv l φ φ' ∧ is_alpha_eqv l ψ ψ'
+| l (eq_ x y) (eq_ x' y') := is_alpha_eqv_var l x x' ∧ is_alpha_eqv_var l y y'
+| l (forall_ x φ) (forall_ x' φ') := is_alpha_eqv ((x, x') :: l) φ φ'
 | _ _ _ := false
 
 
