@@ -4237,68 +4237,7 @@ example
     (fol.formula.subst σ
       (mm0.formula.to_fol_formula (fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M E ∘ τ)) E φ)) :=
 begin
-  induction E generalizing φ,
-  case list.nil : φ
-  { admit },
-  case list.cons : E_hd E_tl E_ih φ
-  {
-    induction φ,
-    case mm0.formula.meta_var_ : X
-    {
-      apply fol.eq_imp_proof_eqv,
-
-      unfold mm0.formula.subst,
-      simp only [meta_var_to_fol_formula, function.comp_app],
-      symmetry,
-      apply fol.subst_inv,
-      {
-        exact h_inv_right,
-      },
-      {
-        exact h_inv_left,
-      }
-    },
-    case mm0.formula.false_
-    { admit },
-    case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1
-    { admit },
-    case mm0.formula.not_ : φ_ᾰ φ_ih
-    { admit },
-    case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
-    { admit },
-    case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1
-    { admit },
-    case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
-    { admit },
-    case mm0.formula.def_ : name args
-    {
-      unfold mm0.formula.subst,
-      simp only [nil_def_to_fol_formula],
-      unfold fol.formula.subst,
-    },
-  },
-  case list.cons : E_hd E_tl E_ih φ
-  {
-    induction φ,
-    case mm0.formula.meta_var_ : φ
-    { admit },
-    case mm0.formula.false_
-    { admit },
-    case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1
-    { admit },
-    case mm0.formula.not_ : φ_ᾰ φ_ih
-    { admit },
-    case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
-    { admit },
-    case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1
-    { admit },
-    case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
-    { admit },
-    case mm0.formula.def_ : name args
-    {
-      sorry,
-    },
-  },
+  sorry,
 end
 
 
