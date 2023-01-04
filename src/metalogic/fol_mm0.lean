@@ -4333,6 +4333,31 @@ begin
 end
 
 
+example
+  (M : mm0.meta_var_name → fol.formula)
+  (E : mm0.env)
+  (φ φ' : mm0.formula)
+  (h1 : mm0.is_conv E φ φ') :
+  fol.proof_eqv (mm0.formula.to_fol_formula M E φ) (mm0.formula.to_fol_formula M E φ') :=
+begin
+  induction h1,
+  case mm0.is_conv.conv_refl : h1
+  { admit },
+  case mm0.is_conv.conv_symm : h1_φ h1_φ' h1_ᾰ h1_ih
+  { admit },
+  case mm0.is_conv.conv_trans : h1_φ h1_φ' h1_φ'' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  { admit },
+  case mm0.is_conv.conv_not : h1_φ h1_φ' h1_ᾰ h1_ih
+  { admit },
+  case mm0.is_conv.conv_imp : h1_φ h1_φ' h1_ψ h1_ψ' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  { admit },
+  case mm0.is_conv.conv_forall : h1_x h1_φ h1_φ' h1_ᾰ h1_ih
+  { admit },
+  case mm0.is_conv.conv_unfold : h1_d h1_σ h1_ᾰ
+  { admit },
+end
+
+
 theorem conservative
   (E : mm0.env)
   (Γ : list (mm0.var_name × mm0.meta_var_name))
