@@ -3222,6 +3222,24 @@ inductive formula : Type
 open formula
 
 
+def formula.free_var_set : formula → finset var_name
+| false_ := ∅
+| (pred_ name args) := args.to_finset
+| (not_ φ) := φ.free_var_set
+| (imp_ φ ψ) := φ.free_var_set ∪ ψ.free_var_set
+| (eq_ x y) := {x, y}
+| (forall_ x p) := p.free_var_set \ {x}
+
+
+def formula.bind_var_set : formula → finset var_name
+| false_ := ∅
+| (pred_ name args) := ∅
+| (not_ φ) := φ.bind_var_set
+| (imp_ φ ψ) := φ.bind_var_set ∪ ψ.bind_var_set
+| (eq_ x y) := ∅
+| (forall_ x φ) := φ.free_var_set ∪ {x}
+
+
 /-
 A substitution mapping.
 A mapping of each variable name to another name.
