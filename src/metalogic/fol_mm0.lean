@@ -3237,7 +3237,7 @@ def formula.bind_var_set : formula → finset var_name
 | (not_ φ) := φ.bind_var_set
 | (imp_ φ ψ) := φ.bind_var_set ∪ ψ.bind_var_set
 | (eq_ x y) := ∅
-| (forall_ x φ) := φ.free_var_set ∪ {x}
+| (forall_ x φ) := φ.bind_var_set ∪ {x}
 
 
 def replace_var
