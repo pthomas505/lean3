@@ -3257,6 +3257,29 @@ def replace (v v' : var_name) : finset var_name → formula → formula
 | binders (forall_ x φ) := forall_ x (replace (binders ∪ {x}) φ)
 
 
+inductive alpha_eqv : formula → formula → Prop
+
+| rename_forall (φ : formula) (x x' : var_name) :
+  x' ∉ φ.free_var_set → x' ∉ φ.bind_var_set →
+    alpha_eqv (forall_ x φ) (forall_ x' (replace x x' ∅ φ))
+
+| compat_not (φ φ' : formula) :
+  alpha_eqv φ φ' → alpha_eqv (not_ φ) (not_ φ')
+
+| compat_imp (φ φ' ψ ψ' : formula) :
+  alpha_eqv φ φ' → alpha_eqv ψ ψ' → alpha_eqv (imp_ φ ψ) (imp_ φ' ψ')
+
+| compat_forall (φ ψ : formula) (z : var_name) :
+  alpha_eqv φ ψ → alpha_eqv (forall_ z φ) (forall_ z ψ)
+
+| refl (φ : formula) :
+  alpha_eqv φ φ
+
+| symm (φ φ' : formula) :
+  alpha_eqv φ φ' → alpha_eqv φ' φ
+
+| trans (φ φ' φ'' : formula) :
+  alpha_eqv φ φ' → alpha_eqv φ' φ'' → alpha_eqv φ φ''
 
 
 /-
