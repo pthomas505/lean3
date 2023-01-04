@@ -4342,7 +4342,10 @@ example
 begin
   induction h1,
   case mm0.is_conv.conv_refl : h1
-  { admit },
+  {
+    apply fol.eq_imp_proof_eqv,
+    refl,
+  },
   case mm0.is_conv.conv_symm : h1_φ h1_φ' h1_ᾰ h1_ih
   { admit },
   case mm0.is_conv.conv_trans : h1_φ h1_φ' h1_φ'' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
