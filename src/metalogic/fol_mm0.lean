@@ -3282,8 +3282,12 @@ inductive alpha_eqv : formula → formula → Prop
   alpha_eqv φ φ' → alpha_eqv φ' φ'' → alpha_eqv φ φ''
 
 
-def is_alpha_eqv_var (l : list (var_name × var_name)) (x x' : var_name) :=
-  x = x' ∨ (x, x') ∈ l
+def is_alpha_eqv_var : list (var_name × var_name) → var_name → var_name → Prop
+| [] x x' := x = x'
+| ((a, b) :: m) x x' :=
+    if x = a
+    then b = x'
+    else b ≠ x' ∧ is_alpha_eqv_var m x x'
 
 
 def is_alpha_eqv_list
