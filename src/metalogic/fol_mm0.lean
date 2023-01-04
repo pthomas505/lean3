@@ -3697,6 +3697,41 @@ begin
 end
 
 
+def proof_eqv
+  (φ ψ : formula) :
+  Prop :=
+  is_proof (imp_ φ ψ) ∧ is_proof (imp_ ψ φ)
+
+
+lemma deduction_1
+  (φ : formula) :
+  is_proof (imp_ φ φ) :=
+begin
+  obtain s1 := is_proof.prop_2 φ (φ.imp_ φ) φ,
+  obtain s2 := is_proof.prop_1 φ (φ.imp_ φ),
+  obtain s3 := is_proof.mp _ _ s2 s1,
+  obtain s4 := is_proof.prop_1 φ φ,
+  apply is_proof.mp _ _ s4 s3,
+end
+
+
+lemma eq_imp_proof_eqv
+  (φ ψ : formula)
+  (h1 : φ = ψ) :
+  proof_eqv φ ψ :=
+begin
+  unfold proof_eqv,
+  rewrite h1,
+  split,
+  {
+    apply deduction_1,
+  },
+  {
+    apply deduction_1,
+  }
+end
+
+
 end fol
 
 
@@ -4198,16 +4233,20 @@ example
   (τ : mm0.meta_instantiation)
   (h_inv_left : σ.val ∘ σ_inv.val = id)
   (h_inv_right : σ_inv.val ∘ σ.val = id) :
-  mm0.formula.to_fol_formula M E (mm0.formula.subst σ τ φ) =
-    fol.formula.subst σ
-      (mm0.formula.to_fol_formula (fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M E ∘ τ)) E φ) :=
+  fol.proof_eqv (mm0.formula.to_fol_formula M E (mm0.formula.subst σ τ φ))
+    (fol.formula.subst σ
+      (mm0.formula.to_fol_formula (fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M E ∘ τ)) E φ)) :=
 begin
   induction E generalizing φ,
   case list.nil : φ
+  { admit },
+  case list.cons : E_hd E_tl E_ih φ
   {
     induction φ,
     case mm0.formula.meta_var_ : X
     {
+      apply fol.eq_imp_proof_eqv,
+
       unfold mm0.formula.subst,
       simp only [meta_var_to_fol_formula, function.comp_app],
       symmetry,
@@ -4257,23 +4296,7 @@ begin
     { admit },
     case mm0.formula.def_ : name args
     {
-      simp only [not_nil_def_to_fol_formula],
-      split_ifs,
-      {
-        cases h,
-        dsimp,
-        obtain s1 := classical.some_spec h_right,
-
-        unfold mm0.formula.subst,
-
-        sorry,
-      },
-      {
-        push_neg at h,
-        unfold mm0.formula.subst,
-        unfold fol.formula.subst,
-        sorry,
-      }
+      sorry,
     },
   },
 end
