@@ -3269,8 +3269,8 @@ inductive alpha_eqv : formula → formula → Prop
 | compat_imp (φ φ' ψ ψ' : formula) :
   alpha_eqv φ φ' → alpha_eqv ψ ψ' → alpha_eqv (imp_ φ ψ) (imp_ φ' ψ')
 
-| compat_forall (φ ψ : formula) (z : var_name) :
-  alpha_eqv φ ψ → alpha_eqv (forall_ z φ) (forall_ z ψ)
+| compat_forall (φ φ' : formula) (z : var_name) :
+  alpha_eqv φ φ' → alpha_eqv (forall_ z φ) (forall_ z φ')
 
 | refl (φ : formula) :
   alpha_eqv φ φ
