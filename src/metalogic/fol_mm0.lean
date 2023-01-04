@@ -3261,7 +3261,7 @@ inductive alpha_eqv : formula → formula → Prop
 
 | rename_forall (φ : formula) (x x' : var_name) :
   x' ∉ φ.free_var_set → x' ∉ φ.bind_var_set →
-    alpha_eqv (forall_ x φ) (forall_ x' (replace x x' ∅ φ))
+  alpha_eqv (forall_ x φ) (forall_ x' (replace x x' ∅ φ))
 
 | compat_not (φ φ' : formula) :
   alpha_eqv φ φ' → alpha_eqv (not_ φ) (not_ φ')
