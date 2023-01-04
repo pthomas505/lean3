@@ -3282,6 +3282,38 @@ inductive alpha_eqv : formula → formula → Prop
   alpha_eqv φ φ' → alpha_eqv φ' φ'' → alpha_eqv φ φ''
 
 
+def is_alpha_eqv_var : list (var_symbols × var_symbols) → var_symbols → var_symbols → Prop
+| [] x y := x = y
+| ((a, b) :: m) x y :=
+    if x = a
+    then b = y
+    else b ≠ y ∧ is_alpha_eqv_var m x y
+
+def is_alpha_eqv_term : list (var_symbols × var_symbols) → term → term → Prop
+| m (var x) (var y) := is_alpha_eqv_var m x y
+| m (func n p t) (func n' p' t') :=
+    if h : n = n'
+    then begin subst h; exact ∀ i, is_alpha_eqv_term m (t i) (t' i) end
+    else false
+| _ _ _ := false
+
+def is_alpha_eqv : list (var_symbols × var_symbols) → formula → formula → Prop
+| m bottom bottom := true
+| m top top := true
+| m (pred n p t) (pred n' p' t') :=
+  if h : n = n'
+  then begin subst h; exact ∀ i, is_alpha_eqv_term m (t i) (t' i) end
+  else false
+| m (not p) (not p') := is_alpha_eqv m p p'
+| m (and p q) (and p' q') := is_alpha_eqv m p p' ∧ is_alpha_eqv m q q'
+| m (or p q) (or p' q') := is_alpha_eqv m p p' ∧ is_alpha_eqv m q q'
+| m (imp p q) (imp p' q') := is_alpha_eqv m p p' ∧ is_alpha_eqv m q q'
+| m (iff p q) (iff p' q') := is_alpha_eqv m p p' ∧ is_alpha_eqv m q q'
+| m (forall_ x p) (forall_ x' p') := is_alpha_eqv ((x,x')::m) p p'
+| m (exists_ x p) (exists_ x' p') := is_alpha_eqv ((x,x')::m) p p'
+| _ _ _ := false
+
+
 /-
 A substitution mapping.
 A mapping of each variable name to another name.
