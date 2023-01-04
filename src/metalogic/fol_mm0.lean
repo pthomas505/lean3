@@ -4346,8 +4346,18 @@ begin
     apply fol.eq_imp_proof_eqv,
     refl,
   },
-  case mm0.is_conv.conv_symm : h1_φ h1_φ' h1_ᾰ h1_ih
-  { admit },
+  case mm0.is_conv.conv_symm : h1_φ h1_φ' h1_1 h1_ih
+  {
+    unfold fol.proof_eqv at *,
+    cases h1_ih,
+    split,
+    {
+      exact h1_ih_right,
+    },
+    {
+      exact h1_ih_left,
+    }
+  },
   case mm0.is_conv.conv_trans : h1_φ h1_φ' h1_φ'' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
   { admit },
   case mm0.is_conv.conv_not : h1_φ h1_φ' h1_ᾰ h1_ih
