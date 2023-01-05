@@ -4416,7 +4416,7 @@ begin
 end
 
 
-example
+lemma is_conv_imp_is_proof_eqv
   (M : mm0.meta_var_name → fol.formula)
   (E : mm0.env)
   (φ φ' : mm0.formula)
@@ -4612,6 +4612,11 @@ begin
   },
   case is_proof.conv : h1_Γ h1_Δ h1_φ h1_φ' h1_1 h1_2 h1_3 h1_ih
   {
-    sorry,
+    specialize h1_ih M h2 h3,
+    obtain s1 := is_conv_imp_is_proof_eqv M _ _ _ h1_3,
+    unfold fol.proof_eqv at s1,
+    cases s1,
+    apply fol.is_proof_imp _ _ s1_left,
+    exact h1_ih,
   },
 end
