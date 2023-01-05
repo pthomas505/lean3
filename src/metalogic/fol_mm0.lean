@@ -4358,8 +4358,12 @@ begin
       exact h1_ih_left,
     }
   },
-  case mm0.is_conv.conv_trans : h1_φ h1_φ' h1_φ'' h1_1 h1_2 h1_ih_1 h1_ih_1
-  { admit },
+  case mm0.is_conv.conv_trans : h1_φ h1_φ' h1_φ'' h1_1 h1_2 h1_ih_1 h1_ih_2
+  {
+    unfold fol.proof_eqv at *,
+    cases h1_ih_1,
+    cases h1_ih_2,
+  },
   case mm0.is_conv.conv_not : h1_φ h1_φ' h1_1 h1_ih
   { admit },
   case mm0.is_conv.conv_imp : h1_φ h1_φ' h1_ψ h1_ψ' h1_1 h1_2 h1_ih_1 h1_ih_2
