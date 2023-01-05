@@ -4225,7 +4225,7 @@ begin
 end
 
 
-example
+lemma lem_1'
   (φ : mm0.formula)
   (M : mm0.meta_var_name → fol.formula)
   (E : mm0.env)
@@ -4363,15 +4363,56 @@ begin
     unfold fol.proof_eqv at *,
     cases h1_ih_1,
     cases h1_ih_2,
+    split,
+    {
+      sorry,
+    },
+    {
+      sorry,
+    }
   },
   case mm0.is_conv.conv_not : h1_φ h1_φ' h1_1 h1_ih
-  { admit },
+  {
+    unfold fol.proof_eqv at *,
+    cases h1_ih,
+    simp only [not_to_fol_formula],
+    split,
+    {
+      sorry,
+    },
+    {
+      sorry,
+    }
+  },
   case mm0.is_conv.conv_imp : h1_φ h1_φ' h1_ψ h1_ψ' h1_1 h1_2 h1_ih_1 h1_ih_2
-  { admit },
+  {
+    unfold fol.proof_eqv at *,
+    cases h1_ih_1,
+    cases h1_ih_2,
+    simp only [imp_to_fol_formula],
+    split,
+    {
+      sorry,
+    },
+    {
+      sorry,
+    }
+  },
   case mm0.is_conv.conv_forall : h1_x h1_φ h1_φ' h1_1 h1_ih
   { admit },
   case mm0.is_conv.conv_unfold : h1_d h1_σ h1_1
-  { admit },
+  {
+    induction E,
+    case list.nil
+    {
+      simp only [list.not_mem_nil] at h1_1,
+      contradiction,
+    },
+    case list.cons : E_hd E_tl E_ih
+    {
+      sorry,
+    },
+  },
 end
 
 
@@ -4456,18 +4497,23 @@ begin
       ⟨h1_σ', begin apply exists.intro h1_σ.val, exact and.intro a1_right a1_left, end⟩,
 
     dsimp at *,
-    rewrite lem_1 h1_φ M E h1_σ h1_σ_inv h1_τ a1_left a1_right,
+
+    obtain s1 := lem_1' h1_φ M E h1_σ h1_σ_inv h1_τ a1_left a1_right,
+    unfold fol.proof_eqv at s1,
+    cases s1,
+
+    apply fol.is_proof.mp _ _ _ s1_right,
     apply fol.is_proof_subst_left,
     apply h1_ih_2,
     {
       intros x X a2,
 
-      have s1 : x = (h1_σ_inv.val ∘ h1_σ.val) x,
+      have s2 : x = (h1_σ_inv.val ∘ h1_σ.val) x,
       simp only [subtype.val_eq_coe],
       rewrite a1_right,
       simp only [id.def],
 
-      rewrite s1,
+      rewrite s2,
       simp only [function.comp_app],
       apply fol.not_free_subst h1_σ_inv,
       exact mm0_not_free_imp_fol_not_free M h1_Γ' E (h1_σ.val x) (h1_τ X) (h1_2 x X a2) h2,
