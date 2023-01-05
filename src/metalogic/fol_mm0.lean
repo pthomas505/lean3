@@ -4307,8 +4307,19 @@ begin
     { admit },
     case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
     { admit },
-    case mm0.formula.def_ : φ_ᾰ φ_ᾰ_1
-    { admit },
+    case mm0.formula.def_ : name args
+    {
+      unfold fol.proof_eqv at *,
+      rewrite forall_and_distrib at E_ih,
+      cases E_ih,
+      split,
+      {
+        sorry,
+      },
+      {
+        sorry,
+      }
+    },
   },
 end
 
@@ -4483,40 +4494,7 @@ begin
     case list.cons : E_hd E_tl E_ih
     {
       simp only [list.mem_cons_iff] at h1_1,
-      cases h1_1,
-      {
-        simp only [not_nil_def_to_fol_formula],
-        split_ifs,
-        {
-          unfold fol.proof_eqv,
-          split,
-          {
-            sorry,
-          },
-          {
-            sorry,
-          }
-        },
-        {
-          subst h1_1,
-          push_neg at h,
-          squeeze_simp at h,
-          specialize h h1_σ,
-          squeeze_simp at h,
-          contradiction,
-        }
-      },
-      {
-        specialize E_ih h1_1,
-        squeeze_simp at *,
-        split_ifs,
-        {
-          sorry,
-        },
-        {
-          
-        }
-      }
+      sorry,
     },
   },
 end
