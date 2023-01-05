@@ -4287,7 +4287,29 @@ lemma lem_1'
     (fol.formula.subst σ
       (mm0.formula.to_fol_formula (fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M E ∘ τ)) E φ)) :=
 begin
-  sorry,
+  induction E generalizing φ,
+  case list.nil : φ
+  { admit },
+  case list.cons : E_hd E_tl E_ih φ
+  {
+    induction φ,
+    case mm0.formula.meta_var_ : φ
+    { admit },
+    case mm0.formula.false_
+    { admit },
+    case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1
+    { admit },
+    case mm0.formula.not_ : φ_ᾰ φ_ih
+    { admit },
+    case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
+    { admit },
+    case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1
+    { admit },
+    case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
+    { admit },
+    case mm0.formula.def_ : φ_ᾰ φ_ᾰ_1
+    { admit },
+  },
 end
 
 
@@ -4460,7 +4482,41 @@ begin
     },
     case list.cons : E_hd E_tl E_ih
     {
-      sorry,
+      simp only [list.mem_cons_iff] at h1_1,
+      cases h1_1,
+      {
+        simp only [not_nil_def_to_fol_formula],
+        split_ifs,
+        {
+          unfold fol.proof_eqv,
+          split,
+          {
+            sorry,
+          },
+          {
+            sorry,
+          }
+        },
+        {
+          subst h1_1,
+          push_neg at h,
+          squeeze_simp at h,
+          specialize h h1_σ,
+          squeeze_simp at h,
+          contradiction,
+        }
+      },
+      {
+        specialize E_ih h1_1,
+        squeeze_simp at *,
+        split_ifs,
+        {
+          sorry,
+        },
+        {
+          
+        }
+      }
     },
   },
 end
