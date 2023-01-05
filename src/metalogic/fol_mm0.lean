@@ -3703,7 +3703,7 @@ def proof_eqv
   is_proof (imp_ φ ψ) ∧ is_proof (imp_ ψ φ)
 
 
-lemma deduction_1
+lemma id
   (φ : formula) :
   is_proof (imp_ φ φ) :=
 begin
@@ -3712,6 +3712,14 @@ begin
   obtain s3 := is_proof.mp _ _ s2 s1,
   obtain s4 := is_proof.prop_1 φ φ,
   apply is_proof.mp _ _ s4 s3,
+end
+
+lemma con3
+  (φ ψ χ : formula)
+  (h1 : is_proof (φ.imp_ (ψ.imp_ χ))) :
+  is_proof (φ.imp_ (χ.not_.imp_ ψ.not_)) :=
+begin
+  sorry,
 end
 
 
@@ -3724,11 +3732,53 @@ begin
   rewrite h1,
   split,
   {
-    apply deduction_1,
+    apply id,
   },
   {
-    apply deduction_1,
+    apply id,
   }
+end
+
+
+lemma is_proof_imp
+  (φ ψ : formula)
+  (h1 : is_proof (φ.imp_ ψ))
+  (h2 : is_proof φ) :
+  is_proof ψ :=
+begin
+  apply is_proof.mp _ _ h2 h1,
+end
+
+
+example
+  (φ ψ : formula)
+  (h1 : proof_eqv (not_ φ) (not_ ψ)) :
+  proof_eqv φ ψ :=
+begin
+  unfold proof_eqv at h1,
+  cases h1,
+  split,
+  {
+    obtain s1 := is_proof.prop_3 ψ φ,
+    obtain s2 := is_proof_imp _ _ s1,
+    apply s2 h1_right,
+  },
+  {
+    obtain s1 := is_proof.prop_3 φ ψ,
+    obtain s2 := is_proof_imp _ _ s1,
+    apply s2 h1_left,
+  }
+end
+
+
+example
+  (φ ψ : formula)
+  (h1 : proof_eqv φ ψ) :
+  proof_eqv (not_ φ) (not_ ψ) :=
+begin
+  unfold proof_eqv at *,
+  cases h1,
+  sorry,
 end
 
 
