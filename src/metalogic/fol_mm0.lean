@@ -3697,6 +3697,91 @@ begin
 end
 
 
+example
+  (φ : formula)
+  (v v' : var_name)
+  (h1 : is_proof φ) :
+  is_proof (replace v v' ∅ φ) :=
+begin
+  induction h1,
+  case fol.is_proof.mp : h1_φ h1_ψ h1_1 h1_2 h1_ih_1 h1_ih_2
+  {
+    unfold replace at *,
+    apply is_proof.mp _ _ h1_ih_1 h1_ih_2,
+  },
+  case fol.is_proof.prop_1 : h1_φ h1_ψ
+  {
+    unfold replace,
+    apply is_proof.prop_1,
+  },
+  case fol.is_proof.prop_2 : h1_φ h1_ψ h1_χ
+  {
+    unfold replace,
+    apply is_proof.prop_2,
+  },
+  case fol.is_proof.prop_3 : h1_φ h1_ψ
+  {
+    unfold replace,
+    apply is_proof.prop_3,
+  },
+  case fol.is_proof.gen : h1_φ h1_x h1_1 h1_ih
+  {
+    unfold replace,
+    apply is_proof.gen,
+    squeeze_simp,
+    sorry,
+  },
+  case fol.is_proof.pred_1 : h1_φ h1_ψ h1_x
+  {
+    unfold replace,
+    apply is_proof.pred_1,
+  },
+  case fol.is_proof.pred_2 : h1_φ h1_x h1_1
+  {
+    unfold replace,
+    squeeze_simp,
+    sorry,
+  },
+  case fol.is_proof.eq_1 : h1_x h1_y h1_1
+  {
+    unfold exists_,
+    unfold replace,
+    unfold replace_var,
+    sorry,
+  },
+  case fol.is_proof.eq_2 : h1_x h1_y h1_z
+  { admit },
+end
+
+
+example
+  (φ φ' : formula)
+  (h1 : alpha_eqv φ φ')
+  (h2 : is_proof φ) :
+  is_proof φ' :=
+begin
+  induction h1,
+  case fol.alpha_eqv.rename_forall : h1_φ h1_x h1_x' h1_1 h1_2
+  {
+    apply is_proof.gen, sorry,
+  },
+  case fol.alpha_eqv.compat_not : h1_φ h1_φ' h1_1 h1_ih
+  {
+    sorry,
+  },
+  case fol.alpha_eqv.compat_imp : h1_φ h1_φ' h1_ψ h1_ψ' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  { admit },
+  case fol.alpha_eqv.compat_forall : h1_φ h1_φ' h1_z h1_ᾰ h1_ih
+  { admit },
+  case fol.alpha_eqv.refl : h1
+  { admit },
+  case fol.alpha_eqv.symm : h1_φ h1_φ' h1_ᾰ h1_ih
+  { admit },
+  case fol.alpha_eqv.trans : h1_φ h1_φ' h1_φ'' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  { admit },
+end
+
+
 def proof_eqv
   (φ ψ : formula) :
   Prop :=
@@ -4495,6 +4580,75 @@ begin
     {
       simp only [list.mem_cons_iff] at h1_1,
       sorry,
+    },
+  },
+end
+
+
+example
+  (M : mm0.meta_var_name → fol.formula)
+  (E : mm0.env)
+  (φ φ' : mm0.formula)
+  (h1 : mm0.is_conv E φ φ')
+  (h2 : E.well_formed) :
+  fol.alpha_eqv
+    (mm0.formula.to_fol_formula M E φ)
+      (mm0.formula.to_fol_formula M E φ') :=
+begin
+  induction h1,
+  case mm0.is_conv.conv_refl : h1
+  {
+    apply fol.alpha_eqv.refl,
+  },
+  case mm0.is_conv.conv_symm : h1_φ h1_φ' h1_ᾰ h1_ih
+  { admit },
+  case mm0.is_conv.conv_trans : h1_φ h1_φ' h1_φ'' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  { admit },
+  case mm0.is_conv.conv_not : h1_φ h1_φ' h1_ᾰ h1_ih
+  { admit },
+  case mm0.is_conv.conv_imp : h1_φ h1_φ' h1_ψ h1_ψ' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  { admit },
+  case mm0.is_conv.conv_forall : h1_x h1_φ h1_φ' h1_ᾰ h1_ih
+  { admit },
+  case mm0.is_conv.conv_unfold : h1_d h1_σ h1_1
+  {
+    induction E,
+    case list.nil
+    {
+      simp only [list.not_mem_nil] at h1_1,
+      contradiction,
+    },
+    case list.cons : E_hd E_tl E_ih
+    {
+      unfold mm0.env.well_formed at h2,
+      cases h2,
+      cases h2_right,
+
+      simp only [list.mem_cons_iff] at h1_1,
+      cases h1_1,
+      {
+        simp only [not_nil_def_to_fol_formula],
+        split_ifs,
+        {
+          cases h,
+          dsimp,
+          obtain s1 := classical.some_spec h_right,
+
+          subst h1_1,
+          sorry,
+        },
+        {
+          push_neg at h,
+          rewrite h1_1 at h,
+          simp only [eq_self_iff_true, ne.def, forall_true_left] at h,
+          specialize h h1_σ,
+          contradiction,
+        }
+      },
+      {
+        specialize E_ih h2_right_right h1_1,
+        sorry,
+      }
     },
   },
 end
