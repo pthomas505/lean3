@@ -3888,7 +3888,7 @@ def mm0.formula.to_fol_formula
 | [] (mm0.formula.def_ _ _) := fol.formula.false_
 | (d :: E) (mm0.formula.def_ name args) :=
   by classical; exact
-  if h : name = d.name ∧ ∃ (σ : mm0.instantiation), d.args.map σ.1 = args
+  if h : name = d.name ∧ ∃ (σ : mm0.instantiation), args = d.args.map σ.1
   then
     let σ := classical.some h.right in
     mm0.formula.to_fol_formula E (d.q.subst σ mm0.formula.meta_var_)
@@ -3915,7 +3915,7 @@ def mm0.formula.to_fol_formula'
       (
         fun (d : mm0.definition_),
           by classical; exact
-          if h : name = d.name ∧ ∃ (σ : mm0.instantiation), d.args.map σ.1 = args
+          if h : name = d.name ∧ ∃ (σ : mm0.instantiation), args = d.args.map σ.1
           then
             let σ := classical.some h.right in
             mm0_formula_to_fol_formula (d.q.subst σ mm0.formula.meta_var_)
@@ -4054,7 +4054,7 @@ lemma not_nil_def_to_fol_formula
   (args : list mm0.var_name) :
   mm0.formula.to_fol_formula M (d :: E) (mm0.formula.def_ name args) =
   by classical; exact
-  if h : name = d.name ∧ ∃ (σ : mm0.instantiation), d.args.map σ.1 = args
+  if h : name = d.name ∧ ∃ (σ : mm0.instantiation), args = d.args.map σ.1
   then
     let σ := classical.some h.right in
     mm0.formula.to_fol_formula M E (d.q.subst σ mm0.formula.meta_var_)
@@ -4063,6 +4063,37 @@ begin
   unfold mm0.formula.to_fol_formula,
   unfold mm0.formula.to_fol_formula',
   simp only [option.elim],
+end
+
+
+lemma to_fol_formula_no_def
+  (name : mm0.def_name)
+  (args : list mm0.var_name)
+  (M : mm0.meta_var_name → fol.formula)
+  (E : mm0.env)
+  (h1 : ∀ (d : mm0.definition_), d ∈ E →
+    name = d.name →
+      ∀ (σ : mm0.instantiation), ¬ args = list.map σ.val d.args) :
+  mm0.formula.to_fol_formula M E (mm0.formula.def_ name args)
+    = fol.formula.false_ :=
+begin
+  induction E,
+  case list.nil
+  {
+    simp only [nil_def_to_fol_formula],
+  },
+  case list.cons : E_hd E_tl E_ih
+  {
+    simp only [not_nil_def_to_fol_formula, dite_eq_right_iff],
+    intros h,
+    cases h,
+    apply exists.elim h_right,
+    intros σ h_right_1,
+    specialize h1 E_hd,
+    simp only [list.mem_cons_iff, eq_self_iff_true, true_or, forall_true_left] at h1,
+    specialize h1 h_left σ,
+    contradiction,
+  },
 end
 
 
@@ -4349,7 +4380,7 @@ begin
         apply mm0.all_free_in_list_and_not_in_list_imp_not_free _ (list.map (classical.some h_right).val E_hd.args),
         apply mm0.no_meta_var_and_all_free_in_list_subst,
         exact E_hd.nf,
-        rewrite classical.some_spec h_right,
+        rewrite <- classical.some_spec h_right,
         exact h1,
       },
       {
@@ -4772,5 +4803,81 @@ begin
     cases s1,
     apply fol.is_proof_imp _ _ s1_left,
     exact h1_ih,
+  },
+end
+
+
+example
+  (M : mm0.meta_var_name → fol.formula)
+  (E E' : mm0.env)
+  (φ : mm0.formula)
+  (h1 : ∃ (E1 : mm0.env), E' = E1 ++ E)
+  (h2 : φ.is_meta_var_or_all_def_in_env E)
+  (h3 : E'.well_formed) :
+  (mm0.formula.to_fol_formula M E φ) =
+    (mm0.formula.to_fol_formula M E' φ) :=
+begin
+  induction φ,
+  case formula.def_ : name args
+  {
+    apply exists.elim h1,
+    intros E1 h1_1,
+    clear h1,
+
+    unfold mm0.formula.is_meta_var_or_all_def_in_env at h2,
+    apply exists.elim h2,
+    intros d h2_1,
+    cases h2_1,
+    cases h2_1_right,
+    clear h2,
+
+    subst h1_1,
+
+    induction E1,
+    case list.nil
+    {
+      simp only [list.nil_append],
+    },
+    case list.cons : E1_hd E1_tl E1_ih
+    {
+      simp only [list.cons_append, list.pairwise_cons, list.mem_append] at h3,
+      cases h3,
+      cases h3_right,
+
+      simp only [list.cons_append, not_nil_def_to_fol_formula],
+      split_ifs,
+      {
+        cases h,
+
+        exfalso,
+        apply h3_left d,
+        {
+          simp only [list.mem_append],
+          apply or.intro_right,
+          exact h2_1_left,
+        },
+        {
+          rewrite <- h2_1_right_left,
+          rewrite h_left,
+        },
+        {
+          rewrite <- h2_1_right_right,
+          apply exists.elim h_right,
+          intros σ a1,
+          obtain s1 := list.length_map σ.val E1_hd.args,
+          rewrite <- s1,
+          rewrite <- a1,
+        },
+      },
+      {
+        specialize E1_ih h3_right_right,
+        apply to_fol_formula_no_def,
+        push_neg at h,
+        intros d' a1 a2 σ,
+        specialize h3_left d',
+        squeeze_simp at h3_left,
+        sorry,
+      }
+    },
   },
 end
