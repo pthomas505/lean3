@@ -4159,7 +4159,39 @@ begin
       }
     },
     case mm0.formula.imp_ : φ ψ φ_ih ψ_ih
-    { admit },
+    {
+      unfold mm0.formula.is_meta_var_or_all_def_in_env at h2,
+      cases h2,
+
+      simp only [imp_to_fol_formula],
+      split,
+      {
+        apply φ_ih h2_left,
+        {
+          intros a1 a2 φ' a3,
+          exact E'_ih a1 a2 φ' a3,
+        },
+        {
+          exact h1,
+        },
+        {
+          exact h3,
+        }
+      },
+      {
+        apply ψ_ih h2_right,
+        {
+          intros a1 a2 ψ' a3,
+          exact E'_ih a1 a2 ψ' a3,
+        },
+        {
+          exact h1,
+        },
+        {
+          exact h3,
+        }
+      }
+    },
     case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1
     { admit },
     case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
