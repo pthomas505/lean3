@@ -4192,8 +4192,10 @@ begin
         }
       }
     },
-    case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1
-    { admit },
+    case mm0.formula.eq_ : x y
+    {
+      simp only [eq_to_fol_formula, eq_self_iff_true, and_self],
+    },
     case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
     { admit },
     case mm0.formula.def_ : name args
