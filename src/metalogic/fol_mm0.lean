@@ -4376,7 +4376,8 @@ begin
         exact h1,
       },
       {
-        sorry,
+        apply E_ih,
+        exact h1,
       }
     },
   },
