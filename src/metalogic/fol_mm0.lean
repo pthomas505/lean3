@@ -4212,12 +4212,12 @@ begin
       intros E1 h1_1,
       cases E1,
       {
-        squeeze_simp at h1_1,
+        simp only [list.nil_append] at h1_1,
         rewrite <- h1_1,
       },
       {
-        squeeze_simp at h1_1,
-        have s1 : (∃ (E1 : mm0.env), (E'_tl = (E1 ++ E))),
+        simp only [list.cons_append] at h1_1,
+        have s1 : ∃ (E1 : mm0.env), (E'_tl = (E1 ++ E)),
         apply exists.intro E1_tl,
         injection h1_1,
 
