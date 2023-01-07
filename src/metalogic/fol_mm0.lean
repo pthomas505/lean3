@@ -4084,7 +4084,129 @@ begin
   },
   case list.cons : E_hd E_tl E_ih
   {
-    sorry,
+    simp only [not_nil_def_to_fol_formula],
+    split_ifs,
+    {
+      cases h,
+      apply exists.elim h_right,
+      intros σ h_right_1,
+      dsimp,
+
+      exfalso,
+      apply h1 E_hd _ h_left σ h_right_1,
+      simp only [list.mem_cons_iff, eq_self_iff_true, true_or],
+    },
+    {
+      apply E_ih,
+      intros d a1 a2 contra,
+      apply h1,
+      {
+        simp only [list.mem_cons_iff],
+        apply or.intro_right,
+        exact a1,
+      },
+      {
+        exact a2,
+      }
+    }
+  },
+end
+
+
+example
+  (M : mm0.meta_var_name → fol.formula)
+  (E E' : mm0.env)
+  (φ : mm0.formula)
+  (h1 : ∃ (E1 : mm0.env), E' = E1 ++ E)
+  (h2 : φ.is_meta_var_or_all_def_in_env E)
+  (h3 : E'.well_formed) :
+  (mm0.formula.to_fol_formula M E φ) =
+    (mm0.formula.to_fol_formula M E' φ) :=
+begin
+  induction E' generalizing φ,
+  case list.nil : φ h2
+  { admit },
+  case list.cons : E'_hd E'_tl E'_ih φ h2
+  {
+    induction φ generalizing E'_tl,
+    case mm0.formula.meta_var_ : φ
+    { admit },
+    case mm0.formula.false_
+    { admit },
+    case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1
+    { admit },
+    case mm0.formula.not_ : φ_ᾰ φ_ih
+    { admit },
+    case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
+    { admit },
+    case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1
+    { admit },
+    case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
+    { admit },
+    case mm0.formula.def_ : name args
+    {
+      apply exists.elim h1,
+      intros E1 h1_1,
+      cases E1,
+      {
+        squeeze_simp at h1_1,
+        rewrite <- h1_1,
+      },
+      {
+        squeeze_simp at h1_1,
+        have s1 : (∃ (E1 : mm0.env), (E'_tl = (E1 ++ E))),
+        apply exists.intro E1_tl,
+        injection h1_1,
+
+        unfold mm0.formula.is_meta_var_or_all_def_in_env at h2,
+        apply exists.elim h2,
+        intros d h2_1,
+        cases h2_1,
+        cases h2_1_right,
+        clear h2,
+
+        have s2 : d ∈ E'_tl,
+        injection h1_1,
+        rewrite h_2,
+        simp only [list.mem_append],
+        apply or.intro_right,
+        exact h2_1_left,
+
+        unfold mm0.env.well_formed at h3,
+        cases h3,
+        cases h3_right,
+
+        specialize h3_left d s2,
+
+        have s3 : ¬ ((name = E'_hd.name) ∧ (∃ (a : mm0.instantiation), (args = list.map (a.val) E'_hd.args))),
+        push_neg,
+        intros a1 σ contra,
+        apply h3_left,
+        rewrite <- h2_1_right_left,
+        rewrite a1,
+        rewrite <- h2_1_right_right,
+        rewrite contra,
+        symmetry,
+        apply list.length_map,
+
+        simp only [subtype.val_eq_coe, not_nil_def_to_fol_formula],
+        rewrite dif_neg,
+        rewrite E'_ih s1 h3_right_right,
+        {
+          push_neg at s3,
+          unfold mm0.formula.is_meta_var_or_all_def_in_env,
+          apply exists.intro d,
+          split,
+          exact h2_1_left,
+          split,
+          exact h2_1_right_left,
+          exact h2_1_right_right,
+        },
+        {
+          exact s3,
+        }
+      }
+    },
   },
 end
 
@@ -4796,103 +4918,5 @@ begin
     cases s1,
     apply fol.is_proof_imp _ _ s1_left,
     exact h1_ih,
-  },
-end
-
-
-example
-  (M : mm0.meta_var_name → fol.formula)
-  (E E' : mm0.env)
-  (φ : mm0.formula)
-  (h1 : ∃ (E1 : mm0.env), E' = E1 ++ E)
-  (h2 : φ.is_meta_var_or_all_def_in_env E)
-  (h3 : E'.well_formed) :
-  (mm0.formula.to_fol_formula M E φ) =
-    (mm0.formula.to_fol_formula M E' φ) :=
-begin
-  induction E' generalizing φ,
-  case list.nil : φ h2
-  { admit },
-  case list.cons : E'_hd E'_tl E'_ih φ h2
-  {
-    induction φ generalizing E'_tl,
-    case mm0.formula.meta_var_ : φ
-    { admit },
-    case mm0.formula.false_
-    { admit },
-    case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1
-    { admit },
-    case mm0.formula.not_ : φ_ᾰ φ_ih
-    { admit },
-    case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
-    { admit },
-    case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1
-    { admit },
-    case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
-    { admit },
-    case mm0.formula.def_ : name args
-    {
-      apply exists.elim h1,
-      intros E1 h1_1,
-      cases E1,
-      {
-        squeeze_simp at h1_1,
-        rewrite <- h1_1,
-      },
-      {
-        squeeze_simp at h1_1,
-        have s1 : (∃ (E1 : mm0.env), (E'_tl = (E1 ++ E))),
-        apply exists.intro E1_tl,
-        injection h1_1,
-
-        unfold mm0.formula.is_meta_var_or_all_def_in_env at h2,
-        apply exists.elim h2,
-        intros d h2_1,
-        cases h2_1,
-        cases h2_1_right,
-        clear h2,
-
-        have s2 : d ∈ E'_tl,
-        injection h1_1,
-        rewrite h_2,
-        simp only [list.mem_append],
-        apply or.intro_right,
-        exact h2_1_left,
-
-        unfold mm0.env.well_formed at h3,
-        cases h3,
-        cases h3_right,
-
-        specialize h3_left d s2,
-
-        have s3 : ¬ ((name = E'_hd.name) ∧ (∃ (a : mm0.instantiation), (args = list.map (a.val) E'_hd.args))),
-        push_neg,
-        intros a1 σ contra,
-        apply h3_left,
-        rewrite <- h2_1_right_left,
-        rewrite a1,
-        rewrite <- h2_1_right_right,
-        rewrite contra,
-        symmetry,
-        apply list.length_map,
-
-        simp only [subtype.val_eq_coe, not_nil_def_to_fol_formula],
-        rewrite dif_neg,
-        rewrite E'_ih s1 h3_right_right,
-        {
-          push_neg at s3,
-          unfold mm0.formula.is_meta_var_or_all_def_in_env,
-          apply exists.intro d,
-          split,
-          exact h2_1_left,
-          split,
-          exact h2_1_right_left,
-          exact h2_1_right_right,
-        },
-        {
-          exact s3,
-        }
-      }
-    },
   },
 end
