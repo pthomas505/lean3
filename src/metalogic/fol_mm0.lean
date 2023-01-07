@@ -4129,14 +4129,35 @@ begin
   case list.cons : E'_hd E'_tl E'_ih φ h2
   {
     induction φ generalizing E'_tl,
-    case mm0.formula.meta_var_ : φ
-    { admit },
+    case mm0.formula.meta_var_ : X
+    {
+      simp only [meta_var_to_fol_formula],
+    },
     case mm0.formula.false_
-    { admit },
-    case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1
-    { admit },
-    case mm0.formula.not_ : φ_ᾰ φ_ih
-    { admit },
+    {
+      simp only [false_to_fol_formula],
+    },
+    case mm0.formula.pred_ : name args
+    {
+      simp only [pred_to_fol_formula, eq_self_iff_true, and_self],
+    },
+    case mm0.formula.not_ : φ φ_ih
+    {
+      unfold mm0.formula.is_meta_var_or_all_def_in_env at h2,
+
+      simp only [not_to_fol_formula],
+      apply φ_ih h2,
+      {
+        intros a1 a2 φ' a3,
+        exact E'_ih a1 a2 φ' a3,
+      },
+      {
+        exact h1,
+      },
+      {
+        exact h3,
+      }
+    },
     case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
     { admit },
     case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1
