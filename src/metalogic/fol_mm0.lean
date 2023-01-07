@@ -4158,7 +4158,7 @@ begin
         exact h3,
       }
     },
-    case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
+    case mm0.formula.imp_ : φ ψ φ_ih ψ_ih
     { admit },
     case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1
     { admit },
