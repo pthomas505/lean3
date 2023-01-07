@@ -4196,8 +4196,13 @@ begin
     {
       simp only [eq_to_fol_formula, eq_self_iff_true, and_self],
     },
-    case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
-    { admit },
+    case mm0.formula.forall_ : x φ φ_ih
+    {
+      unfold mm0.formula.is_meta_var_or_all_def_in_env at h2,
+
+      simp only [forall_to_fol_formula, eq_self_iff_true, true_and],
+      exact φ_ih h2 E'_tl E'_ih h1 h3,
+    },
     case mm0.formula.def_ : name args
     {
       apply exists.elim h1,
