@@ -4125,7 +4125,10 @@ example
 begin
   induction E' generalizing φ,
   case list.nil : φ h2
-  { admit },
+  {
+    simp only [list.nil_eq_append_iff, exists_eq_left] at h1,
+    rewrite h1,
+  },
   case list.cons : E'_hd E'_tl E'_ih φ h2
   {
     induction φ generalizing E'_tl,
