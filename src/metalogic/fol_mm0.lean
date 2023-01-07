@@ -4113,7 +4113,7 @@ begin
 end
 
 
-example
+lemma to_fol_formula_env_ext
   (M : mm0.meta_var_name → fol.formula)
   (E E' : mm0.env)
   (φ : mm0.formula)
