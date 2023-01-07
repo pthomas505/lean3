@@ -3892,7 +3892,7 @@ def mm0.formula.to_fol_formula
   then
     let σ := classical.some h.right in
     mm0.formula.to_fol_formula E (d.q.subst σ mm0.formula.meta_var_)
-  else fol.formula.false_
+  else mm0.formula.to_fol_formula E (mm0.formula.def_ name args)
 -/
 
 
@@ -3920,7 +3920,7 @@ def mm0.formula.to_fol_formula'
             let σ := classical.some h.right in
             mm0_formula_to_fol_formula (d.q.subst σ mm0.formula.meta_var_)
           else
-            fol.formula.false_
+            mm0_formula_to_fol_formula (mm0.formula.def_ name args)
       )
       d
 
@@ -4058,7 +4058,7 @@ lemma not_nil_def_to_fol_formula
   then
     let σ := classical.some h.right in
     mm0.formula.to_fol_formula M E (d.q.subst σ mm0.formula.meta_var_)
-  else fol.formula.false_ :=
+  else mm0.formula.to_fol_formula M E (mm0.formula.def_ name args) :=
 begin
   unfold mm0.formula.to_fol_formula,
   unfold mm0.formula.to_fol_formula',
@@ -4084,15 +4084,7 @@ begin
   },
   case list.cons : E_hd E_tl E_ih
   {
-    simp only [not_nil_def_to_fol_formula, dite_eq_right_iff],
-    intros h,
-    cases h,
-    apply exists.elim h_right,
-    intros σ h_right_1,
-    specialize h1 E_hd,
-    simp only [list.mem_cons_iff, eq_self_iff_true, true_or, forall_true_left] at h1,
-    specialize h1 h_left σ,
-    contradiction,
+    sorry,
   },
 end
 
@@ -4384,7 +4376,7 @@ begin
         exact h1,
       },
       {
-        unfold fol.not_free,
+        sorry,
       }
     },
   },
@@ -4969,13 +4961,11 @@ begin
         symmetry,
         apply list.length_map,
 
-        squeeze_simp,
+        simp only [subtype.val_eq_coe, not_nil_def_to_fol_formula],
         rewrite dif_neg,
         rewrite E'_ih s1 h3_right_right,
         {
-          sorry,
-        },
-        {
+          push_neg at s3,
           unfold mm0.formula.is_meta_var_or_all_def_in_env,
           apply exists.intro d,
           split,
