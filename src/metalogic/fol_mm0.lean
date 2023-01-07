@@ -4818,7 +4818,21 @@ example
     (mm0.formula.to_fol_formula M E' φ) :=
 begin
   induction φ,
-  case formula.def_ : name args
+  case mm0.formula.meta_var_ : φ
+  { admit },
+  case mm0.formula.false_
+  { admit },
+  case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1
+  { admit },
+  case mm0.formula.not_ : φ_ᾰ φ_ih
+  { admit },
+  case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
+  { admit },
+  case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1
+  { admit },
+  case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
+  { admit },
+  case mm0.formula.def_ : name args
   {
     apply exists.elim h1,
     intros E1 h1_1,
@@ -4826,58 +4840,10 @@ begin
 
     unfold mm0.formula.is_meta_var_or_all_def_in_env at h2,
     apply exists.elim h2,
-    intros d h2_1,
-    cases h2_1,
-    cases h2_1_right,
+    intros d a1,
+    cases a1,
+    cases a1_right,
     clear h2,
 
-    subst h1_1,
-
-    induction E1,
-    case list.nil
-    {
-      simp only [list.nil_append],
-    },
-    case list.cons : E1_hd E1_tl E1_ih
-    {
-      simp only [list.cons_append, list.pairwise_cons, list.mem_append] at h3,
-      cases h3,
-      cases h3_right,
-
-      simp only [list.cons_append, not_nil_def_to_fol_formula],
-      split_ifs,
-      {
-        cases h,
-
-        exfalso,
-        apply h3_left d,
-        {
-          simp only [list.mem_append],
-          apply or.intro_right,
-          exact h2_1_left,
-        },
-        {
-          rewrite <- h2_1_right_left,
-          rewrite h_left,
-        },
-        {
-          rewrite <- h2_1_right_right,
-          apply exists.elim h_right,
-          intros σ a1,
-          obtain s1 := list.length_map σ.val E1_hd.args,
-          rewrite <- s1,
-          rewrite <- a1,
-        },
-      },
-      {
-        specialize E1_ih h3_right_right,
-        apply to_fol_formula_no_def,
-        push_neg at h,
-        intros d' a1 a2 σ,
-        specialize h3_left d',
-        squeeze_simp at h3_left,
-        sorry,
-      }
-    },
   },
 end
