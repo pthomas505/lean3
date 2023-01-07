@@ -4817,7 +4817,7 @@ example
   (mm0.formula.to_fol_formula M E φ) =
     (mm0.formula.to_fol_formula M E' φ) :=
 begin
-  induction φ,
+  induction φ generalizing E,
   case mm0.formula.meta_var_ : φ
   { admit },
   case mm0.formula.false_
@@ -4845,5 +4845,49 @@ begin
     cases a1_right,
     clear h2,
 
+    subst h1_1,
+
+    induction E1,
+    case list.nil
+    { admit },
+    case list.cons : E1_hd E1_tl E1_ih
+    {
+      simp only [list.cons_append] at h3,
+      unfold mm0.env.well_formed at h3,
+      cases h3,
+      cases h3_right,
+
+      simp only [list.cons_append],
+      rewrite E1_ih h3_right_right,
+
+      simp only [not_nil_def_to_fol_formula],
+      split_ifs,
+      {
+        cases h,
+        apply exists.elim h_right,
+        intros σ h_right_1,
+
+        exfalso,
+        apply h3_left d,
+        {
+          simp only [list.mem_append],
+          apply or.intro_right,
+          exact a1_left,
+        },
+        {
+          rewrite <- h_left,
+          exact a1_right_left,
+        },
+        {
+          rewrite h_right_1 at a1_right_right,
+          rewrite <- a1_right_right,
+          symmetry,
+          apply list.length_map,
+        }
+      },
+      {
+        sorry,
+      }
+    },
   },
 end
