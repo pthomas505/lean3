@@ -4066,6 +4066,52 @@ begin
 end
 
 
+example
+  (M : mm0.meta_var_name → fol.formula)
+  (d : mm0.definition_)
+  (E : mm0.env)
+  (name : mm0.pred_name)
+  (args : list mm0.var_name)
+  (h1 : name = d.name ∧ ∃ (σ : mm0.instantiation), args = d.args.map σ.1) :
+  ∃ (σ : mm0.instantiation), args = d.args.map σ.1 ∧
+  mm0.formula.to_fol_formula M (d :: E) (mm0.formula.def_ name args) =
+    mm0.formula.to_fol_formula M E (d.q.subst σ mm0.formula.meta_var_) :=
+begin
+  cases h1,
+  obtain σ := classical.some h1_right,
+  obtain h1_right_1 := classical.some_spec h1_right,
+
+  simp only [not_nil_def_to_fol_formula],
+  split_ifs,
+  {
+    cases h,
+    obtain σ' := classical.some h_right,
+    obtain h_1 := classical.some_spec h_right,
+    dsimp at *,
+    intros a1,
+    apply exists.intro σ',
+    split,
+    {
+      exact a1,
+    },
+    {
+      refl,
+    }
+  },
+  {
+    exfalso,
+    apply h,
+    split,
+    {
+      exact h1_left,
+    },
+    {
+      exact h1_right,
+    }
+  }
+end
+
+
 lemma to_fol_formula_no_def
   (name : mm0.def_name)
   (args : list mm0.var_name)
@@ -4603,12 +4649,20 @@ begin
     { admit },
     case mm0.formula.def_ : name args
     {
-      unfold fol.proof_eqv at *,
-      specialize E_ih (mm0.formula.def_ name args),
-      cases E_ih,
-      split,      
+      simp only [not_nil_def_to_fol_formula],
+      split_ifs,
       {
-        sorry,
+        cases h,
+        
+        unfold mm0.formula.subst,
+        simp only [not_nil_def_to_fol_formula],
+        split_ifs,        
+        {
+          sorry,
+        },
+        {
+          sorry,
+        }
       },
       {
         sorry,
