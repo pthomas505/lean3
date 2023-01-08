@@ -4628,14 +4628,16 @@ begin
       by_cases c1 : name = E_hd.name ∧
         ∃ (σ : mm0.instantiation), args = E_hd.args.map σ.1,
       {
-        obtain ⟨σ_1, c_1_1, c_1_2⟩ := lem_2 M' E_hd E_tl name args c1,
+        obtain ⟨σ_1, _, c_1_2⟩ := lem_2 M' E_hd E_tl name args c1,
         rewrite c_1_2,
+        clear c1 c_1_2,
 
         by_cases c2 : name = E_hd.name ∧
           ∃ (σ' : mm0.instantiation), (list.map σ.val args = list.map σ'.val E_hd.args),
         {
-          obtain ⟨σ_2, c_2_1, c_2_2⟩ := lem_2 M E_hd E_tl name (list.map σ.val args) c2,
+          obtain ⟨σ_2, _, c_2_2⟩ := lem_2 M E_hd E_tl name (list.map σ.val args) c2,
           rewrite c_2_2,
+          clear c2 c_2_2,
           sorry,
         },
         {
