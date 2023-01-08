@@ -4077,10 +4077,9 @@ example
   mm0.formula.to_fol_formula M (d :: E) (mm0.formula.def_ name args) =
     mm0.formula.to_fol_formula M E (d.q.subst σ mm0.formula.meta_var_) :=
 begin
-  simp at h1,
   let σ := classical.some h1.right,
   have h2 := classical.some_spec h1.right,
-  simp [not_nil_def_to_fol_formula, dif_pos h1],
+  simp only [not_nil_def_to_fol_formula, dif_pos h1],
   exact ⟨σ, h2, rfl⟩,
 end
 
