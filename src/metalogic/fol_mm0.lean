@@ -4066,7 +4066,7 @@ begin
 end
 
 
-example
+lemma lem_2
   (M : mm0.meta_var_name → fol.formula)
   (d : mm0.definition_)
   (E : mm0.env)
@@ -4621,14 +4621,15 @@ begin
     { admit },
     case mm0.formula.def_ : name args
     {
-      simp only [not_nil_def_to_fol_formula],
-      split_ifs,
+      by_cases c1 : name = E_hd.name ∧
+        ∃ (σ : mm0.instantiation), args = E_hd.args.map σ.1,
       {
-        cases h,
-        dsimp,
+        obtain s1 := lem_2 M E_hd E_tl name args c1,
         sorry,
       },
       {
+        simp only [not_nil_def_to_fol_formula, c1,
+          not_false_iff, dif_neg],
         sorry,
       }
     },
