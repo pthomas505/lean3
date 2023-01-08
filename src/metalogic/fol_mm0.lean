@@ -4604,9 +4604,9 @@ begin
     case mm0.formula.def_ : name args
     {
       unfold fol.proof_eqv at *,
-      rewrite forall_and_distrib at E_ih,
+      specialize E_ih (mm0.formula.def_ name args),
       cases E_ih,
-      split,
+      split,      
       {
         sorry,
       },
@@ -4794,7 +4794,7 @@ begin
 end
 
 
-example
+lemma is_conv_imp_alpha_eqv
   (M : mm0.meta_var_name → fol.formula)
   (E : mm0.env)
   (φ φ' : mm0.formula)
