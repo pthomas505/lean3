@@ -4070,45 +4070,18 @@ example
   (M : mm0.meta_var_name → fol.formula)
   (d : mm0.definition_)
   (E : mm0.env)
-  (name : mm0.pred_name)
+  (name : mm0.def_name)
   (args : list mm0.var_name)
   (h1 : name = d.name ∧ ∃ (σ : mm0.instantiation), args = d.args.map σ.1) :
   ∃ (σ : mm0.instantiation), args = d.args.map σ.1 ∧
   mm0.formula.to_fol_formula M (d :: E) (mm0.formula.def_ name args) =
     mm0.formula.to_fol_formula M E (d.q.subst σ mm0.formula.meta_var_) :=
 begin
-  cases h1,
-  obtain σ := classical.some h1_right,
-  obtain h1_right_1 := classical.some_spec h1_right,
-
-  simp only [not_nil_def_to_fol_formula],
-  split_ifs,
-  {
-    cases h,
-    obtain σ' := classical.some h_right,
-    obtain h_1 := classical.some_spec h_right,
-    dsimp at *,
-    intros a1,
-    apply exists.intro σ',
-    split,
-    {
-      exact a1,
-    },
-    {
-      refl,
-    }
-  },
-  {
-    exfalso,
-    apply h,
-    split,
-    {
-      exact h1_left,
-    },
-    {
-      exact h1_right,
-    }
-  }
+  simp at h1,
+  let σ := classical.some h1.right,
+  have h2 := classical.some_spec h1.right,
+  simp [not_nil_def_to_fol_formula, dif_pos h1],
+  exact ⟨σ, h2, rfl⟩,
 end
 
 
@@ -4658,6 +4631,9 @@ begin
         simp only [not_nil_def_to_fol_formula],
         split_ifs,        
         {
+          cases h,
+          dsimp,
+          set M' := (fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M (E_hd :: E_tl) ∘ τ)),
           sorry,
         },
         {
