@@ -4625,19 +4625,8 @@ begin
       split_ifs,
       {
         cases h,
-        
-        unfold mm0.formula.subst,
-        simp only [not_nil_def_to_fol_formula],
-        split_ifs,        
-        {
-          cases h,
-          dsimp,
-          set M' := (fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M (E_hd :: E_tl) ∘ τ)),
-          sorry,
-        },
-        {
-          sorry,
-        }
+        dsimp,
+        sorry,
       },
       {
         sorry,
