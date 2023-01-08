@@ -4587,7 +4587,7 @@ begin
 end
 
 
-lemma lem_1'
+example
   (φ : mm0.formula)
   (M : mm0.meta_var_name → fol.formula)
   (E : mm0.env)
@@ -4599,37 +4599,52 @@ lemma lem_1'
     (fol.formula.subst σ
       (mm0.formula.to_fol_formula (fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M E ∘ τ)) E φ)) :=
 begin
-  induction E generalizing φ,
-  case list.nil : φ
+  induction E generalizing σ τ φ,
+  case list.nil : σ τ φ h_inv_left h_inv_right
   { admit },
-  case list.cons : E_hd E_tl E_ih φ
+  case list.cons : E_hd E_tl E_ih σ τ φ h_inv_left h_inv_right
   {
-    induction φ,
-    case mm0.formula.meta_var_ : φ
+    induction φ generalizing σ τ,
+    case mm0.formula.meta_var_ : φ σ τ h_inv_left h_inv_right
     { admit },
-    case mm0.formula.false_
+    case mm0.formula.false_ : σ τ h_inv_left h_inv_right
     { admit },
-    case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1
+    case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1 σ τ h_inv_left h_inv_right
     { admit },
-    case mm0.formula.not_ : φ_ᾰ φ_ih
+    case mm0.formula.not_ : φ_ᾰ φ_ih σ τ h_inv_left h_inv_right
     { admit },
-    case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
+    case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1 σ τ h_inv_left h_inv_right
     { admit },
-    case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1
+    case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1 σ τ h_inv_left h_inv_right
     { admit },
-    case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
+    case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih σ τ h_inv_left h_inv_right
     { admit },
-    case mm0.formula.def_ : name args
+    case mm0.formula.def_ : name args σ τ h_inv_left h_inv_right
     {
+      set M' := fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M (E_hd :: E_tl) ∘ τ),
+
+      unfold mm0.formula.subst,
+
       by_cases c1 : name = E_hd.name ∧
         ∃ (σ : mm0.instantiation), args = E_hd.args.map σ.1,
       {
-        obtain s1 := lem_2 M E_hd E_tl name args c1,
-        sorry,
+        obtain ⟨σ_1, c_1_1, c_1_2⟩ := lem_2 M' E_hd E_tl name args c1,
+        rewrite c_1_2,
+
+        by_cases c2 : name = E_hd.name ∧
+          ∃ (σ' : mm0.instantiation), (list.map σ.val args = list.map σ'.val E_hd.args),
+        {
+          obtain ⟨σ_2, c_2_1, c_2_2⟩ := lem_2 M E_hd E_tl name (list.map σ.val args) c2,
+          rewrite c_2_2,
+          sorry,
+        },
+        {
+          simp only [not_nil_def_to_fol_formula, c2, not_false_iff, dif_neg],
+          sorry,
+        }
       },
       {
-        simp only [not_nil_def_to_fol_formula, c1,
-          not_false_iff, dif_neg],
+        simp only [not_nil_def_to_fol_formula, c1, not_false_iff, dif_neg],
         sorry,
       }
     },
