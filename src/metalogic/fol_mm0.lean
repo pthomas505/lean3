@@ -4641,7 +4641,10 @@ begin
         obtain ⟨σ_1, c_1_1, c_1_2⟩ := lem_2 M' E_hd E_tl name args c1,
         rewrite c_1_2,
 
-        obtain ⟨σ_1_inv, σ_1_inv_prop⟩ := σ_1.2,
+        obtain s1 := mm0.instantiation.exists_inverse σ_1,
+        apply exists.elim s1,
+        intros σ_1_inv σ_1_inv_prop,
+        cases σ_1_inv_prop,
 
         by_cases c2 : name = E_hd.name ∧
           ∃ (σ' : mm0.instantiation), (list.map σ.val args = list.map σ'.val E_hd.args),
@@ -4649,13 +4652,12 @@ begin
           obtain ⟨σ_2, c_2_1, c_2_2⟩ := lem_2 M E_hd E_tl name (list.map σ.val args) c2,
           rewrite c_2_2,
 
-          obtain s1 := mm0.instantiation.exists_inverse σ_2,
-          apply exists.elim s1,
-          intros σ_2_inv σ_inv_prop,
-          cases σ_inv_prop,
+          obtain s2 := mm0.instantiation.exists_inverse σ_2,
+          apply exists.elim s2,
+          intros σ_2_inv σ_2_inv_prop,
+          cases σ_2_inv_prop,
 
-          specialize E_ih σ_2 σ_2_inv mm0.formula.meta_var_ E_hd.q σ_inv_prop_left σ_inv_prop_right,
-
+          specialize E_ih σ_2 σ_2_inv mm0.formula.meta_var_ E_hd.q σ_2_inv_prop_left σ_2_inv_prop_right,
 
           sorry,
         },
