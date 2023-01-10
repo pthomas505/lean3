@@ -4609,12 +4609,12 @@ example
     (fol.formula.subst σ
       (mm0.formula.to_fol_formula (fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M E ∘ τ)) E φ)) :=
 begin
-  induction E generalizing σ σ_inv τ φ,
+  induction E generalizing M σ σ_inv τ φ,
   case list.nil : σ σ_inv τ φ h_inv_left h_inv_right
   { admit },
-  case list.cons : E_hd E_tl E_ih σ σ_inv τ φ h_inv_left h_inv_right
+  case list.cons : E_hd E_tl E_ih M σ σ_inv τ φ h_inv_left h_inv_right
   {
-    induction φ generalizing σ σ_inv τ,
+    induction φ generalizing M σ σ_inv τ,
     case mm0.formula.meta_var_ : φ σ σ_inv τ h_inv_left h_inv_right
     { admit },
     case mm0.formula.false_ : σ σ_inv τ h_inv_left h_inv_right
@@ -4629,7 +4629,7 @@ begin
     { admit },
     case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih σ σ_inv τ h_inv_left h_inv_right
     { admit },
-    case mm0.formula.def_ : name args σ σ_inv τ h_inv_left h_inv_right
+    case mm0.formula.def_ : name args M σ σ_inv τ h_inv_left h_inv_right
     {
       set M' := fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M (E_hd :: E_tl) ∘ τ),
 
@@ -4638,7 +4638,7 @@ begin
       by_cases c1 : name = E_hd.name ∧
         ∃ (σ : mm0.instantiation), args = E_hd.args.map σ.1,
       {
-        obtain ⟨σ_1, c_1_1, c_1_2⟩ := lem_2 M' E_hd E_tl name args c1,
+        obtain ⟨σ_1, c_1_1, c_1_2⟩ := lem_2 (fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M (E_hd :: E_tl) ∘ τ)) E_hd E_tl name args c1,
         rewrite c_1_2,
 
         obtain s1 := mm0.instantiation.exists_inverse σ_1,
@@ -4657,7 +4657,7 @@ begin
           intros σ_2_inv σ_2_inv_prop,
           cases σ_2_inv_prop,
 
-          specialize E_ih σ_2 σ_2_inv mm0.formula.meta_var_ E_hd.q σ_2_inv_prop_left σ_2_inv_prop_right,
+          obtain s3 := E_ih M σ_2 σ_2_inv mm0.formula.meta_var_ E_hd.q σ_2_inv_prop_left σ_2_inv_prop_right,
 
           sorry,
         },
