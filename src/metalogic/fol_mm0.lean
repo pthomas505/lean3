@@ -3743,7 +3743,7 @@ begin
   induction h1,
   case fol.alpha_eqv.rename_forall : h1_φ h1_x h1_x' h1_1 h1_2
   {
-    apply is_proof.gen, sorry,
+    sorry,
   },
   case fol.alpha_eqv.compat_not : h1_φ h1_φ' h1_1 h1_ih
   {
@@ -4590,24 +4590,24 @@ example
       (mm0.formula.to_fol_formula (fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M E ∘ τ)) E φ)) :=
 begin
   induction E generalizing M σ σ_inv τ φ,
-  case list.nil : σ σ_inv τ φ h_inv_left h_inv_right
+  case list.nil : M σ σ_inv τ φ h_inv_left h_inv_right
   { admit },
   case list.cons : E_hd E_tl E_ih M σ σ_inv τ φ h_inv_left h_inv_right
   {
     induction φ generalizing M σ σ_inv τ,
-    case mm0.formula.meta_var_ : φ σ σ_inv τ h_inv_left h_inv_right
+    case mm0.formula.meta_var_ : φ M σ σ_inv τ h_inv_left h_inv_right
     { admit },
-    case mm0.formula.false_ : σ σ_inv τ h_inv_left h_inv_right
+    case mm0.formula.false_ : M σ σ_inv τ h_inv_left h_inv_right
     { admit },
-    case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1 σ σ_inv τ h_inv_left h_inv_right
+    case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1 M σ σ_inv τ h_inv_left h_inv_right
     { admit },
-    case mm0.formula.not_ : φ_ᾰ φ_ih σ σ_inv τ h_inv_left h_inv_right
+    case mm0.formula.not_ : φ_ᾰ φ_ih M σ σ_inv τ h_inv_left h_inv_right
     { admit },
-    case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1 σ σ_inv τ h_inv_left h_inv_right
+    case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1 M σ σ_inv τ h_inv_left h_inv_right
     { admit },
-    case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1 σ σ_inv τ h_inv_left h_inv_right
+    case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1 M σ σ_inv τ h_inv_left h_inv_right
     { admit },
-    case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih σ σ_inv τ h_inv_left h_inv_right
+    case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih M σ σ_inv τ h_inv_left h_inv_right
     { admit },
     case mm0.formula.def_ : name args M σ σ_inv τ h_inv_left h_inv_right
     {
