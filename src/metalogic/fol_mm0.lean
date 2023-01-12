@@ -3240,28 +3240,39 @@ def formula.bind_var_set : formula → finset var_name
 | (forall_ x φ) := φ.bind_var_set ∪ {x}
 
 
-def replace_var
-  (x v v' : var_name)
-  (binders : finset var_name) :
+/-
+α equivalence
+
+Type Theory and Formal Proof
+An Introduction
+Rob Nederpelt, Herman Geuvers
+Section 1.5
+-/
+
+
+def replace_free_var
+  (binders : finset var_name)
+  (v v' x : var_name) :
   var_name :=
   if x ∉ binders ∧ v = x then v' else x
 
 
-def replace (v v' : var_name) : finset var_name → formula → formula
+def replace_free_aux (v v' : var_name) : finset var_name → formula → formula
 | _ false_ := false_
-| binders (pred_ name args) :=
-    pred_ name (list.map (fun (x : var_name), replace_var x v v' binders) args)
-| binders (not_ φ) := not_ (replace binders φ)
-| binders (imp_ φ ψ) := imp_ (replace binders φ) (replace binders ψ)
-| binders (eq_ x y) := eq_ (replace_var x v v' binders) (replace_var y v v' binders)
-| binders (forall_ x φ) := forall_ x (replace (binders ∪ {x}) φ)
+| binders (pred_ name args) := pred_ name (args.map (replace_free_var binders v v'))
+| binders (not_ φ) := not_ (replace_free_aux binders φ)
+| binders (imp_ φ ψ) := imp_ (replace_free_aux binders φ) (replace_free_aux binders ψ)
+| binders (eq_ x y) := eq_ (replace_free_var binders v v' x) (replace_free_var binders v v' y)
+| binders (forall_ x φ) := forall_ x (replace_free_aux (binders ∪ {x}) φ)
+
+def replace_free (v v' : var_name) (φ : formula) : formula := replace_free_aux v v' ∅ φ
 
 
 inductive alpha_eqv : formula → formula → Prop
 
 | rename_forall (φ : formula) (x x' : var_name) :
   x' ∉ φ.free_var_set → x' ∉ φ.bind_var_set →
-  alpha_eqv (forall_ x φ) (forall_ x' (replace x x' ∅ φ))
+  alpha_eqv (forall_ x φ) (forall_ x' (replace_free x x' φ))
 
 | compat_not (φ φ' : formula) :
   alpha_eqv φ φ' → alpha_eqv (not_ φ) (not_ φ')
@@ -3280,33 +3291,6 @@ inductive alpha_eqv : formula → formula → Prop
 
 | trans (φ φ' φ'' : formula) :
   alpha_eqv φ φ' → alpha_eqv φ' φ'' → alpha_eqv φ φ''
-
-
-def is_alpha_eqv_var : list (var_name × var_name) → var_name → var_name → Prop
-| [] x x' := x = x'
-| ((a, b) :: m) x x' :=
-    if x = a
-    then b = x'
-    else b ≠ x' ∧ is_alpha_eqv_var m x x'
-
-
-def is_alpha_eqv_list
-  (l : list (var_name × var_name)) :
-  list var_name → list var_name → Prop
-| [] [] := true
-| (x :: xs) (x' :: xs') := is_alpha_eqv_var l x x' ∧ is_alpha_eqv_list xs xs'
-| _ _ := false
-
-
-def is_alpha_eqv : list (var_name × var_name) → formula → formula → Prop
-| _ false_ false_ := true
-| l (pred_ name args) (pred_ name' args') :=
-    name = name' ∧ is_alpha_eqv_list l args args'
-| l (not_ φ) (not_ φ') := is_alpha_eqv l φ φ'
-| l (imp_ φ ψ) (imp_ φ' ψ') := is_alpha_eqv l φ φ' ∧ is_alpha_eqv l ψ ψ'
-| l (eq_ x y) (eq_ x' y') := is_alpha_eqv_var l x x' ∧ is_alpha_eqv_var l y y'
-| l (forall_ x φ) (forall_ x' φ') := is_alpha_eqv ((x, x') :: l) φ φ'
-| _ _ _ := false
 
 
 /-
@@ -3701,52 +3685,48 @@ example
   (φ : formula)
   (v v' : var_name)
   (h1 : is_proof φ) :
-  is_proof (replace v v' ∅ φ) :=
+  is_proof (replace_free v v' φ) :=
 begin
   induction h1,
   case fol.is_proof.mp : h1_φ h1_ψ h1_1 h1_2 h1_ih_1 h1_ih_2
   {
-    unfold replace at *,
     apply is_proof.mp _ _ h1_ih_1 h1_ih_2,
   },
   case fol.is_proof.prop_1 : h1_φ h1_ψ
   {
-    unfold replace,
     apply is_proof.prop_1,
   },
   case fol.is_proof.prop_2 : h1_φ h1_ψ h1_χ
   {
-    unfold replace,
     apply is_proof.prop_2,
   },
   case fol.is_proof.prop_3 : h1_φ h1_ψ
   {
-    unfold replace,
     apply is_proof.prop_3,
   },
   case fol.is_proof.gen : h1_φ h1_x h1_1 h1_ih
   {
-    unfold replace,
     apply is_proof.gen,
     squeeze_simp,
     sorry,
   },
   case fol.is_proof.pred_1 : h1_φ h1_ψ h1_x
   {
-    unfold replace,
     apply is_proof.pred_1,
   },
   case fol.is_proof.pred_2 : h1_φ h1_x h1_1
   {
-    unfold replace,
+    unfold replace_free,
+    unfold replace_free_aux,
     squeeze_simp,
     sorry,
   },
   case fol.is_proof.eq_1 : h1_x h1_y h1_1
   {
     unfold exists_,
-    unfold replace,
-    unfold replace_var,
+    unfold replace_free,
+    unfold replace_free_aux,
+    unfold replace_free_var,
     sorry,
   },
   case fol.is_proof.eq_2 : h1_x h1_y h1_z
