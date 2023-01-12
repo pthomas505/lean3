@@ -3815,6 +3815,26 @@ begin
 end
 
 
+lemma proof_eqv_imp_iff
+  (φ ψ : formula)
+  (h1 : proof_eqv φ ψ) :
+  is_proof φ ↔ is_proof ψ :=
+begin
+  unfold proof_eqv at h1,
+  cases h1,
+
+  split,
+  {
+    intros a1,
+    apply is_proof_imp _ _ h1_left a1,
+  },
+  {
+    intros a1,
+    apply is_proof_imp _ _ h1_right a1,
+  },
+end
+
+
 example
   (φ ψ χ : formula)
   (h1 : is_proof (φ.imp_ ψ))
