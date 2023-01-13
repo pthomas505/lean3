@@ -782,6 +782,69 @@ def formula.subst (σ : instantiation) (τ : meta_instantiation) : formula → f
 | (def_ name args) := def_ name (list.map σ.1 args)
 
 
+lemma no_meta_var_subst
+  (φ : formula)
+  (σ : instantiation)
+  (τ τ' : meta_instantiation)
+  (h1 : φ.meta_var_set = ∅) :
+  φ.subst σ τ = φ.subst σ τ' :=
+begin
+  induction φ,
+  case mm0.formula.meta_var_ : X
+  {
+    unfold formula.meta_var_set at h1,
+    simp only [finset.singleton_ne_empty] at h1,
+    contradiction,
+  },
+  case mm0.formula.false_
+  {
+    unfold formula.subst,
+  },
+  case mm0.formula.pred_ : name args
+  {
+    unfold formula.subst,
+  },
+  case mm0.formula.not_ : φ φ_ih
+  {
+    unfold formula.meta_var_set at h1,
+    unfold formula.subst,
+    congr' 1,
+    exact φ_ih h1,
+  },
+  case mm0.formula.imp_ : φ ψ φ_ih ψ_ih
+  {
+    unfold formula.meta_var_set at h1,
+    simp only [finset.union_eq_empty_iff] at h1,
+    cases h1,
+
+    unfold formula.subst,
+    congr' 1,
+    {
+      exact φ_ih h1_left,
+    },
+    {
+      exact ψ_ih h1_right,
+    }
+  },
+  case mm0.formula.eq_ : x y
+  {
+    unfold formula.subst,
+  },
+  case mm0.formula.forall_ : x φ φ_ih
+  {
+    unfold formula.meta_var_set at h1,
+
+    unfold formula.subst,
+    congr' 1,
+    exact φ_ih h1,
+  },
+  case mm0.formula.def_ : name args
+  {
+    unfold formula.subst,
+  },
+end
+
+
 lemma no_meta_var_and_all_free_in_list_subst
   (φ : formula)
   (S : list var_name)
