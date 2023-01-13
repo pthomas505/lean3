@@ -4016,14 +4016,6 @@ begin
   apply is_proof.mp _ _ s4 s3,
 end
 
-lemma con3
-  (φ ψ χ : formula)
-  (h1 : is_proof (φ.imp_ (ψ.imp_ χ))) :
-  is_proof (φ.imp_ (χ.not_.imp_ ψ.not_)) :=
-begin
-  sorry,
-end
-
 
 lemma eq_imp_proof_eqv
   (φ ψ : formula)
@@ -4073,16 +4065,6 @@ end
 
 
 example
-  (φ ψ χ : formula)
-  (h1 : is_proof (φ.imp_ ψ))
-  (h2 : is_proof (ψ.imp_ χ)) :
-  is_proof (φ.imp_ χ) :=
-begin
-  sorry,
-end
-
-
-example
   (φ ψ : formula)
   (h1 : proof_eqv (not_ φ) (not_ ψ)) :
   proof_eqv φ ψ :=
@@ -4103,7 +4085,7 @@ begin
 end
 
 
-example
+lemma proof_eqv_compat_not
   (φ ψ : formula)
   (h1 : proof_eqv φ ψ) :
   proof_eqv (not_ φ) (not_ ψ) :=
@@ -4112,6 +4094,36 @@ begin
   cases h1,
   sorry,
 end
+
+
+lemma proof_eqv_compat_imp
+  (φ φ' ψ ψ' : formula)
+  (h1 : proof_eqv φ φ')
+  (h2 : proof_eqv ψ ψ') :
+  proof_eqv (imp_ φ ψ) (imp_ φ' ψ') :=
+begin
+  sorry,
+end
+
+
+lemma proof_eqv_compat_eq
+  (x x' y y' : var_name)
+  (h1 : x = x')
+  (h2 : y = y') :
+  proof_eqv (eq_ x y) (eq_ x' y') :=
+begin
+  sorry,
+end
+
+
+lemma proof_eqv_refl
+  (φ : formula) :
+  proof_eqv φ φ :=
+begin
+  sorry,
+end
+
+
 
 
 end fol
@@ -4965,6 +4977,110 @@ end
 example
   (φ : mm0.formula)
   (S : list mm0.var_name)
+  (M : mm0.meta_var_name → fol.formula)
+  (E : mm0.env)
+  (σ σ' : mm0.instantiation)
+  (h1 : φ.no_meta_var_and_all_free_in_list S)
+  (h2 : ∀ (x : mm0.var_name), x ∈ S → σ.val x = σ'.val x) :
+  fol.proof_eqv
+  (mm0.formula.to_fol_formula M E (mm0.formula.subst σ mm0.formula.meta_var_ φ))
+  (mm0.formula.to_fol_formula M E (mm0.formula.subst σ' mm0.formula.meta_var_ φ) ):=
+begin
+  induction φ generalizing S,
+  case mm0.formula.meta_var_ : X
+  {
+    apply fol.eq_imp_proof_eqv,
+    refl,
+  },
+  case mm0.formula.false_
+  {
+    apply fol.eq_imp_proof_eqv,
+    refl,
+  },
+  case mm0.formula.pred_ : name args
+  {
+    apply fol.eq_imp_proof_eqv,
+
+    have s1 : ∀ (x : mm0.var_name), x ∈ args → σ.val x = σ'.val x,
+    intros x s1_1,
+    apply h2,
+    exact h1 s1_1,
+
+    have s2 : list.map σ.val args = list.map σ'.val args,
+    exact list.map_congr s1,
+
+    unfold mm0.formula.subst,
+    rewrite s2,
+  },
+  case mm0.formula.not_ : φ φ_ih
+  {
+    unfold mm0.formula.no_meta_var_and_all_free_in_list at h1,
+
+    unfold mm0.formula.subst,
+    simp only [not_to_fol_formula],
+
+    apply fol.proof_eqv_compat_not,
+    exact φ_ih S h1 h2,
+  },
+  case mm0.formula.imp_ : φ ψ φ_ih ψ_ih
+  {
+    unfold mm0.formula.no_meta_var_and_all_free_in_list at h1,
+    cases h1,
+
+    unfold mm0.formula.subst,
+    simp only [imp_to_fol_formula],
+    apply fol.proof_eqv_compat_imp,
+    {
+      exact φ_ih S h1_left h2,
+    },
+    {
+      exact ψ_ih S h1_right h2,
+    }
+  },
+  case mm0.formula.eq_ : x y
+  {
+    unfold mm0.formula.no_meta_var_and_all_free_in_list at h1,
+    cases h1,
+
+    unfold mm0.formula.subst,
+    simp only [eq_to_fol_formula],
+    apply fol.proof_eqv_compat_eq,
+    {
+      exact h2 x h1_left,
+    },
+    {
+      exact h2 y h1_right,
+    }
+  },
+  case mm0.formula.forall_ : x φ φ_ih
+  {
+    unfold mm0.formula.no_meta_var_and_all_free_in_list at h1,
+
+    unfold mm0.formula.subst,
+    simp only [forall_to_fol_formula],
+    sorry,
+  },
+  case mm0.formula.def_ : name args
+  {
+    have s1 : ∀ (x : mm0.var_name), x ∈ args → σ.val x = σ'.val x,
+    intros x s1_1,
+    apply h2,
+    exact h1 s1_1,
+
+    have s2 : list.map σ.val args = list.map σ'.val args,
+    exact list.map_congr s1,
+
+    unfold mm0.formula.subst,
+    rewrite s2,
+
+    apply fol.proof_eqv_refl,
+  },
+end
+
+
+example
+  (φ : mm0.formula)
+  (S : list mm0.var_name)
   (E : mm0.env)
   (M : mm0.meta_var_name → fol.formula)
   (σ_1 σ_2 σ_3 : mm0.instantiation)
@@ -5020,6 +5136,7 @@ begin
           have s2 : fol.proof_eqv (mm0.formula.to_fol_formula M E_tl (mm0.formula.subst σ_3 mm0.formula.meta_var_ (mm0.formula.subst σ_4 mm0.formula.meta_var_ E_hd.q)))
             (mm0.formula.to_fol_formula M E_tl (mm0.formula.subst σ_5 mm0.formula.meta_var_ E_hd.q)),
           rewrite mm0.subst_comp,
+          sorry,
 
           sorry,
         },
