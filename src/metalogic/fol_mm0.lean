@@ -837,7 +837,7 @@ def formula.subst (σ : instantiation) (τ : meta_instantiation) : formula → f
 | (def_ name args) := def_ name (list.map σ.1 args)
 
 
-lemma subst_compose
+lemma subst_comp
   (φ : formula)
   (σ σ' : instantiation) :
   formula.subst σ formula.meta_var_ (formula.subst σ' formula.meta_var_ φ) =
