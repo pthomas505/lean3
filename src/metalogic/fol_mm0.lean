@@ -837,6 +837,58 @@ def formula.subst (σ : instantiation) (τ : meta_instantiation) : formula → f
 | (def_ name args) := def_ name (list.map σ.1 args)
 
 
+lemma subst_compose
+  (φ : formula)
+  (σ σ' : instantiation) :
+  formula.subst σ formula.meta_var_ (formula.subst σ' formula.meta_var_ φ) =
+    formula.subst (instantiation.comp σ σ') formula.meta_var_ φ :=
+begin
+  induction φ,
+  case mm0.formula.meta_var_ : X
+  {
+    refl,
+  },
+  case mm0.formula.false_
+  {
+    refl,
+  },
+  case mm0.formula.pred_ : name args
+  {
+    unfold formula.subst,
+    unfold instantiation.comp,
+    simp only [list.map_map, eq_self_iff_true, and_self],
+  },
+  case mm0.formula.not_ : φ φ_ih
+  {
+    unfold formula.subst,
+    unfold instantiation.comp,
+    congr' 1,
+  },
+  case mm0.formula.imp_ : φ ψ φ_ih ψ_ih
+  {
+    unfold formula.subst,
+    unfold instantiation.comp,
+    congr' 1,
+  },
+  case mm0.formula.eq_ : x y
+  {
+    refl,
+  },
+  case mm0.formula.forall_ : x φ φ_ih
+  {
+    unfold formula.subst,
+    unfold instantiation.comp,
+    congr' 1,
+  },
+  case mm0.formula.def_ : name args
+  {
+    unfold formula.subst,
+    unfold instantiation.comp,
+    simp only [list.map_map, eq_self_iff_true, and_self],
+  },
+end
+
+
 lemma subst_no_meta_var
   (φ : formula)
   (σ : instantiation)
@@ -4918,7 +4970,7 @@ example
   (σ_1 σ_2 σ_3 : mm0.instantiation)
   (h1 : φ.no_meta_var_and_all_free_in_list S)
   (h2 : ∀ (x : mm0.var_name), x ∈ S → σ_1.1 x = (σ_2.1 ∘ σ_3.1) x) :
-  fol.alpha_eqv
+  fol.proof_eqv
     (fol.formula.subst σ_1 (mm0.formula.to_fol_formula M E φ))
     (fol.formula.subst σ_2 (mm0.formula.to_fol_formula M E (mm0.formula.subst σ_3 mm0.formula.meta_var_ φ))) :=
 begin
@@ -4965,7 +5017,7 @@ begin
           rewrite c_1_1 at c_2_1,
           simp only [list.map_map, list.map_eq_map_iff] at c_2_1,
 
-          have s2 : fol.alpha_eqv (mm0.formula.to_fol_formula M E_tl (mm0.formula.subst σ_3 mm0.formula.meta_var_ (mm0.formula.subst σ_4 mm0.formula.meta_var_ E_hd.q)))
+          have s2 : fol.proof_eqv (mm0.formula.to_fol_formula M E_tl (mm0.formula.subst σ_3 mm0.formula.meta_var_ (mm0.formula.subst σ_4 mm0.formula.meta_var_ E_hd.q)))
             (mm0.formula.to_fol_formula M E_tl (mm0.formula.subst σ_5 mm0.formula.meta_var_ E_hd.q)),
           sorry,
 
