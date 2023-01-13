@@ -5019,7 +5019,7 @@ begin
 
           have s2 : fol.proof_eqv (mm0.formula.to_fol_formula M E_tl (mm0.formula.subst σ_3 mm0.formula.meta_var_ (mm0.formula.subst σ_4 mm0.formula.meta_var_ E_hd.q)))
             (mm0.formula.to_fol_formula M E_tl (mm0.formula.subst σ_5 mm0.formula.meta_var_ E_hd.q)),
-          sorry,
+          rewrite mm0.subst_comp,
 
           sorry,
         },
