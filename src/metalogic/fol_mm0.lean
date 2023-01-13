@@ -765,24 +765,65 @@ begin
 end
 
 
+lemma instantiation_surjective
+  (σ : instantiation):
+  function.surjective σ.1 :=
+begin
+  obtain ⟨σ', a1⟩ := σ.2,
+  cases a1,
+
+  have s1 : function.right_inverse σ' σ.1,
+  exact congr_fun a1_left,
+
+  exact function.right_inverse.surjective s1,
+end
+
+
+lemma instantiation_bijective
+  (σ : instantiation):
+  function.bijective σ.1 :=
+begin
+  unfold function.bijective,
+  split,
+  {
+    exact instantiation_injective σ,
+  },
+  {
+    exact instantiation_surjective σ,
+  },
+end
+
 def instantiation.comp (σ σ' : instantiation) : instantiation :=
 ⟨
   σ.val ∘ σ'.val,
   begin
-    obtain ⟨σ_inv_val, σ_inv_prop⟩ := σ.2,
-    obtain ⟨σ'_inv_val, σ'_inv_prop⟩ := σ'.2,
-    apply exists.intro (σ_inv_val ∘ σ'_inv_val),
-    cases σ_inv_prop,
-    cases σ'_inv_prop,
+    obtain s1 := instantiation_bijective σ,
+    obtain s2 := instantiation_bijective σ',
+    obtain s3 := function.bijective.comp s1 s2,
+    simp only [function.bijective_iff_has_inverse] at s3,
+
+    apply exists.elim s3,
+    intros σ_comp_inv_val σ_comp_inv_prop,
+    cases σ_comp_inv_prop,
+    unfold function.right_inverse at σ_comp_inv_prop_right,
+    unfold function.left_inverse at *,
+
+    apply exists.intro σ_comp_inv_val,
     split,
     {
-      sorry,
+      funext,
+      rewrite function.comp_app,
+      rewrite σ_comp_inv_prop_right,
+      simp only [id.def],
     },
     {
-      sorry,
-    }
+      funext,
+      rewrite function.comp_app,
+      rewrite σ_comp_inv_prop_left,
+      simp only [id.def],
+    },
   end
-⟩ 
+⟩
 
 
 
