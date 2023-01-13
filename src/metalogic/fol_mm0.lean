@@ -4116,6 +4116,15 @@ begin
 end
 
 
+lemma proof_eqv_compat_forall
+  (φ φ' : formula) (z : var_name)
+  (h1 : proof_eqv φ φ') :
+  proof_eqv (forall_ z φ) (forall_ z φ') :=
+begin
+  sorry,
+end
+
+
 lemma proof_eqv_refl
   (φ : formula) :
   proof_eqv φ φ :=
