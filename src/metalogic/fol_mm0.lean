@@ -826,7 +826,6 @@ def instantiation.comp (σ σ' : instantiation) : instantiation :=
 ⟩
 
 
-
 /-
 A meta substitution mapping.
 A mapping of each meta variable name to a formula.
