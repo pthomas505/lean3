@@ -793,35 +793,29 @@ begin
   },
 end
 
+
 def instantiation.comp (σ σ' : instantiation) : instantiation :=
 ⟨
   σ.val ∘ σ'.val,
   begin
-    obtain s1 := instantiation_bijective σ,
-    obtain s2 := instantiation_bijective σ',
-    obtain s3 := function.bijective.comp s1 s2,
-    simp only [function.bijective_iff_has_inverse] at s3,
-
-    apply exists.elim s3,
-    intros σ_comp_inv_val σ_comp_inv_prop,
-    cases σ_comp_inv_prop,
-    unfold function.right_inverse at σ_comp_inv_prop_right,
-    unfold function.left_inverse at *,
-
-    apply exists.intro σ_comp_inv_val,
+    obtain ⟨σ_inv_val, σ_inv_prop⟩ := σ.2,
+    obtain ⟨σ'_inv_val, σ'_inv_prop⟩ := σ'.2,
+    apply exists.intro (σ'_inv_val ∘ σ_inv_val),
+    cases σ_inv_prop,
+    cases σ'_inv_prop,
     split,
     {
-      funext,
-      rewrite function.comp_app,
-      rewrite σ_comp_inv_prop_right,
-      simp only [id.def],
+      change σ.val ∘ (σ'.val ∘ σ'_inv_val) ∘ σ_inv_val = id,
+      rewrite σ'_inv_prop_left,
+      simp only [function.comp.left_id],
+      exact σ_inv_prop_left,
     },
     {
-      funext,
-      rewrite function.comp_app,
-      rewrite σ_comp_inv_prop_left,
-      simp only [id.def],
-    },
+      change (σ'_inv_val ∘ (σ_inv_val ∘ σ.val) ∘ σ'.val) = id,
+      rewrite σ_inv_prop_right,
+      simp only [function.comp.left_id],
+      exact σ'_inv_prop_right,
+    }
   end
 ⟩
 
