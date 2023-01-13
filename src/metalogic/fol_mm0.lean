@@ -4467,7 +4467,8 @@ begin
         cases h,
         dsimp,
         apply E_ih,
-        apply mm0
+        apply mm0.subst_no_meta_var,
+        apply mm0.no_meta_var_imp_meta_var_set_is_empty E_hd.q E_hd.args E_hd.nf,
       }
     },
   },
