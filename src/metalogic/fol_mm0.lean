@@ -4441,11 +4441,63 @@ lemma to_fol_formula_no_meta_var
 begin
   induction E generalizing φ,
   case list.nil : φ h1
-  { admit },
+  {
+    induction φ,
+    case mm0.formula.meta_var_ : X
+    {
+      unfold mm0.formula.meta_var_set at h1,
+      simp only [finset.singleton_ne_empty] at h1,
+      contradiction,
+    },
+    case mm0.formula.false_
+    {
+      refl,
+    },
+    case mm0.formula.pred_ : name args
+    {
+      refl,
+    },
+    case mm0.formula.not_ : φ φ_ih
+    {
+      unfold mm0.formula.meta_var_set at h1,
+      simp only [not_to_fol_formula],
+      exact φ_ih h1,
+    },
+    case mm0.formula.imp_ : φ ψ φ_ih ψ_ih
+    {
+      unfold mm0.formula.meta_var_set at h1,
+      simp only [finset.union_eq_empty_iff] at h1,
+      cases h1,
+
+      simp only [imp_to_fol_formula],
+      split,
+      {
+        exact φ_ih h1_left,
+      },
+      {
+        exact ψ_ih h1_right,
+      }
+    },
+    case mm0.formula.eq_ : x y
+    {
+      refl,
+    },
+    case mm0.formula.forall_ : x φ φ_ih
+    {
+      unfold mm0.formula.meta_var_set at h1,
+
+      simp only [forall_to_fol_formula, eq_self_iff_true, true_and],
+      exact φ_ih h1,
+    },
+    case mm0.formula.def_ : name args
+    {
+      refl,
+    },
+  },
   case list.cons : E_hd E_tl E_ih φ h1
   {
     induction φ,
-    case mm0.formula.meta_var_ : φ
+    case mm0.formula.meta_var_ : X
     { admit },
     case mm0.formula.false_
     { admit },
