@@ -782,6 +782,73 @@ def formula.subst (σ : instantiation) (τ : meta_instantiation) : formula → f
 | (def_ name args) := def_ name (list.map σ.1 args)
 
 
+lemma subst_no_meta_var
+  (φ : formula)
+  (σ : instantiation)
+  (τ : meta_instantiation)
+  (h1 : φ.meta_var_set = ∅) :
+  (φ.subst σ τ).meta_var_set = ∅ :=
+begin
+  induction φ,
+  case mm0.formula.meta_var_ : X
+  {
+    unfold formula.meta_var_set at h1,
+    simp only [finset.singleton_ne_empty] at h1,
+    contradiction,
+  },
+  case mm0.formula.false_
+  {
+    refl,
+  },
+  case mm0.formula.pred_ : name args
+  {
+    refl,
+  },
+  case mm0.formula.not_ : φ φ_ih
+  {
+    unfold formula.meta_var_set at h1,
+
+    unfold formula.subst,
+    unfold formula.meta_var_set,
+    exact φ_ih h1,
+  },
+  case mm0.formula.imp_ : φ ψ φ_ih ψ_ih
+  {
+    unfold formula.meta_var_set at h1,
+    simp only [finset.union_eq_empty_iff] at h1,
+    cases h1,
+
+    unfold formula.subst,
+    unfold formula.meta_var_set,
+    simp only [finset.union_eq_empty_iff],
+    split,
+    {
+      exact φ_ih h1_left,
+    },
+    {
+      exact ψ_ih h1_right,
+    }
+  },
+  case mm0.formula.eq_ : x y
+  {
+    refl,
+  },
+  case mm0.formula.forall_ : x φ φ_ih
+  {
+    unfold formula.meta_var_set at h1,
+
+    unfold formula.subst,
+    unfold formula.meta_var_set,
+    exact φ_ih h1,
+  },
+  case mm0.formula.def_ : name args
+  {
+    unfold formula.subst,
+    unfold formula.meta_var_set,
+  },
+end
+
+
 lemma no_meta_var_subst
   (φ : formula)
   (σ : instantiation)
@@ -4359,6 +4426,48 @@ begin
         {
           exact s3,
         }
+      }
+    },
+  },
+end
+
+
+lemma to_fol_formula_no_meta_var
+  (M M' : mm0.meta_var_name → fol.formula)
+  (E : mm0.env)
+  (φ : mm0.formula)
+  (h1 : φ.meta_var_set = ∅) :
+  mm0.formula.to_fol_formula M E φ = mm0.formula.to_fol_formula M' E φ :=
+begin
+  induction E generalizing φ,
+  case list.nil : φ h1
+  { admit },
+  case list.cons : E_hd E_tl E_ih φ h1
+  {
+    induction φ,
+    case mm0.formula.meta_var_ : φ
+    { admit },
+    case mm0.formula.false_
+    { admit },
+    case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1
+    { admit },
+    case mm0.formula.not_ : φ_ᾰ φ_ih
+    { admit },
+    case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
+    { admit },
+    case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1
+    { admit },
+    case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
+    { admit },
+    case mm0.formula.def_ : name args
+    {
+      simp only [not_nil_def_to_fol_formula],
+      split_ifs,
+      {
+        cases h,
+        dsimp,
+        apply E_ih,
+        apply mm0
       }
     },
   },
