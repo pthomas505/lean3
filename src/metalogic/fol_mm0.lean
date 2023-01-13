@@ -765,6 +765,27 @@ begin
 end
 
 
+def instantiation.comp (σ σ' : instantiation) : instantiation :=
+⟨
+  σ.val ∘ σ'.val,
+  begin
+    obtain ⟨σ_inv_val, σ_inv_prop⟩ := σ.2,
+    obtain ⟨σ'_inv_val, σ'_inv_prop⟩ := σ'.2,
+    apply exists.intro (σ_inv_val ∘ σ'_inv_val),
+    cases σ_inv_prop,
+    cases σ'_inv_prop,
+    split,
+    {
+      sorry,
+    },
+    {
+      sorry,
+    }
+  end
+⟩ 
+
+
+
 /-
 A meta substitution mapping.
 A mapping of each meta variable name to a formula.
@@ -4849,6 +4870,79 @@ begin
       {
         apply E_ih,
         exact h1,
+      }
+    },
+  },
+end
+
+
+example
+  (φ : mm0.formula)
+  (S : list mm0.var_name)
+  (E : mm0.env)
+  (M : mm0.meta_var_name → fol.formula)
+  (σ_1 σ_2 σ_3 : mm0.instantiation)
+  (h1 : φ.no_meta_var_and_all_free_in_list S)
+  (h2 : ∀ (x : mm0.var_name), x ∈ S → σ_1.1 x = (σ_2.1 ∘ σ_3.1) x) :
+  fol.alpha_eqv
+    (fol.formula.subst σ_1 (mm0.formula.to_fol_formula M E φ))
+    (fol.formula.subst σ_2 (mm0.formula.to_fol_formula M E (mm0.formula.subst σ_3 mm0.formula.meta_var_ φ))) :=
+begin
+  induction E generalizing φ σ_1 σ_2 σ_3,
+  case list.nil : φ σ_1 σ_2 σ_3 h1 h2
+  { admit },
+  case list.cons : E_hd E_tl E_ih φ σ_1 σ_2 σ_3 h1 h2
+  {
+    induction φ,
+    case mm0.formula.meta_var_ : φ
+    { admit },
+    case mm0.formula.false_
+    { admit },
+    case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1
+    { admit },
+    case mm0.formula.not_ : φ_ᾰ φ_ih
+    { admit },
+    case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
+    { admit },
+    case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1
+    { admit },
+    case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
+    { admit },
+    case mm0.formula.def_ : name args
+    {
+      unfold mm0.formula.no_meta_var_and_all_free_in_list at h1,
+
+      unfold mm0.formula.subst,
+
+      by_cases c1 : name = E_hd.name ∧
+        ∃ (σ : mm0.instantiation), args = E_hd.args.map σ.1,
+      {
+        obtain ⟨σ_4, c_1_1, c_1_2⟩ := lem_2 M E_hd E_tl name args c1,
+        rewrite c_1_2,
+
+        by_cases c2 : name = E_hd.name ∧
+          (∃ (σ : mm0.instantiation), (list.map σ_3.val args = list.map σ.val E_hd.args)),
+        {
+          obtain ⟨σ_5, c_2_1, c_2_2⟩ := lem_2 M E_hd E_tl name (list.map σ_3.val args) c2,
+          rewrite c_2_2,
+
+          specialize E_ih (mm0.formula.subst σ_4 mm0.formula.meta_var_ E_hd.q) σ_1 σ_2 σ_3,
+
+          rewrite c_1_1 at c_2_1,
+          simp only [list.map_map, list.map_eq_map_iff] at c_2_1,
+
+          have s2 : fol.alpha_eqv (mm0.formula.to_fol_formula M E_tl (mm0.formula.subst σ_3 mm0.formula.meta_var_ (mm0.formula.subst σ_4 mm0.formula.meta_var_ E_hd.q)))
+            (mm0.formula.to_fol_formula M E_tl (mm0.formula.subst σ_5 mm0.formula.meta_var_ E_hd.q)),
+          sorry,
+
+          sorry,
+        },
+        {
+          sorry,
+        }
+      },
+      {
+        sorry,
       }
     },
   },
