@@ -4993,7 +4993,7 @@ example
   (h2 : ∀ (x : mm0.var_name), x ∈ S → σ.val x = σ'.val x) :
   fol.proof_eqv
   (mm0.formula.to_fol_formula M E (mm0.formula.subst σ mm0.formula.meta_var_ φ))
-  (mm0.formula.to_fol_formula M E (mm0.formula.subst σ' mm0.formula.meta_var_ φ) ):=
+  (mm0.formula.to_fol_formula M E (mm0.formula.subst σ' mm0.formula.meta_var_ φ)) :=
 begin
   induction φ generalizing S,
   case mm0.formula.meta_var_ : X
