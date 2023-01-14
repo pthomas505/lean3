@@ -5143,8 +5143,12 @@ begin
         split_ifs,
         {
           rewrite to_fol_formula_no_meta_var (fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M (E_hd :: E_tl) ∘ τ)) M,
-          sorry,
-          unfold mm0.formula.meta_var_set,
+          {
+            sorry,
+          },
+          {
+            unfold mm0.formula.meta_var_set,
+          },
         },
         {
           specialize E_ih M σ σ_inv τ (mm0.formula.def_ name args),
