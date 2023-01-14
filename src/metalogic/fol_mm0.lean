@@ -3962,6 +3962,25 @@ begin
 end
 
 
+lemma proof_eqv_symm
+  (φ φ' : formula)
+  (h1 : proof_eqv φ φ') :
+  proof_eqv φ' φ :=
+begin
+  sorry,
+end
+
+
+lemma proof_eqv_trans
+  (φ φ' φ'' : formula)
+  (h1 : proof_eqv φ φ')
+  (h2 : proof_eqv φ' φ'') :
+  proof_eqv φ φ'' :=
+begin
+  sorry,
+end
+
+
 end fol
 
 
@@ -4961,6 +4980,8 @@ begin
 
           rewrite c_1_1 at c_2_1,
           simp only [list.map_map, list.map_eq_map_iff] at c_2_1,
+
+          specialize E_ih (mm0.formula.subst σ_4 mm0.formula.meta_var_ E_hd.q) σ_1 σ_2 σ_3,
 
           sorry,
         },
