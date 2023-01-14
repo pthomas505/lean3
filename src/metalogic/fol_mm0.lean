@@ -4826,23 +4826,24 @@ begin
   case mm0.formula.meta_var_ : X
   {
     apply fol.proof_eqv_refl,
+    refl,
   },
   case mm0.formula.false_
   {
     apply fol.proof_eqv_refl,
+    refl,
   },
   case mm0.formula.pred_ : name args
   {
-    have s1 : ∀ (x : mm0.var_name), x ∈ args → σ.val x = σ'.val x,
-    intros x s1_1,
-    apply h2,
-    exact h1 s1_1,
+    apply fol.proof_eqv_refl,
 
-    have s2 : list.map σ.val args = list.map σ'.val args,
-    exact list.map_congr s1,
+    unfold mm0.formula.no_meta_var_and_all_free_in_list at h1,
 
     unfold mm0.formula.subst,
-    rewrite s2,
+    rewrite list.map_congr,
+    intros x a1,
+    apply h2 x,
+    exact h1 a1,
   },
   case mm0.formula.not_ : φ φ_ih
   {
@@ -4871,12 +4872,13 @@ begin
   },
   case mm0.formula.eq_ : x y
   {
+    apply fol.proof_eqv_refl,
     unfold mm0.formula.no_meta_var_and_all_free_in_list at h1,
     cases h1,
 
     unfold mm0.formula.subst,
     simp only [eq_to_fol_formula],
-    apply fol.proof_eqv_compat_eq,
+    split,
     {
       exact h2 x h1_left,
     },
@@ -4894,18 +4896,15 @@ begin
   },
   case mm0.formula.def_ : name args
   {
-    have s1 : ∀ (x : mm0.var_name), x ∈ args → σ.val x = σ'.val x,
-    intros x s1_1,
-    apply h2,
-    exact h1 s1_1,
+    apply fol.proof_eqv_refl,
 
-    have s2 : list.map σ.val args = list.map σ'.val args,
-    exact list.map_congr s1,
+    unfold mm0.formula.no_meta_var_and_all_free_in_list at h1,
 
     unfold mm0.formula.subst,
-    rewrite s2,
-
-    apply fol.proof_eqv_refl,
+    rewrite list.map_congr,
+    intros x a1,
+    apply h2 x,
+    exact h1 a1,
   },
 end
 
