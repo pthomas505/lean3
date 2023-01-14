@@ -4810,7 +4810,7 @@ begin
 end
 
 
-example
+lemma proof_eqv_to_fol_formula_subst
   (φ : mm0.formula)
   (S : list mm0.var_name)
   (M : mm0.meta_var_name → fol.formula)
@@ -4959,15 +4959,8 @@ begin
           obtain ⟨σ_5, c_2_1, c_2_2⟩ := lem_2 M E_hd E_tl name (list.map σ_3.val args) c2,
           rewrite c_2_2,
 
-          specialize E_ih (mm0.formula.subst σ_4 mm0.formula.meta_var_ E_hd.q) σ_1 σ_2 σ_3,
-
           rewrite c_1_1 at c_2_1,
           simp only [list.map_map, list.map_eq_map_iff] at c_2_1,
-
-          have s2 : fol.proof_eqv (mm0.formula.to_fol_formula M E_tl (mm0.formula.subst σ_3 mm0.formula.meta_var_ (mm0.formula.subst σ_4 mm0.formula.meta_var_ E_hd.q)))
-            (mm0.formula.to_fol_formula M E_tl (mm0.formula.subst σ_5 mm0.formula.meta_var_ E_hd.q)),
-          rewrite mm0.subst_comp,
-          sorry,
 
           sorry,
         },
