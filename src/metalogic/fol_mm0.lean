@@ -5010,7 +5010,19 @@ begin
           }
         },
         {
-          sorry,
+          cases c1,
+          exfalso,
+          apply c2,
+          split,
+          {
+            exact c1_left,
+          },
+          {
+            rewrite c_1_1,
+            simp only [list.map_map],
+            apply exists.intro (mm0.instantiation.comp σ_3 σ_4),
+            refl,
+          },
         }
       },
       {
