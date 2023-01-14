@@ -5116,7 +5116,19 @@ begin
         },
         {
           simp only [not_nil_def_to_fol_formula, c2, not_false_iff, dif_neg],
-          sorry,
+          cases c1,
+          exfalso,
+          apply c2,
+          split,
+          {
+            exact c1_left,
+          },
+          {
+            rewrite c_1_1,
+            simp only [list.map_map],
+            apply exists.intro (mm0.instantiation.comp σ σ_1),
+            refl,
+          }
         }
       },
       {
