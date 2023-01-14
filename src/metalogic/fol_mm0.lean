@@ -5026,7 +5026,7 @@ begin
         }
       },
       {
-        simp only [not_nil_def_to_fol_formula],
+        simp only [not_nil_def_to_fol_formula, c1, not_false_iff, dif_neg],
         split_ifs,
         {
           sorry,
