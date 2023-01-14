@@ -4982,11 +4982,6 @@ begin
           rewrite c_1_1 at c_2_1,
           simp only [list.map_map, list.map_eq_map_iff] at c_2_1,
 
-          have s1 :
-            fol.proof_eqv
-            (fol.formula.subst σ_2 (mm0.formula.to_fol_formula M E_tl (mm0.formula.subst (σ_3.comp σ_4) mm0.formula.meta_var_ E_hd.q)))
-            (fol.formula.subst σ_2 (mm0.formula.to_fol_formula M E_tl (mm0.formula.subst σ_5 mm0.formula.meta_var_ E_hd.q))),
-            apply proof_eqv_to_fol_formula_subst E_hd.q E_hd.args M E_tl (σ_3.comp σ_4) σ_5 σ_2 E_hd.nf c_2_1,
 
           apply fol.proof_eqv_trans
           (fol.formula.subst σ_1 (mm0.formula.to_fol_formula M E_tl (mm0.formula.subst σ_4 mm0.formula.meta_var_ E_hd.q)))
@@ -5008,7 +5003,7 @@ begin
               sorry,
             },
             {
-              sorry,
+              apply proof_eqv_to_fol_formula_subst E_hd.q E_hd.args M E_tl (σ_3.comp σ_4) σ_5 σ_2 E_hd.nf c_2_1,
             }
           }
         },
