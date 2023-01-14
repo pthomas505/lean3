@@ -5040,7 +5040,7 @@ begin
 end
 
 
-example
+lemma lem_1'
   (φ : mm0.formula)
   (M : mm0.meta_var_name → fol.formula)
   (E : mm0.env)
@@ -5499,7 +5499,6 @@ begin
     obtain s1 := is_conv_imp_is_proof_eqv M _ _ _ h1_3,
     unfold fol.proof_eqv at s1,
     cases s1,
-    apply fol.is_proof_imp _ _ s1_left,
-    exact h1_ih,
+    apply fol.is_proof.mp _ _ h1_ih s1_left,
   },
 end
