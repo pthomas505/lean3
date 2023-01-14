@@ -5026,7 +5026,14 @@ begin
         }
       },
       {
-        sorry,
+        simp only [not_nil_def_to_fol_formula, c1, not_false_iff, dif_neg],
+        split_ifs,
+        {
+          sorry,
+        },
+        {
+          exact E_ih (mm0.formula.def_ name args) σ_1 σ_2 σ_3 S h1 h2,
+        }
       }
     },
   },
