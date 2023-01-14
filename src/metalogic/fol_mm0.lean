@@ -4983,7 +4983,17 @@ begin
 
           specialize E_ih (mm0.formula.subst σ_4 mm0.formula.meta_var_ E_hd.q) σ_1 σ_2 σ_3,
 
-          sorry,
+          apply fol.proof_eqv_trans
+          (fol.formula.subst σ_1 (mm0.formula.to_fol_formula M E_tl (mm0.formula.subst σ_4 mm0.formula.meta_var_ E_hd.q)))
+          (fol.formula.subst σ_1 (mm0.formula.to_fol_formula M E_tl (mm0.formula.subst σ_4 mm0.formula.meta_var_ E_hd.q)))
+          (fol.formula.subst σ_2 (mm0.formula.to_fol_formula M E_tl (mm0.formula.subst σ_5 mm0.formula.meta_var_ E_hd.q))),
+          {
+            apply fol.proof_eqv_refl,
+            refl,
+          },
+          {
+            sorry,
+          }
         },
         {
           sorry,
