@@ -5139,8 +5139,24 @@ begin
         }
       },
       {
-        simp only [not_nil_def_to_fol_formula, c1, not_false_iff, dif_neg],
-        sorry,
+        simp only [not_nil_def_to_fol_formula],
+        split_ifs,
+        {
+          rewrite to_fol_formula_no_meta_var (fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M (E_hd :: E_tl) ∘ τ)) M,
+          sorry,
+          sorry,
+        },
+        {
+          specialize E_ih M σ σ_inv τ (mm0.formula.def_ name args),
+          unfold mm0.formula.subst at E_ih,
+          rewrite to_fol_formula_no_meta_var (fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M (E_hd :: E_tl) ∘ τ)) M,
+          rewrite to_fol_formula_no_meta_var (fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M E_tl ∘ τ)) M at E_ih,
+          apply E_ih,
+          exact h_inv_left,
+          exact h_inv_right,
+          unfold mm0.formula.meta_var_set,
+          unfold mm0.formula.meta_var_set,
+        }
       }
     },
   },
