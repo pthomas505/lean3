@@ -3943,33 +3943,23 @@ begin
 end
 
 
-lemma proof_eqv_compat_eq
-  (x x' y y' : var_name)
-  (h1 : x = x')
-  (h2 : y = y') :
-  proof_eqv (eq_ x y) (eq_ x' y') :=
-begin
-  sorry,
-end
-
-
 lemma proof_eqv_compat_forall
-  (φ φ' : formula) (z : var_name)
+  (φ φ' : formula) (x x' : var_name)
+  (h1 : x = x')
   (h1 : proof_eqv φ φ') :
-  proof_eqv (forall_ z φ) (forall_ z φ') :=
+  proof_eqv (forall_ x φ) (forall_ x' φ') :=
 begin
   sorry,
 end
 
 
 lemma proof_eqv_refl
-  (φ : formula) :
-  proof_eqv φ φ :=
+  (φ φ' : formula)
+  (h1 : φ = φ') :
+  proof_eqv φ φ' :=
 begin
   sorry,
 end
-
-
 
 
 end fol
@@ -4835,18 +4825,14 @@ begin
   induction φ generalizing S,
   case mm0.formula.meta_var_ : X
   {
-    apply fol.eq_imp_proof_eqv,
-    refl,
+    apply fol.proof_eqv_refl,
   },
   case mm0.formula.false_
   {
-    apply fol.eq_imp_proof_eqv,
-    refl,
+    apply fol.proof_eqv_refl,
   },
   case mm0.formula.pred_ : name args
   {
-    apply fol.eq_imp_proof_eqv,
-
     have s1 : ∀ (x : mm0.var_name), x ∈ args → σ.val x = σ'.val x,
     intros x s1_1,
     apply h2,
