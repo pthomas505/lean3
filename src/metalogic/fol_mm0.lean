@@ -5249,63 +5249,34 @@ begin
   induction h1,
   case mm0.is_conv.conv_refl : h1
   {
-    apply fol.eq_imp_proof_eqv,
+    apply fol.proof_eqv_refl,
     refl,
   },
   case mm0.is_conv.conv_symm : h1_φ h1_φ' h1_1 h1_ih
   {
-    unfold fol.proof_eqv at *,
-    cases h1_ih,
-    split,
-    {
-      exact h1_ih_right,
-    },
-    {
-      exact h1_ih_left,
-    }
+    apply fol.proof_eqv_symm _ _ h1_ih,
   },
   case mm0.is_conv.conv_trans : h1_φ h1_φ' h1_φ'' h1_1 h1_2 h1_ih_1 h1_ih_2
   {
-    unfold fol.proof_eqv at *,
-    cases h1_ih_1,
-    cases h1_ih_2,
-    split,
-    {
-      sorry,
-    },
-    {
-      sorry,
-    }
+    apply fol.proof_eqv_trans _ _ _ h1_ih_1 h1_ih_2,
   },
   case mm0.is_conv.conv_not : h1_φ h1_φ' h1_1 h1_ih
   {
-    unfold fol.proof_eqv at *,
-    cases h1_ih,
     simp only [not_to_fol_formula],
-    split,
-    {
-      sorry,
-    },
-    {
-      sorry,
-    }
+    apply fol.proof_eqv_compat_not _ _ h1_ih,
   },
   case mm0.is_conv.conv_imp : h1_φ h1_φ' h1_ψ h1_ψ' h1_1 h1_2 h1_ih_1 h1_ih_2
   {
-    unfold fol.proof_eqv at *,
-    cases h1_ih_1,
-    cases h1_ih_2,
     simp only [imp_to_fol_formula],
-    split,
-    {
-      sorry,
-    },
-    {
-      sorry,
-    }
+    apply fol.proof_eqv_compat_imp _ _ _ _ h1_ih_1 h1_ih_2,
   },
   case mm0.is_conv.conv_forall : h1_x h1_φ h1_φ' h1_1 h1_ih
-  { admit },
+  {
+    simp only [forall_to_fol_formula],
+    apply fol.proof_eqv_compat_forall,
+    refl,
+    exact h1_ih,
+  },
   case mm0.is_conv.conv_unfold : h1_d h1_σ h1_1
   {
     induction E,
