@@ -4941,10 +4941,10 @@ lemma lem_5
     (fol.formula.subst σ_1 (mm0.formula.to_fol_formula M E φ))
     (fol.formula.subst σ_2 (mm0.formula.to_fol_formula M E (mm0.formula.subst σ_3 mm0.formula.meta_var_ φ))) :=
 begin
-  induction E generalizing φ σ_1 σ_2 σ_3,
+  induction E generalizing φ σ_1 σ_2 σ_3 S,
   case list.nil : φ σ_1 σ_2 σ_3 h1 h2
   { admit },
-  case list.cons : E_hd E_tl E_ih φ σ_1 σ_2 σ_3 h1 h2
+  case list.cons : E_hd E_tl E_ih φ σ_1 σ_2 σ_3 S h1 h2
   {
     induction φ,
     case mm0.formula.meta_var_ : φ
@@ -4998,8 +4998,11 @@ begin
             {
               rewrite <- mm0.subst_comp,
               apply E_ih,
-              sorry,
-              sorry,
+              apply mm0.no_meta_var_and_all_free_in_list_subst E_hd.q E_hd.args σ_4 mm0.formula.meta_var_ E_hd.nf,
+              rewrite <- c_1_1,
+              intros x a1,
+              apply h2,
+              exact h1 a1,
             },
             {
               apply proof_eqv_to_fol_formula_subst E_hd.q E_hd.args M E_tl (σ_3.comp σ_4) σ_5 σ_2 E_hd.nf c_2_1,
