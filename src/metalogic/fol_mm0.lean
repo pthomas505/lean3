@@ -5151,7 +5151,12 @@ begin
     unfold mm0.formula.subst,
     induction E,
     case list.nil
-    { admit },
+    {
+      simp only [nil_def_to_fol_formula],
+      unfold fol.formula.subst,
+      apply fol.proof_eqv_refl,
+      refl,
+    },
     case list.cons : E_hd E_tl E_ih
     { admit },
   },
