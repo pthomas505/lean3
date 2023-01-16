@@ -5148,7 +5148,12 @@ begin
   },
   case mm0.formula.def_ : name args
   {
-    sorry,
+    unfold mm0.formula.subst,
+    induction E,
+    case list.nil
+    { admit },
+    case list.cons : E_hd E_tl E_ih
+    { admit },
   },
 end
 
