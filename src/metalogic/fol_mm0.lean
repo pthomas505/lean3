@@ -5071,11 +5071,9 @@ end
 
 example
   (φ : mm0.formula)
-  (S : list mm0.var_name)
   (M : mm0.meta_var_name → fol.formula)
   (E : mm0.env)
-  (σ σ' : mm0.instantiation)
-  (h1 : φ.no_meta_var_and_all_free_in_list S) :
+  (σ σ' : mm0.instantiation) :
   fol.proof_eqv
     (fol.formula.subst σ (mm0.formula.to_fol_formula M E (mm0.formula.subst σ' mm0.formula.meta_var_ φ)))
     (fol.formula.subst (mm0.instantiation.comp σ σ') (mm0.formula.to_fol_formula M E φ)) :=
