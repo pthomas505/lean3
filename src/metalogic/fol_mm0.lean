@@ -5133,15 +5133,24 @@ begin
         },
       },
       {
-        by_cases c2 : name = E_hd.name ∧
-          ∃ (σ : mm0.instantiation), args = list.map σ.val E_hd.args,
+        by_cases c2 : name = E_hd.name
+          ∧ ∃ (σ : mm0.instantiation), list.map σ'.val args = list.map σ.val E_hd.args,
         {
-          obtain ⟨σ_2, c_2_1, c_2_2⟩ := lem_2 M E_hd E_tl name args c2,
-          contradiction,
-        },
-        {
+          obtain ⟨σ_2, c_2_1, c_2_2⟩ := lem_2 M E_hd E_tl name (list.map σ'.val args) c2,
+
+          unfold mm0.formula.subst,
+          rewrite c_2_2,
+          clear c_2_2,
+
+          specialize E_ih (mm0.formula.def_ name args),
+          unfold mm0.formula.subst at E_ih,
+          rewrite c_2_1 at E_ih,
+          clear c_2_1,
           sorry,
         },
+        {
+
+        }
       },
     },
   },
