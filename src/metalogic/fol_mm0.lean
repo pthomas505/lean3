@@ -5104,14 +5104,12 @@ begin
         ∧ ∃ (σ : mm0.instantiation), args = list.map σ.val E_hd.args,
       {
         obtain ⟨σ_1, c_1_1, c_1_2⟩ := lem_2 M E_hd E_tl name args c1,
-        clear c1,
 
         by_cases c2 : (name = E_hd.name) ∧
           ∃ (σ : mm0.instantiation), list.map (σ'.val ∘ σ_1.val) E_hd.args =
             list.map σ.val E_hd.args,
         {
           obtain ⟨σ_2, c_2_1, c_2_2⟩ := lem_2 M E_hd E_tl name (list.map (σ'.val ∘ σ_1.val) E_hd.args) c2,
-          clear c2,
 
           rewrite c_1_2,
           clear c_1_2,
@@ -5127,11 +5125,15 @@ begin
           sorry,
         },
         {
-
+          cases c1,
+          push_neg at c2,
+          exfalso,
+          apply c2 c1_left (mm0.instantiation.comp σ' σ_1),
+          refl,
         },
       },
       {
-
+        sorry,
       }
     },
   },
