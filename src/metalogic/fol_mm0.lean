@@ -5146,6 +5146,8 @@ begin
           unfold mm0.formula.subst at E_ih,
           rewrite c_2_1 at E_ih,
           clear c_2_1,
+
+          rewrite to_fol_formula_env_ext _ _ _ _ _ c1,
           sorry,
         },
         {
