@@ -3924,6 +3924,17 @@ def proof_eqv
   is_proof (imp_ φ ψ) ∧ is_proof (imp_ ψ φ)
 
 
+lemma proof_eqv_rename_all
+  (φ : formula)
+  (x x' : var_name)
+  (h1 : x' ∉ φ.free_var_set)
+  (h2 : x' ∉ φ.bind_var_set) :
+  proof_eqv (forall_ x φ) (forall_ x' (replace_free x x' φ)) :=
+begin
+  sorry,
+end
+
+
 lemma proof_eqv_compat_not
   (φ ψ : formula)
   (h1 : proof_eqv φ ψ) :
@@ -4246,6 +4257,22 @@ end
 
 
 lemma to_fol_formula_env_ext
+  (M : mm0.meta_var_name → fol.formula)
+  (d : mm0.definition_)
+  (E : mm0.env)
+  (name : mm0.def_name)
+  (args : list mm0.var_name)
+  (h1 : ¬((name = d.name) ∧ (∃ (σ : mm0.instantiation), (args = list.map σ.val d.args)))) :
+  (mm0.formula.to_fol_formula M (d :: E) (mm0.formula.def_ name args)) =
+    (mm0.formula.to_fol_formula M E (mm0.formula.def_ name args)) :=
+begin
+  simp only [not_nil_def_to_fol_formula, dite_eq_right_iff],
+  intros contra,
+  contradiction,
+end
+
+
+example
   (M : mm0.meta_var_name → fol.formula)
   (E E' : mm0.env)
   (φ : mm0.formula)
@@ -4929,6 +4956,7 @@ begin
 end
 
 
+/-
 lemma lem_5
   (φ : mm0.formula)
   (S : list mm0.var_name)
@@ -5038,6 +5066,76 @@ begin
     },
   },
 end
+-/
+
+
+example
+  (φ : mm0.formula)
+  (M : mm0.meta_var_name → fol.formula)
+  (E : mm0.env)
+  (σ σ' : mm0.instantiation) :
+  fol.proof_eqv
+    (fol.formula.subst σ (mm0.formula.to_fol_formula M E (mm0.formula.subst σ' mm0.formula.meta_var_ φ)))
+    (fol.formula.subst (mm0.instantiation.comp σ σ') (mm0.formula.to_fol_formula M E φ)) :=
+begin
+  induction E generalizing φ,
+  case list.nil : φ
+  { admit },
+  case list.cons : E_hd E_tl E_ih φ
+  {
+    induction φ,
+    case mm0.formula.meta_var_ : φ
+    { admit },
+    case mm0.formula.false_
+    { admit },
+    case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1
+    { admit },
+    case mm0.formula.not_ : φ_ᾰ φ_ih
+    { admit },
+    case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
+    { admit },
+    case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1
+    { admit },
+    case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
+    { admit },
+    case mm0.formula.def_ : name args
+    {
+      by_cases c1 : name = E_hd.name
+        ∧ ∃ (σ : mm0.instantiation), args = list.map σ.val E_hd.args,
+      {
+        obtain ⟨σ_1, c_1_1, c_1_2⟩ := lem_2 M E_hd E_tl name args c1,
+        clear c1,
+
+        by_cases c2 : (name = E_hd.name) ∧
+          ∃ (σ : mm0.instantiation), list.map (σ'.val ∘ σ_1.val) E_hd.args =
+            list.map σ.val E_hd.args,
+        {
+          obtain ⟨σ_2, c_2_1, c_2_2⟩ := lem_2 M E_hd E_tl name (list.map (σ'.val ∘ σ_1.val) E_hd.args) c2,
+          clear c2,
+
+          rewrite c_1_2,
+          clear c_1_2,
+          rewrite c_1_1,
+          clear c_1_1,
+          unfold mm0.formula.subst,
+          simp only [list.map_map],
+          rewrite c_2_2,
+          clear c_2_2,
+
+          specialize E_ih (mm0.formula.subst σ_1 mm0.formula.meta_var_ E_hd.q),
+          rewrite mm0.subst_comp at E_ih,
+          sorry,
+        },
+        {
+
+        },
+      },
+      {
+
+      }
+    },
+  },
+end
 
 
 lemma lem_1'
@@ -5139,28 +5237,21 @@ begin
         }
       },
       {
-        simp only [not_nil_def_to_fol_formula],
-        split_ifs,
+        specialize E_ih M σ σ_inv τ (mm0.formula.def_ name args),
+        unfold mm0.formula.subst at E_ih,
+        rewrite to_fol_formula_no_meta_var (fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M (E_hd :: E_tl) ∘ τ)) M,
+        rewrite to_fol_formula_no_meta_var (fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M E_tl ∘ τ)) M at E_ih,
+        by_cases c1 : ((name = E_hd.name) ∧ (∃ (σ_1 : mm0.instantiation), (list.map σ.val args = list.map σ_1.val E_hd.args))),
         {
-          rewrite to_fol_formula_no_meta_var (fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M (E_hd :: E_tl) ∘ τ)) M,
-          {
-            sorry,
-          },
-          {
-            unfold mm0.formula.meta_var_set,
-          },
+          sorry,
         },
         {
-          specialize E_ih M σ σ_inv τ (mm0.formula.def_ name args),
-          unfold mm0.formula.subst at E_ih,
-          rewrite to_fol_formula_no_meta_var (fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M (E_hd :: E_tl) ∘ τ)) M,
-          rewrite to_fol_formula_no_meta_var (fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M E_tl ∘ τ)) M at E_ih,
           apply E_ih,
           exact h_inv_left,
           exact h_inv_right,
+        },
           unfold mm0.formula.meta_var_set,
           unfold mm0.formula.meta_var_set,
-        }
       }
     },
   },
