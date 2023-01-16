@@ -5071,9 +5071,11 @@ end
 
 example
   (φ : mm0.formula)
+  (S : list mm0.var_name)
   (M : mm0.meta_var_name → fol.formula)
   (E : mm0.env)
-  (σ σ' : mm0.instantiation) :
+  (σ σ' : mm0.instantiation)
+  (h1 : φ.no_meta_var_and_all_free_in_list S) :
   fol.proof_eqv
     (fol.formula.subst σ (mm0.formula.to_fol_formula M E (mm0.formula.subst σ' mm0.formula.meta_var_ φ)))
     (fol.formula.subst (mm0.instantiation.comp σ σ') (mm0.formula.to_fol_formula M E φ)) :=
@@ -5122,6 +5124,8 @@ begin
 
           specialize E_ih (mm0.formula.subst σ_1 mm0.formula.meta_var_ E_hd.q),
           rewrite mm0.subst_comp at E_ih,
+          rewrite list.map_eq_map_iff at c_2_1,
+          
           sorry,
         },
         {
@@ -5148,6 +5152,7 @@ begin
           clear c_2_1,
 
           rewrite to_fol_formula_env_ext _ _ _ _ _ c1,
+
           sorry,
         },
         {
@@ -5156,7 +5161,7 @@ begin
           rewrite to_fol_formula_env_ext _ _ _ _ _ c2,
           specialize E_ih (mm0.formula.def_ name args),
           unfold mm0.formula.subst at E_ih,
-          exact E_ih,
+          exact E_ih h1,
         }
       },
     },
