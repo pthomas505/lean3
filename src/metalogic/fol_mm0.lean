@@ -5143,15 +5143,9 @@ begin
           obtain ⟨σ_2, c_2_1, c_2_2⟩ := lem_2 M E_hd E_tl name (list.map σ'.val args) c2,
 
           unfold mm0.formula.subst,
-          rewrite c_2_2,
-          clear c_2_2,
+          rewrite to_fol_formula_env_ext _ _ _ _ _ c1,
 
           specialize E_ih (mm0.formula.def_ name args),
-          unfold mm0.formula.subst at E_ih,
-          rewrite c_2_1 at E_ih,
-          clear c_2_1,
-
-          rewrite to_fol_formula_env_ext _ _ _ _ _ c1,
 
           sorry,
         },
