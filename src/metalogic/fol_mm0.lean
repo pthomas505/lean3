@@ -5105,8 +5105,8 @@ begin
       {
         obtain ⟨σ_1, c_1_1, c_1_2⟩ := lem_2 M E_hd E_tl name args c1,
 
-        by_cases c2 : (name = E_hd.name) ∧
-          ∃ (σ : mm0.instantiation), list.map (σ'.val ∘ σ_1.val) E_hd.args =
+        by_cases c2 : name = E_hd.name
+          ∧ ∃ (σ : mm0.instantiation), list.map (σ'.val ∘ σ_1.val) E_hd.args =
             list.map σ.val E_hd.args,
         {
           obtain ⟨σ_2, c_2_1, c_2_2⟩ := lem_2 M E_hd E_tl name (list.map (σ'.val ∘ σ_1.val) E_hd.args) c2,
@@ -5133,8 +5133,16 @@ begin
         },
       },
       {
-        sorry,
-      }
+        by_cases c2 : name = E_hd.name ∧
+          ∃ (σ : mm0.instantiation), args = list.map σ.val E_hd.args,
+        {
+          obtain ⟨σ_2, c_2_1, c_2_2⟩ := lem_2 M E_hd E_tl name args c2,
+          contradiction,
+        },
+        {
+          sorry,
+        },
+      },
     },
   },
 end
