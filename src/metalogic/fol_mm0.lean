@@ -5151,7 +5151,12 @@ begin
           sorry,
         },
         {
-
+          unfold mm0.formula.subst,
+          rewrite to_fol_formula_env_ext _ _ _ _ _ c1,
+          rewrite to_fol_formula_env_ext _ _ _ _ _ c2,
+          specialize E_ih (mm0.formula.def_ name args),
+          unfold mm0.formula.subst at E_ih,
+          exact E_ih,
         }
       },
     },
