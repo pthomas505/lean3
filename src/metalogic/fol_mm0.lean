@@ -5073,7 +5073,92 @@ example
   (φ : mm0.formula)
   (M : mm0.meta_var_name → fol.formula)
   (E : mm0.env)
-  (σ σ' : mm0.instantiation) :
+  (σ σ' : mm0.instantiation)
+  (h1 : φ.meta_var_set = ∅) :
+  fol.proof_eqv
+    (fol.formula.subst σ (mm0.formula.to_fol_formula M E (mm0.formula.subst σ' mm0.formula.meta_var_ φ)))
+    (fol.formula.subst (mm0.instantiation.comp σ σ') (mm0.formula.to_fol_formula M E φ)) :=
+begin
+  induction φ,
+  case mm0.formula.meta_var_ : X
+  {
+    unfold mm0.formula.meta_var_set at h1,
+    simp only [finset.singleton_ne_empty] at h1,
+    contradiction,
+  },
+  case mm0.formula.false_
+  {
+    apply fol.proof_eqv_refl,
+    unfold mm0.formula.subst,
+    simp only [false_to_fol_formula],
+    unfold fol.formula.subst,
+  },
+  case mm0.formula.pred_ : name args
+  {
+    apply fol.proof_eqv_refl,
+    unfold mm0.formula.subst,
+    simp only [pred_to_fol_formula],
+    unfold fol.formula.subst,
+    simp only [list.map_map, eq_self_iff_true, true_and],
+    refl,
+  },
+  case mm0.formula.not_ : φ φ_ih
+  {
+    unfold mm0.formula.meta_var_set at h1,
+    unfold mm0.formula.subst,
+    simp only [not_to_fol_formula],
+    apply fol.proof_eqv_compat_not,
+    exact φ_ih h1,
+  },
+  case mm0.formula.imp_ : φ ψ φ_ih ψ_ih
+  {
+    unfold mm0.formula.meta_var_set at h1,
+    simp only [finset.union_eq_empty_iff] at h1,
+    cases h1,
+    unfold mm0.formula.subst,
+    simp only [imp_to_fol_formula],
+    apply fol.proof_eqv_compat_imp,
+    {
+      exact φ_ih h1_left,
+    },
+    {
+      exact ψ_ih h1_right,
+    }
+  },
+  case mm0.formula.eq_ : name args
+  {
+    unfold mm0.formula.subst,
+    simp only [eq_to_fol_formula],
+    unfold fol.formula.subst,
+    apply fol.proof_eqv_refl,
+    refl,
+  },
+  case mm0.formula.forall_ : x φ φ_ih
+  {
+    unfold mm0.formula.meta_var_set at h1,
+    unfold mm0.formula.subst,
+    simp only [forall_to_fol_formula],
+    apply fol.proof_eqv_compat_forall,
+    {
+      refl,
+    },
+    {
+      exact φ_ih h1,
+    }
+  },
+  case mm0.formula.def_ : name args
+  {
+    sorry,
+  },
+end
+
+
+example
+  (φ : mm0.formula)
+  (M : mm0.meta_var_name → fol.formula)
+  (E : mm0.env)
+  (σ σ' : mm0.instantiation)
+  (h1 : φ.meta_var_set = ∅) :
   fol.proof_eqv
     (fol.formula.subst σ (mm0.formula.to_fol_formula M E (mm0.formula.subst σ' mm0.formula.meta_var_ φ)))
     (fol.formula.subst (mm0.instantiation.comp σ σ') (mm0.formula.to_fol_formula M E φ)) :=
@@ -5084,14 +5169,34 @@ begin
   case list.cons : E_hd E_tl E_ih φ
   {
     induction φ,
-    case mm0.formula.meta_var_ : φ
-    { admit },
+    case mm0.formula.meta_var_ : X
+    {
+      unfold mm0.formula.meta_var_set at h1,
+      squeeze_simp at h1,
+      contradiction,
+    },
     case mm0.formula.false_
-    { admit },
-    case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1
-    { admit },
-    case mm0.formula.not_ : φ_ᾰ φ_ih
-    { admit },
+    {
+      specialize E_ih mm0.formula.false_,
+      unfold mm0.formula.subst at *,
+      simp only [false_to_fol_formula] at *,
+      exact E_ih h1,
+    },
+    case mm0.formula.pred_ : nsme args
+    {
+      specialize E_ih (mm0.formula.pred_ nsme args),
+      unfold mm0.formula.subst at *,
+      simp only [pred_to_fol_formula] at *,
+      exact E_ih,
+    },
+    case mm0.formula.not_ : φ φ_ih
+    {
+      unfold mm0.formula.subst at *,
+      simp only [not_to_fol_formula],
+      unfold fol.formula.subst,
+      apply fol.proof_eqv_compat_not,
+      exact φ_ih,
+    },
     case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
     { admit },
     case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1
@@ -5140,11 +5245,9 @@ begin
         {
           obtain ⟨σ_2, c_2_1, c_2_2⟩ := lem_2 M E_hd E_tl name (list.map σ'.val args) c2,
 
-          unfold mm0.formula.subst,
           rewrite to_fol_formula_env_ext _ _ _ _ _ c1,
-
-          specialize E_ih (mm0.formula.def_ name args),
-
+          unfold mm0.formula.subst at *,
+          rewrite c_2_1,
           sorry,
         },
         {
