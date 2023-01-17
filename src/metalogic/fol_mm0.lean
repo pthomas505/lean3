@@ -5330,10 +5330,15 @@ begin
           obtain ⟨σ_2, c_2_1, c_2_2⟩ := lem_2 M E_hd E_tl name (list.map σ'.val args) c2,
           clear c2,
 
-          
+          rewrite c_2_2,
+          clear c_2_2,
+          sorry,
         },
         {
-          sorry,
+          rewrite to_fol_formula_env_ext M E_hd E_tl name args c1,
+          rewrite to_fol_formula_env_ext M E_hd E_tl name (list.map σ'.val args) c2,
+          apply E_ih (mm0.formula.def_ name args),
+          refl,
         },
       },
     },
