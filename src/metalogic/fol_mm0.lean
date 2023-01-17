@@ -5334,7 +5334,7 @@ begin
           rewrite c_2_2,
           clear c_2_2,
 
-          specialize E_ih E_hd.q,
+          specialize E_ih (mm0.formula.def_ name args),
 
           sorry,
         },
