@@ -64,6 +64,25 @@ begin
 end
 
 
+lemma nodup_eq_len_imp_eqv
+  {α : Type}
+  [decidable_eq α]
+  (l1 l2 : list α)
+  (h1 : l1.length = l2.length)
+  (h2 : l1.nodup)
+  (h3 : l2.nodup) :
+  ∃ (f : α ≃ α), l1.map f.to_fun = l2 :=
+begin
+  have s1 : {x // (x ∈ l1)} ≃ {x // (x ∈ l2)},
+  transitivity,
+  symmetry,
+  exact list.nodup.nth_le_equiv l1 h2,
+  rewrite h1,
+  exact list.nodup.nth_le_equiv l2 h3,
+  sorry,
+end
+
+
 lemma list.nth_le_mem_zip
   {α β : Type}
   [decidable_eq α]
@@ -5328,15 +5347,63 @@ begin
           ∧ ∃ (σ : mm0.instantiation), list.map σ'.val args = list.map σ.val E_hd.args,
         {
           obtain ⟨σ_2, c_2_1, c_2_2⟩ := lem_2 M E_hd E_tl name (list.map σ'.val args) c2,
+          cases c2,
 
-          rewrite to_fol_formula_env_ext M E_hd E_tl name args c1,
+          have s1 : E_hd.args.length = args.length,
+          transitivity (list.map σ'.val args).length,
+          {
+            transitivity (list.map σ_2.val E_hd.args).length,
+            {
+              symmetry,
+              apply list.length_map,
+            },
+            {
+              rewrite c_2_1,
+            },
+          },
+          {
+            apply list.length_map,
+          },
 
-          rewrite c_2_2,
-          clear c_2_2,
+          obtain ⟨σ'_inv, σ'_inv_prop⟩  := mm0.instantiation.exists_inverse σ',
+          have s2 : (list.map σ'_inv.val (list.map σ'.val args)).nodup,
+          apply list.nodup.map (mm0.instantiation_injective σ'_inv),
+          rewrite c_2_1,
+          exact list.nodup.map (mm0.instantiation_injective σ_2) E_hd.nodup,
 
-          specialize E_ih (mm0.formula.def_ name args),
+          have s3 : args.nodup,
+          simp only [list.map_map] at s2,
+          cases σ'_inv_prop,
+          rewrite σ'_inv_prop_right at s2,
+          simp only [list.map_id] at s2,
+          exact s2,
 
-          sorry,
+          obtain s4 := nodup_eq_len_imp_eqv E_hd.args args s1 E_hd.nodup s3,
+
+          exfalso,
+          apply c1,
+          split,
+          {
+            exact c2_left,
+          },
+          {
+            apply exists.elim s4,
+            intros f s4_1,
+            let blah : mm0.instantiation := ⟨ f.to_fun,
+              begin
+                apply exists.intro f.inv_fun,
+                split,
+                {
+                  simp only [equiv.to_fun_as_coe, equiv.inv_fun_as_coe, equiv.self_comp_symm],
+                },
+                {
+                  simp only [equiv.inv_fun_as_coe, equiv.to_fun_as_coe, equiv.symm_comp_self],
+                }
+              end ⟩,
+            apply exists.intro blah,
+            symmetry,
+            exact s4_1,
+          }
         },
         {
           rewrite to_fol_formula_env_ext M E_hd E_tl name args c1,
