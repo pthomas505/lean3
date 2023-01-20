@@ -4906,6 +4906,38 @@ begin
 end
 
 
+example
+  (φ : mm0.formula)
+  (l : list mm0.var_name)
+  (M : mm0.meta_var_name → fol.formula)
+  (E : mm0.env)
+  (σ σ' : mm0.instantiation)
+  (h1 : φ.no_meta_var_and_all_free_in_list l)
+  (h2 : ∀ (x : mm0.var_name), x ∈ l → σ.val x = σ'.val x) :
+  fol.proof_eqv
+  (mm0.formula.to_fol_formula M E (mm0.formula.subst σ mm0.formula.meta_var_ φ))
+  (mm0.formula.to_fol_formula M E (mm0.formula.subst σ' mm0.formula.meta_var_ φ)) :=
+begin
+  induction φ generalizing l,
+  case mm0.formula.meta_var_ : φ l h1 h2
+  { admit },
+  case mm0.formula.false_ : l h1 h2
+  { admit },
+  case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1 l h1 h2
+  { admit },
+  case mm0.formula.not_ : φ_ᾰ φ_ih l h1 h2
+  { admit },
+  case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1 l h1 h2
+  { admit },
+  case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1 l h1 h2
+  { admit },
+  case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih l h1 h2
+  { admit },
+  case mm0.formula.def_ : φ_ᾰ φ_ᾰ_1 l h1 h2
+  { admit },
+end
+
+
 lemma proof_eqv_subst_to_fol_formula_subst
   (φ : mm0.formula)
   (S : list mm0.var_name)
