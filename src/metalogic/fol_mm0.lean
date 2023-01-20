@@ -4892,6 +4892,20 @@ begin
 end
 
 
+example
+  (φ : mm0.formula)
+  (x y : fol.var_name)
+  (S : list mm0.var_name)
+  (M : mm0.meta_var_name → fol.formula)
+  (E : mm0.env)
+  (σ σ' : mm0.instantiation)
+  (h1 : fol.is_proof (fol.formula.forall_ x (mm0.formula.to_fol_formula M E (mm0.formula.subst σ mm0.formula.meta_var_ φ)))) :
+  fol.is_proof (fol.formula.forall_ y (mm0.formula.to_fol_formula M E (mm0.formula.subst σ' mm0.formula.meta_var_ φ))) :=
+begin
+  sorry,
+end
+
+
 lemma proof_eqv_subst_to_fol_formula_subst
   (φ : mm0.formula)
   (S : list mm0.var_name)
