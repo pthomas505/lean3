@@ -4210,7 +4210,7 @@ begin
 end
 
 
-lemma lem_2
+lemma not_nil_def_to_fol_formula'
   (M : mm0.meta_var_name → fol.formula)
   (d : mm0.definition_)
   (E : mm0.env)
@@ -5010,14 +5010,14 @@ begin
       by_cases c1 : name = E_hd.name
         ∧ ∃ (σ : mm0.instantiation), args = list.map σ.val E_hd.args,
       {
-        obtain ⟨σ_1, c_1_1, c_1_2⟩ := lem_2 M E_hd E_tl name args c1,
+        obtain ⟨σ_1, c_1_1, c_1_2⟩ := not_nil_def_to_fol_formula' M E_hd E_tl name args c1,
 
         unfold mm0.formula.subst,
 
         by_cases c2 : name = E_hd.name
           ∧ ∃ (σ : mm0.instantiation), list.map σ'.val args = list.map σ.val E_hd.args,
         {
-          obtain ⟨σ_2, c_2_1, c_2_2⟩ := lem_2 M E_hd E_tl name (list.map σ'.val args) c2,
+          obtain ⟨σ_2, c_2_1, c_2_2⟩ := not_nil_def_to_fol_formula' M E_hd E_tl name (list.map σ'.val args) c2,
           clear c2,
 
           rewrite c_1_2,
@@ -5077,7 +5077,7 @@ begin
         by_cases c2 : name = E_hd.name
           ∧ ∃ (σ : mm0.instantiation), list.map σ'.val args = list.map σ.val E_hd.args,
         {
-          obtain ⟨σ_2, c_2_1, c_2_2⟩ := lem_2 M E_hd E_tl name (list.map σ'.val args) c2,
+          obtain ⟨σ_2, c_2_1, c_2_2⟩ := not_nil_def_to_fol_formula' M E_hd E_tl name (list.map σ'.val args) c2,
           cases c2,
 
           have s1 : E_hd.args.length = args.length,
@@ -5187,7 +5187,7 @@ begin
       by_cases c1 : name = E_hd.name ∧
         ∃ (σ : mm0.instantiation), args = E_hd.args.map σ.1,
       {
-        obtain ⟨σ_1, c_1_1, c_1_2⟩ := lem_2 (fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M (E_hd :: E_tl) ∘ τ)) E_hd E_tl name args c1,
+        obtain ⟨σ_1, c_1_1, c_1_2⟩ := not_nil_def_to_fol_formula' (fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M (E_hd :: E_tl) ∘ τ)) E_hd E_tl name args c1,
         rewrite c_1_2,
         clear c_1_2,
 
@@ -5200,7 +5200,7 @@ begin
         by_cases c2 : name = E_hd.name ∧
           ∃ (σ' : mm0.instantiation), (list.map σ.val args = list.map σ'.val E_hd.args),
         {
-          obtain ⟨σ_2, c_2_1, c_2_2⟩ := lem_2 M E_hd E_tl name (list.map σ.val args) c2,
+          obtain ⟨σ_2, c_2_1, c_2_2⟩ := not_nil_def_to_fol_formula' M E_hd E_tl name (list.map σ.val args) c2,
           rewrite c_2_2,
           clear c_2_2,
 
