@@ -4875,7 +4875,7 @@ begin
 end
 
 
-lemma proof_eqv_to_fol_formula_subst
+lemma proof_eqv_subst_to_fol_formula_subst
   (φ : mm0.formula)
   (S : list mm0.var_name)
   (M : mm0.meta_var_name → fol.formula)
@@ -5148,7 +5148,7 @@ begin
 end
 
 
-lemma lem_1'
+example
   (φ : mm0.formula)
   (M : mm0.meta_var_name → fol.formula)
   (E : mm0.env)
@@ -5223,7 +5223,7 @@ begin
           {
             rewrite to_fol_formula_no_meta_var (fol.formula.subst σ_2_inv ∘ (mm0.formula.to_fol_formula M E_tl ∘ mm0.formula.meta_var_)) M,
             rewrite to_fol_formula_no_meta_var (fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M (E_hd :: E_tl) ∘ τ)) M,
-            apply lem_5 E_hd.q E_hd.args E_tl M σ_2 σ σ_1 E_hd.nf c_2_1,
+            sorry,
             apply mm0.subst_no_meta_var E_hd.q σ_1 mm0.formula.meta_var_,
             apply mm0.no_meta_var_imp_meta_var_set_is_empty E_hd.q E_hd.args E_hd.nf,
             apply mm0.no_meta_var_imp_meta_var_set_is_empty E_hd.q E_hd.args E_hd.nf,            
@@ -5256,9 +5256,7 @@ begin
           sorry,
         },
         {
-          apply E_ih,
-          exact h_inv_left,
-          exact h_inv_right,
+          sorry,
         },
           unfold mm0.formula.meta_var_set,
           unfold mm0.formula.meta_var_set,
