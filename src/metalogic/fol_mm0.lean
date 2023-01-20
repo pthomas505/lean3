@@ -3943,17 +3943,6 @@ def proof_eqv
   is_proof (imp_ φ ψ) ∧ is_proof (imp_ ψ φ)
 
 
-lemma proof_eqv_rename_all
-  (φ : formula)
-  (x x' : var_name)
-  (h1 : x' ∉ φ.free_var_set)
-  (h2 : x' ∉ φ.bind_var_set) :
-  proof_eqv (forall_ x φ) (forall_ x' (replace_free x x' φ)) :=
-begin
-  sorry,
-end
-
-
 lemma proof_eqv_compat_not
   (φ ψ : formula)
   (h1 : proof_eqv φ ψ) :
