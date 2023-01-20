@@ -4011,6 +4011,34 @@ begin
 end
 
 
+lemma proof_eqv_subst
+  (φ φ' : formula)
+  (σ : instantiation)
+  (h1 : proof_eqv φ φ') :
+  proof_eqv (formula.subst σ φ) (formula.subst σ φ') :=
+begin
+  unfold proof_eqv at h1,
+  cases h1,
+
+  have s1 : is_proof (formula.subst σ (φ.imp_ φ')),
+  exact is_proof_subst_left (φ.imp_ φ') σ h1_left,
+
+  have s2 : is_proof (formula.subst σ (φ'.imp_ φ)),
+  exact is_proof_subst_left (φ'.imp_ φ) σ h1_right,
+
+  unfold proof_eqv,
+  split,
+  {
+    unfold formula.subst at s1,
+    exact s1,
+  },
+  {
+    unfold formula.subst at s2,
+    exact s2,
+  }
+end
+
+
 end fol
 
 
