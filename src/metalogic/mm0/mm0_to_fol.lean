@@ -1201,8 +1201,13 @@ begin
       simp only [pred_to_fol_formula],
       unfold fol.formula.subst,
     },
-    case mm0.formula.not_ : φ_ᾰ φ_ih
-    { admit },
+    case mm0.formula.not_ : φ φ_ih
+    {
+      unfold mm0.formula.subst,
+      simp only [not_to_fol_formula],
+      apply fol.proof_eqv_compat_not,
+      exact φ_ih,
+    },
     case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
     { admit },
     case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1
