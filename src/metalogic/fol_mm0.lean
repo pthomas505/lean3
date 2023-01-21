@@ -5006,9 +5006,10 @@ lemma fol_is_proof_forall
   (S : list mm0.var_name)
   (M : mm0.meta_var_name → fol.formula)
   (E : mm0.env)
-  (σ σ' : mm0.instantiation)
-  (h1 : fol.is_proof (fol.formula.forall_ x (mm0.formula.to_fol_formula M E (mm0.formula.subst σ mm0.formula.meta_var_ φ)))) :
-  fol.is_proof (fol.formula.forall_ y (mm0.formula.to_fol_formula M E (mm0.formula.subst σ' mm0.formula.meta_var_ φ))) :=
+  (σ σ' : mm0.instantiation) :
+  fol.is_proof
+  ((fol.formula.forall_ x (mm0.formula.to_fol_formula M E (mm0.formula.subst σ mm0.formula.meta_var_ φ))).imp_
+  (fol.formula.forall_ y (mm0.formula.to_fol_formula M E (mm0.formula.subst σ' mm0.formula.meta_var_ φ)))) :=
 begin
   sorry,
 end
@@ -5097,7 +5098,14 @@ begin
 
     unfold mm0.formula.subst,
     simp only [forall_to_fol_formula],
-    sorry,
+    unfold fol.proof_eqv,
+    split,
+    {
+      apply fol_is_proof_forall _ _ _ l,
+    },
+    {
+      apply fol_is_proof_forall _ _ _ l,
+    },
   },
   case mm0.formula.def_ : name args l h1 h2
   {
