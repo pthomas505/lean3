@@ -1178,7 +1178,30 @@ lemma proof_eqv_subst_to_fol_formula_subst
 begin
   induction E generalizing φ,
   case list.nil : φ
-  { admit },
+  {
+    induction φ,
+    case mm0.formula.meta_var_ : X
+    {
+      apply fol.proof_eqv_refl,
+      unfold mm0.formula.subst,
+      simp only [meta_var_to_fol_formula, function.comp_app],
+      rewrite fol.subst_inv _ σ_inv σ h_inv_right h_inv_left,
+    },
+    case mm0.formula.false_
+    { admit },
+    case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1
+    { admit },
+    case mm0.formula.not_ : φ_ᾰ φ_ih
+    { admit },
+    case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
+    { admit },
+    case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1
+    { admit },
+    case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
+    { admit },
+    case mm0.formula.def_ : φ_ᾰ φ_ᾰ_1
+    { admit },
+  },
   case list.cons : E_hd E_tl E_ih φ
   {
     induction φ,
