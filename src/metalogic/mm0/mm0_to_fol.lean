@@ -1279,7 +1279,85 @@ begin
         },
       },
       {
-        sorry,
+        unfold mm0.formula.subst,
+
+        have s2 : (mm0.formula.subst σ mm0.formula.meta_var_ E_hd.q).meta_var_set = ∅,
+        apply mm0.subst_no_meta_var,
+        apply mm0.no_meta_var_imp_meta_var_set_is_empty E_hd.q E_hd.args E_hd.nf,
+
+        by_cases c2 : name = E_hd.name
+          ∧ ∃ (σ_1 : mm0.instantiation), list.map σ.val args = list.map σ_1.val E_hd.args,
+        {
+          obtain ⟨σ_2, c_2_1, c_2_2⟩ := not_nil_def_to_fol_formula' M E_hd E_tl name (list.map σ.val args) c2,
+          cases c2,
+
+          have s1 : E_hd.args.length = args.length,
+          transitivity (list.map σ.val args).length,
+          {
+            transitivity (list.map σ_2.val E_hd.args).length,
+            {
+              symmetry,
+              apply list.length_map,
+            },
+            {
+              rewrite c_2_1,
+            },
+          },
+          {
+            apply list.length_map,
+          },
+
+          obtain ⟨σ_inv, σ_inv_prop⟩ := mm0.instantiation.exists_inverse σ,
+
+          have s2 : (list.map σ_inv.val (list.map σ.val args)).nodup,
+          apply list.nodup.map (mm0.instantiation_injective σ_inv),
+          rewrite c_2_1,
+          exact list.nodup.map (mm0.instantiation_injective σ_2) E_hd.nodup,
+
+          have s3 : args.nodup,
+          simp only [list.map_map] at s2,
+          cases σ_inv_prop,
+          rewrite σ_inv_prop_right at s2,
+          simp only [list.map_id] at s2,
+          exact s2,
+
+          obtain s4 := nodup_eq_len_imp_eqv E_hd.args args s1 E_hd.nodup s3,
+
+          exfalso,
+          apply c1,
+          split,
+          {
+            exact c2_left,
+          },
+          {
+            apply exists.elim s4,
+            intros f s4_1,
+            let blah : mm0.instantiation := ⟨ f.to_fun,
+              begin
+                apply exists.intro f.inv_fun,
+                split,
+                {
+                  simp only [equiv.to_fun_as_coe, equiv.inv_fun_as_coe, equiv.self_comp_symm],
+                },
+                {
+                  simp only [equiv.inv_fun_as_coe, equiv.to_fun_as_coe, equiv.symm_comp_self],
+                }
+              end ⟩,
+            apply exists.intro blah,
+            symmetry,
+            exact s4_1,
+          }
+        },
+        {
+          rewrite to_fol_formula_env_ext M E_hd E_tl name args c1,
+          rewrite to_fol_formula_env_ext M E_hd E_tl name (list.map σ.val args) c2,
+
+          specialize E_ih (mm0.formula.def_ name args),
+          rewrite to_fol_formula_no_meta_var (fol.formula.subst σ_inv ∘ mm0.formula.to_fol_formula M E_tl ∘ τ) M E_tl (mm0.formula.def_ name args) s1 at E_ih,
+          rewrite mm0.no_meta_var_subst (mm0.formula.def_ name args) σ τ mm0.formula.meta_var_ s1 at E_ih,
+          unfold mm0.formula.subst at E_ih,
+          exact E_ih,
+        },
       },
     },
   },
