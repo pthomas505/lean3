@@ -62,20 +62,38 @@ end
 
 lemma nodup_eq_len_imp_eqv
   {α : Type}
-  [decidable_eq α]
   (l1 l2 : list α)
   (h1 : l1.length = l2.length)
   (h2 : l1.nodup)
   (h3 : l2.nodup) :
-  ∃ (f : α ≃ α), l1.map f.to_fun = l2 :=
+  ∃ (f : α ≃ α), l1.map f = l2 :=
 begin
-  have s1 : {x // (x ∈ l1)} ≃ {x // (x ∈ l2)},
-  transitivity,
-  symmetry,
-  exact list.nodup.nth_le_equiv l1 h2,
-  rewrite h1,
-  exact list.nodup.nth_le_equiv l2 h3,
-  sorry,
+  classical,
+  induction l1 with x l1 ih generalizing l2,
+  { rw [list.length, eq_comm] at h1,
+    cases list.eq_nil_of_length_eq_zero h1,
+    use equiv.refl _,
+    refl, },
+  cases l2 with y l2,
+  { cases h1 },
+  simp only [list.length, add_left_inj] at h1,
+  simp only [list.nodup_cons] at h2 h3,
+  obtain ⟨f, hf⟩ := ih h2.2 l2 h1 h3.2,
+  have : f x ∉ l2 := by simp [← hf, h2],
+  use f.trans (equiv.swap y (f x)),
+  simp only [list.map, equiv.coe_trans, function.comp_app, equiv.swap_apply_right,
+    eq_self_iff_true, true_and],
+  rw ← hf,
+  refine list.map_congr (λ z hz, _),
+  simp only [function.comp_app],
+  apply equiv.swap_apply_of_ne_of_ne,
+  { rintro rfl,
+    apply h3.1,
+    simpa only [←hf, list.mem_map, embedding_like.apply_eq_iff_eq, exists_eq_right] using hz },
+  { intro h,
+    apply this,
+    rw [← h, ← hf],
+    simpa using hz }
 end
 
 
