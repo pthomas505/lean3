@@ -1208,10 +1208,25 @@ begin
       apply fol.proof_eqv_compat_not,
       exact φ_ih,
     },
-    case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
-    { admit },
-    case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1
-    { admit },
+    case mm0.formula.imp_ : φ ψ φ_ih ψ_ih
+    {
+      unfold mm0.formula.subst,
+      simp only [imp_to_fol_formula],
+      apply fol.proof_eqv_compat_imp,
+      {
+        exact φ_ih,
+      },
+      {
+        exact ψ_ih,
+      }
+    },
+    case mm0.formula.eq_ : x y
+    {
+      apply fol.proof_eqv_refl,
+      unfold mm0.formula.subst,
+      simp only [eq_to_fol_formula],
+      unfold fol.formula.subst,
+    },
     case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
     { admit },
     case mm0.formula.def_ : φ_ᾰ φ_ᾰ_1
