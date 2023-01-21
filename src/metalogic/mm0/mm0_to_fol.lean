@@ -1251,19 +1251,64 @@ begin
   {
     induction φ,
     case mm0.formula.meta_var_ : X
-    { admit },
+    {
+      apply fol.proof_eqv_refl,
+      unfold mm0.formula.subst,
+      simp only [meta_var_to_fol_formula, function.comp_app],
+      rewrite fol.subst_inv _ σ_inv σ h_inv_right h_inv_left,
+    },
     case mm0.formula.false_
-    { admit },
+    {
+      apply fol.proof_eqv_refl,
+      unfold mm0.formula.subst,
+      simp only [false_to_fol_formula],
+      unfold fol.formula.subst,
+    },
     case mm0.formula.pred_ : name args
-    { admit },
+    {
+      apply fol.proof_eqv_refl,
+      unfold mm0.formula.subst,
+      simp only [pred_to_fol_formula],
+      unfold fol.formula.subst,
+    },
     case mm0.formula.not_ : φ φ_ih
-    { admit },
+    {
+      unfold mm0.formula.subst,
+      simp only [not_to_fol_formula],
+      apply fol.proof_eqv_compat_not,
+      exact φ_ih,
+    },
     case mm0.formula.imp_ : φ ψ φ_ih ψ_ih
-    { admit },
+    {
+      unfold mm0.formula.subst,
+      simp only [imp_to_fol_formula],
+      apply fol.proof_eqv_compat_imp,
+      {
+        exact φ_ih,
+      },
+      {
+        exact ψ_ih,
+      }
+    },
     case mm0.formula.eq_ : x y
-    { admit },
+    {
+      apply fol.proof_eqv_refl,
+      unfold mm0.formula.subst,
+      simp only [eq_to_fol_formula],
+      unfold fol.formula.subst,
+    },
     case mm0.formula.forall_ : x φ φ_ih
-    { admit },
+    {
+      unfold mm0.formula.subst,
+      simp only [forall_to_fol_formula],
+      apply fol.proof_eqv_compat_forall,
+      {
+        refl,
+      },
+      {
+        exact φ_ih,
+      }
+    },
     case mm0.formula.def_ : name args
     {
       have s1 : (mm0.formula.def_ name args).meta_var_set = ∅,
