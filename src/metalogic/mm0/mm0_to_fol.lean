@@ -1250,19 +1250,19 @@ begin
   case list.cons : E_hd E_tl E_ih φ
   {
     induction φ,
-    case mm0.formula.meta_var_ : φ
+    case mm0.formula.meta_var_ : X
     { admit },
     case mm0.formula.false_
     { admit },
-    case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1
+    case mm0.formula.pred_ : name args
     { admit },
-    case mm0.formula.not_ : φ_ᾰ φ_ih
+    case mm0.formula.not_ : φ φ_ih
     { admit },
-    case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
+    case mm0.formula.imp_ : φ ψ φ_ih ψ_ih
     { admit },
-    case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1
+    case mm0.formula.eq_ : x y
     { admit },
-    case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
+    case mm0.formula.forall_ : x φ φ_ih
     { admit },
     case mm0.formula.def_ : name args
     {
