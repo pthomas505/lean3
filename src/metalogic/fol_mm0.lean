@@ -4919,22 +4919,90 @@ example
   (mm0.formula.to_fol_formula M E (mm0.formula.subst σ' mm0.formula.meta_var_ φ)) :=
 begin
   induction φ generalizing l,
-  case mm0.formula.meta_var_ : φ l h1 h2
-  { admit },
+  case mm0.formula.meta_var_ : X l h1 h2
+  {
+    apply fol.proof_eqv_refl,
+    unfold mm0.formula.subst,
+  },
   case mm0.formula.false_ : l h1 h2
-  { admit },
-  case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1 l h1 h2
-  { admit },
-  case mm0.formula.not_ : φ_ᾰ φ_ih l h1 h2
-  { admit },
-  case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1 l h1 h2
-  { admit },
-  case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1 l h1 h2
-  { admit },
-  case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih l h1 h2
-  { admit },
-  case mm0.formula.def_ : φ_ᾰ φ_ᾰ_1 l h1 h2
-  { admit },
+  {
+    apply fol.proof_eqv_refl,
+    unfold mm0.formula.subst,
+  },
+  case mm0.formula.pred_ : name args l h1 h2
+  {
+    apply fol.proof_eqv_refl,
+
+    unfold mm0.formula.no_meta_var_and_all_free_in_list at h1,
+
+    unfold mm0.formula.subst,
+    rewrite list.map_congr,
+    intros x a1,
+    apply h2 x,
+    exact h1 a1,
+  },
+  case mm0.formula.not_ : φ φ_ih l h1 h2
+  {
+    unfold mm0.formula.no_meta_var_and_all_free_in_list at h1,
+
+    unfold mm0.formula.subst,
+    simp only [not_to_fol_formula],
+
+    apply fol.proof_eqv_compat_not,
+    exact φ_ih l h1 h2,
+  },
+  case mm0.formula.imp_ : φ ψ φ_ih ψ_ih l h1 h2
+  {
+    unfold mm0.formula.no_meta_var_and_all_free_in_list at h1,
+    cases h1,
+
+    unfold mm0.formula.subst,
+    simp only [imp_to_fol_formula],
+    apply fol.proof_eqv_compat_imp,
+    {
+      exact φ_ih l h1_left h2,
+    },
+    {
+      exact ψ_ih l h1_right h2,
+    }
+  },
+  case mm0.formula.eq_ : x y l h1 h2
+  {
+    apply fol.proof_eqv_refl,
+    unfold mm0.formula.no_meta_var_and_all_free_in_list at h1,
+    cases h1,
+
+    unfold mm0.formula.subst,
+    congr' 1,
+    simp only [eq_to_fol_formula],
+    split,
+    {
+      exact h2 x h1_left,
+    },
+    {
+      exact h2 y h1_right,
+    }
+  },
+  case mm0.formula.forall_ : x φ φ_ih l h1 h2
+  {
+    unfold mm0.formula.no_meta_var_and_all_free_in_list at h1,
+
+    unfold mm0.formula.subst,
+    simp only [forall_to_fol_formula],
+    sorry,
+  },
+  case mm0.formula.def_ : name args l h1 h2
+  {
+    apply fol.proof_eqv_refl,
+
+    unfold mm0.formula.no_meta_var_and_all_free_in_list at h1,
+
+    unfold mm0.formula.subst,
+    rewrite list.map_congr,
+    intros x a1,
+    apply h2 x,
+    exact h1 a1,
+  },
 end
 
 
