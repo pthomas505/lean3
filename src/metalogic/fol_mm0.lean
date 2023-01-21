@@ -5132,7 +5132,8 @@ begin
             apply list.length_map,
           },
 
-          obtain ⟨σ'_inv, σ'_inv_prop⟩  := mm0.instantiation.exists_inverse σ',
+          obtain ⟨σ'_inv, σ'_inv_prop⟩ := mm0.instantiation.exists_inverse σ',
+
           have s2 : (list.map σ'_inv.val (list.map σ'.val args)).nodup,
           apply list.nodup.map (mm0.instantiation_injective σ'_inv),
           rewrite c_2_1,
