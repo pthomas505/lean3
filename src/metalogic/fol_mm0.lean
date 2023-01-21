@@ -5008,13 +5008,13 @@ end
 
 lemma proof_eqv_subst_to_fol_formula_subst
   (φ : mm0.formula)
-  (M : mm0.meta_var_name → fol.formula)
+  (M M' : mm0.meta_var_name → fol.formula)
   (E : mm0.env)
   (σ σ' : mm0.instantiation)
   (h1 : φ.meta_var_set = ∅) :
   fol.proof_eqv
     (fol.formula.subst σ (mm0.formula.to_fol_formula M E (mm0.formula.subst σ' mm0.formula.meta_var_ φ)))
-    (fol.formula.subst (mm0.instantiation.comp σ σ') (mm0.formula.to_fol_formula M E φ)) :=
+    (fol.formula.subst (mm0.instantiation.comp σ σ') (mm0.formula.to_fol_formula M' E φ)) :=
 begin
   induction E generalizing φ σ σ',
   case list.nil : φ σ σ' h1
@@ -5041,7 +5041,7 @@ begin
       by_cases c1 : name = E_hd.name
         ∧ ∃ (σ : mm0.instantiation), args = list.map σ.val E_hd.args,
       {
-        obtain ⟨σ_1, c_1_1, c_1_2⟩ := not_nil_def_to_fol_formula' M E_hd E_tl name args c1,
+        obtain ⟨σ_1, c_1_1, c_1_2⟩ := not_nil_def_to_fol_formula' M' E_hd E_tl name args c1,
 
         unfold mm0.formula.subst,
 
@@ -5068,9 +5068,9 @@ begin
             -- left goal
             (fol.formula.subst σ (mm0.formula.to_fol_formula M E_tl (mm0.formula.subst σ_2 mm0.formula.meta_var_ E_hd.q)))
             -- right IH
-            (fol.formula.subst (σ.comp σ') (mm0.formula.to_fol_formula M E_tl (mm0.formula.subst σ_1 mm0.formula.meta_var_ E_hd.q)))
+            (fol.formula.subst (σ.comp σ') (mm0.formula.to_fol_formula M' E_tl (mm0.formula.subst σ_1 mm0.formula.meta_var_ E_hd.q)))
             -- right goal
-            (fol.formula.subst (σ.comp σ') (mm0.formula.to_fol_formula M E_tl (mm0.formula.subst σ_1 mm0.formula.meta_var_ E_hd.q))),
+            (fol.formula.subst (σ.comp σ') (mm0.formula.to_fol_formula M' E_tl (mm0.formula.subst σ_1 mm0.formula.meta_var_ E_hd.q))),
           {
             apply fol.proof_eqv_trans
               -- left goal
@@ -5078,7 +5078,7 @@ begin
               -- left IH
               (fol.formula.subst σ (mm0.formula.to_fol_formula M E_tl (mm0.formula.subst (σ'.comp σ_1) mm0.formula.meta_var_ E_hd.q)))
               -- right IH
-              (fol.formula.subst (σ.comp σ') (mm0.formula.to_fol_formula M E_tl (mm0.formula.subst σ_1 mm0.formula.meta_var_ E_hd.q))),
+              (fol.formula.subst (σ.comp σ') (mm0.formula.to_fol_formula M' E_tl (mm0.formula.subst σ_1 mm0.formula.meta_var_ E_hd.q))),
             {
               apply fol.proof_eqv_subst,
               apply proof_eqv_to_fol_formula_subst E_hd.q E_hd.args M E_tl _ _ E_hd.nf,
@@ -5174,7 +5174,7 @@ begin
           }
         },
         {
-          rewrite to_fol_formula_env_ext M E_hd E_tl name args c1,
+          rewrite to_fol_formula_env_ext M' E_hd E_tl name args c1,
           rewrite to_fol_formula_env_ext M E_hd E_tl name (list.map σ'.val args) c2,
           apply E_ih (mm0.formula.def_ name args),
           refl,
@@ -5197,29 +5197,24 @@ example
     (fol.formula.subst σ
       (mm0.formula.to_fol_formula (fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M E ∘ τ)) E φ)) :=
 begin
-  induction E generalizing M σ σ_inv τ φ,
-  case list.nil : M σ σ_inv τ φ h_inv_left h_inv_right
+  induction φ,
+  case mm0.formula.meta_var_ : φ
   { admit },
-  case list.cons : E_hd E_tl E_ih M σ σ_inv τ φ h_inv_left h_inv_right
+  case mm0.formula.false_
+  { admit },
+  case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1
+  { admit },
+  case mm0.formula.not_ : φ_ᾰ φ_ih
+  { admit },
+  case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1
+  { admit },
+  case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1
+  { admit },
+  case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih
+  { admit },
+  case mm0.formula.def_ : name args
   {
-    induction φ generalizing M σ σ_inv τ,
-    case mm0.formula.meta_var_ : φ M σ σ_inv τ h_inv_left h_inv_right
-    { admit },
-    case mm0.formula.false_ : M σ σ_inv τ h_inv_left h_inv_right
-    { admit },
-    case mm0.formula.pred_ : φ_ᾰ φ_ᾰ_1 M σ σ_inv τ h_inv_left h_inv_right
-    { admit },
-    case mm0.formula.not_ : φ_ᾰ φ_ih M σ σ_inv τ h_inv_left h_inv_right
-    { admit },
-    case mm0.formula.imp_ : φ_ᾰ φ_ᾰ_1 φ_ih_ᾰ φ_ih_ᾰ_1 M σ σ_inv τ h_inv_left h_inv_right
-    { admit },
-    case mm0.formula.eq_ : φ_ᾰ φ_ᾰ_1 M σ σ_inv τ h_inv_left h_inv_right
-    { admit },
-    case mm0.formula.forall_ : φ_ᾰ φ_ᾰ_1 φ_ih M σ σ_inv τ h_inv_left h_inv_right
-    { admit },
-    case mm0.formula.def_ : name args M σ σ_inv τ h_inv_left h_inv_right
-    {
-    },
+
   },
 end
 
