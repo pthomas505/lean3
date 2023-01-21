@@ -1239,8 +1239,13 @@ begin
         exact φ_ih,
       }
     },
-    case mm0.formula.def_ : φ_ᾰ φ_ᾰ_1
-    { admit },
+    case mm0.formula.def_ : name args
+    {
+      apply fol.proof_eqv_refl,
+      unfold mm0.formula.subst,
+      simp only [nil_def_to_fol_formula],
+      unfold fol.formula.subst,
+    },
   },
   case list.cons : E_hd E_tl E_ih φ
   {
