@@ -5080,7 +5080,12 @@ begin
               -- right IH
               (fol.formula.subst (σ.comp σ') (mm0.formula.to_fol_formula M E_tl (mm0.formula.subst σ_1 mm0.formula.meta_var_ E_hd.q))),
             {
-              sorry,
+              apply fol.proof_eqv_subst,
+              apply proof_eqv_to_fol_formula_subst E_hd.q E_hd.args M E_tl _ _ E_hd.nf,
+              simp only [list.map_eq_map_iff] at c_2_1,
+              intros x a1,
+              symmetry,
+              exact c_2_1 x a1,
             },
             {
               apply E_ih,
