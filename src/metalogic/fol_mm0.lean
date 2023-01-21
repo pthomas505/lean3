@@ -3571,6 +3571,32 @@ begin
 end
 
 
+def instantiation.comp (σ σ' : instantiation) : instantiation :=
+⟨
+  σ.val ∘ σ'.val,
+  begin
+    obtain ⟨σ_inv_val, σ_inv_prop⟩ := σ.2,
+    obtain ⟨σ'_inv_val, σ'_inv_prop⟩ := σ'.2,
+    apply exists.intro (σ'_inv_val ∘ σ_inv_val),
+    cases σ_inv_prop,
+    cases σ'_inv_prop,
+    split,
+    {
+      change σ.val ∘ (σ'.val ∘ σ'_inv_val) ∘ σ_inv_val = id,
+      rewrite σ'_inv_prop_left,
+      simp only [function.comp.left_id],
+      exact σ_inv_prop_left,
+    },
+    {
+      change (σ'_inv_val ∘ (σ_inv_val ∘ σ.val) ∘ σ'.val) = id,
+      rewrite σ_inv_prop_right,
+      simp only [function.comp.left_id],
+      exact σ'_inv_prop_right,
+    }
+  end
+⟩
+
+
 def formula.subst (σ : instantiation) : formula → formula
 | (false_) := false_
 | (pred_ name args) := pred_ name (list.map σ.1 args)
@@ -3579,6 +3605,51 @@ def formula.subst (σ : instantiation) : formula → formula
 | (eq_ x y) := eq_ (σ.1 x) (σ.1 y)
 | (forall_ x φ) := forall_ (σ.1 x) φ.subst
 
+
+lemma subst_comp
+  (φ : formula)
+  (σ σ' : instantiation) :
+  formula.subst σ (formula.subst σ' φ) = formula.subst (σ.comp σ') φ :=
+begin
+  induction φ,
+  case fol.formula.false_
+  {
+    refl,
+  },
+  case fol.formula.pred_ : name args
+  {
+    unfold formula.subst,
+    simp only [list.map_map, eq_self_iff_true, true_and],
+    refl,
+  },
+  case fol.formula.not_ : φ φ_ih
+  {
+    unfold formula.subst,
+    congr,
+    exact φ_ih,
+  },
+  case fol.formula.imp_ : φ ψ φ_ih ψ_ih
+  {
+    unfold formula.subst,
+    congr,
+    {
+      exact φ_ih,
+    },
+    {
+      exact ψ_ih,
+    }
+  },
+  case fol.formula.eq_ : x y
+  {
+    refl,
+  },
+  case fol.formula.forall_ : x φ φ_ih
+  {
+    unfold formula.subst,
+    congr,
+    exact φ_ih,
+  },
+end
 
 lemma subst_inv
   (φ : formula)
@@ -5043,7 +5114,7 @@ begin
 end
 
 
-lemma proof_eqv_subst_to_fol_formula_subst
+lemma proof_eqv_subst_to_fol_formula_subst_aux
   (φ : mm0.formula)
   (M M' : mm0.meta_var_name → fol.formula)
   (E : mm0.env)
@@ -5222,7 +5293,7 @@ begin
 end
 
 
-example
+lemma proof_eqv_subst_to_fol_formula_subst
   (φ : mm0.formula)
   (M : mm0.meta_var_name → fol.formula)
   (E : mm0.env)
@@ -5259,9 +5330,14 @@ begin
       have s1 : E_hd.q.meta_var_set = ∅,
       apply mm0.no_meta_var_imp_meta_var_set_is_empty E_hd.q E_hd.args E_hd.nf,
 
-      obtain s2 := proof_eqv_subst_to_fol_formula_subst E_hd.q M M E_tl σ σ_inv s1,
-
-      obtain s2' := fol.proof_eqv_subst_left _ _ σ_inv s2,
+      apply fol.proof_eqv_subst_right _ _ σ_inv,
+      rewrite to_fol_formula_no_meta_var (fol.formula.subst σ_inv ∘ (mm0.formula.to_fol_formula M (E_hd :: E_tl) ∘ τ)) M,
+      rewrite mm0.no_meta_var_subst _ _ τ mm0.formula.meta_var_,
+      rewrite fol.subst_comp,
+      apply proof_eqv_subst_to_fol_formula_subst_aux,
+      refl,
+      refl,
+      refl,
     },
   },
 end
@@ -5402,13 +5478,9 @@ begin
     let h1_σ_inv : mm0.instantiation :=
       ⟨h1_σ', begin apply exists.intro h1_σ.val, exact and.intro a1_right a1_left, end⟩,
 
-    apply fol.is_proof_subst_right _ h1_σ_inv,
-
-    rewrite mm0.no_meta_var_subst _ _ h1_τ mm0.formula.meta_var_,
-
     dsimp at *,
 
-    obtain s1 := proof_eqv_subst_to_fol_formula_subst h1_φ M M E h1_σ h1_σ_inv,
+    obtain s1 := proof_eqv_subst_to_fol_formula_subst h1_φ M E h1_σ h1_σ_inv h1_τ a1_left a1_right,
     unfold fol.proof_eqv at s1,
     cases s1,
 
@@ -5430,10 +5502,13 @@ begin
     },
     {
       intros ψ a2,
-      specialize h1_ih_1 ψ a2 M h2 h3,
-      rewrite lem_1' ψ M E h1_σ h1_σ_inv h1_τ a1_left a1_right at h1_ih_1,
+
+      obtain s3 := proof_eqv_subst_to_fol_formula_subst ψ M E h1_σ h1_σ_inv h1_τ a1_left a1_right,
+      unfold fol.proof_eqv at s3,
+      cases s3,
       apply fol.is_proof_subst_right _ h1_σ,
-      exact h1_ih_1,
+      specialize h1_ih_1 ψ a2 M h2 h3,
+      apply fol.is_proof.mp _ _ h1_ih_1 s3_left,
     }
   },
   case is_proof.conv : h1_Γ h1_Δ h1_φ h1_φ' h1_1 h1_2 h1_3 h1_ih
