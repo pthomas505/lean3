@@ -1,3 +1,5 @@
+import data.hash_map
+
 import metalogic.mm0.mm0
 
 

@@ -1,4 +1,3 @@
-import data.hash_map
 import logic.function.basic
 import tactic
 
