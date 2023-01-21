@@ -5,6 +5,8 @@ import metalogic.mm0.mm0
 
 open mm0
 
+open mm0.formula
+
 
 -- Proof Checker
 
@@ -12,7 +14,7 @@ open mm0
 def definition_map : Type := hash_map string (fun _, definition_)
 
 
-def formula.is_meta_var_or_all_def_in_map (m : definition_map) : formula → option unit
+def mm0.formula.is_meta_var_or_all_def_in_map (m : definition_map) : formula → option unit
 
 | (meta_var_ _) := some ()
 
@@ -188,7 +190,7 @@ def check_command
   else none
 
 | (add_proof P) := do
-  (P.Δ.mmap' (formula.is_meta_var_or_all_def_in_map global_definition_map)),
+  (P.Δ.mmap' (mm0.formula.is_meta_var_or_all_def_in_map global_definition_map)),
   T <- check_proof global_definition_map global_theorem_map P,
   T.φ.is_meta_var_or_all_def_in_map global_definition_map,
   some (global_definition_map, global_theorem_map.insert P.name T)
