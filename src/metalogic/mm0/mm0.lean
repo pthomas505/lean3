@@ -1,10 +1,8 @@
 import logic.function.basic
 import tactic
 
+
 import metalogic.mm0.aux
-
-
-set_option pp.parens true
 
 
 -- Syntax
