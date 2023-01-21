@@ -1268,7 +1268,19 @@ begin
             refl,
           },
         },
-      }
+        {
+          cases c1,
+          rewrite c_1_1 at c2,
+          push_neg at c2,
+          exfalso,
+          apply c2 c1_left (mm0.instantiation.comp σ σ_1),
+          simp only [list.map_map],
+          refl,
+        },
+      },
+      {
+        sorry,
+      },
     },
   },
 end
