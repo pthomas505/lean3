@@ -4892,7 +4892,7 @@ begin
 end
 
 
-example
+lemma fol_is_proof_forall
   (φ : mm0.formula)
   (x y : fol.var_name)
   (S : list mm0.var_name)
@@ -4906,7 +4906,7 @@ begin
 end
 
 
-lemma proof_eqv_subst_to_fol_formula_subst
+lemma proof_eqv_to_fol_formula_subst
   (φ : mm0.formula)
   (l : list mm0.var_name)
   (M : mm0.meta_var_name → fol.formula)
