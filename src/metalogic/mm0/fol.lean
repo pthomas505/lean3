@@ -565,6 +565,19 @@ begin
 end
 
 
+lemma is_proof_id
+  (φ : formula) :
+  is_proof (φ.imp_ φ) :=
+begin
+  obtain s1 := is_proof.prop_2 φ (φ.imp_ φ) φ,
+  obtain s2 := is_proof.prop_1 φ (φ.imp_ φ),
+  obtain s3 := is_proof.mp _ _ s2 s1,
+  obtain s4 := is_proof.prop_1 φ φ,
+  obtain s5 := is_proof.mp _ _ s4 s3,
+  exact s5,
+end
+
+
 def proof_eqv
   (φ ψ : formula) :
   Prop :=
@@ -605,7 +618,15 @@ lemma proof_eqv_refl
   (h1 : φ = φ') :
   proof_eqv φ φ' :=
 begin
-  sorry,
+  rewrite h1,
+  unfold proof_eqv,
+  split,
+  {
+    exact is_proof_id φ',
+  },
+  {
+    exact is_proof_id φ',
+  }
 end
 
 
@@ -614,7 +635,17 @@ lemma proof_eqv_symm
   (h1 : proof_eqv φ φ') :
   proof_eqv φ' φ :=
 begin
-  sorry,
+  unfold proof_eqv at h1,
+  cases h1,
+
+  unfold proof_eqv,
+  split,
+  {
+    exact h1_right,
+  },
+  {
+    exact h1_left,
+  }
 end
 
 
@@ -624,6 +655,12 @@ lemma proof_eqv_trans
   (h2 : proof_eqv φ' φ'') :
   proof_eqv φ φ'' :=
 begin
+  unfold proof_eqv at h1,
+  cases h1,
+
+  unfold proof_eqv at h2,
+  cases h2,
+
   sorry,
 end
 
