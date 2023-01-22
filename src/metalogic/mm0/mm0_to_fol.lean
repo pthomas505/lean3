@@ -1347,7 +1347,32 @@ begin
     case list.cons : E_hd E_tl E_ih
     {
       simp only [list.mem_cons_iff] at h1_1,
-      sorry,
+      cases h1_1,
+      {
+        by_cases c1 : h1_d.name = E_hd.name
+          ∧ ∃ (σ : mm0.instantiation), list.map h1_σ.val h1_d.args = list.map σ.val E_hd.args,
+        {
+          obtain ⟨σ_1, c_1_1, c_1_2⟩ := not_nil_def_to_fol_formula' M E_hd E_tl h1_d.name (list.map h1_σ.val h1_d.args) c1,
+          rewrite c_1_2,
+          sorry,
+        },
+        {
+          exfalso,
+          apply c1,
+          rewrite h1_1,
+          split,
+          {
+            refl,
+          },
+          {
+            apply exists.intro h1_σ,
+            refl,
+          }
+        }
+      },
+      {
+        sorry,
+      }
     },
   },
 end
