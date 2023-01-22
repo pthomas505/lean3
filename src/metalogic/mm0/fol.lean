@@ -624,7 +624,20 @@ lemma proof_eqv_compat_imp
   (h2 : proof_eqv ψ ψ') :
   proof_eqv (imp_ φ ψ) (imp_ φ' ψ') :=
 begin
-  sorry,
+  unfold proof_eqv at h1,
+  cases h1,
+
+  unfold proof_eqv at h2,
+  cases h2,
+
+  unfold proof_eqv,
+  split,
+  {
+    sorry,
+  },
+  {
+    sorry,
+  },
 end
 
 
