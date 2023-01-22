@@ -578,6 +578,21 @@ begin
 end
 
 
+lemma is_proof_trans
+  (φ ψ χ : formula)
+  (h1 : is_proof (φ.imp_ ψ))
+  (h2 : is_proof (ψ.imp_ χ)) :
+  is_proof (φ.imp_ χ) :=
+begin
+    obtain s1 := is_proof.prop_2 φ ψ χ,
+    obtain s2 := is_proof.prop_1 (ψ.imp_ χ) φ,
+    obtain s3 := is_proof.mp _ _ h2 s2,
+    obtain s4 := is_proof.mp _ _ s3 s1,
+    obtain s5 := is_proof.mp _ _ h1 s4,
+    exact s5,
+end
+
+
 def proof_eqv
   (φ ψ : formula) :
   Prop :=
@@ -589,7 +604,17 @@ lemma proof_eqv_compat_not
   (h1 : proof_eqv φ ψ) :
   proof_eqv (not_ φ) (not_ ψ) :=
 begin
-  sorry,
+  unfold proof_eqv at h1,
+  cases h1,
+
+  unfold proof_eqv,
+  split,
+  {
+    sorry,
+  },
+  {
+    sorry,
+  }
 end
 
 
@@ -661,7 +686,14 @@ begin
   unfold proof_eqv at h2,
   cases h2,
 
-  sorry,
+  unfold proof_eqv,
+  split,
+  {
+    apply is_proof_trans φ φ' φ'' h1_left h2_left,
+  },
+  {
+    apply is_proof_trans φ'' φ' φ h2_right h1_right,
+  }
 end
 
 
