@@ -578,6 +578,15 @@ begin
 end
 
 
+lemma is_proof_contra
+  (φ ψ : formula)
+  (h1 : is_proof (φ.imp_ ψ)) :
+  is_proof (ψ.not_.imp_ φ.not_) :=
+begin
+  sorry,
+end
+
+
 lemma is_proof_trans
   (φ ψ χ : formula)
   (h1 : is_proof (φ.imp_ ψ))
@@ -610,10 +619,10 @@ begin
   unfold proof_eqv,
   split,
   {
-    sorry,
+    apply is_proof_contra _ _ h1_right,
   },
   {
-    sorry,
+    apply is_proof_contra _ _ h1_left,
   }
 end
 
