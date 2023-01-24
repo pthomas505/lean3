@@ -1398,12 +1398,41 @@ begin
         by_cases c1 : h1_d.name = E_hd.name
           ∧ ∃ (σ : mm0.instantiation), list.map h1_σ.val h1_d.args = list.map σ.val E_hd.args,
         {
+          unfold mm0.env.well_formed at h2,
+          cases h2,
+          cases h2_right,
+
           obtain ⟨σ_1, c_1_1, c_1_2⟩ := not_nil_def_to_fol_formula' M E_hd E_tl h1_d.name (list.map h1_σ.val h1_d.args) c1,
           rewrite c_1_2,
           clear c_1_2,
-          sorry,
+
+          exfalso,
+          apply h2_left h1_d h1_1,
+          {
+            cases c1,
+            symmetry,
+            exact c1_left,
+          },
+          {
+            have s1 : (list.map h1_σ.val h1_d.args).length = h1_d.args.length,
+            simp only [list.length_map],
+
+            have s2 : (list.map σ_1.val E_hd.args).length = E_hd.args.length,
+            simp only [list.length_map],
+
+            rewrite <- s1,
+            rewrite <- s2,
+            symmetry,
+            rewrite c_1_1,
+          }
         },
         {
+          unfold mm0.env.well_formed at h2,
+          cases h2,
+          cases h2_right,
+
+          rewrite to_fol_formula_env_ext M E_hd E_tl h1_d.name (list.map h1_σ.val h1_d.args) c1,
+
           sorry,
         }
       }
