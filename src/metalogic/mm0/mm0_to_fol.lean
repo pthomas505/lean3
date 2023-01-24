@@ -1427,13 +1427,23 @@ begin
           }
         },
         {
+          have s1 : ∃ (E1 : mm0.env), E_hd :: E_tl = E1 ++ E_tl,
+          apply exists.intro [E_hd],
+          simp only [list.singleton_append, eq_self_iff_true, and_self],
+
+          have s2 : mm0.formula.is_meta_var_or_all_def_in_env E_tl (mm0.formula.subst h1_σ mm0.formula.meta_var_ h1_d.q),
           unfold mm0.env.well_formed at h2,
           cases h2,
           cases h2_right,
+          apply mm0.is_meta_var_or_all_def_in_env_subst h1_d.q E_tl h1_σ,
+          apply mm0.def_in_env_imp_is_meta_var_or_all_def_in_env E_tl h1_d h2_right_right h1_1,
 
           rewrite to_fol_formula_env_ext M E_hd E_tl h1_d.name (list.map h1_σ.val h1_d.args) c1,
+          rewrite <- to_fol_formula_env_ext' M E_tl (E_hd :: E_tl) (mm0.formula.subst h1_σ mm0.formula.meta_var_ h1_d.q) s1 s2 h2,
 
-          sorry,
+          cases h2,
+          cases h2_right,
+          exact E_ih h2_right_right h1_1,
         }
       }
     },
