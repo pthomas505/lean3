@@ -722,6 +722,71 @@ def formula.is_meta_var_or_all_def_in_env (E : env) : formula → Prop
   ∃ (d : definition_), d ∈ E ∧ name = d.name ∧ args.length = d.args.length
 
 
+lemma is_meta_var_or_all_def_in_env_subst
+  (φ : formula)
+  (E : env)
+  (σ : instantiation)
+  (h1 : φ.is_meta_var_or_all_def_in_env E) :
+  (formula.subst σ formula.meta_var_ φ).is_meta_var_or_all_def_in_env E :=
+begin
+  induction φ,
+  case mm0.formula.meta_var_ : X
+  {
+    unfold formula.subst,
+  },
+  case mm0.formula.false_
+  {
+    unfold formula.subst,
+  },
+  case mm0.formula.pred_ : name args
+  {
+    unfold formula.subst,
+  },
+  case mm0.formula.not_ : φ φ_ih
+  {
+    unfold formula.is_meta_var_or_all_def_in_env at h1,
+    unfold formula.subst,
+    unfold formula.is_meta_var_or_all_def_in_env,
+    exact φ_ih h1,
+  },
+  case mm0.formula.imp_ : φ ψ φ_ih ψ_ih
+  {
+    unfold formula.is_meta_var_or_all_def_in_env at h1,
+    cases h1,
+
+    unfold formula.subst,
+    unfold formula.is_meta_var_or_all_def_in_env,
+    split,
+    {
+      exact φ_ih h1_left,
+    },
+    {
+      exact ψ_ih h1_right,
+    }
+  },
+  case mm0.formula.eq_ : x y
+  {
+    unfold formula.subst,
+  },
+  case mm0.formula.forall_ : x φ φ_ih
+  {
+    unfold formula.is_meta_var_or_all_def_in_env at h1,
+    unfold formula.subst,
+    unfold formula.is_meta_var_or_all_def_in_env,
+    exact φ_ih h1,
+  },
+  case mm0.formula.def_ : name args
+  {
+    unfold formula.is_meta_var_or_all_def_in_env at h1,
+
+    unfold formula.subst,
+    unfold formula.is_meta_var_or_all_def_in_env,
+    simp only [list.length_map],
+    exact h1,
+  },
+end
+
+
 def env.well_formed : env → Prop
 | list.nil := true
 | (d :: E) :=

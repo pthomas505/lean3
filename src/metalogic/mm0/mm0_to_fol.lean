@@ -279,7 +279,7 @@ begin
 end
 
 
-example
+lemma to_fol_formula_env_ext'
   (M : mm0.meta_var_name → fol.formula)
   (E E' : mm0.env)
   (φ : mm0.formula)
@@ -1302,7 +1302,8 @@ lemma is_conv_imp_is_proof_eqv
   (M : mm0.meta_var_name → fol.formula)
   (E : mm0.env)
   (φ φ' : mm0.formula)
-  (h1 : mm0.is_conv E φ φ') :
+  (h1 : mm0.is_conv E φ φ')
+  (h2 : E.well_formed) :
   fol.proof_eqv (mm0.formula.to_fol_formula M E φ) (mm0.formula.to_fol_formula M E φ') :=
 begin
   induction h1,
@@ -1355,6 +1356,24 @@ begin
           obtain ⟨σ_1, c_1_1, c_1_2⟩ := not_nil_def_to_fol_formula' M E_hd E_tl h1_d.name (list.map h1_σ.val h1_d.args) c1,
           rewrite c_1_2,
           clear c_1_2,
+          rewrite h1_1,
+
+          have s1 : ∃ (E1 : mm0.env), E_hd :: E_tl = E1 ++ E_tl,
+          apply exists.intro [E_hd],
+          simp only [list.singleton_append, eq_self_iff_true, and_self],
+
+          have s2 : mm0.formula.is_meta_var_or_all_def_in_env E_tl (mm0.formula.subst h1_σ mm0.formula.meta_var_ E_hd.q),
+          unfold mm0.env.well_formed at h2,
+          cases h2,
+          cases h2_right,
+          apply mm0.is_meta_var_or_all_def_in_env_subst E_hd.q E_tl h1_σ h2_right_left,
+
+          rewrite <- to_fol_formula_env_ext' M E_tl (E_hd :: E_tl) (mm0.formula.subst h1_σ mm0.formula.meta_var_ E_hd.q) s1 s2 h2,
+          clear s1,
+          clear s2,
+
+          rewrite h1_1 at c_1_1,
+
           sorry,
         },
         {
@@ -1397,7 +1416,8 @@ theorem conservative
   (M : mm0.meta_var_name → fol.formula)
   (h1 : mm0.is_proof E Γ Δ φ)
   (h2 : ∀ (x : mm0.var_name) (X : mm0.meta_var_name), (x, X) ∈ Γ → fol.not_free x (M X))
-  (h3 : ∀ (ψ : mm0.formula), ψ ∈ Δ → fol.is_proof (mm0.formula.to_fol_formula M E ψ)) :
+  (h3 : ∀ (ψ : mm0.formula), ψ ∈ Δ → fol.is_proof (mm0.formula.to_fol_formula M E ψ))
+  (h4 : E.well_formed) :
   fol.is_proof (mm0.formula.to_fol_formula M E φ) :=
 begin
   induction h1 generalizing M,
@@ -1505,7 +1525,7 @@ begin
   case is_proof.conv : h1_Γ h1_Δ h1_φ h1_φ' h1_1 h1_2 h1_3 h1_ih
   {
     specialize h1_ih M h2 h3,
-    obtain s1 := is_conv_imp_is_proof_eqv M _ _ _ h1_3,
+    obtain s1 := is_conv_imp_is_proof_eqv M _ _ _ h1_3 h4,
     unfold fol.proof_eqv at s1,
     cases s1,
     apply fol.is_proof.mp _ _ h1_ih s1_left,
