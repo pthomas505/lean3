@@ -1354,6 +1354,7 @@ begin
         {
           obtain ⟨σ_1, c_1_1, c_1_2⟩ := not_nil_def_to_fol_formula' M E_hd E_tl h1_d.name (list.map h1_σ.val h1_d.args) c1,
           rewrite c_1_2,
+          clear c_1_2,
           sorry,
         },
         {
@@ -1371,7 +1372,17 @@ begin
         }
       },
       {
-        sorry,
+        by_cases c1 : h1_d.name = E_hd.name
+          ∧ ∃ (σ : mm0.instantiation), list.map h1_σ.val h1_d.args = list.map σ.val E_hd.args,
+        {
+          obtain ⟨σ_1, c_1_1, c_1_2⟩ := not_nil_def_to_fol_formula' M E_hd E_tl h1_d.name (list.map h1_σ.val h1_d.args) c1,
+          rewrite c_1_2,
+          clear c_1_2,
+          sorry,
+        },
+        {
+          sorry,
+        }
       }
     },
   },
