@@ -1374,7 +1374,11 @@ begin
 
           rewrite h1_1 at c_1_1,
 
-          sorry,
+          apply proof_eqv_to_fol_formula_subst E_hd.q E_hd.args M E_tl σ_1 h1_σ E_hd.nf,
+          simp only [list.map_eq_map_iff] at c_1_1,
+          intros x a1,
+          symmetry,
+          exact c_1_1 x a1,
         },
         {
           exfalso,
