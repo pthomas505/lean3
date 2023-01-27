@@ -866,7 +866,6 @@ end
 lemma fol_is_proof_forall
   (φ : mm0.formula)
   (x y : fol.var_name)
-  (S : list mm0.var_name)
   (M : mm0.meta_var_name → fol.formula)
   (E : mm0.env)
   (σ σ' : mm0.instantiation) :
@@ -964,10 +963,10 @@ begin
     unfold fol.proof_eqv,
     split,
     {
-      apply fol_is_proof_forall _ _ _ l,
+      apply fol_is_proof_forall,
     },
     {
-      apply fol_is_proof_forall _ _ _ l,
+      apply fol_is_proof_forall,
     },
   },
   case mm0.formula.def_ : name args l h1 h2
