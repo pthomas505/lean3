@@ -1,4 +1,5 @@
 import logic.function.basic
+import data.fin.vec_notation
 import tactic
 
 
@@ -1034,6 +1035,21 @@ inductive is_conv (E : env) : formula → formula → Prop
   is_conv (def_ d.name (d.args.map σ.1)) (d.q.subst σ meta_var_)
 
 
+def true_ : formula := not_ false_
+
+def and_ (φ ψ : formula) : formula := not_ (φ.imp_ ψ.not_)
+
+open matrix
+
+def And : Π (n : ℕ) (phi : fin n → formula), formula
+| 0 phi := true_
+| (n + 1) phi := and_ (vec_head phi) (And n (vec_tail phi))
+
+def eq_sub_pred (n : ℕ) (name : pred_name) (xs ys : fin n → var_name) : formula :=
+(And n (fun (i : fin n), eq_ (xs i) (ys i))).imp_
+((pred_ name (list.of_fn xs)).imp_ (pred_ name (list.of_fn ys)))
+
+
 def exists_ (x : var_name) (φ : formula) : formula := not_ (forall_ x (not_ φ))
 
 
@@ -1092,6 +1108,10 @@ inductive is_proof
 | eq_2 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
   (x y z : var_name) :
   is_proof Γ Δ ((eq_ x y).imp_ ((eq_ x z).imp_ (eq_ y z)))
+
+| eq_3 (Γ : list (var_name × meta_var_name)) (Δ : list formula)
+  (n : ℕ) (name : pred_name) (xs ys : fin n → var_name) :
+  is_proof Γ Δ (eq_sub_pred n name xs ys)
 
 | thm (Γ Γ' : list (var_name × meta_var_name)) (Δ Δ' : list formula)
   (φ : formula) (σ : instantiation) (τ : meta_instantiation) :
