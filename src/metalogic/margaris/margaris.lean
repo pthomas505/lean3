@@ -171,10 +171,19 @@ inductive is_axiom : formula_ → Prop
   v ∈ P.free_var_set →
   is_axiom (forall_ v P)
 
+
+inductive is_deduction_from (Δ : list formula_) : formula_ → Prop
+| axiom_ (P : formula_) : 
+  is_axiom P →
+  is_deduction_from P
+
+| assume_ (P : formula_) :
+  P ∈ Δ →
+  is_deduction_from P
+
 | mp (P Q : formula_) :
   -- major premise
-  is_axiom (P.imp_ Q) →
+  is_deduction_from (P.imp_ Q) →
   -- minor premise
-  is_axiom P →
-  is_axiom Q
-
+  is_deduction_from P →
+  is_deduction_from Q
