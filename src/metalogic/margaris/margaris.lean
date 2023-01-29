@@ -1,31 +1,36 @@
 import data.finset
 
 
-abbreviation var_name := string
-abbreviation pred_name := string
+@[derive decidable_eq]
+inductive variable_ : Type
+| variable_ : string → variable_
+
+@[derive decidable_eq]
+inductive pred_symbol_ : Type
+| pred_symbol_ : string → pred_symbol_
 
 
 @[derive decidable_eq]
-inductive formula : Type
-| pred_ : pred_name → list var_name → formula
-| not_ : formula → formula
-| imp_ : formula → formula → formula
-| forall_ : var_name → formula → formula
+inductive formula_ : Type
+| pred_ : pred_symbol_ → list variable_ → formula_
+| not_ : formula_ → formula_
+| imp_ : formula_ → formula_ → formula_
+| forall_ : variable_ → formula_ → formula_
 
-open formula
+open formula_
 
 
 -- P ∨ Q := ~ P → Q
-def or_ (P Q : formula) : formula := imp_ (not_ P) Q
+def or_ (P Q : formula_) : formula_ := imp_ (not_ P) Q
 
 -- P ∧ Q := ~ ( P → ~ Q )
-def and_ (P Q : formula) : formula := not_ (imp_ P (not_ Q))
+def and_ (P Q : formula_) : formula_ := not_ (imp_ P (not_ Q))
 
 -- P ↔ Q := ( P → Q ) ∧ ( Q → P )
-def iff_ (P Q : formula) : formula := and_ (imp_ P Q) (imp_ Q P)
+def iff_ (P Q : formula_) : formula_ := and_ (imp_ P Q) (imp_ Q P)
 
 -- ∃ x P := ~ ∀ x ~ P
-def exists_ (x : var_name) (P : formula) : formula := not_ (forall_ x (not_ P))
+def exists_ (x : variable_) (P : formula_) : formula_ := not_ (forall_ x (not_ P))
 
 
 /-
@@ -54,47 +59,47 @@ If $P$ is a formula, $v$ is a variable, and $t$ is a term, then $P(t/v)$ is the 
 If $v$ and $u$ are variables and $P$ is a formula, then $P$ admits $u$ for $v$ if and only if there is no free occurrence of $v$ in $P$ that becomes a bound occurrence of $u$ in $P(u/v)$. If $t$ is a term, then $P$ admits $t$ for $v$ if and only if $P$ admits for $v$ every variable in $t$.
 -/
 
-def formula.free_var_set : formula → finset var_name
+def formula_.free_var_set : formula_ → finset variable_
 | (pred_ name args) := args.to_finset
-| (not_ φ) := φ.free_var_set
-| (imp_ φ ψ) := φ.free_var_set ∪ ψ.free_var_set
-| (forall_ x φ) := φ.free_var_set \ {x}
+| (not_ P) := P.free_var_set
+| (imp_ P Q) := P.free_var_set ∪ Q.free_var_set
+| (forall_ x P) := P.free_var_set \ {x}
 
-def is_free_in (v : var_name) : formula → Prop
+def is_free_in (v : variable_) : formula_ → Prop
 | (pred_ name args) := v ∈ args.to_finset
 | (not_ P) := is_free_in P
 | (imp_ P Q) := is_free_in P ∨ is_free_in Q
 | (forall_ x P) := ¬ v = x ∧ is_free_in P
 
 example
-  (v : var_name)
-  (P : formula) :
+  (v : variable_)
+  (P : formula_) :
   is_free_in v P ↔ v ∈ P.free_var_set :=
 begin
   induction P,
-  case formula.pred_ : name args
+  case formula_.pred_ : name args
   {
     refl,
   },
-  case formula.not_ : P P_ih
+  case formula_.not_ : P P_ih
   {
     unfold is_free_in,
-    unfold formula.free_var_set,
+    unfold formula_.free_var_set,
     exact P_ih,
   },
-  case formula.imp_ : P Q P_ih Q_ih
+  case formula_.imp_ : P Q P_ih Q_ih
   {
     unfold is_free_in,
-    unfold formula.free_var_set,
+    unfold formula_.free_var_set,
     simp only [finset.mem_union],
     exact iff.or P_ih Q_ih,
   },
-  case formula.forall_ : x P P_ih
+  case formula_.forall_ : x P P_ih
   {
     cases P_ih,
 
     unfold is_free_in,
-    unfold formula.free_var_set,
+    unfold formula_.free_var_set,
     simp only [finset.mem_sdiff, finset.mem_singleton],
     split,
     {
@@ -123,35 +128,54 @@ begin
 end
 
 
-inductive is_axiom : formula → Prop
+-- v -> u
+def replace
+  {α : Type}
+  [decidable_eq α]
+  (v u x : α) : α :=
+  if x = v then u else x
 
-| prop_1 (P Q : formula) :
+def replace_free (v u : variable_) : formula_ → formula_
+| (pred_ name args) := pred_ name (args.map (replace v u))
+| (not_ P) := not_ (replace_free P)
+| (imp_ P Q) := imp_ (replace_free P) (replace_free Q)
+| (forall_ x φ) :=
+  if x = v
+  then forall_ x φ
+  else forall_ x (replace_free φ)
+
+
+
+
+inductive is_axiom : formula_ → Prop
+
+| prop_1 (P Q : formula_) :
   is_axiom (P.imp_ (Q.imp_ P))
 
-| prop_2 (P Q S : formula) :
+| prop_2 (P Q S : formula_) :
   is_axiom ((S.imp_ (P.imp_ Q)).imp_ ((S.imp_ P).imp_ (S.imp_ Q)))
 
-| prop_3 (P Q : formula) :
+| prop_3 (P Q : formula_) :
   is_axiom (((not_ Q).imp_ (not_ P)).imp_ (P.imp_ Q))
 
-| pred_1 (P Q : formula) (v : var_name) :
+| pred_1 (P Q : formula_) (v : variable_) :
   is_axiom ((forall_ v (P.imp_ Q)).imp_ ((forall_ v P).imp_ (forall_ v Q)))
 
-| pred_2 (v : var_name) (P : formula)
-  (t : var_name) :
+| pred_2 (v : variable_) (P : formula_)
+  (t : variable_) :
   P.admits t v → 
   is_axiom ((forall_ v P).imp_ P(t/v))
 
-| pred_3 (P : formula) (v : var_name) :
+| pred_3 (P : formula_) (v : variable_) :
   v ∉ P.free_var_set →
   is_axiom (P.imp_ (forall_ v P))
 
-| gen (P : formula) (v : var_name) :
+| gen (P : formula_) (v : variable_) :
   is_axiom P →
   v ∈ P.free_var_set →
   is_axiom (forall_ v P)
 
-| mp (P Q : formula) :
+| mp (P Q : formula_) :
   -- major premise
   is_axiom (P.imp_ Q) →
   -- minor premise
