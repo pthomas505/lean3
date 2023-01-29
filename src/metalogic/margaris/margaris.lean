@@ -173,7 +173,7 @@ inductive is_axiom : formula_ → Prop
 
 
 inductive is_deduct_from (Δ : finset formula_) : formula_ → Prop
-| axiom_ (P : formula_) : 
+| axiom_ (P : formula_) :
   is_axiom P →
   is_deduct_from P
 
