@@ -338,3 +338,30 @@ begin
     exact is_deduct.mp_ s2 h1_ih_2,
   },
 end
+
+
+example
+  (P Q : formula) :
+  is_proof ((not_ P).imp_ (P.imp_ Q)) :=
+begin
+  have s1 : is_deduct (∅ ∪ {P.not_}) P.not_,
+  apply is_deduct.assumption_,
+  simp only [finset.empty_union, finset.mem_singleton],
+
+  have s2 : is_deduct (∅ ∪ {P.not_}) (P.not_.imp_ (Q.not_.imp_ P.not_)),
+  apply is_deduct.axiom_,
+  apply is_axiom.prop_1,
+
+  have s3 : is_deduct (∅ ∪ {P.not_}) (Q.not_.imp_ P.not_),
+  exact is_deduct.mp_ s2 s1,
+
+  have s4 : is_deduct (∅ ∪ {P.not_}) ((Q.not_.imp_ P.not_).imp_ (P.imp_ Q)),
+  apply is_deduct.axiom_,
+  apply is_axiom.prop_3,
+
+  have s5 : is_deduct (∅ ∪ {P.not_}) (P.imp_ Q),
+  exact is_deduct.mp_ s4 s3,
+
+  apply deduction_theorem,
+  exact s5,
+end
