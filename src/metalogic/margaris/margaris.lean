@@ -79,13 +79,53 @@ example
 begin
   induction P,
   case formula_.pred_ : name args
-  { admit },
+  {
+    refl,
+  },
   case formula_.not_ : P P_ih
-  { admit },
+  {
+    unfold is_free_in,
+    unfold formula_.free_var_set,
+    exact P_ih,
+  },
   case formula_.imp_ : P Q P_ih Q_ih
-  { admit },
+  {
+    unfold is_free_in,
+    unfold formula_.free_var_set,
+    simp only [finset.mem_union],
+    exact iff.or P_ih Q_ih,
+  },
   case formula_.forall_ : x P P_ih
-  { admit },
+  {
+    cases P_ih,
+
+    unfold is_free_in,
+    unfold formula_.free_var_set,
+    simp only [finset.mem_sdiff, finset.mem_singleton],
+    split,
+    {
+      intros a1,
+      cases a1,
+      split,
+      {
+        exact P_ih_mp a1_right,
+      },
+      {
+        exact a1_left,
+      }
+    },
+    {
+      intros a1,
+      cases a1,
+      split,
+      {
+        exact a1_right,
+      },
+      {
+        exact P_ih_mpr a1_left,
+      }
+    }
+  },
 end
 
 
