@@ -172,6 +172,24 @@ inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
   is_prop_sub (forall_ x P) v t (forall_ x P')
 
 
+example
+  (P : formula)
+  (v t : variable_)
+  (h1 : admits v t P) :
+  is_prop_sub P v t (replace_free v t P) :=
+begin
+  induction P,
+  case formula.pred_ : P_ᾰ P_ᾰ_1
+  { admit },
+  case formula.not_ : P_ᾰ P_ih
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
+  { admit },
+  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih
+  { admit },
+end
+
+
 inductive is_axiom : formula → Prop
 
 | prop_1 (P Q : formula) :
