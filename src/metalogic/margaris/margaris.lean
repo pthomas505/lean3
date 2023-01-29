@@ -172,48 +172,82 @@ inductive is_axiom : formula → Prop
   is_axiom (forall_ v P)
 
 
-inductive is_deduct_from (Δ : finset formula) : formula → Prop
+inductive is_deduct (Δ : finset formula) : formula → Prop
 | axiom_ (P : formula) :
   is_axiom P →
-  is_deduct_from P
+  is_deduct P
 
 | assumption_ (P : formula) :
   P ∈ Δ →
-  is_deduct_from P
+  is_deduct P
 
 | mp_ {P Q : formula} :
   -- major premise
-  is_deduct_from (P.imp_ Q) →
+  is_deduct (P.imp_ Q) →
   -- minor premise
-  is_deduct_from P →
-  is_deduct_from Q
+  is_deduct P →
+  is_deduct Q
 
 
-def is_proof (P : formula) : Prop := is_deduct_from ∅ P
+def is_proof (P : formula) : Prop := is_deduct ∅ P
 
 
 theorem thm_5
   (P : formula) :
   is_proof (P.imp_ P) :=
 begin
-  have s1 : is_deduct_from ∅ ((P.imp_ ((P.imp_ P).imp_ P)).imp_ ((P.imp_ (P.imp_ P)).imp_ (P.imp_ P))),
-  apply is_deduct_from.axiom_,
+  have s1 : is_deduct ∅ ((P.imp_ ((P.imp_ P).imp_ P)).imp_ ((P.imp_ (P.imp_ P)).imp_ (P.imp_ P))),
+  apply is_deduct.axiom_,
   apply is_axiom.prop_2,
 
-  have s2 : is_deduct_from ∅ (P.imp_ ((P.imp_ P).imp_ P)),
-  apply is_deduct_from.axiom_,
+  have s2 : is_deduct ∅ (P.imp_ ((P.imp_ P).imp_ P)),
+  apply is_deduct.axiom_,
   apply is_axiom.prop_1,
 
-  have s3 : is_deduct_from ∅ ((P.imp_ (P.imp_ P)).imp_ (P.imp_ P)),
-  exact is_deduct_from.mp_ s1 s2,
+  have s3 : is_deduct ∅ ((P.imp_ (P.imp_ P)).imp_ (P.imp_ P)),
+  exact is_deduct.mp_ s1 s2,
 
-  have s4 : is_deduct_from ∅ (P.imp_ (P.imp_ P)),
-  apply is_deduct_from.axiom_,
+  have s4 : is_deduct ∅ (P.imp_ (P.imp_ P)),
+  apply is_deduct.axiom_,
   apply is_axiom.prop_1,
 
-  have s5 : is_deduct_from ∅ (P.imp_ P),
-  exact is_deduct_from.mp_ s3 s4,
+  have s5 : is_deduct ∅ (P.imp_ P),
+  exact is_deduct.mp_ s3 s4,
 
   unfold is_proof,
   exact s5,
+end
+
+
+theorem thm_6
+  (P Q : formula) :
+  is_proof ((not_ P).imp_ (P.imp_ Q)) :=
+begin
+  have s1 : is_deduct ∅ ((Q.not_.imp_ P.not_).imp_ (P.imp_ Q)),
+  apply is_deduct.axiom_,
+  apply is_axiom.prop_3,
+
+  have s2 : is_deduct ∅ (((Q.not_.imp_ P.not_).imp_ (P.imp_ Q)).imp_ (P.not_.imp_ ((Q.not_.imp_ P.not_).imp_ (P.imp_ Q)))),
+  apply is_deduct.axiom_,
+  apply is_axiom.prop_1,
+
+  have s3 : is_deduct ∅ (P.not_.imp_ ((Q.not_.imp_ P.not_).imp_ (P.imp_ Q))),
+  exact is_deduct.mp_ s2 s1,
+
+  have s4 : is_deduct ∅ ((P.not_.imp_ ((Q.not_.imp_ P.not_).imp_ (P.imp_ Q))).imp_ ((P.not_.imp_ (Q.not_.imp_ P.not_)).imp_ (P.not_.imp_ (P.imp_ Q)))),
+  apply is_deduct.axiom_,
+  apply is_axiom.prop_2,
+
+  have s5 : is_deduct ∅ ((P.not_.imp_ (Q.not_.imp_ P.not_)).imp_ (P.not_.imp_ (P.imp_ Q))),
+  exact is_deduct.mp_ s4 s3,
+
+  have s6 : is_deduct ∅ (P.not_.imp_ (Q.not_.imp_ P.not_)),
+  apply is_deduct.axiom_,
+  apply is_axiom.prop_1,
+
+  have s7 : is_deduct ∅ (P.not_.imp_ (P.imp_ Q)),
+  exact is_deduct.mp_ s5 s6,
+
+  unfold is_proof,
+  exact s7,
 end
