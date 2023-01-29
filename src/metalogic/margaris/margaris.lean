@@ -187,3 +187,7 @@ inductive is_deduction_from (Δ : finset formula_) : formula_ → Prop
   -- minor premise
   is_deduction_from P →
   is_deduction_from Q
+
+
+def is_proof (P : formula_) : Prop := is_deduction_from ∅ P
+
