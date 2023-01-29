@@ -1,4 +1,5 @@
 import data.finset
+import data.fin.vec_notation
 
 
 namespace fol
@@ -477,6 +478,21 @@ begin
 end
 
 
+def true_ : formula := not_ false_
+
+def and_ (φ ψ : formula) : formula := not_ (φ.imp_ ψ.not_)
+
+open matrix
+
+def And : Π (n : ℕ) (phi : fin n → formula), formula
+| 0 phi := true_
+| (n + 1) phi := and_ (vec_head phi) (And n (vec_tail phi))
+
+def eq_sub_pred (n : ℕ) (name : pred_name) (xs ys : fin n → var_name) : formula :=
+(And n (fun (i : fin n), eq_ (xs i) (ys i))).imp_
+((pred_ name (list.of_fn xs)).imp_ (pred_ name (list.of_fn ys)))
+
+
 def exists_ (x : var_name) (φ : formula) : formula :=
   not_ (forall_ x (not_ φ))
 
@@ -509,11 +525,12 @@ inductive is_proof : formula → Prop
   is_prop_sub φ x y φ' →
   is_proof ((forall_ x φ).imp_ φ')
 
-| eq_1 (x y : var_name) :
-  y ≠ x → is_proof (exists_ x (eq_ x y))
+| eq_1 (x : var_name) :
+  is_proof (eq_ x x)
 
-| eq_2 (x y z : var_name) :
-  is_proof ((eq_ x y).imp_ ((eq_ x z).imp_ (eq_ y z)))
+| eq_2
+  (n : ℕ) (name : pred_name) (xs ys : fin n → var_name) :
+  is_proof (eq_sub_pred n name xs ys)
 
 
 lemma is_proof_subst_left
