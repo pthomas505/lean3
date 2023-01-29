@@ -279,6 +279,27 @@ begin
 end
 
 
+example
+  (P : formula)
+  (v t : variable_)
+  (P' : formula)
+  (h1 : is_prop_sub P v t P') :
+  admits v t P ∧ P' = replace_free v t P :=
+begin
+  induction h1,
+  case is_prop_sub.pred_ : h1_name h1_args h1_v h1_t
+  { admit },
+  case is_prop_sub.not_ : h1_P h1_v h1_t h1_P' h1_ᾰ h1_ih
+  { admit },
+  case is_prop_sub.imp_ : h1_P h1_Q h1_v h1_t h1_P' h1_Q' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  { admit },
+  case is_prop_sub.forall_not_free : h1_x h1_P h1_v h1_t h1_ᾰ
+  { admit },
+  case is_prop_sub.forall_free : h1_x h1_P h1_v h1_t h1_P' h1_ᾰ h1_ᾰ_1 h1_ᾰ_2 h1_ih
+  { admit },
+end
+
+
 inductive is_axiom : formula → Prop
 
 | prop_1 (P Q : formula) :
