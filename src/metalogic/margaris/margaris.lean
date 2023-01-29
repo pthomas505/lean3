@@ -260,8 +260,18 @@ theorem deduct
   is_deduct Δ (P.imp_ Q) :=
 begin
   induction h1,
-  case is_deduct.axiom_ : h1_P h1_ᾰ
-  { admit },
+  case is_deduct.axiom_ : h1_P h1_1
+  {
+    have s1 : is_deduct Δ h1_P,
+    apply is_deduct.axiom_,
+    apply h1_1,
+
+    have s2 : is_deduct Δ (h1_P.imp_ (P.imp_ h1_P)),
+    apply is_deduct.axiom_,
+    apply is_axiom.prop_1,
+
+    exact is_deduct.mp_ s2 s1,
+  },
   case is_deduct.assumption_ : h1_P h1_ᾰ
   { admit },
   case is_deduct.mp_ : h1_P h1_Q h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
