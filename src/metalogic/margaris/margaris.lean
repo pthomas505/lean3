@@ -191,8 +191,19 @@ begin
     apply is_prop_sub.not_,
     exact P_ih h1,
   },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
-  { admit },
+  case formula.imp_ : P Q P_ih Q_ih
+  {
+    unfold admits at h1,
+    cases h1,
+    unfold replace_free,
+    apply is_prop_sub.imp_,
+    {
+      exact P_ih h1_left,
+    },
+    {
+      exact Q_ih h1_right,
+    }
+  },
   case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih
   { admit },
 end
