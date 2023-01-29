@@ -123,10 +123,10 @@ def replace_free (v t : variable_) : formula → formula
 | (pred_ name args) := pred_ name (args.map (replace v t))
 | (not_ P) := not_ (replace_free P)
 | (imp_ P Q) := imp_ (replace_free P) (replace_free Q)
-| (forall_ x φ) :=
+| (forall_ x P) :=
   if x = v
-  then forall_ x φ
-  else forall_ x (replace_free φ)
+  then forall_ x P
+  else forall_ x (replace_free P)
 
 
 /-
@@ -139,6 +139,37 @@ def admits (v u : variable_) : formula → Prop
 | (not_ P) := admits P
 | (imp_ P Q) := admits P ∧ admits Q
 | (forall_ x P) := x = v ∨ (¬ x = u ∧ admits P)
+
+
+inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
+| pred_ (name : pred_symbol_) (args : list variable_)
+  (v t : variable_) :
+  is_prop_sub (pred_ name args) v t (pred_ name (args.map (replace v t)))
+
+| not_ (P : formula)
+  (v t : variable_)
+  (P' : formula) :
+  is_prop_sub P v t P' →
+  is_prop_sub P.not_ v t P'.not_
+
+| imp_ (P Q : formula)
+  (v t : variable_)
+  (P' Q' : formula) :
+  is_prop_sub P v t P' →
+  is_prop_sub Q v t Q' →
+  is_prop_sub (P.imp_ Q) v t (P'.imp_ Q')
+
+| forall_not_free (x : variable_) (P : formula)
+  (v t : variable_) :
+  x = v →
+  is_prop_sub (forall_ x P) v t (forall_ x P)
+
+| forall_free (x : variable_) (P : formula)
+  (v t : variable_)
+  (P' : formula) :
+  ¬ x = v → ¬ x = t →
+  is_prop_sub P v t P' →
+  is_prop_sub (forall_ x P) v t (forall_ x P')
 
 
 inductive is_axiom : formula → Prop
