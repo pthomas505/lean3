@@ -340,6 +340,11 @@ begin
       {
         exact h1_ih_left,
       }
+    },
+    {
+      unfold replace_free,
+      rewrite if_neg h1_1,
+      rewrite h1_ih_right,
     }
   },
 end
