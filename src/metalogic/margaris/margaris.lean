@@ -180,9 +180,14 @@ example
 begin
   induction h1,
   case is_prop_sub.pred_ : h1_name h1_args h1_v h1_t
-  { admit },
-  case is_prop_sub.not_ : h1_P h1_v h1_t h1_P' h1_ᾰ h1_ih
-  { admit },
+  {
+    unfold admits,
+  },
+  case is_prop_sub.not_ : h1_P h1_v h1_t h1_P' h1_1 h1_ih
+  {
+    unfold admits,
+    exact h1_ih,
+  },
   case is_prop_sub.imp_ : h1_P h1_Q h1_v h1_t h1_P' h1_Q' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
   { admit },
   case is_prop_sub.forall_not_free : h1_x h1_P h1_v h1_t h1_ᾰ
