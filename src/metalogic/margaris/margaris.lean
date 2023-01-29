@@ -191,6 +191,28 @@ inductive is_deduct (Δ : finset formula) : formula → Prop
 
 def is_proof (P : formula) : Prop := is_deduct ∅ P
 
+example
+  (P : formula)
+  (h1 : is_proof P) :
+  ∀ (Δ : finset formula), is_deduct Δ P :=
+begin
+  intros Δ,
+  unfold is_proof at h1,
+  induction h1,
+  case is_deduct.axiom_ : h1_P h1_1
+  {
+    apply is_deduct.axiom_,
+    exact h1_1,
+  },
+  case is_deduct.assumption_ : h1_P h1_1
+  {
+    simp only [finset.not_mem_empty] at h1_1,
+    contradiction,
+  },
+  case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
+  { admit },
+end
+
 
 theorem thm_5
   (P : formula) :
@@ -272,8 +294,26 @@ begin
 
     exact is_deduct.mp_ s2 s1,
   },
-  case is_deduct.assumption_ : h1_P h1_ᾰ
-  { admit },
+  case is_deduct.assumption_ : h1_P h1_1
+  {
+    simp only [finset.mem_union, finset.mem_singleton] at h1_1,
+    cases h1_1,
+    {
+      have s1 : is_deduct Δ h1_P,
+      apply is_deduct.assumption_,
+      exact h1_1,
+
+      have s2 : is_deduct Δ (h1_P.imp_ (P.imp_ h1_P)),
+      apply is_deduct.axiom_,
+      apply is_axiom.prop_1,
+
+      exact is_deduct.mp_ s2 s1,
+    },
+    {
+      rewrite h1_1,
+      apply thm_5,
+    }
+  },
   case is_deduct.mp_ : h1_P h1_Q h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
   { admit },
 end
