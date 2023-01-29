@@ -319,5 +319,14 @@ begin
     }
   },
   case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
-  { admit },
+  {
+    have s1 : is_deduct Δ ((P.imp_ (h1_P.imp_ h1_Q)).imp_ ((P.imp_ h1_P).imp_ (P.imp_ h1_Q))),
+    apply is_deduct.axiom_,
+    apply is_axiom.prop_2,
+
+    have s2 : is_deduct Δ ((P.imp_ h1_P).imp_ (P.imp_ h1_Q)),
+    exact is_deduct.mp_ s1 h1_ih_1,
+
+    exact is_deduct.mp_ s2 h1_ih_2,
+  },
 end
