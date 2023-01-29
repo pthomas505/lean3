@@ -181,7 +181,7 @@ inductive is_deduct_from (Δ : finset formula_) : formula_ → Prop
   P ∈ Δ →
   is_deduct_from P
 
-| mp_ (P Q : formula_) :
+| mp_ {P Q : formula_} :
   -- major premise
   is_deduct_from (P.imp_ Q) →
   -- minor premise
@@ -196,8 +196,6 @@ theorem thm_5
   (P : formula_) :
   is_proof (P.imp_ P) :=
 begin
-  unfold is_proof,
-
   have s1 : is_deduct_from ∅ ((P.imp_ ((P.imp_ P).imp_ P)).imp_ ((P.imp_ (P.imp_ P)).imp_ (P.imp_ P))),
   apply is_deduct_from.axiom_,
   apply is_axiom.prop_2,
@@ -207,14 +205,15 @@ begin
   apply is_axiom.prop_1,
 
   have s3 : is_deduct_from ∅ ((P.imp_ (P.imp_ P)).imp_ (P.imp_ P)),
-  apply is_deduct_from.mp_ _ _ s1 s2,
+  exact is_deduct_from.mp_ s1 s2,
 
   have s4 : is_deduct_from ∅ (P.imp_ (P.imp_ P)),
   apply is_deduct_from.axiom_,
   apply is_axiom.prop_1,
 
   have s5 : is_deduct_from ∅ (P.imp_ P),
-  apply is_deduct_from.mp_ _ _ s3 s4,
+  exact is_deduct_from.mp_ s3 s4,
 
+  unfold is_proof,
   exact s5,
 end
