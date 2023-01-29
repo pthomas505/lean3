@@ -184,8 +184,13 @@ begin
     unfold replace_free,
     apply is_prop_sub.pred_,
   },
-  case formula.not_ : P_ᾰ P_ih
-  { admit },
+  case formula.not_ : P P_ih
+  {
+    unfold admits at h1,
+    unfold replace_free,
+    apply is_prop_sub.not_,
+    exact P_ih h1,
+  },
   case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
   { admit },
   case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih
