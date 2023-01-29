@@ -318,6 +318,6 @@ begin
       exact thm_5 P,
     }
   },
-  case is_deduct.mp_ : h1_P h1_Q h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
   { admit },
 end
