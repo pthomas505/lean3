@@ -191,7 +191,8 @@ inductive is_deduct (Δ : finset formula) : formula → Prop
 
 def is_proof (P : formula) : Prop := is_deduct ∅ P
 
-example
+
+lemma proof_imp_deduct
   (P : formula)
   (h1 : is_proof P) :
   ∀ (Δ : finset formula), is_deduct Δ P :=
@@ -210,7 +211,9 @@ begin
     contradiction,
   },
   case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
-  { admit },
+  {
+    exact is_deduct.mp_ h1_ih_1 h1_ih_2,
+  },
 end
 
 
@@ -311,7 +314,8 @@ begin
     },
     {
       rewrite h1_1,
-      apply thm_5,
+      apply proof_imp_deduct,
+      exact thm_5 P,
     }
   },
   case is_deduct.mp_ : h1_P h1_Q h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
