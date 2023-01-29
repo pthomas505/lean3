@@ -205,7 +205,7 @@ begin
     apply or.intro_left,
     exact h1_1,
   },
-  case is_prop_sub.forall_free : h1_x h1_P h1_v h1_t h1_P' h1_ᾰ h1_ᾰ_1 h1_ᾰ_2 h1_ih
+  case is_prop_sub.forall_free : h1_x h1_P h1_v h1_t h1_P' h1_1 h1_2 h1_3 h1_ih
   { admit },
 end
 
