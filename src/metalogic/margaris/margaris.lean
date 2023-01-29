@@ -172,22 +172,49 @@ inductive is_axiom : formula_ → Prop
   is_axiom (forall_ v P)
 
 
-inductive is_deduction_from (Δ : finset formula_) : formula_ → Prop
+inductive is_deduct_from (Δ : finset formula_) : formula_ → Prop
 | axiom_ (P : formula_) : 
   is_axiom P →
-  is_deduction_from P
+  is_deduct_from P
 
 | assumption_ (P : formula_) :
   P ∈ Δ →
-  is_deduction_from P
+  is_deduct_from P
 
-| mp (P Q : formula_) :
+| mp_ (P Q : formula_) :
   -- major premise
-  is_deduction_from (P.imp_ Q) →
+  is_deduct_from (P.imp_ Q) →
   -- minor premise
-  is_deduction_from P →
-  is_deduction_from Q
+  is_deduct_from P →
+  is_deduct_from Q
 
 
-def is_proof (P : formula_) : Prop := is_deduction_from ∅ P
+def is_proof (P : formula_) : Prop := is_deduct_from ∅ P
 
+
+theorem thm_5
+  (P : formula_) :
+  is_proof (P.imp_ P) :=
+begin
+  unfold is_proof,
+
+  have s1 : is_deduct_from ∅ ((P.imp_ ((P.imp_ P).imp_ P)).imp_ ((P.imp_ (P.imp_ P)).imp_ (P.imp_ P))),
+  apply is_deduct_from.axiom_,
+  apply is_axiom.prop_2,
+
+  have s2 : is_deduct_from ∅ (P.imp_ ((P.imp_ P).imp_ P)),
+  apply is_deduct_from.axiom_,
+  apply is_axiom.prop_1,
+
+  have s3 : is_deduct_from ∅ ((P.imp_ (P.imp_ P)).imp_ (P.imp_ P)),
+  apply is_deduct_from.mp_ _ _ s1 s2,
+
+  have s4 : is_deduct_from ∅ (P.imp_ (P.imp_ P)),
+  apply is_deduct_from.axiom_,
+  apply is_axiom.prop_1,
+
+  have s5 : is_deduct_from ∅ (P.imp_ P),
+  apply is_deduct_from.mp_ _ _ s3 s4,
+
+  exact s5,
+end
