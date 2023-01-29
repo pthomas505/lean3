@@ -78,13 +78,13 @@ example
   is_free_in v P ↔ v ∈ P.free_var_set :=
 begin
   induction P,
-  case formula_.pred_ : P_ᾰ P_ᾰ_1
+  case formula_.pred_ : name args
   { admit },
-  case formula_.not_ : P_ᾰ P_ih
+  case formula_.not_ : P P_ih
   { admit },
-  case formula_.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
+  case formula_.imp_ : P Q P_ih Q_ih
   { admit },
-  case formula_.forall_ : P_ᾰ P_ᾰ_1 P_ih
+  case formula_.forall_ : x P P_ih
   { admit },
 end
 
