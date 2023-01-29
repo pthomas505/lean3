@@ -21,16 +21,16 @@ open formula_
 
 
 -- P ∨ Q := ~ P → Q
-def or_ (P Q : formula_) : formula_ := imp_ (not_ P) Q
+def formula_.or_ (P Q : formula_) : formula_ := (not_ P).imp_ Q
 
 -- P ∧ Q := ~ ( P → ~ Q )
-def and_ (P Q : formula_) : formula_ := not_ (imp_ P (not_ Q))
+def formula_.and_ (P Q : formula_) : formula_ := not_ (P.imp_ (not_ Q))
 
 -- P ↔ Q := ( P → Q ) ∧ ( Q → P )
-def iff_ (P Q : formula_) : formula_ := and_ (imp_ P Q) (imp_ Q P)
+def formula_.iff_ (P Q : formula_) : formula_ := (P.imp_ Q).and_ (Q.imp_ P)
 
 -- ∃ x P := ~ ∀ x ~ P
-def exists_ (x : variable_) (P : formula_) : formula_ := not_ (forall_ x (not_ P))
+def formula_.exists_ (x : variable_) (P : formula_) : formula_ := not_ (forall_ x (not_ P))
 
 
 /-
