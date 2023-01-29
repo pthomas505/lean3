@@ -287,6 +287,8 @@ begin
   induction h1,
   case is_deduct.axiom_ : h1_P h1_1
   {
+    -- Case 1
+
     have s1 : is_deduct Δ h1_P,
     apply is_deduct.axiom_,
     apply h1_1,
@@ -302,6 +304,8 @@ begin
     simp only [finset.mem_union, finset.mem_singleton] at h1_1,
     cases h1_1,
     {
+      -- Case 2
+
       have s1 : is_deduct Δ h1_P,
       apply is_deduct.assumption_,
       exact h1_1,
@@ -313,6 +317,8 @@ begin
       exact is_deduct.mp_ s2 s1,
     },
     {
+      -- Case 3
+
       rewrite h1_1,
       apply proof_imp_deduct,
       exact thm_5 P,
@@ -320,6 +326,8 @@ begin
   },
   case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
   {
+    -- Case 4
+
     have s1 : is_deduct Δ ((P.imp_ (h1_P.imp_ h1_Q)).imp_ ((P.imp_ h1_P).imp_ (P.imp_ h1_Q))),
     apply is_deduct.axiom_,
     apply is_axiom.prop_2,
