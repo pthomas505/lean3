@@ -251,3 +251,19 @@ begin
   unfold is_proof,
   exact s7,
 end
+
+
+theorem deduct
+  (P Q : formula)
+  (Δ : finset formula)
+  (h1 : is_deduct (Δ ∪ {P}) Q) :
+  is_deduct Δ (P.imp_ Q) :=
+begin
+  induction h1,
+  case is_deduct.axiom_ : h1_P h1_ᾰ
+  { admit },
+  case is_deduct.assumption_ : h1_P h1_ᾰ
+  { admit },
+  case is_deduct.mp_ : h1_P h1_Q h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  { admit },
+end
