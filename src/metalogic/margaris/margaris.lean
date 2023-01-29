@@ -312,8 +312,20 @@ begin
   },
   case is_prop_sub.imp_ : h1_P h1_Q h1_v h1_t h1_P' h1_Q' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
   { admit },
-  case is_prop_sub.forall_not_free : h1_x h1_P h1_v h1_t h1_ᾰ
-  { admit },
+  case is_prop_sub.forall_not_free : h1_x h1_P h1_v h1_t h1_1
+  {
+    split,
+    {
+      unfold admits,
+      apply or.intro_left,
+      exact h1_1,
+    },
+    {
+      rewrite h1_1,
+      unfold replace_free,
+      simp only [eq_self_iff_true, if_true, and_self],
+    }
+  },
   case is_prop_sub.forall_free : h1_x h1_P h1_v h1_t h1_P' h1_ᾰ h1_ᾰ_1 h1_ᾰ_2 h1_ih
   { admit },
 end
