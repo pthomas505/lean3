@@ -157,7 +157,7 @@ inductive is_axiom : formula_ → Prop
 
 | pred_2 (v : variable_) (P : formula_) (t : variable_) :
   -- $P$ admits $t$ for $v$
-  admits v t P → 
+  admits v t P →
   -- $P(t/v)$
   is_axiom ((forall_ v P).imp_ (replace_free v t P))
 
