@@ -71,6 +71,24 @@ def is_free_in (v : variable_) : formula_ → Prop
 | (imp_ P Q) := is_free_in P ∨ is_free_in Q
 | (forall_ x P) := ¬ v = x ∧ is_free_in P
 
+
+example
+  (v : variable_)
+  (P : formula_) :
+  is_free_in v P ↔ v ∈ P.free_var_set :=
+begin
+  induction P,
+  case formula_.pred_ : P_ᾰ P_ᾰ_1
+  { admit },
+  case formula_.not_ : P_ᾰ P_ih
+  { admit },
+  case formula_.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
+  { admit },
+  case formula_.forall_ : P_ᾰ P_ᾰ_1 P_ih
+  { admit },
+end
+
+
 example
   (v : variable_)
   (P : formula_) :
