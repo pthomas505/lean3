@@ -204,8 +204,18 @@ begin
       exact Q_ih h1_right,
     }
   },
-  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih
-  { admit },
+  case formula.forall_ : x P P_ih
+  {
+    unfold admits at h1,
+    unfold replace_free,
+    cases h1,
+    {
+      rewrite <- h1,
+      simp only [eq_self_iff_true, if_true],
+      apply is_prop_sub.forall_not_free,
+      refl,
+    }
+  },
 end
 
 
