@@ -188,8 +188,17 @@ begin
     unfold admits,
     exact h1_ih,
   },
-  case is_prop_sub.imp_ : h1_P h1_Q h1_v h1_t h1_P' h1_Q' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
-  { admit },
+  case is_prop_sub.imp_ : h1_P h1_Q h1_v h1_t h1_P' h1_Q' h1_1 h1_2 h1_ih_1 h1_ih_2
+  {
+    unfold admits,
+    split,
+    {
+      exact h1_ih_1,
+    },
+    {
+      exact h1_ih_2,
+    }
+  },
   case is_prop_sub.forall_not_free : h1_x h1_P h1_v h1_t h1_ᾰ
   { admit },
   case is_prop_sub.forall_free : h1_x h1_P h1_v h1_t h1_P' h1_ᾰ h1_ᾰ_1 h1_ᾰ_2 h1_ih
