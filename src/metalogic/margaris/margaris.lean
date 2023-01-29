@@ -278,7 +278,7 @@ begin
 end
 
 
-theorem deduct
+theorem deduction_theorem
   (P Q : formula)
   (Δ : finset formula)
   (h1 : is_deduct (Δ ∪ {P}) Q) :
