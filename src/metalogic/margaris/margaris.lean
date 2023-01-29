@@ -34,29 +34,7 @@ def formula_.exists_ (x : variable_) (P : formula_) : formula_ := not_ (forall_ 
 
 
 /-
-  pg. 20
-
-  An occurrence of a variable v in a formula P is bound if and only if it is the explicit occurrence in a quantifier ∀ v or ∃ v, or if it is in the scope of a quantifier ∀ v or ∃ v. An occurrence of a variable is free if and only if it is not bound. A variable is bound or free in P according as it has a bound or free occurrence in P.
--/
-
-/-
-  pg. 38
-  Let P be a formula, v a variable, and t a term. Then P(t/v) is the formula that results when each free occurrence of v in P is replaced by an occurrence of t. We say that P(t/v) is the result of substituting t for v in P.
-
-  Let u and v be variables and P a formula. P admits u for v if and only if every free occurrence of v in P becomes a free occurrence of u in P(u/v).
-
-  Let t be a term, v a variable, and P a formula. Then P admits t for v if and only if P admits u for v for every variable u that occurrs in t.
--/
-
-
-/-
-pg. 48
-
 An occurrence of a variable $v$ in a formula $P$ is bound if and only if it occurs in a subformula of $P$ of the form $\forall v Q$. An occurrence of $v$ in $P$ is free if and only if it is not a bound occurrence. The variable $v$ is free or bound in $P$ according as it has a free or bound occurrence in $P$.
-
-If $P$ is a formula, $v$ is a variable, and $t$ is a term, then $P(t/v)$ is the result of replacing each free occurrence of $v$ in $P$ by an occurrence of $t$.
-
-If $v$ and $u$ are variables and $P$ is a formula, then $P$ admits $u$ for $v$ if and only if there is no free occurrence of $v$ in $P$ that becomes a bound occurrence of $u$ in $P(u/v)$. If $t$ is a term, then $P$ admits $t$ for $v$ if and only if $P$ admits for $v$ every variable in $t$.
 -/
 
 def formula_.free_var_set : formula_ → finset variable_
@@ -129,15 +107,20 @@ begin
 end
 
 
--- v -> u
+/-
+If $P$ is a formula, $v$ is a variable, and $t$ is a term, then $P(t/v)$ is the result of replacing each free occurrence of $v$ in $P$ by an occurrence of $t$.
+-/
+
+-- v -> t
 def replace
   {α : Type}
   [decidable_eq α]
-  (v u x : α) : α :=
-  if x = v then u else x
+  (v t x : α) : α :=
+  if x = v then t else x
 
-def replace_free (v u : variable_) : formula_ → formula_
-| (pred_ name args) := pred_ name (args.map (replace v u))
+-- P (t/v)
+def replace_free (v t : variable_) : formula_ → formula_
+| (pred_ name args) := pred_ name (args.map (replace v t))
 | (not_ P) := not_ (replace_free P)
 | (imp_ P Q) := imp_ (replace_free P) (replace_free Q)
 | (forall_ x φ) :=
@@ -146,6 +129,16 @@ def replace_free (v u : variable_) : formula_ → formula_
   else forall_ x (replace_free φ)
 
 
+/-
+If $v$ and $u$ are variables and $P$ is a formula, then $P$ admits $u$ for $v$ if and only if there is no free occurrence of $v$ in $P$ that becomes a bound occurrence of $u$ in $P(u/v)$. If $t$ is a term, then $P$ admits $t$ for $v$ if and only if $P$ admits for $v$ every variable in $t$.
+-/
+
+-- P admits u for v
+def admits (v u : variable_) : formula_ → Prop
+| (pred_ name args) := true
+| (not_ P) := admits P
+| (imp_ P Q) := admits P ∧ admits Q
+| (forall_ x P) := x = v ∨ (¬ x = u ∧ admits P)
 
 
 inductive is_axiom : formula_ → Prop
@@ -162,13 +155,15 @@ inductive is_axiom : formula_ → Prop
 | pred_1 (P Q : formula_) (v : variable_) :
   is_axiom ((forall_ v (P.imp_ Q)).imp_ ((forall_ v P).imp_ (forall_ v Q)))
 
-| pred_2 (v : variable_) (P : formula_)
-  (t : variable_) :
-  P.admits t v → 
-  is_axiom ((forall_ v P).imp_ P(t/v))
+| pred_2 (v : variable_) (P : formula_) (t : variable_) :
+  -- $P$ admits $t$ for $v$
+  admits v t P → 
+  -- $P(t/v)$
+  is_axiom ((forall_ v P).imp_ (replace_free v t P))
 
 | pred_3 (P : formula_) (v : variable_) :
-  v ∉ P.free_var_set →
+  -- $v$ is not free in $P$
+  ¬ is_free_in v P →
   is_axiom (P.imp_ (forall_ v P))
 
 | gen (P : formula_) (v : variable_) :
