@@ -214,6 +214,18 @@ begin
       simp only [eq_self_iff_true, if_true],
       apply is_prop_sub.forall_not_free,
       refl,
+    },
+    {
+      cases h1,
+      split_ifs,
+      {
+        apply is_prop_sub.forall_not_free,
+        exact h,
+      },
+      {
+        apply is_prop_sub.forall_free x P v t (replace_free v t P) h h1_left,
+        exact P_ih h1_right,
+      }
     }
   },
 end
