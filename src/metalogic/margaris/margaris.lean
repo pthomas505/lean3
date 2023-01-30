@@ -154,6 +154,24 @@ def admits (v u : variable_) : formula → Prop
 | (forall_ x P) := x = v ∨ (¬ x = u ∧ admits P)
 
 
+example
+  (P : formula)
+  (v t : variable_)
+  (h1 : admits v t P) :
+  replace_free t v (replace_free v t P) = P :=
+begin
+  induction P,
+  case formula.pred_ : P_ᾰ P_ᾰ_1
+  { admit },
+  case formula.not_ : P_ᾰ P_ih
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
+  { admit },
+  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih
+  { admit },
+end
+
+
 inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
 | pred_ (name : pred_symbol_) (args : list variable_)
   (v t : variable_) :
