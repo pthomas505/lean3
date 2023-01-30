@@ -146,7 +146,7 @@ pg. 48
 If $v$ and $u$ are variables and $P$ is a formula, then $P$ admits $u$ for $v$ if and only if there is no free occurrence of $v$ in $P$ that becomes a bound occurrence of $u$ in $P(u/v)$. If $t$ is a term, then $P$ admits $t$ for $v$ if and only if $P$ admits for $v$ every variable in $t$.
 -/
 
--- P admits u for v
+-- P admits u for v (v replaced by u)
 
 def admits_aux (v u : variable_) : finset variable_ → formula → Prop
 | binders (pred_ name args) :=
@@ -210,55 +210,6 @@ example
 begin
   subst h2,
   induction P,
-  case formula.pred_ : name args
-  {
-    unfold replace_free,
-    apply is_prop_sub.pred_,
-  },
-  case formula.not_ : P P_ih
-  {
-    unfold admits at h1,
-    unfold replace_free,
-    apply is_prop_sub.not_,
-    exact P_ih h1,
-  },
-  case formula.imp_ : P Q P_ih Q_ih
-  {
-    unfold admits at h1,
-    cases h1,
-    unfold replace_free,
-    apply is_prop_sub.imp_,
-    {
-      exact P_ih h1_left,
-    },
-    {
-      exact Q_ih h1_right,
-    }
-  },
-  case formula.forall_ : x P P_ih
-  {
-    unfold admits at h1,
-    unfold replace_free,
-    cases h1,
-    {
-      rewrite <- h1,
-      simp only [eq_self_iff_true, if_true],
-      apply is_prop_sub.forall_not_free,
-      refl,
-    },
-    {
-      cases h1,
-      split_ifs,
-      {
-        apply is_prop_sub.forall_not_free,
-        exact h,
-      },
-      {
-        apply is_prop_sub.forall_free x P v t (replace_free v t P) h h1_left,
-        exact P_ih h1_right,
-      }
-    }
-  },
 end
 
 
@@ -270,85 +221,6 @@ example
   admits v t P ∧ P' = replace_free v t P :=
 begin
   induction h1,
-  case is_prop_sub.pred_ : h1_name h1_args h1_v h1_t
-  {
-    split,
-    {
-      unfold admits,
-    },
-    {
-      unfold replace_free,
-    }
-  },
-  case is_prop_sub.not_ : h1_P h1_v h1_t h1_P' h1_1 h1_ih
-  {
-    cases h1_ih,
-    split,
-    {
-      unfold admits,
-      exact h1_ih_left,
-    },
-    {
-      unfold replace_free,
-      rewrite h1_ih_right,
-    }
-  },
-  case is_prop_sub.imp_ : h1_P h1_Q h1_v h1_t h1_P' h1_Q' h1_1 h1_2 h1_ih_1 h1_ih_2
-  {
-    cases h1_ih_1,
-    cases h1_ih_2,
-    split,
-    {
-      unfold admits,
-      split,
-      {
-        exact h1_ih_1_left,
-      },
-      {
-        exact h1_ih_2_left,
-      }
-    },
-    {
-      unfold replace_free,
-      rewrite h1_ih_1_right,
-      rewrite h1_ih_2_right,
-    }
-  },
-  case is_prop_sub.forall_not_free : h1_x h1_P h1_v h1_t h1_1
-  {
-    split,
-    {
-      unfold admits,
-      apply or.intro_left,
-      exact h1_1,
-    },
-    {
-      unfold replace_free,
-      rewrite h1_1,
-      simp only [eq_self_iff_true, if_true, and_self],
-    }
-  },
-  case is_prop_sub.forall_free : h1_x h1_P h1_v h1_t h1_P' h1_1 h1_2 h1_3 h1_ih
-  {
-    cases h1_ih,
-    split,
-    {
-      unfold admits,
-      apply or.intro_right,
-      split,
-      {
-        exact h1_2,
-      },
-      {
-        exact h1_ih_left,
-      }
-    },
-    {
-      unfold replace_free,
-      rewrite if_neg h1_1,
-      rewrite h1_ih_right,
-    }
-  },
 end
 
 
