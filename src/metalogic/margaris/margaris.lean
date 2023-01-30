@@ -187,7 +187,7 @@ inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
   is_prop_sub P v t P' →
   is_prop_sub Q v t Q' →
   is_prop_sub (P.imp_ Q) v t (P'.imp_ Q')
-
+/-
 | not_free (x : variable_) (P : formula)
   (v t : variable_)
   (P' : formula) :
@@ -200,6 +200,19 @@ inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
   ¬ x = v → ¬ x = t →
   is_prop_sub P v t P' →
   is_prop_sub (forall_ x P) v t (forall_ x P')
+-/
+| not_free (x : variable_) (P : formula)
+  (v t : variable_)
+  (P' : formula) :
+  v ∉ P.free_var_set ∪ {x} →
+  is_prop_sub P v t P
+
+| forall_free (x : variable_) (P : formula)
+  (v t : variable_)
+  (P' : formula) :
+  ¬ x = t →
+  is_prop_sub P v t P' →
+  is_prop_sub (forall_ x P) v t (forall_ x P')
 
 
 example
@@ -207,35 +220,7 @@ example
   (v u : variable_) :
   admits v u P ↔ admits' v u P :=
 begin
-  induction P,
-  case formula.pred_ : name args
-  {
-    unfold admits,
-    unfold admits_aux,
-    simp only [finset.not_mem_empty, not_false_iff, or_true, true_iff],
-  },
-  case formula.not_ : P_ᾰ P_ih
-  { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
-  { admit },
-  case formula.forall_ : x P P_ih
-  {
-    unfold admits at P_ih,
-    cases P_ih,
-    unfold admits,
-    unfold admits_aux,
-    simp only [finset.empty_union],
-    unfold admits',
-    split,
-    {
-      intros a1,
-      sorry,
-    },
-    {
-      intros a1,
-      cases a1,
-    }
-  },
+
 end
 
 
