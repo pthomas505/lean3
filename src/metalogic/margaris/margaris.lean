@@ -175,54 +175,6 @@ inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
 example
   (P : formula)
   (v t : variable_)
-  (h1 : is_prop_sub P v t (replace_free v t P)) :
-  admits v t P :=
-begin
-  induction h1,
-  case is_prop_sub.pred_ : h1_name h1_args h1_v h1_t
-  {
-    unfold admits,
-  },
-  case is_prop_sub.not_ : h1_P h1_v h1_t h1_P' h1_1 h1_ih
-  {
-    unfold admits,
-    exact h1_ih,
-  },
-  case is_prop_sub.imp_ : h1_P h1_Q h1_v h1_t h1_P' h1_Q' h1_1 h1_2 h1_ih_1 h1_ih_2
-  {
-    unfold admits,
-    split,
-    {
-      exact h1_ih_1,
-    },
-    {
-      exact h1_ih_2,
-    }
-  },
-  case is_prop_sub.forall_not_free : h1_x h1_P h1_v h1_t h1_1
-  {
-    unfold admits,
-    apply or.intro_left,
-    exact h1_1,
-  },
-  case is_prop_sub.forall_free : h1_x h1_P h1_v h1_t h1_P' h1_1 h1_2 h1_3 h1_ih
-  {
-    unfold admits,
-    apply or.intro_right,
-    split,
-    {
-      exact h1_2,
-    },
-    {
-      exact h1_ih,
-    }
-  },
-end
-
-
-example
-  (P : formula)
-  (v t : variable_)
   (h1 : admits v t P) :
   is_prop_sub P v t (replace_free v t P) :=
 begin
