@@ -242,13 +242,21 @@ begin
   rewrite h2,
   induction P,
   case formula.pred_ : name args
-  { admit },
+  {
+
+  },
   case formula.not_ : P P_ih
-  { admit },
+  {
+
+  },
   case formula.imp_ : P Q P_ih Q_ih
-  { admit },
+  {
+
+  },
   case formula.forall_ : x P P_ih
-  { admit },
+  {
+
+  },
 end
 
 
