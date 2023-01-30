@@ -100,40 +100,6 @@ def replace
   if x = x0 then x1 else x
 
 inductive is_prop_sub : formula → var_name → var_name → formula → Prop
-| false_ (x0 x1 : var_name) :
-  is_prop_sub false_ x0 x1 false_
-
-| pred_ (name : pred_name) (args : list var_name)
-  (x0 x1 : var_name) :
-  is_prop_sub (pred_ name args) x0 x1 (pred_ name (args.map (replace x0 x1)))
-
-| not_ (φ : formula)
-  (x0 x1 : var_name)
-  (φ' : formula) :
-  is_prop_sub φ x0 x1 φ' →
-  is_prop_sub φ.not_ x0 x1 φ'.not_
-
-| imp_ (φ ψ : formula)
-  (x0 x1 : var_name)
-  (φ' ψ' : formula) :
-  is_prop_sub φ x0 x1 φ' →
-  is_prop_sub ψ x0 x1 ψ' →
-  is_prop_sub (φ.imp_ ψ) x0 x1 (φ'.imp_ ψ')
-
-| eq_ (x y : var_name)
-  (x0 x1 : var_name) :
-  is_prop_sub (eq_ x y) x0 x1 (eq_ (replace x0 x1 x) (replace x0 x1 y))
-
-| forall_not_free (x : var_name) (φ : formula)
-  (x1 : var_name) :
-  is_prop_sub (forall_ x φ) x x1 (forall_ x φ)
-
-| forall_free (x : var_name) (φ : formula)
-  (x0 x1 : var_name)
-  (φ' : formula) :
-  ¬ x = x0 → ¬ x = x1 →
-  is_prop_sub φ x0 x1 φ' →
-  is_prop_sub (forall_ x φ) x0 x1 (forall_ x φ')
 
 
 /-
