@@ -163,13 +163,6 @@ def admits (v u : variable_) (P : formula) : Prop :=
   admits_aux v u ∅ P
 
 
-def admits' (v u : variable_) : formula → Prop
-| (pred_ name args) := true
-| (not_ P) := admits' P
-| (imp_ P Q) := admits' P ∧ admits' Q
-| (forall_ x P) := v ∈ (P.free_var_set \ {x}) → (¬ x = u ∧ admits' P)
-
-
 inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
 | pred_ (name : pred_symbol_) (args : list variable_)
   (v t : variable_) :
@@ -187,8 +180,8 @@ inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
   is_prop_sub P v t P' →
   is_prop_sub Q v t Q' →
   is_prop_sub (P.imp_ Q) v t (P'.imp_ Q')
-/-
-| not_free (x : variable_) (P : formula)
+
+| not_free (P : formula)
   (v t : variable_)
   (P' : formula) :
   v ∉ P.free_var_set →
@@ -200,28 +193,6 @@ inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
   ¬ x = v → ¬ x = t →
   is_prop_sub P v t P' →
   is_prop_sub (forall_ x P) v t (forall_ x P')
--/
-| not_free (x : variable_) (P : formula)
-  (v t : variable_)
-  (P' : formula) :
-  v ∉ P.free_var_set ∪ {x} →
-  is_prop_sub P v t P
-
-| forall_free (x : variable_) (P : formula)
-  (v t : variable_)
-  (P' : formula) :
-  ¬ x = t →
-  is_prop_sub P v t P' →
-  is_prop_sub (forall_ x P) v t (forall_ x P')
-
-
-example
-  (P : formula)
-  (v u : variable_) :
-  admits v u P ↔ admits' v u P :=
-begin
-
-end
 
 
 example
