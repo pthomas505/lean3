@@ -235,6 +235,26 @@ example
   (P : formula)
   (v t : variable_)
   (P' : formula)
+  (h1 : admits v t P)
+  (h2 : P' = replace_free v t P) :
+  is_prop_sub P v t P' :=
+begin
+  induction P,
+  case formula.pred_ : P_ᾰ P_ᾰ_1
+  { admit },
+  case formula.not_ : P_ᾰ P_ih
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
+  { admit },
+  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih
+  { admit },
+end
+
+
+example
+  (P : formula)
+  (v t : variable_)
+  (P' : formula)
   (h1 : is_prop_sub P v t P') :
   admits v t P ∧ P' = replace_free v t P :=
 begin
