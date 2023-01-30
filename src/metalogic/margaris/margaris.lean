@@ -130,6 +130,7 @@ def replace
   if x = v then t else x
 
 -- P (t/v)
+-- v -> t in P
 def replace_free (v t : variable_) : formula → formula
 | (pred_ name args) := pred_ name (args.map (replace v t))
 | (not_ P) := not_ (replace_free P)
