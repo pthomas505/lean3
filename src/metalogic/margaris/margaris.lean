@@ -147,11 +147,18 @@ If $v$ and $u$ are variables and $P$ is a formula, then $P$ admits $u$ for $v$ i
 -/
 
 -- P admits u for v
-def admits (v u : variable_) : formula → Prop
-| (pred_ name args) := true
-| (not_ P) := admits P
-| (imp_ P Q) := admits P ∧ admits Q
-| (forall_ x P) := x = v ∨ (¬ x = u ∧ admits P)
+
+def admits_aux (v u : variable_) : finset variable_ → formula → Prop
+| binders (pred_ name args) :=
+    v ∉ args ∨
+    v ∈ binders ∨
+    u ∉ binders
+| binders (not_ P) := admits_aux binders P
+| binders (imp_ P Q) := admits_aux binders P ∧ admits_aux binders Q
+| binders (forall_ x P) := admits_aux (binders ∪ {x}) P
+
+def admits' (v u : variable_) (P : formula) : Prop :=
+  admits_aux v u ∅ P
 
 
 inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
@@ -172,10 +179,11 @@ inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
   is_prop_sub Q v t Q' →
   is_prop_sub (P.imp_ Q) v t (P'.imp_ Q')
 
-| forall_not_free (x : variable_) (P : formula)
-  (v t : variable_) :
-  x = v →
-  is_prop_sub (forall_ x P) v t (forall_ x P)
+| not_free (x : variable_) (P : formula)
+  (v t : variable_)
+  (P' : formula) :
+  v ∉ P.free_var_set →
+  is_prop_sub P v t P
 
 | forall_free (x : variable_) (P : formula)
   (v t : variable_)
