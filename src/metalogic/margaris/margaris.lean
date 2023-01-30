@@ -167,7 +167,7 @@ def admits' (v u : variable_) : formula → Prop
 | (pred_ name args) := true
 | (not_ P) := admits' P
 | (imp_ P Q) := admits' P ∧ admits' Q
-| (forall_ x P) := x = v ∨ ((x = u → v ∉ P.free_var_set) ∧ admits' P)
+| (forall_ x P) := v ∈ (P.free_var_set \ {x}) → ¬ x = u
 
 
 inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
@@ -220,7 +220,21 @@ begin
   { admit },
   case formula.forall_ : x P P_ih
   {
-
+    unfold admits at P_ih,
+    cases P_ih,
+    unfold admits,
+    unfold admits_aux,
+    simp only [finset.empty_union],
+    unfold admits',
+    split,
+    {
+      intros a1,
+      sorry,
+    },
+    {
+      intros a1,
+      cases a1,
+    }
   },
 end
 
