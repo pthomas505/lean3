@@ -147,7 +147,8 @@ pg. 48
 If $v$ and $u$ are variables and $P$ is a formula, then $P$ admits $u$ for $v$ if and only if there is no free occurrence of $v$ in $P$ that becomes a bound occurrence of $u$ in $P(u/v)$. If $t$ is a term, then $P$ admits $t$ for $v$ if and only if $P$ admits for $v$ every variable in $t$.
 -/
 
--- P admits u for v (v replaced by u)
+-- P admits u for v
+-- v → u in P
 
 def admits_aux (v u : variable_) : finset variable_ → formula → Prop
 | binders (pred_ name args) :=
