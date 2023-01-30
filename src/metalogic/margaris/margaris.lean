@@ -239,24 +239,16 @@ example
   (h2 : P' = replace_free v t P) :
   is_prop_sub P v t P' :=
 begin
-  rewrite h2,
+  subst h2,
   induction P,
-  case formula.pred_ : name args
-  {
-
-  },
-  case formula.not_ : P P_ih
-  {
-
-  },
-  case formula.imp_ : P Q P_ih Q_ih
-  {
-
-  },
-  case formula.forall_ : x P P_ih
-  {
-
-  },
+  case formula.pred_ : P_ᾰ P_ᾰ_1
+  { admit },
+  case formula.not_ : P_ᾰ P_ih
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
+  { admit },
+  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih
+  { admit },
 end
 
 
