@@ -175,65 +175,6 @@ inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
 example
   (P : formula)
   (v t : variable_)
-  (h1 : admits v t P) :
-  is_prop_sub P v t (replace_free v t P) :=
-begin
-  induction P,
-  case formula.pred_ : name args
-  {
-    unfold replace_free,
-    apply is_prop_sub.pred_,
-  },
-  case formula.not_ : P P_ih
-  {
-    unfold admits at h1,
-    unfold replace_free,
-    apply is_prop_sub.not_,
-    exact P_ih h1,
-  },
-  case formula.imp_ : P Q P_ih Q_ih
-  {
-    unfold admits at h1,
-    cases h1,
-    unfold replace_free,
-    apply is_prop_sub.imp_,
-    {
-      exact P_ih h1_left,
-    },
-    {
-      exact Q_ih h1_right,
-    }
-  },
-  case formula.forall_ : x P P_ih
-  {
-    unfold admits at h1,
-    unfold replace_free,
-    cases h1,
-    {
-      rewrite <- h1,
-      simp only [eq_self_iff_true, if_true],
-      apply is_prop_sub.forall_not_free,
-      refl,
-    },
-    {
-      cases h1,
-      split_ifs,
-      {
-        apply is_prop_sub.forall_not_free,
-        exact h,
-      },
-      {
-        apply is_prop_sub.forall_free x P v t (replace_free v t P) h h1_left,
-        exact P_ih h1_right,
-      }
-    }
-  },
-end
-
-
-example
-  (P : formula)
-  (v t : variable_)
   (P' : formula)
   (h1 : admits v t P)
   (h2 : P' = replace_free v t P) :
