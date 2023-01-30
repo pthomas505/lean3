@@ -208,8 +208,10 @@ example
   admits v u P ↔ admits' v u P :=
 begin
   induction P,
-  case formula.pred_ : P_ᾰ P_ᾰ_1
-  { admit },
+  case formula.pred_ : name args
+  {
+
+  },
   case formula.not_ : P_ᾰ P_ih
   { admit },
   case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
