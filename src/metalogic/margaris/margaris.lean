@@ -161,6 +161,13 @@ def admits (v u : variable_) (P : formula) : Prop :=
   admits_aux v u ∅ P
 
 
+def admits' (v u : variable_) : formula → Prop
+| (pred_ name args) := true
+| (not_ P) := admits' P
+| (imp_ P Q) := admits' P ∧ admits' Q
+| (forall_ x P) := x = v ∨ ((x = u → v ∉ P.free_var_set) ∧ admits' P)
+
+
 inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
 | pred_ (name : pred_symbol_) (args : list variable_)
   (v t : variable_) :
