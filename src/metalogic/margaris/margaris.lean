@@ -310,8 +310,27 @@ begin
       unfold replace_free,
     }
   },
-  case is_prop_sub.imp_ : h1_P h1_Q h1_v h1_t h1_P' h1_Q' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
-  { admit },
+  case is_prop_sub.imp_ : h1_P h1_Q h1_v h1_t h1_P' h1_Q' h1_1 h1_2 h1_ih_1 h1_ih_2
+  {
+    cases h1_ih_1,
+    cases h1_ih_2,
+    split,
+    {
+      unfold admits,
+      split,
+      {
+        exact h1_ih_1_left,
+      },
+      {
+        exact h1_ih_2_left,
+      }
+    },
+    {
+      unfold replace_free,
+      rewrite h1_ih_1_right,
+      rewrite h1_ih_2_right,
+    }
+  },
   case is_prop_sub.forall_not_free : h1_x h1_P h1_v h1_t h1_1
   {
     split,
