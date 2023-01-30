@@ -261,8 +261,8 @@ begin
       exact h1_ih_left,
     },
     {
-      rewrite h1_ih_right,
       unfold replace_free,
+      rewrite h1_ih_right,
     }
   },
   case is_prop_sub.imp_ : h1_P h1_Q h1_v h1_t h1_P' h1_Q' h1_1 h1_2 h1_ih_1 h1_ih_2
@@ -295,8 +295,8 @@ begin
       exact h1_1,
     },
     {
-      rewrite h1_1,
       unfold replace_free,
+      rewrite h1_1,
       simp only [eq_self_iff_true, if_true, and_self],
     }
   },
