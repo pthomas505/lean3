@@ -210,7 +210,9 @@ begin
   induction P,
   case formula.pred_ : name args
   {
-
+    unfold admits,
+    unfold admits_aux,
+    simp only [finset.not_mem_empty, not_false_iff, or_true, true_iff],
   },
   case formula.not_ : P_ᾰ P_ih
   { admit },
