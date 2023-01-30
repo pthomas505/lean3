@@ -219,7 +219,9 @@ begin
   case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
   { admit },
   case formula.forall_ : x P P_ih
-  { admit },
+  {
+
+  },
 end
 
 
