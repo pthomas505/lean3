@@ -7,6 +7,8 @@ by Angelo Margaris
 
 import data.finset
 
+set_option pp.parens true
+
 
 @[derive decidable_eq]
 inductive variable_ : Type
@@ -167,10 +169,69 @@ begin
   case formula.forall_ : x P P_ih S h1
   {
     unfold admits_aux at h1,
+    simp only [finset.union_right_comm S T {x}] at h1,
 
     unfold admits_aux,
-    apply P_ih (S ∪ {x}),
-    simp only [finset.union_right_comm],
+    apply P_ih,
+    exact h1,
+  },
+end
+
+
+example
+  (P : formula)
+  (v u : variable_)
+  (S T : finset variable_)
+  (h1 : admits_aux v u S P)
+  (h2 : u ∉ T) :
+  admits_aux v u (S ∪ T) P :=
+begin
+  induction P generalizing S,
+  case formula.pred_ : name args S h1
+  {
+    unfold admits_aux at h1,
+
+    unfold admits_aux,
+    cases h1,
+    {
+      apply or.intro_left,
+      exact h1,
+    },
+    {
+      cases h1,
+      {
+        simp only [finset.mem_union],
+        apply or.intro_right,
+        apply or.intro_left,
+        apply or.intro_left,
+        exact h1,
+      },
+      {
+        apply or.intro_right,
+        apply or.intro_right,
+        simp only [finset.mem_union],
+        push_neg,
+        split,
+        {
+          exact h1,
+        },
+        {
+          exact h2,
+        },
+      }
+    }
+  },
+  case formula.not_ : P_ᾰ P_ih S h1
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 S h1
+  { admit },
+  case formula.forall_ : x P P_ih S h1
+  {
+    unfold admits_aux at h1,
+
+    unfold admits_aux,
+    simp only [finset.union_right_comm S T {x}],
+    apply P_ih,
     exact h1,
   },
 end
