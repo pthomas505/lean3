@@ -35,34 +35,6 @@ def formula.free_var_set : formula → finset variable_
 | (forall_ x P) := P.free_var_set \ {x}
 
 
-def formula.is_bound_list_aux : finset variable_ →  formula → list bool
-| binders (pred_ name args) := args.map (fun (x : variable_), x ∈ binders)
-| binders (not_ P) := P.is_bound_list_aux binders
-| binders (imp_ P Q) := (P.is_bound_list_aux binders) ++ (Q.is_bound_list_aux binders)
-| binders (forall_ x P) := P.is_bound_list_aux (binders ∪ {x})
-
-def formula.is_bound_list (P : formula) : list bool :=
-  P.is_bound_list_aux ∅
-
-
-@[derive decidable_eq]
-inductive formula' : Type
-| pred_ : pred_symbol_ → list bool → formula'
-| not_ : formula' → formula'
-| imp_ : formula' → formula' → formula'
-| forall_ : variable_ → formula' → formula'
-
-def to_is_free_aux : finset variable_ → formula → formula'
-| binders (pred_ name args) :=
-    formula'.pred_ name (args.map (fun (x : variable_), x ∉ binders))
-| binders (not_ P) := formula'.not_ (to_is_free_aux binders P)
-| binders (imp_ P Q) := formula'.imp_ (to_is_free_aux binders P) (to_is_free_aux binders Q)
-| binders (forall_ x P) := formula'.forall_ x (to_is_free_aux (binders ∪ {x}) P)
-
-def to_is_free (P : formula) : formula' :=
-  to_is_free_aux ∅ P
-
-
 /-
 pg. 48
 
@@ -118,125 +90,88 @@ def admits (v u : variable_) : formula → Prop
 -/
 
 
+def formula.to_bound_list_aux : finset variable_ → formula → list bool
+| binders (pred_ name args) := args.map (fun (x : variable_), x ∈ binders)
+| binders (not_ P) := P.to_bound_list_aux binders
+| binders (imp_ P Q) := (P.to_bound_list_aux binders) ++ (Q.to_bound_list_aux binders)
+| binders (forall_ x P) := P.to_bound_list_aux (binders ∪ {x})
+
+def formula.to_bound_list (P : formula) : list bool :=
+  P.to_bound_list_aux ∅
+
 
 example
-  (α : Type)
-  [decidable_eq α]
-  (S T : finset α)
-  (x : α)
-  (h1 : (S \ {x}) ∩ T = ∅) :
-  S ∩ (T ∪ {x}) = ∅ :=
-begin
-  sorry,
-end
-
-lemma blah
   (P : formula)
   (v u : variable_)
-  (S : finset variable_)
-  (h1 : admits_aux v u S P)
-  (h2 : P.free_var_set ∩ S = ∅) :
-  to_is_free_aux S (replace_free v u P) = to_is_free_aux S P :=
+  (S T : finset variable_)
+  (h1 : admits_aux v u (S ∪ T) P)
+  (h2 : v ∉ T) :
+  admits_aux v u S P :=
 begin
   induction P generalizing S,
-  case formula.pred_ : name args S h1 h2
-  {
-    unfold replace_free,
-    induction args generalizing S,
-    case list.nil
-    {
-      simp only [list.map_nil],
-    },
-    case list.cons : args_hd args_tl args_ih
-    {
-      unfold admits_aux at h1,
-      simp only [list.mem_cons_iff] at h1,
-      push_neg at h1,
-
-      unfold formula.free_var_set at h2,
-
-      
-      unfold to_is_free_aux at args_ih,
-      unfold admits_aux at args_ih,
-      unfold formula.free_var_set at args_ih,
-      specialize args_ih S,
-
-      have s1 : v ∉ args_tl ∨ v ∈ S ∨ u ∉ S,
-      cases h1,
-      cases h1,
-      apply or.intro_left,
-      exact h1_right,
-      apply or.intro_right,
-      exact h1,
-
-      specialize args_ih s1 sorry,
-      injection args_ih,
-
-
-      unfold to_is_free_aux,
-      congr' 1,
-      simp only [list.map, list.map_map] at *,
-      split,
-      {
-        unfold replace,
-        split_ifs,
-        cases h1,
-        rewrite h at h1,
-        cases h1,
-        contradiction,
-        subst h,
-        cases h1,
-        sorry, --contradiction
-        sorry, -- true and true
-        refl,
-      },
-      {
-        exact h_2,
-      }
-    },
-  },
-  case formula.not_ : P P_ih S h1 h2
+  case formula.pred_ : name args S h1
   {
     unfold admits_aux at h1,
-    unfold formula.free_var_set at h2,
-    unfold replace_free,
-    unfold to_is_free_aux,
-    congr' 1,
-    exact P_ih S h1 h2,
+
+    unfold admits_aux,
+    cases h1,
+    {
+      apply or.intro_left,
+      exact h1,
+    },
+    {
+      cases h1,
+      {
+        simp only [finset.mem_union] at h1,
+        cases h1,
+        {
+          apply or.intro_right,
+          apply or.intro_left,
+          exact h1,
+        },
+        {
+          contradiction,
+        }
+      },
+      {
+        simp only [finset.mem_union] at h1,
+        push_neg at h1,
+        cases h1,
+        apply or.intro_right,
+        apply or.intro_right,
+        exact h1_left,
+      }
+    }
   },
-  case formula.imp_ : P Q P_ih Q_ih S h1 h2
+  case formula.not_ : P P_ih S h1
+  {
+    unfold admits_aux at h1,
+
+    unfold admits_aux,
+    exact P_ih S h1,
+  },
+  case formula.imp_ : P Q P_ih Q_ih S h1
   {
     unfold admits_aux at h1,
     cases h1,
-    unfold formula.free_var_set at h2,
-    rewrite finset.inter_distrib_right at h2,
-    rewrite finset.union_eq_empty_iff at h2,
-    cases h2,
-    
-    unfold replace_free,
-    unfold to_is_free_aux,
-    congr' 1,
-    apply P_ih S h1_left h2_left,
-    apply Q_ih S h1_right h2_right,
-  },
-  case formula.forall_ : x P P_ih S h1 h2
-  {
-    unfold replace_free,
-    split_ifs,
+
+    unfold admits_aux,
+    split,
     {
-      refl,
+      exact P_ih S h1_left,
     },
     {
-      unfold admits_aux at h1,
+      exact Q_ih S h1_right,
+    },
+  },
+  case formula.forall_ : x P P_ih S h1
+  {
+    unfold admits_aux at h1,
 
-      unfold formula.free_var_set at h2,
-
-      specialize P_ih (S ∪ {x}) h1,
-      specialize P_ih sorry,
-      unfold to_is_free_aux,
-      congr,
-      exact P_ih,
-    }
+    unfold admits_aux,
+    apply P_ih (S ∪ {x}),
+    simp only [finset.union_right_comm],
+    exact h1,
   },
 end
 
@@ -245,117 +180,7 @@ example
   (P : formula)
   (v u : variable_)
   (h1 : admits v u P) :
-  to_is_free (replace_free v u P) = to_is_free P :=
+  (replace_free v u P).to_bound_list = P.to_bound_list :=
 begin
-  unfold admits at h1,
-  unfold to_is_free,
-  apply blah,
-  exact h1,
-  simp only [finset.inter_empty],
-end
-
-
-example
-  (P : formula)
-  (v u : variable_)
-  (binders : finset variable_)
-  (h1 : admits_aux v u binders P)
-  (h2 : ∀ (x : variable_), x ∈ P.free_var_set → x ∉ binders) :
-  (replace_free v u P).is_bound_list_aux binders =
-    P.is_bound_list_aux binders :=
-begin
-  induction P generalizing binders,
-  case formula.pred_ : name args binders h1 h2
-  {
-    induction args,
-    case list.nil
-    {
-      unfold replace_free,
-      simp only [list.map_nil],
-    },
-    case list.cons : args_hd args_tl args_ih
-    {
-      unfold admits_aux at h1,
-      simp only [list.mem_cons_iff] at h1,
-      push_neg at h1,
-
-      unfold formula.free_var_set at h2,
-      simp only [list.to_finset_cons, finset.mem_insert, list.mem_to_finset, forall_eq_or_imp] at h2,
-      cases h2,
-
-      unfold admits_aux at args_ih,
-
-      unfold formula.free_var_set at args_ih,
-      simp only [list.mem_to_finset] at args_ih,
-
-      unfold replace_free at args_ih,
-      unfold formula.is_bound_list_aux at args_ih,
-      simp only [list.map_map] at args_ih,
-
-      unfold replace_free,
-      unfold formula.is_bound_list_aux,
-      simp only [list.map, list.map_map, bool.to_bool_eq],
-
-      split,
-      {
-        have s1 : ¬ replace v u args_hd ∈ binders,
-        unfold replace,
-        split_ifs,
-        {
-          subst h,
-          cases h1,
-          {
-            cases h1,
-            contradiction,
-          },
-          {
-            cases h1,
-            {
-              contradiction,
-            },
-            {
-              exact h1,
-            }
-          }
-        },
-        {
-          exact h2_left,
-        },
-
-        split,
-        {
-          intros a1,
-          contradiction,
-        },
-        {
-          intros a1,
-          contradiction,
-        },
-      },
-      {
-        apply args_ih,
-        {
-          cases h1,
-          {
-            cases h1,
-            apply or.intro_left,
-            exact h1_right,
-          },
-          {
-            apply or.intro_right,
-            exact h1,
-          },
-        },
-        {
-          exact h2_right,
-        },
-      },
-    },
-  },
-  case formula.not_ : P_ᾰ P_ih binders h1 h2
-  { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1 h2
-  { admit },
-  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih binders h1 h2
-  { admit },
+  sorry,
 end
