@@ -35,6 +35,16 @@ def formula.free_var_set : formula → finset variable_
 | (forall_ x P) := P.free_var_set \ {x}
 
 
+def formula.is_bound_list_aux : finset variable_ →  formula → list bool
+| binders (pred_ name args) := args.map (fun (x : variable_), x ∈ binders)
+| binders (not_ P) := P.is_bound_list_aux binders
+| binders (imp_ P Q) := (P.is_bound_list_aux binders) ++ (Q.is_bound_list_aux binders)
+| binders (forall_ x P) := P.is_bound_list_aux (binders ∪ {x})
+
+def formula.is_bound_list (P : formula) : list bool :=
+  P.is_bound_list_aux ∅
+
+
 @[derive decidable_eq]
 inductive formula' : Type
 | pred_ : pred_symbol_ → list bool → formula'
@@ -242,4 +252,110 @@ begin
   apply blah,
   exact h1,
   simp only [finset.inter_empty],
+end
+
+
+example
+  (P : formula)
+  (v u : variable_)
+  (binders : finset variable_)
+  (h1 : admits_aux v u binders P)
+  (h2 : ∀ (x : variable_), x ∈ P.free_var_set → x ∉ binders) :
+  (replace_free v u P).is_bound_list_aux binders =
+    P.is_bound_list_aux binders :=
+begin
+  induction P generalizing binders,
+  case formula.pred_ : name args binders h1 h2
+  {
+    induction args,
+    case list.nil
+    {
+      unfold replace_free,
+      simp only [list.map_nil],
+    },
+    case list.cons : args_hd args_tl args_ih
+    {
+      unfold admits_aux at h1,
+      simp only [list.mem_cons_iff] at h1,
+      push_neg at h1,
+
+      unfold formula.free_var_set at h2,
+      simp only [list.to_finset_cons, finset.mem_insert, list.mem_to_finset, forall_eq_or_imp] at h2,
+      cases h2,
+
+      unfold admits_aux at args_ih,
+
+      unfold formula.free_var_set at args_ih,
+      simp only [list.mem_to_finset] at args_ih,
+
+      unfold replace_free at args_ih,
+      unfold formula.is_bound_list_aux at args_ih,
+      simp only [list.map_map] at args_ih,
+
+      unfold replace_free,
+      unfold formula.is_bound_list_aux,
+      simp only [list.map, list.map_map, bool.to_bool_eq],
+
+      split,
+      {
+        have s1 : ¬ replace v u args_hd ∈ binders,
+        unfold replace,
+        split_ifs,
+        {
+          subst h,
+          cases h1,
+          {
+            cases h1,
+            contradiction,
+          },
+          {
+            cases h1,
+            {
+              contradiction,
+            },
+            {
+              exact h1,
+            }
+          }
+        },
+        {
+          exact h2_left,
+        },
+
+        split,
+        {
+          intros a1,
+          contradiction,
+        },
+        {
+          intros a1,
+          contradiction,
+        },
+      },
+      {
+        apply args_ih,
+        {
+          cases h1,
+          {
+            cases h1,
+            apply or.intro_left,
+            exact h1_right,
+          },
+          {
+            apply or.intro_right,
+            exact h1,
+          },
+        },
+        {
+          exact h2_right,
+        },
+      },
+    },
+  },
+  case formula.not_ : P_ᾰ P_ih binders h1 h2
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1 h2
+  { admit },
+  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih binders h1 h2
+  { admit },
 end
