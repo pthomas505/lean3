@@ -92,16 +92,6 @@ def admits (v u : variable_) : formula → Prop
 -/
 
 
-def formula.to_bound_list_aux : finset variable_ → formula → list bool
-| binders (pred_ name args) := args.map (fun (x : variable_), x ∈ binders)
-| binders (not_ P) := P.to_bound_list_aux binders
-| binders (imp_ P Q) := (P.to_bound_list_aux binders) ++ (Q.to_bound_list_aux binders)
-| binders (forall_ x P) := P.to_bound_list_aux (binders ∪ {x})
-
-def formula.to_bound_list (P : formula) : list bool :=
-  P.to_bound_list_aux ∅
-
-
 example
   (P : formula)
   (v u : variable_)
@@ -251,14 +241,4 @@ begin
     apply P_ih,
     exact h1,
   },
-end
-
-
-example
-  (P : formula)
-  (v u : variable_)
-  (h1 : admits v u P) :
-  (replace_free v u P).to_bound_list = P.to_bound_list :=
-begin
-  sorry,
 end
