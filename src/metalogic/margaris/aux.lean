@@ -16,13 +16,13 @@ inductive variable_ : Type
 
 
 @[derive decidable_eq]
-inductive pred_symbol_ : Type
-| pred_symbol_ : string → pred_symbol_
+inductive pred_name_ : Type
+| pred_name_ : string → pred_name_
 
 
 @[derive decidable_eq]
 inductive formula : Type
-| pred_ : pred_symbol_ → list variable_ → formula
+| pred_ : pred_name_ → list variable_ → formula
 | not_ : formula → formula
 | imp_ : formula → formula → formula
 | forall_ : variable_ → formula → formula
