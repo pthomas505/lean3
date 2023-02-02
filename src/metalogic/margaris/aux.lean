@@ -79,7 +79,7 @@ def admits_aux (v u : variable_) : finset variable_ → formula → Prop
 | binders (imp_ P Q) := admits_aux binders P ∧ admits_aux binders Q
 | binders (forall_ x P) := admits_aux (binders ∪ {x}) P
 
-def admits' (v u : variable_) (P : formula) : Prop :=
+def admits (v u : variable_) (P : formula) : Prop :=
   admits_aux v u ∅ P
 
 
