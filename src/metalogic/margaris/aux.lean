@@ -71,6 +71,7 @@ If $v$ and $u$ are variables and $P$ is a formula, then $P$ admits $u$ for $v$ i
 -- P admits u for v
 -- v → u in P
 
+/-
 def admits_aux (v u : variable_) : finset variable_ → formula → Prop
 | binders (pred_ name args) :=
     v ∉ args ∨
@@ -82,7 +83,7 @@ def admits_aux (v u : variable_) : finset variable_ → formula → Prop
 
 def admits (v u : variable_) (P : formula) : Prop :=
   admits_aux v u ∅ P
-
+-/
 /-
 def admits (v u : variable_) : formula → Prop
 | (pred_ name args) := true
@@ -91,7 +92,7 @@ def admits (v u : variable_) : formula → Prop
 | (forall_ x P) := x = v ∨ ((x = u → v ∉ P.free_var_set) ∧ admits P)
 -/
 
-
+/-
 example
   (P : formula)
   (v u : variable_)
@@ -242,3 +243,21 @@ begin
     exact h1,
   },
 end
+-/
+
+/-
+pg. 48
+
+If $v$ and $u$ are variables and $P$ is a formula, then $P$ admits $u$ for $v$ if and only if there is no free occurrence of $v$ in $P$ that becomes a bound occurrence of $u$ in $P(u/v)$. If $t$ is a term, then $P$ admits $t$ for $v$ if and only if $P$ admits for $v$ every variable in $t$.
+-/
+
+def admits_aux (v u : variable_) : finset variable_ → formula → Prop
+| binders (pred_ name args) :=
+    v ∈ args → -- if there is a free occurrence of v in P
+    u ∉ binders -- then it does not become a bound occurrence of u in P(u/v)
+| binders (not_ P) := admits_aux binders P
+| binders (imp_ P Q) := admits_aux binders P ∧ admits_aux binders Q
+| binders (forall_ x P) := x = v ∨ admits_aux (binders ∪ {x}) P
+
+def admits (v u : variable_) (P : formula) : Prop :=
+  admits_aux v u ∅ P
