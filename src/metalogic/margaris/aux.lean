@@ -335,13 +335,21 @@ lemma admits_aux_eqv_right
 begin
   induction P generalizing S,
   case formula.pred_ : name args S h1
-  { admit },
+  {
+
+  },
   case formula.not_ : P P_ih S h1
-  { admit },
+  {
+
+  },
   case formula.imp_ : P Q P_ih Q_ih S h1
-  { admit },
+  {
+
+  },
   case formula.forall_ : x P P_ih S h1
-  { admit },
+  {
+
+  },
 end
 
 
