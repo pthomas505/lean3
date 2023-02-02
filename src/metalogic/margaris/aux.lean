@@ -385,7 +385,17 @@ begin
   induction P generalizing S,
   case formula.pred_ : name args S h1
   {
-
+    unfold admits_aux' at h1,
+    unfold admits_aux,
+    intros a1,
+    cases a1,
+    cases h1,
+    {
+      contradiction,
+    },
+    {
+      exact h1 a1_left,
+    }
   },
   case formula.not_ : P P_ih S h1
   {
@@ -396,7 +406,35 @@ begin
   },
   case formula.imp_ : P Q P_ih Q_ih S h1
   {
-
+    unfold admits_aux' at h1,
+    unfold admits_aux,
+    split,
+    {
+      apply P_ih,
+      cases h1,
+      {
+        apply or.intro_left,
+        exact h1,
+      },
+      {
+        cases h1,
+        apply or.intro_right,
+        exact h1_left,
+      }
+    },
+    {
+      apply Q_ih,
+      cases h1,
+      {
+        apply or.intro_left,
+        exact h1,
+      },
+      {
+        cases h1,
+        apply or.intro_right,
+        exact h1_right,
+      }
+    }
   },
   case formula.forall_ : x P P_ih S h1
   {
