@@ -207,3 +207,183 @@ begin
     exact h1,
   },
 end
+
+
+def admits_aux' (v u : variable_) : finset variable_ → formula → Prop
+| binders (pred_ name args) :=
+    v ∈ args → -- if there is a free occurrence of v in P
+    u ∉ binders -- then it does not become a bound occurrence of u in P(u/v)
+| binders (not_ P) := admits_aux' binders P
+| binders (imp_ P Q) := admits_aux' binders P ∧ admits_aux' binders Q
+| binders (forall_ x P) := v = x ∨ admits_aux' (binders ∪ {x}) P
+
+def admits' (v u : variable_) (P : formula) : Prop :=
+  admits_aux' v u ∅ P
+
+
+example
+  (P : formula)
+  (v u : variable_)
+  (S : finset variable_)
+  (h1 : admits_aux v u S P)
+  (h2 : v ∉ S) :
+  admits_aux' v u S P :=
+begin
+  induction P generalizing S,
+  case formula.pred_ : name args
+  {
+    unfold admits_aux at h1,
+
+    unfold admits_aux',
+    intros a1,
+    apply h1,
+    split,
+    {
+      exact a1,
+    },
+    {
+      exact h2,
+    },
+  },
+  case formula.not_ : P P_ih
+  {
+    unfold admits_aux at h1,
+
+    unfold admits_aux',
+    exact P_ih S h1 h2,
+  },
+  case formula.imp_ : P Q P_ih Q_ih
+  {
+    unfold admits_aux at h1,
+    cases h1,
+
+    unfold admits_aux',
+    split,
+    {
+      exact P_ih S h1_left h2,
+    },
+    {
+      exact Q_ih S h1_right h2,
+    }
+  },
+  case formula.forall_ : x P P_ih
+  {
+    unfold admits_aux at h1,
+
+    unfold admits_aux',
+    by_cases c1 : v = x,
+    {
+      apply or.intro_left,
+      exact c1,
+    },
+    {
+      apply or.intro_right,
+      apply P_ih,
+      {
+        exact h1,
+      },
+      {
+        simp only [finset.mem_union, finset.mem_singleton],
+        push_neg,
+        split,
+        {
+          exact h2,
+        },
+        {
+          exact c1,
+        }
+      }
+    }
+  },
+end
+
+
+example
+  (P : formula)
+  (v u : variable_)
+  (S : finset variable_)
+  (h1 : v ∈ S ∨ admits_aux' v u S P) :
+  admits_aux v u S P :=
+begin
+  induction P generalizing S,
+  case formula.pred_ : name args S h1
+  {
+    unfold admits_aux' at h1,
+    unfold admits_aux,
+    intros a1,
+    cases a1,
+    cases h1,
+    {
+      contradiction,
+    },
+    {
+      exact h1 a1_left,
+    }
+  },
+  case formula.not_ : P P_ih S h1
+  {
+    unfold admits_aux' at h1,
+
+    unfold admits_aux,
+    exact P_ih S h1,
+  },
+  case formula.imp_ : P Q P_ih Q_ih S h1
+  {
+    unfold admits_aux' at h1,
+    unfold admits_aux,
+    split,
+    {
+      apply P_ih,
+      cases h1,
+      {
+        apply or.intro_left,
+        exact h1,
+      },
+      {
+        cases h1,
+        apply or.intro_right,
+        exact h1_left,
+      }
+    },
+    {
+      apply Q_ih,
+      cases h1,
+      {
+        apply or.intro_left,
+        exact h1,
+      },
+      {
+        cases h1,
+        apply or.intro_right,
+        exact h1_right,
+      }
+    }
+  },
+  case formula.forall_ : x P P_ih S h1
+  {
+    unfold admits_aux' at h1,
+
+    unfold admits_aux,
+    apply P_ih,
+    cases h1,
+    {
+      apply or.intro_left,
+      simp only [finset.mem_union, finset.mem_singleton],
+      apply or.intro_left,
+      exact h1,
+    },
+    {
+      cases h1,
+      {
+        apply or.intro_left,
+        simp only [finset.mem_union, finset.mem_singleton],
+        apply or.intro_right,
+        exact h1,
+      },
+      {
+        apply or.intro_right,
+        exact h1,
+      }
+    }
+  },
+end
