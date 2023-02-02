@@ -261,3 +261,23 @@ def admits_aux (v u : variable_) : finset variable_ → formula → Prop
 
 def admits (v u : variable_) (P : formula) : Prop :=
   admits_aux v u ∅ P
+
+
+example
+  (P : formula)
+  (v u : variable_)
+  (S T : finset variable_)
+  (h1 : admits_aux v u (S ∪ T) P)
+  (h2 : v ∉ T) :
+  admits_aux v u S P :=
+begin
+  induction P generalizing S,
+  case formula.pred_ : P_ᾰ P_ᾰ_1 S h1
+  { admit },
+  case formula.not_ : P_ᾰ P_ih S h1
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 S h1
+  { admit },
+  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih S h1
+  { admit },
+end
