@@ -230,6 +230,26 @@ lemma admits_aux_eqv_left
   admits_aux' v u S P :=
 begin
   induction P generalizing S,
+  case formula.pred_ : P_ᾰ P_ᾰ_1 S h1 h2
+  { admit },
+  case formula.not_ : P_ᾰ P_ih S h1 h2
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 S h1 h2
+  { admit },
+  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih S h1 h2
+  { admit },
+end
+
+
+example
+  (P : formula)
+  (v u : variable_)
+  (S : finset variable_)
+  (h1 : admits_aux v u S P)
+  (h2 : v ∉ S) :
+  admits_aux' v u S P :=
+begin
+  induction P generalizing S,
   case formula.pred_ : name args
   {
     unfold admits_aux at h1,
