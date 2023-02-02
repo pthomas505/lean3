@@ -307,6 +307,19 @@ begin
   },
   case formula.forall_ : x P P_ih S h1
   {
+    unfold admits_aux at h1,
+    simp only [finset.union_right_comm S T {x}] at h1,
 
+    unfold admits_aux,
+    cases h1,
+    {
+      apply or.intro_left,
+      exact h1,
+    },
+    {
+      apply or.intro_right,
+      apply P_ih,
+      exact h1,
+    }
   },
 end
