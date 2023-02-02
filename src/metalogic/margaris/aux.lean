@@ -389,7 +389,10 @@ begin
   },
   case formula.not_ : P P_ih S h1
   {
+    unfold admits_aux' at h1,
 
+    unfold admits_aux,
+    exact P_ih S h1,
   },
   case formula.imp_ : P Q P_ih Q_ih S h1
   {
@@ -397,7 +400,30 @@ begin
   },
   case formula.forall_ : x P P_ih S h1
   {
+    unfold admits_aux' at h1,
 
+    unfold admits_aux,
+    apply P_ih,
+    cases h1,
+    {
+      apply or.intro_left,
+      simp only [finset.mem_union, finset.mem_singleton],
+      apply or.intro_left,
+      exact h1,
+    },
+    {
+      cases h1,
+      {
+        apply or.intro_left,
+        simp only [finset.mem_union, finset.mem_singleton],
+        apply or.intro_right,
+        exact h1,
+      },
+      {
+        apply or.intro_right,
+        exact h1,
+      }
+    }
   },
 end
 
