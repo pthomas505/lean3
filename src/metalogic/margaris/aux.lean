@@ -217,7 +217,7 @@ def fast_admits_aux (v u : variable_) : finset variable_ → formula → Prop
 | binders (imp_ P Q) := fast_admits_aux binders P ∧ fast_admits_aux binders Q
 | binders (forall_ x P) := v = x ∨ fast_admits_aux (binders ∪ {x}) P
 
-def admits' (v u : variable_) (P : formula) : Prop :=
+def fast_admits (v u : variable_) (P : formula) : Prop :=
   fast_admits_aux v u ∅ P
 
 
@@ -392,10 +392,10 @@ end
 example
   (P : formula)
   (v u : variable_) :
-  admits v u P ↔ admits' v u P :=
+  admits v u P ↔ fast_admits v u P :=
 begin
   unfold admits,
-  unfold admits',
+  unfold fast_admits,
   split,
   {
     intros a1,
