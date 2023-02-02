@@ -209,16 +209,16 @@ begin
 end
 
 
-def admits_aux' (v u : variable_) : finset variable_ → formula → Prop
+def fast_admits_aux (v u : variable_) : finset variable_ → formula → Prop
 | binders (pred_ name args) :=
     v ∈ args → -- if there is a free occurrence of v in P
     u ∉ binders -- then it does not become a bound occurrence of u in P(u/v)
-| binders (not_ P) := admits_aux' binders P
-| binders (imp_ P Q) := admits_aux' binders P ∧ admits_aux' binders Q
-| binders (forall_ x P) := v = x ∨ admits_aux' (binders ∪ {x}) P
+| binders (not_ P) := fast_admits_aux binders P
+| binders (imp_ P Q) := fast_admits_aux binders P ∧ fast_admits_aux binders Q
+| binders (forall_ x P) := v = x ∨ fast_admits_aux (binders ∪ {x}) P
 
 def admits' (v u : variable_) (P : formula) : Prop :=
-  admits_aux' v u ∅ P
+  fast_admits_aux v u ∅ P
 
 
 lemma admits_aux_eqv_left
@@ -227,14 +227,14 @@ lemma admits_aux_eqv_left
   (S : finset variable_)
   (h1 : admits_aux v u S P)
   (h2 : v ∉ S) :
-  admits_aux' v u S P :=
+  fast_admits_aux v u S P :=
 begin
   induction P generalizing S,
   case formula.pred_ : name args S h1 h2
   {
     unfold admits_aux at h1,
 
-    unfold admits_aux',
+    unfold fast_admits_aux,
     intros a1,
     apply h1,
     split,
@@ -249,7 +249,7 @@ begin
   {
     unfold admits_aux at h1,
 
-    unfold admits_aux',
+    unfold fast_admits_aux,
     exact P_ih S h1 h2,
   },
   case formula.imp_ : P Q P_ih Q_ih S h1 h2
@@ -257,7 +257,7 @@ begin
     unfold admits_aux at h1,
     cases h1,
 
-    unfold admits_aux',
+    unfold fast_admits_aux,
     split,
     {
       exact P_ih S h1_left h2,
@@ -270,7 +270,7 @@ begin
   {
     unfold admits_aux at h1,
 
-    unfold admits_aux',
+    unfold fast_admits_aux,
     by_cases c1 : v = x,
     {
       apply or.intro_left,
@@ -302,13 +302,13 @@ lemma admits_aux_eqv_right
   (P : formula)
   (v u : variable_)
   (S : finset variable_)
-  (h1 : v ∈ S ∨ admits_aux' v u S P) :
+  (h1 : v ∈ S ∨ fast_admits_aux v u S P) :
   admits_aux v u S P :=
 begin
   induction P generalizing S,
   case formula.pred_ : name args S h1
   {
-    unfold admits_aux' at h1,
+    unfold fast_admits_aux at h1,
     unfold admits_aux,
     intros a1,
     cases a1,
@@ -322,14 +322,14 @@ begin
   },
   case formula.not_ : P P_ih S h1
   {
-    unfold admits_aux' at h1,
+    unfold fast_admits_aux at h1,
 
     unfold admits_aux,
     exact P_ih S h1,
   },
   case formula.imp_ : P Q P_ih Q_ih S h1
   {
-    unfold admits_aux' at h1,
+    unfold fast_admits_aux at h1,
     unfold admits_aux,
     split,
     {
@@ -361,7 +361,7 @@ begin
   },
   case formula.forall_ : x P P_ih S h1
   {
-    unfold admits_aux' at h1,
+    unfold fast_admits_aux at h1,
 
     unfold admits_aux,
     apply P_ih,
