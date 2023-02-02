@@ -230,13 +230,13 @@ lemma admits_aux_eqv_left
   admits_aux' v u S P :=
 begin
   induction P generalizing S,
-  case formula.pred_ : P_ᾰ P_ᾰ_1 S h1 h2
+  case formula.pred_ : name args S h1 h2
   { admit },
-  case formula.not_ : P_ᾰ P_ih S h1 h2
+  case formula.not_ : P P_ih S h1 h2
   { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 S h1 h2
+  case formula.imp_ : P Q P_ih Q_ih S h1 h2
   { admit },
-  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih S h1 h2
+  case formula.forall_ : x P P_ih S h1 h2
   { admit },
 end
 
