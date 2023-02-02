@@ -319,28 +319,42 @@ example
   (P : formula)
   (v u : variable_)
   (S T : finset variable_)
-  (h1 : admits_aux v u S P)
+  (h1 : admits_aux' v u S P)
   (h2 : u ∉ T) :
-  admits_aux v u (S ∪ T) P :=
+  admits_aux' v u (S ∪ T) P :=
 begin
   induction P generalizing S,
   case formula.pred_ : name args S h1
   {
-    admit
+    unfold admits_aux' at h1,
+    simp only [and_imp] at h1,
+
+    unfold admits_aux',
+    simp only [finset.mem_union, and_imp],
+    push_neg,
+    intros a1 a2,
+    cases a2,
+    split,
+    {
+      exact h1 a1 a2_left,
+    },
+    {
+      exact h2,
+    },
   },
   case formula.not_ : P P_ih S h1
   {
-    unfold admits_aux at h1,
+    unfold admits_aux' at h1,
 
-    unfold admits_aux,
+    unfold admits_aux',
     exact P_ih S h1,
   },
   case formula.imp_ : P Q P_ih Q_ih S h1
   {
-    unfold admits_aux at h1,
+    unfold admits_aux' at h1,
     cases h1,
 
-    unfold admits_aux,
+    unfold admits_aux',
     split,
     {
       exact P_ih S h1_left,
@@ -351,9 +365,9 @@ begin
   },
   case formula.forall_ : x P P_ih S h1
   {
-    unfold admits_aux at h1,
+    unfold admits_aux' at h1,
 
-    unfold admits_aux,
+    unfold admits_aux',
     simp only [finset.union_right_comm S T {x}],
     apply P_ih,
     exact h1,
