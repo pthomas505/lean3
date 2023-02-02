@@ -274,15 +274,36 @@ begin
   induction P generalizing S,
   case formula.pred_ : name args S h1
   {
+    unfold admits_aux at h1,
+    simp only [finset.mem_union] at h1,
+    push_neg at h1,
 
+    unfold admits_aux,
+    intros a1,
+    specialize h1 a1,
+    cases h1,
+    exact h1_left,
   },
   case formula.not_ : P P_ih S h1
   {
+    unfold admits_aux at h1,
 
+    unfold admits_aux,
+    exact P_ih S h1,
   },
   case formula.imp_ : P Q P_ih Q_ih S h1
   {
+    unfold admits_aux at h1,
+    cases h1,
 
+    unfold admits_aux,
+    split,
+    {
+      exact P_ih S h1_left,
+    },
+    {
+      exact Q_ih S h1_right,
+    },
   },
   case formula.forall_ : x P P_ih S h1
   {
