@@ -221,7 +221,7 @@ def admits' (v u : variable_) (P : formula) : Prop :=
   admits_aux' v u ∅ P
 
 
-example
+lemma admits_aux_eqv_left
   (P : formula)
   (v u : variable_)
   (S : finset variable_)
@@ -298,7 +298,7 @@ begin
 end
 
 
-example
+lemma admits_aux_eqv_right
   (P : formula)
   (v u : variable_)
   (S : finset variable_)
@@ -386,4 +386,31 @@ begin
       }
     }
   },
+end
+
+
+example
+  (P : formula)
+  (v u : variable_) :
+  admits v u P ↔ admits' v u P :=
+begin
+  unfold admits,
+  unfold admits',
+  split,
+  {
+    intros a1,
+    apply admits_aux_eqv_left,
+    {
+      exact a1,
+    },
+    {
+      simp only [finset.not_mem_empty, not_false_iff],
+    }
+  },
+  {
+    intros a1,
+    apply admits_aux_eqv_right,
+    simp only [finset.not_mem_empty, false_or],
+    exact a1,
+  }
 end
