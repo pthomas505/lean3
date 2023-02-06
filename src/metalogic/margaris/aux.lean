@@ -36,6 +36,13 @@ pg. 48
 An occurrence of a variable $v$ in a formula $P$ is bound if and only if it occurs in a subformula of $P$ of the form $\forall v Q$. An occurrence of $v$ in $P$ is free if and only if it is not a bound occurrence. The variable $v$ is free or bound in $P$ according as it has a free or bound occurrence in $P$.
 -/
 
+def formula.bound_var_set : formula → finset variable_
+| (pred_ name args) := ∅
+| (not_ P) := P.bound_var_set
+| (imp_ P Q) := P.bound_var_set ∪ Q.bound_var_set
+| (forall_ x P) := P.bound_var_set ∪ {x}
+
+
 def formula.free_var_set : formula → finset variable_
 | (pred_ name args) := args.to_finset
 | (not_ P) := P.free_var_set
