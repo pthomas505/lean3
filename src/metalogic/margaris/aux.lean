@@ -42,6 +42,12 @@ def formula.bound_var_set : formula → finset variable_
 | (imp_ P Q) := P.bound_var_set ∪ Q.bound_var_set
 | (forall_ x P) := P.bound_var_set ∪ {x}
 
+def is_bound_in (v : variable_) : formula → Prop
+| (pred_ name args) := false
+| (not_ P) := is_bound_in P
+| (imp_ P Q) := is_bound_in P ∨ is_bound_in Q
+| (forall_ x P) := v = x ∨ is_bound_in P
+
 
 def formula.free_var_set : formula → finset variable_
 | (pred_ name args) := args.to_finset
