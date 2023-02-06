@@ -48,6 +48,22 @@ def is_bound_in (v : variable_) : formula → Prop
 | (imp_ P Q) := is_bound_in P ∨ is_bound_in Q
 | (forall_ x P) := v = x ∨ is_bound_in P
 
+example
+  (v : variable_)
+  (P : formula) :
+  is_bound_in v P ↔ v ∈ P.bound_var_set :=
+begin
+  induction P,
+  case formula.pred_ : P_ᾰ P_ᾰ_1
+  { admit },
+  case formula.not_ : P_ᾰ P_ih
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
+  { admit },
+  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih
+  { admit },
+end
+
 
 def formula.free_var_set : formula → finset variable_
 | (pred_ name args) := args.to_finset
