@@ -651,8 +651,21 @@ begin
     congr' 1,
     exact P_ih binders h1,
   },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1
-  { admit },
+  case formula.imp_ : P Q P_ih Q_ih binders h1
+  {
+    unfold admits_aux at h1,
+    cases h1,
+
+    unfold replace_free,
+    unfold to_is_bound_aux,
+    congr' 1,
+    {
+      exact P_ih binders h1_left,
+    },
+    {
+      exact Q_ih binders h1_right,
+    }
+  },
   case formula.forall_ : x P P_ih binders h1
   {
     unfold admits_aux at h1,
