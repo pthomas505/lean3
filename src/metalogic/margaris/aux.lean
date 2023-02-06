@@ -597,3 +597,22 @@ def to_is_bound_aux : finset variable_ → formula → bool_formula
 
 def to_is_bound (P : formula) : bool_formula :=
   to_is_bound_aux ∅ P
+
+
+example
+  (P : formula)
+  (v u : variable_)
+  (binders : finset variable_)
+  (h1 : admits_aux v u binders P) :
+  to_is_bound_aux binders P = to_is_bound_aux binders (replace_free v u P) :=
+begin
+  induction P generalizing binders,
+  case formula.pred_ : P_ᾰ P_ᾰ_1 binders h1
+  { admit },
+  case formula.not_ : P_ᾰ P_ih binders h1
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1
+  { admit },
+  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih binders h1
+  { admit },
+end
