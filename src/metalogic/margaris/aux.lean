@@ -556,3 +556,44 @@ begin
     exact a1,
   }
 end
+
+
+inductive admits' : variable_ → variable_ → formula → Prop
+
+| pred_ (name : pred_name_) (args : list variable_)
+  (v u : variable_) :
+  admits' v u (pred_ name args)
+
+| not_ (P : formula)
+  (v u : variable_) :
+  admits' v u P →
+  admits' v u (not_ P)
+
+| imp_ (P Q : formula)
+  (v u : variable_) :
+  admits' v u P →
+  admits' v u Q →
+  admits' v u (imp_ P Q)
+
+| not_free (P : formula)
+  (v u : variable_) :
+  v ∉ P.free_var_set →
+  admits' v u P
+
+
+@[derive decidable_eq]
+inductive bool_formula : Type
+| pred_ : pred_name_ → list bool → bool_formula
+| not_ : bool_formula → bool_formula
+| imp_ : bool_formula → bool_formula → bool_formula
+| forall_ : bool → bool_formula → bool_formula
+
+
+def to_is_bound_aux : finset variable_ → formula → bool_formula
+| binders (pred_ name args) := bool_formula.pred_ name (args.map (fun (v : variable_), v ∈ binders))
+| binders (not_ P) := bool_formula.not_ (to_is_bound_aux binders P)
+| binders (imp_ P Q) := bool_formula.imp_ (to_is_bound_aux binders P) (to_is_bound_aux binders Q)
+| binders (forall_ x P) := bool_formula.forall_ true (to_is_bound_aux (binders ∪ {x}) P)
+
+def to_is_bound (P : formula) : bool_formula :=
+  to_is_bound_aux ∅ P
