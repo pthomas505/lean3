@@ -36,6 +36,69 @@ def formula.free_var_set : formula → finset variable_
 | (imp_ P Q) := P.free_var_set ∪ Q.free_var_set
 | (forall_ x P) := P.free_var_set \ {x}
 
+def is_free_in (v : variable_) : formula → Prop
+| (pred_ name args) := v ∈ args.to_finset
+| (not_ P) := is_free_in P
+| (imp_ P Q) := is_free_in P ∨ is_free_in Q
+| (forall_ x P) := ¬ v = x ∧ is_free_in P
+
+
+example
+  (v : variable_)
+  (P : formula) :
+  is_free_in v P ↔ v ∈ P.free_var_set :=
+begin
+  induction P,
+  case formula.pred_ : name args
+  {
+    refl,
+  },
+  case formula.not_ : P P_ih
+  {
+    unfold is_free_in,
+    unfold formula.free_var_set,
+    exact P_ih,
+  },
+  case formula.imp_ : P Q P_ih Q_ih
+  {
+    unfold is_free_in,
+    unfold formula.free_var_set,
+    simp only [finset.mem_union],
+    exact iff.or P_ih Q_ih,
+  },
+  case formula.forall_ : x P P_ih
+  {
+    cases P_ih,
+
+    unfold is_free_in,
+    unfold formula.free_var_set,
+    simp only [finset.mem_sdiff, finset.mem_singleton],
+    split,
+    {
+      intros a1,
+      cases a1,
+      split,
+      {
+        exact P_ih_mp a1_right,
+      },
+      {
+        exact a1_left,
+      }
+    },
+    {
+      intros a1,
+      cases a1,
+      split,
+      {
+        exact a1_right,
+      },
+      {
+        exact P_ih_mpr a1_left,
+      }
+    }
+  },
+end
+
 
 /-
 pg. 48
