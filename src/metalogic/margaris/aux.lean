@@ -607,12 +607,59 @@ example
   to_is_bound_aux binders P = to_is_bound_aux binders (replace_free v u P) :=
 begin
   induction P generalizing binders,
-  case formula.pred_ : P_ᾰ P_ᾰ_1 binders h1
-  { admit },
+  case formula.pred_ : name args binders h1
+  {
+    unfold admits_aux at h1,
+
+    unfold replace_free,
+    unfold to_is_bound_aux,
+    induction args generalizing binders,
+    case list.nil
+    {
+      simp only [list.map_nil],
+      simp only [eq_self_iff_true, and_self],
+    },
+    case list.cons : args_hd args_tl args_ih
+    {
+      squeeze_simp at h1,
+
+      squeeze_simp at args_ih,
+      simp only [list.map_eq_map_iff] at args_ih,
+      squeeze_simp at args_ih,
+      unfold replace at args_ih,
+
+      have s1 : v ∈ args_tl → v ∉ binders → u ∉ binders,
+      intros a1,
+      apply h1,
+      apply or.intro_right,
+      exact a1,
+
+      have s2 : v = args_hd → v ∉ binders → u ∉ binders,
+      intros a1,
+      apply h1,
+      apply or.intro_left,
+      exact a1,
+      sorry,
+    },
+  },
   case formula.not_ : P_ᾰ P_ih binders h1
   { admit },
   case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1
   { admit },
-  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih binders h1
-  { admit },
+  case formula.forall_ : x P P_ih binders h1
+  {
+    unfold admits_aux at h1,
+
+    unfold replace_free,
+    split_ifs,
+    {
+      refl,
+    },
+    {
+      unfold to_is_bound_aux,
+      congr' 1,
+      apply P_ih,
+      exact h1,
+    }
+  },
 end
