@@ -629,6 +629,13 @@ begin
 end
 
 
+def admits_alt (v u : variable_) : formula → Prop
+| (pred_ name args) := true
+| (not_ P) := admits_alt P
+| (imp_ P Q) := admits_alt P ∧ admits_alt Q
+| (forall_ x P) := x = v ∨ ((x = u → v ∉ P.free_var_set) ∧ admits_alt P)
+
+
 inductive admits' : variable_ → variable_ → formula → Prop
 
 | pred_ (name : pred_name_) (args : list variable_)
