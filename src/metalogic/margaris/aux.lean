@@ -185,6 +185,20 @@ pg. 48
 If $P$ is a formula, $v$ is a variable, and $t$ is a term, then $P(t/v)$ is the result of replacing each free occurrence of $v$ in $P$ by an occurrence of $t$.
 -/
 
+-- P (t/v)
+-- v -> t in P
+def replace_free_aux (v t : variable_) : finset variable_ → formula → formula
+| binders (pred_ name args) :=
+    pred_ name (args.map (fun (x : variable_),
+      if v = x ∧ x ∉ binders
+      then t
+      else x))
+| binders (not_ P) := not_ (replace_free_aux binders P)
+| binders (imp_ P Q) :=
+    imp_ (replace_free_aux binders P) (replace_free_aux binders Q)
+| binders (forall_ x P) := forall_ x (replace_free_aux (binders ∪ {x}) P)
+
+
 -- v -> t
 def replace
   {α : Type}
@@ -192,16 +206,14 @@ def replace
   (v t x : α) : α :=
   if v = x then t else x
 
--- P (t/v)
--- v -> t in P
-def replace_free (v t : variable_) : formula → formula
+def fast_replace_free (v t : variable_) : formula → formula
 | (pred_ name args) := pred_ name (args.map (replace v t))
-| (not_ P) := not_ (replace_free P)
-| (imp_ P Q) := imp_ (replace_free P) (replace_free Q)
+| (not_ P) := not_ (fast_replace_free P)
+| (imp_ P Q) := imp_ (fast_replace_free P) (fast_replace_free Q)
 | (forall_ x P) :=
   if v = x
   then forall_ x P
-  else forall_ x (replace_free P)
+  else forall_ x (fast_replace_free P)
 
 
 /-
@@ -676,7 +688,7 @@ lemma lem_1
   (binders : finset variable_)
   (h1 : fast_admits_aux v u binders P)
   (h2 : v ∉ binders) :
-  to_is_bound_aux binders P = to_is_bound_aux binders (replace_free v u P) :=
+  to_is_bound_aux binders P = to_is_bound_aux binders (fast_replace_free v u P) :=
 begin
   induction P generalizing binders,
   case formula.pred_ : name args binders
@@ -686,7 +698,7 @@ begin
     induction args generalizing binders,
     case list.nil
     {
-      unfold replace_free,
+      unfold fast_replace_free,
       simp only [list.map_nil],
     },
     case list.cons : args_hd args_tl args_ih
@@ -699,10 +711,10 @@ begin
       apply or.intro_right,
       exact a1,
 
-      unfold replace_free at args_ih,
+      unfold fast_replace_free at args_ih,
       unfold to_is_bound_aux at args_ih,
 
-      unfold replace_free,
+      unfold fast_replace_free,
       unfold to_is_bound_aux,
 
       squeeze_simp,
@@ -733,7 +745,7 @@ begin
   {
     unfold fast_admits_aux at h1,
 
-    unfold replace_free,
+    unfold fast_replace_free,
     unfold to_is_bound_aux,
     congr' 1,
     exact P_ih binders h1 h2,
@@ -743,7 +755,7 @@ begin
     unfold fast_admits_aux at h1,
     cases h1,
 
-    unfold replace_free,
+    unfold fast_replace_free,
     unfold to_is_bound_aux,
     congr' 1,
     {
@@ -757,7 +769,7 @@ begin
   {
     unfold fast_admits_aux at h1,
 
-    unfold replace_free,
+    unfold fast_replace_free,
     split_ifs,
     {
       refl,
@@ -790,7 +802,7 @@ example
   (v u : variable_)
   (binders : finset variable_)
   (h1 : fast_admits v u P) :
-  to_is_bound P = to_is_bound (replace_free v u P) :=
+  to_is_bound P = to_is_bound (fast_replace_free v u P) :=
 begin
   apply lem_1,
   exact h1,
@@ -802,14 +814,14 @@ lemma lem_2
   (P : formula)
   (v u : variable_)
   (binders : finset variable_)
-  (h1 : to_is_bound_aux binders P = to_is_bound_aux binders (replace_free v u P))
+  (h1 : to_is_bound_aux binders P = to_is_bound_aux binders (fast_replace_free v u P))
   (h2 : v ∉ binders) :
   fast_admits_aux v u binders P :=
 begin
   induction P generalizing binders,
   case formula.pred_ : name args binders h1
   {
-    unfold replace_free at h1,
+    unfold fast_replace_free at h1,
     unfold to_is_bound_aux at h1,
     injection h1,
 
@@ -830,7 +842,7 @@ begin
   },
   case formula.not_ : P P_ih binders h1
   {
-    unfold replace_free at h1,
+    unfold fast_replace_free at h1,
     unfold to_is_bound_aux at h1,
     injection h1,
     unfold fast_admits_aux,
@@ -840,7 +852,7 @@ begin
   },
   case formula.imp_ : P Q P_ih Q_ih binders h1
   {
-    unfold replace_free at h1,
+    unfold fast_replace_free at h1,
     unfold to_is_bound_aux at h1,
     injection h1,
     unfold fast_admits_aux,
@@ -854,7 +866,7 @@ begin
   },
   case formula.forall_ : x P P_ih binders h1
   {
-    unfold replace_free at h1,
+    unfold fast_replace_free at h1,
     unfold to_is_bound_aux at h1,
 
     unfold fast_admits_aux,
@@ -880,7 +892,7 @@ end
 example
   (P : formula)
   (v u : variable_)
-  (h1 : to_is_bound P = to_is_bound (replace_free v u P)) :
+  (h1 : to_is_bound P = to_is_bound (fast_replace_free v u P)) :
   fast_admits v u P :=
 begin
   apply lem_2,
@@ -896,7 +908,7 @@ example
   (binders : finset variable_)
   (h1 : v ∉ binders)
   (h2 : admits_aux v u binders P) :
-  to_is_bound_aux binders P = to_is_bound_aux binders (replace_free v u P) :=
+  to_is_bound_aux binders P = to_is_bound_aux binders (fast_replace_free v u P) :=
 begin
   induction P generalizing binders,
   case formula.pred_ : name args binders h1 h2
@@ -904,7 +916,7 @@ begin
     induction args,
     case list.nil
     {
-      unfold replace_free,
+      unfold fast_replace_free,
       simp only [list.map_nil],
     },
     case list.cons : args_hd args_tl args_ih
@@ -913,7 +925,7 @@ begin
       simp only [list.mem_cons_iff, and_imp] at h2,
 
       unfold admits_aux at args_ih,
-      unfold replace_free at args_ih,
+      unfold fast_replace_free at args_ih,
       unfold to_is_bound_aux at args_ih,
 
       simp only [and_imp, list.map_map, eq_self_iff_true, true_and] at args_ih,
@@ -931,7 +943,7 @@ begin
 
       specialize args_ih s1,
 
-      unfold replace_free,
+      unfold fast_replace_free,
       unfold to_is_bound_aux,
 
       simp only [list.map, list.map_map, eq_self_iff_true, bool.to_bool_eq, true_and],
@@ -975,7 +987,7 @@ begin
   {
     unfold admits_aux at h2,
 
-    unfold replace_free,
+    unfold fast_replace_free,
     unfold to_is_bound_aux,
     simp only,
     exact P_ih binders h1 h2,
@@ -985,7 +997,7 @@ begin
     unfold admits_aux at h2,
     cases h2,
 
-    unfold replace_free,
+    unfold fast_replace_free,
     unfold to_is_bound_aux,
     simp only,
     split,
@@ -1000,7 +1012,7 @@ begin
   {
     unfold admits_aux at h2,
 
-    unfold replace_free,
+    unfold fast_replace_free,
     split_ifs,
     {
       refl,
@@ -1032,7 +1044,7 @@ example
   (P : formula)
   (v u : variable_)
   (binders : finset variable_)
-  (h1 : to_is_bound_aux binders P = to_is_bound_aux binders (replace_free v u P)) :
+  (h1 : to_is_bound_aux binders P = to_is_bound_aux binders (fast_replace_free v u P)) :
   admits_aux v u binders P :=
 begin
   induction P generalizing binders,
@@ -1046,13 +1058,13 @@ begin
     },
     case list.cons : args_hd args_tl args_ih
     {
-      unfold replace_free at h1,
+      unfold fast_replace_free at h1,
       unfold to_is_bound_aux at h1,
       simp only [list.map, list.map_map, eq_self_iff_true, bool.to_bool_eq, true_and] at h1,
       cases h1,
 
       unfold admits_aux at args_ih,
-      unfold replace_free at args_ih,
+      unfold fast_replace_free at args_ih,
       unfold to_is_bound_aux at args_ih,
       simp only [list.map_map, eq_self_iff_true, true_and, and_imp] at args_ih,
 
@@ -1095,7 +1107,10 @@ begin
   { admit },
   case formula.forall_ : x P P_ih binders h1
   {
+    unfold admits_aux,
+    apply P_ih,
 
+    sorry
   },
 end
 
@@ -1105,7 +1120,7 @@ example
   (v u : variable_)
   (binders : finset variable_)
   (h1 : v ∉ binders)
-  (h2 : to_is_bound_aux binders P = to_is_bound_aux binders (replace_free v u P)) :
+  (h2 : to_is_bound_aux binders P = to_is_bound_aux binders (fast_replace_free v u P)) :
   admits_aux v u binders P :=
 begin
   induction P generalizing binders,
@@ -1119,13 +1134,13 @@ begin
     },
     case list.cons : args_hd args_tl args_ih
     {
-      unfold replace_free at h2,
+      unfold fast_replace_free at h2,
       unfold to_is_bound_aux at h2,
       simp only [list.map, list.map_map, eq_self_iff_true, bool.to_bool_eq, true_and] at h2,
       cases h2,
 
       unfold admits_aux at args_ih,
-      unfold replace_free at args_ih,
+      unfold fast_replace_free at args_ih,
       unfold to_is_bound_aux at args_ih,
       simp only [list.map_map, eq_self_iff_true, true_and, and_imp] at args_ih,
 
