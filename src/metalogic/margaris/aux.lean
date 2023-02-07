@@ -981,7 +981,21 @@ begin
     exact P_ih binders h1 h2,
   },
   case formula.imp_ : P Q P_ih Q_ih binders h1 h2
-  { admit },
+  {
+    unfold admits_aux at h2,
+    cases h2,
+
+    unfold replace_free,
+    unfold to_is_bound_aux,
+    simp only,
+    split,
+    {
+      exact P_ih binders h1 h2_left,
+    },
+    {
+      exact Q_ih binders h1 h2_right,
+    }
+  },
   case formula.forall_ : x P P_ih binders h1 h2
   {
     unfold admits_aux at h2,
