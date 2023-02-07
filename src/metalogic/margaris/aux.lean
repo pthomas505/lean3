@@ -1184,3 +1184,24 @@ begin
   case formula.forall_ : x P P_ih binders h1 h2
   { admit },
 end
+
+--
+
+example
+  (P : formula)
+  (v u : variable_)
+  (binders : finset variable_)
+  (h1 : v ∉ binders)
+  (h2 : fast_admits_aux v u binders P) :
+  to_is_bound_aux binders P = to_is_bound_aux binders (fast_replace_free v u P) :=
+begin
+  induction P generalizing binders,
+  case formula.pred_ : P_ᾰ P_ᾰ_1 binders h1 h2
+  { admit },
+  case formula.not_ : P_ᾰ P_ih binders h1 h2
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1 h2
+  { admit },
+  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih binders h1 h2
+  { admit },
+end
