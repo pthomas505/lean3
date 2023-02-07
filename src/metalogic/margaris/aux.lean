@@ -1198,7 +1198,8 @@ begin
   induction P generalizing binders,
   case formula.pred_ : name args binders h1 h2
   {
-
+    induction args,
+    pretty_cases,
   },
   case formula.not_ : P P_ih binders h1 h2
   {
@@ -1226,7 +1227,8 @@ begin
   induction P generalizing binders,
   case formula.pred_ : name args binders h1 h2
   {
-
+    induction args,
+    pretty_cases,
   },
   case formula.not_ : P P_ih binders h1 h2
   {
