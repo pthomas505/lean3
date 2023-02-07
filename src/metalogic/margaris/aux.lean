@@ -967,7 +967,7 @@ begin
 end
 
 
-example
+lemma lem_2
   (P : formula)
   (v u : variable_)
   (binders : finset variable_)
@@ -1046,3 +1046,14 @@ begin
   },
 end
 
+example
+  (P : formula)
+  (v u : variable_)
+  (h1 : to_is_bound P = to_is_bound (replace_free v u P)) :
+  fast_admits v u P :=
+begin
+  apply lem_2,
+  unfold to_is_bound at h1,
+  exact h1,
+  simp only [finset.not_mem_empty, not_false_iff],
+end
