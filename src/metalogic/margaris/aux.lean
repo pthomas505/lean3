@@ -1041,7 +1041,9 @@ begin
   {
     induction args,
     case list.nil
-    { admit },
+    {
+
+    },
     case list.cons : args_hd args_tl args_ih
     { admit },
   },
