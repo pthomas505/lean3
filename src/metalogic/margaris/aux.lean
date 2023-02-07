@@ -1038,7 +1038,56 @@ begin
   induction P generalizing binders,
   case formula.pred_ : name args binders h1
   {
+    induction args,
+    case list.nil
+    {
+      unfold admits_aux,
+      simp only [list.not_mem_nil, false_and, is_empty.forall_iff],
+    },
+    case list.cons : args_hd args_tl args_ih
+    {
+      unfold replace_free at h1,
+      unfold to_is_bound_aux at h1,
+      simp only [list.map, list.map_map, eq_self_iff_true, bool.to_bool_eq, true_and] at h1,
+      cases h1,
 
+      unfold admits_aux at args_ih,
+      unfold replace_free at args_ih,
+      unfold to_is_bound_aux at args_ih,
+      simp only [list.map_map, eq_self_iff_true, true_and, and_imp] at args_ih,
+
+      specialize args_ih h1_right,
+
+      unfold admits_aux,
+      simp only [list.mem_cons_iff, and_imp],
+      intros a1 a2,
+
+      unfold replace at h1_left,
+      split_ifs at h1_left,
+      {
+        subst h,
+        cases h1_left,
+        by_contradiction contra,
+        apply a2,
+        apply h1_left_mpr,
+        exact contra,
+      },
+      {
+        apply args_ih,
+        {
+          cases a1,
+          {
+            contradiction,
+          },
+          {
+            exact a1,
+          },
+        },
+        {
+          exact a2,
+        }
+      },
+    },
   },
   case formula.not_ : P_ᾰ P_ih binders h1
   { admit },
