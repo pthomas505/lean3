@@ -1213,3 +1213,17 @@ begin
 
   },
 end
+
+
+example
+  (P : formula)
+  (v u : variable_)
+  (binders : finset variable_)
+  (h1 : v ∉ binders)
+  (h2 : to_is_bound_aux binders P = to_is_bound_aux binders (fast_replace_free v u P)) :
+  fast_admits_aux v u binders P :=
+begin
+  induction P generalizing binders,
+
+end
+
