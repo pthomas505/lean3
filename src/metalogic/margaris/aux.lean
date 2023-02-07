@@ -1046,7 +1046,9 @@ begin
       simp only [list.not_mem_nil, false_and, is_empty.forall_iff],
     },
     case list.cons : args_hd args_tl args_ih
-    { admit },
+    {
+
+    },
   },
   case formula.not_ : P P_ih binders h1 h2
   { admit },
