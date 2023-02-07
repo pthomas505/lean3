@@ -190,7 +190,7 @@ def replace
   {α : Type}
   [decidable_eq α]
   (v t x : α) : α :=
-  if x = v then t else x
+  if v = x then t else x
 
 -- P (t/v)
 -- v -> t in P
@@ -199,7 +199,7 @@ def replace_free (v t : variable_) : formula → formula
 | (not_ P) := not_ (replace_free P)
 | (imp_ P Q) := imp_ (replace_free P) (replace_free Q)
 | (forall_ x P) :=
-  if x = v
+  if v = x
   then forall_ x P
   else forall_ x (replace_free P)
 
@@ -633,7 +633,18 @@ def admits_alt (v u : variable_) : formula → Prop
 | (pred_ name args) := true
 | (not_ P) := admits_alt P
 | (imp_ P Q) := admits_alt P ∧ admits_alt Q
-| (forall_ x P) := x = v ∨ ((x = u → v ∉ P.free_var_set) ∧ admits_alt P)
+| (forall_ x P) := v = x ∨ ((x = u → v ∉ P.free_var_set) ∧ admits_alt P)
+
+
+example
+  (P : formula)
+  (v u : variable_)
+  (S : finset variable_)
+  (h1 : fast_admits_aux v u S P) :
+  admits_alt v u P :=
+begin
+  sorry,
+end
 
 
 inductive admits' : variable_ → variable_ → formula → Prop
@@ -758,13 +769,13 @@ example
   (P : formula)
   (v u : variable_)
   (binders : finset variable_)
-  (h1 : admits_aux v u binders P) :
+  (h1 : fast_admits_aux v u binders P) :
   to_is_bound_aux binders P = to_is_bound_aux binders (replace_free v u P) :=
 begin
   induction P generalizing binders,
   case formula.pred_ : name args binders h1
   {
-    unfold admits_aux at h1,
+    unfold fast_admits_aux at h1,
 
     induction args generalizing binders,
     case list.nil
@@ -779,7 +790,7 @@ begin
   },
   case formula.not_ : P P_ih binders h1
   {
-    unfold admits_aux at h1,
+    unfold fast_admits_aux at h1,
 
     unfold replace_free,
     unfold to_is_bound_aux,
@@ -788,7 +799,7 @@ begin
   },
   case formula.imp_ : P Q P_ih Q_ih binders h1
   {
-    unfold admits_aux at h1,
+    unfold fast_admits_aux at h1,
     cases h1,
 
     unfold replace_free,
@@ -803,7 +814,7 @@ begin
   },
   case formula.forall_ : x P P_ih binders h1
   {
-    unfold admits_aux at h1,
+    unfold fast_admits_aux at h1,
 
     unfold replace_free,
     split_ifs,
@@ -814,7 +825,13 @@ begin
       unfold to_is_bound_aux,
       congr' 1,
       apply P_ih,
-      exact h1,
+      cases h1,
+      {
+        contradiction,
+      },
+      {
+        exact h1,
+      }
     }
   },
 end
