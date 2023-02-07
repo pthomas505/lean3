@@ -1200,9 +1200,9 @@ begin
   {
     induction args,
     case list.nil
-  { admit },
-  case list.cons : args_hd args_tl args_ih
-  { admit },
+    { admit },
+    case list.cons : args_hd args_tl args_ih
+    { admit },
   },
   case formula.not_ : P P_ih binders h1 h2
   {
