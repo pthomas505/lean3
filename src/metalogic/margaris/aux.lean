@@ -1199,7 +1199,10 @@ begin
   case formula.pred_ : name args binders h1 h2
   {
     induction args,
-    pretty_cases,
+    case list.nil
+  { admit },
+  case list.cons : args_hd args_tl args_ih
+  { admit },
   },
   case formula.not_ : P P_ih binders h1 h2
   {
@@ -1228,7 +1231,10 @@ begin
   case formula.pred_ : name args binders h1 h2
   {
     induction args,
-    pretty_cases,
+    case list.nil
+  { admit },
+  case list.cons : args_hd args_tl args_ih
+  { admit },
   },
   case formula.not_ : P P_ih binders h1 h2
   {
