@@ -976,5 +976,32 @@ begin
   case formula.imp_ : P Q P_ih Q_ih binders h1 h2
   { admit },
   case formula.forall_ : x P P_ih binders h1 h2
-  { admit },
+  {
+    unfold admits_aux at h2,
+
+    unfold replace_free,
+    split_ifs,
+    {
+      refl,
+    },
+    {
+      unfold to_is_bound_aux,
+      simp only [eq_self_iff_true, true_and],
+      apply P_ih,
+      {
+        simp only [finset.mem_union, finset.mem_singleton],
+        push_neg,
+        split,
+        {
+          exact h1,
+        },
+        {
+          exact h,
+        }
+      },
+      {
+        exact h2,
+      }
+    }
+  },
 end
