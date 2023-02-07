@@ -1036,7 +1036,7 @@ example
   admits_aux v u binders P :=
 begin
   induction P generalizing binders,
-  case formula.pred_ : P_ᾰ P_ᾰ_1 binders h1
+  case formula.pred_ : name args binders h1
   { admit },
   case formula.not_ : P_ᾰ P_ih binders h1
   { admit },
