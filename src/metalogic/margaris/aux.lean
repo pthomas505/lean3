@@ -903,7 +903,10 @@ begin
   {
     induction args,
     case list.nil
-    { admit },
+    {
+      unfold replace_free,
+      simp only [list.map_nil],
+    },
     case list.cons : args_hd args_tl args_ih
     { admit },
   },
