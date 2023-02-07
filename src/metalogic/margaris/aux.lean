@@ -1201,7 +1201,8 @@ begin
     induction args,
     case list.nil
     {
-
+      unfold fast_replace_free,
+      simp only [list.map_nil],
     },
     case list.cons : args_hd args_tl args_ih
     {
@@ -1237,7 +1238,8 @@ begin
     induction args,
     case list.nil
     {
-
+      unfold fast_admits_aux,
+      simp only [list.not_mem_nil, is_empty.forall_iff],
     },
     case list.cons : args_hd args_tl args_ih
     {
