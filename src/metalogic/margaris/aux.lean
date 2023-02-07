@@ -633,7 +633,20 @@ def admits_alt (v u : variable_) : formula → Prop
 | (pred_ name args) := true
 | (not_ P) := admits_alt P
 | (imp_ P Q) := admits_alt P ∧ admits_alt Q
-| (forall_ x P) := v = x ∨ ((x = u → v ∉ P.free_var_set) ∧ admits_alt P)
+| (forall_ x P) := v = x ∨ ((u = x → v ∉ P.free_var_set) ∧ admits_alt P)
+
+
+def admits_alt' (v u : variable_) : formula → Prop
+| (pred_ name args) := true
+| (not_ P) := admits_alt' P
+| (imp_ P Q) := admits_alt' P ∧ admits_alt' Q
+| (forall_ x P) := v = x ∨ (¬ u = x ∧ admits_alt' P) ∨ (v ∉ P.free_var_set ∧ admits_alt' P)
+
+def admits_alt'' (v u : variable_) : formula → Prop
+| (pred_ name args) := true
+| (not_ P) := admits_alt'' P
+| (imp_ P Q) := admits_alt'' P ∧ admits_alt'' Q
+| (forall_ x P) := v ∉ P.free_var_set ∨ v = x ∨ (¬ u = x ∧ admits_alt'' P)
 
 
 example
@@ -643,8 +656,69 @@ example
   (h1 : fast_admits_aux v u S P) :
   admits_alt v u P :=
 begin
-  sorry,
+  induction P generalizing S,
+  case formula.pred_ : name args S h1
+  {
+    unfold admits_alt,
+  },
+  case formula.not_ : P_ᾰ P_ih S h1
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 S h1
+  { admit },
+  case formula.forall_ : x P P_ih S h1
+  {
+    unfold fast_admits_aux at h1,
+
+    unfold admits_alt,
+    cases h1,
+    {
+      apply or.intro_left,
+      exact h1,
+    },
+    {
+      apply or.intro_right,
+      split,
+      
+    },
+  },
 end
+
+
+example
+  (P : formula)
+  (v u : variable_)
+  (S : finset variable_)
+  (h1 : admits_alt v u P) :
+  fast_admits_aux v u S P :=
+begin
+  induction P generalizing S,
+  case formula.pred_ : name args S
+  {
+    unfold fast_admits_aux,
+    sorry,
+  },
+  case formula.not_ : P_ᾰ P_ih S
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 S
+  { admit },
+  case formula.forall_ : x P P_ih S
+  {
+    unfold admits_alt at h1,
+    unfold fast_admits_aux,
+    cases h1,
+    {
+      apply or.intro_left,
+      exact h1,
+    },
+    {
+      apply or.intro_right,
+      cases h1,
+      apply P_ih,
+      exact h1_right,
+    }
+  },
+end
+
 
 
 inductive admits' : variable_ → variable_ → formula → Prop
@@ -765,15 +839,16 @@ def to_is_bound (P : formula) : bool_formula :=
   to_is_bound_aux ∅ P
 
 
-example
+lemma lem_1
   (P : formula)
   (v u : variable_)
   (binders : finset variable_)
-  (h1 : fast_admits_aux v u binders P) :
+  (h1 : fast_admits_aux v u binders P)
+  (h2 : v ∉ binders) :
   to_is_bound_aux binders P = to_is_bound_aux binders (replace_free v u P) :=
 begin
   induction P generalizing binders,
-  case formula.pred_ : name args binders h1
+  case formula.pred_ : name args binders
   {
     unfold fast_admits_aux at h1,
 
@@ -785,7 +860,42 @@ begin
     },
     case list.cons : args_hd args_tl args_ih
     {
-      sorry,
+      squeeze_simp at h1,
+
+      have s1 : ((v ∈ args_tl) → (u ∉ binders)) ,
+      intros a1,
+      apply h1,
+      apply or.intro_right,
+      exact a1,
+
+      unfold replace_free at args_ih,
+      unfold to_is_bound_aux at args_ih,
+
+      unfold replace_free,
+      unfold to_is_bound_aux,
+
+      squeeze_simp,
+      split,
+      split,
+      intros a1,
+      unfold replace,
+      split_ifs, -- v ∉ binders
+      subst h,
+      contradiction,
+      exact a1,
+      unfold replace,
+      split_ifs,
+      intros a1,
+      exfalso,
+      apply h1,
+      apply or.intro_left,
+      exact h,
+      exact a1,
+      simp only [imp_self],
+      specialize args_ih binders h2 s1,
+      injection args_ih,
+      squeeze_simp at h_2,
+      exact h_2,
     },
   },
   case formula.not_ : P P_ih binders h1
@@ -795,7 +905,7 @@ begin
     unfold replace_free,
     unfold to_is_bound_aux,
     congr' 1,
-    exact P_ih binders h1,
+    exact P_ih binders h1 h2,
   },
   case formula.imp_ : P Q P_ih Q_ih binders h1
   {
@@ -806,10 +916,10 @@ begin
     unfold to_is_bound_aux,
     congr' 1,
     {
-      exact P_ih binders h1_left,
+      exact P_ih binders h1_left h2,
     },
     {
-      exact Q_ih binders h1_right,
+      exact Q_ih binders h1_right h2,
     }
   },
   case formula.forall_ : x P P_ih binders h1
@@ -831,7 +941,88 @@ begin
       },
       {
         exact h1,
+      },
+      {
+        simp only [finset.mem_union, finset.mem_singleton],
+        push_neg,
+        split,
+        exact h2,
+        exact h,
       }
     }
   },
 end
+
+
+example
+  (P : formula)
+  (v u : variable_)
+  (binders : finset variable_)
+  (h1 : fast_admits v u P) :
+  to_is_bound P = to_is_bound (replace_free v u P) :=
+begin
+  apply lem_1,
+  exact h1,
+  simp only [finset.not_mem_empty, not_false_iff],
+end
+
+
+example
+  (P : formula)
+  (v u : variable_)
+  (binders : finset variable_)
+  (h1 : to_is_bound_aux binders P = to_is_bound_aux binders (replace_free v u P))
+  (h2 : v ∉ binders) :
+  fast_admits_aux v u binders P :=
+begin
+  induction P generalizing binders,
+  case formula.pred_ : name args binders h1
+  {
+    unfold replace_free at h1,
+    unfold to_is_bound_aux at h1,
+    injection h1,
+
+    unfold fast_admits_aux,
+    intros a1,
+    squeeze_simp at h_2,
+    simp only [list.map_eq_map_iff] at h_2,
+    specialize h_2 v a1,
+    squeeze_simp at h_2,
+    unfold replace at h_2,
+    split_ifs at h_2,
+    cases h_2,
+    by_contra,
+    apply h2,
+    apply h_2_mpr,
+    exact h,
+    contradiction,
+  },
+  case formula.not_ : P_ᾰ P_ih binders h1
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1
+  { admit },
+  case formula.forall_ : x P P_ih binders h1
+  {
+    unfold replace_free at h1,
+    unfold to_is_bound_aux at h1,
+
+    unfold fast_admits_aux,
+
+    by_cases v = x,
+    apply or.intro_left,
+    exact h,
+
+    apply or.intro_right,
+    apply P_ih,
+    split_ifs at h1,
+    unfold to_is_bound_aux at h1,
+    injection h1,
+    squeeze_simp,
+    push_neg,
+    split,
+    exact h2,
+    exact h,
+
+  },
+end
+
