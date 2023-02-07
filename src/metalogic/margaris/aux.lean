@@ -997,10 +997,30 @@ begin
     exact h,
     contradiction,
   },
-  case formula.not_ : P_ᾰ P_ih binders h1
-  { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1
-  { admit },
+  case formula.not_ : P P_ih binders h1
+  {
+    unfold replace_free at h1,
+    unfold to_is_bound_aux at h1,
+    injection h1,
+    unfold fast_admits_aux,
+    apply P_ih,
+    exact h_1,
+    exact h2,
+  },
+  case formula.imp_ : P Q P_ih Q_ih binders h1
+  {
+    unfold replace_free at h1,
+    unfold to_is_bound_aux at h1,
+    injection h1,
+    unfold fast_admits_aux,
+    split,
+    apply P_ih,
+    exact h_1,
+    exact h2,
+    apply Q_ih,
+    exact h_2,
+    exact h2,
+  },
   case formula.forall_ : x P P_ih binders h1
   {
     unfold replace_free at h1,
