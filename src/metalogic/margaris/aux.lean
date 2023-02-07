@@ -1047,7 +1047,47 @@ begin
     },
     case list.cons : args_hd args_tl args_ih
     {
+      unfold replace_free at h2,
+      unfold to_is_bound_aux at h2,
+      simp only [list.map, list.map_map, eq_self_iff_true, bool.to_bool_eq, true_and] at h2,
+      cases h2,
 
+      unfold admits_aux at args_ih,
+      unfold replace_free at args_ih,
+      unfold to_is_bound_aux at args_ih,
+      simp only [list.map_map, eq_self_iff_true, true_and, and_imp] at args_ih,
+
+      specialize args_ih h2_right,
+
+      unfold admits_aux,
+      simp only [list.mem_cons_iff, and_imp],
+      intros a1 a2,
+
+      unfold replace at h2_left,
+      split_ifs at h2_left,
+      {
+        subst h,
+        cases h2_left,
+        by_contradiction contra,
+        apply a2,
+        apply h2_left_mpr,
+        exact contra,
+      },
+      {
+        apply args_ih,
+        {
+          cases a1,
+          {
+            contradiction,
+          },
+          {
+            exact a1,
+          },
+        },
+        {
+          exact a2,
+        }
+      },
     },
   },
   case formula.not_ : P P_ih binders h1 h2
