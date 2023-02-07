@@ -908,7 +908,68 @@ begin
       simp only [list.map_nil],
     },
     case list.cons : args_hd args_tl args_ih
-    { admit },
+    {
+      unfold admits_aux at h2,
+      simp only [list.mem_cons_iff, and_imp] at h2,
+
+      unfold admits_aux at args_ih,
+      unfold replace_free at args_ih,
+      unfold to_is_bound_aux at args_ih,
+
+      simp only [and_imp, list.map_map, eq_self_iff_true, true_and] at args_ih,
+
+      have s1 : ((v ∈ args_tl) → (v ∉ binders) → (u ∉ binders)),
+      intros a1 a2,
+      apply h2,
+      {
+        apply or.intro_right,
+        exact a1,
+      },
+      {
+        exact a2,
+      },
+
+      specialize args_ih s1,
+
+      unfold replace_free,
+      unfold to_is_bound_aux,
+
+      simp only [list.map, list.map_map, eq_self_iff_true, bool.to_bool_eq, true_and],
+      split,
+      {
+        unfold replace,
+        split_ifs,
+        {
+          split,
+          {
+            intros a1,
+            subst h,
+            contradiction,
+          },
+          {
+            intros a1,
+            exfalso,
+            apply h2,
+            {
+              apply or.intro_left,
+              exact h,
+            },
+            {
+              exact h1,
+            },
+            {
+              exact a1,
+            },
+          }
+        },
+        {
+          refl,
+        }
+      },
+      {
+        exact args_ih,
+      }
+    },
   },
   case formula.not_ : P P_ih binders h1 h2
   { admit },
