@@ -343,7 +343,16 @@ begin
   },
   case formula.imp_ : P Q P_ih Q_ih binders h1
   {
-
+    unfold replace_free_aux,
+    unfold fast_replace_free,
+    simp only,
+    split,
+    {
+      exact P_ih binders h1,
+    },
+    {
+      exact Q_ih binders h1,
+    }
   },
   case formula.forall_ : x P P_ih binders h1
   {
