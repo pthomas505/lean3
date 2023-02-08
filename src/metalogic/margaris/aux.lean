@@ -203,6 +203,66 @@ def replace_free (v t : variable_) (P : formula) : formula :=
   replace_free_aux v t ∅ P
 
 
+lemma blah
+  (P : formula)
+  (v t : variable_)
+  (binders : finset variable_)
+  (h1 : v ∈ binders) :
+  replace_free_aux v t binders P = P :=
+begin
+  induction P generalizing binders,
+  case formula.pred_ : name args binders h1
+  {
+    unfold replace_free_aux,
+    simp only [eq_self_iff_true, true_and],
+    apply list.map_id',
+    intros x,
+    split_ifs,
+    {
+      cases h,
+      subst h_left,
+      contradiction,
+    },
+    {
+      refl,
+    }
+  },
+  case formula.not_ : P P_ih binders h1
+  {
+    unfold replace_free_aux,
+    simp only,
+    exact P_ih binders h1,
+  },
+  case formula.imp_ : P Q P_ih Q_ih binders h1
+  {
+    unfold replace_free_aux,
+    simp only,
+    split,
+    {
+      exact P_ih binders h1,
+    },
+    {
+      exact Q_ih binders h1,
+    }
+  },
+  case formula.forall_ : x P P_ih binders h1
+  {
+    unfold replace_free_aux,
+    simp only,
+    split,
+    {
+      refl,
+    },
+    {
+      apply P_ih,
+      simp only [finset.mem_union, finset.mem_singleton],
+      apply or.intro_left,
+      exact h1,
+    }
+  },
+end
+
+
 -- v -> t
 def replace
   {α : Type}
@@ -219,6 +279,7 @@ def fast_replace_free (v t : variable_) : formula → formula
   then forall_ x P
   else forall_ x (fast_replace_free P)
 
+
 example
   (P : formula)
   (v t : variable_)
@@ -227,14 +288,85 @@ example
   replace_free_aux v t binders P = fast_replace_free v t P :=
 begin
   induction P generalizing binders,
-  case formula.pred_ : P_ᾰ P_ᾰ_1 binders h1
-  { admit },
-  case formula.not_ : P_ᾰ P_ih binders h1
-  { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1
-  { admit },
-  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih binders h1
-  { admit },
+  case formula.pred_ : name args binders h1
+  {
+    unfold replace_free_aux,
+    unfold fast_replace_free,
+    simp only [eq_self_iff_true, true_and],
+    apply list.map_congr,
+    intros x a1,
+    split_ifs,
+    {
+      unfold replace,
+      split_ifs,
+      {
+        refl,
+      },
+      {
+        cases h,
+        contradiction,
+      }
+    },
+    {
+      unfold replace,
+      split_ifs,
+      {
+        subst h_1,
+        push_neg at h,
+        simp only [eq_self_iff_true, forall_true_left] at h,
+        contradiction,
+      },
+      {
+        refl,
+      }
+    },
+  },
+  case formula.not_ : P P_ih binders h1
+  {
+    unfold replace_free_aux,
+    unfold fast_replace_free,
+    simp only,
+    exact P_ih binders h1,
+  },
+  case formula.imp_ : P Q P_ih Q_ih binders h1
+  {
+    unfold replace_free_aux,
+    unfold fast_replace_free,
+    simp only,
+    split,
+    {
+      exact P_ih binders h1,
+    },
+    {
+      exact Q_ih binders h1,
+    }
+  },
+  case formula.forall_ : x P P_ih binders h1
+  {
+    unfold replace_free_aux,
+    unfold fast_replace_free,
+    split_ifs,
+    {
+      simp only [eq_self_iff_true, true_and],
+      apply blah,
+      simp only [finset.mem_union, finset.mem_singleton],
+      apply or.intro_right,
+      exact h,
+    },
+    {
+      simp only [eq_self_iff_true, true_and],
+      apply P_ih,
+      simp only [finset.mem_union, finset.mem_singleton],
+      push_neg,
+      split,
+      {
+        exact h1,
+      },
+      {
+        exact h,
+      }
+    }
+  },
 end
 
 
