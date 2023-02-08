@@ -303,7 +303,36 @@ begin
   induction P generalizing binders,
   case formula.pred_ : name args binders h1
   {
-
+    unfold replace_free_aux,
+    unfold fast_replace_free,
+    simp only [eq_self_iff_true, true_and],
+    apply list.map_congr,
+    intros x a1,
+    split_ifs,
+    {
+      unfold replace,
+      split_ifs,
+      {
+        refl,
+      },
+      {
+        cases h,
+        contradiction,
+      }
+    },
+    {
+      unfold replace,
+      split_ifs,
+      {
+        subst h_1,
+        push_neg at h,
+        simp only [eq_self_iff_true, forall_true_left] at h,
+        contradiction,
+      },
+      {
+        refl,
+      }
+    },
   },
   case formula.not_ : P P_ih binders h1
   {
