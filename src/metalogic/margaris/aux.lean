@@ -198,6 +198,9 @@ def replace_free_aux (v t : variable_) : finset variable_ → formula → formul
     imp_ (replace_free_aux binders P) (replace_free_aux binders Q)
 | binders (forall_ x P) := forall_ x (replace_free_aux (binders ∪ {x}) P)
 
+def replace_free (v t : variable_) (P : formula) : formula :=
+  replace_free_aux v t ∅ P
+
 
 -- v -> t
 def replace
