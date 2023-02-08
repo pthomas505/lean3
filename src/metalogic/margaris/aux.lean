@@ -187,6 +187,7 @@ If $P$ is a formula, $v$ is a variable, and $t$ is a term, then $P(t/v)$ is the 
 
 -- P (t/v)
 -- v -> t in P
+
 def replace_free_aux (v t : variable_) : finset variable_ → formula → formula
 | binders (pred_ name args) :=
     pred_ name (args.map (fun (x : variable_),
