@@ -967,7 +967,12 @@ begin
   },
   case formula.not_ : P P_ih binders h1 h2
   {
-    sorry
+    unfold fast_admits_aux at h2,
+
+    unfold fast_replace_free,
+    unfold to_is_bound_aux,
+    congr' 1,
+    exact P_ih binders h1 h2,
   },
   case formula.imp_ : P Q P_ih Q_ih binders h1 h2
   {
