@@ -556,13 +556,13 @@ def fast_admits (v u : variable_) (P : formula) : Prop :=
 lemma admits_aux_eqv_left
   (P : formula)
   (v u : variable_)
-  (S : finset variable_)
-  (h1 : admits_aux v u S P)
-  (h2 : v ∉ S) :
-  fast_admits_aux v u S P :=
+  (binders : finset variable_)
+  (h1 : admits_aux v u binders P)
+  (h2 : v ∉ binders) :
+  fast_admits_aux v u binders P :=
 begin
-  induction P generalizing S,
-  case formula.pred_ : name args S h1 h2
+  induction P generalizing binders,
+  case formula.pred_ : name args binders h1 h2
   {
     unfold admits_aux at h1,
 
@@ -577,14 +577,14 @@ begin
       exact h2,
     },
   },
-  case formula.not_ : P P_ih S h1 h2
+  case formula.not_ : P P_ih binders h1 h2
   {
     unfold admits_aux at h1,
 
     unfold fast_admits_aux,
-    exact P_ih S h1 h2,
+    exact P_ih binders h1 h2,
   },
-  case formula.imp_ : P Q P_ih Q_ih S h1 h2
+  case formula.imp_ : P Q P_ih Q_ih binders h1 h2
   {
     unfold admits_aux at h1,
     cases h1,
@@ -592,13 +592,13 @@ begin
     unfold fast_admits_aux,
     split,
     {
-      exact P_ih S h1_left h2,
+      exact P_ih binders h1_left h2,
     },
     {
-      exact Q_ih S h1_right h2,
+      exact Q_ih binders h1_right h2,
     }
   },
-  case formula.forall_ : x P P_ih S h1 h2
+  case formula.forall_ : x P P_ih binders h1 h2
   {
     unfold admits_aux at h1,
 
@@ -633,12 +633,12 @@ end
 lemma admits_aux_eqv_right
   (P : formula)
   (v u : variable_)
-  (S : finset variable_)
-  (h1 : v ∈ S ∨ fast_admits_aux v u S P) :
-  admits_aux v u S P :=
+  (binders : finset variable_)
+  (h1 : v ∈ binders ∨ fast_admits_aux v u binders P) :
+  admits_aux v u binders P :=
 begin
-  induction P generalizing S,
-  case formula.pred_ : name args S h1
+  induction P generalizing binders,
+  case formula.pred_ : name args binders h1
   {
     unfold fast_admits_aux at h1,
     unfold admits_aux,
@@ -652,14 +652,14 @@ begin
       exact h1 a1_left,
     }
   },
-  case formula.not_ : P P_ih S h1
+  case formula.not_ : P P_ih binders h1
   {
     unfold fast_admits_aux at h1,
 
     unfold admits_aux,
-    exact P_ih S h1,
+    exact P_ih binders h1,
   },
-  case formula.imp_ : P Q P_ih Q_ih S h1
+  case formula.imp_ : P Q P_ih Q_ih binders h1
   {
     unfold fast_admits_aux at h1,
     unfold admits_aux,
@@ -691,7 +691,7 @@ begin
       }
     }
   },
-  case formula.forall_ : x P P_ih S h1
+  case formula.forall_ : x P P_ih binders h1
   {
     unfold fast_admits_aux at h1,
 
