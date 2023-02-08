@@ -30,6 +30,19 @@ inductive formula : Type
 open formula
 
 
+-- P ∨ Q := ~ P → Q
+def formula.or_ (P Q : formula) : formula := (not_ P).imp_ Q
+
+-- P ∧ Q := ~ ( P → ~ Q )
+def formula.and_ (P Q : formula) : formula := not_ (P.imp_ (not_ Q))
+
+-- P ↔ Q := ( P → Q ) ∧ ( Q → P )
+def formula.iff_ (P Q : formula) : formula := (P.imp_ Q).and_ (Q.imp_ P)
+
+-- ∃ x P := ~ ∀ x ~ P
+def formula.exists_ (x : variable_) (P : formula) : formula := not_ (forall_ x (not_ P))
+
+
 /-
 pg. 48
 
