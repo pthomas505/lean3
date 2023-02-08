@@ -663,7 +663,7 @@ def to_is_bound (P : formula) : bool_formula :=
   to_is_bound_aux ∅ P
 
 
-example
+lemma admits_imp_free_bound_unchanged_by_replace_free
   (P : formula)
   (v u : variable_)
   (binders : finset variable_)
@@ -786,7 +786,7 @@ begin
 end
 
 
-example
+lemma free_bound_unchanged_by_replace_free_imp_admits
   (P : formula)
   (v u : variable_)
   (binders : finset variable_)
