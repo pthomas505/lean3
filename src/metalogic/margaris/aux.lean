@@ -1348,11 +1348,11 @@ begin
   },
   case formula.not_ : P P_ih binders h1 h2
   {
-
+    sorry
   },
   case formula.imp_ : P Q P_ih Q_ih binders h1 h2
   {
-
+    sorry
   },
   case formula.forall_ : x P P_ih binders h1 h2
   {
