@@ -336,7 +336,10 @@ begin
   },
   case formula.not_ : P P_ih binders h1
   {
-
+    unfold replace_free_aux,
+    unfold fast_replace_free,
+    simp only,
+    exact P_ih binders h1,
   },
   case formula.imp_ : P Q P_ih Q_ih binders h1
   {
