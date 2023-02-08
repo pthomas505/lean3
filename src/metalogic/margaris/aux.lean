@@ -293,7 +293,7 @@ def fast_replace_free (v t : variable_) : formula → formula
   else forall_ x (fast_replace_free P)
 
 
-example
+lemma meh
   (P : formula)
   (v t : variable_)
   (binders : finset variable_)
@@ -380,6 +380,17 @@ begin
       }
     }
   },
+end
+
+
+example
+  (P : formula)
+  (v t : variable_) :
+  replace_free v t P = fast_replace_free v t P :=
+begin
+  unfold replace_free,
+  apply meh,
+  simp only [finset.not_mem_empty, not_false_iff],
 end
 
 
