@@ -1123,3 +1123,6 @@ inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
   ¬ v = x → ¬ t = x →
   is_prop_sub P v t P' →
   is_prop_sub (forall_ x P) v t (forall_ x P')
+
+
+#lint
