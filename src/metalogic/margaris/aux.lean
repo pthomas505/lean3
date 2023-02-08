@@ -868,7 +868,19 @@ begin
   },
   case formula.imp_ : P Q P_ih Q_ih binders h1 h2
   {
-    sorry
+    unfold fast_replace_free at h2,
+    unfold to_is_bound_aux at h2,
+    simp only at h2,
+    cases h2,
+
+    unfold fast_admits_aux,
+    split,
+    {
+      exact P_ih binders h1 h2_left,
+    },
+    {
+      exact Q_ih binders h1 h2_right,
+    }
   },
   case formula.forall_ : x P P_ih binders h1 h2
   {
