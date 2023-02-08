@@ -1093,24 +1093,33 @@ begin
 end
 
 
-inductive is_admits : variable_ → variable_ → formula → Prop
-
+inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
 | pred_ (name : pred_name_) (args : list variable_)
-  (v u : variable_) :
-  is_admits v u (pred_ name args)
+  (v t : variable_) :
+  is_prop_sub (pred_ name args) v t (pred_ name (args.map (replace v t)))
 
 | not_ (P : formula)
-  (v u : variable_) :
-  is_admits v u P →
-  is_admits v u (not_ P)
+  (v t : variable_)
+  (P' : formula) :
+  is_prop_sub P v t P' →
+  is_prop_sub P.not_ v t P'.not_
 
 | imp_ (P Q : formula)
-  (v u : variable_) :
-  is_admits v u P →
-  is_admits v u Q →
-  is_admits v u (imp_ P Q)
+  (v t : variable_)
+  (P' Q' : formula) :
+  is_prop_sub P v t P' →
+  is_prop_sub Q v t Q' →
+  is_prop_sub (P.imp_ Q) v t (P'.imp_ Q')
 
 | not_free (P : formula)
-  (v u : variable_) :
+  (v t : variable_)
+  (P' : formula) :
   v ∉ P.free_var_set →
-  is_admits v u P
+  is_prop_sub P v t P
+
+| forall_free (x : variable_) (P : formula)
+  (v t : variable_)
+  (P' : formula) :
+  ¬ x = v → ¬ x = t →
+  is_prop_sub P v t P' →
+  is_prop_sub (forall_ x P) v t (forall_ x P')
