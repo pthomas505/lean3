@@ -902,7 +902,17 @@ example
   (v u : variable_) :
   fast_admits v u P ↔ to_is_bound P = to_is_bound (fast_replace_free v u P) :=
 begin
-
+  unfold fast_admits,
+  unfold to_is_bound,
+  split,
+  {
+    apply admits_imp_free_bound_unchanged_by_replace_free,
+    simp only [finset.not_mem_empty, not_false_iff],
+  },
+  {
+    apply free_bound_unchanged_by_replace_free_imp_admits,
+    simp only [finset.not_mem_empty, not_false_iff],
+  }
 end
 
 
