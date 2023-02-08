@@ -837,7 +837,7 @@ def to_is_bound (P : formula) : bool_formula :=
   to_is_bound_aux ∅ P
 
 
-lemma admits_imp_free_bound_unchanged_by_replace_free
+lemma admits_imp_is_bound_unchanged_by_replace_free
   (P : formula)
   (v u : variable_)
   (binders : finset variable_)
@@ -960,7 +960,7 @@ begin
 end
 
 
-lemma free_bound_unchanged_by_replace_free_imp_admits
+lemma is_bound_unchanged_by_replace_free_imp_admits
   (P : formula)
   (v u : variable_)
   (binders : finset variable_)
@@ -1083,11 +1083,11 @@ begin
   unfold to_is_bound,
   split,
   {
-    apply admits_imp_free_bound_unchanged_by_replace_free,
+    apply admits_imp_is_bound_unchanged_by_replace_free,
     simp only [finset.not_mem_empty, not_false_iff],
   },
   {
-    apply free_bound_unchanged_by_replace_free_imp_admits,
+    apply is_bound_unchanged_by_replace_free_imp_admits,
     simp only [finset.not_mem_empty, not_false_iff],
   }
 end
