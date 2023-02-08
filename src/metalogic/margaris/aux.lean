@@ -1356,7 +1356,34 @@ begin
   },
   case formula.forall_ : x P P_ih binders h1 h2
   {
+    unfold fast_replace_free at h2,
 
+    unfold fast_admits_aux,
+    split_ifs at h2,
+    {
+      apply or.intro_left,
+      exact h,
+    },
+    {
+      apply or.intro_right,
+      apply P_ih,
+      {
+        simp only [finset.mem_union, finset.mem_singleton],
+        push_neg,
+        split,
+        {
+          exact h1,
+        },
+        {
+          exact h,
+        }
+      },
+      {
+        unfold to_is_bound_aux at h2,
+        simp only [eq_self_iff_true, true_and] at h2,
+        exact h2,
+      }
+    }
   },
 end
 
