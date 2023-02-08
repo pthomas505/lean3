@@ -897,6 +897,15 @@ begin
 end
 
 
+example
+  (P : formula)
+  (v u : variable_) :
+  fast_admits v u P ↔ to_is_bound P = to_is_bound (fast_replace_free v u P) :=
+begin
+
+end
+
+
 inductive admits' : variable_ → variable_ → formula → Prop
 
 | pred_ (name : pred_name_) (args : list variable_)
