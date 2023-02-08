@@ -226,19 +226,52 @@ begin
   induction P generalizing binders,
   case formula.pred_ : name args binders h1
   {
-
+    unfold replace_free_aux,
+    simp only [eq_self_iff_true, true_and],
+    apply list.map_id',
+    intros x,
+    split_ifs,
+    {
+      cases h,
+      subst h_left,
+      contradiction,
+    },
+    {
+      refl,
+    }
   },
   case formula.not_ : P P_ih binders h1
   {
-
+    unfold replace_free_aux,
+    simp only,
+    exact P_ih binders h1,
   },
   case formula.imp_ : P Q P_ih Q_ih binders h1
   {
-
+    unfold replace_free_aux,
+    simp only,
+    split,
+    {
+      exact P_ih binders h1,
+    },
+    {
+      exact Q_ih binders h1,
+    }
   },
   case formula.forall_ : x P P_ih binders h1
   {
-
+    unfold replace_free_aux,
+    simp only,
+    split,
+    {
+      refl,
+    },
+    {
+      apply P_ih,
+      simp only [finset.mem_union, finset.mem_singleton],
+      apply or.intro_left,
+      exact h1,
+    }
   },
 end
 
