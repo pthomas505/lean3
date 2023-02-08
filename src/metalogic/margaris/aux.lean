@@ -222,17 +222,18 @@ def fast_replace_free (v t : variable_) : formula → formula
 example
   (P : formula)
   (v t : variable_)
-  (binders : finset variable_) :
+  (binders : finset variable_)
+  (h1 : v ∉ binders) :
   replace_free_aux v t binders P = fast_replace_free v t P :=
 begin
   induction P generalizing binders,
-  case formula.pred_ : P_ᾰ P_ᾰ_1 binders
+  case formula.pred_ : P_ᾰ P_ᾰ_1 binders h1
   { admit },
-  case formula.not_ : P_ᾰ P_ih binders
+  case formula.not_ : P_ᾰ P_ih binders h1
   { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1
   { admit },
-  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih binders
+  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih binders h1
   { admit },
 end
 
