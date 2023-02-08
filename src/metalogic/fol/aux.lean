@@ -394,6 +394,59 @@ begin
 end
 
 
+lemma replace_not_free
+  (P : formula)
+  (v t : variable_)
+  (h1 : v ∉ P.free_var_set) :
+  fast_replace_free v t P = P :=
+begin
+  induction P,
+  case formula.pred_ : name args
+  {
+    induction args,
+    case list.nil
+    {
+      unfold fast_replace_free,
+      simp only [list.map_nil, eq_self_iff_true, and_self],
+    },
+    case list.cons : args_hd args_tl args_ih
+    {
+      unfold formula.free_var_set at h1,
+      simp only [list.to_finset_cons, finset.mem_insert, list.mem_to_finset] at h1,
+      push_neg at h1,
+      cases h1,
+
+      unfold formula.free_var_set at args_ih,
+      unfold fast_replace_free at args_ih,
+      simp only [list.mem_to_finset, eq_self_iff_true, true_and] at args_ih,
+
+      unfold fast_replace_free,
+      simp only [list.map, eq_self_iff_true, true_and],
+      split,
+      {
+        unfold replace,
+        split_ifs,
+        {
+          contradiction,
+        },
+        {
+          refl,
+        }
+      },
+      {
+        exact args_ih h1_right,
+      }
+    },
+  },
+  case formula.not_ : P_ᾰ P_ih
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
+  { admit },
+  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih
+  { admit },
+end
+
+
 /-
 pg. 48
 
@@ -1123,6 +1176,30 @@ inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
   ¬ v = x → ¬ t = x →
   is_prop_sub P v t P' →
   is_prop_sub (forall_ x P) v t (forall_ x P')
+
+
+example
+  (P P' : formula)
+  (v u : variable_)
+  (h1 : fast_admits v u P)
+  (h2 : is_prop_sub P v u P') :
+  fast_replace_free v u P = P' :=
+begin
+  induction h2,
+  case is_prop_sub.pred_ : h2_name h2_args h2_v h2_t
+  { admit },
+  case is_prop_sub.not_ : h2_P h2_v h2_t h2_P' h2_ᾰ h2_ih
+  { admit },
+  case is_prop_sub.imp_ : h2_P h2_Q h2_v h2_t h2_P' h2_Q' h2_ᾰ h2_ᾰ_1 h2_ih_ᾰ h2_ih_ᾰ_1
+  { admit },
+  case is_prop_sub.not_free : h2_P h2_v h2_t h2_P' h2_1
+  {
+    apply replace_not_free,
+    exact h2_1,
+  },
+  case is_prop_sub.forall_free : h2_x h2_P h2_v h2_t h2_P' h2_ᾰ h2_ᾰ_1 h2_ᾰ_2 h2_ih
+  { admit },
+end
 
 
 #lint
