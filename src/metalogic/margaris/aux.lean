@@ -682,7 +682,6 @@ def to_is_bound (P : formula) : bool_formula :=
   to_is_bound_aux ∅ P
 
 
-
 example
   (P : formula)
   (v u : variable_)
