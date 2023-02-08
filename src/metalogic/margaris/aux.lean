@@ -10,17 +10,17 @@ import data.finset
 set_option pp.parens true
 
 
-@[derive decidable_eq]
+@[derive [inhabited, decidable_eq]]
 inductive variable_ : Type
 | variable_ : string → variable_
 
 
-@[derive decidable_eq]
+@[derive [inhabited, decidable_eq]]
 inductive pred_name_ : Type
 | pred_name_ : string → pred_name_
 
 
-@[derive decidable_eq]
+@[derive [inhabited, decidable_eq]]
 inductive formula : Type
 | pred_ : pred_name_ → list variable_ → formula
 | not_ : formula → formula
@@ -819,7 +819,7 @@ begin
 end
 
 
-@[derive decidable_eq]
+@[derive [inhabited, decidable_eq]]
 inductive bool_formula : Type
 | pred_ : pred_name_ → list bool → bool_formula
 | not_ : bool_formula → bool_formula
