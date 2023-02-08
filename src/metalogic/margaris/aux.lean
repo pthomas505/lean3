@@ -293,6 +293,18 @@ def fast_replace_free (v t : variable_) : formula → formula
   else forall_ x (fast_replace_free P)
 
 
+lemma replace_free_aux_eq_fast_replace_free
+  (P : formula)
+  (v t : variable_)
+  (binders : finset variable_)
+  (h1 : v ∉ binders) :
+  replace_free_aux v t binders P = fast_replace_free v t P :=
+begin
+  induction P generalizing binders,
+
+end
+
+
 lemma meh
   (P : formula)
   (v t : variable_)
