@@ -641,29 +641,6 @@ begin
 end
 
 
-inductive admits' : variable_ → variable_ → formula → Prop
-
-| pred_ (name : pred_name_) (args : list variable_)
-  (v u : variable_) :
-  admits' v u (pred_ name args)
-
-| not_ (P : formula)
-  (v u : variable_) :
-  admits' v u P →
-  admits' v u (not_ P)
-
-| imp_ (P Q : formula)
-  (v u : variable_) :
-  admits' v u P →
-  admits' v u Q →
-  admits' v u (imp_ P Q)
-
-| not_free (P : formula)
-  (v u : variable_) :
-  v ∉ P.free_var_set →
-  admits' v u P
-
-
 @[derive decidable_eq]
 inductive bool_formula : Type
 | pred_ : pred_name_ → list bool → bool_formula
@@ -915,3 +892,25 @@ begin
   },
 end
 
+
+inductive admits' : variable_ → variable_ → formula → Prop
+
+| pred_ (name : pred_name_) (args : list variable_)
+  (v u : variable_) :
+  admits' v u (pred_ name args)
+
+| not_ (P : formula)
+  (v u : variable_) :
+  admits' v u P →
+  admits' v u (not_ P)
+
+| imp_ (P Q : formula)
+  (v u : variable_) :
+  admits' v u P →
+  admits' v u Q →
+  admits' v u (imp_ P Q)
+
+| not_free (P : formula)
+  (v u : variable_) :
+  v ∉ P.free_var_set →
+  admits' v u P
