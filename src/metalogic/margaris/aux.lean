@@ -897,6 +897,9 @@ begin
 end
 
 
+/-
+P admits u for v if and only if every free occurrence of a variable in P remains free in P(u/v) and every bound occurrence of a variable in P remains bound in P(u/v).
+-/
 example
   (P : formula)
   (v u : variable_) :
