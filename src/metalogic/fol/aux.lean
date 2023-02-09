@@ -1302,7 +1302,7 @@ begin
 
     unfold fast_replace_free,
     split_ifs,
-    squeeze_simp,
+    simp only [eq_self_iff_true, true_and],
     apply h2_ih binders,
     cases h1,
     {
