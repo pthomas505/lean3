@@ -709,12 +709,26 @@ example
   (v u : variable_)
   (binders : finset variable_)
   (h1 : fast_admits_aux v u binders P)
+  (h2 : v ∉ binders)
+  (h3 : v ∈ P.free_var_set) :
+  u ∉ binders :=
+begin
+  induction P generalizing binders,
+  pretty_cases,
+end
+
+
+example
+  (P : formula)
+  (v u : variable_)
+  (binders : finset variable_)
+  (h1 : fast_admits_aux v u binders P)
   (h2 : v ∈ P.free_var_set)
   (h3 : v ∉ binders) :
   u ∉ binders :=
 begin
   induction P generalizing binders,
-  case formula.pred_ : P_ᾰ P_ᾰ_1 binders h1 h3
+  case formula.pred_ : name args binders h1 h3
   { admit },
   case formula.not_ : P_ᾰ P_ih binders h1 h3
   { admit },
