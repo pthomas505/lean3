@@ -714,8 +714,10 @@ example
   u ∉ binders :=
 begin
   induction P generalizing binders,
-  case formula.pred_ : P_ᾰ P_ᾰ_1 binders h1 h2
-  { admit },
+  case formula.pred_ : name args binders h1 h2
+  {
+
+  },
   case formula.not_ : P_ᾰ P_ih binders h1 h2
   { admit },
   case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1 h2
