@@ -642,7 +642,7 @@ def fast_admits (v u : variable_) (P : formula) : Prop :=
   fast_admits_aux v u ∅ P
 
 
-example
+lemma fast_admits_aux_sub_binders
   (P : formula)
   (v u : variable_)
   (S T : finset variable_)
@@ -1309,7 +1309,9 @@ begin
       contradiction,
     },
     {
-
+      apply fast_admits_aux_sub_binders h2_P h2_v h2_t binders {h2_x} h1,
+      simp only [finset.mem_singleton],
+      exact h2_1,
     }
   },
 end
