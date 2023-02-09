@@ -747,49 +747,6 @@ begin
 end
 
 
-example
-  (P : formula)
-  (v u : variable_)
-  (binders : finset variable_)
-  (h1 : fast_admits_aux v u binders P)
-  (h2 : v ∈ P.free_var_set)
-  (h3 : v ∉ binders) :
-  u ∉ binders :=
-begin
-  induction P generalizing binders,
-  case formula.pred_ : name args binders h1 h3
-  { admit },
-  case formula.not_ : P_ᾰ P_ih binders h1 h3
-  { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1 h3
-  { admit },
-  case formula.forall_ : x P P_ih binders h1 h3
-  {
-    unfold fast_admits_aux at h1,
-
-    unfold formula.free_var_set at h2,
-    simp only [finset.mem_sdiff, finset.mem_singleton] at h2,
-    cases h2,
-
-    apply P_ih h2_left,
-    {
-      cases h1,
-      {
-        contradiction,
-      },
-      {
-        apply fast_admits_aux_sub_binders P v u binders {x} h1,
-        simp only [finset.mem_singleton],
-        exact h2_right,
-      }
-    },
-    {
-      exact h3,
-    }
-  },
-end
-
-
 lemma admits_aux_eqv_left
   (P : formula)
   (v u : variable_)
