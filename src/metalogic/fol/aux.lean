@@ -642,6 +642,26 @@ def fast_admits (v u : variable_) (P : formula) : Prop :=
   fast_admits_aux v u ∅ P
 
 
+example
+  (P : formula)
+  (v u : variable_)
+  (S T : finset variable_)
+  (h1 : fast_admits_aux v u (S ∪ T) P)
+  (h2 : v ∉ T) :
+  fast_admits_aux v u S P :=
+begin
+  induction P generalizing S,
+  case formula.pred_ : P_ᾰ P_ᾰ_1 S h1
+  { admit },
+  case formula.not_ : P_ᾰ P_ih S h1
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 S h1
+  { admit },
+  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih S h1
+  { admit },
+end
+
+
 lemma admits_aux_eqv_left
   (P : formula)
   (v u : variable_)
@@ -1217,11 +1237,12 @@ inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
 example
   (P P' : formula)
   (v u : variable_)
-  (h1 : fast_admits v u P)
+  (binders : finset variable_)
+  (h1 : fast_admits_aux v u binders P)
   (h2 : is_prop_sub P v u P') :
   fast_replace_free v u P = P' :=
 begin
-  induction h2,
+  induction h2 generalizing binders,
   case is_prop_sub.pred_ : h2_name h2_args h2_v h2_t
   { admit },
   case is_prop_sub.not_ : h2_P h2_v h2_t h2_P' h2_ᾰ h2_ih
@@ -1233,8 +1254,22 @@ begin
     apply replace_not_free,
     exact h2_1,
   },
-  case is_prop_sub.forall_free : h2_x h2_P h2_v h2_t h2_P' h2_ᾰ h2_ᾰ_1 h2_ᾰ_2 h2_ih
-  { admit },
+  case is_prop_sub.forall_free : h2_x h2_P h2_v h2_t h2_P' h2_1 h2_2 h2_3 h2_ih
+  {
+    unfold fast_admits_aux at h1,
+
+    unfold fast_replace_free,
+    split_ifs,
+    squeeze_simp,
+    apply h2_ih binders,
+    cases h1,
+    {
+      contradiction,
+    },
+    {
+
+    }
+  },
 end
 
 
