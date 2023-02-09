@@ -703,7 +703,7 @@ begin
 end
 
 
-example
+lemma fast_admits_aux_mem_free
   (P : formula)
   (v u : variable_)
   (binders : finset variable_)
