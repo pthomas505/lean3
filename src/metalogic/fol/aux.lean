@@ -438,8 +438,14 @@ begin
       }
     },
   },
-  case formula.not_ : P_ᾰ P_ih
-  { admit },
+  case formula.not_ : P P_ih
+  {
+    unfold formula.free_var_set at h1,
+
+    unfold fast_replace_free,
+    congr,
+    exact P_ih h1,
+  },
   case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
   { admit },
   case formula.forall_ : x P P_ih
