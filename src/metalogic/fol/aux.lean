@@ -722,7 +722,11 @@ begin
   },
   case formula.not_ : P P_ih binders h1
   {
+    unfold fast_admits_aux at h1,
 
+    unfold formula.free_var_set at h2,
+
+    exact P_ih h2 binders h1,
   },
   case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1
   { admit },
