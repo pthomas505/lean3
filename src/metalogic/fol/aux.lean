@@ -1337,6 +1337,16 @@ begin
 end
 
 
+example
+  (P P' : formula)
+  (v u : variable_)
+  (binders : finset variable_)
+  (h1 : fast_admits_aux v u binders P)
+  (h2 : fast_replace_free v u P = P') :
+  is_prop_sub P v u P' :=
+begin
+
+end
 
 
 #lint
