@@ -704,6 +704,19 @@ begin
 end
 
 
+example
+  (P : formula)
+  (v u : variable_)
+  (binders : finset variable_)
+  (h1 : fast_admits_aux v u binders P)
+  (h2 : v ∈ P.free_var_set)
+  (h3 : v ∉ binders) :
+  u ∉ binders :=
+begin
+  sorry,
+end
+
+
 lemma admits_aux_eqv_left
   (P : formula)
   (v u : variable_)
@@ -1342,21 +1355,11 @@ example
   (v u : variable_)
   (binders : finset variable_)
   (h1 : fast_admits_aux v u binders P)
-  (h2 : fast_replace_free v u P = P') :
+  (h2 : fast_replace_free v u P = P')
+  (h3 : v ∉ binders) :
   is_prop_sub P v u P' :=
 begin
-  induction P generalizing binders,
-  case formula.pred_ : name args binders h1
-  {
-    subst h2,
-    apply is_prop_sub.pred_,
-  },
-  case formula.not_ : P_ᾰ P_ih binders h1
-  { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1
-  { admit },
-  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih binders h1
-  { admit },
+  induction P generalizing binders P',
 end
 
 
