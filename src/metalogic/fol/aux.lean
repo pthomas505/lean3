@@ -729,7 +729,21 @@ begin
     exact P_ih h2 binders h1,
   },
   case formula.imp_ : P Q P_ih Q_ih binders h1
-  { admit },
+  {
+    unfold fast_admits_aux at h1,
+    cases h1,
+
+    unfold formula.free_var_set at h2,
+    simp only [finset.mem_union] at h2,
+
+    cases h2,
+    {
+
+    },
+    {
+
+    }
+  },
   case formula.forall_ : x P P_ih binders h1
   {
     unfold fast_admits_aux at h1,
