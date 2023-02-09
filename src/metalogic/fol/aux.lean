@@ -722,7 +722,27 @@ begin
   { admit },
   case formula.forall_ : x P P_ih binders h1 h3
   {
+    unfold fast_admits_aux at h1,
 
+    unfold formula.free_var_set at h2,
+    simp only [finset.mem_sdiff, finset.mem_singleton] at h2,
+    cases h2,
+
+    apply P_ih h2_left,
+    {
+      cases h1,
+      {
+        contradiction,
+      },
+      {
+        apply fast_admits_aux_sub_binders P v u binders {x} h1,
+        simp only [finset.mem_singleton],
+        exact h2_right,
+      }
+    },
+    {
+      exact h3,
+    }
   },
 end
 
