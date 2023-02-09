@@ -713,7 +713,15 @@ example
   (h3 : v ∉ binders) :
   u ∉ binders :=
 begin
-  sorry,
+  induction P generalizing binders,
+  case formula.pred_ : P_ᾰ P_ᾰ_1 binders h1 h3
+  { admit },
+  case formula.not_ : P_ᾰ P_ih binders h1 h3
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1 h3
+  { admit },
+  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih binders h1 h3
+  { admit },
 end
 
 
