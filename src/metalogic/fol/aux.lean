@@ -728,7 +728,7 @@ begin
 
     exact P_ih h2 binders h1,
   },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1
+  case formula.imp_ : P Q P_ih Q_ih binders h1
   { admit },
   case formula.forall_ : x P P_ih binders h1
   {
