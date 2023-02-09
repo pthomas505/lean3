@@ -724,11 +724,11 @@ begin
   {
     unfold fast_admits_aux at h1,
 
-    unfold formula.free_var_set at h2,
-    simp only [finset.mem_sdiff, finset.mem_singleton] at h2,
-    cases h2,
+    unfold formula.free_var_set at h3,
+    simp only [finset.mem_sdiff, finset.mem_singleton] at h3,
+    cases h3,
 
-    apply P_ih h2_left,
+    apply P_ih h3_left,
     {
       cases h1,
       {
@@ -737,11 +737,11 @@ begin
       {
         apply fast_admits_aux_sub_binders P v u binders {x} h1,
         simp only [finset.mem_singleton],
-        exact h2_right,
+        exact h3_right,
       }
     },
     {
-      exact h3,
+      exact h2,
     }
   },
 end
