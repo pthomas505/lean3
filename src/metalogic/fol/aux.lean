@@ -663,8 +663,13 @@ begin
     cases h1,
     exact h1_left,
   },
-  case formula.not_ : P_ᾰ P_ih S h1
-  { admit },
+  case formula.not_ : P P_ih S h1
+  {
+    unfold fast_admits_aux at h1,
+
+    unfold fast_admits_aux,
+    exact P_ih S h1,
+  },
   case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 S h1
   { admit },
   case formula.forall_ : x P P_ih S h1
