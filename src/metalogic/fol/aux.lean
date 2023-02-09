@@ -651,14 +651,39 @@ example
   fast_admits_aux v u S P :=
 begin
   induction P generalizing S,
-  case formula.pred_ : P_ᾰ P_ᾰ_1 S h1
-  { admit },
+  case formula.pred_ : name args S h1
+  {
+    unfold fast_admits_aux at h1,
+    simp only [finset.mem_union] at h1,
+    push_neg at h1,
+
+    unfold fast_admits_aux,
+    intros a1,
+    specialize h1 a1,
+    cases h1,
+    exact h1_left,
+  },
   case formula.not_ : P_ᾰ P_ih S h1
   { admit },
   case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 S h1
   { admit },
-  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih S h1
-  { admit },
+  case formula.forall_ : x P P_ih S h1
+  {
+    unfold fast_admits_aux at h1,
+    simp only [finset.union_right_comm S T {x}] at h1,
+
+    unfold fast_admits_aux,
+    cases h1,
+    {
+      apply or.intro_left,
+      exact h1,
+    },
+    {
+      apply or.intro_right,
+      apply P_ih,
+      exact h1,
+    }
+  },
 end
 
 
