@@ -738,10 +738,10 @@ begin
 
     cases h2,
     {
-
+      exact P_ih h2 binders h1_left,
     },
     {
-
+      exact Q_ih h2 binders h1_right,
     }
   },
   case formula.forall_ : x P P_ih binders h1
