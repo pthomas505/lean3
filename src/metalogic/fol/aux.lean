@@ -1287,23 +1287,52 @@ begin
   induction h1 generalizing binders,
   case is_prop_sub.pred_ : h1_name h1_args h1_v h1_t binders h2
   {
-
+    unfold fast_replace_free,
   },
   case is_prop_sub.not_ : h1_P h1_v h1_t h1_P' h1_1 h1_ih binders h2
   {
+    unfold fast_admits_aux at h2,
 
+    unfold fast_replace_free,
+    congr,
+    exact h1_ih binders h2,
   },
   case is_prop_sub.imp_ : h1_P h1_Q h1_v h1_t h1_P' h1_Q' h1_1 h1_2 h1_ih_1 h1_ih_2 binders h2
   {
+    unfold fast_admits_aux at h2,
+    cases h2,
 
+    unfold fast_replace_free,
+    congr,
+    {
+      exact h1_ih_1 binders h2_left,
+    },
+    {
+      exact h1_ih_2 binders h2_right,
+    }
   },
   case is_prop_sub.not_free : h1_P h1_v h1_t h1_P' h1_1 binders h2
   {
-
+    apply replace_not_free,
+    exact h1_1,
   },
   case is_prop_sub.forall_free : h1_x h1_P h1_v h1_t h1_P' h1_1 h1_2 h1_3 h1_ih binders h2
   {
+    unfold fast_admits_aux at h2,
 
+    unfold fast_replace_free,
+    split_ifs,
+    simp only [eq_self_iff_true, true_and],
+    apply h1_ih binders,
+    cases h2,
+    {
+      contradiction,
+    },
+    {
+      apply fast_admits_aux_sub_binders h1_P h1_v h1_t binders {h1_x} h2,
+      simp only [finset.mem_singleton],
+      exact h1_1,
+    }
   },
 end
 
