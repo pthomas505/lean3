@@ -1346,8 +1346,11 @@ example
   is_prop_sub P v u P' :=
 begin
   induction P generalizing binders,
-  case formula.pred_ : P_ᾰ P_ᾰ_1 binders h1
-  { admit },
+  case formula.pred_ : name args binders h1
+  {
+    subst h2,
+    apply is_prop_sub.pred_,
+  },
   case formula.not_ : P_ᾰ P_ih binders h1
   { admit },
   case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1
