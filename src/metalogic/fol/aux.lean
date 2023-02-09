@@ -1341,67 +1341,6 @@ example
   (P P' : formula)
   (v u : variable_)
   (binders : finset variable_)
-  (h1 : is_prop_sub P v u P')
-  (h2 : fast_admits_aux v u binders P) :
-  fast_replace_free v u P = P' :=
-begin
-  induction h2 generalizing binders,
-  case is_prop_sub.pred_ : h2_name h2_args h2_v h2_t
-  {
-    unfold fast_replace_free,
-  },
-  case is_prop_sub.not_ : h2_P h2_v h2_t h2_P' h2_1 h2_ih
-  {
-    unfold fast_admits_aux at h1,
-
-    unfold fast_replace_free,
-    congr,
-    exact h2_ih binders h1,
-  },
-  case is_prop_sub.imp_ : h2_P h2_Q h2_v h2_t h2_P' h2_Q' h2_1 h2_2 h2_ih_1 h2_ih_2
-  {
-    unfold fast_admits_aux at h1,
-    cases h1,
-
-    unfold fast_replace_free,
-    congr,
-    {
-      exact h2_ih_1 binders h1_left,
-    },
-    {
-      exact h2_ih_2 binders h1_right,
-    }
-  },
-  case is_prop_sub.not_free : h2_P h2_v h2_t h2_P' h2_1
-  {
-    apply replace_not_free,
-    exact h2_1,
-  },
-  case is_prop_sub.forall_free : h2_x h2_P h2_v h2_t h2_P' h2_1 h2_2 h2_3 h2_ih
-  {
-    unfold fast_admits_aux at h1,
-
-    unfold fast_replace_free,
-    split_ifs,
-    simp only [eq_self_iff_true, true_and],
-    apply h2_ih binders,
-    cases h1,
-    {
-      contradiction,
-    },
-    {
-      apply fast_admits_aux_sub_binders h2_P h2_v h2_t binders {h2_x} h1,
-      simp only [finset.mem_singleton],
-      exact h2_1,
-    }
-  },
-end
-
-
-example
-  (P P' : formula)
-  (v u : variable_)
-  (binders : finset variable_)
   (h1 : fast_admits_aux v u binders P)
   (h2 : is_prop_sub P v u P') :
   fast_replace_free v u P = P' :=
