@@ -1286,11 +1286,31 @@ example
 begin
   induction h2 generalizing binders,
   case is_prop_sub.pred_ : h2_name h2_args h2_v h2_t
-  { admit },
-  case is_prop_sub.not_ : h2_P h2_v h2_t h2_P' h2_ᾰ h2_ih
-  { admit },
-  case is_prop_sub.imp_ : h2_P h2_Q h2_v h2_t h2_P' h2_Q' h2_ᾰ h2_ᾰ_1 h2_ih_ᾰ h2_ih_ᾰ_1
-  { admit },
+  {
+    unfold fast_replace_free,
+  },
+  case is_prop_sub.not_ : h2_P h2_v h2_t h2_P' h2_1 h2_ih
+  {
+    unfold fast_admits_aux at h1,
+
+    unfold fast_replace_free,
+    congr,
+    exact h2_ih binders h1,
+  },
+  case is_prop_sub.imp_ : h2_P h2_Q h2_v h2_t h2_P' h2_Q' h2_1 h2_2 h2_ih_1 h2_ih_2
+  {
+    unfold fast_admits_aux at h1,
+    cases h1,
+
+    unfold fast_replace_free,
+    congr,
+    {
+      exact h2_ih_1 binders h1_left,
+    },
+    {
+      exact h2_ih_2 binders h1_right,
+    }
+  },
   case is_prop_sub.not_free : h2_P h2_v h2_t h2_P' h2_1
   {
     apply replace_not_free,
