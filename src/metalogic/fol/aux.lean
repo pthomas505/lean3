@@ -1529,33 +1529,32 @@ end
 lemma is_prop_sub_imp_fast_replace_free
   (P P' : formula)
   (v u : variable_)
-  (binders : finset variable_)
   (h1 : is_prop_sub' P v u P') :
   fast_replace_free v u P = P' :=
 begin
-  induction h1 generalizing binders,
-  case is_prop_sub'.pred_ : h1_name h1_args h1_v h1_t binders
+  induction h1,
+  case is_prop_sub'.pred_ : h1_name h1_args h1_v h1_t
   {
     unfold fast_replace_free,
   },
-  case is_prop_sub'.not_ : h1_P h1_v h1_t h1_P' h1_1 h1_ih binders
+  case is_prop_sub'.not_ : h1_P h1_v h1_t h1_P' h1_1 h1_ih
   {
     unfold fast_replace_free,
     congr,
-    exact h1_ih binders,
+    exact h1_ih,
   },
-  case is_prop_sub'.imp_ : h1_P h1_Q h1_v h1_t h1_P' h1_Q' h1_1 h1_2 h1_ih_1 h1_ih_2 binders
+  case is_prop_sub'.imp_ : h1_P h1_Q h1_v h1_t h1_P' h1_Q' h1_1 h1_2 h1_ih_1 h1_ih_2
   {
     unfold fast_replace_free,
     congr,
     {
-      exact h1_ih_1 binders,
+      exact h1_ih_1,
     },
     {
-      exact h1_ih_2 binders,
+      exact h1_ih_2,
     }
   },
-  case is_prop_sub'.forall_same : h1_x h1_P h1_v h1_t h1_P' h1_1 binders
+  case is_prop_sub'.forall_same : h1_x h1_P h1_v h1_t h1_P' h1_1
   {
     apply replace_not_free,
     unfold formula.free_var_set,
@@ -1563,19 +1562,19 @@ begin
     intros a1,
     exact h1_1,
   },
-  case is_prop_sub'.forall_diff_nel : h1_x h1_P h1_v h1_t h1_P' h1_1 h1_2 h1_3 h1_ih binders
+  case is_prop_sub'.forall_diff_nel : h1_x h1_P h1_v h1_t h1_P' h1_1 h1_2 h1_3 h1_ih
   {
     unfold fast_replace_free,
     split_ifs,
     simp only [eq_self_iff_true, true_and],
-    apply h1_ih binders,
+    apply h1_ih,
   },
-  case is_prop_sub'.forall_diff : h1_x h1_P h1_v h1_t h1_P' h1_1 h1_2 h1_3 h1_ih binders
+  case is_prop_sub'.forall_diff : h1_x h1_P h1_v h1_t h1_P' h1_1 h1_2 h1_3 h1_ih
   {
     unfold fast_replace_free,
     split_ifs,
     simp only [eq_self_iff_true, true_and],
-    apply h1_ih binders,
+    apply h1_ih,
   },
 end
 
@@ -1586,7 +1585,31 @@ example
   is_prop_sub' P v u P' ↔
     (fast_admits v u P ∧ fast_replace_free v u P = P') :=
 begin
-  sorry,
+  unfold fast_admits,
+  split,
+  {
+    intros a1,
+    split,
+    {
+      apply is_prop_sub_imp_fast_admits_aux,
+      {
+        apply exists.intro P',
+        exact a1,
+      },
+      {
+        simp only [finset.not_mem_empty, not_false_iff],
+      }
+    },
+    {
+      apply is_prop_sub_imp_fast_replace_free,
+      exact a1,
+    }
+  },
+  {
+    intros a1,
+    cases a1,
+    exact fast_admits_aux_and_fast_replace_free_imp_is_prop_sub P P' v u ∅ a1_left a1_right,
+  }
 end
 
 
