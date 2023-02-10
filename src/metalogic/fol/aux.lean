@@ -1557,7 +1557,14 @@ begin
   },
   case is_prop_sub'.imp_ : h1_1_P h1_1_Q h1_1_v h1_1_t h1_1_P' h1_1_Q' h1_1_1 h1_1_2 h1_1_ih_1 h1_1_ih_2 binders h2
   {
-
+    unfold fast_admits_aux,
+    split,
+    {
+      exact h1_1_ih_1 binders h2,
+    },
+    {
+      exact h1_1_ih_2 binders h2,
+    }
   },
   case is_prop_sub'.forall_same : h1_1_x h1_1_P h1_1_v h1_1_t h1_1_P' h1_1_1 binders h2
   {
