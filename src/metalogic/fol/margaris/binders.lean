@@ -1642,7 +1642,7 @@ begin
 end
 
 
-example
+lemma fast_simult_replace_free_id
   (P : formula) :
   fast_simult_replace_free id P = P :=
 begin
@@ -1762,7 +1762,7 @@ begin
       apply h1,
       exact h,
       simp only [s1],
-      sorry,
+      apply fast_simult_replace_free_id,
     },
     {
       squeeze_simp,
