@@ -1305,7 +1305,7 @@ begin
   }
 end
 
-
+/-
 inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
 | pred_ (name : pred_name_) (args : list variable_)
   (v t : variable_) :
@@ -1395,6 +1395,51 @@ begin
     }
   },
 end
+-/
+
+
+inductive is_prop_sub' : formula → variable_ → variable_ → formula → Prop
+| pred_ (name : pred_name_) (args : list variable_)
+  (v t : variable_) :
+  is_prop_sub' (pred_ name args) v t (pred_ name (args.map (replace v t)))
+
+| not_ (P : formula)
+  (v t : variable_)
+  (P' : formula) :
+  is_prop_sub' P v t P' →
+  is_prop_sub' P.not_ v t P'.not_
+
+| imp_ (P Q : formula)
+  (v t : variable_)
+  (P' Q' : formula) :
+  is_prop_sub' P v t P' →
+  is_prop_sub' Q v t Q' →
+  is_prop_sub' (P.imp_ Q) v t (P'.imp_ Q')
+
+| forall_same
+  (x : variable_) (P : formula)
+  (v t : variable_)
+  (P' : formula) :
+  v = x →
+  is_prop_sub' (forall_ x P) v t (forall_ x P)
+
+| forall_diff_nel
+  (x : variable_) (P : formula)
+  (v t : variable_)
+  (P' : formula) :
+  ¬ v = x →
+  v ∉ (forall_ x P).free_var_set →
+  is_prop_sub' P v t P' →
+  is_prop_sub' (forall_ x P) v t (forall_ x P')
+
+| forall_diff
+  (x : variable_) (P : formula)
+  (v t : variable_)
+  (P' : formula) :
+  ¬ v = x →
+  ¬ t = x →
+  is_prop_sub' P v t P' →
+  is_prop_sub' (forall_ x P) v t (forall_ x P')
 
 
 example
@@ -1403,18 +1448,77 @@ example
   (binders : finset variable_)
   (h1 : fast_admits_aux v u binders P)
   (h2 : fast_replace_free v u P = P') :
-  is_prop_sub P v u P' :=
+  is_prop_sub' P v u P' :=
 begin
-  induction P generalizing binders P',
-  case formula.pred_ : P_ᾰ P_ᾰ_1 binders P' h1 h2
+  subst h2,
+  induction P generalizing binders,
+  case formula.pred_ : P_ᾰ P_ᾰ_1 binders h1
   { admit },
-  case formula.not_ : P_ᾰ P_ih binders P' h1 h2
+  case formula.not_ : P_ᾰ P_ih binders h1
   { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders P' h1 h2
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1
   { admit },
-  case formula.forall_ : x P P_ih binders P' h1 h2
+  case formula.forall_ : x P P_ih binders h1
   {
+    unfold fast_admits_aux at h1,
 
+    cases h1,
+    {
+      unfold fast_replace_free,
+      split_ifs,
+      apply is_prop_sub'.forall_same x P v u P h1,
+    },
+    {
+      unfold fast_replace_free,
+      split_ifs,
+      {
+        apply is_prop_sub'.forall_same x P v u P h,
+      },
+      {
+        by_cases c1 : v ∈ (forall_ x P).free_var_set,
+        {
+          apply is_prop_sub'.forall_diff,
+          {
+            exact h,
+          },
+          {
+            unfold formula.free_var_set at c1,
+            simp only [finset.mem_sdiff, finset.mem_singleton] at c1,
+
+            cases c1,
+            have s1 : u ∉ binders ∪ {x},
+            apply fast_admits_aux_mem_free P v u,
+            {
+              exact h1,
+            },
+            {
+              exact c1_left,
+            },
+
+            simp only [finset.mem_union, finset.mem_singleton] at s1,
+            push_neg at s1,
+            cases s1,
+            exact s1_right,
+          },
+          {
+            apply P_ih (binders ∪ {x}),
+            exact h1,
+          }
+        },
+        {
+          apply is_prop_sub'.forall_diff_nel,
+          {
+            exact h,
+          },
+          {
+            exact c1,
+          },
+          {
+            apply P_ih (binders ∪ {x}) h1,
+          },
+        }
+      }
+    }
   },
 end
 
