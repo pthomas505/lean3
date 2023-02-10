@@ -1563,7 +1563,9 @@ begin
   },
   case is_prop_sub'.forall_diff : h1_1_x h1_1_P h1_1_v h1_1_t h1_1_P' h1_1_1 h1_1_2 h1_1_3 h1_1_ih binders
   {
-
+    unfold fast_admits_aux,
+    apply or.intro_right,
+    apply h1_1_ih,
   },
 end
 
