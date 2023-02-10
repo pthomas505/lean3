@@ -1547,8 +1547,11 @@ begin
     intros a1,
     exact h1_1,
   },
-  case is_prop_sub'.forall_diff_nel : h1_x h1_P h1_v h1_t h1_P' h1_ᾰ h1_ᾰ_1 h1_ᾰ_2 h1_ih binders h2
-  { admit },
+  case is_prop_sub'.forall_diff_nel : h1_x h1_P h1_v h1_t h1_P' h1_1 h1_2 h1_3 h1_ih binders h2
+  {
+    unfold fast_admits_aux at h2,
+
+  },
   case is_prop_sub'.forall_diff : h1_x h1_P h1_v h1_t h1_P' h1_ᾰ h1_ᾰ_1 h1_ᾰ_2 h1_ih binders h2
   { admit },
 end
