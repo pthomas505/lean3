@@ -1368,7 +1368,10 @@ begin
   },
   case formula.not_ : P P_ih binders h1
   {
+    unfold fast_admits_aux at h1,
 
+    apply is_prop_sub'.not_,
+    exact P_ih binders h1,
   },
   case formula.imp_ : P Q P_ih Q_ih binders h1
   {
