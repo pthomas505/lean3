@@ -1375,7 +1375,16 @@ begin
   },
   case formula.imp_ : P Q P_ih Q_ih binders h1
   {
+    unfold fast_admits_aux at h1,
+    cases h1,
 
+    apply is_prop_sub'.imp_,
+    {
+      exact P_ih binders h1_left,
+    },
+    {
+      exact Q_ih binders h1_right,
+    }
   },
   case formula.forall_ : x P P_ih binders h1
   {
