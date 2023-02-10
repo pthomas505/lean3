@@ -1604,23 +1604,25 @@ begin
 end
 
 
+lemma is_prop_sub_imp_fast_replace_free
+  (P P' : formula)
+  (v u : variable_)
+  (binders : finset variable_)
+  (h1 : is_prop_sub' P v u P') :
+  fast_replace_free v u P = P' :=
+begin
+  induction h1 generalizing binders,
+  pretty_cases,
+end
+
+
 example
   (P P' : formula)
   (v u : variable_) :
   is_prop_sub' P v u P' ↔
     (fast_admits v u P ∧ fast_replace_free v u P = P') :=
 begin
-  split,
-  {
-    unfold fast_admits,
-    intros a1,
-    apply is_prop_sub_and_fast_admits_aux_imp_fast_replace_free P P' v u ∅ a1,
-  },
-  {
-    unfold fast_admits,
-    intros a1,
-    apply fast_admits_aux_and_fast_replace_free_imp_is_prop_sub P P' v u ∅,
-  }
+  sorry,
 end
 
 
