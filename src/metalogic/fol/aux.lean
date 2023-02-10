@@ -1363,17 +1363,8 @@ begin
   induction P generalizing binders,
   case formula.pred_ : name args binders h1
   {
-    induction args,
-    case list.nil
-    {
-      unfold fast_replace_free,
-      simp only [list.map_nil],
-      apply is_prop_sub'.pred_,
-    },
-    case list.cons : args_hd args_tl args_ih
-    {
-
-    },
+    unfold fast_replace_free,
+    apply is_prop_sub'.pred_,
   },
   case formula.not_ : P P_ih binders h1
   {
