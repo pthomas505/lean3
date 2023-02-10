@@ -1306,33 +1306,33 @@ begin
 end
 
 
-inductive is_prop_sub' : formula → variable_ → variable_ → formula → Prop
+inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
 | pred_
   (name : pred_name_) (args : list variable_)
   (v t : variable_) :
-  is_prop_sub' (pred_ name args) v t (pred_ name (args.map (replace v t)))
+  is_prop_sub (pred_ name args) v t (pred_ name (args.map (replace v t)))
 
 | not_
   (P : formula)
   (v t : variable_)
   (P' : formula) :
-  is_prop_sub' P v t P' →
-  is_prop_sub' P.not_ v t P'.not_
+  is_prop_sub P v t P' →
+  is_prop_sub P.not_ v t P'.not_
 
 | imp_
   (P Q : formula)
   (v t : variable_)
   (P' Q' : formula) :
-  is_prop_sub' P v t P' →
-  is_prop_sub' Q v t Q' →
-  is_prop_sub' (P.imp_ Q) v t (P'.imp_ Q')
+  is_prop_sub P v t P' →
+  is_prop_sub Q v t Q' →
+  is_prop_sub (P.imp_ Q) v t (P'.imp_ Q')
 
 | forall_same
   (x : variable_) (P : formula)
   (v t : variable_)
   (P' : formula) :
   v = x →
-  is_prop_sub' (forall_ x P) v t (forall_ x P)
+  is_prop_sub (forall_ x P) v t (forall_ x P)
 
 | forall_diff_nel
   (x : variable_) (P : formula)
@@ -1340,8 +1340,8 @@ inductive is_prop_sub' : formula → variable_ → variable_ → formula → Pro
   (P' : formula) :
   ¬ v = x →
   v ∉ (forall_ x P).free_var_set →
-  is_prop_sub' P v t P' →
-  is_prop_sub' (forall_ x P) v t (forall_ x P')
+  is_prop_sub P v t P' →
+  is_prop_sub (forall_ x P) v t (forall_ x P')
 
 | forall_diff
   (x : variable_) (P : formula)
@@ -1349,8 +1349,8 @@ inductive is_prop_sub' : formula → variable_ → variable_ → formula → Pro
   (P' : formula) :
   ¬ v = x →
   ¬ t = x →
-  is_prop_sub' P v t P' →
-  is_prop_sub' (forall_ x P) v t (forall_ x P')
+  is_prop_sub P v t P' →
+  is_prop_sub (forall_ x P) v t (forall_ x P')
 
 
 lemma fast_admits_aux_and_fast_replace_free_imp_is_prop_sub
@@ -1359,20 +1359,20 @@ lemma fast_admits_aux_and_fast_replace_free_imp_is_prop_sub
   (binders : finset variable_)
   (h1 : fast_admits_aux v u binders P)
   (h2 : fast_replace_free v u P = P') :
-  is_prop_sub' P v u P' :=
+  is_prop_sub P v u P' :=
 begin
   subst h2,
   induction P generalizing binders,
   case formula.pred_ : name args binders h1
   {
     unfold fast_replace_free,
-    apply is_prop_sub'.pred_,
+    apply is_prop_sub.pred_,
   },
   case formula.not_ : P P_ih binders h1
   {
     unfold fast_admits_aux at h1,
 
-    apply is_prop_sub'.not_,
+    apply is_prop_sub.not_,
     exact P_ih binders h1,
   },
   case formula.imp_ : P Q P_ih Q_ih binders h1
@@ -1380,7 +1380,7 @@ begin
     unfold fast_admits_aux at h1,
     cases h1,
 
-    apply is_prop_sub'.imp_,
+    apply is_prop_sub.imp_,
     {
       exact P_ih binders h1_left,
     },
@@ -1396,18 +1396,18 @@ begin
     {
       unfold fast_replace_free,
       split_ifs,
-      apply is_prop_sub'.forall_same x P v u P h1,
+      apply is_prop_sub.forall_same x P v u P h1,
     },
     {
       unfold fast_replace_free,
       split_ifs,
       {
-        apply is_prop_sub'.forall_same x P v u P h,
+        apply is_prop_sub.forall_same x P v u P h,
       },
       {
         by_cases c1 : v ∈ (forall_ x P).free_var_set,
         {
-          apply is_prop_sub'.forall_diff,
+          apply is_prop_sub.forall_diff,
           {
             exact h,
           },
@@ -1436,7 +1436,7 @@ begin
           }
         },
         {
-          apply is_prop_sub'.forall_diff_nel,
+          apply is_prop_sub.forall_diff_nel,
           {
             exact h,
           },
@@ -1457,7 +1457,7 @@ lemma is_prop_sub_imp_fast_admits_aux
   (P : formula)
   (v u : variable_)
   (binders : finset variable_)
-  (h1 : ∃ (P' : formula), is_prop_sub' P v u P')
+  (h1 : ∃ (P' : formula), is_prop_sub P v u P')
   (h2 : u ∉ binders) :
   fast_admits_aux v u binders P :=
 begin
@@ -1466,18 +1466,18 @@ begin
   clear h1,
 
   induction h1_1 generalizing binders,
-  case is_prop_sub'.pred_ : h1_1_name h1_1_args h1_1_v h1_1_t binders h2
+  case is_prop_sub.pred_ : h1_1_name h1_1_args h1_1_v h1_1_t binders h2
   {
     unfold fast_admits_aux,
     intros a1,
     exact h2,
   },
-  case is_prop_sub'.not_ : h1_1_P h1_1_v h1_1_t h1_1_P' h1_1_1 h1_1_ih binders h2
+  case is_prop_sub.not_ : h1_1_P h1_1_v h1_1_t h1_1_P' h1_1_1 h1_1_ih binders h2
   {
     unfold fast_admits_aux,
     exact h1_1_ih binders h2,
   },
-  case is_prop_sub'.imp_ : h1_1_P h1_1_Q h1_1_v h1_1_t h1_1_P' h1_1_Q' h1_1_1 h1_1_2 h1_1_ih_1 h1_1_ih_2 binders h2
+  case is_prop_sub.imp_ : h1_1_P h1_1_Q h1_1_v h1_1_t h1_1_P' h1_1_Q' h1_1_1 h1_1_2 h1_1_ih_1 h1_1_ih_2 binders h2
   {
     unfold fast_admits_aux,
     split,
@@ -1488,13 +1488,13 @@ begin
       exact h1_1_ih_2 binders h2,
     }
   },
-  case is_prop_sub'.forall_same : h1_1_x h1_1_P h1_1_v h1_1_t h1_1_P' h1_1_1 binders h2
+  case is_prop_sub.forall_same : h1_1_x h1_1_P h1_1_v h1_1_t h1_1_P' h1_1_1 binders h2
   {
     unfold fast_admits_aux,
     apply or.intro_left,
     exact h1_1_1,
   },
-  case is_prop_sub'.forall_diff_nel : h1_1_x h1_1_P h1_1_v h1_1_t h1_1_P' h1_1_1 h1_1_2 h1_1_3 h1_1_ih binders h2
+  case is_prop_sub.forall_diff_nel : h1_1_x h1_1_P h1_1_v h1_1_t h1_1_P' h1_1_1 h1_1_2 h1_1_3 h1_1_ih binders h2
   {
     unfold formula.free_var_set at h1_1_2,
     simp only [finset.mem_sdiff, finset.mem_singleton, not_and, not_not] at h1_1_2,
@@ -1508,7 +1508,7 @@ begin
     apply h1_1_2,
     exact contra,
   },
-  case is_prop_sub'.forall_diff : h1_1_x h1_1_P h1_1_v h1_1_t h1_1_P' h1_1_1 h1_1_2 h1_1_3 h1_1_ih binders h2
+  case is_prop_sub.forall_diff : h1_1_x h1_1_P h1_1_v h1_1_t h1_1_P' h1_1_1 h1_1_2 h1_1_3 h1_1_ih binders h2
   {
     unfold fast_admits_aux,
     apply or.intro_right,
@@ -1529,21 +1529,21 @@ end
 lemma is_prop_sub_imp_fast_replace_free
   (P P' : formula)
   (v u : variable_)
-  (h1 : is_prop_sub' P v u P') :
+  (h1 : is_prop_sub P v u P') :
   fast_replace_free v u P = P' :=
 begin
   induction h1,
-  case is_prop_sub'.pred_ : h1_name h1_args h1_v h1_t
+  case is_prop_sub.pred_ : h1_name h1_args h1_v h1_t
   {
     unfold fast_replace_free,
   },
-  case is_prop_sub'.not_ : h1_P h1_v h1_t h1_P' h1_1 h1_ih
+  case is_prop_sub.not_ : h1_P h1_v h1_t h1_P' h1_1 h1_ih
   {
     unfold fast_replace_free,
     congr,
     exact h1_ih,
   },
-  case is_prop_sub'.imp_ : h1_P h1_Q h1_v h1_t h1_P' h1_Q' h1_1 h1_2 h1_ih_1 h1_ih_2
+  case is_prop_sub.imp_ : h1_P h1_Q h1_v h1_t h1_P' h1_Q' h1_1 h1_2 h1_ih_1 h1_ih_2
   {
     unfold fast_replace_free,
     congr,
@@ -1554,7 +1554,7 @@ begin
       exact h1_ih_2,
     }
   },
-  case is_prop_sub'.forall_same : h1_x h1_P h1_v h1_t h1_P' h1_1
+  case is_prop_sub.forall_same : h1_x h1_P h1_v h1_t h1_P' h1_1
   {
     apply replace_not_free,
     unfold formula.free_var_set,
@@ -1562,14 +1562,14 @@ begin
     intros a1,
     exact h1_1,
   },
-  case is_prop_sub'.forall_diff_nel : h1_x h1_P h1_v h1_t h1_P' h1_1 h1_2 h1_3 h1_ih
+  case is_prop_sub.forall_diff_nel : h1_x h1_P h1_v h1_t h1_P' h1_1 h1_2 h1_3 h1_ih
   {
     unfold fast_replace_free,
     split_ifs,
     simp only [eq_self_iff_true, true_and],
     apply h1_ih,
   },
-  case is_prop_sub'.forall_diff : h1_x h1_P h1_v h1_t h1_P' h1_1 h1_2 h1_3 h1_ih
+  case is_prop_sub.forall_diff : h1_x h1_P h1_v h1_t h1_P' h1_1 h1_2 h1_3 h1_ih
   {
     unfold fast_replace_free,
     split_ifs,
@@ -1582,7 +1582,7 @@ end
 example
   (P P' : formula)
   (v u : variable_) :
-  is_prop_sub' P v u P' ↔
+  is_prop_sub P v u P' ↔
     (fast_admits v u P ∧ fast_replace_free v u P = P') :=
 begin
   unfold fast_admits,
