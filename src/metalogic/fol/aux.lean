@@ -1565,7 +1565,19 @@ begin
   },
   case is_prop_sub'.forall_diff : h1_x h1_P h1_v h1_t h1_P' h1_1 h1_2 h1_3 h1_ih binders h2
   {
+    unfold fast_admits_aux at h2,
 
+    unfold fast_replace_free,
+    split_ifs,
+    simp only [eq_self_iff_true, true_and],
+    apply h1_ih binders,
+    cases h2,
+    {
+      contradiction,
+    },
+    {
+      apply fast_admits_aux_sub_binders h1_P h1_v h1_t binders {h1_x} h2,
+    }
   },
 end
 
