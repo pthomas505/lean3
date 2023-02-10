@@ -1624,19 +1624,59 @@ def fast_simult_replace_free : (variable_ → variable_) → formula → formula
 | σ (forall_ x P) := forall_ x (fast_simult_replace_free (function.update σ x x) P)
 
 
+lemma function.update_id
+  {α : Type}
+  [decidable_eq α]
+  (x : α) :
+  function.update (id : α → α) x x = id :=
+begin
+  funext,
+  simp only [function.update_apply],
+  split_ifs,
+  {
+    subst h,
+    simp only [id.def],
+  },
+  {
+    refl,
+  }
+end
+
+
 example
   (P : formula) :
   fast_simult_replace_free id P = P :=
 begin
   induction P,
-  case formula.pred_ : P_ᾰ P_ᾰ_1
-  { admit },
-  case formula.not_ : P_ᾰ P_ih
-  { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
-  { admit },
-  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih
-  { admit },
+  case formula.pred_ : name args
+  {
+    unfold fast_simult_replace_free,
+    simp only [list.map_id, eq_self_iff_true, and_self],
+  },
+  case formula.not_ : P P_ih
+  {
+    unfold fast_simult_replace_free,
+    congr,
+    exact P_ih,
+  },
+  case formula.imp_ : P Q P_ih Q_ih
+  {
+    unfold fast_simult_replace_free,
+    congr,
+    {
+      exact P_ih,
+    },
+    {
+      exact Q_ih,
+    }
+  },
+  case formula.forall_ : x P P_ih
+  {
+    unfold fast_simult_replace_free,
+    squeeze_simp,
+    simp only [function.update_id],
+    exact P_ih,
+  },
 end
 
 
