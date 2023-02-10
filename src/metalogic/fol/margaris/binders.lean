@@ -1616,7 +1616,6 @@ end
 /-
   The simultaneous replacement of the free variables in a formula.
 -/
-
 def fast_simult_replace_free : (variable_ → variable_) → formula → formula
 | σ (pred_ name args) := pred_ name (args.map σ)
 | σ (not_ P) := not_ (fast_simult_replace_free σ P)
