@@ -5,7 +5,7 @@ by Angelo Margaris
 -/
 
 
-import metalogic.fol.binders
+import metalogic.fol.margaris.binders
 
 open formula
 
