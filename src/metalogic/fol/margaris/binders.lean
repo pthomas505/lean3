@@ -1617,20 +1617,6 @@ end
   The simultaneous replacement of each occurrence of a free variable in a formula by a variable.
 -/
 
-def simult_replace_free_aux (σ : variable_ → variable_) : finset variable_ → formula → formula
-| binders (pred_ name args) :=
-    pred_ name (args.map (fun (x : variable_),
-      if x ∈ binders
-      then x
-      else σ x))
-| binders (not_ P) := not_ (simult_replace_free_aux binders P)
-| binders (imp_ P Q) :=
-    imp_ (simult_replace_free_aux binders P) (simult_replace_free_aux binders Q)
-| binders (forall_ x P) := forall_ x (simult_replace_free_aux (binders ∪ {x}) P)
-
-def simult_replace_free (σ : variable_ → variable_) (P : formula) : formula :=
-  simult_replace_free_aux σ ∅ P
-
 
 def fast_simult_replace_free : (variable_ → variable_) → formula → formula
 | σ (pred_ name args) := pred_ name (args.map σ)
@@ -1641,32 +1627,17 @@ def fast_simult_replace_free : (variable_ → variable_) → formula → formula
 
 example
   (P : formula)
-  (σ : variable_ → variable_)
-  (binders : finset variable_)
-  (h1 : ∀ (v : variable_), v ∈ binders → v = σ v) :
-  simult_replace_free_aux σ binders P = fast_simult_replace_free σ P :=
+  (v t : variable_) :
+  fast_simult_replace_free (function.update id v t) P = fast_replace_free v t P :=
 begin
-  induction P generalizing binders,
-  case formula.pred_ : name args binders
-  {
-    unfold simult_replace_free_aux,
-    unfold fast_simult_replace_free,
-    simp only [eq_self_iff_true, true_and],
-    apply list.map_congr,
-    intros x a1,
-    split_ifs,
-    {
-      exact h1 x h,
-    },
-    {
-      refl,
-    }
-  },
-  case formula.not_ : P_ᾰ P_ih binders
+  induction P,
+  case formula.pred_ : P_ᾰ P_ᾰ_1
   { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders
+  case formula.not_ : P_ᾰ P_ih
   { admit },
-  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih binders
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
+  { admit },
+  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih
   { admit },
 end
 
