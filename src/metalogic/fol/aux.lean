@@ -1541,7 +1541,11 @@ begin
   { admit },
   case is_prop_sub'.forall_same : h1_x h1_P h1_v h1_t h1_P' h1_1 binders h2
   {
-
+    apply replace_not_free,
+    unfold formula.free_var_set,
+    simp only [finset.mem_sdiff, finset.mem_singleton, not_and, not_not],
+    intros a1,
+    exact h1_1,
   },
   case is_prop_sub'.forall_diff_nel : h1_x h1_P h1_v h1_t h1_P' h1_ᾰ h1_ᾰ_1 h1_ᾰ_2 h1_ih binders h2
   { admit },
