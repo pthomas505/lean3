@@ -1366,7 +1366,9 @@ begin
     induction args,
     case list.nil
     {
-
+      unfold fast_replace_free,
+      simp only [list.map_nil],
+      apply is_prop_sub'.pred_,
     },
     case list.cons : args_hd args_tl args_ih
     {
