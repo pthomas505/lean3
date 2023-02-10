@@ -1539,8 +1539,10 @@ begin
   { admit },
   case is_prop_sub'.imp_ : h1_P h1_Q h1_v h1_t h1_P' h1_Q' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1 binders h2
   { admit },
-  case is_prop_sub'.forall_same : h1_x h1_P h1_v h1_t h1_P' h1_ᾰ binders h2
-  { admit },
+  case is_prop_sub'.forall_same : h1_x h1_P h1_v h1_t h1_P' h1_1 binders h2
+  {
+
+  },
   case is_prop_sub'.forall_diff_nel : h1_x h1_P h1_v h1_t h1_P' h1_ᾰ h1_ᾰ_1 h1_ᾰ_2 h1_ih binders h2
   { admit },
   case is_prop_sub'.forall_diff : h1_x h1_P h1_v h1_t h1_P' h1_ᾰ h1_ᾰ_1 h1_ᾰ_2 h1_ih binders h2
