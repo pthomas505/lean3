@@ -1613,4 +1613,48 @@ begin
 end
 
 
+/-
+  The simultaneous replacement of each occurrence of a free variable in a formula by a variable.
+-/
+
+def simult_replace_free_aux (σ : variable_ → variable_) : finset variable_ → formula → formula
+| binders (pred_ name args) :=
+    pred_ name (args.map (fun (x : variable_),
+      if x ∉ binders
+      then σ x
+      else x))
+| binders (not_ P) := not_ (simult_replace_free_aux binders P)
+| binders (imp_ P Q) :=
+    imp_ (simult_replace_free_aux binders P) (simult_replace_free_aux binders Q)
+| binders (forall_ x P) := forall_ x (simult_replace_free_aux (binders ∪ {x}) P)
+
+def simult_replace_free (σ : variable_ → variable_) (P : formula) : formula :=
+  simult_replace_free_aux σ ∅ P
+
+
+def fast_simult_replace_free : (variable_ → variable_) → formula → formula
+| σ (pred_ name args) := pred_ name (args.map σ)
+| σ (not_ P) := not_ (fast_simult_replace_free σ P)
+| σ (imp_ P Q) := imp_ (fast_simult_replace_free σ P) (fast_simult_replace_free σ Q)
+| σ (forall_ x P) := forall_ x (fast_simult_replace_free (function.update σ x x) P)
+
+
+example
+  (P : formula)
+  (σ : variable_ → variable_)
+  (binders : finset variable_) :
+  simult_replace_free_aux σ binders P = fast_simult_replace_free σ P :=
+begin
+  induction P generalizing binders,
+  case formula.pred_ : P_ᾰ P_ᾰ_1 binders
+  { admit },
+  case formula.not_ : P_ᾰ P_ih binders
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders
+  { admit },
+  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih binders
+  { admit },
+end
+
+
 #lint
