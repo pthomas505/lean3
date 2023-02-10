@@ -1614,9 +1614,8 @@ end
 
 
 /-
-  The simultaneous replacement of each occurrence of a free variable in a formula by a variable.
+  The simultaneous replacement of the free variables in a formula.
 -/
-
 
 def fast_simult_replace_free : (variable_ → variable_) → formula → formula
 | σ (pred_ name args) := pred_ name (args.map σ)
@@ -1626,9 +1625,8 @@ def fast_simult_replace_free : (variable_ → variable_) → formula → formula
 
 
 example
-  (P : formula)
-  (v t : variable_) :
-  fast_simult_replace_free (function.update id v t) P = fast_replace_free v t P :=
+  (P : formula) :
+  fast_simult_replace_free id P = P :=
 begin
   induction P,
   case formula.pred_ : P_ᾰ P_ᾰ_1
@@ -1639,6 +1637,111 @@ begin
   { admit },
   case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih
   { admit },
+end
+
+
+def replace'
+  {α : Type}
+  [decidable_eq α]
+  (v t x : α) : α :=
+  if x = v then t else x
+
+def fast_replace_free' (v t : variable_) : formula → formula
+| (pred_ name args) := pred_ name (args.map (replace' v t))
+| (not_ P) := not_ (fast_replace_free' P)
+| (imp_ P Q) := imp_ (fast_replace_free' P) (fast_replace_free' Q)
+| (forall_ x P) :=
+  if x = v
+  then forall_ x P
+  else forall_ x (fast_replace_free' P)
+
+
+example
+  (P : formula)
+  (v t : variable_)
+  (σ : variable_ → variable_)
+  (h1 : ∀ (x : variable_), ¬ x = v → σ x = x) :
+  fast_simult_replace_free (function.update σ v t) P = fast_replace_free' v t P :=
+begin
+  induction P generalizing σ,
+  case formula.pred_ : name args
+  {
+    induction args,
+    case list.nil
+    {
+      unfold fast_simult_replace_free,
+      unfold fast_replace_free',
+      simp only [list.map_nil, eq_self_iff_true, and_self],
+    },
+    case list.cons : args_hd args_tl args_ih
+    {
+      unfold fast_simult_replace_free at args_ih,
+      unfold fast_replace_free' at args_ih,
+      squeeze_simp at args_ih,
+
+      unfold fast_simult_replace_free,
+      unfold fast_replace_free',
+      squeeze_simp,
+      split,
+      {
+        unfold replace',
+        split_ifs,
+        {
+          subst h,
+          squeeze_simp,
+        },
+        {
+          simp only [function.update_noteq h],
+          apply h1,
+          exact h,
+        }
+      },
+      {
+        exact args_ih,
+      }
+    },
+  },
+  case formula.not_ : P_ᾰ P_ih
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
+  { admit },
+  case formula.forall_ : x P P_ih
+  {
+    unfold fast_simult_replace_free,
+    unfold fast_replace_free',
+    split_ifs,
+    {
+      simp only [eq_self_iff_true, true_and],
+      subst h,
+      squeeze_simp,
+      have s1 : (function.update σ x x) = id,
+      ext,
+      simp only [function.update_apply],
+      split_ifs,
+      subst h,
+      squeeze_simp,
+      apply h1,
+      exact h,
+      simp only [s1],
+      sorry,
+    },
+    {
+      squeeze_simp,
+      specialize P_ih σ h1,
+      specialize h1 x h,
+
+      have s1 : (function.update σ v t) = (function.update (function.update σ v t) x x),
+      ext,
+      by_cases x_1 = x,
+      subst h,
+      squeeze_simp,
+      simp only [function.update_noteq h],
+      exact h1,
+      simp only [function.update_noteq h],
+      rewrite <- s1,
+      apply P_ih,
+    }
+  },
 end
 
 
