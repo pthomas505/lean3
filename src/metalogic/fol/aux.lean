@@ -1353,13 +1353,15 @@ inductive is_prop_sub' : formula → variable_ → variable_ → formula → Pro
   is_prop_sub' (forall_ x P) v t (forall_ x P')
 
 
-example
-  (P : formula)
+lemma fast_admits_aux_and_fast_replace_free_imp_is_prop_sub
+  (P P' : formula)
   (v u : variable_)
   (binders : finset variable_)
-  (h1 : fast_admits_aux v u binders P) :
-  is_prop_sub' P v u (fast_replace_free v u P) :=
+  (h1 : fast_admits_aux v u binders P)
+  (h2 : fast_replace_free v u P = P') :
+  is_prop_sub' P v u P' :=
 begin
+  subst h2,
   induction P generalizing binders,
   case formula.pred_ : name args binders h1
   {
@@ -1451,7 +1453,7 @@ begin
 end
 
 
-example
+lemma is_prop_sub_and_fast_admits_aux_imp_fast_replace_free
   (P P' : formula)
   (v u : variable_)
   (binders : finset variable_)
@@ -1526,6 +1528,16 @@ begin
       apply fast_admits_aux_sub_binders h1_P h1_v h1_t binders {h1_x} h2,
     }
   },
+end
+
+
+example
+  (P P' : formula)
+  (v u : variable_) :
+  is_prop_sub' P v u P' ↔
+    (fast_admits v u P → fast_replace_free v u P = P') :=
+begin
+
 end
 
 
