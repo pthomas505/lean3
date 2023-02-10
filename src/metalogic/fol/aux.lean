@@ -1453,60 +1453,6 @@ begin
 end
 
 
-lemma is_prop_sub_and_fast_admits_aux_imp_fast_replace_free
-  (P P' : formula)
-  (v u : variable_)
-  (binders : finset variable_)
-  (h1 : is_prop_sub' P v u P') :
-  fast_replace_free v u P = P' :=
-begin
-  induction h1 generalizing binders,
-  case is_prop_sub'.pred_ : h1_name h1_args h1_v h1_t binders
-  {
-    unfold fast_replace_free,
-  },
-  case is_prop_sub'.not_ : h1_P h1_v h1_t h1_P' h1_1 h1_ih binders
-  {
-    unfold fast_replace_free,
-    congr,
-    exact h1_ih binders,
-  },
-  case is_prop_sub'.imp_ : h1_P h1_Q h1_v h1_t h1_P' h1_Q' h1_1 h1_2 h1_ih_1 h1_ih_2 binders
-  {
-    unfold fast_replace_free,
-    congr,
-    {
-      exact h1_ih_1 binders,
-    },
-    {
-      exact h1_ih_2 binders,
-    }
-  },
-  case is_prop_sub'.forall_same : h1_x h1_P h1_v h1_t h1_P' h1_1 binders
-  {
-    apply replace_not_free,
-    unfold formula.free_var_set,
-    simp only [finset.mem_sdiff, finset.mem_singleton, not_and, not_not],
-    intros a1,
-    exact h1_1,
-  },
-  case is_prop_sub'.forall_diff_nel : h1_x h1_P h1_v h1_t h1_P' h1_1 h1_2 h1_3 h1_ih binders
-  {
-    unfold fast_replace_free,
-    split_ifs,
-    squeeze_simp,
-    apply h1_ih binders,
-  },
-  case is_prop_sub'.forall_diff : h1_x h1_P h1_v h1_t h1_P' h1_1 h1_2 h1_3 h1_ih binders
-  {
-    unfold fast_replace_free,
-    split_ifs,
-    simp only [eq_self_iff_true, true_and],
-    apply h1_ih binders,
-  },
-end
-
-
 lemma is_prop_sub_imp_fast_admits_aux
   (P : formula)
   (v u : variable_)
