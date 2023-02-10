@@ -1399,17 +1399,20 @@ end
 
 
 inductive is_prop_sub' : formula → variable_ → variable_ → formula → Prop
-| pred_ (name : pred_name_) (args : list variable_)
+| pred_
+  (name : pred_name_) (args : list variable_)
   (v t : variable_) :
   is_prop_sub' (pred_ name args) v t (pred_ name (args.map (replace v t)))
 
-| not_ (P : formula)
+| not_
+  (P : formula)
   (v t : variable_)
   (P' : formula) :
   is_prop_sub' P v t P' →
   is_prop_sub' P.not_ v t P'.not_
 
-| imp_ (P Q : formula)
+| imp_
+  (P Q : formula)
   (v t : variable_)
   (P' Q' : formula) :
   is_prop_sub' P v t P' →
