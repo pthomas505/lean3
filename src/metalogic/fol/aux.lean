@@ -1590,15 +1590,15 @@ begin
   induction h1 generalizing binders,
   case is_prop_sub'.pred_ : h1_name h1_args h1_v h1_t binders
   { admit },
-  case is_prop_sub'.not_ : h1_P h1_v h1_t h1_P' h1_ᾰ h1_ih binders
+  case is_prop_sub'.not_ : h1_P h1_v h1_t h1_P' h1_1 h1_ih binders
   { admit },
-  case is_prop_sub'.imp_ : h1_P h1_Q h1_v h1_t h1_P' h1_Q' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1 binders
+  case is_prop_sub'.imp_ : h1_P h1_Q h1_v h1_t h1_P' h1_Q' h1_1 h1_2 h1_ih_1 h1_ih_2 binders
   { admit },
-  case is_prop_sub'.forall_same : h1_x h1_P h1_v h1_t h1_P' h1_ᾰ binders
+  case is_prop_sub'.forall_same : h1_x h1_P h1_v h1_t h1_P' h1_1 binders
   { admit },
-  case is_prop_sub'.forall_diff_nel : h1_x h1_P h1_v h1_t h1_P' h1_ᾰ h1_ᾰ_1 h1_ᾰ_2 h1_ih binders
+  case is_prop_sub'.forall_diff_nel : h1_x h1_P h1_v h1_t h1_P' h1_1 h1_2 h1_3 h1_ih binders
   { admit },
-  case is_prop_sub'.forall_diff : h1_x h1_P h1_v h1_t h1_P' h1_ᾰ h1_ᾰ_1 h1_ᾰ_2 h1_ih binders
+  case is_prop_sub'.forall_diff : h1_x h1_P h1_v h1_t h1_P' h1_1 h1_2 h1_3 h1_ih binders
   { admit },
 end
 
