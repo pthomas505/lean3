@@ -1362,11 +1362,17 @@ example
 begin
   induction P generalizing binders,
   case formula.pred_ : name args binders h1
-  { admit },
+  {
+
+  },
   case formula.not_ : P P_ih binders h1
-  { admit },
+  {
+
+  },
   case formula.imp_ : P Q P_ih Q_ih binders h1
-  { admit },
+  {
+
+  },
   case formula.forall_ : x P P_ih binders h1
   {
     unfold fast_admits_aux at h1,
