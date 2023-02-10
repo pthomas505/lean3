@@ -1531,13 +1531,48 @@ begin
 end
 
 
+lemma is_prop_sub_imp_fast_admits_aux
+  (P : formula)
+  (v u : variable_)
+  (binders : finset variable_)
+  (h1 : ∃ (P' : formula), is_prop_sub' P v u P') :
+  fast_admits_aux v u binders P :=
+begin
+  apply exists.elim h1,
+  intros P' h1_1,
+  induction h1_1 generalizing binders,
+  case is_prop_sub'.pred_ : h1_1_name h1_1_args h1_1_v h1_1_t binders
+  { admit },
+  case is_prop_sub'.not_ : h1_1_P h1_1_v h1_1_t h1_1_P' h1_1_ᾰ h1_1_ih binders
+  { admit },
+  case is_prop_sub'.imp_ : h1_1_P h1_1_Q h1_1_v h1_1_t h1_1_P' h1_1_Q' h1_1_ᾰ h1_1_ᾰ_1 h1_1_ih_ᾰ h1_1_ih_ᾰ_1 binders
+  { admit },
+  case is_prop_sub'.forall_same : h1_1_x h1_1_P h1_1_v h1_1_t h1_1_P' h1_1_ᾰ binders
+  { admit },
+  case is_prop_sub'.forall_diff_nel : h1_1_x h1_1_P h1_1_v h1_1_t h1_1_P' h1_1_ᾰ h1_1_ᾰ_1 h1_1_ᾰ_2 h1_1_ih binders
+  { admit },
+  case is_prop_sub'.forall_diff : h1_1_x h1_1_P h1_1_v h1_1_t h1_1_P' h1_1_ᾰ h1_1_ᾰ_1 h1_1_ᾰ_2 h1_1_ih binders
+  { admit },
+end
+
+
 example
   (P P' : formula)
   (v u : variable_) :
   is_prop_sub' P v u P' ↔
-    (fast_admits v u P → fast_replace_free v u P = P') :=
+    (fast_admits v u P ∧ fast_replace_free v u P = P') :=
 begin
-
+  split,
+  {
+    unfold fast_admits,
+    intros a1,
+    apply is_prop_sub_and_fast_admits_aux_imp_fast_replace_free P P' v u ∅ a1,
+  },
+  {
+    unfold fast_admits,
+    intros a1,
+    apply fast_admits_aux_and_fast_replace_free_imp_is_prop_sub P P' v u ∅,
+  }
 end
 
 
