@@ -1673,7 +1673,7 @@ begin
   case formula.forall_ : x P P_ih
   {
     unfold fast_simult_replace_free,
-    squeeze_simp,
+    simp only [eq_self_iff_true, true_and],
     simp only [function.update_id],
     exact P_ih,
   },
