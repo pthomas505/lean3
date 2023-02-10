@@ -1539,7 +1539,65 @@ begin
   { admit },
   case formula.forall_ : x P P_ih binders h1
   {
+    unfold fast_admits_aux at h1,
 
+    cases h1,
+    {
+      unfold fast_replace_free,
+      split_ifs,
+      apply is_prop_sub'.forall_same x P v u P h1,
+    },
+    {
+      unfold fast_replace_free,
+      split_ifs,
+      {
+        apply is_prop_sub'.forall_same x P v u P h,
+      },
+      {
+        by_cases c1 : v ∈ (forall_ x P).free_var_set,
+        {
+          apply is_prop_sub'.forall_diff,
+          {
+            exact h,
+          },
+          {
+            unfold formula.free_var_set at c1,
+            simp only [finset.mem_sdiff, finset.mem_singleton] at c1,
+
+            cases c1,
+            have s1 : u ∉ binders ∪ {x},
+            apply fast_admits_aux_mem_free P v u,
+            {
+              exact h1,
+            },
+            {
+              exact c1_left,
+            },
+
+            simp only [finset.mem_union, finset.mem_singleton] at s1,
+            push_neg at s1,
+            cases s1,
+            exact s1_right,
+          },
+          {
+            apply P_ih (binders ∪ {x}),
+            exact h1,
+          }
+        },
+        {
+          apply is_prop_sub'.forall_diff_nel,
+          {
+            exact h,
+          },
+          {
+            exact c1,
+          },
+          {
+            apply P_ih (binders ∪ {x}) h1,
+          },
+        }
+      }
+    }
   },
 end
 
