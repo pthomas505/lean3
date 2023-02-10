@@ -1588,7 +1588,18 @@ lemma is_prop_sub_imp_fast_replace_free
   fast_replace_free v u P = P' :=
 begin
   induction h1 generalizing binders,
-  pretty_cases,
+  case is_prop_sub'.pred_ : h1_name h1_args h1_v h1_t binders
+  { admit },
+  case is_prop_sub'.not_ : h1_P h1_v h1_t h1_P' h1_ᾰ h1_ih binders
+  { admit },
+  case is_prop_sub'.imp_ : h1_P h1_Q h1_v h1_t h1_P' h1_Q' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1 binders
+  { admit },
+  case is_prop_sub'.forall_same : h1_x h1_P h1_v h1_t h1_P' h1_ᾰ binders
+  { admit },
+  case is_prop_sub'.forall_diff_nel : h1_x h1_P h1_v h1_t h1_P' h1_ᾰ h1_ᾰ_1 h1_ᾰ_2 h1_ih binders
+  { admit },
+  case is_prop_sub'.forall_diff : h1_x h1_P h1_v h1_t h1_P' h1_ᾰ h1_ᾰ_1 h1_ᾰ_2 h1_ih binders
+  { admit },
 end
 
 
