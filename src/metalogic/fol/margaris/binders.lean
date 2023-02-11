@@ -1740,9 +1740,9 @@ begin
       funext,
       by_cases c1 : a = x,
       {
-        rewrite eq_comm at h,
         subst c1,
         simp only [function.update_same],
+        rewrite eq_comm at h,
         simp only [function.update_noteq h],
         simp only [id.def],
       },
