@@ -170,7 +170,28 @@ example
   is_deduct_simp Δ P :=
 begin
   induction h1,
-
+  case is_deduct.axiom_ : h1_P h1_1
+  {
+    induction h1_1,
+    case is_axiom.prop_1 : h1_1_P h1_1_Q
+  { admit },
+  case is_axiom.prop_2 : h1_1_P h1_1_Q h1_1_S
+  { admit },
+  case is_axiom.prop_3 : h1_1_P h1_1_Q
+  { admit },
+  case is_axiom.pred_1 : h1_1_P h1_1_Q h1_1_v
+  { admit },
+  case is_axiom.pred_2 : h1_1_v h1_1_P h1_1_t h1_1_ᾰ
+  { admit },
+  case is_axiom.pred_3 : h1_1_P h1_1_v h1_1_ᾰ
+  { admit },
+  case is_axiom.gen : h1_1_P h1_1_v h1_1_ᾰ h1_1_ᾰ_1 h1_1_ih
+  { admit },
+  },
+  case is_deduct.assumption_ : h1_P h1_ᾰ
+  { admit },
+  case is_deduct.mp_ : h1_P h1_Q h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  { admit },
 end
 
 
