@@ -1716,23 +1716,22 @@ begin
     {
       unfold fast_simult_replace_free at args_ih,
       unfold fast_replace_free' at args_ih,
-      squeeze_simp at args_ih,
+      simp only [eq_self_iff_true, true_and] at args_ih,
 
       unfold fast_simult_replace_free,
       unfold fast_replace_free',
-      squeeze_simp,
+      simp only [list.map, eq_self_iff_true, true_and],
       split,
       {
         unfold replace',
         split_ifs,
         {
           subst h,
-          squeeze_simp,
+          simp only [function.update_same],
         },
         {
           simp only [function.update_noteq h],
-          apply h1,
-          exact h,
+          exact h1 args_hd h,
         }
       },
       {
@@ -1752,33 +1751,43 @@ begin
     {
       simp only [eq_self_iff_true, true_and],
       subst h,
-      squeeze_simp,
-      have s1 : (function.update σ x x) = id,
-      ext,
+      simp only [function.update_idem],
+
+      have s1 : function.update σ x x = id,
+      funext,
       simp only [function.update_apply],
       split_ifs,
-      subst h,
-      squeeze_simp,
-      apply h1,
-      exact h,
+      {
+        subst h,
+        simp only [id.def],
+      },
+      {
+        exact h1 a h,
+      },
+
       simp only [s1],
       apply fast_simult_replace_free_id,
     },
     {
-      squeeze_simp,
+      simp only [eq_self_iff_true, true_and],
       specialize P_ih σ h1,
       specialize h1 x h,
 
-      have s1 : (function.update σ v t) = (function.update (function.update σ v t) x x),
-      ext,
-      by_cases x_1 = x,
-      subst h,
-      squeeze_simp,
-      simp only [function.update_noteq h],
-      exact h1,
-      simp only [function.update_noteq h],
+      have s1 : function.update σ v t = function.update (function.update σ v t) x x,
+      funext,
+      by_cases a = x,
+      {
+        subst h,
+        simp only [function.update_same],
+        simp only [function.update_noteq h],
+        exact h1,
+      },
+      {
+        simp only [function.update_noteq h],
+      },
+
       rewrite <- s1,
-      apply P_ih,
+      exact P_ih,
     }
   },
 end
