@@ -136,7 +136,10 @@ example
 begin
   induction h1,
   case is_deduct_simp.prop_1 : h1_P h1_Q
-  { admit },
+  {
+    apply is_deduct.axiom_,
+    apply is_axiom.prop_1,
+  },
   case is_deduct_simp.prop_2 : h1_P h1_Q h1_S
   { admit },
   case is_deduct_simp.prop_3 : h1_P h1_Q
@@ -149,10 +152,14 @@ begin
   { admit },
   case is_deduct_simp.gen : h1_P h1_v h1_ᾰ h1_ᾰ_1 h1_ih
   { admit },
-  case is_deduct_simp.assumption_ : h1_P h1_ᾰ
-  { admit },
-  case is_deduct_simp.mp_ : h1_P h1_Q h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
-  { admit },
+  case is_deduct_simp.assumption_ : h1_P h1_1
+  {
+    exact is_deduct.assumption_ h1_P h1_1,
+  },
+  case is_deduct_simp.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
+  {
+    exact is_deduct.mp_ h1_ih_1 h1_ih_2,
+  },
 end
 
 
