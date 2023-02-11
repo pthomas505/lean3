@@ -1613,6 +1613,36 @@ begin
 end
 
 
+def function.update_ite
+  {α β : Type}
+  [decidable_eq α]
+  (f : α → β)
+  (a' : α) (b : β) (a : α) :=
+  if a' = a then b else f a
+
+
+@[simp]
+lemma function.update_ite_idem
+  {α β : Type}
+  [decidable_eq α]
+  (f : α → β)
+  (a : α)
+  (x y : β)  :
+  function.update_ite (function.update_ite f a x) a y =
+    function.update_ite f a y :=
+begin
+  funext,
+  unfold function.update_ite,
+  split_ifs,
+  {
+    refl,
+  },
+  {
+    refl,
+  }
+end
+
+
 /-
   The simultaneous replacement of the free variables in a formula.
 -/
@@ -1620,17 +1650,17 @@ def fast_simult_replace_free : (variable_ → variable_) → formula → formula
 | σ (pred_ name args) := pred_ name (args.map σ)
 | σ (not_ P) := not_ (fast_simult_replace_free σ P)
 | σ (imp_ P Q) := imp_ (fast_simult_replace_free σ P) (fast_simult_replace_free σ Q)
-| σ (forall_ x P) := forall_ x (fast_simult_replace_free (function.update σ x x) P)
+| σ (forall_ x P) := forall_ x (fast_simult_replace_free (function.update_ite σ x x) P)
 
 
 lemma function.update_id
   {α : Type}
   [decidable_eq α]
   (x : α) :
-  function.update (id : α → α) x x = id :=
+  function.update_ite (id : α → α) x x = id :=
 begin
   funext,
-  simp only [function.update_apply],
+  unfold function.update_ite,
   split_ifs,
   {
     subst h,
@@ -1682,7 +1712,7 @@ end
 example
   (P : formula)
   (v t : variable_) :
-  fast_simult_replace_free (function.update id v t) P = fast_replace_free v t P :=
+  fast_simult_replace_free (function.update_ite id v t) P = fast_replace_free v t P :=
 begin
   induction P,
   case formula.pred_ : name args
@@ -1693,14 +1723,12 @@ begin
     apply list.map_congr,
     intros x a1,
     unfold replace,
+    unfold function.update_ite,
     split_ifs,
     {
-      subst h,
-      simp only [function.update_same],
+      refl,
     },
     {
-      rewrite eq_comm at h,
-      simp only [function.update_noteq h],
       simp only [id.def],
     },
   },
@@ -1730,24 +1758,29 @@ begin
     split_ifs,
     {
       subst h,
-      simp only [eq_self_iff_true, function.update_idem, true_and],
+      simp only [eq_self_iff_true, function.update_ite_idem, true_and],
 
       simp only [function.update_id],
       apply fast_simult_replace_free_id,
     },
     {
-      have s1 : (function.update (function.update (id : variable_ → variable_) v t) x x) = function.update id v t,
+      have s1 : (function.update_ite (function.update_ite (id : variable_ → variable_) v t) x x) = function.update_ite id v t,
       funext,
-      by_cases c1 : a = x,
+      unfold function.update_ite,
+      split_ifs,
       {
-        subst c1,
-        simp only [function.update_same],
-        rewrite eq_comm at h,
-        simp only [function.update_noteq h],
+        subst h_1,
+        contradiction,
+      },
+      {
+        subst h_1,
         simp only [id.def],
       },
       {
-        simp only [function.update_noteq c1],
+        refl,
+      },
+      {
+        refl,
       },
 
       simp only [eq_self_iff_true, true_and],
