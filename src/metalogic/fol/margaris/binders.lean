@@ -1751,8 +1751,22 @@ begin
       apply fast_simult_replace_free_id,
     },
     {
-      simp only [eq_self_iff_true, true_and],
+      have s1 : (function.update (function.update (id : variable_ → variable_) v t) x x) = function.update id v t,
+      funext,
+      by_cases c1 : a = x,
+      {
+        subst c1,
+        simp only [function.update_same],
+        simp only [function.update_noteq h],
+        simp only [id.def],
+      },
+      {
+        simp only [function.update_noteq c1],
+      },
 
+      simp only [eq_self_iff_true, true_and],
+      simp only [s1],
+      exact P_ih,
     }
   },
 end
