@@ -163,6 +163,17 @@ begin
 end
 
 
+example
+  (Δ : finset formula)
+  (P : formula)
+  (h1 : is_deduct Δ P) :
+  is_deduct_simp Δ P :=
+begin
+  induction h1,
+
+end
+
+
 theorem thm_5
   (P : formula) :
   is_proof (P.imp_ P) :=
