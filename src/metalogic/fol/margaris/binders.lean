@@ -1738,7 +1738,7 @@ begin
     {
       have s1 : (function.update (function.update (id : variable_ → variable_) v t) x x) = function.update id v t,
       funext,
-      by_cases c1 : x = a,
+      by_cases c1 : a = x,
       {
         rewrite eq_comm at h,
         subst c1,
@@ -1747,7 +1747,6 @@ begin
         simp only [id.def],
       },
       {
-        rewrite eq_comm at c1,
         simp only [function.update_noteq c1],
       },
 
