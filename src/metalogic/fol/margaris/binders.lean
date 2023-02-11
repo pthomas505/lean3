@@ -1791,4 +1791,16 @@ begin
 end
 
 
+def simult_admits_aux (σ : variable_ → variable_) : finset variable_ → formula → Prop
+| binders (pred_ name args) :=
+    ∀ (v : variable_), v ∈ args ∧ v ∉ binders → σ v ∉ binders
+| binders (not_ P) := simult_admits_aux binders P
+| binders (imp_ P Q) := simult_admits_aux binders P ∧ simult_admits_aux binders Q
+| binders (forall_ x P) := simult_admits_aux (binders ∪ {x}) P
+
+
+def simult_admits (σ : variable_ → variable_) (P : formula) : Prop :=
+  simult_admits_aux σ ∅ P
+
+
 #lint
