@@ -174,7 +174,9 @@ begin
   {
     induction h1_1,
     case is_axiom.prop_1 : h1_1_P h1_1_Q
-    { admit },
+    {
+      apply is_deduct_simp.prop_1,
+    },
     case is_axiom.prop_2 : h1_1_P h1_1_Q h1_1_S
     { admit },
     case is_axiom.prop_3 : h1_1_P h1_1_Q
@@ -185,8 +187,16 @@ begin
     { admit },
     case is_axiom.pred_3 : h1_1_P h1_1_v h1_1_ᾰ
     { admit },
-    case is_axiom.gen : h1_1_P h1_1_v h1_1_ᾰ h1_1_ᾰ_1 h1_1_ih
-    { admit },
+    case is_axiom.gen : h1_1_P h1_1_v h1_1_1 h1_1_2 h1_1_ih
+    {
+      apply is_deduct_simp.gen,
+      {
+        exact h1_1_ih,
+      },
+      {
+        exact h1_1_2,
+      }
+    },
   },
   case is_deduct.assumption_ : h1_P h1_ᾰ
   { admit },
