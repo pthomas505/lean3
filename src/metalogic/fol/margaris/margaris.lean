@@ -86,6 +86,76 @@ begin
 end
 
 
+inductive is_deduct_simp (Δ : finset formula) : formula → Prop
+
+| prop_1 (P Q : formula) :
+  is_deduct_simp (P.imp_ (Q.imp_ P))
+
+| prop_2 (P Q S : formula) :
+  is_deduct_simp ((S.imp_ (P.imp_ Q)).imp_ ((S.imp_ P).imp_ (S.imp_ Q)))
+
+| prop_3 (P Q : formula) :
+  is_deduct_simp (((not_ Q).imp_ (not_ P)).imp_ (P.imp_ Q))
+
+| pred_1 (P Q : formula) (v : variable_) :
+  is_deduct_simp ((forall_ v (P.imp_ Q)).imp_ ((forall_ v P).imp_ (forall_ v Q)))
+
+| pred_2 (v : variable_) (P : formula) (t : variable_) :
+  -- $P$ admits $t$ for $v$
+  admits v t P →
+  -- $P(t/v)$
+  is_deduct_simp ((forall_ v P).imp_ (replace_free v t P))
+
+| pred_3 (P : formula) (v : variable_) :
+  -- $v$ is not free in $P$
+  ¬ is_free_in v P →
+  is_deduct_simp (P.imp_ (forall_ v P))
+
+| gen (P : formula) (v : variable_) :
+  is_deduct_simp P →
+  v ∈ P.free_var_set →
+  is_deduct_simp (forall_ v P)
+
+| assumption_ (P : formula) :
+  P ∈ Δ →
+  is_deduct_simp P
+
+| mp_ {P Q : formula} :
+  -- major premise
+  is_deduct_simp (P.imp_ Q) →
+  -- minor premise
+  is_deduct_simp P →
+  is_deduct_simp Q
+
+
+example
+  (Δ : finset formula)
+  (P : formula)
+  (h1 : is_deduct_simp Δ P) :
+  is_deduct_simp Δ P :=
+begin
+  induction h1,
+  case is_deduct_simp.prop_1 : h1_P h1_Q
+  { admit },
+  case is_deduct_simp.prop_2 : h1_P h1_Q h1_S
+  { admit },
+  case is_deduct_simp.prop_3 : h1_P h1_Q
+  { admit },
+  case is_deduct_simp.pred_1 : h1_P h1_Q h1_v
+  { admit },
+  case is_deduct_simp.pred_2 : h1_v h1_P h1_t h1_ᾰ
+  { admit },
+  case is_deduct_simp.pred_3 : h1_P h1_v h1_ᾰ
+  { admit },
+  case is_deduct_simp.gen : h1_P h1_v h1_ᾰ h1_ᾰ_1 h1_ih
+  { admit },
+  case is_deduct_simp.assumption_ : h1_P h1_ᾰ
+  { admit },
+  case is_deduct_simp.mp_ : h1_P h1_Q h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  { admit },
+end
+
+
 theorem thm_5
   (P : formula) :
   is_proof (P.imp_ P) :=
