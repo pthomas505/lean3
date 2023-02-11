@@ -132,7 +132,7 @@ example
   (Δ : finset formula)
   (P : formula)
   (h1 : is_deduct_simp Δ P) :
-  is_deduct_simp Δ P :=
+  is_deduct Δ P :=
 begin
   induction h1,
   case is_deduct_simp.prop_1 : h1_P h1_Q
