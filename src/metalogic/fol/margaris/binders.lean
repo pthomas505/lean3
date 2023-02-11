@@ -1679,42 +1679,27 @@ begin
 end
 
 
-def replace'
-  {α : Type}
-  [decidable_eq α]
-  (v t x : α) : α :=
-  if x = v then t else x
-
-def fast_replace_free' (v t : variable_) : formula → formula
-| (pred_ name args) := pred_ name (args.map (replace' v t))
-| (not_ P) := not_ (fast_replace_free' P)
-| (imp_ P Q) := imp_ (fast_replace_free' P) (fast_replace_free' Q)
-| (forall_ x P) :=
-  if x = v
-  then forall_ x P
-  else forall_ x (fast_replace_free' P)
-
-
 example
   (P : formula)
   (v t : variable_) :
-  fast_simult_replace_free (function.update id v t) P = fast_replace_free' v t P :=
+  fast_simult_replace_free (function.update id v t) P = fast_replace_free v t P :=
 begin
   induction P,
   case formula.pred_ : name args
   {
     unfold fast_simult_replace_free,
-    unfold fast_replace_free',
+    unfold fast_replace_free,
     simp only [eq_self_iff_true, true_and],
     apply list.map_congr,
     intros x a1,
-    unfold replace',
+    unfold replace,
     split_ifs,
     {
       subst h,
       simp only [function.update_same],
     },
     {
+      rewrite eq_comm at h,
       simp only [function.update_noteq h],
       simp only [id.def],
     },
@@ -1722,14 +1707,14 @@ begin
   case formula.not_ : P P_ih
   {
     unfold fast_simult_replace_free,
-    unfold fast_replace_free',
+    unfold fast_replace_free,
     congr,
     exact P_ih,
   },
   case formula.imp_ : P Q P_ih Q_ih
   {
     unfold fast_simult_replace_free,
-    unfold fast_replace_free',
+    unfold fast_replace_free,
     congr,
     {
       exact P_ih,
@@ -1741,7 +1726,7 @@ begin
   case formula.forall_ : x P P_ih
   {
     unfold fast_simult_replace_free,
-    unfold fast_replace_free',
+    unfold fast_replace_free,
     split_ifs,
     {
       subst h,
@@ -1753,14 +1738,16 @@ begin
     {
       have s1 : (function.update (function.update (id : variable_ → variable_) v t) x x) = function.update id v t,
       funext,
-      by_cases c1 : a = x,
+      by_cases c1 : x = a,
       {
+        rewrite eq_comm at h,
         subst c1,
         simp only [function.update_same],
         simp only [function.update_noteq h],
         simp only [id.def],
       },
       {
+        rewrite eq_comm at c1,
         simp only [function.update_noteq c1],
       },
 
