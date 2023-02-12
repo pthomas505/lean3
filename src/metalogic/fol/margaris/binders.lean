@@ -216,7 +216,7 @@ def replace_free (v t : variable_) (P : formula) : formula :=
   replace_free_aux v t ∅ P
 
 
-lemma replace_mem_binders
+lemma replace_free_aux_mem_binders
   (P : formula)
   (v t : variable_)
   (binders : finset variable_)
@@ -361,7 +361,7 @@ begin
     split_ifs,
     {
       simp only [eq_self_iff_true, true_and],
-      apply replace_mem_binders,
+      apply replace_free_aux_mem_binders,
       simp only [finset.mem_union, finset.mem_singleton],
       apply or.intro_right,
       exact h,
@@ -394,7 +394,7 @@ begin
 end
 
 
-lemma replace_not_free
+lemma fast_replace_free_not_mem_free
   (P : formula)
   (v t : variable_)
   (h1 : v ∉ P.free_var_set) :
@@ -642,7 +642,7 @@ def fast_admits (v u : variable_) (P : formula) : Prop :=
   fast_admits_aux v u ∅ P
 
 
-lemma fast_admits_aux_sub_binders
+lemma fast_admits_aux_del_binders
   (P : formula)
   (v u : variable_)
   (S T : finset variable_)
@@ -759,14 +759,14 @@ begin
         contradiction,
       },
       {
-        apply fast_admits_aux_sub_binders P v u binders {x} h1,
+        apply fast_admits_aux_del_binders P v u binders {x} h1,
       }
     }
   },
 end
 
 
-lemma admits_aux_eqv_left
+lemma admits_aux_imp_fast_admits_aux
   (P : formula)
   (v u : variable_)
   (binders : finset variable_)
@@ -843,7 +843,7 @@ begin
 end
 
 
-lemma admits_aux_eqv_right
+lemma fast_admits_aux_imp_admits_aux
   (P : formula)
   (v u : variable_)
   (binders : finset variable_)
@@ -944,7 +944,7 @@ begin
   split,
   {
     intros a1,
-    apply admits_aux_eqv_left,
+    apply admits_aux_imp_fast_admits_aux,
     {
       exact a1,
     },
@@ -954,14 +954,14 @@ begin
   },
   {
     intros a1,
-    apply admits_aux_eqv_right,
+    apply fast_admits_aux_imp_admits_aux,
     simp only [finset.not_mem_empty, false_or],
     exact a1,
   }
 end
 
 
-lemma not_free_imp_fast_admits_aux
+lemma not_mem_free_imp_fast_admits_aux
   (P : formula)
   (v u : variable_)
   (binders : finset variable_)
@@ -1020,14 +1020,14 @@ begin
 end
 
 
-lemma not_free_imp_fast_admits
+lemma not_mem_free_imp_fast_admits
   (P : formula)
   (v u : variable_)
   (h1 : v ∉ P.free_var_set) :
   fast_admits v u P :=
 begin
   unfold fast_admits,
-  apply not_free_imp_fast_admits_aux,
+  apply not_mem_free_imp_fast_admits_aux,
   exact h1,
 end
 
@@ -1050,7 +1050,7 @@ def to_is_bound (P : formula) : bool_formula :=
   to_is_bound_aux ∅ P
 
 
-lemma admits_imp_is_bound_unchanged_by_replace_free
+lemma fast_admits_aux_imp_free_and_bound_unchanged
   (P : formula)
   (v u : variable_)
   (binders : finset variable_)
@@ -1173,7 +1173,7 @@ begin
 end
 
 
-lemma is_bound_unchanged_by_replace_free_imp_admits
+lemma free_and_bound_unchanged_imp_fast_admits_aux
   (P : formula)
   (v u : variable_)
   (binders : finset variable_)
@@ -1296,11 +1296,11 @@ begin
   unfold to_is_bound,
   split,
   {
-    apply admits_imp_is_bound_unchanged_by_replace_free,
+    apply fast_admits_aux_imp_free_and_bound_unchanged,
     simp only [finset.not_mem_empty, not_false_iff],
   },
   {
-    apply is_bound_unchanged_by_replace_free_imp_admits,
+    apply free_and_bound_unchanged_imp_fast_admits_aux,
     simp only [finset.not_mem_empty, not_false_iff],
   }
 end
@@ -1502,7 +1502,7 @@ begin
     unfold fast_admits_aux,
 
     apply or.intro_right,
-    apply not_free_imp_fast_admits_aux,
+    apply not_mem_free_imp_fast_admits_aux,
     intros contra,
     apply h1_1_1,
     apply h1_1_2,
@@ -1556,7 +1556,7 @@ begin
   },
   case is_prop_sub.forall_same_ : h1_x h1_P h1_v h1_t h1_P' h1_1
   {
-    apply replace_not_free,
+    apply fast_replace_free_not_mem_free,
     unfold formula.free_var_set,
     simp only [finset.mem_sdiff, finset.mem_singleton, not_and, not_not],
     intros a1,
