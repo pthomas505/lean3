@@ -1327,14 +1327,14 @@ inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
   is_prop_sub Q v t Q' →
   is_prop_sub (P.imp_ Q) v t (P'.imp_ Q')
 
-| forall_same
+| forall_same_
   (x : variable_) (P : formula)
   (v t : variable_)
   (P' : formula) :
   v = x →
   is_prop_sub (forall_ x P) v t (forall_ x P)
 
-| forall_diff_nel
+| forall_diff_nel_
   (x : variable_) (P : formula)
   (v t : variable_)
   (P' : formula) :
@@ -1343,7 +1343,7 @@ inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
   is_prop_sub P v t P' →
   is_prop_sub (forall_ x P) v t (forall_ x P')
 
-| forall_diff
+| forall_diff_
   (x : variable_) (P : formula)
   (v t : variable_)
   (P' : formula) :
@@ -1396,18 +1396,18 @@ begin
     {
       unfold fast_replace_free,
       split_ifs,
-      apply is_prop_sub.forall_same x P v u P h1,
+      apply is_prop_sub.forall_same_ x P v u P h1,
     },
     {
       unfold fast_replace_free,
       split_ifs,
       {
-        apply is_prop_sub.forall_same x P v u P h,
+        apply is_prop_sub.forall_same_ x P v u P h,
       },
       {
         by_cases c1 : v ∈ (forall_ x P).free_var_set,
         {
-          apply is_prop_sub.forall_diff,
+          apply is_prop_sub.forall_diff_,
           {
             exact h,
           },
@@ -1436,7 +1436,7 @@ begin
           }
         },
         {
-          apply is_prop_sub.forall_diff_nel,
+          apply is_prop_sub.forall_diff_nel_,
           {
             exact h,
           },
@@ -1488,13 +1488,13 @@ begin
       exact h1_1_ih_2 binders h2,
     }
   },
-  case is_prop_sub.forall_same : h1_1_x h1_1_P h1_1_v h1_1_t h1_1_P' h1_1_1 binders h2
+  case is_prop_sub.forall_same_ : h1_1_x h1_1_P h1_1_v h1_1_t h1_1_P' h1_1_1 binders h2
   {
     unfold fast_admits_aux,
     apply or.intro_left,
     exact h1_1_1,
   },
-  case is_prop_sub.forall_diff_nel : h1_1_x h1_1_P h1_1_v h1_1_t h1_1_P' h1_1_1 h1_1_2 h1_1_3 h1_1_ih binders h2
+  case is_prop_sub.forall_diff_nel_ : h1_1_x h1_1_P h1_1_v h1_1_t h1_1_P' h1_1_1 h1_1_2 h1_1_3 h1_1_ih binders h2
   {
     unfold formula.free_var_set at h1_1_2,
     simp only [finset.mem_sdiff, finset.mem_singleton, not_and, not_not] at h1_1_2,
@@ -1508,7 +1508,7 @@ begin
     apply h1_1_2,
     exact contra,
   },
-  case is_prop_sub.forall_diff : h1_1_x h1_1_P h1_1_v h1_1_t h1_1_P' h1_1_1 h1_1_2 h1_1_3 h1_1_ih binders h2
+  case is_prop_sub.forall_diff_ : h1_1_x h1_1_P h1_1_v h1_1_t h1_1_P' h1_1_1 h1_1_2 h1_1_3 h1_1_ih binders h2
   {
     unfold fast_admits_aux,
     apply or.intro_right,
@@ -1554,7 +1554,7 @@ begin
       exact h1_ih_2,
     }
   },
-  case is_prop_sub.forall_same : h1_x h1_P h1_v h1_t h1_P' h1_1
+  case is_prop_sub.forall_same_ : h1_x h1_P h1_v h1_t h1_P' h1_1
   {
     apply replace_not_free,
     unfold formula.free_var_set,
@@ -1562,14 +1562,14 @@ begin
     intros a1,
     exact h1_1,
   },
-  case is_prop_sub.forall_diff_nel : h1_x h1_P h1_v h1_t h1_P' h1_1 h1_2 h1_3 h1_ih
+  case is_prop_sub.forall_diff_nel_ : h1_x h1_P h1_v h1_t h1_P' h1_1 h1_2 h1_3 h1_ih
   {
     unfold fast_replace_free,
     split_ifs,
     simp only [eq_self_iff_true, true_and],
     apply h1_ih,
   },
-  case is_prop_sub.forall_diff : h1_x h1_P h1_v h1_t h1_P' h1_1 h1_2 h1_3 h1_ih
+  case is_prop_sub.forall_diff_ : h1_x h1_P h1_v h1_t h1_P' h1_1 h1_2 h1_3 h1_ih
   {
     unfold fast_replace_free,
     split_ifs,
