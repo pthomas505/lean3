@@ -174,15 +174,15 @@ begin
   {
     -- Case 1
 
-    have s1 : is_deduct Δ h1_P,
-    apply is_deduct.axiom_,
-    apply h1_1,
-
-    have s2 : is_deduct Δ (h1_P.imp_ (P.imp_ h1_P)),
-    apply is_deduct.axiom_,
-    apply is_axiom.prop_1_,
-
-    exact is_deduct.mp_ h1_P (imp_ P h1_P) s2 s1,
+    apply is_deduct.mp_,
+    {
+      apply is_deduct.axiom_,
+      exact is_axiom.prop_1_ h1_P P,
+    },
+    {
+      apply is_deduct.axiom_,
+      exact h1_1,
+    },
   },
   case is_deduct.assume_ : h1_P h1_1
   {
