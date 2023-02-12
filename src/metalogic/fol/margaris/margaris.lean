@@ -48,11 +48,6 @@ inductive is_proof (Δ : set formula) : formula → Prop
   is_proof P →
   is_proof (forall_ v P)
 
-| assume_
-  (P : formula) :
-  P ∈ Δ →
-  is_proof P
-
 | mp_
   {P Q : formula} :
   -- major premise
@@ -60,6 +55,11 @@ inductive is_proof (Δ : set formula) : formula → Prop
   -- minor premise
   is_proof P →
   is_proof Q
+
+| assume_
+  (P : formula) :
+  P ∈ Δ →
+  is_proof P
 
 
 theorem thm_5
