@@ -44,7 +44,7 @@ inductive is_proof (Δ : set formula) : formula → Prop
   ¬ is_free_in v P →
   is_proof (P.imp_ (forall_ v P))
 
--- ⊢ P ⇒ ⊢ ∀ v P  provided v is not free in the hypotheses
+-- ⊢ P ⇒ ⊢ ∀ v P  provided v is not free in any of the assumptions
 | gen_
   (P : formula) (v : variable_) :
   ∀ (H : formula), H ∈ Δ → v ∉ H.free_var_set →
