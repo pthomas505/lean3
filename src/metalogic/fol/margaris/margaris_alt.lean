@@ -46,7 +46,7 @@ inductive is_proof (Δ : set formula) : formula → Prop
 
 -- ⊢ P → Q ⇒ ⊢ P ⇒ ⊢ Q 
 | mp_
-  {P Q : formula} :
+  (P Q : formula) :
   -- major premise
   is_proof (P.imp_ Q) →
   -- minor premise
