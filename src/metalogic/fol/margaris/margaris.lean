@@ -235,24 +235,22 @@ example
   (P Q : formula) :
   is_proof ((not_ P).imp_ (P.imp_ Q)) :=
 begin
-  have s1 : is_deduct (∅ ∪ {P.not_}) P.not_,
-  apply is_deduct.assume_,
-  simp only [finset.empty_union, finset.mem_singleton],
-
-  have s2 : is_deduct (∅ ∪ {P.not_}) (P.not_.imp_ (Q.not_.imp_ P.not_)),
-  apply is_deduct.axiom_,
-  apply is_axiom.prop_1_,
-
-  have s3 : is_deduct (∅ ∪ {P.not_}) (Q.not_.imp_ P.not_),
-  apply is_deduct.mp_ _ _ s2 s1,
-
-  have s4 : is_deduct (∅ ∪ {P.not_}) ((Q.not_.imp_ P.not_).imp_ (P.imp_ Q)),
-  apply is_deduct.axiom_,
-  apply is_axiom.prop_3_,
-
-  have s5 : is_deduct (∅ ∪ {P.not_}) (P.imp_ Q),
-  apply is_deduct.mp_ _ _ s4 s3,
-
   apply deduction_theorem,
-  exact s5,
+
+  apply is_deduct.mp_,
+  {
+    apply is_deduct.axiom_,
+    exact is_axiom.prop_3_ Q P,
+  },
+  {
+    apply is_deduct.mp_,
+    {
+      apply is_deduct.axiom_,
+      exact is_axiom.prop_1_ P.not_ Q.not_,
+    },
+    {
+    apply is_deduct.assume_,
+    simp only [finset.empty_union, finset.mem_singleton],
+    },
+  },
 end
