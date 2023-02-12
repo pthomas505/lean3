@@ -213,14 +213,20 @@ begin
   {
     -- Case 4
 
-    have s1 : is_deduct Δ ((P.imp_ (h1_P.imp_ h1_Q)).imp_ ((P.imp_ h1_P).imp_ (P.imp_ h1_Q))),
-    apply is_deduct.axiom_,
-    apply is_axiom.prop_2_,
-
-    have s2 : is_deduct Δ ((P.imp_ h1_P).imp_ (P.imp_ h1_Q)),
-    exact is_deduct.mp_ (P.imp_ (h1_P.imp_ h1_Q)) ((P.imp_ h1_P).imp_ (P.imp_ h1_Q)) s1 h1_ih_1,
-
-    exact is_deduct.mp_ (imp_ P h1_P) (imp_ P h1_Q) s2 h1_ih_2,
+    apply is_deduct.mp_,
+    {
+      apply is_deduct.mp_,
+      {
+        apply is_deduct.axiom_,
+        exact is_axiom.prop_2_ P h1_P h1_Q,
+      },
+      {
+        exact h1_ih_1,
+      }
+    },
+    {
+      exact h1_ih_2,
+    },
   },
 end
 
