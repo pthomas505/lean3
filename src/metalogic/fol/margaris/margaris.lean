@@ -121,18 +121,14 @@ end
 
 example
   (P Q : formula)
-  (Δ : finset formula)
+  (Δ : set formula)
   (h1 : is_proof (Δ ∪ {P}) Q) :
   is_proof Δ (P.imp_ Q) :=
 begin
   induction h1,
   case is_proof.prop_1_ : h1_P h1_Q
-  {
-    apply is_proof.mp_,
-    apply is_proof.prop_1_,
-    apply is_proof.prop_1_,
-  },
-  case is_proof.prop_2_ : h1_P h1_Q h1_S
+  { admit },
+  case is_proof.prop_2_ : h1_P h1_Q h1_R
   { admit },
   case is_proof.prop_3_ : h1_P h1_Q
   { admit },
@@ -142,13 +138,14 @@ begin
   { admit },
   case is_proof.pred_3_ : h1_P h1_v h1_ᾰ
   { admit },
-  case is_proof.gen_ : h1_P h1_v h1_H h1_ᾰ h1_ᾰ_1 h1_ᾰ_2 h1_ᾰ_3 h1_ih
-  { admit },
-  case is_proof.assume_ : h1_P h1_ᾰ
+  case is_proof.gen_ : h1_P h1_v h1_H h1_ᾰ h1_ᾰ_1 h1_ᾰ_2 h1_ih
   { admit },
   case is_proof.mp_ : h1_P h1_Q h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
   { admit },
+  case is_proof.assume_ : h1_P h1_ᾰ
+  { admit },
 end
+
 
 /-
 theorem proofion_theorem
