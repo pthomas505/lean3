@@ -70,9 +70,7 @@ inductive is_deduct (Δ : finset formula) : formula → Prop
   is_deduct P
 
 | mp_ {P Q : formula} :
-  -- major premise
   is_deduct (P.imp_ Q) →
-  -- minor premise
   is_deduct P →
   is_deduct Q
 
