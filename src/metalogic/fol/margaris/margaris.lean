@@ -12,17 +12,20 @@ open formula
 
 inductive is_proof (Δ : set formula) : formula → Prop
 
+-- |- (p -> (q -> p))
 | prop_1_
   (P Q : formula) :
   is_proof (P.imp_ (Q.imp_ P))
 
+-- |- ((p -> (q -> r)) -> ((p -> q) -> (p -> r)))
 | prop_2_
-  (P Q S : formula) :
-  is_proof ((S.imp_ (P.imp_ Q)).imp_ ((S.imp_ P).imp_ (S.imp_ Q)))
+  (P Q R : formula) :
+  is_proof ((P.imp_ (Q.imp_ R)).imp_ ((P.imp_ Q).imp_ (P.imp_ R)))
 
+-- |- ((~p -> ~q) -> (q -> p))
 | prop_3_
   (P Q : formula) :
-  is_proof (((not_ Q).imp_ (not_ P)).imp_ (P.imp_ Q))
+  is_proof (((not_ P).imp_ (not_ Q)).imp_ (Q.imp_ P))
 
 | pred_1_
   (P Q : formula) (v : variable_) :
@@ -70,13 +73,13 @@ begin
   apply is_proof.prop_2_,
 
   have s2 : is_proof ∅ (P.imp_ ((P.imp_ P).imp_ P)),
-  apply is_proof.prop_1_,
+  apply is_proof.prop_1_ P (P.imp_ P),
 
   have s3 : is_proof ∅ ((P.imp_ (P.imp_ P)).imp_ (P.imp_ P)),
   exact is_proof.mp_ s1 s2,
 
   have s4 : is_proof ∅ (P.imp_ (P.imp_ P)),
-  apply is_proof.prop_1_,
+  apply is_proof.prop_1_ P P,
 
   have s5 : is_proof ∅ (P.imp_ P),
   exact is_proof.mp_ s3 s4,
