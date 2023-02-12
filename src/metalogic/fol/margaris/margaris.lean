@@ -235,6 +235,8 @@ example
   (P Q : formula) :
   is_proof ((not_ P).imp_ (P.imp_ Q)) :=
 begin
+  unfold is_proof,
+
   apply deduction_theorem,
 
   apply is_deduct.mp_,
