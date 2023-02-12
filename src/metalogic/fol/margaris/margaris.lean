@@ -106,7 +106,7 @@ begin
 end
 
 
-theorem thm_5
+lemma prop_id
   (P : formula) :
   is_proof (P.imp_ P) :=
 begin
@@ -131,37 +131,35 @@ begin
 end
 
 
-theorem thm_6
+example
   (P Q : formula) :
   is_proof ((not_ P).imp_ (P.imp_ Q)) :=
 begin
-  have s1 : is_deduct ∅ ((Q.not_.imp_ P.not_).imp_ (P.imp_ Q)),
-  apply is_deduct.axiom_,
-  apply is_axiom.prop_3_,
-
-  have s2 : is_deduct ∅ (((Q.not_.imp_ P.not_).imp_ (P.imp_ Q)).imp_ (P.not_.imp_ ((Q.not_.imp_ P.not_).imp_ (P.imp_ Q)))),
-  apply is_deduct.axiom_,
-  apply is_axiom.prop_1_,
-
-  have s3 : is_deduct ∅ (P.not_.imp_ ((Q.not_.imp_ P.not_).imp_ (P.imp_ Q))),
-  apply is_deduct.mp_ _ _ s2 s1,
-
-  have s4 : is_deduct ∅ ((P.not_.imp_ ((Q.not_.imp_ P.not_).imp_ (P.imp_ Q))).imp_ ((P.not_.imp_ (Q.not_.imp_ P.not_)).imp_ (P.not_.imp_ (P.imp_ Q)))),
-  apply is_deduct.axiom_,
-  apply is_axiom.prop_2_,
-
-  have s5 : is_deduct ∅ ((P.not_.imp_ (Q.not_.imp_ P.not_)).imp_ (P.not_.imp_ (P.imp_ Q))),
-  exact is_deduct.mp_ _ _ s4 s3,
-
-  have s6 : is_deduct ∅ (P.not_.imp_ (Q.not_.imp_ P.not_)),
-  apply is_deduct.axiom_,
-  apply is_axiom.prop_1_,
-
-  have s7 : is_deduct ∅ (P.not_.imp_ (P.imp_ Q)),
-  apply is_deduct.mp_ _ _ s5 s6,
-
   unfold is_proof,
-  exact s7,
+
+  apply is_deduct.mp_,
+  {
+    apply is_deduct.mp_,
+    {
+      apply is_deduct.axiom_,
+      exact is_axiom.prop_2_ P.not_ (Q.not_.imp_ P.not_) (P.imp_ Q),
+    },
+    {
+      apply is_deduct.mp_,
+      {
+        apply is_deduct.axiom_,
+        exact is_axiom.prop_1_ ((Q.not_.imp_ P.not_).imp_ (P.imp_ Q)) P.not_,
+      },
+      {
+        apply is_deduct.axiom_,
+        exact is_axiom.prop_3_ Q P,
+      }
+    }
+  },
+  {
+    apply is_deduct.axiom_,
+    exact is_axiom.prop_1_ P.not_ Q.not_,
+  },
 end
 
 
@@ -208,7 +206,7 @@ begin
 
       rewrite h1_1,
       apply proof_imp_deduct,
-      exact thm_5 P,
+      exact prop_id P,
     }
   },
   case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
