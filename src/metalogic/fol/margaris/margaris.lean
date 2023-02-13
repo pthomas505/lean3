@@ -81,6 +81,17 @@ inductive is_deduct (Δ : finset formula) : formula → Prop
 def is_proof (P : formula) : Prop := is_deduct ∅ P
 
 
+def list.is_deduct (Δ : finset formula) (l : list formula) : Prop :=
+  ∀ P ∈ l,
+    is_axiom P ∨
+    P ∈ Δ ∨
+    ∃ (Q R : formula),
+      Q ∈ l ∧ R ∈ l ∧
+      l.index_of Q < l.index_of P ∧
+      l.index_of R < l.index_of P ∧
+      R = Q.imp_ P
+
+
 lemma proof_imp_deduct
   (P : formula)
   (h1 : is_proof P) :
