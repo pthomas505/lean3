@@ -231,7 +231,7 @@ begin
 end
 
 
-example
+theorem T_13_6
   (P Q : formula) :
   is_proof ((not_ P).imp_ (P.imp_ Q)) :=
 begin
@@ -255,4 +255,37 @@ begin
     simp only [finset.empty_union, finset.mem_singleton],
     },
   },
+end
+
+
+theorem T_14_5
+  (P : formula) :
+  is_proof ((not_ (not_ P)).imp_ P) :=
+begin
+  unfold is_proof,
+
+  apply deduction_theorem,
+  apply is_deduct.mp_,
+  {
+    apply is_deduct.mp_,
+    {
+      apply is_deduct.axiom_,
+      apply is_axiom.prop_3_,
+    },
+    {
+      apply is_deduct.mp_,
+      {
+        apply proof_imp_deduct,
+        apply T_13_6,
+      },
+      {
+        apply is_deduct.assume_,
+        simp only [finset.empty_union, finset.mem_singleton],
+      }
+    }
+  },
+  {
+    apply is_deduct.assume_,
+    simp only [finset.empty_union, finset.mem_singleton],
+  }
 end
