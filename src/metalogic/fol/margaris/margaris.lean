@@ -375,3 +375,51 @@ begin
     }
   }
 end
+
+
+theorem T_14_9
+  (P S : formula) :
+  is_proof ( (S.imp_ P).imp_ (((not_ S).imp_ P).imp_ P) ) :=
+begin
+  unfold is_proof,
+
+  apply DT,
+  apply is_deduct.mp_,
+  {
+    apply is_deduct.axiom_,
+    apply is_axiom.prop_3_,
+  },
+  {
+    apply DT,
+    apply is_deduct.mp_,
+    {
+      apply is_deduct.mp_,
+      {
+        apply proof_imp_deduct,
+        apply T_14_8,
+      },
+      {
+        apply is_deduct.mp_,
+        {
+          apply is_deduct.mp_ (S.imp_ P),
+          {
+            apply proof_imp_deduct,
+            apply T_14_7,
+          },
+          {
+            apply is_deduct.assume_,
+            simp only [finset.empty_union, finset.mem_union, finset.mem_singleton, eq_self_iff_true, and_self, or_false],
+          }
+        },
+        {
+          apply is_deduct.assume_,
+          simp only [finset.empty_union, finset.mem_union, finset.mem_singleton, false_or],
+        }
+      }
+    },
+    {
+      apply is_deduct.assume_,
+      simp only [finset.empty_union, finset.mem_union, finset.mem_singleton, false_or],
+    }
+  }
+end
