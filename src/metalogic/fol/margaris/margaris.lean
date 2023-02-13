@@ -423,3 +423,20 @@ begin
     }
   }
 end
+
+
+theorem T_14_10
+  (Q : formula)
+  (Δ : finset formula)
+  (h1 : is_deduct Δ Q) :
+  ∀ (Γ : finset formula), is_deduct (Δ ∪ Γ) Q :=
+begin
+  intros Γ,
+  induction h1,
+  case is_deduct.axiom_ : h1_P h1_ᾰ
+  { admit },
+  case is_deduct.assume_ : h1_P h1_ᾰ
+  { admit },
+  case is_deduct.mp_ : h1_P h1_Q h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  { admit },
+end
