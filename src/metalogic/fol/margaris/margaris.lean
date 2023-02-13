@@ -348,3 +348,30 @@ begin
     }
   }
 end
+
+
+theorem T_14_8
+  (Q R : formula) :
+  is_proof (Q.imp_((not_ R).imp_ (not_ (Q.imp_ R)))) :=
+begin
+  unfold is_proof,
+
+  apply DT,
+  apply is_deduct.mp_,
+  {
+    apply proof_imp_deduct,
+    apply T_14_7,
+  },
+  {
+    apply DT,
+    apply is_deduct.mp_ Q R,
+    {
+      apply is_deduct.assume_,
+      simp only [finset.mem_union, finset.mem_singleton, eq_self_iff_true, and_self, or_true],
+    },
+    {
+      apply is_deduct.assume_,
+      simp only [finset.empty_union, finset.mem_union, finset.mem_singleton, eq_self_iff_true, true_or],
+    }
+  }
+end
