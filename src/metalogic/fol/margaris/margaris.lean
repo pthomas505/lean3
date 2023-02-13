@@ -82,6 +82,12 @@ def is_proof (P : formula) : Prop := is_deduct ∅ P
 
 
 def list.is_deduct (Δ : finset formula) (l : list formula) : Prop :=
+  ∀ (i : ℕ) (h1 : i < l.length),
+    ∃ (j k : ℕ) (h2 : j < i) (h3 : k < i),
+      (l.nth_le j (lt_trans h2 h1)).imp_ (l.nth_le i h1) = (l.nth_le k (lt_trans h3 h1))
+
+
+def list.is_deduct' (Δ : finset formula) (l : list formula) : Prop :=
   ∀ P ∈ l,
     is_axiom P ∨
     P ∈ Δ ∨
@@ -92,20 +98,7 @@ def list.is_deduct (Δ : finset formula) (l : list formula) : Prop :=
       Q.imp_ P = R
 
 
-
-inductive is_deduct' (Δ : finset formula) : formula → Prop
-| base_
-  (P : formula) :
-  is_deduct' P
-
-| mp_
-  (P Q : formula) :
-  is_deduct' (P.imp_ Q) →
-  is_deduct' P →
-  is_deduct' Q
-
-
-def list.is_deduct' (Δ : finset formula) (l : list formula) : Prop :=
+def list.is_deduct'' (Δ : finset formula) (l : list formula) : Prop :=
   ∀ P ∈ l,
     ∃ (Q R : formula),
       Q ∈ l ∧ R ∈ l ∧
@@ -115,27 +108,29 @@ def list.is_deduct' (Δ : finset formula) (l : list formula) : Prop :=
 example
   (Δ : finset formula)
   (H : formula)
-  (h1 : is_deduct' Δ H) :
-  ∃ (l : list formula), H ∈ l ∧ l.is_deduct' Δ :=
+  (h1 : is_deduct Δ H) :
+  ∃ (l : list formula), H ∈ l ∧ l.is_deduct'' Δ :=
 begin
   induction h1,
-  case is_deduct'.base_ : h1
+  case is_deduct.axiom_ : h1_P h1_ᾰ
   { admit },
-  case is_deduct'.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
+  case is_deduct.assume_ : h1_P h1_ᾰ
+  { admit },
+  case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
   {
     apply exists.elim h1_ih_1,
     intros l1 a1,
     clear h1_ih_1,
     cases a1,
 
-    unfold list.is_deduct' at a1_right,
+    unfold list.is_deduct'' at a1_right,
 
     apply exists.elim h1_ih_2,
     intros l2 a2,
     clear h1_ih_2,
     cases a2,
 
-    unfold list.is_deduct' at a2_right,
+    unfold list.is_deduct'' at a2_right,
 
     apply exists.intro (l1 ++ l2 ++ [h1_Q]),
     split,
@@ -143,7 +138,7 @@ begin
       squeeze_simp,
     },
     {
-      unfold list.is_deduct',
+      unfold list.is_deduct'',
       intros S a3,
       squeeze_simp at a3,
 
