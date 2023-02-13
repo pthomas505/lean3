@@ -89,7 +89,98 @@ def list.is_deduct (Δ : finset formula) (l : list formula) : Prop :=
       Q ∈ l ∧ R ∈ l ∧
       l.index_of Q < l.index_of P ∧
       l.index_of R < l.index_of P ∧
-      R = Q.imp_ P
+      Q.imp_ P = R
+
+
+
+inductive is_deduct' (Δ : finset formula) : formula → Prop
+| base_
+  (P : formula) :
+  is_deduct' P
+
+| mp_
+  (P Q : formula) :
+  is_deduct' (P.imp_ Q) →
+  is_deduct' P →
+  is_deduct' Q
+
+
+def list.is_deduct' (Δ : finset formula) (l : list formula) : Prop :=
+  ∀ P ∈ l,
+    ∃ (Q R : formula),
+      Q ∈ l ∧ R ∈ l ∧
+      Q.imp_ P = R
+
+
+example
+  (Δ : finset formula)
+  (H : formula)
+  (h1 : is_deduct' Δ H) :
+  ∃ (l : list formula), H ∈ l ∧ l.is_deduct' Δ :=
+begin
+  induction h1,
+  case is_deduct'.base_ : h1
+  { admit },
+  case is_deduct'.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
+  {
+    apply exists.elim h1_ih_1,
+    intros l1 a1,
+    clear h1_ih_1,
+    cases a1,
+
+    unfold list.is_deduct' at a1_right,
+
+    apply exists.elim h1_ih_2,
+    intros l2 a2,
+    clear h1_ih_2,
+    cases a2,
+
+    unfold list.is_deduct' at a2_right,
+
+    apply exists.intro (l1 ++ l2 ++ [h1_Q]),
+    split,
+    {
+      squeeze_simp,
+    },
+    {
+      unfold list.is_deduct',
+      intros S a3,
+      squeeze_simp at a3,
+
+      cases a3,
+      {
+        sorry,
+      },
+      {
+        cases a3,
+        {
+          sorry,
+        },
+        {
+          apply exists.intro h1_P,
+          apply exists.intro (h1_P.imp_ h1_Q),
+          squeeze_simp,
+          split,
+          {
+            apply or.intro_right,
+            apply or.intro_left,
+            exact a2_left,
+          },
+          {
+            split,
+            {
+              apply or.intro_left,
+              exact a1_left,
+            },
+            {
+              exact a3,
+            }
+          },
+        }
+      }
+    }
+  },
+end
 
 
 lemma proof_imp_deduct
