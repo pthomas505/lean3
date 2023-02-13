@@ -433,10 +433,26 @@ theorem T_14_10
 begin
   intros Γ,
   induction h1,
-  case is_deduct.axiom_ : h1_P h1_ᾰ
-  { admit },
-  case is_deduct.assume_ : h1_P h1_ᾰ
-  { admit },
-  case is_deduct.mp_ : h1_P h1_Q h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
-  { admit },
+  case is_deduct.axiom_ : h1_P h1_1
+  {
+    apply is_deduct.axiom_,
+    exact h1_1,
+  },
+  case is_deduct.assume_ : h1_P h1_1
+  {
+    apply is_deduct.assume_,
+    simp only [finset.mem_union],
+    apply or.intro_left,
+    exact h1_1,
+  },
+  case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
+  {
+    apply is_deduct.mp_ h1_P h1_Q,
+    {
+      exact h1_ih_1,
+    },
+    {
+      exact h1_ih_2,
+    }
+  },
 end
