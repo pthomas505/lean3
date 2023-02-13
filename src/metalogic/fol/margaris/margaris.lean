@@ -131,7 +131,7 @@ begin
 end
 
 
-example
+theorem T_13_6
   (P Q : formula) :
   is_proof ((not_ P).imp_ (P.imp_ Q)) :=
 begin
@@ -231,7 +231,7 @@ begin
 end
 
 
-theorem T_13_6
+example
   (P Q : formula) :
   is_proof ((not_ P).imp_ (P.imp_ Q)) :=
 begin
