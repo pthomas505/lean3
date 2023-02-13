@@ -163,7 +163,7 @@ begin
 end
 
 
-theorem deduction_theorem
+theorem DT
   (P Q : formula)
   (Δ : finset formula)
   (h1 : is_deduct (Δ ∪ {P}) Q) :
@@ -237,7 +237,7 @@ theorem T_13_6
 begin
   unfold is_proof,
 
-  apply deduction_theorem,
+  apply DT,
 
   apply is_deduct.mp_,
   {
@@ -264,7 +264,7 @@ theorem T_14_5
 begin
   unfold is_proof,
 
-  apply deduction_theorem,
+  apply DT,
   apply is_deduct.mp_,
   {
     apply is_deduct.mp_,
@@ -305,5 +305,46 @@ begin
   {
     apply proof_imp_deduct,
     apply T_14_5,
+  }
+end
+
+
+theorem T_14_7
+  (P Q : formula) :
+  is_proof ((P.imp_ Q).imp_ ((not_ Q).imp_ (not_ P))) :=
+begin
+  unfold is_proof,
+
+  apply DT,
+  apply is_deduct.mp_,
+  {
+    apply is_deduct.axiom_,
+    apply is_axiom.prop_3_,
+  },
+  {
+    apply DT,
+    apply is_deduct.mp_,
+    {
+      apply proof_imp_deduct,
+      apply T_14_6,
+    },
+    {
+      apply is_deduct.mp_,
+      {
+        apply is_deduct.assume_,
+        simp only [finset.empty_union, finset.mem_union, finset.mem_singleton, eq_self_iff_true, and_true, or_false],
+      },
+      {
+        apply is_deduct.mp_,
+        {
+          apply proof_imp_deduct,
+          apply T_14_5,
+        },
+        {
+          apply is_deduct.assume_,
+          simp only [finset.empty_union, finset.mem_union, finset.mem_singleton, false_or],
+        }
+      }
+    }
   }
 end
