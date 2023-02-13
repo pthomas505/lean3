@@ -106,7 +106,7 @@ begin
 end
 
 
-lemma prop_id
+theorem T_13_5
   (P : formula) :
   is_proof (P.imp_ P) :=
 begin
@@ -206,7 +206,7 @@ begin
 
       rewrite h1_1,
       apply proof_imp_deduct,
-      exact prop_id P,
+      exact T_13_5 P,
     }
   },
   case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
