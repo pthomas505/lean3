@@ -456,3 +456,17 @@ begin
     }
   },
 end
+
+
+theorem C_14_11
+  (Q : formula)
+  (h1 : is_proof Q) :
+  ∀ (Γ : finset formula), is_deduct Γ Q :=
+begin
+  unfold is_proof at h1,
+
+  intros Γ,
+  rewrite <- finset.union_empty Γ,
+  rewrite finset.union_comm,
+  apply T_14_10 Q ∅ h1 Γ,
+end
