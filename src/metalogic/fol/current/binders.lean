@@ -1,10 +1,3 @@
-/-
-Reference:
-First Order Mathematical Logic (Dover Books on Mathematics)
-by Angelo Margaris
--/
-
-
 import data.finset
 
 set_option pp.parens true
@@ -44,6 +37,7 @@ def formula.exists_ (x : variable_) (P : formula) : formula := not_ (forall_ x (
 
 
 /-
+[margaris]
 pg. 48
 
 An occurrence of a variable $v$ in a formula $P$ is bound if and only if it occurs in a subformula of $P$ of the form $\forall v Q$. An occurrence of $v$ in $P$ is free if and only if it is not a bound occurrence. The variable $v$ is free or bound in $P$ according as it has a free or bound occurrence in $P$.
@@ -193,6 +187,7 @@ end
 
 
 /-
+[margaris]
 pg. 48
 
 If $P$ is a formula, $v$ is a variable, and $t$ is a term, then $P(t/v)$ is the result of replacing each free occurrence of $v$ in $P$ by an occurrence of $t$.
@@ -484,6 +479,7 @@ end
 
 
 /-
+[margaris]
 pg. 48
 
 If $v$ and $u$ are variables and $P$ is a formula, then $P$ admits $u$ for $v$ if and only if there is no free occurrence of $v$ in $P$ that becomes a bound occurrence of $u$ in $P(u/v)$. If $t$ is a term, then $P$ admits $t$ for $v$ if and only if $P$ admits for $v$ every variable in $t$.

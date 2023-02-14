@@ -1,11 +1,4 @@
-/-
-Reference:
-First Order Mathematical Logic (Dover Books on Mathematics)
-by Angelo Margaris
--/
-
-
-import metalogic.fol.margaris.binders
+import metalogic.fol.current.binders
 
 open formula
 

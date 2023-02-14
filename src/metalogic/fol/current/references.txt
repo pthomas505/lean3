@@ -1,0 +1,11 @@
+[enderton]
+A Mathematical Introduction to Logic
+by Herbert B. Enderton
+
+[harrison]
+Handbook of Practical Logic and Automated Reasoning
+by John Harrison
+
+[margaris]
+First Order Mathematical Logic (Dover Books on Mathematics)
+by Angelo Margaris
