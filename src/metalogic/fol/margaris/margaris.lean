@@ -50,15 +50,6 @@ inductive is_axiom : formula → Prop
   is_axiom P →
   is_axiom (forall_ v P)
 
--- ⊢ P → Q ⇒ ⊢ P ⇒ ⊢ Q 
-| mp_
-  (P Q : formula) :
-  -- major premise
-  is_axiom (P.imp_ Q) →
-  -- minor premise
-  is_axiom P →
-  is_axiom Q
-
 
 inductive is_deduct (Δ : finset formula) : formula → Prop
 | axiom_
