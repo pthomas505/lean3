@@ -521,6 +521,20 @@ begin
 end
 
 
+theorem C_14_14
+  (P Q : formula)
+  (Γ : set formula)
+  (h1 : is_proof P)
+  (h2 : is_deduct Γ (P.imp_ Q)) :
+  is_deduct Γ Q :=
+begin
+  have s1 : is_deduct Γ P,
+  exact C_14_11 P h1 Γ,
+
+  exact is_deduct.mp_ P Q h2 s1,
+end
+
+
 theorem T_14_16
   (Q : formula)
   (Δ Γ : set formula)
