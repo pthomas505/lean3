@@ -80,7 +80,7 @@ begin
   },
   case is_deduct.assume_ : h1_P h1_1
   {
-    squeeze_simp at h1_1,
+    simp only [set.mem_empty_eq] at h1_1,
     contradiction,
   },
   case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
@@ -170,7 +170,7 @@ begin
   },
   case is_deduct.assume_ : h1_P h1_1
   {
-    squeeze_simp at h1_1,
+    simp only [set.union_singleton, set.mem_insert_iff] at h1_1,
     cases h1_1,
     {
       -- Case 3
@@ -236,7 +236,7 @@ begin
     },
     {
       apply is_deduct.assume_,
-      squeeze_simp,
+      simp only [set.union_singleton, insert_emptyc_eq, set.mem_singleton],
     },
   },
 end
@@ -264,13 +264,13 @@ begin
       },
       {
         apply is_deduct.assume_,
-        squeeze_simp,
+        simp only [set.union_singleton, insert_emptyc_eq, set.mem_singleton],
       }
     }
   },
   {
     apply is_deduct.assume_,
-    squeeze_simp,
+    simp only [set.union_singleton, insert_emptyc_eq, set.mem_singleton_iff],
   }
 end
 
@@ -316,7 +316,8 @@ begin
       apply is_deduct.mp_,
       {
         apply is_deduct.assume_,
-        squeeze_simp,
+        simp only [set.union_singleton, insert_emptyc_eq, set.mem_insert_iff, set.mem_singleton_iff, eq_self_iff_true, and_true,
+  false_or],
       },
       {
         apply is_deduct.mp_,
@@ -326,7 +327,7 @@ begin
         },
         {
           apply is_deduct.assume_,
-          squeeze_simp,
+          simp only [set.union_singleton, insert_emptyc_eq, set.mem_insert_iff, set.mem_singleton_iff, or_false],
         }
       }
     }
@@ -351,11 +352,11 @@ begin
     apply is_deduct.mp_ Q R,
     {
       apply is_deduct.assume_,
-      squeeze_simp,
+      simp only [set.union_singleton, set.mem_insert_iff, eq_self_iff_true, and_self, true_or],
     },
     {
       apply is_deduct.assume_,
-      squeeze_simp,
+      simp only [set.union_singleton, insert_emptyc_eq, set.mem_insert_iff, set.mem_singleton, or_true],
     }
   }
 end
@@ -392,18 +393,18 @@ begin
           },
           {
             apply is_deduct.assume_,
-            squeeze_simp,
+            simp only [set.union_singleton, insert_emptyc_eq, set.mem_insert_iff, set.mem_singleton, false_or],
           }
         },
         {
           apply is_deduct.assume_,
-          squeeze_simp,
+          simp only [set.union_singleton, insert_emptyc_eq, set.mem_insert_iff, set.mem_singleton_iff, or_false],
         }
       }
     },
     {
       apply is_deduct.assume_,
-      squeeze_simp,
+      simp only [set.union_singleton, insert_emptyc_eq, set.mem_insert_iff, set.mem_singleton_iff, or_false],
     }
   }
 end
@@ -425,7 +426,7 @@ begin
   case is_deduct.assume_ : h1_P h1_1
   {
     apply is_deduct.assume_,
-    squeeze_simp,
+    simp only [set.mem_union_eq],
     apply or.intro_left,
     exact h1_1,
   },
