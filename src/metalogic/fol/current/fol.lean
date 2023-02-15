@@ -586,3 +586,18 @@ begin
     exact is_deduct.mp_ h1_P h1_Q h1_ih_1 h1_ih_2,
   },
 end
+
+
+example
+  (P : formula)
+  (h1 : is_deduct ∅ P) :
+  is_proof_alt P :=
+begin
+  induction h1,
+  case is_deduct.axiom_ : h1_P h1_1
+  { admit },
+  case is_deduct.assume_ : h1_P h1_1
+  { admit },
+  case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
+  { admit },
+end
