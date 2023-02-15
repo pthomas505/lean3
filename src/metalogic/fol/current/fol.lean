@@ -478,6 +478,30 @@ begin
 end
 
 
+theorem T_14_16
+  (Q : formula)
+  (Δ Γ : set formula)
+  (h1 : is_deduct Γ Q)
+  (h2 : ∀ (P : formula), P ∈ Γ → is_deduct Δ P) :
+  is_deduct Δ Q :=
+begin
+  induction h1,
+  case is_deduct.axiom_ : h1_P h1_1
+  {
+    apply is_deduct.axiom_,
+    exact h1_1,
+  },
+  case is_deduct.assume_ : h1_P h1_1
+  {
+    apply h2,
+    exact h1_1,
+  },
+  case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
+  {
+    exact is_deduct.mp_ h1_P h1_Q h1_ih_1 h1_ih_2,
+  },
+end
+
 
 inductive is_proof_alt : formula → Prop
 
