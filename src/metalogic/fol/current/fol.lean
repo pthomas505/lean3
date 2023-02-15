@@ -503,6 +503,20 @@ begin
 end
 
 
+theorem C_14_17
+  (Q : formula)
+  (Δ Γ : set formula)
+  (h1 : is_deduct Γ Q)
+  (h2 : ∀ (P : formula), P ∈ Γ → is_proof P) :
+  is_proof Q :=
+begin
+  unfold is_proof at h2,
+
+  unfold is_proof,
+  exact T_14_16 Q ∅ Γ h1 h2,
+end
+
+
 inductive is_proof_alt : formula → Prop
 
 -- ⊢ P → (Q → P)
