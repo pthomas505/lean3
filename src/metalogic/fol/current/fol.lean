@@ -148,7 +148,7 @@ begin
 end
 
 
-theorem DT
+theorem deduction_theorem
   (P Q : formula)
   (Δ : set formula)
   (h1 : is_deduct (Δ ∪ {P}) Q) :
@@ -222,8 +222,7 @@ example
 begin
   unfold is_proof,
 
-  apply DT,
-
+  apply deduction_theorem,
   apply is_deduct.mp_,
   {
     apply is_deduct.axiom_,
@@ -249,7 +248,7 @@ theorem T_14_5
 begin
   unfold is_proof,
 
-  apply DT,
+  apply deduction_theorem,
   apply is_deduct.mp_,
   {
     apply is_deduct.mp_,
@@ -300,14 +299,14 @@ theorem T_14_7
 begin
   unfold is_proof,
 
-  apply DT,
+  apply deduction_theorem,
   apply is_deduct.mp_,
   {
     apply is_deduct.axiom_,
     apply is_axiom.prop_3_,
   },
   {
-    apply DT,
+    apply deduction_theorem,
     apply is_deduct.mp_,
     {
       apply proof_imp_deduct,
@@ -342,14 +341,14 @@ theorem T_14_8
 begin
   unfold is_proof,
 
-  apply DT,
+  apply deduction_theorem,
   apply is_deduct.mp_,
   {
     apply proof_imp_deduct,
     apply T_14_7,
   },
   {
-    apply DT,
+    apply deduction_theorem,
     apply is_deduct.mp_ Q R,
     {
       apply is_deduct.assume_,
@@ -369,14 +368,14 @@ theorem T_14_9
 begin
   unfold is_proof,
 
-  apply DT,
+  apply deduction_theorem,
   apply is_deduct.mp_,
   {
     apply is_deduct.axiom_,
     apply is_axiom.prop_3_,
   },
   {
-    apply DT,
+    apply deduction_theorem,
     apply is_deduct.mp_,
     {
       apply is_deduct.mp_,
