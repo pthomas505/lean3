@@ -45,6 +45,7 @@ inductive is_axiom : formula → Prop
 
 
 inductive is_deduct (Δ : set formula) : formula → Prop
+
 | axiom_
   (P : formula) :
   is_axiom P →
