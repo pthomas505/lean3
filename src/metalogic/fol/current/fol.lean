@@ -595,7 +595,23 @@ example
 begin
   induction h1,
   case is_deduct.axiom_ : h1_P h1_1
-  { admit },
+  {
+    induction h1_1,
+    case is_axiom.prop_1_ : h1_1_P h1_1_Q
+    { admit },
+    case is_axiom.prop_2_ : h1_1_P h1_1_Q h1_1_R
+    { admit },
+    case is_axiom.prop_3_ : h1_1_P h1_1_Q
+    { admit },
+    case is_axiom.pred_1_ : h1_1_P h1_1_Q h1_1_v
+    { admit },
+    case is_axiom.pred_2_ : h1_1_v h1_1_P h1_1_t h1_1_ᾰ
+    { admit },
+    case is_axiom.pred_3_ : h1_1_P h1_1_v h1_1_ᾰ
+    { admit },
+    case is_axiom.gen_ : h1_1_P h1_1_v h1_1_ᾰ h1_1_ih
+    { admit },
+  },
   case is_deduct.assume_ : h1_P h1_1
   { admit },
   case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
