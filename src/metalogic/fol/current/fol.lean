@@ -517,6 +517,7 @@ inductive is_proof_alt : formula → Prop
   is_proof_alt P →
   is_proof_alt (forall_ v P)
 
+-- ⊢ P → Q ⇒ ⊢ P ⇒ ⊢ Q
 | mp_
   (P Q : formula) :
   is_proof_alt (P.imp_ Q) →
