@@ -444,6 +444,24 @@ begin
 end
 
 
+theorem deduction_theorem_converse
+  (P Q : formula)
+  (Δ : set formula)
+  (h1 : is_deduct Δ (P.imp_ Q)) :
+  is_deduct (Δ ∪ {P}) Q :=
+begin
+  have s1 : is_deduct (Δ ∪ {P}) (P.imp_ Q),
+  apply T_14_10,
+  exact h1,
+
+  have s2 : is_deduct (Δ ∪ {P}) P,
+  apply is_deduct.assume_,
+  simp only [set.union_singleton, set.mem_insert_iff, eq_self_iff_true, true_or],
+
+  exact is_deduct.mp_ P Q s1 s2,
+end
+
+
 theorem C_14_11
   (Q : formula)
   (h1 : is_proof Q) :
