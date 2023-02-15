@@ -495,6 +495,32 @@ begin
 end
 
 
+theorem C_14_13
+  (P Q : formula)
+  (Δ : set formula)
+  (h1 : is_deduct Δ P)
+  (h2 : is_deduct Δ (P.imp_ Q)) :
+  is_deduct Δ Q :=
+begin
+  have s1 : is_deduct (Δ ∪ Δ) Q, 
+  apply T_14_12 P Q Δ Δ h1 h2,
+
+  simp only [set.union_self] at s1,
+  exact s1,
+end
+
+
+theorem C_14_13'
+  (P Q : formula)
+  (Δ : set formula)
+  (h1 : is_deduct Δ P)
+  (h2 : is_deduct Δ (P.imp_ Q)) :
+  is_deduct Δ Q :=
+begin
+  apply is_deduct.mp_ P Q h2 h1,
+end
+
+
 theorem T_14_16
   (Q : formula)
   (Δ Γ : set formula)
