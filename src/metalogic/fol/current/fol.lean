@@ -44,7 +44,7 @@ inductive is_axiom : formula → Prop
   is_axiom (forall_ v P)
 
 
-inductive is_deduct (Δ : finset formula) : formula → Prop
+inductive is_deduct (Δ : set formula) : formula → Prop
 | axiom_
   (P : formula) :
   is_axiom P →
@@ -68,7 +68,7 @@ def is_proof (P : formula) : Prop := is_deduct ∅ P
 lemma proof_imp_deduct
   (P : formula)
   (h1 : is_proof P) :
-  ∀ (Δ : finset formula), is_deduct Δ P :=
+  ∀ (Δ : set formula), is_deduct Δ P :=
 begin
   intros Δ,
   unfold is_proof at h1,
@@ -80,7 +80,7 @@ begin
   },
   case is_deduct.assume_ : h1_P h1_1
   {
-    simp only [finset.not_mem_empty] at h1_1,
+    squeeze_simp at h1_1,
     contradiction,
   },
   case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
@@ -149,7 +149,7 @@ end
 
 theorem DT
   (P Q : formula)
-  (Δ : finset formula)
+  (Δ : set formula)
   (h1 : is_deduct (Δ ∪ {P}) Q) :
   is_deduct Δ (P.imp_ Q) :=
 begin
@@ -170,8 +170,15 @@ begin
   },
   case is_deduct.assume_ : h1_P h1_1
   {
-    simp only [finset.mem_union, finset.mem_singleton] at h1_1,
+    squeeze_simp at h1_1,
     cases h1_1,
+    {
+      -- Case 3
+
+      rewrite h1_1,
+      apply proof_imp_deduct,
+      exact T_13_5 P,
+    },
     {
       -- Case 2
 
@@ -184,13 +191,6 @@ begin
         apply is_deduct.assume_,
         exact h1_1,
       },
-    },
-    {
-      -- Case 3
-
-      rewrite h1_1,
-      apply proof_imp_deduct,
-      exact T_13_5 P,
     }
   },
   case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
@@ -235,8 +235,8 @@ begin
       exact is_axiom.prop_1_ P.not_ Q.not_,
     },
     {
-    apply is_deduct.assume_,
-    simp only [finset.empty_union, finset.mem_singleton],
+      apply is_deduct.assume_,
+      squeeze_simp,
     },
   },
 end
@@ -264,13 +264,13 @@ begin
       },
       {
         apply is_deduct.assume_,
-        simp only [finset.empty_union, finset.mem_singleton],
+        squeeze_simp,
       }
     }
   },
   {
     apply is_deduct.assume_,
-    simp only [finset.empty_union, finset.mem_singleton],
+    squeeze_simp,
   }
 end
 
@@ -316,7 +316,7 @@ begin
       apply is_deduct.mp_,
       {
         apply is_deduct.assume_,
-        simp only [finset.empty_union, finset.mem_union, finset.mem_singleton, eq_self_iff_true, and_true, or_false],
+        squeeze_simp,
       },
       {
         apply is_deduct.mp_,
@@ -326,7 +326,7 @@ begin
         },
         {
           apply is_deduct.assume_,
-          simp only [finset.empty_union, finset.mem_union, finset.mem_singleton, false_or],
+          squeeze_simp,
         }
       }
     }
@@ -351,11 +351,11 @@ begin
     apply is_deduct.mp_ Q R,
     {
       apply is_deduct.assume_,
-      simp only [finset.mem_union, finset.mem_singleton, eq_self_iff_true, and_self, or_true],
+      squeeze_simp,
     },
     {
       apply is_deduct.assume_,
-      simp only [finset.empty_union, finset.mem_union, finset.mem_singleton, eq_self_iff_true, true_or],
+      squeeze_simp,
     }
   }
 end
@@ -392,18 +392,18 @@ begin
           },
           {
             apply is_deduct.assume_,
-            simp only [finset.empty_union, finset.mem_union, finset.mem_singleton, eq_self_iff_true, and_self, or_false],
+            squeeze_simp,
           }
         },
         {
           apply is_deduct.assume_,
-          simp only [finset.empty_union, finset.mem_union, finset.mem_singleton, false_or],
+          squeeze_simp,
         }
       }
     },
     {
       apply is_deduct.assume_,
-      simp only [finset.empty_union, finset.mem_union, finset.mem_singleton, false_or],
+      squeeze_simp,
     }
   }
 end
@@ -411,9 +411,9 @@ end
 
 theorem T_14_10
   (Q : formula)
-  (Δ : finset formula)
+  (Δ : set formula)
   (h1 : is_deduct Δ Q) :
-  ∀ (Γ : finset formula), is_deduct (Δ ∪ Γ) Q :=
+  ∀ (Γ : set formula), is_deduct (Δ ∪ Γ) Q :=
 begin
   intros Γ,
   induction h1,
@@ -425,7 +425,7 @@ begin
   case is_deduct.assume_ : h1_P h1_1
   {
     apply is_deduct.assume_,
-    simp only [finset.mem_union],
+    squeeze_simp,
     apply or.intro_left,
     exact h1_1,
   },
@@ -445,20 +445,20 @@ end
 theorem C_14_11
   (Q : formula)
   (h1 : is_proof Q) :
-  ∀ (Γ : finset formula), is_deduct Γ Q :=
+  ∀ (Γ : set formula), is_deduct Γ Q :=
 begin
   unfold is_proof at h1,
 
   intros Γ,
-  rewrite <- finset.union_empty Γ,
-  rewrite finset.union_comm,
+  rewrite <- set.union_empty Γ,
+  rewrite set.union_comm,
   apply T_14_10 Q ∅ h1 Γ,
 end
 
 
 theorem T_14_12
   (P Q : formula)
-  (Δ Γ : finset formula)
+  (Δ Γ : set formula)
   (h1 : is_deduct Δ P)
   (h2 : is_deduct Γ (P.imp_ Q)) :
   is_deduct (Δ ∪ Γ) Q :=
@@ -468,7 +468,7 @@ begin
   exact h1,
 
   have s2 : is_deduct (Δ ∪ Γ) (P.imp_ Q),
-  rewrite finset.union_comm,
+  rewrite set.union_comm,
   apply T_14_10,
   exact h2,
 
