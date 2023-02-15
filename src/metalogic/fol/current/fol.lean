@@ -598,19 +598,36 @@ begin
   {
     induction h1_1,
     case is_axiom.prop_1_ : h1_1_P h1_1_Q
-    { admit },
+    {
+      apply is_proof_alt.prop_1_,
+    },
     case is_axiom.prop_2_ : h1_1_P h1_1_Q h1_1_R
-    { admit },
+    {
+      apply is_proof_alt.prop_2_,
+    },
     case is_axiom.prop_3_ : h1_1_P h1_1_Q
-    { admit },
+    {
+      apply is_proof_alt.prop_3_,
+    },
     case is_axiom.pred_1_ : h1_1_P h1_1_Q h1_1_v
-    { admit },
-    case is_axiom.pred_2_ : h1_1_v h1_1_P h1_1_t h1_1_ᾰ
-    { admit },
-    case is_axiom.pred_3_ : h1_1_P h1_1_v h1_1_ᾰ
-    { admit },
-    case is_axiom.gen_ : h1_1_P h1_1_v h1_1_ᾰ h1_1_ih
-    { admit },
+    {
+      apply is_proof_alt.pred_1_,
+    },
+    case is_axiom.pred_2_ : h1_1_v h1_1_P h1_1_t h1_1_1
+    {
+      apply is_proof_alt.pred_2_,
+      exact h1_1_1,
+    },
+    case is_axiom.pred_3_ : h1_1_P h1_1_v h1_1_1
+    {
+      apply is_proof_alt.pred_3_,
+      exact h1_1_1,
+    },
+    case is_axiom.gen_ : h1_1_P h1_1_v h1_1_1 h1_1_ih
+    {
+      apply is_proof_alt.gen_,
+      exact h1_1_ih,
+    },
   },
   case is_deduct.assume_ : h1_P h1_1
   { admit },
