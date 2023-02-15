@@ -630,7 +630,12 @@ begin
     },
   },
   case is_deduct.assume_ : h1_P h1_1
-  { admit },
+  {
+    simp only [set.mem_empty_eq] at h1_1,
+    contradiction,
+  },
   case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
-  { admit },
+  {
+    exact is_proof_alt.mp_ h1_P h1_Q h1_ih_1 h1_ih_2,
+  },
 end
