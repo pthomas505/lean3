@@ -1,5 +1,9 @@
 import metalogic.fol.current.binders
 
+
+set_option pp.parens true
+
+
 open formula
 
 
