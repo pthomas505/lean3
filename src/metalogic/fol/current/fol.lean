@@ -749,6 +749,21 @@ inductive is_prop_deduct (Δ : set formula) : formula → Prop
 def is_prop_proof (P : formula) : Prop := is_prop_deduct ∅ P
 
 
+example
+  (P : formula)
+  (h1 : is_prop_proof P) :
+  P.is_tauto :=
+begin
+  induction h1,
+  case is_prop_deduct.axiom_ : h1_P h1_1
+  { admit },
+  case is_prop_deduct.assume_ : h1_P h1_1
+  { admit },
+  case is_prop_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
+  { admit },
+end
+
+
 inductive is_proof_alt : formula → Prop
 
 -- ⊢ P → (Q → P)
