@@ -759,11 +759,17 @@ begin
   {
     induction h1_1,
     case is_prop_axiom.prop_1_ : h1_1_P h1_1_Q
-    { admit },
+    {
+      exact is_tauto_prop_1 h1_1_P h1_1_Q,
+    },
     case is_prop_axiom.prop_2_ : h1_1_P h1_1_Q h1_1_R
-    { admit },
+    {
+      exact is_tauto_prop_2 h1_1_P h1_1_Q h1_1_R,
+    },
     case is_prop_axiom.prop_3_ : h1_1_P h1_1_Q
-    { admit },
+    {
+      exact is_tauto_prop_3 h1_1_P h1_1_Q,
+    },
   },
   case is_prop_deduct.assume_ : h1_P h1_1
   { admit },
