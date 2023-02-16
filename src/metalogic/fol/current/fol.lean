@@ -727,6 +727,28 @@ inductive is_prop_axiom : formula → Prop
   is_prop_axiom (((not_ P).imp_ (not_ Q)).imp_ (Q.imp_ P))
 
 
+inductive is_prop_deduct (Δ : set formula) : formula → Prop
+
+| axiom_
+  (P : formula) :
+  is_prop_axiom P →
+  is_prop_deduct P
+
+| assume_
+  (P : formula) :
+  P ∈ Δ →
+  is_prop_deduct P
+
+| mp_
+  (P Q : formula) :
+  is_prop_deduct (P.imp_ Q) →
+  is_prop_deduct P →
+  is_prop_deduct Q
+
+
+def is_prop_proof (P : formula) : Prop := is_prop_deduct ∅ P
+
+
 inductive is_proof_alt : formula → Prop
 
 -- ⊢ P → (Q → P)
