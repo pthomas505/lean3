@@ -605,27 +605,107 @@ def formula.prime_constituent_set : formula → finset formula
 | (forall_ x P) := {forall_ x P}
 
 
-def bool.bimp : bool → bool → bool
-| bool.tt bool.tt := bool.tt
-| bool.tt bool.ff := bool.ff
-| bool.ff bool.tt := bool.tt
-| bool.ff bool.ff := bool.tt
+def valuation : Type := formula → bool
 
-def formula.truth_value (valuation : formula → bool) : formula → bool
-| (pred_ name args) := valuation (pred_ name args)
-| (not_ P) := bnot P.truth_value
-| (imp_ P Q) := bool.bimp P.truth_value Q.truth_value
-| (forall_ x P) := valuation (forall_ x P)
+def formula.eval (val : valuation) : formula → bool
+| (pred_ name args) := val (pred_ name args)
+| (not_ P) := ! P.eval
+| (imp_ P Q) := (! P.eval) || Q.eval
+| (forall_ x P) := val (forall_ x P)
 
-def formula.is_tautology (P : formula) : Prop :=
-  ∀ (valuation : formula → bool), P.truth_value valuation = bool.tt
+def formula.is_tauto (P : formula) : Prop :=
+  ∀ (val : valuation), P.eval val = bool.tt
 
 
-lemma L_15_3_a
-  (P Q : formula) :
-  formula.is_tautology (P.imp_ (Q.imp_ P)) :=
+theorem eval_not
+  (P : formula)
+  (val : valuation) :
+  formula.eval val (not_ P) = bool.tt ↔
+    ¬ (formula.eval val P = bool.tt) :=
 begin
-  sorry,
+  unfold formula.eval,
+  cases formula.eval val P;
+  exact dec_trivial,
+end
+
+
+theorem eval_imp
+  (P Q : formula)
+  (val : valuation) :
+  formula.eval val (imp_ P Q) = bool.tt ↔
+    ((formula.eval val P = bool.tt) → (formula.eval val Q = bool.tt)) :=
+begin
+  unfold formula.eval,
+  cases formula.eval val P;
+  cases formula.eval val Q;
+  exact dec_trivial,
+end
+
+
+theorem is_tauto_mp
+  (P Q : formula)
+  (h1 : (P.imp_ Q).is_tauto)
+  (h2 : P.is_tauto) :
+  Q.is_tauto :=
+begin
+  unfold formula.is_tauto at h1,
+  unfold formula.is_tauto at h2,
+
+  unfold formula.is_tauto,
+  intro val,
+  simp only [eval_imp] at h1,
+  apply h1,
+  apply h2,
+end
+
+
+theorem is_tauto_prop_1
+  (P Q : formula) :
+  (P.imp_ (Q.imp_ P)).is_tauto :=
+begin
+  unfold formula.is_tauto,
+  intro val,
+  simp only [eval_imp],
+  intros a1 a2,
+  exact a1,
+end
+
+
+theorem is_tauto_prop_2
+  (P Q R : formula) :
+  ((P.imp_ (Q.imp_ R)).imp_ ((P.imp_ Q).imp_ (P.imp_ R))).is_tauto :=
+begin
+  unfold formula.is_tauto,
+  intro val,
+  simp only [eval_imp],
+  intros a1 a2 a3,
+  apply a1,
+  {
+    exact a3,
+  },
+  {
+    apply a2,
+    exact a3,
+  },
+end
+
+
+theorem is_tauto_prop_3
+  (P Q : formula) :
+  (((not_ P).imp_ (not_ Q)).imp_ (Q.imp_ P)).is_tauto :=
+begin
+  unfold formula.is_tauto,
+  intro val,
+  simp only [eval_not, eval_imp],
+  intros a1 a2,
+  by_contradiction contra,
+  apply a1,
+  {
+    exact contra,
+  },
+  {
+    exact a2,
+  }
 end
 
 
