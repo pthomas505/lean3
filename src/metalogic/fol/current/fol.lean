@@ -778,7 +778,7 @@ begin
   },
   case is_prop_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
   {
-
+    exact is_tauto_mp h1_P h1_Q h1_ih_1 h1_ih_2,
   },
 end
 
