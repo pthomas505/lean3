@@ -709,6 +709,24 @@ begin
 end
 
 
+inductive is_prop_axiom : formula → Prop
+
+-- ⊢ P → (Q → P)
+| prop_1_
+  (P Q : formula) :
+  is_prop_axiom (P.imp_ (Q.imp_ P))
+
+-- ⊢ (P → (Q → R)) → ((P → Q) → (P → R))
+| prop_2_
+  (P Q R : formula) :
+  is_prop_axiom ((P.imp_ (Q.imp_ R)).imp_ ((P.imp_ Q).imp_ (P.imp_ R)))
+
+-- ⊢ (¬ P → ¬ Q) → (Q → P)
+| prop_3_
+  (P Q : formula) :
+  is_prop_axiom (((not_ P).imp_ (not_ Q)).imp_ (Q.imp_ P))
+
+
 inductive is_proof_alt : formula → Prop
 
 -- ⊢ P → (Q → P)
