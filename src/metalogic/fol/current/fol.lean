@@ -864,6 +864,45 @@ begin
 end
 
 
+lemma spec_id
+  (P : formula)
+  (v : variable_) :
+  is_proof ((forall_ v P).imp_ P) :=
+begin
+  have s1 : is_proof ((forall_ v P).imp_ (replace_free v v P)),
+  unfold is_proof,
+  apply is_deduct.axiom_,
+  apply is_axiom.pred_2_,
+  exact admits_id P v,
+
+  simp only [replace_free_id] at s1,
+  exact s1,
+end
+
+
+theorem T_17_6
+  (P : formula)
+  (v : variable_) :
+  is_proof ((forall_ v P).imp_ (exists_ v P)) :=
+begin
+  have s1 : is_deduct {forall_ v P} (forall_ v P),
+  apply is_deduct.assume_,
+  simp only [set.mem_singleton],
+
+  have s2 : is_deduct {forall_ v P} P,
+  apply is_deduct.mp_ (forall_ v P) P,
+  {
+    apply proof_imp_deduct,
+    apply spec_id,
+  },
+  {
+    exact s1,
+  },
+
+  sorry,
+end
+
+
 inductive is_proof_alt : formula → Prop
 
 -- ⊢ P → (Q → P)
