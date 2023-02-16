@@ -844,6 +844,26 @@ begin
 end
 
 
+theorem T_17_4
+  (P : formula)
+  (v t : variable_)
+  (Δ : set formula)
+  (h1 : admits v t P)
+  (h2 : is_deduct Δ (replace_free v t P)) :
+  is_deduct Δ (exists_ v P) :=
+begin
+  apply is_deduct.mp_ (replace_free v t P) (exists_ v P),
+  {
+    apply proof_imp_deduct,
+    apply T_17_3,
+    exact h1,
+  },
+  {
+    exact h2,
+  }
+end
+
+
 inductive is_proof_alt : formula → Prop
 
 -- ⊢ P → (Q → P)
