@@ -473,7 +473,7 @@ def admits (v u : variable_) (P : formula) : Prop :=
   admits_aux v u ∅ P
 
 
-lemma admits_id
+lemma admits_aux_id
   (P : formula)
   (v : variable_)
   (binders : finset variable_) :
@@ -506,6 +506,16 @@ begin
     unfold admits_aux,
     apply P_ih,
   },
+end
+
+
+lemma admits_id
+  (P : formula)
+  (v : variable_) :
+  admits v v P :=
+begin
+  unfold admits,
+  apply admits_aux_id,
 end
 
 
