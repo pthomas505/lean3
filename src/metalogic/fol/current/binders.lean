@@ -1,4 +1,4 @@
-import metalogic.fol.current.formula
+import .formula
 
 import data.finset
 

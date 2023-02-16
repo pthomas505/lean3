@@ -1,4 +1,4 @@
-import metalogic.fol.current.binders
+import .binders
 
 
 set_option pp.parens true
