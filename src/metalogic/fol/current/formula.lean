@@ -34,3 +34,29 @@ def formula.iff_ (P Q : formula) : formula := (P.imp_ Q).and_ (Q.imp_ P)
 
 -- ∃ x P := ~ ∀ x ~ P
 def formula.exists_ (x : variable_) (P : formula) : formula := not_ (forall_ x (not_ P))
+
+
+def formula.is_prime : formula → Prop
+| (pred_ name args) := true
+| (not_ P) := false
+| (imp_ P Q) := false
+| (forall_ x P) := true
+
+def formula.prime_constituent_set : formula → finset formula
+| (pred_ name args) := {pred_ name args}
+| (not_ P) := P.prime_constituent_set
+| (imp_ P Q) := P.prime_constituent_set ∪ Q.prime_constituent_set
+| (forall_ x P) := {forall_ x P}
+
+
+def bimp : bool → bool → bool
+| bool.tt bool.tt := bool.tt
+| bool.tt bool.ff := bool.ff
+| bool.ff bool.tt := bool.tt
+| bool.ff bool.ff := bool.tt
+
+def formula.truth_value (valuation : formula → bool) : formula → bool
+| (pred_ name args) := valuation (pred_ name args)
+| (not_ P) := bnot P.truth_value
+| (imp_ P Q) := bimp P.truth_value Q.truth_value
+| (forall_ x P) := valuation (forall_ x P)
