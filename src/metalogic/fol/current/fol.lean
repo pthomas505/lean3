@@ -783,6 +783,12 @@ begin
 end
 
 
+theorem prop_complete
+  (P : formula)
+  (h1 : P.is_tauto) :
+  is_proof P := sorry
+
+
 theorem spec
   (P : formula)
   (v t : variable_)
@@ -797,6 +803,42 @@ begin
     exact is_axiom.pred_2_ v P t h2,
   },
   {
+    exact h1,
+  }
+end
+
+
+lemma SC_1
+  (P Q : formula) :
+  is_proof ((P.imp_ (not_ Q)).imp_ (Q.imp_ (not_ P))) :=
+begin
+  apply prop_complete,
+  unfold formula.is_tauto,
+  simp only [eval_not, eval_imp],
+  intros val a1 a2 contra,
+  apply a1 contra a2,
+end
+
+
+theorem T_17_3
+  (P : formula)
+  (v t : variable_)
+  (h1 : admits v t P) :
+  is_proof ((replace_free v t P).imp_ (exists_ v P)) :=
+begin
+  unfold formula.exists_,
+  unfold is_proof,
+  apply is_deduct.mp_,
+  {
+    apply SC_1,
+  },
+  {
+    unfold admits at h1,
+
+    apply is_deduct.axiom_,
+    apply is_axiom.pred_2_,
+    unfold admits,
+    unfold admits_aux,
     exact h1,
   }
 end
