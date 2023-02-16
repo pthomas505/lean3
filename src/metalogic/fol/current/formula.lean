@@ -49,7 +49,7 @@ def formula.prime_constituent_set : formula → finset formula
 | (forall_ x P) := {forall_ x P}
 
 
-def bimp : bool → bool → bool
+def bool.bimp : bool → bool → bool
 | bool.tt bool.tt := bool.tt
 | bool.tt bool.ff := bool.ff
 | bool.ff bool.tt := bool.tt
@@ -58,8 +58,16 @@ def bimp : bool → bool → bool
 def formula.truth_value (valuation : formula → bool) : formula → bool
 | (pred_ name args) := valuation (pred_ name args)
 | (not_ P) := bnot P.truth_value
-| (imp_ P Q) := bimp P.truth_value Q.truth_value
+| (imp_ P Q) := bool.bimp P.truth_value Q.truth_value
 | (forall_ x P) := valuation (forall_ x P)
 
-def formula.is_tautology (P : formula) :=
+def formula.is_tautology (P : formula) : Prop :=
   ∀ (valuation : formula → bool), P.truth_value valuation = bool.tt
+
+
+lemma L_15_3_a
+  (P Q : formula) :
+  formula.is_tautology (P.imp_ (Q.imp_ P)) :=
+begin
+  sorry,
+end
