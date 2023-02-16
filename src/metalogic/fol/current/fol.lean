@@ -642,23 +642,6 @@ begin
 end
 
 
-theorem is_tauto_mp
-  (P Q : formula)
-  (h1 : (P.imp_ Q).is_tauto)
-  (h2 : P.is_tauto) :
-  Q.is_tauto :=
-begin
-  unfold formula.is_tauto at h1,
-  unfold formula.is_tauto at h2,
-
-  unfold formula.is_tauto,
-  intro val,
-  simp only [eval_imp] at h1,
-  apply h1,
-  apply h2,
-end
-
-
 theorem is_tauto_prop_1
   (P Q : formula) :
   (P.imp_ (Q.imp_ P)).is_tauto :=
@@ -706,6 +689,23 @@ begin
   {
     exact a2,
   }
+end
+
+
+theorem is_tauto_mp
+  (P Q : formula)
+  (h1 : (P.imp_ Q).is_tauto)
+  (h2 : P.is_tauto) :
+  Q.is_tauto :=
+begin
+  unfold formula.is_tauto at h1,
+  unfold formula.is_tauto at h2,
+
+  unfold formula.is_tauto,
+  intro val,
+  simp only [eval_imp] at h1,
+  apply h1,
+  apply h2,
 end
 
 
