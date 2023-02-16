@@ -783,6 +783,25 @@ begin
 end
 
 
+theorem spec
+  (P : formula)
+  (v t : variable_)
+  (Δ : set formula)
+  (h1 : is_deduct Δ (forall_ v P))
+  (h2 : admits v t P) :
+  is_deduct Δ (replace_free v t P) :=
+begin
+  apply is_deduct.mp_ (forall_ v P) (replace_free v t P),
+  {
+    apply is_deduct.axiom_,
+    exact is_axiom.pred_2_ v P t h2,
+  },
+  {
+    exact h1,
+  }
+end
+
+
 inductive is_proof_alt : formula → Prop
 
 -- ⊢ P → (Q → P)
