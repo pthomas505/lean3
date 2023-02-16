@@ -60,3 +60,6 @@ def formula.truth_value (valuation : formula → bool) : formula → bool
 | (not_ P) := bnot P.truth_value
 | (imp_ P Q) := bimp P.truth_value Q.truth_value
 | (forall_ x P) := valuation (forall_ x P)
+
+def is_tautology (P : formula) :=
+  ∀ (valuation : formula → bool), P.truth_value valuation = bool.tt
