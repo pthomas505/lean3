@@ -184,6 +184,64 @@ def replace_free (v t : variable_) (P : formula) : formula :=
   replace_free_aux v t ∅ P
 
 
+lemma replace_free_aux_id
+  (P : formula)
+  (v : variable_)
+  (binders : finset variable_) :
+  replace_free_aux v v binders P = P :=
+begin
+  induction P generalizing binders,
+  case formula.pred_ : name args binders
+  {
+    unfold replace_free_aux,
+    simp only [eq_self_iff_true, true_and],
+    apply list.map_id',
+    intro x,
+    split_ifs,
+    {
+      cases h,
+      exact h_left,
+    },
+    {
+      refl,
+    }
+  },
+  case formula.not_ : P P_ih binders
+  {
+    unfold replace_free_aux,
+    congr,
+    exact P_ih binders,
+  },
+  case formula.imp_ : P Q P_ih Q_ih binders
+  {
+    unfold replace_free_aux,
+    congr,
+    {
+      exact P_ih binders,
+    },
+    {
+      exact Q_ih binders,
+    }
+  },
+  case formula.forall_ : x P P_ih binders
+  {
+    unfold replace_free_aux,
+    congr,
+    apply P_ih,
+  },
+end
+
+
+lemma replace_free_id
+  (P : formula)
+  (v : variable_) :
+  replace_free v v P = P :=
+begin
+  unfold replace_free,
+  apply replace_free_aux_id,
+end
+
+
 lemma replace_free_aux_mem_binders
   (P : formula)
   (v t : variable_)
