@@ -880,6 +880,20 @@ begin
 end
 
 
+lemma exists_id
+  (P : formula)
+  (v : variable_) :
+  is_proof (P.imp_ (exists_ v P)) :=
+begin
+  have s1 : is_proof ((replace_free v v P).imp_ (exists_ v P)),
+  apply T_17_3,
+  exact admits_id P v,
+
+  simp only [replace_free_id] at s1,
+  exact s1,
+end
+
+
 theorem T_17_6
   (P : formula)
   (v : variable_) :
@@ -893,13 +907,25 @@ begin
   apply is_deduct.mp_ (forall_ v P) P,
   {
     apply proof_imp_deduct,
-    apply spec_id,
+    exact spec_id P v,
   },
   {
     exact s1,
   },
 
-  sorry,
+  have s3 : is_deduct {forall_ v P} (exists_ v P),
+  apply is_deduct.mp_ P,
+  {
+    apply proof_imp_deduct,
+    exact exists_id P v,
+  },
+  {
+    exact s2,
+  },
+
+  apply deduction_theorem,
+  simp only [set.union_singleton, insert_emptyc_eq],
+  exact s3,
 end
 
 
