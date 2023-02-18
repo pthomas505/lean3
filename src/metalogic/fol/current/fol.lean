@@ -920,7 +920,7 @@ begin
 end
 
 
-theorem T_17_7
+theorem generalization
   (Q : formula)
   (v : variable_)
   (Δ : set formula)
@@ -1057,7 +1057,7 @@ begin
   },
   case is_proof_alt.gen_ : h1_P h1_v h1_1 h1_ih
   {
-    apply T_17_7,
+    apply generalization,
     {
       exact h1_ih,
     },
