@@ -925,16 +925,47 @@ theorem T_17_7
   (v : variable_)
   (Δ : set formula)
   (h1 : is_deduct Δ Q)
-  (h2 : ∀ (H : formula), H ∈ Δ → v ∉ H.free_var_set) :
+  (h2 : ∀ (H : formula), H ∈ Δ → ¬ is_free_in v H) :
   is_deduct Δ (forall_ v Q) :=
 begin
   induction h1,
-  case is_deduct.axiom_ : h1_P h1_ᾰ
-  { admit },
-  case is_deduct.assume_ : h1_P h1_ᾰ
-  { admit },
-  case is_deduct.mp_ : h1_P h1_Q h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
-  { admit },
+  case is_deduct.axiom_ : h1_P h1_1
+  {
+    apply is_deduct.axiom_,
+    apply is_axiom.gen_,
+    exact h1_1,
+  },
+  case is_deduct.assume_ : h1_P h1_1
+  {
+    apply is_deduct.mp_ h1_P,
+    {
+      apply is_deduct.axiom_,
+      apply is_axiom.pred_3_,
+      apply h2,
+      exact h1_1,
+    },
+    {
+      apply is_deduct.assume_,
+      exact h1_1,
+    },
+  },
+  case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
+  {
+    apply is_deduct.mp_ (forall_ v h1_P),
+    {
+      apply is_deduct.mp_,
+      {
+        apply is_deduct.axiom_,
+        apply is_axiom.pred_1_,
+      },
+      {
+        exact h1_ih_1,
+      }
+    },
+    {
+      exact h1_ih_2,
+    }
+  },
 end
 
 
