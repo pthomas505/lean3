@@ -1123,3 +1123,45 @@ begin
     exact is_proof_alt.mp_ h1_P h1_Q h1_ih_1 h1_ih_2,
   },
 end
+
+
+theorem T_17_10
+  (P : formula)
+  (u v : variable_) :
+  is_proof ((forall_ u (forall_ v P)).imp_ (forall_ v (forall_ u P))) :=
+begin
+  apply deduction_theorem,
+  simp only [set.union_singleton, insert_emptyc_eq],
+  apply generalization,
+  {
+    apply generalization,
+    {
+      apply is_deduct.mp_ (forall_ v P) P,
+      {
+        apply proof_imp_deduct,
+        apply spec_id,
+      },
+      {
+        apply is_deduct.mp_ (forall_ u (forall_ v P)),
+        {
+          apply proof_imp_deduct,
+          apply spec_id,
+        },
+        {
+          apply is_deduct.assume_,
+          simp only [set.mem_singleton],
+        }
+      }
+    },
+    {
+      simp only [set.mem_singleton_iff, forall_eq],
+      unfold is_free_in,
+      simp only [eq_self_iff_true, not_true, false_and, not_false_iff],
+    }
+  },
+  {
+    simp only [set.mem_singleton_iff, forall_eq],
+    unfold is_free_in,
+    simp only [eq_self_iff_true, not_true, false_and, and_false, not_false_iff],
+  }
+end
