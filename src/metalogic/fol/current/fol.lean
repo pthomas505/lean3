@@ -899,33 +899,24 @@ theorem T_17_6
   (v : variable_) :
   is_proof ((forall_ v P).imp_ (exists_ v P)) :=
 begin
-  have s1 : is_deduct {forall_ v P} (forall_ v P),
-  apply is_deduct.assume_,
-  simp only [set.mem_singleton],
-
-  have s2 : is_deduct {forall_ v P} P,
-  apply is_deduct.mp_ (forall_ v P) P,
-  {
-    apply proof_imp_deduct,
-    exact spec_id P v,
-  },
-  {
-    exact s1,
-  },
-
-  have s3 : is_deduct {forall_ v P} (exists_ v P),
+  apply deduction_theorem,
+  simp only [set.union_singleton, insert_emptyc_eq],
   apply is_deduct.mp_ P,
   {
     apply proof_imp_deduct,
     exact exists_id P v,
   },
   {
-    exact s2,
+    apply is_deduct.mp_ (forall_ v P) P,
+    {
+      apply proof_imp_deduct,
+      exact spec_id P v,
+    },
+    {
+      apply is_deduct.assume_,
+      simp only [set.mem_singleton],
+    },
   },
-
-  apply deduction_theorem,
-  simp only [set.union_singleton, insert_emptyc_eq],
-  exact s3,
 end
 
 
