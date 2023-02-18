@@ -920,6 +920,18 @@ begin
 end
 
 
+theorem T_17_7
+  (Q : formula)
+  (v : variable_)
+  (Δ : set formula)
+  (h1 : is_deduct Δ Q)
+  (h2 : ∀ (H : formula), H ∈ Δ → v ∉ H.free_var_set) :
+  is_deduct Δ (forall_ v Q) :=
+begin
+  sorry,
+end
+
+
 inductive is_proof_alt : formula → Prop
 
 -- ⊢ P → (Q → P)
@@ -968,15 +980,6 @@ inductive is_proof_alt : formula → Prop
   is_proof_alt Q
 
 
-lemma generalization
-  (P : formula)
-  (v : variable_)
-  (Δ : set formula)
-  (h1 : is_deduct Δ P)
-  (h2 : ∀ (H : formula), H ∈ Δ → v ∉ H.free_var_set) :
-  is_deduct Δ (forall_ v P) := sorry
-
-
 example
   (P : formula)
   (h1 : is_proof_alt P) :
@@ -1017,7 +1020,7 @@ begin
   },
   case is_proof_alt.gen_ : h1_P h1_v h1_1 h1_ih
   {
-    apply generalization,
+    apply T_17_7,
     {
       exact h1_ih,
     },
