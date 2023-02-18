@@ -928,7 +928,13 @@ theorem T_17_7
   (h2 : ∀ (H : formula), H ∈ Δ → v ∉ H.free_var_set) :
   is_deduct Δ (forall_ v Q) :=
 begin
-  sorry,
+  induction h1,
+  case is_deduct.axiom_ : h1_P h1_ᾰ
+  { admit },
+  case is_deduct.assume_ : h1_P h1_ᾰ
+  { admit },
+  case is_deduct.mp_ : h1_P h1_Q h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  { admit },
 end
 
 
