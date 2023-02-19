@@ -249,7 +249,7 @@ begin
 end
 
 
-example
+lemma is_free_in_replace_free_aux
   (P : formula)
   (v t : variable_)
   (binders : finset variable_)
@@ -315,6 +315,18 @@ begin
       exact a1,
     }
   },
+end
+
+
+lemma is_free_in_replace_free
+  (P : formula)
+  (v t : variable_)
+  (h1 : ¬ v = t) :
+  ¬ is_free_in v (replace_free v t P) :=
+begin
+  unfold replace_free,
+  apply is_free_in_replace_free_aux P v t ∅ h1,
+  simp only [finset.not_mem_empty, not_false_iff],
 end
 
 
