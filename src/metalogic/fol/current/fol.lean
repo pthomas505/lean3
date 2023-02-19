@@ -927,6 +927,59 @@ end
 alias T_17_7 <- generalization
 
 
+def occurs_in (v : variable_) : formula → Prop
+| (pred_ name args) := v ∈ args
+| (not_ P) := occurs_in P
+| (imp_ P Q) := occurs_in P ∨ occurs_in Q
+| (forall_ x P) := v = x ∨ occurs_in P
+
+
+example
+  (P : formula)
+  (v t : variable_)
+  (Δ : set formula)
+  (h1 : ¬ occurs_in t P)
+  (h2 : is_deduct Δ (replace_free v t P))
+  (h3 : ∀ (H : formula), H ∈ Δ → ¬ is_free_in t H) :
+  is_deduct Δ (forall_ v P) :=
+begin
+  apply is_deduct.mp_ (forall_ t (replace_free v t P)),
+  {
+    apply proof_imp_deduct,
+    apply deduction_theorem,
+    simp only [set.union_singleton, insert_emptyc_eq],
+    apply generalization,
+    {
+      have s1 : is_deduct {forall_ t (replace_free v t P)} (replace_free t v (replace_free v t P)),
+      apply spec,
+      {
+        apply is_deduct.assume_,
+        simp only [set.mem_singleton],
+      },
+      {
+        sorry,
+      },
+
+      have s2 : (replace_free t v (replace_free v t P)) = P,
+      sorry,
+
+      simp only [s2] at s1,
+      exact s1,
+    },
+    {
+      simp only [set.mem_singleton_iff, forall_eq],
+      unfold is_free_in,
+      simp only [not_and],
+      intros a1 contra,
+      sorry,
+    }
+  },
+  {
+    exact generalization (replace_free v t P) t Δ h2 h3,
+  },
+end
+
+
 example
   (P : formula)
   (h1 : is_proof_alt P) :
