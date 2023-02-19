@@ -615,8 +615,17 @@ begin
   { admit },
   case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders
   { admit },
-  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih binders
-  { admit },
+  case formula.forall_ : x P P_ih binders
+  {
+    unfold occurs_in at h1,
+    push_neg at h1,
+    cases h1,
+
+    unfold replace_free_aux,
+    unfold admits_aux,
+    apply P_ih,
+    exact h1_right,
+  },
 end
 
 
