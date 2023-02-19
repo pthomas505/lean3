@@ -249,6 +249,25 @@ begin
 end
 
 
+lemma replace_free_aux_invert
+  (P : formula)
+  (v t : variable_)
+  (binders : finset variable_)
+  (h1 : ¬ occurs_in t P) :
+  replace_free_aux t v binders (replace_free_aux v t binders P) = P :=
+begin
+  induction P generalizing binders,
+  case formula.pred_ : P_ᾰ P_ᾰ_1 binders
+  { admit },
+  case formula.not_ : P_ᾰ P_ih binders
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders
+  { admit },
+  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih binders
+  { admit },
+end
+
+
 lemma replace_free_aux_mem_binders
   (P : formula)
   (v t : variable_)
