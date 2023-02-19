@@ -1102,7 +1102,7 @@ theorem T_17_11
   (P Q : formula)
   (v : variable_)
   (h1 : ¬ is_free_in v Q) :
-  is_proof ( (forall_ v (P.imp_ Q)).imp_ ((exists_ v P).imp_ Q) ) :=
+  is_proof ((forall_ v (P.imp_ Q)).imp_ ((exists_ v P).imp_ Q)) :=
 begin
   apply deduction_theorem,
   simp only [set.union_singleton, insert_emptyc_eq],
