@@ -1142,3 +1142,45 @@ begin
     exact h1,
   }
 end
+
+
+theorem T_17_12
+  (P Q : formula)
+  (v : variable_)
+  (Δ : set formula)
+  (h1 : is_deduct Δ (exists_ v P))
+  (h2 : is_deduct (Δ ∪ {P}) Q)
+  (h3 : ∀ (H : formula), H ∈ Δ → ¬ is_free_in v H)
+  (h4 : ¬ is_free_in v Q) :
+  is_deduct Δ Q :=
+begin
+  have s1 : is_deduct Δ (P.imp_ Q),
+  apply deduction_theorem,
+  exact h2,
+
+  have s2 : is_deduct Δ (forall_ v (P.imp_ Q)),
+  apply generalization,
+  exact s1,
+  exact h3,
+
+  have s3 : is_deduct Δ ((forall_ v (P.imp_ Q)).imp_ ((exists_ v P).imp_ Q)),
+  apply proof_imp_deduct,
+  apply T_17_11 P Q v h4,
+
+  have s4 : is_deduct Δ ((exists_ v P).imp_ Q),
+  apply is_deduct.mp_,
+  {
+    exact s3,
+  },
+  {
+    exact s2,
+  },
+
+  apply is_deduct.mp_,
+  {
+    exact s4,
+  },
+  {
+    exact h1,
+  }
+end
