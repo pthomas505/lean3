@@ -452,8 +452,7 @@ theorem deduction_theorem_converse
   is_deduct (Δ ∪ {P}) Q :=
 begin
   have s1 : is_deduct (Δ ∪ {P}) (P.imp_ Q),
-  apply T_14_10,
-  exact h1,
+  exact T_14_10 (P.imp_ Q) Δ h1 {P},
 
   have s2 : is_deduct (Δ ∪ {P}) P,
   apply is_deduct.assume_,
@@ -473,7 +472,7 @@ begin
   intros Γ,
   rewrite <- set.union_empty Γ,
   rewrite set.union_comm,
-  apply T_14_10 Q ∅ h1 Γ,
+  exact T_14_10 Q ∅ h1 Γ,
 end
 
 
@@ -512,7 +511,7 @@ theorem C_14_13
   is_deduct Δ Q :=
 begin
   have s1 : is_deduct (Δ ∪ Δ) Q, 
-  apply T_14_12 P Q Δ Δ h1 h2,
+  exact T_14_12 P Q Δ Δ h1 h2,
 
   simp only [set.union_self] at s1,
   exact s1,
@@ -526,7 +525,7 @@ theorem C_14_13'
   (h2 : is_deduct Δ (P.imp_ Q)) :
   is_deduct Δ Q :=
 begin
-  apply is_deduct.mp_ P Q h2 h1,
+  exact is_deduct.mp_ P Q h2 h1,
 end
 
 
@@ -577,8 +576,7 @@ begin
   },
   case is_deduct.assume_ : h1_P h1_1
   {
-    apply h2,
-    exact h1_1,
+    exact h2 h1_P h1_1,
   },
   case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
   {
