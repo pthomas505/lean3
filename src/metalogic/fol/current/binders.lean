@@ -249,6 +249,75 @@ begin
 end
 
 
+example
+  (P : formula)
+  (v t : variable_)
+  (binders : finset variable_)
+  (h1 : ¬ v = t)
+  (h2 : v ∉ binders) :
+  ¬ is_free_in v (replace_free_aux v t binders P) :=
+begin
+  induction P generalizing binders,
+  case formula.pred_ : name args binders h2
+  {
+    unfold replace_free_aux,
+    unfold is_free_in,
+    simp only [list.mem_to_finset, list.mem_map, not_exists, not_and],
+    intros x a1,
+    split_ifs,
+    {
+      intros contra,
+      apply h1,
+      symmetry,
+      exact contra,
+    },
+    {
+      push_neg at h,
+      intros contra,
+      subst contra,
+      simp only [eq_self_iff_true, forall_true_left] at h,
+      contradiction,
+    }
+  },
+  case formula.not_ : P P_ih binders h2
+  {
+    unfold replace_free_aux,
+    unfold is_free_in,
+    exact P_ih binders h2,
+  },
+  case formula.imp_ : P Q P_ih Q_ih binders h2
+  {
+    unfold replace_free_aux,
+    unfold is_free_in,
+    push_neg,
+    split,
+    {
+      exact P_ih binders h2,
+    },
+    {
+      exact Q_ih binders h2,
+    }
+  },
+  case formula.forall_ : x P P_ih binders h2
+  {
+    unfold replace_free_aux,
+    unfold is_free_in,
+    simp only [not_and],
+    intros a1,
+    apply P_ih,
+    simp only [finset.mem_union, finset.mem_singleton],
+    push_neg,
+    split,
+    {
+      exact h2,
+    },
+    {
+      exact a1,
+    }
+  },
+end
+
+
 lemma replace_free_aux_invert
   (P : formula)
   (v t : variable_)
@@ -256,15 +325,7 @@ lemma replace_free_aux_invert
   (h1 : ¬ occurs_in t P) :
   replace_free_aux t v binders (replace_free_aux v t binders P) = P :=
 begin
-  induction P generalizing binders,
-  case formula.pred_ : name args binders
-  { admit },
-  case formula.not_ : P P_ih binders
-  { admit },
-  case formula.imp_ : P Q P_ih Q_ih binders
-  { admit },
-  case formula.forall_ : x P P_ih binders
-  { admit },
+  sorry,
 end
 
 
