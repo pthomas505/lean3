@@ -9,3 +9,5 @@ by John Harrison
 [margaris]
 First Order Mathematical Logic (Dover Books on Mathematics)
 by Angelo Margaris
+
+https://en.wikipedia.org/wiki/Hilbert_system
