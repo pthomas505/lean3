@@ -767,7 +767,7 @@ begin
   exact pred_2_mp v P t Δ h2 h1,
 end
 
-alias T_17_1 <- spec
+alias T_17_1 <- spec forall_elim
 
 
 lemma spec_id
@@ -789,6 +789,8 @@ begin
   simp only [replace_free_id] at s1,
   exact s1,
 end
+
+alias spec_id <- forall_elim_id
 
 
 lemma SC_1
@@ -846,8 +848,10 @@ begin
   }
 end
 
+alias T_17_4 <- exists_intro
 
-lemma exists_id
+
+lemma exists_intro_id
   (P : formula)
   (v : variable_)
   (Δ : set formula)
@@ -868,7 +872,7 @@ theorem T_17_6
 begin
   apply deduction_theorem,
   simp only [set.union_singleton, insert_emptyc_eq],
-  apply exists_id,
+  apply exists_intro_id,
   apply spec_id P v,
   apply is_deduct.assume_,
   simp only [set.mem_singleton],
