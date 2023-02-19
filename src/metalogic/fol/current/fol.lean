@@ -974,7 +974,7 @@ begin
 end
 
 
-theorem generalization
+theorem T_17_7
   (Q : formula)
   (v : variable_)
   (Δ : set formula)
@@ -991,12 +991,9 @@ begin
   },
   case is_deduct.assume_ : h1_P h1_1
   {
-    apply is_deduct.mp_ h1_P,
+    apply pred_3_mp h1_P v Δ,
     {
-      apply is_deduct.axiom_,
-      apply is_axiom.pred_3_,
-      apply h2,
-      exact h1_1,
+      exact h2 h1_P h1_1,
     },
     {
       apply is_deduct.assume_,
@@ -1021,6 +1018,8 @@ begin
     }
   },
 end
+
+alias T_17_7 <- generalization
 
 
 inductive is_proof_alt : formula → Prop
