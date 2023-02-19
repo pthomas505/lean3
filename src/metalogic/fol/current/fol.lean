@@ -793,13 +793,13 @@ end
 
 lemma SC_1
   (P Q : formula) :
-  is_proof ((P.imp_ (not_ Q)).imp_ (Q.imp_ (not_ P))) :=
+  is_proof ((P.imp_ Q.not_).imp_ (Q.imp_ P.not_)) :=
 begin
   apply prop_complete,
   unfold formula.is_tauto,
   simp only [eval_not, eval_imp],
   intros val a1 a2 contra,
-  apply a1 contra a2,
+  exact a1 contra a2,
 end
 
 
