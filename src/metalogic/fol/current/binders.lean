@@ -587,17 +587,35 @@ end
 example
   (P : formula)
   (v t : variable_)
+  (binders : finset variable_)
   (h1 : ¬ occurs_in t P) :
-  admits t v (replace_free v t P) :=
+  admits_aux t v binders (replace_free_aux v t binders P) :=
 begin
-  induction P,
-  case formula.pred_ : name args
+  induction P generalizing binders,
+  case formula.pred_ : name args binders
+  {
+    unfold occurs_in at h1,
+
+    unfold replace_free_aux,
+    unfold admits_aux,
+    simp only [list.mem_map, ite_eq_left_iff, not_and, not_not, and_imp, forall_exists_index],
+    intros x a1 a2 a3 contra,
+
+    have s1 : x = t,
+    apply a2,
+    intros a4,
+    subst a4,
+    exact contra,
+
+    subst s1,
+    apply h1,
+    exact a1,
+  },
+  case formula.not_ : P_ᾰ P_ih binders
   { admit },
-  case formula.not_ : P P_ih
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders
   { admit },
-  case formula.imp_ : P Q P_ih Q_ih
-  { admit },
-  case formula.forall_ : x P P_ih
+  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih binders
   { admit },
 end
 
