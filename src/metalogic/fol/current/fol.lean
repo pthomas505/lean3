@@ -763,6 +763,7 @@ theorem prop_complete
   is_proof P := sorry
 
 
+-- Universal Elimination
 theorem T_17_1
   (P : formula)
   (v t : variable_)
@@ -836,6 +837,7 @@ begin
 end
 
 
+-- Existential Introduction
 theorem T_17_4
   (P : formula)
   (v t : variable_)
