@@ -1189,22 +1189,10 @@ begin
   {
     apply generalization,
     {
-      apply is_deduct.mp_ (forall_ v P) P,
-      {
-        apply proof_imp_deduct,
-        apply spec_id,
-      },
-      {
-        apply is_deduct.mp_ (forall_ u (forall_ v P)),
-        {
-          apply proof_imp_deduct,
-          apply spec_id,
-        },
-        {
-          apply is_deduct.assume_,
-          simp only [set.mem_singleton],
-        }
-      }
+      apply spec_id P v,
+      apply spec_id (forall_ v P) u,
+      apply is_deduct.assume_,
+      simp only [set.mem_singleton],
     },
     {
       simp only [set.mem_singleton_iff, forall_eq],
@@ -1242,30 +1230,9 @@ begin
   unfold exists_,
   apply SC_2 (forall_ v P.not_) (forall_ v Q.not_) Q,
   {
-    apply is_deduct.mp_,
-    {
-      apply is_deduct.axiom_,
-      apply is_axiom.pred_1_,
-    },
-    {
-      apply generalization,
-      {
-        apply is_deduct.mp_ (P.imp_ Q),
-        {
-          apply proof_imp_deduct,
-          apply T_14_7,
-        },
-        {
-
-          apply spec_id,
-        }
-      },
-      {
-
-      }
-    }
+    sorry,
   },
   {
-
+    sorry,
   }
 end
