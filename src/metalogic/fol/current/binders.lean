@@ -437,6 +437,18 @@ begin
 end
 
 
+lemma replace_free_inverse
+  (P : formula)
+  (v t : variable_)
+  (h1 : ¬ occurs_in t P) :
+  replace_free t v (replace_free v t P) = P :=
+begin
+  unfold replace_free,
+  apply replace_free_aux_inverse P v t ∅ h1,
+  simp only [finset.not_mem_empty, not_false_iff],
+end
+
+
 lemma replace_free_aux_mem_binders
   (P : formula)
   (v t : variable_)
