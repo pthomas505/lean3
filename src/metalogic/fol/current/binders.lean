@@ -173,9 +173,10 @@ pg. 48
 If $P$ is a formula, $v$ is a variable, and $t$ is a term, then $P(t/v)$ is the result of replacing each free occurrence of $v$ in $P$ by an occurrence of $t$.
 -/
 
--- P (t/v)
--- v -> t in P
-
+/--
+  P (t/v) ;
+  v → t in P
+-/
 def replace_free_aux (v t : variable_) : finset variable_ → formula → formula
 | binders (pred_ name args) :=
     pred_ name (args.map (fun (x : variable_),
@@ -187,6 +188,10 @@ def replace_free_aux (v t : variable_) : finset variable_ → formula → formul
     imp_ (replace_free_aux binders P) (replace_free_aux binders Q)
 | binders (forall_ x P) := forall_ x (replace_free_aux (binders ∪ {x}) P)
 
+/--
+  P (t/v) ;
+  v → t in P
+-/
 def replace_free (v t : variable_) (P : formula) : formula :=
   replace_free_aux v t ∅ P
 
@@ -401,7 +406,7 @@ begin
 end
 
 
--- v -> t
+/-- v → t -/
 def replace
   {α : Type}
   [decidable_eq α]
@@ -615,9 +620,11 @@ pg. 48
 If $v$ and $u$ are variables and $P$ is a formula, then $P$ admits $u$ for $v$ if and only if there is no free occurrence of $v$ in $P$ that becomes a bound occurrence of $u$ in $P(u/v)$. If $t$ is a term, then $P$ admits $t$ for $v$ if and only if $P$ admits for $v$ every variable in $t$.
 -/
 
--- P admits u for v
--- v → u in P
-
+/--
+  admits_aux v u ∅ P =
+  P admits u for v ;
+  v → u in P
+-/
 def admits_aux (v u : variable_) : finset variable_ → formula → Prop
 | binders (pred_ name args) :=
     (v ∈ args ∧ v ∉ binders) → -- if there is a free occurrence of v in P
@@ -626,6 +633,11 @@ def admits_aux (v u : variable_) : finset variable_ → formula → Prop
 | binders (imp_ P Q) := admits_aux binders P ∧ admits_aux binders Q
 | binders (forall_ x P) := admits_aux (binders ∪ {x}) P
 
+/--
+  admits v u P = 
+  P admits u for v ;
+  v → u in P
+-/
 def admits (v u : variable_) (P : formula) : Prop :=
   admits_aux v u ∅ P
 
