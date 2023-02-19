@@ -859,9 +859,13 @@ lemma exists_intro_id
   is_deduct Δ (exists_ v P) :=
 begin
   apply T_17_4 P v v Δ,
-  exact admits_id P v,
-  simp only [replace_free_id],
-  exact h1,
+  {
+    exact admits_id P v,
+  },
+  {
+    simp only [replace_free_id],
+    exact h1,
+  }
 end
 
 
