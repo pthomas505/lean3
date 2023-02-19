@@ -146,7 +146,7 @@ begin
 end
 
 
-theorem deduction_theorem
+theorem T_14_3
   (P Q : formula)
   (Δ : set formula)
   (h1 : is_deduct (Δ ∪ {P}) Q) :
@@ -212,6 +212,8 @@ begin
     },
   },
 end
+
+alias T_14_3 <- deduction_theorem
 
 
 example
