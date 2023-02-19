@@ -159,6 +159,13 @@ begin
 end
 
 
+def occurs_in (v : variable_) : formula → Prop
+| (pred_ name args) := v ∈ args
+| (not_ P) := occurs_in P
+| (imp_ P Q) := occurs_in P ∨ occurs_in Q
+| (forall_ x P) := v = x ∨ occurs_in P
+
+
 /-
 [margaris]
 pg. 48
