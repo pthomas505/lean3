@@ -1144,6 +1144,8 @@ begin
 end
 
 
+-- Rule C
+
 theorem T_17_12
   (P Q : formula)
   (v : variable_)
@@ -1176,3 +1178,5 @@ begin
     exact h1,
   }
 end
+
+alias T_17_12 <- rule_C
