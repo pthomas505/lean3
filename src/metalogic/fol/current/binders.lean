@@ -337,14 +337,84 @@ begin
 end
 
 
-lemma replace_free_aux_invert
+lemma list.map_id'''
+  {α : Type}
+  {f : α → α}
+  (l : list α)
+  (h : ∀ (x : α), x ∈ l → f x = x) :
+  list.map f l = l := sorry
+
+
+lemma replace_free_aux_inverse
   (P : formula)
   (v t : variable_)
   (binders : finset variable_)
-  (h1 : ¬ occurs_in t P) :
+  (h1 : ¬ occurs_in t P)
+  (h2 : t ∉ binders) :
   replace_free_aux t v binders (replace_free_aux v t binders P) = P :=
 begin
-  sorry,
+  induction P generalizing binders,
+  case formula.pred_ : name args binders
+  {
+    unfold occurs_in at h1,
+
+    unfold replace_free_aux,
+    congr,
+    simp only [list.map_map],
+
+    apply list.map_id''',
+    intros x a1,
+    simp only [function.comp_app],
+    by_cases c1 : (v = x) ∧ (x ∉ binders),
+    {
+      simp only [if_pos c1],
+      simp only [eq_self_iff_true, true_and, ite_not],
+      simp only [if_neg h2],
+      cases c1,
+      exact c1_left,
+    },
+    {
+      simp only [if_neg c1],
+      push_neg at c1,
+      split_ifs,
+      {
+        cases h,
+        subst h_left,
+        contradiction,
+      },
+      {
+        refl,
+      }
+    }
+  },
+  case formula.not_ : P_ᾰ P_ih binders
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders
+  { admit },
+  case formula.forall_ : x P P_ih binders
+  {
+    unfold occurs_in at h1,
+    push_neg at h1,
+    cases h1,
+
+    unfold replace_free_aux,
+    simp only [eq_self_iff_true, true_and],
+    apply P_ih,
+    {
+      exact h1_right,
+    },
+    {
+      simp only [finset.mem_union, finset.mem_singleton],
+      push_neg,
+      split,
+      {
+        exact h2,
+      },
+      {
+        exact h1_left,
+      }
+    }
+  },
 end
 
 
