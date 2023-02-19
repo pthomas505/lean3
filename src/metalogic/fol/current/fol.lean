@@ -1081,13 +1081,31 @@ theorem T_17_11
   is_proof ( (forall_ v (P.imp_ Q)).imp_ ((exists_ v P).imp_ Q) ) :=
 begin
   apply deduction_theorem,
-  squeeze_simp,
+  simp only [set.union_singleton, insert_emptyc_eq],
   unfold exists_,
   apply SC_2 (forall_ v P.not_) (forall_ v Q.not_) Q,
   {
-    sorry,
+    apply is_deduct.mp_,
+    {
+      apply is_deduct.axiom_,
+      apply is_axiom.pred_1_,
+    },
+    {
+      apply generalization,
+      {
+        sorry,
+      },
+      {
+        simp only [set.mem_singleton_iff, forall_eq],
+        unfold is_free_in,
+        simp only [eq_self_iff_true, not_true, false_and, not_false_iff],
+      }
+    },
   },
   {
-    sorry,
+    apply is_deduct.axiom_,
+    apply is_axiom.pred_3_,
+    unfold is_free_in,
+    exact h1,
   }
 end
