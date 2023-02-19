@@ -70,6 +70,63 @@ inductive is_deduct (Δ : set formula) : formula → Prop
 def is_proof (P : formula) : Prop := is_deduct ∅ P
 
 
+lemma pred_1_mp
+  (P Q : formula)
+  (v : variable_)
+  (Δ : set formula)
+  (h1 : is_deduct Δ (forall_ v (P.imp_ Q))) :
+  is_deduct Δ ((forall_ v P).imp_ (forall_ v Q)) :=
+begin
+  apply is_deduct.mp_,
+  {
+    apply is_deduct.axiom_,
+    exact is_axiom.pred_1_ P Q v,
+  },
+  {
+    exact h1,
+  }
+end
+
+
+lemma pred_2_mp
+  (v : variable_)
+  (P : formula)
+  (t : variable_)
+  (Δ : set formula)
+  (h1 : admits v t P)
+  (h2 : is_deduct Δ (forall_ v P)) :
+  is_deduct Δ (replace_free v t P) :=
+begin
+  apply is_deduct.mp_,
+  {
+    apply is_deduct.axiom_,
+    exact is_axiom.pred_2_ v P t h1,
+  },
+  {
+    exact h2,
+  }
+end
+
+
+lemma pred_3_mp
+  (P : formula)
+  (v : variable_)
+  (Δ : set formula)
+  (h1 : ¬ is_free_in v P)
+  (h2 : is_deduct Δ P) :
+  is_deduct Δ (forall_ v P) :=
+begin
+  apply is_deduct.mp_,
+  {
+    apply is_deduct.axiom_,
+    exact is_axiom.pred_3_ P v h1,
+  },
+  {
+    exact h2,
+  }
+end
+
+
 lemma proof_imp_deduct
   (P : formula)
   (h1 : is_proof P) :
@@ -479,6 +536,13 @@ begin
 end
 
 
+example :
+  C_14_11 = proof_imp_deduct :=
+begin
+  refl,
+end
+
+
 theorem T_14_12
   (P Q : formula)
   (Δ Γ : set formula)
@@ -538,6 +602,8 @@ begin
   exact is_deduct.mp_ P Q h2 s1,
 end
 
+alias C_14_14 <- mp_proof_deduct
+
 
 theorem C_14_15
   (P Q : formula)
@@ -551,6 +617,8 @@ begin
 
   exact is_deduct.mp_ P Q s1 h1,
 end
+
+alias C_14_15 <- mp_deduct_proof
 
 
 theorem T_14_16
@@ -797,14 +865,28 @@ theorem spec
   (h2 : admits v t P) :
   is_deduct Δ (replace_free v t P) :=
 begin
-  apply is_deduct.mp_ (forall_ v P) (replace_free v t P),
+  exact pred_2_mp v P t Δ h2 h1,
+end
+
+
+lemma spec_id
+  (P : formula)
+  (v : variable_)
+  (Δ : set formula)
+  (h1 : is_deduct Δ (forall_ v P)) :
+  is_deduct Δ P :=
+begin
+  have s1 : is_deduct Δ (replace_free v v P),
+  apply pred_2_mp v P v Δ,
   {
-    apply is_deduct.axiom_,
-    exact is_axiom.pred_2_ v P t h2,
+    exact admits_id P v,
   },
   {
     exact h1,
-  }
+  },
+
+  simp only [replace_free_id] at s1,
+  exact s1,
 end
 
 
@@ -864,33 +946,17 @@ begin
 end
 
 
-lemma spec_id
-  (P : formula)
-  (v : variable_) :
-  is_proof ((forall_ v P).imp_ P) :=
-begin
-  have s1 : is_proof ((forall_ v P).imp_ (replace_free v v P)),
-  unfold is_proof,
-  apply is_deduct.axiom_,
-  apply is_axiom.pred_2_,
-  exact admits_id P v,
-
-  simp only [replace_free_id] at s1,
-  exact s1,
-end
-
-
 lemma exists_id
   (P : formula)
-  (v : variable_) :
-  is_proof (P.imp_ (exists_ v P)) :=
+  (v : variable_)
+  (Δ : set formula)
+  (h1 : is_deduct Δ P) :
+  is_deduct Δ (exists_ v P) :=
 begin
-  have s1 : is_proof ((replace_free v v P).imp_ (exists_ v P)),
-  apply T_17_3,
+  apply T_17_4 P v v Δ,
   exact admits_id P v,
-
-  simp only [replace_free_id] at s1,
-  exact s1,
+  simp only [replace_free_id],
+  exact h1,
 end
 
 
@@ -901,22 +967,10 @@ theorem T_17_6
 begin
   apply deduction_theorem,
   simp only [set.union_singleton, insert_emptyc_eq],
-  apply is_deduct.mp_ P,
-  {
-    apply proof_imp_deduct,
-    exact exists_id P v,
-  },
-  {
-    apply is_deduct.mp_ (forall_ v P) P,
-    {
-      apply proof_imp_deduct,
-      exact spec_id P v,
-    },
-    {
-      apply is_deduct.assume_,
-      simp only [set.mem_singleton],
-    },
-  },
+  apply exists_id,
+  apply spec_id P v,
+  apply is_deduct.assume_,
+  simp only [set.mem_singleton],
 end
 
 
@@ -1163,5 +1217,56 @@ begin
     simp only [set.mem_singleton_iff, forall_eq],
     unfold is_free_in,
     simp only [eq_self_iff_true, not_true, false_and, and_false, not_false_iff],
+  }
+end
+
+
+lemma SC_2
+  (P Q R : formula)
+  (Δ : set formula)
+  (h1 : is_deduct Δ (Q.imp_ P))
+  (h2 : is_deduct Δ (R.not_.imp_ Q)) :
+  is_deduct Δ (P.not_.imp_ R) :=
+begin
+  sorry,
+end
+
+
+theorem T_17_11
+  (P Q : formula)
+  (v : variable_)
+  (h1 : ¬ is_free_in v Q) :
+  is_proof ( (forall_ v (P.imp_ Q)).imp_ ((exists_ v P).imp_ Q) ) :=
+begin
+  apply deduction_theorem,
+  squeeze_simp,
+  unfold exists_,
+  apply SC_2 (forall_ v P.not_) (forall_ v Q.not_) Q,
+  {
+    apply is_deduct.mp_,
+    {
+      apply is_deduct.axiom_,
+      apply is_axiom.pred_1_,
+    },
+    {
+      apply generalization,
+      {
+        apply is_deduct.mp_ (P.imp_ Q),
+        {
+          apply proof_imp_deduct,
+          apply T_14_7,
+        },
+        {
+
+          apply spec_id,
+        }
+      },
+      {
+
+      }
+    }
+  },
+  {
+
   }
 end
