@@ -174,6 +174,7 @@ If $P$ is a formula, $v$ is a variable, and $t$ is a term, then $P(t/v)$ is the 
 -/
 
 /--
+  replace_free_aux v t ∅ P =
   P (t/v) ;
   v → t in P
 -/
@@ -189,6 +190,7 @@ def replace_free_aux (v t : variable_) : finset variable_ → formula → formul
 | binders (forall_ x P) := forall_ x (replace_free_aux (binders ∪ {x}) P)
 
 /--
+  replace_free v t P =
   P (t/v) ;
   v → t in P
 -/
