@@ -591,13 +591,13 @@ example
   admits t v (replace_free v t P) :=
 begin
   induction P,
-  case formula.pred_ : P_ᾰ P_ᾰ_1
+  case formula.pred_ : name args
   { admit },
-  case formula.not_ : P_ᾰ P_ih
+  case formula.not_ : P P_ih
   { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
+  case formula.imp_ : P Q P_ih Q_ih
   { admit },
-  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih
+  case formula.forall_ : x P P_ih
   { admit },
 end
 
