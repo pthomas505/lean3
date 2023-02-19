@@ -955,7 +955,7 @@ begin
       },
 
       have s2 : (replace_free t v (replace_free v t P)) = P,
-      sorry,
+      exact replace_free_inverse P v t h1,
 
       simp only [s2] at s1,
       exact s1,
