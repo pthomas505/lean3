@@ -246,7 +246,7 @@ end
 
 theorem T_14_5
   (P : formula) :
-  is_proof ((not_ (not_ P)).imp_ P) :=
+  is_proof (P.not_.not_.imp_ P) :=
 begin
   unfold is_proof,
 
@@ -279,7 +279,7 @@ end
 
 theorem T_14_6
   (P : formula) :
-  is_proof (P.imp_ (not_ (not_ P))) :=
+  is_proof (P.imp_ P.not_.not_) :=
 begin
   unfold is_proof,
 
@@ -297,7 +297,7 @@ end
 
 theorem T_14_7
   (P Q : formula) :
-  is_proof ((P.imp_ Q).imp_ ((not_ Q).imp_ (not_ P))) :=
+  is_proof ((P.imp_ Q).imp_ (Q.not_.imp_ P.not_)) :=
 begin
   unfold is_proof,
 
@@ -339,7 +339,7 @@ end
 
 theorem T_14_8
   (Q R : formula) :
-  is_proof (Q.imp_((not_ R).imp_ (not_ (Q.imp_ R)))) :=
+  is_proof (Q.imp_ (R.not_.imp_ ((Q.imp_ R).not_))) :=
 begin
   unfold is_proof,
 
@@ -366,7 +366,7 @@ end
 
 theorem T_14_9
   (P S : formula) :
-  is_proof ( (S.imp_ P).imp_ (((not_ S).imp_ P).imp_ P) ) :=
+  is_proof ((S.imp_ P).imp_ ((S.not_.imp_ P).imp_ P)) :=
 begin
   unfold is_proof,
 
