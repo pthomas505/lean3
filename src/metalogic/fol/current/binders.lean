@@ -257,13 +257,13 @@ lemma replace_free_aux_invert
   replace_free_aux t v binders (replace_free_aux v t binders P) = P :=
 begin
   induction P generalizing binders,
-  case formula.pred_ : P_ᾰ P_ᾰ_1 binders
+  case formula.pred_ : name args binders
   { admit },
-  case formula.not_ : P_ᾰ P_ih binders
+  case formula.not_ : P P_ih binders
   { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders
+  case formula.imp_ : P Q P_ih Q_ih binders
   { admit },
-  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih binders
+  case formula.forall_ : x P P_ih binders
   { admit },
 end
 
