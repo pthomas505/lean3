@@ -965,7 +965,7 @@ begin
       unfold is_free_in,
       simp only [not_and],
       intros a1 contra,
-      sorry,
+      exact is_free_in_replace_free P v t a1 contra,
     }
   },
   {
