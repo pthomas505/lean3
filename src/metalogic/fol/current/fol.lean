@@ -1070,7 +1070,31 @@ lemma SC_2
   (h2 : is_deduct Δ (R.not_.imp_ Q)) :
   is_deduct Δ (P.not_.imp_ R) :=
 begin
-  sorry,
+  apply is_deduct.mp_ (R.not_.imp_ Q),
+  {
+    apply is_deduct.mp_ (Q.imp_ P),
+    {
+      apply proof_imp_deduct,
+      apply prop_complete,
+      unfold formula.is_tauto,
+      simp only [eval_imp, eval_not],
+      simp only [eq_ff_eq_not_eq_tt],
+      intros val a1 a2 a3,
+
+      rewrite <- bool_iff_false at *,
+      by_contradiction contra,
+      apply a3,
+      apply a1,
+      apply a2,
+      apply contra,
+    },
+    {
+      exact h1,
+    }
+  },
+  {
+    exact h2,
+  }
 end
 
 
