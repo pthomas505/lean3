@@ -712,7 +712,7 @@ begin
   intro val,
   simp only [eval_imp] at h1,
   apply h1,
-  apply h2,
+  exact h2 val,
 end
 
 
@@ -756,7 +756,7 @@ theorem prop_complete
   is_proof P := sorry
 
 
-theorem spec
+theorem T_17_1
   (P : formula)
   (v t : variable_)
   (Δ : set formula)
@@ -766,6 +766,8 @@ theorem spec
 begin
   exact pred_2_mp v P t Δ h2 h1,
 end
+
+alias T_17_1 <- spec
 
 
 lemma spec_id
