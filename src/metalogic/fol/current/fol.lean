@@ -11,16 +11,23 @@ lemma pred_1_mp
   (P Q : formula)
   (v : variable_)
   (Δ : set formula)
-  (h1 : is_deduct Δ (forall_ v (P.imp_ Q))) :
-  is_deduct Δ ((forall_ v P).imp_ (forall_ v Q)) :=
+  (h1 : is_deduct Δ (forall_ v (P.imp_ Q)))
+  (h2 : is_deduct Δ (forall_ v P)) :
+  is_deduct Δ (forall_ v Q) :=
 begin
   apply is_deduct.mp_,
   {
-    apply is_deduct.axiom_,
-    exact is_axiom.pred_1_ P Q v,
+    apply is_deduct.mp_,
+    {
+      apply is_deduct.axiom_,
+      exact is_axiom.pred_1_ P Q v,
+    },
+    {
+      exact h1,
+    }
   },
   {
-    exact h1,
+    exact h2,
   }
 end
 
@@ -911,20 +918,7 @@ begin
   },
   case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
   {
-    apply is_deduct.mp_ (forall_ v h1_P),
-    {
-      apply is_deduct.mp_,
-      {
-        apply is_deduct.axiom_,
-        apply is_axiom.pred_1_,
-      },
-      {
-        exact h1_ih_1,
-      }
-    },
-    {
-      exact h1_ih_2,
-    }
+    exact pred_1_mp h1_P h1_Q v Δ h1_ih_1 h1_ih_2,
   },
 end
 
