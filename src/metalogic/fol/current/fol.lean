@@ -1093,7 +1093,16 @@ begin
     {
       apply generalization,
       {
-        sorry,
+        apply is_deduct.mp_,
+        {
+          apply proof_imp_deduct,
+          apply T_14_7,
+        },
+        {
+          apply spec_id (P.imp_ Q) v,
+          apply is_deduct.assume_,
+          simp only [set.mem_singleton],
+        }
       },
       {
         simp only [set.mem_singleton_iff, forall_eq],
