@@ -950,7 +950,8 @@ begin
         simp only [set.mem_singleton],
       },
       {
-        sorry,
+        apply replace_free_admits,
+        exact h1,
       },
 
       have s2 : (replace_free t v (replace_free v t P)) = P,
