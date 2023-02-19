@@ -116,7 +116,7 @@ end
 
 theorem T_13_6
   (P Q : formula) :
-  is_proof ((not_ P).imp_ (P.imp_ Q)) :=
+  is_proof (P.not_.imp_ (P.imp_ Q)) :=
 begin
   unfold is_proof,
 
@@ -145,6 +145,8 @@ begin
   },
 end
 
+
+-- Deduction Theorem
 
 theorem T_14_3
   (P Q : formula)
@@ -218,7 +220,7 @@ alias T_14_3 <- deduction_theorem
 
 example
   (P Q : formula) :
-  is_proof ((not_ P).imp_ (P.imp_ Q)) :=
+  is_proof (P.not_.imp_ (P.imp_ Q)) :=
 begin
   unfold is_proof,
 
