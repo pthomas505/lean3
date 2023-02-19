@@ -584,7 +584,7 @@ begin
 end
 
 
-example
+lemma replace_free_aux_admits_aux
   (P : formula)
   (v t : variable_)
   (binders : finset variable_)
@@ -646,6 +646,19 @@ begin
     apply P_ih,
     exact h1_right,
   },
+end
+
+
+lemma replace_free_admits
+  (P : formula)
+  (v t : variable_)
+  (h1 : ¬ occurs_in t P) :
+  admits t v (replace_free v t P) :=
+begin
+  unfold replace_free,
+  unfold admits,
+  apply replace_free_aux_admits_aux,
+  exact h1,
 end
 
 
