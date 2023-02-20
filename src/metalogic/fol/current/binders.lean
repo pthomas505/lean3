@@ -355,7 +355,7 @@ begin
     congr,
     simp only [list.map_map],
 
-    apply list.map_id'_alt,
+    apply list.map_id'''',
     intros x a1,
     simp only [function.comp_app],
     by_cases c1 : (v = x) ∧ (x ∉ binders),

@@ -1,7 +1,7 @@
 import data.list.basic
 
 
-lemma list.map_id'_alt
+lemma list.map_id''''
   {α : Type}
   {f : α → α}
   (l : list α)
