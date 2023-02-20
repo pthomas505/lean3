@@ -1,5 +1,5 @@
 import .formula
-import .aux_list
+import .misc_list
 
 import data.finset
 
