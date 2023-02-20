@@ -442,18 +442,10 @@ begin
   case formula.pred_ : name args binders h1
   {
     unfold replace_free_aux,
-    simp only [eq_self_iff_true, true_and],
-    apply list.map_id',
-    intros x,
-    split_ifs,
-    {
-      cases h,
-      subst h_left,
-      contradiction,
-    },
-    {
-      refl,
-    }
+    simp only [eq_self_iff_true, list.map_eq_self_iff, ite_eq_right_iff, and_imp, true_and],
+    intros x a1 a2 a3,
+    subst a2,
+    contradiction,
   },
   case formula.not_ : P P_ih binders h1
   {
