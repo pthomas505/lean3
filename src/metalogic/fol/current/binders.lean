@@ -1,4 +1,5 @@
 import .formula
+import .aux_list
 
 import data.finset
 
@@ -337,14 +338,6 @@ begin
 end
 
 
-lemma list.map_id'''
-  {α : Type}
-  {f : α → α}
-  (l : list α)
-  (h : ∀ (x : α), x ∈ l → f x = x) :
-  list.map f l = l := sorry
-
-
 lemma replace_free_aux_inverse
   (P : formula)
   (v t : variable_)
@@ -362,7 +355,7 @@ begin
     congr,
     simp only [list.map_map],
 
-    apply list.map_id''',
+    apply list.map_id'_alt,
     intros x a1,
     simp only [function.comp_app],
     by_cases c1 : (v = x) ∧ (x ∉ binders),
