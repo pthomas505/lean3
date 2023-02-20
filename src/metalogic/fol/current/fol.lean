@@ -927,6 +927,7 @@ end
 alias T_17_7 <- generalization
 
 
+-- Universal Introduction
 example
   (P : formula)
   (v t : variable_)
