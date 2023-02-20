@@ -156,3 +156,6 @@ inductive is_proof_alt : formula → Prop
   is_proof_alt (P.imp_ Q) →
   is_proof_alt P →
   is_proof_alt Q
+
+
+#lint

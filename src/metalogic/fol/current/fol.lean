@@ -594,7 +594,7 @@ end
 
 theorem C_14_17
   (Q : formula)
-  (Δ Γ : set formula)
+  (Γ : set formula)
   (h1 : is_deduct Γ Q)
   (h2 : ∀ (P : formula), P ∈ Γ → is_proof P) :
   is_proof Q :=
@@ -619,6 +619,7 @@ def formula.prime_constituent_set : formula → finset formula
 | (forall_ x P) := {forall_ x P}
 
 
+@[derive inhabited]
 def valuation : Type := formula → bool
 
 def formula.eval (val : valuation) : formula → bool
@@ -1246,3 +1247,6 @@ begin
   sorry,
 --  apply rule_C (replace_free v t P) Q t Δ,
 end
+
+
+#lint

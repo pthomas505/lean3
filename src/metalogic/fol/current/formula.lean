@@ -35,3 +35,6 @@ def formula.iff_ (P Q : formula) : formula := (P.imp_ Q).and_ (Q.imp_ P)
 
 -- ∃ x P := ~ ∀ x ~ P
 def formula.exists_ (x : variable_) (P : formula) : formula := not_ (forall_ x (not_ P))
+
+
+#lint
