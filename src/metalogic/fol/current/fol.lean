@@ -1249,4 +1249,35 @@ begin
 end
 
 
+theorem T_17_14
+  (P Q : formula)
+  (v : variable_) :
+  is_proof ((exists_ v (P.and_ Q)).imp_ ((exists_ v P).and_ (exists_ v Q))) :=
+begin
+  apply deduction_theorem,
+  simp only [set.union_singleton, insert_emptyc_eq],
+  apply rule_C (P.and_ Q) ((exists_ v P).and_ (exists_ v Q)) v,
+  {
+    apply is_deduct.assume_,
+    simp only [set.mem_singleton],
+  },
+  {
+    sorry,
+  },
+  {
+    unfold and_,
+    unfold exists_,
+    simp only [set.mem_singleton_iff, forall_eq],
+    unfold is_free_in,
+    simp only [eq_self_iff_true, not_true, false_and, not_false_iff],
+  },
+  {
+    unfold and_,
+    unfold exists_,
+    unfold is_free_in,
+    simp only [eq_self_iff_true, not_true, false_and, or_self, not_false_iff],
+  }
+end
+
+
 #lint
