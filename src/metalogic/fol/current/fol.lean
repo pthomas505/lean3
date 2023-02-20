@@ -1230,3 +1230,19 @@ begin
 end
 
 alias T_17_12 <- rule_C
+
+
+example
+  (P Q : formula)
+  (v t : variable_)
+  (Δ : set formula)
+  (h1 : is_deduct Δ (exists_ v P))
+  (h2 : is_deduct (Δ ∪ {replace_free v t P}) Q)
+  (h3 : ¬ occurs_in t P)
+  (h4 : ¬ occurs_in t Q)
+  (h5 : ∀ (H : formula), H ∈ Δ → ¬ is_free_in t H) :
+  is_deduct Δ Q :=
+begin
+  sorry,
+--  apply rule_C (replace_free v t P) Q t Δ,
+end

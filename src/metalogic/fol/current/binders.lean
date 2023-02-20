@@ -353,9 +353,7 @@ begin
 
     unfold replace_free_aux,
     congr,
-    simp only [list.map_map],
-
-    apply list.map_id'''',
+    simp only [list.map_map, list.map_eq_self_iff],
     intros x a1,
     simp only [function.comp_app],
     by_cases c1 : (v = x) ∧ (x ∉ binders),
