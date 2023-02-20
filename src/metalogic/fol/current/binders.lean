@@ -512,8 +512,7 @@ begin
   {
     unfold replace_free_aux,
     unfold fast_replace_free,
-    simp only [eq_self_iff_true, true_and],
-    apply list.map_congr,
+    simp only [list.map_eq_map_iff, eq_self_iff_true, true_and],
     intros x a1,
     split_ifs,
     {
@@ -625,20 +624,14 @@ begin
 
       unfold formula.free_var_set at args_ih,
       unfold fast_replace_free at args_ih,
-      simp only [list.mem_to_finset, eq_self_iff_true, true_and] at args_ih,
+      simp only [list.mem_to_finset, eq_self_iff_true, list.map_eq_self_iff, true_and] at args_ih,
 
       unfold fast_replace_free,
-      simp only [list.map, eq_self_iff_true, true_and],
+      simp only [list.map, eq_self_iff_true, list.map_eq_self_iff, true_and],
       split,
       {
         unfold replace,
-        split_ifs,
-        {
-          contradiction,
-        },
-        {
-          refl,
-        }
+        simp only [if_neg h1_left],
       },
       {
         exact args_ih h1_right,
