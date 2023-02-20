@@ -1,6 +1,7 @@
 import data.list.basic
 
 
+@[simp]
 lemma list.map_eq_self_iff
   {α : Type}
   {f : α → α}

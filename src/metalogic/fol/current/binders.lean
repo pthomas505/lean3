@@ -209,17 +209,9 @@ begin
   case formula.pred_ : name args binders
   {
     unfold replace_free_aux,
-    simp only [eq_self_iff_true, true_and],
-    apply list.map_id',
-    intro x,
-    split_ifs,
-    {
-      cases h,
-      exact h_left,
-    },
-    {
-      refl,
-    }
+    simp only [eq_self_iff_true, list.map_eq_self_iff, ite_eq_right_iff, and_imp, true_and],
+    intros x a1 a2 a3,
+    exact a2,
   },
   case formula.not_ : P P_ih binders
   {
