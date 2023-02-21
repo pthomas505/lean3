@@ -1318,7 +1318,13 @@ begin
       {
         apply deduction_theorem,
         apply deduction_theorem,
-        sorry,
+        apply and_intro,
+        {
+          simp only [set.union_singleton, set.mem_insert_iff, eq_self_iff_true, true_or, or_true],
+        },
+        {
+          simp only [set.union_singleton, set.mem_insert_iff, eq_self_iff_true, true_or],
+        }
       },
       {
         apply exists_intro P v v,
