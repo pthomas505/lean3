@@ -1249,6 +1249,56 @@ begin
 end
 
 
+theorem eval_and
+  (P Q : formula)
+  (val : valuation) :
+  formula.eval val (and_ P Q) = bool.tt ↔
+    ((formula.eval val P = bool.tt) ∧ (formula.eval val Q = bool.tt)) :=
+begin
+  unfold formula.and_,
+  unfold formula.eval,
+  cases formula.eval val P;
+  cases formula.eval val Q;
+  exact dec_trivial,
+end
+
+
+lemma and_intro
+  (P Q : formula)
+  (Δ : set formula)
+  (h1 : P ∈ Δ)
+  (h2 : Q ∈ Δ) :
+  is_deduct Δ (P.and_ Q) :=
+begin
+  apply is_deduct.mp_ Q,
+  {
+    apply is_deduct.mp_ P,
+    {
+      apply proof_imp_deduct,
+      apply prop_complete,
+      unfold formula.is_tauto,
+      simp only [eval_and, eval_imp],
+      intros val a1 a2,
+      split,
+      {
+        exact a1,
+      },
+      {
+        exact a2,
+      },
+    },
+    {
+      apply is_deduct.assume_,
+      exact h1,
+    }
+  },
+  {
+    apply is_deduct.assume_,
+    exact h2,
+  }
+end
+
+
 theorem T_17_14
   (P Q : formula)
   (v : variable_) :
@@ -1262,7 +1312,35 @@ begin
     simp only [set.mem_singleton],
   },
   {
-    sorry,
+    apply is_deduct.mp_ (exists_ v Q),
+    {
+      apply is_deduct.mp_ (exists_ v P),
+      {
+        apply deduction_theorem,
+        apply deduction_theorem,
+        sorry,
+      },
+      {
+        apply exists_intro P v v,
+        {
+          apply admits_id,
+        },
+        {
+          simp only [replace_free_id],
+          sorry,
+        },
+      }
+    },
+    {
+      apply exists_intro Q v v,
+      {
+        apply admits_id,
+      },
+      {
+        simp only [replace_free_id],
+        sorry,
+      }
+    }
   },
   {
     unfold and_,
