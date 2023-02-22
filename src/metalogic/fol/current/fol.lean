@@ -660,6 +660,18 @@ begin
 end
 
 
+theorem is_tauto_prop_false
+  (P : formula) :
+  (false_.imp_ P).is_tauto :=
+begin
+  unfold formula.is_tauto,
+  intro val,
+  simp only [eval_imp],
+  unfold formula.eval,
+  simp only [is_empty.forall_iff],
+end
+
+
 theorem is_tauto_prop_1
   (P Q : formula) :
   (P.imp_ (Q.imp_ P)).is_tauto :=
@@ -736,6 +748,10 @@ begin
   case is_prop_deduct.axiom_ : h1_P h1_1
   {
     induction h1_1,
+    case is_prop_axiom.prop_false_ : h1_1_P
+    {
+      exact is_tauto_prop_false h1_1_P,
+    },
     case is_prop_axiom.prop_1_ : h1_1_P h1_1_Q
     {
       exact is_tauto_prop_1 h1_1_P h1_1_Q,
@@ -985,6 +1001,11 @@ example
   is_deduct ∅ P :=
 begin
   induction h1,
+  case is_proof_alt.prop_false_ : h1_P
+  {
+    apply is_deduct.axiom_,
+    apply is_axiom.prop_false_,
+  },
   case is_proof_alt.prop_1_ : h1_P h1_Q
   {
     apply is_deduct.axiom_,
@@ -1043,6 +1064,10 @@ begin
   case is_deduct.axiom_ : h1_P h1_1
   {
     induction h1_1,
+    case is_axiom.prop_false_ : h1_1_P
+    {
+      apply is_proof_alt.prop_false_,
+    },
     case is_axiom.prop_1_ : h1_1_P h1_1_Q
     {
       apply is_proof_alt.prop_1_,
