@@ -9,6 +9,11 @@ open formula
 
 inductive is_prop_axiom : formula → Prop
 
+-- ⊢ ⊥ → P
+| prop_false_
+  (P : formula) :
+  is_prop_axiom (false_.imp_ P)
+
 -- ⊢ P → (Q → P)
 | prop_1_
   (P Q : formula) :
@@ -48,6 +53,11 @@ def is_prop_proof (P : formula) : Prop := is_prop_deduct ∅ P
 
 
 inductive is_axiom : formula → Prop
+
+-- ⊢ ⊥ → P
+| prop_false_
+  (P : formula) :
+  is_axiom (false_.imp_ P)
 
 -- ⊢ P → (Q → P)
 | prop_1_
@@ -111,6 +121,11 @@ def is_proof (P : formula) : Prop := is_deduct ∅ P
 
 
 inductive is_proof_alt : formula → Prop
+
+-- ⊢ ⊥ → P
+| prop_false_
+  (P : formula) :
+  is_proof_alt (false_.imp_ P)
 
 -- ⊢ P → (Q → P)
 | prop_1_
