@@ -16,6 +16,7 @@ inductive pred_name_ : Type
 
 @[derive [inhabited, decidable_eq]]
 inductive formula : Type
+| false_ : formula
 | pred_ : pred_name_ → list variable_ → formula
 | not_ : formula → formula
 | imp_ : formula → formula → formula
