@@ -1327,6 +1327,52 @@ begin
 end
 
 
+lemma and_elim_left
+  (P Q : formula)
+  (Δ : set formula)
+  (h1 : (P.and_ Q) ∈ Δ) :
+  is_deduct Δ P :=
+begin
+  apply is_deduct.mp_ (P.and_ Q),
+  {
+    apply proof_imp_deduct,
+    apply prop_complete,
+    unfold formula.is_tauto,
+    simp only [eval_and, eval_imp],
+    intros val a1,
+    cases a1,
+    exact a1_left,
+  },
+  {
+    apply is_deduct.assume_,
+    exact h1,
+  }
+end
+
+
+lemma and_elim_right
+  (P Q : formula)
+  (Δ : set formula)
+  (h1 : (P.and_ Q) ∈ Δ) :
+  is_deduct Δ Q :=
+begin
+  apply is_deduct.mp_ (P.and_ Q),
+  {
+    apply proof_imp_deduct,
+    apply prop_complete,
+    unfold formula.is_tauto,
+    simp only [eval_and, eval_imp],
+    intros val a1,
+    cases a1,
+    exact a1_right,
+  },
+  {
+    apply is_deduct.assume_,
+    exact h1,
+  }
+end
+
+
 theorem T_17_14
   (P Q : formula)
   (v : variable_) :
@@ -1361,7 +1407,8 @@ begin
         },
         {
           simp only [replace_free_id],
-          sorry,
+          apply and_elim_left P Q,
+          simp only [set.union_singleton, set.mem_insert_iff, eq_self_iff_true, true_or],
         },
       }
     },
@@ -1372,7 +1419,8 @@ begin
       },
       {
         simp only [replace_free_id],
-        sorry,
+        apply and_elim_right P Q,
+        simp only [set.union_singleton, set.mem_insert_iff, eq_self_iff_true, true_or],
       }
     }
   },
