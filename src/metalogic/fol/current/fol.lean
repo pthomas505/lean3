@@ -1293,83 +1293,51 @@ end
 
 lemma and_intro
   (P Q : formula)
-  (Δ : set formula)
-  (h1 : P ∈ Δ)
-  (h2 : Q ∈ Δ) :
-  is_deduct Δ (P.and_ Q) :=
+  (Δ : set formula) :
+  is_deduct Δ (P.imp_ (Q.imp_ (P.and_ Q))) :=
 begin
-  apply is_deduct.mp_ Q,
+  apply proof_imp_deduct,
+  apply prop_complete,
+  unfold formula.is_tauto,
+  simp only [eval_and, eval_imp],
+  intros val a1 a2,
+  split,
   {
-    apply is_deduct.mp_ P,
-    {
-      apply proof_imp_deduct,
-      apply prop_complete,
-      unfold formula.is_tauto,
-      simp only [eval_and, eval_imp],
-      intros val a1 a2,
-      split,
-      {
-        exact a1,
-      },
-      {
-        exact a2,
-      },
-    },
-    {
-      apply is_deduct.assume_,
-      exact h1,
-    }
+    exact a1,
   },
   {
-    apply is_deduct.assume_,
-    exact h2,
-  }
+    exact a2,
+  },
 end
 
 
 lemma and_elim_left
   (P Q : formula)
-  (Δ : set formula)
-  (h1 : (P.and_ Q) ∈ Δ) :
-  is_deduct Δ P :=
+  (Δ : set formula) :
+  is_deduct Δ ((P.and_ Q).imp_ P) :=
 begin
-  apply is_deduct.mp_ (P.and_ Q),
-  {
-    apply proof_imp_deduct,
-    apply prop_complete,
-    unfold formula.is_tauto,
-    simp only [eval_and, eval_imp],
-    intros val a1,
-    cases a1,
-    exact a1_left,
-  },
-  {
-    apply is_deduct.assume_,
-    exact h1,
-  }
+  apply proof_imp_deduct,
+  apply prop_complete,
+  unfold formula.is_tauto,
+  simp only [eval_and, eval_imp],
+  intros val a1,
+  cases a1,
+  exact a1_left,
 end
 
 
 lemma and_elim_right
   (P Q : formula)
-  (Δ : set formula)
-  (h1 : (P.and_ Q) ∈ Δ) :
-  is_deduct Δ Q :=
+  (Δ : set formula) :
+  is_deduct Δ ((P.and_ Q).imp_ Q) :=
 begin
-  apply is_deduct.mp_ (P.and_ Q),
-  {
-    apply proof_imp_deduct,
-    apply prop_complete,
-    unfold formula.is_tauto,
-    simp only [eval_and, eval_imp],
-    intros val a1,
-    cases a1,
-    exact a1_right,
-  },
-  {
-    apply is_deduct.assume_,
-    exact h1,
-  }
+  apply proof_imp_deduct,
+  apply prop_complete,
+  unfold formula.is_tauto,
+  simp only [eval_and, eval_imp],
+  intros val a1,
+  cases a1,
+  exact a1_right,
 end
 
 
@@ -1392,11 +1360,19 @@ begin
       {
         apply deduction_theorem,
         apply deduction_theorem,
-        apply and_intro,
+        apply is_deduct.mp_,
         {
-          simp only [set.union_singleton, set.mem_insert_iff, eq_self_iff_true, true_or, or_true],
+          apply is_deduct.mp_,
+          {
+            apply and_intro,
+          },
+          {
+            apply is_deduct.assume_,
+            simp only [set.union_singleton, set.mem_insert_iff, eq_self_iff_true, true_or, or_true],
+          }
         },
         {
+          apply is_deduct.assume_,
           simp only [set.union_singleton, set.mem_insert_iff, eq_self_iff_true, true_or],
         }
       },
@@ -1407,8 +1383,14 @@ begin
         },
         {
           simp only [replace_free_id],
-          apply and_elim_left P Q,
-          simp only [set.union_singleton, set.mem_insert_iff, eq_self_iff_true, true_or],
+          apply is_deduct.mp_,
+          {
+            apply and_elim_left P Q,
+          },
+          {
+            apply is_deduct.assume_,
+            simp only [set.union_singleton, set.mem_insert_iff, eq_self_iff_true, true_or],
+          }
         },
       }
     },
@@ -1419,8 +1401,14 @@ begin
       },
       {
         simp only [replace_free_id],
-        apply and_elim_right P Q,
-        simp only [set.union_singleton, set.mem_insert_iff, eq_self_iff_true, true_or],
+        apply is_deduct.mp_,
+        {
+          apply and_elim_right P Q,
+        },
+        {
+          apply is_deduct.assume_,
+          simp only [set.union_singleton, set.mem_insert_iff, eq_self_iff_true, true_or],
+        }
       }
     }
   },
@@ -1436,6 +1424,46 @@ begin
     unfold exists_,
     unfold is_free_in,
     simp only [eq_self_iff_true, not_true, false_and, or_self, not_false_iff],
+  }
+end
+
+
+def proof_equiv (P Q : formula) : Prop := is_proof (P.iff_ Q)
+
+
+theorem T_18_1
+  (P Q : formula)
+  (v : variable_) :
+  is_proof ((forall_ v (P.iff_ Q)).imp_ ((forall_ v P).imp_ (forall_ v Q))) :=
+begin
+  unfold iff_,
+  apply deduction_theorem,
+  apply deduction_theorem,
+  simp only [set.union_singleton, insert_emptyc_eq],
+  apply generalization,
+  {
+    apply is_deduct.mp_ P,
+    {
+      apply is_deduct.mp_ ((P.imp_ Q).and_ (Q.imp_ P)),
+      {
+        apply and_elim_left,
+      },
+      {
+        apply spec_id ((P.imp_ Q).and_ (Q.imp_ P)) v,
+        apply is_deduct.assume_,
+        simp only [set.mem_insert_iff, set.mem_singleton, or_true],
+      }
+    },
+    {
+      apply spec_id P v,
+      apply is_deduct.assume_,
+      simp only [set.mem_insert_iff, eq_self_iff_true, true_and, true_or],
+    }
+  },
+  {
+    simp only [set.mem_insert_iff, set.mem_singleton_iff, forall_eq_or_imp, forall_eq],
+    unfold is_free_in,
+    simp only [eq_self_iff_true, not_true, false_and, not_false_iff, and_self],
   }
 end
 
