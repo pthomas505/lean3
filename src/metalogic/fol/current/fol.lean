@@ -607,12 +607,14 @@ end
 
 
 def formula.is_prime : formula → Prop
+| (false_) := true
 | (pred_ name args) := true
 | (not_ P) := false
 | (imp_ P Q) := false
 | (forall_ x P) := true
 
 def formula.prime_constituent_set : formula → finset formula
+| (false_) := {false_}
 | (pred_ name args) := {pred_ name args}
 | (not_ P) := P.prime_constituent_set
 | (imp_ P Q) := P.prime_constituent_set ∪ Q.prime_constituent_set
@@ -623,6 +625,7 @@ def formula.prime_constituent_set : formula → finset formula
 def valuation : Type := formula → bool
 
 def formula.eval (val : valuation) : formula → bool
+| (false_) := bool.ff
 | (pred_ name args) := val (pred_ name args)
 | (not_ P) := ! P.eval
 | (imp_ P Q) := (! P.eval) || Q.eval
