@@ -701,12 +701,13 @@ begin
       apply not_free_in_fast_replace_free_id,
       intros contra,
       apply h1_right,
-      sorry,
+      apply is_free_in_imp_occurs_in,
+      exact contra,
     },
     {
       unfold fast_replace_free,
       simp only [if_neg h1_left],
-      squeeze_simp,
+      simp only [eq_self_iff_true, true_and],
       exact P_ih h1_right,
     }
   },
