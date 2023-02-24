@@ -350,7 +350,8 @@ begin
   case formula.pred_ : name args binders h1
   {
     unfold replace_free_aux,
-    simp only [eq_self_iff_true, list.map_eq_self_iff, ite_eq_right_iff, and_imp, true_and],
+    congr,
+    simp only [list.map_eq_self_iff, ite_eq_right_iff, and_imp],
     intros x a1 a2 a3,
     subst a2,
     contradiction,
@@ -358,14 +359,13 @@ begin
   case formula.not_ : P P_ih binders h1
   {
     unfold replace_free_aux,
-    simp only,
+    congr,
     exact P_ih binders h1,
   },
   case formula.imp_ : P Q P_ih Q_ih binders h1
   {
     unfold replace_free_aux,
-    simp only,
-    split,
+    congr,
     {
       exact P_ih binders h1,
     },
@@ -376,17 +376,11 @@ begin
   case formula.forall_ : x P P_ih binders h1
   {
     unfold replace_free_aux,
-    simp only,
-    split,
-    {
-      refl,
-    },
-    {
-      apply P_ih,
-      simp only [finset.mem_union, finset.mem_singleton],
-      apply or.intro_left,
-      exact h1,
-    }
+    simp only [eq_self_iff_true, true_and],
+    apply P_ih,
+    simp only [finset.mem_union, finset.mem_singleton],
+    apply or.intro_left,
+    exact h1,
   },
 end
 
