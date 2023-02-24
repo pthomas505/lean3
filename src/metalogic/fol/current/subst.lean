@@ -617,7 +617,7 @@ lemma replace_free_aux_not_mem_free
   (P : formula)
   (v t : variable_)
   (binders : finset variable_)
-  (h1 : v ∉ P.free_var_set) :
+  (h1 : ¬ is_free_in v P) :
   replace_free_aux v t binders P = P :=
 begin
   induction P generalizing binders,
