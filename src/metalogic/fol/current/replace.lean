@@ -58,7 +58,7 @@ def fast_replace_free (v t : variable_) : formula → formula
 | (not_ P) := not_ (fast_replace_free P)
 | (imp_ P Q) := imp_ (fast_replace_free P) (fast_replace_free Q)
 | (forall_ x P) :=
-  if x = v
+  if v = x
   then forall_ x P
   else forall_ x (fast_replace_free P)
 
@@ -168,7 +168,6 @@ begin
       simp only [eq_self_iff_true, true_and],
       apply P_ih,
       apply h1,
-      simp only [eq_comm] at h,
       exact h,
     }
   },
@@ -241,7 +240,6 @@ begin
     {
       unfold fast_replace_free,
       simp [if_neg h1_left],
-      intros a1,
       apply not_free_in_fast_replace_free_id,
       intros contra,
       apply h1_right,
@@ -315,7 +313,6 @@ begin
       unfold is_free_in,
       simp only [not_and],
       intros a1,
-      simp only [eq_comm] at h,
       contradiction,
     },
     {
@@ -441,7 +438,6 @@ begin
       apply replace_free_aux_mem_binders,
       simp only [finset.mem_union, finset.mem_singleton],
       apply or.intro_right,
-      symmetry,
       exact h,
     },
     {
@@ -454,7 +450,6 @@ begin
         exact h1,
       },
       {
-        simp only [eq_comm] at h,
         exact h,
       }
     }
