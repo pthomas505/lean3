@@ -610,8 +610,8 @@ end
 theorem not_free_in_fast_replace_free_id
   (P : formula)
   (v t : variable_)
-  (h1 : ¬ is_free_in t P) :
-  fast_replace_free t v P = P :=
+  (h1 : ¬ is_free_in v P) :
+  fast_replace_free v t P = P :=
 begin
   induction P,
   case formula.true_
