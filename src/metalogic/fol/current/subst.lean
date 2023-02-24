@@ -1321,11 +1321,11 @@ begin
   },
   case is_prop_sub.forall_same_ : h1_x h1_P h1_v h1_t h1_P' h1_1
   {
-    apply fast_replace_free_not_mem_free,
-    unfold formula.free_var_set,
+    apply not_free_in_fast_replace_free_id,
+    unfold is_free_in,
     simp only [finset.mem_sdiff, finset.mem_singleton, not_and, not_not],
     intros a1,
-    exact h1_1,
+    contradiction,
   },
   case is_prop_sub.forall_diff_nel_ : h1_x h1_P h1_v h1_t h1_P' h1_1 h1_2 h1_3 h1_ih
   {
