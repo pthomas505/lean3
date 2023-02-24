@@ -23,7 +23,7 @@ If $P$ is a formula, $v$ is a variable, and $t$ is a term, then $P(t/v)$ is the 
   v → t in P
 -/
 def replace_free_aux (v t : variable_) : finset variable_ → formula → formula
-| _ true_ := true_
+| _ (true_) := true_
 | binders (pred_ name args) :=
     pred_ name (args.map (fun (x : variable_),
       if v = x ∧ x ∉ binders
@@ -43,13 +43,6 @@ def replace_free (v t : variable_) (P : formula) : formula :=
   replace_free_aux v t ∅ P
 
 
-/-- v → t -/
-def replace
-  {α : Type}
-  [decidable_eq α]
-  (v t x : α) : α :=
-  if v = x then t else x
-
 /--
   fast_replace_free v t P =
   P (t/v) ;
@@ -57,7 +50,11 @@ def replace
 -/
 def fast_replace_free (v t : variable_) : formula → formula
 | (true_) := true_
-| (pred_ name args) := pred_ name (args.map (replace v t))
+| (pred_ name args) :=
+    pred_ name (args.map (fun (x : variable_),
+      if v = x
+      then t
+      else x))
 | (not_ P) := not_ (fast_replace_free P)
 | (imp_ P Q) := imp_ (fast_replace_free P) (fast_replace_free Q)
 | (forall_ x P) :=
@@ -80,10 +77,7 @@ begin
   {
     unfold fast_replace_free,
     congr,
-    simp only [list.map_eq_self_iff],
-    intros x a1,
-    unfold replace,
-    simp only [ite_eq_right_iff, imp_self],
+    simp only [list.map_eq_self_iff, ite_eq_right_iff, imp_self, implies_true_iff],
   },
   case formula.not_ : P P_ih
   {
@@ -130,17 +124,10 @@ begin
 
     unfold fast_replace_free,
     congr,
-    simp only [list.map_eq_self_iff],
-    intros x a1,
-    unfold replace,
-    split_ifs,
-    {
-      subst h,
-      contradiction,
-    },
-    {
-      refl,
-    }
+    simp only [list.map_eq_self_iff, ite_eq_right_iff],
+    intros x a1 a2,
+    subst a2,
+    contradiction,
   },
   case formula.not_ : P P_ih
   {
@@ -203,7 +190,6 @@ begin
     congr,
     simp only [list.map_map, list.map_eq_self_iff, function.comp_app],
     intros x a1,
-    unfold replace,
     split_ifs,
     {
       exact h,
@@ -285,7 +271,6 @@ begin
     unfold is_free_in,
     simp only [list.mem_to_finset, list.mem_map, not_exists, not_and],
     intros x a1,
-    unfold replace,
     split_ifs,
     {
       simp only [eq_comm],
@@ -401,33 +386,22 @@ begin
   {
     unfold replace_free_aux,
     unfold fast_replace_free,
-    simp only [list.map_eq_map_iff, eq_self_iff_true, true_and],
-    intros x a1,
-    split_ifs,
+    congr,
+    funext,
+    by_cases c1 : v = x,
     {
-      unfold replace,
-      split_ifs,
-      {
-        refl,
-      },
-      {
-        cases h,
-        contradiction,
-      }
+      simp only [if_pos c1],
+      subst c1,
+      simp only [eq_self_iff_true, true_and, ite_not, ite_eq_right_iff],
+      intros a1,
+      contradiction,
     },
     {
-      unfold replace,
-      split_ifs,
-      {
-        subst h_1,
-        push_neg at h,
-        simp only [eq_self_iff_true, forall_true_left] at h,
-        contradiction,
-      },
-      {
-        refl,
-      }
-    },
+      simp only [if_neg c1],
+      simp only [ite_eq_right_iff, and_imp],
+      intros a1,
+      contradiction,
+    }
   },
   case formula.not_ : P P_ih binders h1
   {
