@@ -467,4 +467,190 @@ begin
 end
 
 
+def function.update_ite
+  {α β : Type}
+  [decidable_eq α]
+  (f : α → β)
+  (a' : α) (b : β) (a : α) :=
+  if a = a' then b else f a
+
+/-
+  The simultaneous replacement of the free variables in a formula.
+-/
+def fast_simult_replace_free : (variable_ → variable_) → formula → formula
+| _ true_ := true_
+| σ (pred_ name args) := pred_ name (args.map σ)
+| σ (not_ P) := not_ (fast_simult_replace_free σ P)
+| σ (imp_ P Q) := imp_ (fast_simult_replace_free σ P) (fast_simult_replace_free σ Q)
+| σ (forall_ x P) := forall_ x (fast_simult_replace_free (function.update_ite σ x x) P)
+
+
+@[simp]
+lemma function.update_ite_idem
+  {α β : Type}
+  [decidable_eq α]
+  (f : α → β)
+  (a : α)
+  (x y : β)  :
+  function.update_ite (function.update_ite f a x) a y =
+    function.update_ite f a y :=
+begin
+  funext,
+  unfold function.update_ite,
+  split_ifs,
+  {
+    refl,
+  },
+  {
+    refl,
+  }
+end
+
+
+lemma function.update_ite_id
+  {α : Type}
+  [decidable_eq α]
+  (x : α) :
+  function.update_ite (id : α → α) x x = id :=
+begin
+  funext,
+  unfold function.update_ite,
+  split_ifs,
+  {
+    subst h,
+    simp only [id.def],
+  },
+  {
+    refl,
+  }
+end
+
+
+lemma fast_simult_replace_free_id
+  (P : formula) :
+  fast_simult_replace_free id P = P :=
+begin
+  induction P,
+  case formula.true_
+  {
+    refl,
+  },
+  case formula.pred_ : name args
+  {
+    unfold fast_simult_replace_free,
+    simp only [list.map_id, eq_self_iff_true, and_self],
+  },
+  case formula.not_ : P P_ih
+  {
+    unfold fast_simult_replace_free,
+    congr,
+    exact P_ih,
+  },
+  case formula.imp_ : P Q P_ih Q_ih
+  {
+    unfold fast_simult_replace_free,
+    congr,
+    {
+      exact P_ih,
+    },
+    {
+      exact Q_ih,
+    }
+  },
+  case formula.forall_ : x P P_ih
+  {
+    unfold fast_simult_replace_free,
+    simp only [eq_self_iff_true, true_and],
+    simp only [function.update_ite_id],
+    exact P_ih,
+  },
+end
+
+
+example
+  (P : formula)
+  (v t : variable_) :
+  fast_simult_replace_free (function.update_ite id v t) P = fast_replace_free v t P :=
+begin
+  induction P,
+  case formula.true_
+  {
+    refl,
+  },
+  case formula.pred_ : name args
+  {
+    unfold fast_simult_replace_free,
+    unfold fast_replace_free,
+    simp only [eq_self_iff_true, true_and],
+    apply list.map_congr,
+    intros x a1,
+    unfold function.update_ite,
+    split_ifs,
+    {
+      refl,
+    },
+    {
+      simp only [id.def],
+    },
+  },
+  case formula.not_ : P P_ih
+  {
+    unfold fast_simult_replace_free,
+    unfold fast_replace_free,
+    congr,
+    exact P_ih,
+  },
+  case formula.imp_ : P Q P_ih Q_ih
+  {
+    unfold fast_simult_replace_free,
+    unfold fast_replace_free,
+    congr,
+    {
+      exact P_ih,
+    },
+    {
+      exact Q_ih,
+    }
+  },
+  case formula.forall_ : x P P_ih
+  {
+    unfold fast_simult_replace_free,
+    unfold fast_replace_free,
+    split_ifs,
+    {
+      subst h,
+      simp only [eq_self_iff_true, function.update_ite_idem, true_and],
+
+      simp only [function.update_ite_id],
+      apply fast_simult_replace_free_id,
+    },
+    {
+      have s1 : (function.update_ite (function.update_ite (id : variable_ → variable_) v t) x x) = function.update_ite id v t,
+      funext,
+      unfold function.update_ite,
+      split_ifs,
+      {
+        subst h_1,
+        simp only [eq_comm] at h_2,
+        contradiction,
+      },
+      {
+        subst h_1,
+        simp only [id.def],
+      },
+      {
+        refl,
+      },
+      {
+        refl,
+      },
+
+      simp only [eq_self_iff_true, true_and],
+      simp only [s1],
+      exact P_ih,
+    }
+  },
+end
+
+
 #lint
