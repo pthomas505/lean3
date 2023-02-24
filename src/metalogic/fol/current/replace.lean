@@ -75,8 +75,9 @@ begin
   {
     unfold fast_replace_free,
     simp only [eq_self_iff_true, list.map_eq_self_iff, true_and],
+    intros x a1,
     unfold replace,
-    simp only [ite_eq_right_iff, imp_self, implies_true_iff],
+    simp only [ite_eq_right_iff, imp_self],
   },
   case formula.not_ : P P_ih
   {
