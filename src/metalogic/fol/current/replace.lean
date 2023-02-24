@@ -50,6 +50,11 @@ def replace
   (v t x : α) : α :=
   if v = x then t else x
 
+/--
+  fast_replace_free v t P =
+  P (t/v) ;
+  v → t in P
+-/
 def fast_replace_free (v t : variable_) : formula → formula
 | (true_) := true_
 | (pred_ name args) := pred_ name (args.map (replace v t))
