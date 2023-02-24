@@ -564,6 +564,26 @@ begin
 end
 
 
+theorem fast_replace_free_inverse
+  (P : formula)
+  (v t : variable_)
+  (h1 : ¬ occurs_in t P) :
+  fast_replace_free t v (fast_replace_free v t P) = P :=
+begin
+  induction P,
+  case formula.true_
+  { admit },
+  case formula.pred_ : P_ᾰ P_ᾰ_1
+  { admit },
+  case formula.not_ : P_ᾰ P_ih
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
+  { admit },
+  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih
+  { admit },
+end
+
+
 lemma replace_free_aux_mem_binders
   (P : formula)
   (v t : variable_)
