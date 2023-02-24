@@ -92,8 +92,7 @@ begin
   },
 end
 
-
-lemma admits_id
+theorem admits_id
   (P : formula)
   (v : variable_) :
   admits v v P :=
