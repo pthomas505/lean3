@@ -411,7 +411,7 @@ begin
 end
 
 
-lemma replace_free_id
+theorem replace_free_id
   (P : formula)
   (v : variable_) :
   replace_free v v P = P :=
@@ -496,7 +496,7 @@ begin
 end
 
 
-lemma is_free_in_replace_free
+theorem is_free_in_replace_free
   (P : formula)
   (v t : variable_)
   (h1 : ¬ v = t) :
@@ -601,7 +601,7 @@ begin
 end
 
 
-lemma replace_free_inverse
+theorem replace_free_inverse
   (P : formula)
   (v t : variable_)
   (h1 : ¬ occurs_in t P) :
