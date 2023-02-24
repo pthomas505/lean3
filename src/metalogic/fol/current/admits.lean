@@ -262,8 +262,30 @@ begin
   { admit },
   case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h2
   { admit },
-  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih binders h2
-  { admit },
+  case formula.forall_ : x P P_ih binders h2
+  {
+    unfold is_bound_in at h1,
+    push_neg at h1,
+    cases h1,
+
+    unfold fast_admits_aux,
+    apply or.intro_right,
+    apply P_ih,
+    {
+      exact h1_right,
+    },
+    {
+      simp only [finset.mem_union, finset.mem_singleton],
+      push_neg,
+      split,
+      {
+        exact h2,
+      },
+      {
+        exact h1_left,
+      }
+    }
+  },
 end
 
 
