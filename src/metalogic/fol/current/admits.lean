@@ -177,6 +177,26 @@ begin
 end
 
 
+lemma not_bound_in_imp_fast_admits_aux
+  (P : formula)
+  (v u : variable_)
+  (binders : finset variable_)
+  (h1 : ¬ is_bound_in u P) :
+  fast_admits_aux v u binders P :=
+begin
+  induction P generalizing binders,
+  case formula.true_ : binders
+  { admit },
+  case formula.pred_ : P_ᾰ P_ᾰ_1 binders
+  { admit },
+  case formula.not_ : P_ᾰ P_ih binders
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders
+  { admit },
+  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih binders
+  { admit },
+end
+
 
 lemma replace_free_aux_admits_aux
   (P : formula)
