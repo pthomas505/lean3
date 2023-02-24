@@ -19,14 +19,14 @@ An occurrence of a variable $v$ in a formula $P$ is bound if and only if it occu
 
 
 def formula.bound_var_set : formula → finset variable_
-| (false_) := ∅ 
+| (true_) := ∅
 | (pred_ name args) := ∅
 | (not_ P) := P.bound_var_set
 | (imp_ P Q) := P.bound_var_set ∪ Q.bound_var_set
 | (forall_ x P) := P.bound_var_set ∪ {x}
 
 def is_bound_in (v : variable_) : formula → Prop
-| (false_) := false
+| (true_) := false
 | (pred_ name args) := false
 | (not_ P) := is_bound_in P
 | (imp_ P Q) := is_bound_in P ∨ is_bound_in Q
@@ -39,7 +39,7 @@ example
   is_bound_in v P ↔ v ∈ P.bound_var_set :=
 begin
   induction P,
-  case formula.false_
+  case formula.true_
   {
     refl,
   },
@@ -97,14 +97,14 @@ end
 
 
 def formula.free_var_set : formula → finset variable_
-| (false_) := ∅
+| (true_) := ∅
 | (pred_ name args) := args.to_finset
 | (not_ P) := P.free_var_set
 | (imp_ P Q) := P.free_var_set ∪ Q.free_var_set
 | (forall_ x P) := P.free_var_set \ {x}
 
 def is_free_in (v : variable_) : formula → Prop
-| (false_) := false
+| (true_) := false
 | (pred_ name args) := v ∈ args.to_finset
 | (not_ P) := is_free_in P
 | (imp_ P Q) := is_free_in P ∨ is_free_in Q
@@ -117,7 +117,7 @@ example
   is_free_in v P ↔ v ∈ P.free_var_set :=
 begin
   induction P,
-  case formula.false_
+  case formula.true_
   {
     refl,
   },
@@ -173,7 +173,7 @@ end
 
 
 def occurs_in (v : variable_) : formula → Prop
-| (false_) := false
+| (true_) := false
 | (pred_ name args) := v ∈ args
 | (not_ P) := occurs_in P
 | (imp_ P Q) := occurs_in P ∨ occurs_in Q
@@ -193,7 +193,7 @@ If $P$ is a formula, $v$ is a variable, and $t$ is a term, then $P(t/v)$ is the 
   v → t in P
 -/
 def replace_free_aux (v t : variable_) : finset variable_ → formula → formula
-| _ false_ := false_
+| _ true_ := true_
 | binders (pred_ name args) :=
     pred_ name (args.map (fun (x : variable_),
       if v = x ∧ x ∉ binders
@@ -220,7 +220,7 @@ lemma replace_free_aux_id
   replace_free_aux v v binders P = P :=
 begin
   induction P generalizing binders,
-  case formula.false_ : binders
+  case formula.true_ : binders
   {
     refl,
   },
@@ -276,7 +276,7 @@ lemma is_free_in_replace_free_aux
   ¬ is_free_in v (replace_free_aux v t binders P) :=
 begin
   induction P generalizing binders,
-  case formula.false_ : binders h2
+  case formula.true_ : binders h2
   {
     unfold replace_free_aux,
     unfold is_free_in,
@@ -363,7 +363,7 @@ lemma replace_free_aux_inverse
   replace_free_aux t v binders (replace_free_aux v t binders P) = P :=
 begin
   induction P generalizing binders,
-  case formula.false_ : binders h2
+  case formula.true_ : binders h2
   {
     refl,
   },
@@ -467,7 +467,7 @@ lemma replace_free_aux_mem_binders
   replace_free_aux v t binders P = P :=
 begin
   induction P generalizing binders,
-  case formula.false_ : binders h1
+  case formula.true_ : binders h1
   {
     refl,
   },
@@ -523,7 +523,7 @@ def replace
   if v = x then t else x
 
 def fast_replace_free (v t : variable_) : formula → formula
-| (false_) := false_
+| (true_) := true_
 | (pred_ name args) := pred_ name (args.map (replace v t))
 | (not_ P) := not_ (fast_replace_free P)
 | (imp_ P Q) := imp_ (fast_replace_free P) (fast_replace_free Q)
@@ -541,7 +541,7 @@ lemma replace_free_aux_eq_fast_replace_free
   replace_free_aux v t binders P = fast_replace_free v t P :=
 begin
   induction P generalizing binders,
-  case formula.false_ : binders h1
+  case formula.true_ : binders h1
   {
     refl,
   },
@@ -644,7 +644,7 @@ lemma fast_replace_free_not_mem_free
   fast_replace_free v t P = P :=
 begin
   induction P,
-  case formula.false_
+  case formula.true_
   {
     refl,
   },
@@ -737,7 +737,7 @@ If $v$ and $u$ are variables and $P$ is a formula, then $P$ admits $u$ for $v$ i
   v → u in P
 -/
 def admits_aux (v u : variable_) : finset variable_ → formula → Prop
-| _ false_ := true
+| _ true_ := true
 | binders (pred_ name args) :=
     (v ∈ args ∧ v ∉ binders) → -- if there is a free occurrence of v in P
     u ∉ binders -- then it does not become a bound occurrence of u in P(u/v)
@@ -761,7 +761,7 @@ lemma admits_aux_id
   admits_aux v v binders P :=
 begin
   induction P generalizing binders,
-  case formula.false_ : binders
+  case formula.true_ : binders
   {
     unfold admits_aux,
   },
@@ -812,7 +812,7 @@ lemma replace_free_aux_admits_aux
   admits_aux t v binders (replace_free_aux v t binders P) :=
 begin
   induction P generalizing binders,
-  case formula.false_ : binders
+  case formula.true_ : binders
   {
     unfold replace_free_aux,
   },
@@ -895,7 +895,7 @@ example
   admits_aux v u S P :=
 begin
   induction P generalizing S,
-  case formula.false_ : S h1
+  case formula.true_ : S h1
   {
     unfold admits_aux,
   },
@@ -965,7 +965,7 @@ example
   admits_aux v u (S ∪ T) P :=
 begin
   induction P generalizing S,
-  case formula.false_ : S h1
+  case formula.true_ : S h1
   {
     unfold admits_aux,
   },
@@ -1021,7 +1021,7 @@ end
 
 
 def fast_admits_aux (v u : variable_) : finset variable_ → formula → Prop
-| _ false_ := true
+| _ true_ := true
 | binders (pred_ name args) :=
     v ∈ args → -- if there is a free occurrence of v in P
     u ∉ binders -- then it does not become a bound occurrence of u in P(u/v)
@@ -1041,7 +1041,7 @@ lemma fast_admits_aux_del_binders
   fast_admits_aux v u S P :=
 begin
   induction P generalizing S,
-  case formula.false_ : S h1
+  case formula.true_ : S h1
   {
     unfold fast_admits_aux,
   },
@@ -1107,7 +1107,7 @@ lemma fast_admits_aux_mem_free
   u ∉ binders :=
 begin
   induction P generalizing binders,
-  case formula.false_ : binders h1
+  case formula.true_ : binders h1
   {
     unfold formula.free_var_set at h2,
     simp only [finset.not_mem_empty] at h2,
@@ -1177,7 +1177,7 @@ lemma admits_aux_imp_fast_admits_aux
   fast_admits_aux v u binders P :=
 begin
   induction P generalizing binders,
-  case formula.false_ : binders h1 h2
+  case formula.true_ : binders h1 h2
   {
     unfold fast_admits_aux,
   },
@@ -1257,7 +1257,7 @@ lemma fast_admits_aux_imp_admits_aux
   admits_aux v u binders P :=
 begin
   induction P generalizing binders,
-  case formula.false_ : binders h1
+  case formula.true_ : binders h1
   {
     unfold admits_aux,
   },
@@ -1379,7 +1379,7 @@ lemma not_mem_free_imp_fast_admits_aux
   fast_admits_aux v u binders P :=
 begin
   induction P generalizing binders,
-  case formula.false_ : binders
+  case formula.true_ : binders
   {
     unfold fast_admits_aux,
   },
@@ -1448,7 +1448,7 @@ end
 
 @[derive [inhabited, decidable_eq]]
 inductive bool_formula : Type
-| false_ : bool_formula
+| true_ : bool_formula
 | pred_ : pred_name_ → list bool → bool_formula
 | not_ : bool_formula → bool_formula
 | imp_ : bool_formula → bool_formula → bool_formula
@@ -1456,7 +1456,7 @@ inductive bool_formula : Type
 
 
 def to_is_bound_aux : finset variable_ → formula → bool_formula
-| _ false_ := bool_formula.false_
+| _ true_ := bool_formula.true_
 | binders (pred_ name args) := bool_formula.pred_ name (args.map (fun (v : variable_), v ∈ binders))
 | binders (not_ P) := bool_formula.not_ (to_is_bound_aux binders P)
 | binders (imp_ P Q) := bool_formula.imp_ (to_is_bound_aux binders P) (to_is_bound_aux binders Q)
@@ -1475,7 +1475,7 @@ lemma fast_admits_aux_imp_free_and_bound_unchanged
   to_is_bound_aux binders P = to_is_bound_aux binders (fast_replace_free v u P) :=
 begin
   induction P generalizing binders,
-  case formula.false_ : binders h1 h2
+  case formula.true_ : binders h1 h2
   {
     refl,
   },
@@ -1602,7 +1602,7 @@ lemma free_and_bound_unchanged_imp_fast_admits_aux
   fast_admits_aux v u binders P :=
 begin
   induction P generalizing binders,
-  case formula.false_ : binders h1 h2
+  case formula.true_ : binders h1 h2
   {
     unfold fast_admits_aux,
   },
@@ -1731,9 +1731,9 @@ end
 
 
 inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
-| false_
+| true_
   (v t : variable_) :
-  is_prop_sub false_ v t false_
+  is_prop_sub true_ v t true_
 
 | pred_
   (name : pred_name_) (args : list variable_)
@@ -1791,10 +1791,10 @@ lemma fast_admits_aux_and_fast_replace_free_imp_is_prop_sub
 begin
   subst h2,
   induction P generalizing binders,
-  case formula.false_ : binders h1
+  case formula.true_ : binders h1
   {
     unfold fast_replace_free,
-    apply is_prop_sub.false_,
+    apply is_prop_sub.true_,
   },
   case formula.pred_ : name args binders h1
   {
@@ -1899,7 +1899,7 @@ begin
   clear h1,
 
   induction h1_1 generalizing binders,
-  case is_prop_sub.false_ : h1_1_v h1_1_t binders h2
+  case is_prop_sub.true_ : h1_1_v h1_1_t binders h2
   {
     unfold fast_admits_aux,
   },
@@ -1970,7 +1970,7 @@ lemma is_prop_sub_imp_fast_replace_free
   fast_replace_free v u P = P' :=
 begin
   induction h1,
-  case is_prop_sub.false_ : h1_v h1_t
+  case is_prop_sub.true_ : h1_v h1_t
   {
     refl,
   },
@@ -2088,7 +2088,7 @@ end
   The simultaneous replacement of the free variables in a formula.
 -/
 def fast_simult_replace_free : (variable_ → variable_) → formula → formula
-| _ false_ := false_
+| _ true_ := true_
 | σ (pred_ name args) := pred_ name (args.map σ)
 | σ (not_ P) := not_ (fast_simult_replace_free σ P)
 | σ (imp_ P Q) := imp_ (fast_simult_replace_free σ P) (fast_simult_replace_free σ Q)
@@ -2119,7 +2119,7 @@ lemma fast_simult_replace_free_id
   fast_simult_replace_free id P = P :=
 begin
   induction P,
-  case formula.false_
+  case formula.true_
   {
     refl,
   },
@@ -2161,7 +2161,7 @@ example
   fast_simult_replace_free (function.update_ite id v t) P = fast_replace_free v t P :=
 begin
   induction P,
-  case formula.false_
+  case formula.true_
   {
     refl,
   },
@@ -2242,7 +2242,7 @@ end
 
 
 def simult_admits_aux (σ : variable_ → variable_) : finset variable_ → formula → Prop
-| _ false_ := true
+| _ true_ := true
 | binders (pred_ name args) :=
     ∀ (v : variable_), v ∈ args ∧ v ∉ binders → σ v ∉ binders
 | binders (not_ P) := simult_admits_aux binders P

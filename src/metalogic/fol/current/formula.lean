@@ -16,7 +16,7 @@ inductive pred_name_ : Type
 
 @[derive [inhabited, decidable_eq]]
 inductive formula : Type
-| false_ : formula
+| true_ : formula
 | pred_ : pred_name_ → list variable_ → formula
 | not_ : formula → formula
 | imp_ : formula → formula → formula
@@ -24,6 +24,9 @@ inductive formula : Type
 
 open formula
 
+
+-- ⊥ := ¬ ⊤
+def formula.false_ : formula := not_ true_
 
 -- P ∨ Q := ~ P → Q
 def formula.or_ (P Q : formula) : formula := (not_ P).imp_ Q
@@ -36,6 +39,12 @@ def formula.iff_ (P Q : formula) : formula := (P.imp_ Q).and_ (Q.imp_ P)
 
 -- ∃ x P := ~ ∀ x ~ P
 def formula.exists_ (x : variable_) (P : formula) : formula := not_ (forall_ x (not_ P))
+
+
+-- Forall [x0 ... xn] P := ∀ x0 ... ∀ xn P
+def formula.Forall_ : list variable_ → formula → formula
+| [] P := P
+| (x :: xs) P := forall_ x (formula.Forall_ xs P)
 
 
 #lint

@@ -9,10 +9,9 @@ open formula
 
 inductive is_prop_axiom : formula → Prop
 
--- ⊢ ⊥ → P
-| prop_false_
-  (P : formula) :
-  is_prop_axiom (false_.imp_ P)
+-- ⊢ ⊤
+| prop_true_ :
+  is_prop_axiom true_
 
 -- ⊢ P → (Q → P)
 | prop_1_
@@ -54,10 +53,9 @@ def is_prop_proof (P : formula) : Prop := is_prop_deduct ∅ P
 
 inductive is_axiom : formula → Prop
 
--- ⊢ ⊥ → P
-| prop_false_
-  (P : formula) :
-  is_axiom (false_.imp_ P)
+-- ⊢ ⊤
+| prop_true_ :
+  is_axiom true_
 
 -- ⊢ P → (Q → P)
 | prop_1_
@@ -76,24 +74,25 @@ inductive is_axiom : formula → Prop
 
 -- ⊢ (∀ v (P → Q)) → ((∀ v P) → (∀ v Q))
 | pred_1_
-  (P Q : formula) (v : variable_) :
+  (v : variable_) (P Q : formula) :
   is_axiom ((forall_ v (P.imp_ Q)).imp_ ((forall_ v P).imp_ (forall_ v Q)))
 
 -- ⊢ (∀ v P) → P(t/v)  provided P admits t for v
 | pred_2_
-  (v : variable_) (P : formula) (t : variable_) :
+  (v t : variable_) (P P' : formula) :
   admits v t P →
-  is_axiom ((forall_ v P).imp_ (replace_free v t P))
+  replace_free v t P = P' →
+  is_axiom ((forall_ v P).imp_ P')
 
 -- ⊢ P → (∀ v P)  provided v is not free in P
 | pred_3_
-  (P : formula) (v : variable_) :
+  (v : variable_) (P : formula) :
   ¬ is_free_in v P →
   is_axiom (P.imp_ (forall_ v P))
 
 -- ⊢ P ⇒ ⊢ ∀ v P
 | gen_
-  (P : formula) (v : variable_) :
+  (v : variable_) (P : formula) :
   is_axiom P →
   is_axiom (forall_ v P)
 
@@ -122,10 +121,9 @@ def is_proof (P : formula) : Prop := is_deduct ∅ P
 
 inductive is_proof_alt : formula → Prop
 
--- ⊢ ⊥ → P
-| prop_false_
-  (P : formula) :
-  is_proof_alt (false_.imp_ P)
+-- ⊢ ⊤
+| prop_true_ :
+  is_proof_alt true_
 
 -- ⊢ P → (Q → P)
 | prop_1_
@@ -144,24 +142,25 @@ inductive is_proof_alt : formula → Prop
 
 -- ⊢ (∀ v (P → Q)) → ((∀ v P) → (∀ v Q))
 | pred_1_
-  (P Q : formula) (v : variable_) :
+  (v : variable_) (P Q : formula) :
   is_proof_alt ((forall_ v (P.imp_ Q)).imp_ ((forall_ v P).imp_ (forall_ v Q)))
 
 -- ⊢ (∀ v P) → P(t/v)  provided P admits t for v
 | pred_2_
-  (v : variable_) (P : formula) (t : variable_) :
+  (v t : variable_) (P P' : formula) :
   admits v t P →
-  is_proof_alt ((forall_ v P).imp_ (replace_free v t P))
+  replace_free v t P = P' →
+  is_proof_alt ((forall_ v P).imp_ P')
 
 -- ⊢ P → (∀ v P)  provided v is not free in P
 | pred_3_
-  (P : formula) (v : variable_) :
+  (v : variable_) (P : formula) :
   ¬ is_free_in v P →
   is_proof_alt (P.imp_ (forall_ v P))
 
 -- ⊢ P ⇒ ⊢ ∀ v P
 | gen_
-  (P : formula) (v : variable_) :
+  (v : variable_) (P : formula) :
   is_proof_alt P →
   is_proof_alt (forall_ v P)
 

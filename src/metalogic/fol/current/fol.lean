@@ -7,77 +7,14 @@ set_option pp.parens true
 open formula
 
 
-lemma pred_1_mp
-  (P Q : formula)
-  (v : variable_)
-  (Δ : set formula)
-  (h1 : is_deduct Δ (forall_ v (P.imp_ Q)))
-  (h2 : is_deduct Δ (forall_ v P)) :
-  is_deduct Δ (forall_ v Q) :=
-begin
-  apply is_deduct.mp_,
-  {
-    apply is_deduct.mp_,
-    {
-      apply is_deduct.axiom_,
-      exact is_axiom.pred_1_ P Q v,
-    },
-    {
-      exact h1,
-    }
-  },
-  {
-    exact h2,
-  }
-end
-
-
-lemma pred_2_mp
-  (v : variable_)
-  (P : formula)
-  (t : variable_)
-  (Δ : set formula)
-  (h1 : admits v t P)
-  (h2 : is_deduct Δ (forall_ v P)) :
-  is_deduct Δ (replace_free v t P) :=
-begin
-  apply is_deduct.mp_,
-  {
-    apply is_deduct.axiom_,
-    exact is_axiom.pred_2_ v P t h1,
-  },
-  {
-    exact h2,
-  }
-end
-
-
-lemma pred_3_mp
-  (P : formula)
-  (v : variable_)
-  (Δ : set formula)
-  (h1 : ¬ is_free_in v P)
-  (h2 : is_deduct Δ P) :
-  is_deduct Δ (forall_ v P) :=
-begin
-  apply is_deduct.mp_,
-  {
-    apply is_deduct.axiom_,
-    exact is_axiom.pred_3_ P v h1,
-  },
-  {
-    exact h2,
-  }
-end
-
-
 lemma proof_imp_deduct
   (P : formula)
   (h1 : is_proof P) :
   ∀ (Δ : set formula), is_deduct Δ P :=
 begin
-  intros Δ,
   unfold is_proof at h1,
+
+  intros Δ,
   induction h1,
   case is_deduct.axiom_ : h1_P h1_1
   {
@@ -119,6 +56,8 @@ begin
     exact is_axiom.prop_1_ P P,
   },
 end
+
+alias T_13_5 <- prop_id
 
 
 theorem T_13_6
@@ -164,8 +103,6 @@ begin
   induction h1,
   case is_deduct.axiom_ : h1_P h1_1
   {
-    -- Case 1
-
     apply is_deduct.mp_,
     {
       apply is_deduct.axiom_,
@@ -181,15 +118,11 @@ begin
     simp only [set.union_singleton, set.mem_insert_iff] at h1_1,
     cases h1_1,
     {
-      -- Case 3
-
-      rewrite h1_1,
+      subst h1_1,
       apply proof_imp_deduct,
-      exact T_13_5 P,
+      exact prop_id h1_P,
     },
     {
-      -- Case 2
-
       apply is_deduct.mp_,
       {
         apply is_deduct.axiom_,
@@ -203,8 +136,6 @@ begin
   },
   case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
   {
-    -- Case 4
-
     apply is_deduct.mp_,
     {
       apply is_deduct.mp_,
@@ -258,15 +189,15 @@ begin
   unfold is_proof,
 
   apply deduction_theorem,
-  apply is_deduct.mp_,
+  apply is_deduct.mp_ P.not_.not_,
   {
-    apply is_deduct.mp_,
+    apply is_deduct.mp_ (P.not_.imp_ P.not_.not_.not_),
     {
       apply is_deduct.axiom_,
       apply is_axiom.prop_3_,
     },
     {
-      apply is_deduct.mp_,
+      apply is_deduct.mp_ P.not_.not_,
       {
         apply proof_imp_deduct,
         apply T_13_6,
@@ -290,14 +221,14 @@ theorem T_14_6
 begin
   unfold is_proof,
 
-  apply is_deduct.mp_,
+  apply is_deduct.mp_ (P.not_.not_.not_.imp_ P.not_),
   {
     apply is_deduct.axiom_,
-    apply is_axiom.prop_3_,
+    exact is_axiom.prop_3_ P.not_.not_ P,
   },
   {
     apply proof_imp_deduct,
-    apply T_14_5,
+    exact T_14_5 P.not_,
   }
 end
 
@@ -607,14 +538,14 @@ end
 
 
 def formula.is_prime : formula → Prop
-| (false_) := true
+| (true_) := true
 | (pred_ name args) := true
 | (not_ P) := false
 | (imp_ P Q) := false
 | (forall_ x P) := true
 
 def formula.prime_constituent_set : formula → finset formula
-| (false_) := {false_}
+| (true_) := {true_}
 | (pred_ name args) := {pred_ name args}
 | (not_ P) := P.prime_constituent_set
 | (imp_ P Q) := P.prime_constituent_set ∪ Q.prime_constituent_set
@@ -625,7 +556,7 @@ def formula.prime_constituent_set : formula → finset formula
 def valuation : Type := formula → bool
 
 def formula.eval (val : valuation) : formula → bool
-| (false_) := bool.ff
+| (true_) := bool.tt
 | (pred_ name args) := val (pred_ name args)
 | (not_ P) := ! P.eval
 | (imp_ P Q) := (! P.eval) || Q.eval
@@ -660,15 +591,12 @@ begin
 end
 
 
-theorem is_tauto_prop_false
-  (P : formula) :
-  (false_.imp_ P).is_tauto :=
+theorem is_tauto_prop_true :
+  true_.is_tauto :=
 begin
   unfold formula.is_tauto,
   intro val,
-  simp only [eval_imp],
   unfold formula.eval,
-  simp only [is_empty.forall_iff],
 end
 
 
@@ -679,8 +607,7 @@ begin
   unfold formula.is_tauto,
   intro val,
   simp only [eval_imp],
-  intros a1 a2,
-  exact a1,
+  tauto,
 end
 
 
@@ -691,15 +618,7 @@ begin
   unfold formula.is_tauto,
   intro val,
   simp only [eval_imp],
-  intros a1 a2 a3,
-  apply a1,
-  {
-    exact a3,
-  },
-  {
-    apply a2,
-    exact a3,
-  },
+  tauto,
 end
 
 
@@ -710,15 +629,7 @@ begin
   unfold formula.is_tauto,
   intro val,
   simp only [eval_not, eval_imp],
-  intros a1 a2,
-  by_contradiction contra,
-  apply a1,
-  {
-    exact contra,
-  },
-  {
-    exact a2,
-  }
+  tauto,
 end
 
 
@@ -748,9 +659,9 @@ begin
   case is_prop_deduct.axiom_ : h1_P h1_1
   {
     induction h1_1,
-    case is_prop_axiom.prop_false_ : h1_1_P
+    case is_prop_axiom.prop_true_ :
     {
-      exact is_tauto_prop_false h1_1_P,
+      exact is_tauto_prop_true,
     },
     case is_prop_axiom.prop_1_ : h1_1_P h1_1_Q
     {
@@ -792,30 +703,41 @@ theorem T_17_1
   (h2 : admits v t P) :
   is_deduct Δ (replace_free v t P) :=
 begin
-  exact pred_2_mp v P t Δ h2 h1,
+  apply is_deduct.mp_ (forall_ v P),
+  {
+    apply is_deduct.axiom_,
+    apply is_axiom.pred_2_ v t P (replace_free v t P) h2,
+    refl,
+  },
+  {
+    exact h1,
+  }
 end
 
 alias T_17_1 <- spec forall_elim
 
 
 lemma spec_id
-  (P : formula)
   (v : variable_)
+  (P : formula)
   (Δ : set formula)
   (h1 : is_deduct Δ (forall_ v P)) :
   is_deduct Δ P :=
 begin
-  have s1 : is_deduct Δ (replace_free v v P),
-  apply pred_2_mp v P v Δ,
+  apply is_deduct.mp_ (forall_ v P),
   {
-    exact admits_id P v,
+    apply is_deduct.axiom_,
+    apply is_axiom.pred_2_ v v P,
+    {
+      exact admits_id P v,
+    },
+    {
+      exact replace_free_id P v,
+    },
   },
   {
     exact h1,
-  },
-
-  simp only [replace_free_id] at s1,
-  exact s1,
+  }
 end
 
 alias spec_id <- forall_elim_id
@@ -828,8 +750,7 @@ begin
   apply prop_complete,
   unfold formula.is_tauto,
   simp only [eval_not, eval_imp],
-  intros val a1 a2 contra,
-  exact a1 contra a2,
+  tauto,
 end
 
 
@@ -849,10 +770,15 @@ begin
     unfold admits at h1,
 
     apply is_deduct.axiom_,
-    apply is_axiom.pred_2_,
-    unfold admits,
-    unfold admits_aux,
-    exact h1,
+    apply is_axiom.pred_2_ v t,
+    {
+      unfold admits,
+      unfold admits_aux,
+      exact h1,
+    },
+    {
+      refl,
+    },
   }
 end
 
@@ -906,7 +832,7 @@ begin
   apply deduction_theorem,
   simp only [set.union_singleton, insert_emptyc_eq],
   apply exists_intro_id,
-  apply spec_id P v,
+  apply spec_id v,
   apply is_deduct.assume_,
   simp only [set.mem_singleton],
 end
@@ -929,8 +855,10 @@ begin
   },
   case is_deduct.assume_ : h1_P h1_1
   {
-    apply pred_3_mp h1_P v Δ,
+    apply is_deduct.mp_,
     {
+      apply is_deduct.axiom_,
+      apply is_axiom.pred_3_,
       exact h2 h1_P h1_1,
     },
     {
@@ -940,7 +868,20 @@ begin
   },
   case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
   {
-    exact pred_1_mp h1_P h1_Q v Δ h1_ih_1 h1_ih_2,
+    apply is_deduct.mp_ (forall_ v h1_P),
+    {
+      apply is_deduct.mp_,
+      {
+        apply is_deduct.axiom_,
+        apply is_axiom.pred_1_,
+      },
+      {
+        exact h1_ih_1,
+      }
+    },
+    {
+      exact h1_ih_2,
+    }
   },
 end
 
@@ -1001,10 +942,10 @@ example
   is_deduct ∅ P :=
 begin
   induction h1,
-  case is_proof_alt.prop_false_ : h1_P
+  case is_proof_alt.prop_true_ :
   {
     apply is_deduct.axiom_,
-    apply is_axiom.prop_false_,
+    apply is_axiom.prop_true_,
   },
   case is_proof_alt.prop_1_ : h1_P h1_Q
   {
@@ -1021,24 +962,23 @@ begin
     apply is_deduct.axiom_,
     apply is_axiom.prop_3_,
   },
-  case is_proof_alt.pred_1_ : h1_P h1_Q h1_v
+  case is_proof_alt.pred_1_ : h1_v h1_P h1_Q
   {
     apply is_deduct.axiom_,
     apply is_axiom.pred_1_,
   },
-  case is_proof_alt.pred_2_ : h1_v h1_P h1_t h1_1
+  case is_proof_alt.pred_2_ : h1_v h1_t h1_P h1_P' h1_1 h1_ih_1
   {
     apply is_deduct.axiom_,
-    apply is_axiom.pred_2_,
-    exact h1_1,
+    exact is_axiom.pred_2_ h1_v h1_t h1_P h1_P' h1_1 h1_ih_1,    
   },
-  case is_proof_alt.pred_3_ : h1_P h1_v h1_1
+  case is_proof_alt.pred_3_ : h1_v h1_P h1_1
   {
     apply is_deduct.axiom_,
     apply is_axiom.pred_3_,
     exact h1_1,
   },
-  case is_proof_alt.gen_ : h1_P h1_v h1_1 h1_ih
+  case is_proof_alt.gen_ : h1_v h1_P h1_1 h1_ih
   {
     apply generalization,
     {
@@ -1064,9 +1004,9 @@ begin
   case is_deduct.axiom_ : h1_P h1_1
   {
     induction h1_1,
-    case is_axiom.prop_false_ : h1_1_P
+    case is_axiom.prop_true_ :
     {
-      apply is_proof_alt.prop_false_,
+      apply is_proof_alt.prop_true_,
     },
     case is_axiom.prop_1_ : h1_1_P h1_1_Q
     {
@@ -1080,21 +1020,20 @@ begin
     {
       apply is_proof_alt.prop_3_,
     },
-    case is_axiom.pred_1_ : h1_1_P h1_1_Q h1_1_v
+    case is_axiom.pred_1_ : h1_1_v h1_1_P h1_1_Q
     {
       apply is_proof_alt.pred_1_,
     },
-    case is_axiom.pred_2_ : h1_1_v h1_1_P h1_1_t h1_1_1
+    case is_axiom.pred_2_ : h1_1_v h1_1_t h1_1_P h1_1_1 h1_1_ih_1 h1_1_ih_2
     {
-      apply is_proof_alt.pred_2_,
-      exact h1_1_1,
+      apply is_proof_alt.pred_2_ h1_1_v h1_1_t h1_1_P h1_1_1 h1_1_ih_1 h1_1_ih_2,
     },
-    case is_axiom.pred_3_ : h1_1_P h1_1_v h1_1_1
+    case is_axiom.pred_3_ : h1_1_v h1_1_P h1_1_1
     {
       apply is_proof_alt.pred_3_,
       exact h1_1_1,
     },
-    case is_axiom.gen_ : h1_1_P h1_1_v h1_1_1 h1_1_ih
+    case is_axiom.gen_ : h1_1_v h1_1_P h1_1_1 h1_1_ih
     {
       apply is_proof_alt.gen_,
       exact h1_1_ih,
@@ -1123,8 +1062,8 @@ begin
   {
     apply generalization,
     {
-      apply spec_id P v,
-      apply spec_id (forall_ v P) u,
+      apply spec_id v P,
+      apply spec_id u (forall_ v P),
       apply is_deduct.assume_,
       simp only [set.mem_singleton],
     },
@@ -1157,15 +1096,7 @@ begin
       apply prop_complete,
       unfold formula.is_tauto,
       simp only [eval_imp, eval_not],
-      simp only [eq_ff_eq_not_eq_tt],
-      intros val a1 a2 a3,
-
-      rewrite <- bool_iff_false at *,
-      by_contradiction contra,
-      apply a3,
-      apply a1,
-      apply a2,
-      apply contra,
+      tauto,
     },
     {
       exact h1,
@@ -1202,7 +1133,7 @@ begin
           apply T_14_7,
         },
         {
-          apply spec_id (P.imp_ Q) v,
+          apply spec_id v (P.imp_ Q),
           apply is_deduct.assume_,
           simp only [set.mem_singleton],
         }
@@ -1300,14 +1231,7 @@ begin
   apply prop_complete,
   unfold formula.is_tauto,
   simp only [eval_and, eval_imp],
-  intros val a1 a2,
-  split,
-  {
-    exact a1,
-  },
-  {
-    exact a2,
-  },
+  tauto,
 end
 
 
@@ -1320,9 +1244,7 @@ begin
   apply prop_complete,
   unfold formula.is_tauto,
   simp only [eval_and, eval_imp],
-  intros val a1,
-  cases a1,
-  exact a1_left,
+  tauto,
 end
 
 
@@ -1335,9 +1257,7 @@ begin
   apply prop_complete,
   unfold formula.is_tauto,
   simp only [eval_and, eval_imp],
-  intros val a1,
-  cases a1,
-  exact a1_right,
+  tauto,
 end
 
 
@@ -1431,7 +1351,7 @@ end
 def proof_equiv (P Q : formula) : Prop := is_proof (P.iff_ Q)
 
 
-theorem T_18_1
+theorem T_18_1_left
   (P Q : formula)
   (v : variable_) :
   is_proof ((forall_ v (P.iff_ Q)).imp_ ((forall_ v P).imp_ (forall_ v Q))) :=
@@ -1449,13 +1369,13 @@ begin
         apply and_elim_left,
       },
       {
-        apply spec_id ((P.imp_ Q).and_ (Q.imp_ P)) v,
+        apply spec_id v ((P.imp_ Q).and_ (Q.imp_ P)),
         apply is_deduct.assume_,
         simp only [set.mem_insert_iff, set.mem_singleton, or_true],
       }
     },
     {
-      apply spec_id P v,
+      apply spec_id v P,
       apply is_deduct.assume_,
       simp only [set.mem_insert_iff, eq_self_iff_true, true_and, true_or],
     }
@@ -1465,6 +1385,136 @@ begin
     unfold is_free_in,
     simp only [eq_self_iff_true, not_true, false_and, not_false_iff, and_self],
   }
+end
+
+
+lemma iff_intro
+  (P Q R : formula) :
+  is_proof ((P.imp_ Q).imp_ ((Q.imp_ P).imp_ (P.iff_ Q))) :=
+begin
+  unfold formula.iff_,
+  apply prop_complete,
+  unfold formula.is_tauto,
+  simp only [eval_and, eval_imp],
+  tauto,
+end
+
+
+theorem T_18_1
+  (P Q : formula)
+  (v : variable_) :
+  is_proof ((forall_ v (P.iff_ Q)).imp_ ((forall_ v P).iff_ (forall_ v Q))) :=
+begin
+  sorry,
+end
+
+
+def is_repl (U V : formula) : formula → formula → Prop
+| (not_ P) (not_ P') := is_repl P P'
+| (imp_ P Q) (imp_ P' Q') := is_repl P P' ∧ is_repl Q Q'
+| (forall_ x P) (forall_ x' P') := x = x' ∧ is_repl P P'
+| P P' := P = P' ∨ (P = U ∧ P' = V)
+
+
+inductive is_repl_of (U V : formula) : formula → formula → Prop
+| same_
+  (P P' : formula) :
+  P = P' →
+  is_repl_of P P'
+
+| diff_
+  (P P' : formula) :
+  P = U →
+  P' = V →
+  is_repl_of P P'
+
+| not_
+  (P P' : formula) :
+  is_repl_of P P' →
+  is_repl_of P.not_ P'.not_
+
+| imp_
+  (P Q : formula)
+  (P' Q' : formula) :
+  is_repl_of P P' →
+  is_repl_of Q Q' →
+  is_repl_of (P.imp_ Q) (P'.imp_ Q')
+
+| forall_
+  (x : variable_)
+  (P P' : formula) :
+  is_repl_of P P' →
+  is_repl_of (forall_ x P) (forall_ x P')
+
+
+lemma Forall_spec_id
+  (xs : list variable_)
+  (P : formula) :
+  is_proof ((Forall_ xs P).imp_ P) :=
+begin
+  induction xs,
+  case list.nil
+  {
+    unfold Forall_,
+    apply prop_id,
+  },
+  case list.cons : xs_hd xs_tl xs_ih
+  {
+    unfold Forall_,
+    apply deduction_theorem,
+    squeeze_simp,
+    apply is_deduct.mp_ (Forall_ xs_tl P),
+    apply proof_imp_deduct,
+    exact xs_ih,
+    apply spec_id xs_hd,
+    apply is_deduct.assume_,
+    squeeze_simp,
+  },
+end
+
+
+lemma prop_iff_id
+  (P : formula) :
+  is_proof (P.iff_ P) :=
+begin
+  unfold formula.iff_,
+  apply prop_complete,
+  unfold formula.is_tauto,
+  simp only [eval_and, eval_imp],
+  squeeze_simp,
+end
+
+
+theorem T_18_2
+  (U V : formula)
+  (P_U P_V : formula)
+  (l : list variable_)
+  (h1 : is_repl_of U V P_U P_V)
+  (h2 : ∀ (v : variable_), ((is_free_in v U ∨ is_free_in v V) ∧ is_bound_in v P_U) → v ∈ l) :
+  is_proof ((Forall_ l (U.iff_ V)).imp_ (P_U.iff_ P_V)) :=
+begin
+  induction h1,
+  case is_repl_of.same_ : h1_P h1_P' h1_1
+  {
+    subst h1_1,
+    apply deduction_theorem,
+    apply proof_imp_deduct,
+    apply prop_iff_id,
+  },
+  case is_repl_of.diff_ : h1_P h1_P' h1_1 h1_2
+  {
+    subst h1_1,
+    subst h1_2,
+    apply Forall_spec_id,
+  },
+  case is_repl_of.not_ : h1_P h1_P' h1_1 h1_ih
+  {
+    sorry,
+  },
+  case is_repl_of.imp_ : h1_P h1_Q h1_P' h1_Q' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  { admit },
+  case is_repl_of.forall_ : h1_x h1_P h1_P' h1_ᾰ h1_ih
+  { admit },
 end
 
 
