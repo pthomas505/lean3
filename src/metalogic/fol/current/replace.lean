@@ -64,59 +64,6 @@ def fast_replace_free (v t : variable_) : formula → formula
 -- replace free
 
 
-lemma replace_free_aux_id
-  (P : formula)
-  (v : variable_)
-  (binders : finset variable_) :
-  replace_free_aux v v binders P = P :=
-begin
-  induction P generalizing binders,
-  case formula.true_ : binders
-  {
-    refl,
-  },
-  case formula.pred_ : name args binders
-  {
-    unfold replace_free_aux,
-    simp only [eq_self_iff_true, list.map_eq_self_iff, ite_eq_right_iff, and_imp, true_and],
-    intros x a1 a2 a3,
-    exact a2,
-  },
-  case formula.not_ : P P_ih binders
-  {
-    unfold replace_free_aux,
-    congr,
-    exact P_ih binders,
-  },
-  case formula.imp_ : P Q P_ih Q_ih binders
-  {
-    unfold replace_free_aux,
-    congr,
-    {
-      exact P_ih binders,
-    },
-    {
-      exact Q_ih binders,
-    }
-  },
-  case formula.forall_ : x P P_ih binders
-  {
-    unfold replace_free_aux,
-    congr,
-    apply P_ih,
-  },
-end
-
-theorem replace_free_id
-  (P : formula)
-  (v : variable_) :
-  replace_free v v P = P :=
-begin
-  unfold replace_free,
-  apply replace_free_aux_id,
-end
-
-
 theorem fast_replace_free_id
   (P : formula)
   (v : variable_) :
