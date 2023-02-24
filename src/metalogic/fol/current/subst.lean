@@ -211,19 +211,44 @@ def to_is_bound (P : formula) : bool_formula :=
 theorem fast_replace_free_id
   (P : formula)
   (v : variable_) :
-  replace_free v v P = P :=
+  fast_replace_free v v P = P :=
 begin
   induction P,
   case formula.true_
-  { admit },
-  case formula.pred_ : P_ᾰ P_ᾰ_1
-  { admit },
-  case formula.not_ : P_ᾰ P_ih
-  { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
-  { admit },
-  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih
-  { admit },
+  {
+    unfold fast_replace_free,
+  },
+  case formula.pred_ : name args
+  {
+    unfold fast_replace_free,
+    simp only [eq_self_iff_true, list.map_eq_self_iff, true_and],
+    unfold replace,
+    simp only [ite_eq_right_iff, imp_self, implies_true_iff],
+  },
+  case formula.not_ : P P_ih
+  {
+    unfold fast_replace_free,
+    congr,
+    exact P_ih,
+  },
+  case formula.imp_ : P Q P_ih Q_ih
+  {
+    unfold fast_replace_free,
+    congr,
+    {
+      exact P_ih,
+    },
+    {
+      exact Q_ih,
+    }
+  },
+  case formula.forall_ : x P P_ih
+  {
+    unfold fast_replace_free,
+    simp only [ite_eq_left_iff, eq_self_iff_true, true_and],
+    intros a1,
+    exact P_ih,
+  },
 end
 
 
