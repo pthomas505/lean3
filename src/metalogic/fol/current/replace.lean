@@ -59,7 +59,7 @@ def fast_replace_free (v t : variable_) : formula → formula
 | (imp_ P Q) := imp_ (fast_replace_free P) (fast_replace_free Q)
 | (forall_ x P) :=
   if v = x
-  then forall_ x P
+  then forall_ x P -- v is not free in P
   else forall_ x (fast_replace_free P)
 
 
