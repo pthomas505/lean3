@@ -104,26 +104,6 @@ def fast_admits (v u : variable_) (P : formula) : Prop :=
   fast_admits_aux v u ∅ P
 
 
-@[derive [inhabited, decidable_eq]]
-inductive bool_formula : Type
-| true_ : bool_formula
-| pred_ : pred_name_ → list bool → bool_formula
-| not_ : bool_formula → bool_formula
-| imp_ : bool_formula → bool_formula → bool_formula
-| forall_ : bool → bool_formula → bool_formula
-
-
-def to_is_bound_aux : finset variable_ → formula → bool_formula
-| _ true_ := bool_formula.true_
-| binders (pred_ name args) := bool_formula.pred_ name (args.map (fun (v : variable_), v ∈ binders))
-| binders (not_ P) := bool_formula.not_ (to_is_bound_aux binders P)
-| binders (imp_ P Q) := bool_formula.imp_ (to_is_bound_aux binders P) (to_is_bound_aux binders Q)
-| binders (forall_ x P) := bool_formula.forall_ true (to_is_bound_aux (binders ∪ {x}) P)
-
-def to_is_bound (P : formula) : bool_formula :=
-  to_is_bound_aux ∅ P
-
-
 inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
 | true_
   (v t : variable_) :
@@ -182,7 +162,6 @@ def function.update_ite
   (a' : α) (b : β) (a : α) :=
   if a' = a then b else f a
 
-
 /-
   The simultaneous replacement of the free variables in a formula.
 -/
@@ -202,9 +181,28 @@ def simult_admits_aux (σ : variable_ → variable_) : finset variable_ → form
 | binders (imp_ P Q) := simult_admits_aux binders P ∧ simult_admits_aux binders Q
 | binders (forall_ x P) := simult_admits_aux (binders ∪ {x}) P
 
-
 def simult_admits (σ : variable_ → variable_) (P : formula) : Prop :=
   simult_admits_aux σ ∅ P
+
+
+@[derive [inhabited, decidable_eq]]
+inductive bool_formula : Type
+| true_ : bool_formula
+| pred_ : pred_name_ → list bool → bool_formula
+| not_ : bool_formula → bool_formula
+| imp_ : bool_formula → bool_formula → bool_formula
+| forall_ : bool → bool_formula → bool_formula
+
+
+def to_is_bound_aux : finset variable_ → formula → bool_formula
+| _ true_ := bool_formula.true_
+| binders (pred_ name args) := bool_formula.pred_ name (args.map (fun (v : variable_), v ∈ binders))
+| binders (not_ P) := bool_formula.not_ (to_is_bound_aux binders P)
+| binders (imp_ P Q) := bool_formula.imp_ (to_is_bound_aux binders P) (to_is_bound_aux binders Q)
+| binders (forall_ x P) := bool_formula.forall_ true (to_is_bound_aux (binders ∪ {x}) P)
+
+def to_is_bound (P : formula) : bool_formula :=
+  to_is_bound_aux ∅ P
 
 
 lemma replace_free_aux_id
