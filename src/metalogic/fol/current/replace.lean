@@ -486,3 +486,6 @@ begin
   apply replace_free_aux_eq_fast_replace_free,
   simp only [finset.not_mem_empty, not_false_iff],
 end
+
+
+#lint
