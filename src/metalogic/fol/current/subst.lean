@@ -622,10 +622,41 @@ lemma replace_free_aux_not_mem_free
 begin
   induction P generalizing binders,
   case formula.true_ : binders
-  { admit },
-  case formula.pred_ : P_ᾰ P_ᾰ_1 binders
-  { admit },
-  case formula.not_ : P_ᾰ P_ih binders
+  {
+    unfold replace_free_aux,
+  },
+  case formula.pred_ : name args binders
+  {
+    induction args,
+    case list.nil
+    {
+      unfold replace_free_aux,
+      simp only [list.map_nil, eq_self_iff_true, and_self],
+    },
+    case list.cons : args_hd args_tl args_ih
+    {
+      unfold is_free_in at h1,
+      simp only [list.to_finset_cons, finset.mem_insert, list.mem_to_finset] at h1,
+      push_neg at h1,
+      cases h1,
+
+      unfold is_free_in at args_ih,
+      unfold replace_free_aux at args_ih,
+      simp only [list.mem_to_finset, eq_self_iff_true, list.map_eq_self_iff, ite_eq_right_iff, and_imp, true_and] at args_ih,
+
+      unfold replace_free_aux,
+      simp only [list.map, eq_self_iff_true, ite_eq_right_iff, and_imp, list.map_eq_self_iff, true_and],
+      split,
+      {
+        intros a1,
+        contradiction,
+      },
+      {
+        exact args_ih h1_right,
+      }
+    },
+  },
+  case formula.not_ : P P_ih binders
   { admit },
   case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders
   { admit },
