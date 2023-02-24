@@ -74,7 +74,8 @@ begin
   case formula.pred_ : name args
   {
     unfold fast_replace_free,
-    simp only [eq_self_iff_true, list.map_eq_self_iff, true_and],
+    congr,
+    simp only [list.map_eq_self_iff],
     intros x a1,
     unfold replace,
     simp only [ite_eq_right_iff, imp_self],
