@@ -108,76 +108,6 @@ begin
 end
 
 
-theorem not_free_in_fast_replace_free_id
-  (P : formula)
-  (v t : variable_)
-  (h1 : ¬ is_free_in t P) :
-  fast_replace_free t v P = P :=
-begin
-  induction P,
-  case formula.true_
-  {
-    refl,
-  },
-  case formula.pred_ : name args
-  {
-    unfold is_free_in at h1,
-    simp only [list.mem_to_finset] at h1,
-
-    unfold fast_replace_free,
-    simp only [eq_self_iff_true, list.map_eq_self_iff, true_and],
-    intros x a1,
-    unfold replace,
-    split_ifs,
-    {
-      subst h,
-      contradiction,
-    },
-    {
-      refl,
-    }
-  },
-  case formula.not_ : P P_ih
-  {
-    unfold is_free_in at h1,
-
-    unfold fast_replace_free,
-    congr,
-    exact P_ih h1,
-  },
-  case formula.imp_ : P Q P_ih Q_ih
-  {
-    unfold is_free_in at h1,
-    push_neg at h1,
-    cases h1,
-
-    unfold fast_replace_free,
-    congr,
-    {
-      exact P_ih h1_left,
-    },
-    {
-      exact Q_ih h1_right,
-    }
-  },
-  case formula.forall_ : x P P_ih
-  {
-    unfold is_free_in at h1,
-    push_neg at h1,
-
-    unfold fast_replace_free,
-    split_ifs,
-    {
-      simp only [eq_self_iff_true, and_self],
-    },
-    {
-      simp only [eq_self_iff_true, true_and],
-      apply P_ih,
-      exact h1 h,
-    }
-  },
-end
-
 
 lemma not_is_free_in_replace_free_aux
   (P : formula)
@@ -771,6 +701,78 @@ begin
   unfold replace_free,
   apply replace_free_aux_eq_fast_replace_free,
   simp only [finset.not_mem_empty, not_false_iff],
+end
+
+
+
+theorem not_free_in_fast_replace_free_id
+  (P : formula)
+  (v t : variable_)
+  (h1 : ¬ is_free_in t P) :
+  fast_replace_free t v P = P :=
+begin
+  induction P,
+  case formula.true_
+  {
+    refl,
+  },
+  case formula.pred_ : name args
+  {
+    unfold is_free_in at h1,
+    simp only [list.mem_to_finset] at h1,
+
+    unfold fast_replace_free,
+    simp only [eq_self_iff_true, list.map_eq_self_iff, true_and],
+    intros x a1,
+    unfold replace,
+    split_ifs,
+    {
+      subst h,
+      contradiction,
+    },
+    {
+      refl,
+    }
+  },
+  case formula.not_ : P P_ih
+  {
+    unfold is_free_in at h1,
+
+    unfold fast_replace_free,
+    congr,
+    exact P_ih h1,
+  },
+  case formula.imp_ : P Q P_ih Q_ih
+  {
+    unfold is_free_in at h1,
+    push_neg at h1,
+    cases h1,
+
+    unfold fast_replace_free,
+    congr,
+    {
+      exact P_ih h1_left,
+    },
+    {
+      exact Q_ih h1_right,
+    }
+  },
+  case formula.forall_ : x P P_ih
+  {
+    unfold is_free_in at h1,
+    push_neg at h1,
+
+    unfold fast_replace_free,
+    split_ifs,
+    {
+      simp only [eq_self_iff_true, and_self],
+    },
+    {
+      simp only [eq_self_iff_true, true_and],
+      apply P_ih,
+      exact h1 h,
+    }
+  },
 end
 
 
