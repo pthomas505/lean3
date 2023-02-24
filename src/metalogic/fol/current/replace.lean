@@ -129,7 +129,8 @@ begin
     simp only [list.mem_to_finset] at h1,
 
     unfold fast_replace_free,
-    simp only [eq_self_iff_true, list.map_eq_self_iff, true_and],
+    congr,
+    simp only [list.map_eq_self_iff],
     intros x a1,
     unfold replace,
     split_ifs,
