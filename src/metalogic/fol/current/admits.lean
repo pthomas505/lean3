@@ -103,7 +103,7 @@ begin
 end
 
 
-lemma not_mem_free_imp_fast_admits_aux
+lemma not_free_in_imp_fast_admits_aux
   (P : formula)
   (v u : variable_)
   (binders : finset variable_)
@@ -166,14 +166,14 @@ begin
 end
 
 
-lemma not_mem_free_imp_fast_admits
+lemma not_free_in_imp_fast_admits
   (P : formula)
   (v u : variable_)
   (h1 : ¬ is_free_in v P) :
   fast_admits v u P :=
 begin
   unfold fast_admits,
-  apply not_mem_free_imp_fast_admits_aux,
+  apply not_free_in_imp_fast_admits_aux,
   exact h1,
 end
 
