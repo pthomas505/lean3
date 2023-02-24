@@ -197,8 +197,11 @@ begin
   },
   case formula.pred_ : name args
   {
+    unfold occurs_in at h1,
+
     unfold fast_replace_free,
-    simp only [list.map_map, eq_self_iff_true, list.map_eq_self_iff, function.comp_app, true_and],
+    congr,
+    simp only [list.map_map, list.map_eq_self_iff, function.comp_app],
     intros x a1,
     unfold replace,
     split_ifs,
