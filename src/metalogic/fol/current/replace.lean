@@ -26,7 +26,7 @@ def replace_free_aux (v t : variable_) : finset variable_ → formula → formul
 | _ (true_) := true_
 | binders (pred_ name args) :=
     pred_ name (args.map (fun (x : variable_),
-      if v = x ∧ x ∉ binders
+      if x = v ∧ x ∉ binders
       then t
       else x))
 | binders (not_ P) := not_ (replace_free_aux binders P)
@@ -52,13 +52,13 @@ def fast_replace_free (v t : variable_) : formula → formula
 | (true_) := true_
 | (pred_ name args) :=
     pred_ name (args.map (fun (x : variable_),
-      if v = x
+      if x = v
       then t
       else x))
 | (not_ P) := not_ (fast_replace_free P)
 | (imp_ P Q) := imp_ (fast_replace_free P) (fast_replace_free Q)
 | (forall_ x P) :=
-  if v = x
+  if x = v
   then forall_ x P
   else forall_ x (fast_replace_free P)
 
@@ -77,7 +77,9 @@ begin
   {
     unfold fast_replace_free,
     congr,
-    simp only [list.map_eq_self_iff, ite_eq_right_iff, imp_self, implies_true_iff],
+    simp only [list.map_eq_self_iff, ite_eq_right_iff],
+    intros x a1 a2,
+    subst a2,
   },
   case formula.not_ : P P_ih
   {
@@ -165,7 +167,9 @@ begin
     {
       simp only [eq_self_iff_true, true_and],
       apply P_ih,
-      exact h1 h,
+      apply h1,
+      simp only [eq_comm] at h,
+      exact h,
     }
   },
 end
@@ -192,6 +196,7 @@ begin
     intros x a1,
     split_ifs,
     {
+      symmetry,
       exact h,
     },
     {
@@ -236,6 +241,7 @@ begin
     {
       unfold fast_replace_free,
       simp [if_neg h1_left],
+      intros a1,
       apply not_free_in_fast_replace_free_id,
       intros contra,
       apply h1_right,
@@ -244,8 +250,10 @@ begin
     },
     {
       unfold fast_replace_free,
+      simp only [eq_comm],
       simp only [if_neg h1_left],
       simp only [eq_self_iff_true, true_and],
+      symmetry,
       exact P_ih h1_right,
     }
   },
@@ -277,7 +285,6 @@ begin
       exact h1,
     },
     {
-      simp only [eq_comm],
       exact h,
     }
   },
@@ -308,6 +315,7 @@ begin
       unfold is_free_in,
       simp only [not_and],
       intros a1,
+      simp only [eq_comm] at h,
       contradiction,
     },
     {
@@ -388,7 +396,7 @@ begin
     unfold fast_replace_free,
     congr,
     funext,
-    by_cases c1 : v = x,
+    by_cases c1 : x = v,
     {
       simp only [if_pos c1],
       subst c1,
@@ -433,6 +441,7 @@ begin
       apply replace_free_aux_mem_binders,
       simp only [finset.mem_union, finset.mem_singleton],
       apply or.intro_right,
+      symmetry,
       exact h,
     },
     {
@@ -445,6 +454,7 @@ begin
         exact h1,
       },
       {
+        simp only [eq_comm] at h,
         exact h,
       }
     }
