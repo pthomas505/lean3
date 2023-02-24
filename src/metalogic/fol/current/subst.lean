@@ -208,6 +208,25 @@ def to_is_bound (P : formula) : bool_formula :=
 -- replace free
 
 
+theorem fast_replace_free_id
+  (P : formula)
+  (v : variable_) :
+  replace_free v v P = P :=
+begin
+  induction P,
+  case formula.true_
+  { admit },
+  case formula.pred_ : P_ᾰ P_ᾰ_1
+  { admit },
+  case formula.not_ : P_ᾰ P_ih
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
+  { admit },
+  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih
+  { admit },
+end
+
+
 lemma replace_free_aux_id
   (P : formula)
   (v : variable_)
