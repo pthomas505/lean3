@@ -264,10 +264,22 @@ begin
     cases a1,
     contradiction,
   },
-  case formula.not_ : P_ᾰ P_ih binders h1
-  { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1
-  { admit },
+  case formula.not_ : P P_ih binders h1
+  {
+    unfold admits_aux,
+    exact P_ih binders h1,
+  },
+  case formula.imp_ : P Q P_ih Q_ih binders h1
+  {
+    unfold admits_aux,
+    split,
+    {
+      exact P_ih binders h1,
+    },
+    {
+      exact Q_ih binders h1,
+    }
+  },
   case formula.forall_ : x P P_ih binders h1
   {
     unfold admits_aux,
