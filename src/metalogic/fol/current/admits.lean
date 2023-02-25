@@ -53,7 +53,7 @@ def fast_admits (v u : variable_) (P : formula) : Prop :=
   fast_admits_aux v u ∅ P
 
 
-lemma fast_admits_aux_id
+lemma fast_admits_aux_self
   (P : formula)
   (v : variable_)
   (binders : finset variable_)
@@ -111,18 +111,18 @@ begin
   },
 end
 
-theorem fast_admits_id
+theorem fast_admits_self
   (P : formula)
   (v : variable_) :
   fast_admits v v P :=
 begin
   unfold fast_admits,
-  apply fast_admits_aux_id,
+  apply fast_admits_aux_self,
   simp only [finset.not_mem_empty, not_false_iff],
 end
 
 
-lemma admits_aux_id
+lemma admits_aux_self
   (P : formula)
   (v : variable_)
   (binders : finset variable_) :
@@ -161,13 +161,13 @@ begin
   },
 end
 
-theorem admits_id
+theorem admits_self
   (P : formula)
   (v : variable_) :
   admits v v P :=
 begin
   unfold admits,
-  apply admits_aux_id,
+  apply admits_aux_self,
 end
 
 
