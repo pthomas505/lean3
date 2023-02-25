@@ -52,6 +52,8 @@ def fast_admits_aux (v u : variable_) : finset variable_ → formula → Prop
 def fast_admits (v u : variable_) (P : formula) : Prop :=
   fast_admits_aux v u ∅ P
 
+--
+
 
 lemma fast_admits_aux_self
   (P : formula)
@@ -170,6 +172,7 @@ begin
   apply admits_aux_self,
 end
 
+--
 
 lemma not_is_free_in_imp_fast_admits_aux
   (P : formula)
@@ -296,13 +299,13 @@ begin
   case formula.forall_ : x P P_ih binders
   {
     unfold is_free_in at h1,
-    squeeze_simp at h1,
+    simp only [not_and] at h1,
 
     unfold admits_aux,
     by_cases c1 : v = x,
     {
       apply blah,
-      squeeze_simp,
+      simp only [finset.mem_union, finset.mem_singleton],
       apply or.intro_right,
       exact c1,
     },
@@ -313,6 +316,18 @@ begin
   },
 end
 
+theorem not_is_free_in_imp_admits
+  (P : formula)
+  (v u : variable_)
+  (h1 : ¬ is_free_in v P) :
+  admits v u P :=
+begin
+  unfold admits,
+  apply not_is_free_in_imp_admits_aux,
+  exact h1,
+end
+
+--
 
 lemma not_is_bound_in_imp_fast_admits_aux
   (P : formula)
