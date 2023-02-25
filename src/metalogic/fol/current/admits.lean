@@ -1383,3 +1383,148 @@ def simult_admits (σ : variable_ → variable_) (P : formula) : Prop :=
 
 
 #lint
+
+
+def admits_alt (v u : variable_) : formula → Prop
+| (true_) := true
+| (pred_ name args) := true
+| (not_ P) := admits_alt P
+| (imp_ P Q) := admits_alt P ∧ admits_alt Q
+| (forall_ x P) := v = x ∨ ((x = u → ¬ is_free_in v P) ∧ admits_alt P)
+
+
+example
+  (P : formula)
+  (v u : variable_)
+  (binders : finset variable_)
+  (h1 : u ∉ binders) :
+  admits_alt v u P → fast_admits_aux v u binders P :=
+begin
+  induction P generalizing binders,
+  case formula.true_ : binders
+  { admit },
+  case formula.pred_ : name args binders
+  {
+    unfold fast_admits_aux,
+    unfold admits_alt,
+    squeeze_simp,
+    intros a1,
+    exact h1,
+  },
+  case formula.not_ : P_ᾰ P_ih binders
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders
+  { admit },
+  case formula.forall_ : x P P_ih binders
+  {
+    unfold fast_admits_aux,
+    unfold admits_alt,
+    by_cases c1 : u = x,
+    subst c1,
+    squeeze_simp,
+    intros a1,
+    cases a1,
+    apply or.intro_left,
+    exact a1,
+    cases a1,
+    apply or.intro_right,
+    apply not_is_free_in_imp_fast_admits_aux,
+    exact a1_left,
+    intros a1,
+    cases a1,
+    apply or.intro_left,
+    exact a1,
+    apply or.intro_right,
+    apply P_ih,
+    squeeze_simp,
+    push_neg,
+    split,
+    exact h1,
+    exact c1,
+    cases a1,
+    exact a1_right,
+  },
+end
+
+
+lemma meh
+  (P : formula)
+  (v u : variable_)
+  (binders : finset variable_)
+  (h1 : fast_admits_aux v u binders P)
+  (h2 : u ∈ binders) :
+  ¬is_free_in v P :=
+begin
+  induction P generalizing binders,
+  case formula.true_ : binders h1 h2
+  { admit },
+  case formula.pred_ : name args binders h1 h2
+  {
+    unfold fast_admits_aux at h1,
+    unfold is_free_in,
+    squeeze_simp,
+    intros contra,
+    apply h1,
+    exact contra,
+    exact h2,
+  },
+  case formula.not_ : P_ᾰ P_ih binders h1 h2
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1 h2
+  { admit },
+  case formula.forall_ : x P P_ih binders h1 h2
+  {
+    unfold fast_admits_aux at h1,
+    unfold is_free_in,
+    squeeze_simp,
+    intros a1,
+    cases h1,
+    contradiction,
+    apply P_ih,
+    exact h1,
+    squeeze_simp,
+    apply or.intro_left,
+    exact h2,
+  },
+end
+
+
+example
+  (P : formula)
+  (v u : variable_)
+  (binders : finset variable_) :
+  fast_admits_aux v u binders P → admits_alt v u P :=
+begin
+  induction P generalizing binders,
+  case formula.true_ : binders
+  { admit },
+  case formula.pred_ : name args binders
+  {
+    unfold admits_alt,
+    unfold fast_admits_aux,
+    squeeze_simp,
+  },
+  case formula.not_ : P_ᾰ P_ih binders
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders
+  { admit },
+  case formula.forall_ : x P P_ih binders
+  {
+    unfold admits_alt,
+    unfold fast_admits_aux,
+    intros a1,
+    cases a1,
+    apply or.intro_left,
+    exact a1,
+    apply or.intro_right,
+    split,
+    intros a2,
+    apply meh P v u (binders ∪ {x}) a1,
+    squeeze_simp,
+    apply or.intro_right,
+    symmetry,
+    exact a2,    
+    apply P_ih,
+    exact a1,
+  },
+end
