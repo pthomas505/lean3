@@ -26,7 +26,7 @@ def formula.var_set : formula → finset variable_
 
 def occurs_in (v : variable_) : formula → Prop
 | (true_) := false
-| (pred_ name args) := v ∈ args
+| (pred_ name args) := v ∈ args.to_finset
 | (not_ P) := occurs_in P
 | (imp_ P Q) := occurs_in P ∨ occurs_in Q
 | (forall_ x P) := v = x ∨ occurs_in P
@@ -74,9 +74,7 @@ begin
   },
   case formula.pred_ : name args
   {
-    unfold occurs_in,
-    unfold formula.var_set,
-    simp only [list.mem_to_finset],
+    refl,
   },
   case formula.not_ : P P_ih
   {
@@ -325,6 +323,7 @@ begin
     simp only [list.mem_to_finset] at h1,
 
     unfold occurs_in,
+    simp only [list.mem_to_finset],
     exact h1,
   },
   case formula.not_ : P P_ih
