@@ -71,10 +71,22 @@ begin
     intros a1,
     exact h1,
   },
-  case formula.not_ : P_ᾰ P_ih binders h1
-  { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1
-  { admit },
+  case formula.not_ : P P_ih binders h1
+  {
+    unfold fast_admits_aux,
+    exact P_ih binders h1,
+  },
+  case formula.imp_ : P Q P_ih Q_ih binders h1
+  {
+    unfold fast_admits_aux,
+    split,
+    {
+      exact P_ih binders h1,
+    },
+    {
+      exact Q_ih binders h1,
+    }
+  },
   case formula.forall_ : x P P_ih binders h1
   {
     unfold fast_admits_aux,
@@ -305,10 +317,28 @@ begin
     intros a1,
     exact h2,
   },
-  case formula.not_ : P_ᾰ P_ih binders h2
-  { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h2
-  { admit },
+  case formula.not_ : P P_ih binders h2
+  {
+    unfold is_bound_in at h1,
+
+    unfold fast_admits_aux,
+    exact P_ih h1 binders h2,
+  },
+  case formula.imp_ : P Q P_ih Q_ih binders h2
+  {
+    unfold is_bound_in at h1,
+    push_neg at h1,
+    cases h1,
+
+    unfold fast_admits_aux,
+    split,
+    {
+      exact P_ih h1_left binders h2,
+    },
+    {
+      exact Q_ih h1_right binders h2,
+    }
+  },
   case formula.forall_ : x P P_ih binders h2
   {
     unfold is_bound_in at h1,
