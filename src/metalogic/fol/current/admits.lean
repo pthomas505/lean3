@@ -676,19 +676,18 @@ begin
 end
 
 
-lemma fast_admits_aux_mem_free
+lemma fast_admits_aux_is_free_in
   (P : formula)
   (v u : variable_)
   (binders : finset variable_)
   (h1 : fast_admits_aux v u binders P)
-  (h2 : v ∈ P.free_var_set) :
+  (h2 : is_free_in v P) :
   u ∉ binders :=
 begin
   induction P generalizing binders,
   case formula.true_ : binders h1
   {
-    unfold formula.free_var_set at h2,
-    simp only [finset.not_mem_empty] at h2,
+    unfold is_free_in at h2,
 
     contradiction,
   },
@@ -696,15 +695,16 @@ begin
   {
     unfold fast_admits_aux at h1,
 
-    unfold formula.free_var_set at h2,
+    unfold is_free_in at h2,
     simp only [list.mem_to_finset] at h2,
+
     exact h1 h2,
   },
   case formula.not_ : P P_ih binders h1
   {
     unfold fast_admits_aux at h1,
 
-    unfold formula.free_var_set at h2,
+    unfold is_free_in at h2,
 
     exact P_ih h2 binders h1,
   },
@@ -713,8 +713,7 @@ begin
     unfold fast_admits_aux at h1,
     cases h1,
 
-    unfold formula.free_var_set at h2,
-    simp only [finset.mem_union] at h2,
+    unfold is_free_in at h2,
 
     cases h2,
     {
@@ -728,11 +727,10 @@ begin
   {
     unfold fast_admits_aux at h1,
 
-    unfold formula.free_var_set at h2,
-    simp only [finset.mem_sdiff, finset.mem_singleton] at h2,
+    unfold is_free_in at h2,
     cases h2,
 
-    apply P_ih h2_left,
+    apply P_ih h2_right,
     {
       cases h1,
       {
