@@ -251,6 +251,62 @@ begin
 end
 
 
+theorem is_bound_in_imp_occurs_in
+  (P : formula)
+  (v : variable_)
+  (h1 : is_bound_in v P) :
+  occurs_in v P :=
+begin
+  induction P,
+  case formula.true_
+  {
+    unfold is_bound_in at h1,
+    contradiction,
+  },
+  case formula.pred_ : name args
+  {
+    unfold is_bound_in at h1,
+    contradiction,
+  },
+  case formula.not_ : P P_ih
+  {
+    unfold is_bound_in at h1,
+
+    exact P_ih h1,
+  },
+  case formula.imp_ : P Q P_ih Q_ih
+  {
+    unfold is_bound_in at h1,
+
+    unfold occurs_in,
+    cases h1,
+    {
+      apply or.intro_left,
+      exact P_ih h1,
+    },
+    {
+      apply or.intro_right,
+      exact Q_ih h1,
+    }
+  },
+  case formula.forall_ : x P P_ih
+  {
+    unfold is_bound_in at h1,
+
+    unfold occurs_in,
+    cases h1,
+    {
+      apply or.intro_left,
+      exact h1,
+    },
+    {
+      apply or.intro_right,
+      exact P_ih h1,
+    }
+  },
+end
+
+
 theorem is_free_in_imp_occurs_in
   (P : formula)
   (v : variable_)
