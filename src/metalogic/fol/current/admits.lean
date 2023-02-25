@@ -52,6 +52,7 @@ def fast_admits_aux (v u : variable_) : finset variable_ → formula → Prop
 def fast_admits (v u : variable_) (P : formula) : Prop :=
   fast_admits_aux v u ∅ P
 
+
 --
 
 
@@ -490,6 +491,8 @@ begin
   }
 end
 
+
+--
 
 lemma replace_free_aux_admits_aux
   (P : formula)
