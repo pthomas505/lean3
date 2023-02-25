@@ -248,7 +248,7 @@ begin
 end
 
 
-lemma blah
+lemma mem_binders_imp_admits_aux
   (P : formula)
   (v u : variable_)
   (binders : finset variable_)
@@ -304,7 +304,7 @@ begin
     unfold admits_aux,
     by_cases c1 : v = x,
     {
-      apply blah,
+      apply mem_binders_imp_admits_aux,
       simp only [finset.mem_union, finset.mem_singleton],
       apply or.intro_right,
       exact c1,
