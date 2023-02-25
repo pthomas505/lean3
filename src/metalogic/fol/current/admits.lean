@@ -111,6 +111,16 @@ begin
   },
 end
 
+theorem fast_admits_id
+  (P : formula)
+  (v : variable_) :
+  fast_admits v v P :=
+begin
+  unfold fast_admits,
+  apply fast_admits_aux_id,
+  simp only [finset.not_mem_empty, not_false_iff],
+end
+
 
 lemma admits_aux_id
   (P : formula)
