@@ -308,7 +308,7 @@ begin
   case formula.pred_ : name args binders
   {
     unfold is_free_in at h1,
-    squeeze_simp at h1,
+    simp only [list.mem_to_finset] at h1,
 
     unfold admits_aux,
     intros a1,
