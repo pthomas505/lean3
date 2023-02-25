@@ -256,7 +256,9 @@ lemma mem_binders_imp_admits_aux
 begin
   induction P generalizing binders,
   case formula.true_ : binders h1
-  { admit },
+  {
+    unfold admits_aux,
+  },
   case formula.pred_ : name args binders h1
   {
     unfold admits_aux,
@@ -300,13 +302,40 @@ lemma not_is_free_in_imp_admits_aux
 begin
   induction P generalizing binders,
   case formula.true_ : binders
-  { admit },
-  case formula.pred_ : P_ᾰ P_ᾰ_1 binders
-  { admit },
-  case formula.not_ : P_ᾰ P_ih binders
-  { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders
-  { admit },
+  {
+    unfold admits_aux,
+  },
+  case formula.pred_ : name args binders
+  {
+    unfold is_free_in at h1,
+    squeeze_simp at h1,
+
+    unfold admits_aux,
+    intros a1,
+    cases a1,
+    contradiction,
+  },
+  case formula.not_ : P P_ih binders
+  {
+    unfold is_free_in at h1,
+
+    exact P_ih h1 binders,
+  },
+  case formula.imp_ : P Q P_ih Q_ih binders
+  {
+    unfold is_free_in at h1,
+    push_neg at h1,
+    cases h1,
+
+    unfold admits_aux,
+    split,
+    {
+      exact P_ih h1_left binders,
+    },
+    {
+      exact Q_ih h1_right binders,
+    }
+  },
   case formula.forall_ : x P P_ih binders
   {
     unfold is_free_in at h1,
