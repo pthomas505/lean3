@@ -246,7 +246,7 @@ begin
 end
 
 
-lemma not_bound_in_imp_fast_admits_aux
+lemma not_is_bound_in_imp_fast_admits_aux
   (P : formula)
   (v u : variable_)
   (binders : finset variable_)
@@ -314,14 +314,14 @@ begin
 end
 
 
-theorem not_bound_in_imp_fast_admits
+theorem not_is_bound_in_imp_fast_admits
   (P : formula)
   (v u : variable_)
   (h1 : ¬ is_bound_in u P) :
   fast_admits v u P :=
 begin
   unfold fast_admits,
-  apply not_bound_in_imp_fast_admits_aux,
+  apply not_is_bound_in_imp_fast_admits_aux,
   {
     exact h1,
   },
@@ -331,7 +331,7 @@ begin
 end
 
 
-lemma not_bound_in_imp_admits_aux
+lemma not_is_bound_in_imp_admits_aux
   (P : formula)
   (v u : variable_)
   (binders : finset variable_)
@@ -392,14 +392,14 @@ begin
   },
 end
 
-lemma not_bound_in_imp_admits
+lemma not_is_bound_in_imp_admits
   (P : formula)
   (v u : variable_)
   (h1 : ¬ is_bound_in u P) :
   admits v u P :=
 begin
   unfold admits,
-  apply not_bound_in_imp_admits_aux,
+  apply not_is_bound_in_imp_admits_aux,
   {
     exact h1,
   },
