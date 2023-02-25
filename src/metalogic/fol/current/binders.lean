@@ -65,6 +65,71 @@ def is_free_in (v : variable_) : formula → Prop
 example
   (v : variable_)
   (P : formula) :
+  occurs_in v P ↔ v ∈ P.var_set :=
+begin
+  induction P,
+  case formula.true_
+  {
+    refl,
+  },
+  case formula.pred_ : name args
+  {
+    unfold occurs_in,
+    unfold formula.var_set,
+    simp only [list.mem_to_finset],
+  },
+  case formula.not_ : P P_ih
+  {
+    unfold occurs_in,
+    unfold formula.var_set,
+    exact P_ih,
+  },
+  case formula.imp_ : P Q P_ih Q_ih
+  {
+    unfold occurs_in,
+    unfold formula.var_set,
+    simp only [finset.mem_union],
+    exact iff.or P_ih Q_ih,
+  },
+  case formula.forall_ : x P P_ih
+  {
+    cases P_ih,
+
+    unfold occurs_in,
+    unfold formula.var_set,
+    simp only [finset.mem_union, finset.mem_singleton],
+    split,
+    {
+      intros a1,
+      cases a1,
+      {
+        apply or.intro_right,
+        exact a1,
+      },
+      {
+        apply or.intro_left,
+        exact P_ih_mp a1,
+      }
+    },
+    {
+      intros a1,
+      cases a1,
+      {
+        apply or.intro_right,
+        exact P_ih_mpr a1,
+      },
+      {
+        apply or.intro_left,
+        exact a1,
+      }
+    }
+  },
+end
+
+
+example
+  (v : variable_)
+  (P : formula) :
   is_bound_in v P ↔ v ∈ P.bound_var_set :=
 begin
   induction P,
