@@ -18,6 +18,7 @@ inductive pred_name_ : Type
 inductive formula : Type
 | true_ : formula
 | pred_ : pred_name_ → list variable_ → formula
+| eq_ : variable_ → variable_ → formula
 | not_ : formula → formula
 | imp_ : formula → formula → formula
 | forall_ : variable_ → formula → formula
