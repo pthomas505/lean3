@@ -188,6 +188,7 @@ begin
   case formula.pred_ : name args
   {
     unfold occurs_in at h1,
+    simp only [list.mem_to_finset] at h1,
 
     unfold fast_replace_free,
     congr,

@@ -547,6 +547,7 @@ begin
   case formula.pred_ : name args binders
   {
     unfold occurs_in at h1,
+    simp only [list.mem_to_finset] at h1,
 
     unfold replace_free_aux,
     unfold admits_aux,
