@@ -53,6 +53,53 @@ def fast_admits (v u : variable_) (P : formula) : Prop :=
   fast_admits_aux v u ∅ P
 
 
+lemma fast_admits_aux_id
+  (P : formula)
+  (v : variable_)
+  (binders : finset variable_)
+  (h1 : v ∉ binders) :
+  fast_admits_aux v v binders P :=
+begin
+  induction P generalizing binders,
+  case formula.true_ : binders h1
+  {
+    unfold fast_admits_aux,
+  },
+  case formula.pred_ : name args binders h1
+  {
+    unfold fast_admits_aux,
+    intros a1,
+    exact h1,
+  },
+  case formula.not_ : P_ᾰ P_ih binders h1
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1
+  { admit },
+  case formula.forall_ : x P P_ih binders h1
+  {
+    unfold fast_admits_aux,
+    by_cases c1 : v = x,
+    {
+      apply or.intro_left,
+      exact c1,
+    },
+    {
+      apply or.intro_right,
+      apply P_ih,
+      simp only [finset.mem_union, finset.mem_singleton],
+      push_neg,
+      split,
+      {
+        exact h1,
+      },
+      {
+        exact c1,
+      }
+    }
+  },
+end
+
+
 lemma admits_aux_id
   (P : formula)
   (v : variable_)
