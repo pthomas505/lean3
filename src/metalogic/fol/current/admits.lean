@@ -706,9 +706,7 @@ begin
   },
 end
 
-
 --
-
 
 lemma fast_admits_aux_del_binders
   (P : formula)
@@ -842,9 +840,7 @@ begin
   },
 end
 
-
 --
-
 
 lemma admits_aux_imp_fast_admits_aux
   (P : formula)
@@ -1048,8 +1044,7 @@ begin
   }
 end
 
-
-
+--
 
 @[derive [inhabited, decidable_eq]]
 inductive bool_formula : Type
@@ -1331,6 +1326,7 @@ begin
   }
 end
 
+--
 
 def simult_admits_aux (σ : variable_ → variable_) : finset variable_ → formula → Prop
 | _ true_ := true
