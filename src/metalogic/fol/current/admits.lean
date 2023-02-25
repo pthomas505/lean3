@@ -376,6 +376,21 @@ begin
 end
 
 
+theorem not_bound_in_imp_fast_admits
+  (P : formula)
+  (v u : variable_)
+  (h1 : ¬ is_bound_in u P) :
+  fast_admits v u P :=
+begin
+  unfold fast_admits,
+  apply not_bound_in_imp_fast_admits_aux,
+  {
+    exact h1,
+  },
+  {
+    simp only [finset.not_mem_empty, not_false_iff],
+  }
+end
 
 
 lemma replace_free_aux_admits_aux
