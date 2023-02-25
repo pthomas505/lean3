@@ -171,7 +171,7 @@ begin
 end
 
 
-lemma not_free_in_imp_fast_admits_aux
+lemma not_is_free_in_imp_fast_admits_aux
   (P : formula)
   (v u : variable_)
   (binders : finset variable_)
@@ -234,77 +234,15 @@ begin
 end
 
 
-lemma not_free_in_imp_fast_admits
+lemma not_is_free_in_imp_fast_admits
   (P : formula)
   (v u : variable_)
   (h1 : ¬ is_free_in v P) :
   fast_admits v u P :=
 begin
   unfold fast_admits,
-  apply not_free_in_imp_fast_admits_aux,
+  apply not_is_free_in_imp_fast_admits_aux,
   exact h1,
-end
-
-
-lemma not_bound_in_imp_admits_aux
-  (P : formula)
-  (v u : variable_)
-  (binders : finset variable_)
-  (h1 : ¬ is_bound_in u P)
-  (h2 : u ∉ binders) :
-  admits_aux v u binders P :=
-begin
-  induction P generalizing binders,
-  case formula.true_ : binders h2
-  {
-    unfold admits_aux,
-  },
-  case formula.pred_ : name args binders h2
-  {
-    unfold admits_aux,
-    intros a1,
-    exact h2,
-  },
-  case formula.not_ : P P_ih binders h2
-  {
-    unfold is_bound_in at h1,
-
-    unfold admits_aux,
-    exact P_ih h1 binders h2,
-  },
-  case formula.imp_ : P Q P_ih Q_ih binders h2
-  {
-    unfold is_bound_in at h1,
-    push_neg at h1,
-    cases h1,
-
-    unfold admits_aux,
-    split,
-    {
-      exact P_ih h1_left binders h2,
-    },
-    {
-      exact Q_ih h1_right binders h2,
-    }
-  },
-  case formula.forall_ : x P P_ih binders h2
-  {
-    unfold is_bound_in at h1,
-    push_neg at h1,
-    cases h1,
-
-    unfold admits_aux,
-    apply P_ih h1_right,
-    simp only [finset.mem_union, finset.mem_singleton],
-    push_neg,
-    split,
-    {
-      exact h2,
-    },
-    {
-      exact h1_left,
-    }
-  },
 end
 
 
@@ -384,6 +322,84 @@ theorem not_bound_in_imp_fast_admits
 begin
   unfold fast_admits,
   apply not_bound_in_imp_fast_admits_aux,
+  {
+    exact h1,
+  },
+  {
+    simp only [finset.not_mem_empty, not_false_iff],
+  }
+end
+
+
+lemma not_bound_in_imp_admits_aux
+  (P : formula)
+  (v u : variable_)
+  (binders : finset variable_)
+  (h1 : ¬ is_bound_in u P)
+  (h2 : u ∉ binders) :
+  admits_aux v u binders P :=
+begin
+  induction P generalizing binders,
+  case formula.true_ : binders h2
+  {
+    unfold admits_aux,
+  },
+  case formula.pred_ : name args binders h2
+  {
+    unfold admits_aux,
+    intros a1,
+    exact h2,
+  },
+  case formula.not_ : P P_ih binders h2
+  {
+    unfold is_bound_in at h1,
+
+    unfold admits_aux,
+    exact P_ih h1 binders h2,
+  },
+  case formula.imp_ : P Q P_ih Q_ih binders h2
+  {
+    unfold is_bound_in at h1,
+    push_neg at h1,
+    cases h1,
+
+    unfold admits_aux,
+    split,
+    {
+      exact P_ih h1_left binders h2,
+    },
+    {
+      exact Q_ih h1_right binders h2,
+    }
+  },
+  case formula.forall_ : x P P_ih binders h2
+  {
+    unfold is_bound_in at h1,
+    push_neg at h1,
+    cases h1,
+
+    unfold admits_aux,
+    apply P_ih h1_right,
+    simp only [finset.mem_union, finset.mem_singleton],
+    push_neg,
+    split,
+    {
+      exact h2,
+    },
+    {
+      exact h1_left,
+    }
+  },
+end
+
+lemma not_bound_in_imp_admits
+  (P : formula)
+  (v u : variable_)
+  (h1 : ¬ is_bound_in u P) :
+  admits v u P :=
+begin
+  unfold admits,
+  apply not_bound_in_imp_admits_aux,
   {
     exact h1,
   },
