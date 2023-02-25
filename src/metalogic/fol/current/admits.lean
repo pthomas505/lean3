@@ -52,9 +52,7 @@ def fast_admits_aux (v u : variable_) : finset variable_ → formula → Prop
 def fast_admits (v u : variable_) (P : formula) : Prop :=
   fast_admits_aux v u ∅ P
 
-
 --
-
 
 lemma fast_admits_aux_self
   (P : formula)
@@ -491,7 +489,6 @@ begin
   }
 end
 
-
 --
 
 lemma replace_free_aux_admits_aux
@@ -574,6 +571,7 @@ begin
   exact h1,
 end
 
+--
 
 example
   (P : formula)
@@ -709,6 +707,7 @@ begin
 end
 
 
+--
 
 
 lemma fast_admits_aux_del_binders
@@ -842,6 +841,9 @@ begin
     }
   },
 end
+
+
+--
 
 
 lemma admits_aux_imp_fast_admits_aux
