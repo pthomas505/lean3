@@ -233,8 +233,7 @@ begin
   },
 end
 
-
-lemma not_is_free_in_imp_fast_admits
+theorem not_is_free_in_imp_fast_admits
   (P : formula)
   (v u : variable_)
   (h1 : ¬ is_free_in v P) :
@@ -312,7 +311,6 @@ begin
     }
   },
 end
-
 
 theorem not_is_bound_in_imp_fast_admits
   (P : formula)
@@ -392,7 +390,7 @@ begin
   },
 end
 
-lemma not_is_bound_in_imp_admits
+theorem not_is_bound_in_imp_admits
   (P : formula)
   (v u : variable_)
   (h1 : ¬ is_bound_in u P) :
@@ -477,8 +475,7 @@ begin
   },
 end
 
-
-lemma replace_free_admits
+theorem replace_free_admits
   (P : formula)
   (v t : variable_)
   (h1 : ¬ occurs_in t P) :
