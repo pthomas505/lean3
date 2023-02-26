@@ -27,6 +27,9 @@ def admits_aux (v u : variable_) : finset variable_ → formula → Prop
 | binders (pred_ name args) :=
     (v ∈ args ∧ v ∉ binders) → -- if there is a free occurrence of v in P
     u ∉ binders -- then it does not become a bound occurrence of u in P(u/v)
+| binders (eq_ x y) :=
+    ((v = x ∨ v = y) ∧ (v ∉ binders)) →
+    u ∉ binders
 | binders (not_ P) := admits_aux binders P
 | binders (imp_ P Q) := admits_aux binders P ∧ admits_aux binders Q
 | binders (forall_ x P) := admits_aux (binders ∪ {x}) P
@@ -45,6 +48,9 @@ def fast_admits_aux (v u : variable_) : finset variable_ → formula → Prop
 | binders (pred_ name args) :=
     v ∈ args → -- if there is a free occurrence of v in P
     u ∉ binders -- then it does not become a bound occurrence of u in P(u/v)
+| binders (eq_ x y) :=
+    (v = x ∨ v = y) →
+    u ∉ binders
 | binders (not_ P) := fast_admits_aux binders P
 | binders (imp_ P Q) := fast_admits_aux binders P ∧ fast_admits_aux binders Q
 | binders (forall_ x P) := v = x ∨ fast_admits_aux (binders ∪ {x}) P
