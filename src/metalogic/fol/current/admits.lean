@@ -78,6 +78,12 @@ begin
     intros a1,
     exact h1,
   },
+  case formula.eq_ : x y binders h1
+  {
+    unfold fast_admits_aux,
+    intros a1,
+    exact h1,
+  },
   case formula.not_ : P P_ih binders h1
   {
     unfold fast_admits_aux,
@@ -145,6 +151,11 @@ begin
     unfold admits_aux,
     simp only [and_imp, imp_self, implies_true_iff],
   },
+  case formula.eq_ : x y binders
+  {
+    unfold admits_aux,
+    simp only [and_imp, imp_self, implies_true_iff],
+  },
   case formula.not_ : P P_ih binders
   {
     unfold admits_aux,
@@ -199,6 +210,22 @@ begin
     unfold fast_admits_aux,
     intros a1,
     contradiction,
+  },
+  case formula.eq_ : x y binders
+  {
+    unfold is_free_in at h1,
+    push_neg at h1,
+    cases h1,
+
+    unfold fast_admits_aux,
+    intros a1,
+    cases a1,
+    {
+      contradiction,
+    },
+    {
+      contradiction,
+    }
   },
   case formula.not_ : P P_ih
   {
@@ -272,6 +299,13 @@ begin
     cases a1,
     contradiction,
   },
+  case formula.eq_ : x y binders h1
+  {
+    unfold admits_aux,
+    intros a1,
+    cases a1,
+    contradiction,
+  },
   case formula.not_ : P P_ih binders h1
   {
     unfold admits_aux,
@@ -320,6 +354,23 @@ begin
     intros a1,
     cases a1,
     contradiction,
+  },
+  case formula.eq_ : x y binders
+  {
+    unfold is_free_in at h1,
+    push_neg at h1,
+    cases h1,
+
+    unfold admits_aux,
+    intros a1,
+    cases a1,
+    cases a1_left,
+    {
+      contradiction,
+    },
+    {
+      contradiction,
+    }
   },
   case formula.not_ : P P_ih binders
   {
@@ -389,6 +440,12 @@ begin
     unfold fast_admits_aux,
   },
   case formula.pred_ : name args binders h2
+  {
+    unfold fast_admits_aux,
+    intros a1,
+    exact h2,
+  },
+  case formula.eq_ : x y binders h2
   {
     unfold fast_admits_aux,
     intros a1,
@@ -473,6 +530,12 @@ begin
     unfold admits_aux,
   },
   case formula.pred_ : name args binders h2
+  {
+    unfold admits_aux,
+    intros a1,
+    exact h2,
+  },
+  case formula.eq_ : x y binders h2
   {
     unfold admits_aux,
     intros a1,
@@ -570,6 +633,40 @@ begin
     apply h1,
     exact a1,
   },
+  case formula.eq_ : x y binders
+  {
+    unfold occurs_in at h1,
+    push_neg at h1,
+    cases h1,
+
+    unfold replace_free_aux,
+    unfold admits_aux,
+    intros a1,
+    cases a1,
+    cases a1_left,
+    {
+      split_ifs at a1_left,
+      {
+        cases h,
+        subst h_left,
+        exact h_right,
+      },
+      {
+        contradiction,
+      }
+    },
+    {
+      split_ifs at a1_left,
+      {
+        cases h,
+        subst h_left,
+        exact h_right,
+      },
+      {
+        contradiction,
+      }
+    }
+  },
   case formula.not_ : P P_ih binders
   {
     unfold occurs_in at h1,
@@ -640,7 +737,7 @@ begin
     simp only [finset.mem_union, and_imp] at h1,
 
     unfold admits_aux,
-    intros a1 a2,
+    intros a1 contra,
     cases a1,
     apply h1 a1_left,
     {
@@ -655,7 +752,31 @@ begin
     },
     {
       apply or.intro_left,
-      exact a2,
+      exact contra,
+    }
+  },
+  case formula.eq_ : x y S h1
+  {
+    unfold admits_aux at h1,
+    simp only [finset.mem_union, and_imp] at h1,
+
+    unfold admits_aux,
+    intros a1 contra,
+    cases a1,
+    apply h1 a1_left,
+    {
+      push_neg,
+      split,
+      {
+        exact a1_right,
+      },
+      {
+        exact h2,
+      }
+    },
+    {
+      apply or.intro_left,
+      exact contra,
     }
   },
   case formula.not_ : P P_ih S h1
@@ -722,6 +843,24 @@ begin
       exact h2,
     },
   },
+  case formula.eq_ : x y S h1
+  {
+    unfold admits_aux at h1,
+    simp only [and_imp] at h1,
+
+    unfold admits_aux,
+    simp only [finset.mem_union, and_imp],
+    push_neg,
+    intros a1 a2,
+    cases a2,
+    split,
+    {
+      exact h1 a1 a2_left,
+    },
+    {
+      exact h2,
+    },
+  },
   case formula.not_ : P P_ih S h1
   {
     unfold admits_aux at h1,
@@ -769,6 +908,18 @@ begin
     unfold fast_admits_aux,
   },
   case formula.pred_ : name args S h1
+  {
+    unfold fast_admits_aux at h1,
+    simp only [finset.mem_union] at h1,
+    push_neg at h1,
+
+    unfold fast_admits_aux,
+    intros a1,
+    specialize h1 a1,
+    cases h1,
+    exact h1_left,
+  },
+  case formula.eq_ : x y S h1
   {
     unfold fast_admits_aux at h1,
     simp only [finset.mem_union] at h1,
@@ -845,6 +996,14 @@ begin
 
     exact h1 h2,
   },
+  case formula.eq_ : x y binders h1
+  {
+    unfold fast_admits_aux at h1,
+
+    unfold is_free_in at h2,
+
+    exact h1 h2,
+  },
   case formula.not_ : P P_ih binders h1
   {
     unfold fast_admits_aux at h1,
@@ -904,6 +1063,21 @@ begin
     unfold fast_admits_aux,
   },
   case formula.pred_ : name args binders h1 h2
+  {
+    unfold admits_aux at h1,
+
+    unfold fast_admits_aux,
+    intros a1,
+    apply h1,
+    split,
+    {
+      exact a1,
+    },
+    {
+      exact h2,
+    },
+  },
+  case formula.eq_ : x y binders h1 h2
   {
     unfold admits_aux at h1,
 
@@ -984,6 +1158,20 @@ begin
     unfold admits_aux,
   },
   case formula.pred_ : name args binders h1
+  {
+    unfold fast_admits_aux at h1,
+    unfold admits_aux,
+    intros a1,
+    cases a1,
+    cases h1,
+    {
+      contradiction,
+    },
+    {
+      exact h1 a1_left,
+    }
+  },
+  case formula.eq_ : x y binders h1
   {
     unfold fast_admits_aux at h1,
     unfold admits_aux,
@@ -1098,6 +1286,7 @@ end
 inductive bool_formula : Type
 | true_ : bool_formula
 | pred_ : pred_name_ → list bool → bool_formula
+| eq_ : bool → bool → bool_formula
 | not_ : bool_formula → bool_formula
 | imp_ : bool_formula → bool_formula → bool_formula
 | forall_ : bool → bool_formula → bool_formula
@@ -1106,6 +1295,7 @@ inductive bool_formula : Type
 def to_is_bound_aux : finset variable_ → formula → bool_formula
 | _ true_ := bool_formula.true_
 | binders (pred_ name args) := bool_formula.pred_ name (args.map (fun (v : variable_), v ∈ binders))
+| binders (eq_ x y) := bool_formula.eq_ (x ∈ binders) (y ∈ binders)
 | binders (not_ P) := bool_formula.not_ (to_is_bound_aux binders P)
 | binders (imp_ P Q) := bool_formula.imp_ (to_is_bound_aux binders P) (to_is_bound_aux binders Q)
 | binders (forall_ x P) := bool_formula.forall_ true (to_is_bound_aux (binders ∪ {x}) P)
@@ -1177,6 +1367,53 @@ begin
         exact a1,
       }
     },
+  },
+  case formula.eq_ : x y binders h1 h2
+  {
+    unfold fast_admits_aux at h2,
+
+    unfold fast_replace_free,
+    unfold to_is_bound_aux,
+    simp only [bool.to_bool_eq],
+    split,
+    {
+      split_ifs,
+      {
+        subst h,
+        simp only [eq_self_iff_true, true_or, forall_true_left] at h2,
+        split,
+        {
+          intros a1,
+          contradiction,
+        },
+        {
+          intros a1,
+          contradiction,
+        }
+      },
+      {
+        refl,
+      }
+    },
+    {
+      split_ifs,
+      {
+        subst h,
+        simp only [eq_self_iff_true, or_true, forall_true_left] at h2,
+        split,
+        {
+          intros a1,
+          contradiction,
+        },
+        {
+          intros a1,
+          contradiction,
+        }
+      },
+      {
+        refl,
+      }
+    }
   },
   case formula.not_ : P P_ih binders h1 h2
   {
@@ -1294,6 +1531,31 @@ begin
       }
     },
   },
+  case formula.eq_ : x y binders h1 h2
+  {
+    unfold fast_replace_free at h2,
+    unfold to_is_bound_aux at h2,
+    simp only [bool.to_bool_eq] at h2,
+    cases h2,
+
+    unfold fast_admits_aux,
+    intros a1 contra,
+    cases a1,
+    {
+      subst a1,
+      simp only [eq_self_iff_true, if_true] at h2_left,
+      cases h2_left,
+      apply h1,
+      exact h2_left_mpr contra,
+    },
+    {
+      subst a1,
+      simp only [eq_self_iff_true, if_true] at h2_right,
+      cases h2_right,
+      apply h1,
+      exact h2_right_mpr contra,
+    },
+  },
   case formula.not_ : P P_ih binders h1 h2
   {
     unfold fast_replace_free at h2,
@@ -1380,6 +1642,8 @@ def simult_admits_aux (σ : variable_ → variable_) : finset variable_ → form
 | _ true_ := true
 | binders (pred_ name args) :=
     ∀ (v : variable_), v ∈ args ∧ v ∉ binders → σ v ∉ binders
+| binders (eq_ x y) :=
+    (x ∉ binders → σ x ∉ binders) ∧ (y ∉ binders → σ y ∉ binders)
 | binders (not_ P) := simult_admits_aux binders P
 | binders (imp_ P Q) := simult_admits_aux binders P ∧ simult_admits_aux binders Q
 | binders (forall_ x P) := simult_admits_aux (binders ∪ {x}) P
@@ -1394,6 +1658,7 @@ def simult_admits (σ : variable_ → variable_) (P : formula) : Prop :=
 def admits_alt (v u : variable_) : formula → Prop
 | (true_) := true
 | (pred_ name args) := true
+| (eq_ x y) := true
 | (not_ P) := admits_alt P
 | (imp_ P Q) := admits_alt P ∧ admits_alt Q
 | (forall_ x P) := v = x ∨ ((x = u → ¬ is_free_in v P) ∧ admits_alt P)
@@ -1417,6 +1682,8 @@ begin
     intros a1,
     exact h1,
   },
+  case formula.eq_ : x y binders h1
+  { admit },
   case formula.not_ : P_ᾰ P_ih binders
   { admit },
   case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders
@@ -1474,6 +1741,8 @@ begin
     exact contra,
     exact h2,
   },
+  case formula.eq_ : P_ᾰ P_ᾰ_1 binders h1 h2
+  { admit },
   case formula.not_ : P_ᾰ P_ih binders h1 h2
   { admit },
   case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1 h2
@@ -1510,6 +1779,8 @@ begin
     unfold fast_admits_aux,
     squeeze_simp,
   },
+  case formula.eq_ : P_ᾰ P_ᾰ_1 binders
+  { admit },
   case formula.not_ : P_ᾰ P_ih binders
   { admit },
   case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders
