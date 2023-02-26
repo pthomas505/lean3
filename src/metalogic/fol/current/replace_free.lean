@@ -25,13 +25,18 @@ If $P$ is a formula, $v$ is a variable, and $t$ is a term, then $P(t/v)$ is the 
 def replace_free_aux (v t : variable_) : finset variable_ → formula → formula
 | _ (true_) := true_
 | binders (pred_ name args) :=
-    pred_ name (args.map (fun (x : variable_),
-      if x = v ∧ x ∉ binders
-      then t
-      else x))
+    pred_
+    name
+    (args.map (fun (x : variable_), if x = v ∧ x ∉ binders then t else x))
+| binders (eq_ x y) :=
+    eq_
+    (if x = v ∧ x ∉ binders then t else x)
+    (if y = v ∧ y ∉ binders then t else y)
 | binders (not_ P) := not_ (replace_free_aux binders P)
 | binders (imp_ P Q) :=
-    imp_ (replace_free_aux binders P) (replace_free_aux binders Q)
+    imp_
+    (replace_free_aux binders P)
+    (replace_free_aux binders Q)
 | binders (forall_ x P) := forall_ x (replace_free_aux (binders ∪ {x}) P)
 
 /--
@@ -51,16 +56,19 @@ def replace_free (v t : variable_) (P : formula) : formula :=
 def fast_replace_free (v t : variable_) : formula → formula
 | (true_) := true_
 | (pred_ name args) :=
-    pred_ name (args.map (fun (x : variable_),
-      if x = v
-      then t
-      else x))
+    pred_
+    name
+    (args.map (fun (x : variable_), if x = v then t else x))
+| (eq_ x y) :=
+    eq_
+    (if x = v then t else x)
+    (if y = v then t else y)
 | (not_ P) := not_ (fast_replace_free P)
 | (imp_ P Q) := imp_ (fast_replace_free P) (fast_replace_free Q)
 | (forall_ x P) :=
-  if v = x
-  then forall_ x P -- v is not free in P
-  else forall_ x (fast_replace_free P)
+    if v = x
+    then forall_ x P -- v is not free in P
+    else forall_ x (fast_replace_free P)
 
 
 theorem fast_replace_free_id
@@ -80,6 +88,21 @@ begin
     simp only [list.map_eq_self_iff, ite_eq_right_iff],
     intros x a1 a2,
     subst a2,
+  },
+  case formula.eq_ : x y
+  {
+    unfold fast_replace_free,
+    congr,
+    {
+      simp only [ite_eq_right_iff],
+      intros a1,
+      subst a1,
+    },
+    {
+      simp only [ite_eq_right_iff],
+      intros a1,
+      subst a1,
+    }
   },
   case formula.not_ : P P_ih
   {
@@ -130,6 +153,27 @@ begin
     intros x a1 a2,
     subst a2,
     contradiction,
+  },
+  case formula.eq_ : x y
+  {
+    unfold is_free_in at h1,
+    push_neg at h1,
+    cases h1,
+
+    unfold fast_replace_free,
+    congr,
+    {
+      simp only [ite_eq_right_iff],
+      intros a1,
+      simp only [eq_comm] at a1,
+      contradiction,
+    },
+    {
+      simp only [ite_eq_right_iff],
+      intros a1,
+      simp only [eq_comm] at a1,
+      contradiction,
+    }
   },
   case formula.not_ : P P_ih
   {
@@ -205,6 +249,55 @@ begin
     },
     {
       refl,
+    }
+  },
+  case formula.eq_ : x y
+  {
+    unfold occurs_in at h1,
+    push_neg at h1,
+    cases h1,
+
+    unfold fast_replace_free,
+    congr,
+    {
+      simp only [ite_eq_left_iff],
+      split_ifs,
+      {
+        by_contradiction contra,
+        apply h1_left,
+        symmetry,
+        apply h,
+        simp only [eq_comm],
+        exact contra,
+      },
+      {
+        push_neg at h,
+        cases h,
+        contradiction,
+      },
+      {
+        refl,
+      }
+    },
+    {
+      simp only [ite_eq_left_iff],
+      split_ifs,
+      {
+        by_contradiction contra,
+        apply h1_right,
+        symmetry,
+        apply h,
+        simp only [eq_comm],
+        exact contra,
+      },
+      {
+        push_neg at h,
+        cases h,
+        contradiction,
+      },
+      {
+        refl,
+      }
     }
   },
   case formula.not_ : P P_ih
@@ -287,6 +380,33 @@ begin
       exact h,
     }
   },
+  case formula.eq_ : x y
+  {
+    unfold fast_replace_free,
+    unfold is_free_in,
+    push_neg,
+    split,
+    {
+      split_ifs,
+      {
+        exact h1,
+      },
+      {
+        simp only [eq_comm] at h,
+        exact h,
+      }
+    },
+    {
+      split_ifs,
+      {
+        exact h1,
+      },
+      {
+        symmetry,
+        exact h,
+      }
+    }
+  },
   case formula.not_ : P P_ih
   {
     unfold fast_replace_free,
@@ -346,6 +466,23 @@ begin
     intros x a1 a2 a3,
     subst a2,
     contradiction,
+  },
+  case formula.eq_ : x y binders h1
+  {
+    unfold replace_free_aux,
+    congr,
+    {
+      simp only [ite_eq_right_iff, and_imp],
+      intros a1 a2,
+      subst a1,
+      contradiction,
+    },
+    {
+      simp only [ite_eq_right_iff, and_imp],
+      intros a1 a2,
+      subst a1,
+      contradiction,
+    }
   },
   case formula.not_ : P P_ih binders h1
   {
@@ -407,6 +544,24 @@ begin
       simp only [ite_eq_right_iff, and_imp],
       intros a1,
       contradiction,
+    }
+  },
+  case formula.eq_ : x y binders h1
+  {
+    unfold replace_free_aux,
+    unfold fast_replace_free,
+    congr,
+    {
+      simp only [eq_iff_iff, and_iff_left_iff_imp],
+      intros a1,
+      subst a1,
+      exact h1,
+    },
+    {
+      simp only [eq_iff_iff, and_iff_left_iff_imp],
+      intros a1,
+      subst a1,
+      exact h1,
     }
   },
   case formula.not_ : P P_ih binders h1
@@ -481,6 +636,7 @@ def function.update_ite
 def fast_simult_replace_free : (variable_ → variable_) → formula → formula
 | _ true_ := true_
 | σ (pred_ name args) := pred_ name (args.map σ)
+| σ (eq_ x y) := eq_ (σ x) (σ y)
 | σ (not_ P) := not_ (fast_simult_replace_free σ P)
 | σ (imp_ P Q) := imp_ (fast_simult_replace_free σ P) (fast_simult_replace_free σ Q)
 | σ (forall_ x P) := forall_ x (fast_simult_replace_free (function.update_ite σ x x) P)
@@ -541,6 +697,11 @@ begin
     unfold fast_simult_replace_free,
     simp only [list.map_id, eq_self_iff_true, and_self],
   },
+  case formula.eq_ : x y
+  {
+    unfold fast_simult_replace_free,
+    congr,
+  },
   case formula.not_ : P P_ih
   {
     unfold fast_simult_replace_free,
@@ -593,6 +754,12 @@ begin
     {
       simp only [id.def],
     },
+  },
+  case formula.eq_ : x y
+  {
+    unfold fast_simult_replace_free,
+    unfold fast_replace_free,
+    congr,
   },
   case formula.not_ : P P_ih
   {
