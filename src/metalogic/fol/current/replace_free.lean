@@ -87,7 +87,8 @@ begin
     congr,
     simp only [list.map_eq_self_iff, ite_eq_right_iff],
     intros x a1 a2,
-    subst a2,
+    symmetry,
+    exact a2,
   },
   case formula.eq_ : x y
   {
@@ -95,13 +96,11 @@ begin
     congr,
     {
       simp only [ite_eq_right_iff],
-      intros a1,
-      subst a1,
+      tauto,
     },
     {
       simp only [ite_eq_right_iff],
-      intros a1,
-      subst a1,
+      tauto,
     }
   },
   case formula.not_ : P P_ih
@@ -164,15 +163,11 @@ begin
     congr,
     {
       simp only [ite_eq_right_iff],
-      intros a1,
-      simp only [eq_comm] at a1,
-      contradiction,
+      tauto,
     },
     {
       simp only [ite_eq_right_iff],
-      intros a1,
-      simp only [eq_comm] at a1,
-      contradiction,
+      tauto,
     }
   },
   case formula.not_ : P P_ih
@@ -204,16 +199,8 @@ begin
     push_neg at h1,
 
     unfold fast_replace_free,
-    split_ifs,
-    {
-      simp only [eq_self_iff_true, and_self],
-    },
-    {
-      simp only [eq_self_iff_true, true_and],
-      apply P_ih,
-      apply h1,
-      exact h,
-    }
+    simp only [ite_eq_left_iff, eq_self_iff_true, true_and],
+    tauto,
   },
 end
 
@@ -236,20 +223,21 @@ begin
 
     unfold fast_replace_free,
     congr,
-    simp only [list.map_map, list.map_eq_self_iff, function.comp_app],
+    simp only [list.map_map, list.map_eq_self_iff, function.comp_app, ite_eq_left_iff],
     intros x a1,
-    split_ifs,
+    by_cases c1 : x = v,
     {
-      symmetry,
-      exact h,
+      subst c1,
+      simp only [eq_self_iff_true, not_true, is_empty.forall_iff, if_true],
     },
     {
-      subst h_1,
+      simp only [if_neg c1],
+      simp only [ite_eq_right_iff],
+      intros a2,
+      specialize a2 c1,
+      subst a2,
       contradiction,
     },
-    {
-      refl,
-    }
   },
   case formula.eq_ : x y
   {
@@ -261,43 +249,29 @@ begin
     congr,
     {
       simp only [ite_eq_left_iff],
-      split_ifs,
+      by_cases c1 : x = v,
       {
-        by_contradiction contra,
-        apply h1_left,
-        symmetry,
-        apply h,
-        simp only [eq_comm],
-        exact contra,
+        subst c1,
+        simp only [eq_self_iff_true, not_true, is_empty.forall_iff, if_true],
       },
       {
-        push_neg at h,
-        cases h,
-        contradiction,
+        simp only [if_neg c1],
+        simp only [ite_eq_right_iff],
+        tauto,
       },
-      {
-        refl,
-      }
     },
     {
       simp only [ite_eq_left_iff],
-      split_ifs,
+      by_cases c1 : y = v,
       {
-        by_contradiction contra,
-        apply h1_right,
-        symmetry,
-        apply h,
-        simp only [eq_comm],
-        exact contra,
+        subst c1,
+        simp only [eq_self_iff_true, not_true, is_empty.forall_iff, if_true],
       },
       {
-        push_neg at h,
-        cases h,
-        contradiction,
+        simp only [if_neg c1],
+        simp only [ite_eq_right_iff],
+        tauto,
       },
-      {
-        refl,
-      }
     }
   },
   case formula.not_ : P P_ih
@@ -373,8 +347,7 @@ begin
     intros x a1,
     split_ifs,
     {
-      simp only [eq_comm],
-      exact h1,
+      tauto,
     },
     {
       exact h,
@@ -392,8 +365,7 @@ begin
         exact h1,
       },
       {
-        simp only [eq_comm] at h,
-        exact h,
+        tauto,
       }
     },
     {
@@ -402,8 +374,7 @@ begin
         exact h1,
       },
       {
-        symmetry,
-        exact h,
+        tauto,
       }
     }
   },
@@ -432,9 +403,7 @@ begin
     split_ifs,
     {
       unfold is_free_in,
-      simp only [not_and],
-      intros a1,
-      contradiction,
+      tauto,
     },
     {
       unfold is_free_in,
@@ -533,9 +502,8 @@ begin
     funext,
     by_cases c1 : x = v,
     {
-      simp only [if_pos c1],
       subst c1,
-      simp only [eq_self_iff_true, true_and, ite_not, ite_eq_right_iff],
+      simp only [eq_self_iff_true, true_and, ite_not, if_true, ite_eq_right_iff],
       intros a1,
       contradiction,
     },
@@ -744,16 +712,7 @@ begin
     unfold fast_simult_replace_free,
     unfold fast_replace_free,
     simp only [eq_self_iff_true, true_and],
-    apply list.map_congr,
-    intros x a1,
-    unfold function.update_ite,
-    split_ifs,
-    {
-      refl,
-    },
-    {
-      simp only [id.def],
-    },
+    congr,
   },
   case formula.eq_ : x y
   {
