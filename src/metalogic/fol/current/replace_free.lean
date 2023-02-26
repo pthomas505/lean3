@@ -84,48 +84,32 @@ begin
   case formula.pred_ : name args
   {
     unfold fast_replace_free,
-    congr,
-    simp only [list.map_eq_self_iff, ite_eq_right_iff],
-    intros x a1 a2,
-    symmetry,
-    exact a2,
+    simp only [eq_self_iff_true, list.map_eq_self_iff, ite_eq_right_iff, true_and],
+    tauto,
   },
   case formula.eq_ : x y
   {
     unfold fast_replace_free,
-    congr,
-    {
-      simp only [ite_eq_right_iff],
-      tauto,
-    },
-    {
-      simp only [ite_eq_right_iff],
-      tauto,
-    }
+    simp only [ite_eq_right_iff],
+    tauto,
   },
   case formula.not_ : P P_ih
   {
     unfold fast_replace_free,
-    congr,
-    exact P_ih,
+    squeeze_simp,
+    tauto,
   },
   case formula.imp_ : P Q P_ih Q_ih
   {
     unfold fast_replace_free,
-    congr,
-    {
-      exact P_ih,
-    },
-    {
-      exact Q_ih,
-    }
+    squeeze_simp,
+    tauto,
   },
   case formula.forall_ : x P P_ih
   {
     unfold fast_replace_free,
     simp only [ite_eq_left_iff, eq_self_iff_true, true_and],
-    intros a1,
-    exact P_ih,
+    tauto,
   },
 end
 

@@ -90,21 +90,17 @@ begin
   },
   case formula.not_ : P P_ih
   {
-    unfold occurs_in,
-    unfold formula.var_set,
-    exact P_ih,
+    tauto,
   },
   case formula.imp_ : P Q P_ih Q_ih
   {
     unfold occurs_in,
     unfold formula.var_set,
     simp only [finset.mem_union],
-    exact iff.or P_ih Q_ih,
+    tauto,
   },
   case formula.forall_ : x P P_ih
   {
-    cases P_ih,
-
     unfold occurs_in,
     unfold formula.var_set,
     simp only [finset.mem_union, finset.mem_singleton],
@@ -133,21 +129,17 @@ begin
   },
   case formula.not_ : P P_ih
   {
-    unfold is_bound_in,
-    unfold formula.bound_var_set,
-    exact P_ih,
+    tauto,
   },
   case formula.imp_ : P Q P_ih Q_ih
   {
     unfold is_bound_in,
     unfold formula.bound_var_set,
     simp only [finset.mem_union],
-    exact iff.or P_ih Q_ih,
+    tauto,
   },
   case formula.forall_ : x P P_ih
   {
-    cases P_ih,
-
     unfold is_bound_in,
     unfold formula.bound_var_set,
     simp only [finset.mem_union, finset.mem_singleton],
@@ -178,21 +170,17 @@ begin
   },
   case formula.not_ : P P_ih
   {
-    unfold is_free_in,
-    unfold formula.free_var_set,
-    exact P_ih,
+    tauto,
   },
   case formula.imp_ : P Q P_ih Q_ih
   {
     unfold is_free_in,
     unfold formula.free_var_set,
     simp only [finset.mem_union],
-    exact iff.or P_ih Q_ih,
+    tauto,
   },
   case formula.forall_ : x P P_ih
   {
-    cases P_ih,
-
     unfold is_free_in,
     unfold formula.free_var_set,
     simp only [finset.mem_sdiff, finset.mem_singleton],
@@ -210,24 +198,19 @@ begin
   induction P,
   case formula.true_
   {
-    unfold is_bound_in at h1,
-    contradiction,
+    tauto,
   },
   case formula.pred_ : name args
   {
-    unfold is_bound_in at h1,
-    contradiction,
+    tauto,
   },
   case formula.eq_ : x y
   {
-    unfold is_bound_in at h1,
-    contradiction,
+    tauto,
   },
   case formula.not_ : P P_ih
   {
-    unfold is_bound_in at h1,
-
-    exact P_ih h1,
+    tauto,
   },
   case formula.imp_ : P Q P_ih Q_ih
   {
@@ -291,11 +274,9 @@ begin
   case formula.forall_ : x P P_ih
   {
     unfold is_free_in at h1,
-    cases h1,
 
     unfold occurs_in,
-    apply or.intro_right,
-    exact P_ih h1_right,
+    tauto,
   }
 end
 
