@@ -108,31 +108,7 @@ begin
     unfold occurs_in,
     unfold formula.var_set,
     simp only [finset.mem_union, finset.mem_singleton],
-    split,
-    {
-      intros a1,
-      cases a1,
-      {
-        apply or.intro_right,
-        exact a1,
-      },
-      {
-        apply or.intro_left,
-        exact P_ih_mp a1,
-      }
-    },
-    {
-      intros a1,
-      cases a1,
-      {
-        apply or.intro_right,
-        exact P_ih_mpr a1,
-      },
-      {
-        apply or.intro_left,
-        exact a1,
-      }
-    }
+    tauto,
   },
 end
 
@@ -175,31 +151,7 @@ begin
     unfold is_bound_in,
     unfold formula.bound_var_set,
     simp only [finset.mem_union, finset.mem_singleton],
-    split,
-    {
-      intros a1,
-      cases a1,
-      {
-        apply or.intro_right,
-        exact a1,
-      },
-      {
-        apply or.intro_left,
-        exact P_ih_mp a1,
-      }
-    },
-    {
-      intros a1,
-      cases a1,
-      {
-        apply or.intro_right,
-        exact P_ih_mpr a1,
-      },
-      {
-        apply or.intro_left,
-        exact a1,
-      }
-    }
+    tauto,
   },
 end
 
@@ -244,29 +196,7 @@ begin
     unfold is_free_in,
     unfold formula.free_var_set,
     simp only [finset.mem_sdiff, finset.mem_singleton],
-    split,
-    {
-      intros a1,
-      cases a1,
-      split,
-      {
-        exact P_ih_mp a1_right,
-      },
-      {
-        exact a1_left,
-      }
-    },
-    {
-      intros a1,
-      cases a1,
-      split,
-      {
-        exact a1_right,
-      },
-      {
-        exact P_ih_mpr a1_left,
-      }
-    }
+    tauto,
   },
 end
 
@@ -304,30 +234,14 @@ begin
     unfold is_bound_in at h1,
 
     unfold occurs_in,
-    cases h1,
-    {
-      apply or.intro_left,
-      exact P_ih h1,
-    },
-    {
-      apply or.intro_right,
-      exact Q_ih h1,
-    }
+    tauto,
   },
   case formula.forall_ : x P P_ih
   {
     unfold is_bound_in at h1,
 
     unfold occurs_in,
-    cases h1,
-    {
-      apply or.intro_left,
-      exact h1,
-    },
-    {
-      apply or.intro_right,
-      exact P_ih h1,
-    }
+    tauto,
   },
 end
 
@@ -372,15 +286,7 @@ begin
     unfold is_free_in at h1,
 
     unfold occurs_in,
-    cases h1,
-    {
-      apply or.intro_left,
-      exact P_ih h1,
-    },
-    {
-      apply or.intro_right,
-      exact Q_ih h1,
-    }
+    tauto,
   },
   case formula.forall_ : x P P_ih
   {
