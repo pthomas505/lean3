@@ -1771,27 +1771,49 @@ lemma fast_admits_aux_and_mem_binders_imp_not_is_free_in
   (binders : finset variable_)
   (h1 : fast_admits_aux v u binders P)
   (h2 : u ∈ binders) :
-  ¬is_free_in v P :=
+  ¬ is_free_in v P :=
 begin
   induction P generalizing binders,
   case formula.true_ : binders h1 h2
-  { admit },
+  {
+    dunfold is_free_in,
+    exact dec_trivial,
+  },
   case formula.pred_ : name args binders h1 h2
   {
-    unfold fast_admits_aux at h1,
-    unfold is_free_in,
-    squeeze_simp,
+    dunfold fast_admits_aux at h1,
+    dunfold is_free_in,
+    simp only [list.mem_to_finset],
     intros contra,
-    apply h1,
-    exact contra,
-    exact h2,
+    exact h1 contra h2,
   },
-  case formula.eq_ : P_ᾰ P_ᾰ_1 binders h1 h2
-  { admit },
-  case formula.not_ : P_ᾰ P_ih binders h1 h2
-  { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1 h2
-  { admit },
+  case formula.eq_ : x y binders h1 h2
+  {
+    dunfold fast_admits_aux at h1,
+    dunfold is_free_in,
+    tauto,
+  },
+  case formula.not_ : P P_ih binders h1 h2
+  {
+    dunfold fast_admits_aux at h1,
+    dunfold is_free_in,
+    exact P_ih binders h1 h2,
+  },
+  case formula.imp_ : P Q P_ih Q_ih binders h1 h2
+  {
+    dunfold fast_admits_aux at h1,
+    cases h1,
+
+    dunfold is_free_in,
+    push_neg,
+    split,
+    {
+      exact P_ih binders h1_left h2,
+    },
+    {
+      exact Q_ih binders h1_right h2,
+    }
+  },
   case formula.forall_ : x P P_ih binders h1 h2
   {
     unfold fast_admits_aux at h1,
