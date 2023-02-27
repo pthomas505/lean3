@@ -1693,49 +1693,80 @@ example
 begin
   induction P generalizing binders,
   case formula.true_ : binders
-  { admit },
+  {
+    dunfold fast_admits_aux,
+    dunfold admits_alt,
+    intros a1,
+    assumption,
+  },
   case formula.pred_ : name args binders
   {
-    unfold fast_admits_aux,
-    unfold admits_alt,
-    squeeze_simp,
-    intros a1,
-    exact h1,
+    dunfold fast_admits_aux,
+    dunfold admits_alt,
+    intros a1 a2 a3,
+    contradiction,
   },
   case formula.eq_ : x y binders h1
-  { admit },
-  case formula.not_ : P_ᾰ P_ih binders
-  { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders
-  { admit },
+  {
+    dunfold fast_admits_aux,
+    dunfold admits_alt,
+    intros a1 a2 a3,
+    contradiction,
+  },
+  case formula.not_ : P P_ih binders
+  {
+    dunfold fast_admits_aux,
+    dunfold admits_alt,
+    intros a1,
+    exact P_ih binders h1 a1,
+  },
+  case formula.imp_ : P Q P_ih Q_ih binders
+  {
+    dunfold fast_admits_aux,
+    dunfold admits_alt,
+    tauto,
+  },
   case formula.forall_ : x P P_ih binders
   {
-    unfold fast_admits_aux,
-    unfold admits_alt,
+    dunfold fast_admits_aux,
+    dunfold admits_alt,
     by_cases c1 : u = x,
-    subst c1,
-    squeeze_simp,
-    intros a1,
-    cases a1,
-    apply or.intro_left,
-    exact a1,
-    cases a1,
-    apply or.intro_right,
-    apply not_is_free_in_imp_fast_admits_aux,
-    exact a1_left,
-    intros a1,
-    cases a1,
-    apply or.intro_left,
-    exact a1,
-    apply or.intro_right,
-    apply P_ih,
-    squeeze_simp,
-    push_neg,
-    split,
-    exact h1,
-    exact c1,
-    cases a1,
-    exact a1_right,
+    {
+      subst c1,
+      simp only [eq_self_iff_true, forall_true_left],
+      intros a1,
+      cases a1,
+      {
+        apply or.intro_left,
+        exact a1,
+      },
+      {
+        cases a1,
+        apply or.intro_right,
+        apply not_is_free_in_imp_fast_admits_aux,
+        exact a1_left,
+      },
+    },
+    {
+      intros a1,
+      cases a1,
+      {
+        apply or.intro_left,
+        exact a1,
+      },
+      {
+        apply or.intro_right,
+        apply P_ih,
+        {
+          simp only [finset.mem_union, finset.mem_singleton],
+          tauto,
+        },
+        {
+          cases a1,
+          exact a1_right,
+        },
+      },
+    },
   },
 end
 
