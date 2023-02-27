@@ -1678,9 +1678,6 @@ begin
 end
 
 
-#lint
-
-
 example
   (P : formula)
   (v u : variable_)
@@ -1768,7 +1765,7 @@ begin
 end
 
 
-lemma meh
+lemma fast_admits_aux_and_mem_binders_imp_not_is_free_in
   (P : formula)
   (v u : variable_)
   (binders : finset variable_)
@@ -1844,7 +1841,7 @@ begin
     apply or.intro_right,
     split,
     intros a2,
-    apply meh P v u (binders ∪ {x}) a1,
+    apply fast_admits_aux_and_mem_binders_imp_not_is_free_in P v u (binders ∪ {x}) a1,
     squeeze_simp,
     apply or.intro_right,
     symmetry,
@@ -1853,3 +1850,6 @@ begin
     exact a1,
   },
 end
+
+
+#lint
