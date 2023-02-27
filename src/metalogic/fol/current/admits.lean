@@ -70,6 +70,38 @@ def fast_admits_aux (v u : variable_) : finset variable_ → formula → Prop
 def fast_admits (v u : variable_) (P : formula) : Prop :=
   fast_admits_aux v u ∅ P
 
+
+/--
+  admits_alt v u P := True if and only if there is no free occurrence of the variable v in the formula P that becomes a bound occurrence of the variable u in P(u/v).
+
+  P admits u for v
+
+  v → u in P
+
+  This is a version of admits that does not require the use of a binders variable.
+-/
+def admits_alt (v u : variable_) : formula → Prop
+| (true_) := true
+| (pred_ name args) := true
+| (eq_ x y) := true
+| (not_ P) := admits_alt P
+| (imp_ P Q) := admits_alt P ∧ admits_alt Q
+| (forall_ x P) := v = x ∨ ((x = u → ¬ is_free_in v P) ∧ admits_alt P)
+
+
+def simult_admits_aux (σ : variable_ → variable_) : finset variable_ → formula → Prop
+| _ true_ := true
+| binders (pred_ name args) :=
+    ∀ (v : variable_), v ∈ args ∧ v ∉ binders → σ v ∉ binders
+| binders (eq_ x y) :=
+    (x ∉ binders → σ x ∉ binders) ∧ (y ∉ binders → σ y ∉ binders)
+| binders (not_ P) := simult_admits_aux binders P
+| binders (imp_ P Q) := simult_admits_aux binders P ∧ simult_admits_aux binders Q
+| binders (forall_ x P) := simult_admits_aux (binders ∪ {x}) P
+
+def simult_admits (σ : variable_ → variable_) (P : formula) : Prop :=
+  simult_admits_aux σ ∅ P
+
 --
 
 lemma fast_admits_aux_self
@@ -1650,30 +1682,9 @@ end
 
 --
 
-def simult_admits_aux (σ : variable_ → variable_) : finset variable_ → formula → Prop
-| _ true_ := true
-| binders (pred_ name args) :=
-    ∀ (v : variable_), v ∈ args ∧ v ∉ binders → σ v ∉ binders
-| binders (eq_ x y) :=
-    (x ∉ binders → σ x ∉ binders) ∧ (y ∉ binders → σ y ∉ binders)
-| binders (not_ P) := simult_admits_aux binders P
-| binders (imp_ P Q) := simult_admits_aux binders P ∧ simult_admits_aux binders Q
-| binders (forall_ x P) := simult_admits_aux (binders ∪ {x}) P
-
-def simult_admits (σ : variable_ → variable_) (P : formula) : Prop :=
-  simult_admits_aux σ ∅ P
 
 
 #lint
-
-
-def admits_alt (v u : variable_) : formula → Prop
-| (true_) := true
-| (pred_ name args) := true
-| (eq_ x y) := true
-| (not_ P) := admits_alt P
-| (imp_ P Q) := admits_alt P ∧ admits_alt Q
-| (forall_ x P) := v = x ∨ ((x = u → ¬ is_free_in v P) ∧ admits_alt P)
 
 
 example
