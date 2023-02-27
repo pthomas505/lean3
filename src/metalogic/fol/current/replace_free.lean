@@ -304,9 +304,8 @@ begin
   induction P,
   case formula.true_
   {
-    unfold fast_replace_free,
-    unfold is_free_in,
-    simp only [not_false_iff],
+    intros a1,
+    assumption,
   },
   case formula.pred_ : name args
   {
@@ -349,9 +348,7 @@ begin
   },
   case formula.not_ : P P_ih
   {
-    unfold fast_replace_free,
-    unfold is_free_in,
-    exact P_ih,
+    assumption,
   },
   case formula.imp_ : P Q P_ih Q_ih
   {
@@ -376,9 +373,7 @@ begin
     },
     {
       unfold is_free_in,
-      push_neg,
-      intros a1,
-      exact P_ih,
+      tauto,
     }
   },
 end
@@ -399,8 +394,7 @@ begin
   case formula.pred_ : name args binders h1
   {
     unfold replace_free_aux,
-    congr,
-    simp only [list.map_eq_self_iff, ite_eq_right_iff, and_imp],
+    simp only [eq_self_iff_true, list.map_eq_self_iff, ite_eq_right_iff, and_imp, true_and],
     intros x a1 a2 a3,
     subst a2,
     contradiction,
@@ -424,9 +418,7 @@ begin
   },
   case formula.not_ : P P_ih binders h1
   {
-    unfold replace_free_aux,
-    congr,
-    exact P_ih binders h1,
+    solve_by_elim,
   },
   case formula.imp_ : P Q P_ih Q_ih binders h1
   {
@@ -445,8 +437,7 @@ begin
     simp only [eq_self_iff_true, true_and],
     apply P_ih,
     simp only [finset.mem_union, finset.mem_singleton],
-    apply or.intro_left,
-    exact h1,
+    tauto,
   },
 end
 
@@ -636,14 +627,11 @@ begin
   },
   case formula.eq_ : x y
   {
-    unfold fast_simult_replace_free,
-    congr,
+    refl,
   },
   case formula.not_ : P P_ih
   {
-    unfold fast_simult_replace_free,
-    congr,
-    exact P_ih,
+    solve_by_elim,
   },
   case formula.imp_ : P Q P_ih Q_ih
   {
@@ -678,16 +666,11 @@ begin
   },
   case formula.pred_ : name args
   {
-    unfold fast_simult_replace_free,
-    unfold fast_replace_free,
-    simp only [eq_self_iff_true, true_and],
-    congr,
+    refl,
   },
   case formula.eq_ : x y
   {
-    unfold fast_simult_replace_free,
-    unfold fast_replace_free,
-    congr,
+    refl,
   },
   case formula.not_ : P P_ih
   {
@@ -727,8 +710,7 @@ begin
       split_ifs,
       {
         subst h_1,
-        simp only [eq_comm] at h_2,
-        contradiction,
+        tauto,
       },
       {
         subst h_1,
