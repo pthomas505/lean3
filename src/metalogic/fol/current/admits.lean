@@ -1782,6 +1782,7 @@ begin
   case formula.pred_ : name args binders h1 h2
   {
     dunfold fast_admits_aux at h1,
+
     dunfold is_free_in,
     simp only [list.mem_to_finset],
     intros contra,
@@ -1790,12 +1791,14 @@ begin
   case formula.eq_ : x y binders h1 h2
   {
     dunfold fast_admits_aux at h1,
+
     dunfold is_free_in,
     tauto,
   },
   case formula.not_ : P P_ih binders h1 h2
   {
     dunfold fast_admits_aux at h1,
+
     dunfold is_free_in,
     exact P_ih binders h1 h2,
   },
@@ -1816,17 +1819,26 @@ begin
   },
   case formula.forall_ : x P P_ih binders h1 h2
   {
-    unfold fast_admits_aux at h1,
-    unfold is_free_in,
-    squeeze_simp,
+    dunfold fast_admits_aux at h1,
+
+    dunfold is_free_in,
+    push_neg,
     intros a1,
     cases h1,
-    contradiction,
-    apply P_ih,
-    exact h1,
-    squeeze_simp,
-    apply or.intro_left,
-    exact h2,
+    {
+      contradiction,
+    },
+    {
+      apply P_ih,
+      {
+        exact h1,
+      },
+      {
+        simp only [finset.mem_union, finset.mem_singleton],
+        apply or.intro_left,
+        exact h2,
+      },
+    },
   },
 end
 
