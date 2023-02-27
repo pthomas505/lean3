@@ -18,7 +18,7 @@ If $P$ is a formula, $v$ is a variable, and $t$ is a term, then $P(t/v)$ is the 
 -/
 
 /--
-  This is a helper function for replace_free.
+  Helper function for replace_free.
 -/
 def replace_free_aux (v t : variable_) : finset variable_ → formula → formula
 | _ (true_) := true_
@@ -80,7 +80,7 @@ def fast_replace_free (v t : variable_) : formula → formula
 
 
 /--
-  This is a specialized version of function.update.
+  Specialized version of function.update.
 -/
 def function.update_ite
   {α β : Type}
