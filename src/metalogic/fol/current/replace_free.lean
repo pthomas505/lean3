@@ -40,7 +40,7 @@ def replace_free_aux (v t : variable_) : finset variable_ → formula → formul
 /--
   replace_free v t P :=
 
-  P (t/v)
+  P(t/v)
 
   v → t in P for each free occurrence of v in P
 
@@ -53,7 +53,7 @@ def replace_free (v t : variable_) (P : formula) : formula :=
 /--
   fast_replace_free v t P :=
 
-  P (t/v)
+  P(t/v)
 
   v → t in P for each free occurrence of v in P
 

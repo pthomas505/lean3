@@ -18,9 +18,7 @@ If $v$ and $u$ are variables and $P$ is a formula, then $P$ admits $u$ for $v$ i
 -/
 
 /--
-  admits_aux v u ∅ P =
-  P admits u for v ;
-  v → u in P
+  Helper function for admits.
 -/
 def admits_aux (v u : variable_) : finset variable_ → formula → Prop
 | _ true_ := true
@@ -35,8 +33,10 @@ def admits_aux (v u : variable_) : finset variable_ → formula → Prop
 | binders (forall_ x P) := admits_aux (binders ∪ {x}) P
 
 /--
-  admits v u P = 
-  P admits u for v ;
+  admits v u P := True if and only if there is no free occurrence of the variable v in the formula P that becomes a bound occurrence of the variable u in P(u/v).
+
+  P admits u for v
+
   v → u in P
 -/
 def admits (v u : variable_) (P : formula) : Prop :=
