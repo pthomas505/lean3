@@ -90,7 +90,7 @@ begin
   },
   case formula.not_ : P P_ih
   {
-    tauto,
+    assumption,
   },
   case formula.imp_ : P Q P_ih Q_ih
   {
@@ -129,7 +129,7 @@ begin
   },
   case formula.not_ : P P_ih
   {
-    tauto,
+    assumption,
   },
   case formula.imp_ : P Q P_ih Q_ih
   {
@@ -170,7 +170,7 @@ begin
   },
   case formula.not_ : P P_ih
   {
-    tauto,
+    assumption,
   },
   case formula.imp_ : P Q P_ih Q_ih
   {
@@ -198,19 +198,19 @@ begin
   induction P,
   case formula.true_
   {
-    tauto,
+    assumption,
   },
   case formula.pred_ : name args
   {
-    tauto,
+    cases h1,
   },
   case formula.eq_ : x y
   {
-    tauto,
+    cases h1,
   },
   case formula.not_ : P P_ih
   {
-    tauto,
+    solve_by_elim,
   },
   case formula.imp_ : P Q P_ih Q_ih
   {
@@ -238,31 +238,19 @@ begin
   induction P,
   case formula.true_
   {
-    unfold is_free_in at h1,
-    contradiction,
+    assumption,
   },
   case formula.pred_ : name args
   {
-    unfold is_free_in at h1,
-    simp only [list.mem_to_finset] at h1,
-
-    unfold occurs_in,
-    simp only [list.mem_to_finset],
-    exact h1,
+    assumption,
   },
   case formula.eq_ : x y
   {
-    unfold is_free_in at h1,
-
-    unfold occurs_in,
-    exact h1,
+    assumption,
   },
   case formula.not_ : P P_ih
   {
-    unfold is_free_in at h1,
-
-    unfold occurs_in,
-    exact P_ih h1,
+    solve_by_elim,
   },
   case formula.imp_ : P Q P_ih Q_ih
   {
