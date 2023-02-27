@@ -18,9 +18,12 @@ If $P$ is a formula, $v$ is a variable, and $t$ is a term, then $P(t/v)$ is the 
 -/
 
 /--
-  replace_free_aux v t ∅ P =
-  P (t/v) ;
-  v → t in P for each free occurrence of v in P;
+  replace_free_aux v t ∅ P :=
+
+  P (t/v)
+
+  v → t in P for each free occurrence of v in P
+
   The result of replacing each free occurrence of v in P by an occurrence of t.
 -/
 def replace_free_aux (v t : variable_) : finset variable_ → formula → formula
@@ -41,9 +44,12 @@ def replace_free_aux (v t : variable_) : finset variable_ → formula → formul
 | binders (forall_ x P) := forall_ x (replace_free_aux (binders ∪ {x}) P)
 
 /--
-  replace_free v t P =
-  P (t/v) ;
-  v → t in P for each free occurrence of v in P;
+  replace_free v t P :=
+
+  P (t/v)
+
+  v → t in P for each free occurrence of v in P
+
   The result of replacing each free occurrence of v in P by an occurrence of t.
 -/
 def replace_free (v t : variable_) (P : formula) : formula :=
@@ -51,10 +57,14 @@ def replace_free (v t : variable_) (P : formula) : formula :=
 
 
 /--
-  fast_replace_free v t P =
-  P (t/v) ;
-  v → t in P for each free occurrence of v in P;
+  fast_replace_free v t P :=
+
+  P (t/v)
+
+  v → t in P for each free occurrence of v in P
+
   The result of replacing each free occurrence of v in P by an occurrence of t.
+
   This is a more efficient version of replace_free.
 -/
 def fast_replace_free (v t : variable_) : formula → formula
@@ -73,6 +83,28 @@ def fast_replace_free (v t : variable_) : formula → formula
     if v = x
     then forall_ x P -- v is not free in P
     else forall_ x (fast_replace_free P)
+
+
+/--
+  This is a specialized version of function.update.
+-/
+def function.update_ite
+  {α β : Type}
+  [decidable_eq α]
+  (f : α → β)
+  (a' : α) (b : β) (a : α) :=
+  if a = a' then b else f a
+
+/--
+  fast_simult_replace_free σ P := The simultaneous replacement of each free occurence of any variable v in the formula P by σ v.
+-/
+def fast_simult_replace_free : (variable_ → variable_) → formula → formula
+| _ true_ := true_
+| σ (pred_ name args) := pred_ name (args.map σ)
+| σ (eq_ x y) := eq_ (σ x) (σ y)
+| σ (not_ P) := not_ (fast_simult_replace_free σ P)
+| σ (imp_ P Q) := imp_ (fast_simult_replace_free σ P) (fast_simult_replace_free σ Q)
+| σ (forall_ x P) := forall_ x (fast_simult_replace_free (function.update_ite σ x x) P)
 
 
 theorem fast_replace_free_id
@@ -553,28 +585,6 @@ begin
   apply replace_free_aux_eq_fast_replace_free,
   simp only [finset.not_mem_empty, not_false_iff],
 end
-
-
-/--
-  This is a specialized version of function.update.
--/
-def function.update_ite
-  {α β : Type}
-  [decidable_eq α]
-  (f : α → β)
-  (a' : α) (b : β) (a : α) :=
-  if a = a' then b else f a
-
-/--
-  fast_simult_replace_free σ P = The simultaneous replacement of each free occurence of any variable v in the formula P by σ v.
--/
-def fast_simult_replace_free : (variable_ → variable_) → formula → formula
-| _ true_ := true_
-| σ (pred_ name args) := pred_ name (args.map σ)
-| σ (eq_ x y) := eq_ (σ x) (σ y)
-| σ (not_ P) := not_ (fast_simult_replace_free σ P)
-| σ (imp_ P Q) := imp_ (fast_simult_replace_free σ P) (fast_simult_replace_free σ Q)
-| σ (forall_ x P) := forall_ x (fast_simult_replace_free (function.update_ite σ x x) P)
 
 
 @[simp]
