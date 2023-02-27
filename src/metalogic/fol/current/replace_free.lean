@@ -95,14 +95,12 @@ begin
   },
   case formula.not_ : P P_ih
   {
-    unfold fast_replace_free,
-    squeeze_simp,
-    tauto,
+    solve_by_elim,
   },
   case formula.imp_ : P Q P_ih Q_ih
   {
     unfold fast_replace_free,
-    squeeze_simp,
+    simp only,
     tauto,
   },
   case formula.forall_ : x P P_ih
@@ -156,11 +154,7 @@ begin
   },
   case formula.not_ : P P_ih
   {
-    unfold is_free_in at h1,
-
-    unfold fast_replace_free,
-    congr,
-    exact P_ih h1,
+    solve_by_elim,
   },
   case formula.imp_ : P Q P_ih Q_ih
   {
@@ -260,11 +254,7 @@ begin
   },
   case formula.not_ : P P_ih
   {
-    unfold occurs_in at h1,
-
-    unfold fast_replace_free,
-    congr,
-    exact P_ih h1,
+    solve_by_elim,
   },
   case formula.imp_ : P Q P_ih Q_ih
   {
@@ -293,18 +283,13 @@ begin
       unfold fast_replace_free,
       simp [if_neg h1_left],
       apply not_free_in_fast_replace_free_id,
-      intros contra,
-      apply h1_right,
-      apply is_free_in_imp_occurs_in,
-      exact contra,
+      contrapose! h1_right,
+      exact is_free_in_imp_occurs_in P t h1_right,
     },
     {
       unfold fast_replace_free,
-      simp only [eq_comm],
       simp only [if_neg h1_left],
-      simp only [eq_self_iff_true, true_and],
-      symmetry,
-      exact P_ih h1_right,
+      tauto,
     }
   },
 end
