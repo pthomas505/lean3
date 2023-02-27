@@ -18,13 +18,7 @@ If $P$ is a formula, $v$ is a variable, and $t$ is a term, then $P(t/v)$ is the 
 -/
 
 /--
-  replace_free_aux v t ∅ P :=
-
-  P (t/v)
-
-  v → t in P for each free occurrence of v in P
-
-  The result of replacing each free occurrence of v in P by an occurrence of t.
+  This is a helper function for replace_free.
 -/
 def replace_free_aux (v t : variable_) : finset variable_ → formula → formula
 | _ (true_) := true_
