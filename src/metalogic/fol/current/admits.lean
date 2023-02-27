@@ -43,6 +43,9 @@ def admits (v u : variable_) (P : formula) : Prop :=
   admits_aux v u ∅ P
 
 
+/--
+  Helper function for fast_admits.
+-/
 def fast_admits_aux (v u : variable_) : finset variable_ → formula → Prop
 | _ true_ := true
 | binders (pred_ name args) :=
@@ -55,6 +58,15 @@ def fast_admits_aux (v u : variable_) : finset variable_ → formula → Prop
 | binders (imp_ P Q) := fast_admits_aux binders P ∧ fast_admits_aux binders Q
 | binders (forall_ x P) := v = x ∨ fast_admits_aux (binders ∪ {x}) P
 
+/--
+  fast_admits v u P := True if and only if there is no free occurrence of the variable v in the formula P that becomes a bound occurrence of the variable u in P(u/v).
+
+  P admits u for v
+
+  v → u in P
+
+  This is a more efficient version of admits.
+-/
 def fast_admits (v u : variable_) (P : formula) : Prop :=
   fast_admits_aux v u ∅ P
 
