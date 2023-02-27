@@ -17,6 +17,9 @@ An occurrence of a variable $v$ in a formula $P$ is bound if and only if it occu
 -/
 
 
+/--
+  formula.var_set P = The set of all of the variables that have an occurrence in the formula P.
+-/
 def formula.var_set : formula → finset variable_
 | (true_) := ∅
 | (pred_ name args) := args.to_finset
@@ -25,6 +28,9 @@ def formula.var_set : formula → finset variable_
 | (imp_ P Q) := P.var_set ∪ Q.var_set
 | (forall_ x P) := P.var_set ∪ {x}
 
+/--
+  occurs_in v P = True if and only if there is an occurrence of the variable v in the formula P.
+-/
 def occurs_in (v : variable_) : formula → Prop
 | (true_) := false
 | (pred_ name args) := v ∈ args.to_finset
@@ -34,6 +40,9 @@ def occurs_in (v : variable_) : formula → Prop
 | (forall_ x P) := v = x ∨ occurs_in P
 
 
+/--
+  formula.bound_var_set P = The set of all of the variables that have a bound occurrence in the formula P.
+-/
 def formula.bound_var_set : formula → finset variable_
 | (true_) := ∅
 | (pred_ name args) := ∅
@@ -42,6 +51,9 @@ def formula.bound_var_set : formula → finset variable_
 | (imp_ P Q) := P.bound_var_set ∪ Q.bound_var_set
 | (forall_ x P) := P.bound_var_set ∪ {x}
 
+/--
+  is_bound_in v P = True if and only if there is a bound occurrence of the variable v in the formula P.
+-/
 def is_bound_in (v : variable_) : formula → Prop
 | (true_) := false
 | (pred_ name args) := false
@@ -51,6 +63,9 @@ def is_bound_in (v : variable_) : formula → Prop
 | (forall_ x P) := v = x ∨ is_bound_in P
 
 
+/--
+  formula.free_var_set P = The set of all of the variables that have a free occurrence in the formula P.
+-/
 def formula.free_var_set : formula → finset variable_
 | (true_) := ∅
 | (pred_ name args) := args.to_finset
@@ -59,6 +74,9 @@ def formula.free_var_set : formula → finset variable_
 | (imp_ P Q) := P.free_var_set ∪ Q.free_var_set
 | (forall_ x P) := P.free_var_set \ {x}
 
+/--
+  is_free_in v P = True if and only if there is a free occurrence of the variable v in the formula P.
+-/
 def is_free_in (v : variable_) : formula → Prop
 | (true_) := false
 | (pred_ name args) := v ∈ args.to_finset

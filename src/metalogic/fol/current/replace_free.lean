@@ -20,7 +20,8 @@ If $P$ is a formula, $v$ is a variable, and $t$ is a term, then $P(t/v)$ is the 
 /--
   replace_free_aux v t ∅ P =
   P (t/v) ;
-  v → t in P
+  v → t in P for each free occurrence of v in P;
+  The result of replacing each free occurrence of v in P by an occurrence of t.
 -/
 def replace_free_aux (v t : variable_) : finset variable_ → formula → formula
 | _ (true_) := true_
@@ -42,7 +43,8 @@ def replace_free_aux (v t : variable_) : finset variable_ → formula → formul
 /--
   replace_free v t P =
   P (t/v) ;
-  v → t in P
+  v → t in P for each free occurrence of v in P;
+  The result of replacing each free occurrence of v in P by an occurrence of t.
 -/
 def replace_free (v t : variable_) (P : formula) : formula :=
   replace_free_aux v t ∅ P
@@ -51,7 +53,9 @@ def replace_free (v t : variable_) (P : formula) : formula :=
 /--
   fast_replace_free v t P =
   P (t/v) ;
-  v → t in P
+  v → t in P for each free occurrence of v in P;
+  The result of replacing each free occurrence of v in P by an occurrence of t.
+  This is a more efficient version of replace_free.
 -/
 def fast_replace_free (v t : variable_) : formula → formula
 | (true_) := true_
@@ -551,6 +555,9 @@ begin
 end
 
 
+/--
+  This is a specialized version of function.update.
+-/
 def function.update_ite
   {α β : Type}
   [decidable_eq α]
@@ -558,8 +565,8 @@ def function.update_ite
   (a' : α) (b : β) (a : α) :=
   if a = a' then b else f a
 
-/-
-  The simultaneous replacement of the free variables in a formula.
+/--
+  fast_simult_replace_free σ P = The simultaneous replacement of each free occurence of any variable v in the formula P by σ v.
 -/
 def fast_simult_replace_free : (variable_ → variable_) → formula → formula
 | _ true_ := true_
