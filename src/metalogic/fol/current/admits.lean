@@ -92,7 +92,7 @@ def admits_alt (v u : variable_) : formula → Prop
 def simult_admits_aux (σ : variable_ → variable_) : finset variable_ → formula → Prop
 | _ true_ := true
 | binders (pred_ name args) :=
-    ∀ (v : variable_), v ∈ args ∧ v ∉ binders → σ v ∉ binders
+    ∀ (v : variable_), (v ∈ args ∧ v ∉ binders) → σ v ∉ binders
 | binders (eq_ x y) :=
     (x ∉ binders → σ x ∉ binders) ∧ (y ∉ binders → σ y ∉ binders)
 | binders (not_ P) := simult_admits_aux binders P
@@ -2267,3 +2267,135 @@ end
 
 
 #lint
+
+
+lemma blah
+  (P : formula)
+  (σ : variable_ → variable_)
+  (binders : finset variable_)
+  (x : variable_)
+  (h1 : x ∈ binders) :
+  simult_admits_aux (function.update_ite σ x x) binders P
+    ↔ simult_admits_aux σ binders P :=
+begin
+  induction P generalizing binders,
+  case formula.true_ : binders h1
+  { admit },
+  case formula.pred_ : name args binders h1
+  {
+    unfold simult_admits_aux,
+    unfold function.update_ite,
+    split,
+    intros a1 v a2,
+    cases a2,
+    specialize a1 v,
+    split_ifs at a1,
+    subst h,
+    contradiction,
+    apply a1,
+    split,
+    exact a2_left,
+    exact a2_right,
+    intros a1 v a2,
+    cases a2,
+    split_ifs,
+    subst h,
+    contradiction,
+    apply a1,
+    split,
+    exact a2_left,
+    exact a2_right,
+  },
+  case formula.eq_ : P_ᾰ P_ᾰ_1 binders h1
+  { admit },
+  case formula.not_ : P_ᾰ P_ih binders h1
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1
+  { admit },
+  case formula.forall_ : x P P_ih binders h1
+  {
+    unfold simult_admits_aux,
+    apply P_ih,
+    squeeze_simp,
+    left,
+    exact h1,
+  },
+end
+
+
+lemma meh
+  (P : formula)
+  (σ : variable_ → variable_)
+  (binders : finset variable_)
+  (h1 : simult_admits_aux σ binders P)
+  (h2 : ∀ (x : variable_), x ∈ binders → σ x ∈ binders) :
+  to_is_bound_aux binders P =
+    to_is_bound_aux binders (fast_simult_replace_free σ P) :=
+begin
+  induction P generalizing binders σ,
+  case formula.true_ : binders σ h1
+  { admit },
+  case formula.pred_ : name args binders σ h1
+  {
+    unfold simult_admits_aux at h1,
+
+    unfold fast_simult_replace_free,
+    unfold to_is_bound_aux,
+    congr' 1,
+    squeeze_simp,
+    unfold function.comp,
+    apply list.map_congr,
+    intros x a1,
+    specialize h1 x,
+    squeeze_simp at h1,
+    specialize h1 a1,
+    squeeze_simp,
+    split,
+    exact h2 x,
+    contrapose,
+    exact h1,
+
+  },
+  case formula.eq_ : P_ᾰ P_ᾰ_1 binders σ h1
+  { admit },
+  case formula.not_ : P_ᾰ P_ih binders σ h1
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders σ h1
+  { admit },
+  case formula.forall_ : x P P_ih binders σ h1
+  {
+    unfold simult_admits_aux at h1,
+
+    unfold fast_simult_replace_free,
+    unfold to_is_bound_aux,
+    squeeze_simp,
+    apply P_ih,
+    rewrite blah,
+    exact h1,
+    squeeze_simp,
+    intros z a1,
+    unfold function.update_ite,
+    split_ifs,
+    squeeze_simp,
+    squeeze_simp,
+    squeeze_simp at a1,
+    cases a1,
+    left,
+    apply h2,
+    exact a1,
+    contradiction,
+  },
+end
+
+
+example
+  (P : formula)
+  (σ : variable_ → variable_)
+  (h1 : simult_admits σ P) :
+  to_is_bound P =
+    to_is_bound (fast_simult_replace_free σ P) :=
+begin
+  apply meh,
+  exact h1,
+  squeeze_simp,
+end
