@@ -2188,6 +2188,46 @@ example
   (P : formula)
   (v u : variable_)
   (binders : finset variable_) :
+  simult_admits_aux (function.update_ite id v u) binders P →
+    admits_aux v u binders P :=
+begin
+  induction P generalizing binders,
+  case formula.true_ : binders
+  { admit },
+  case formula.pred_ : name args binders
+  {
+    unfold admits_aux,
+    unfold simult_admits_aux,
+    unfold function.update_ite,
+    intros a1 a2 contra,
+    cases a2,
+    specialize a1 v,
+    apply a1,
+    split,
+    exact a2_left,
+    exact a2_right,
+    squeeze_simp,
+    exact contra,
+  },
+  case formula.eq_ : P_ᾰ P_ᾰ_1 binders
+  { admit },
+  case formula.not_ : P_ᾰ P_ih binders
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders
+  { admit },
+  case formula.forall_ : x P P_ih binders
+  {
+    unfold admits_aux,
+    unfold simult_admits_aux,
+    apply P_ih,
+  },
+end
+
+
+example
+  (P : formula)
+  (v u : variable_)
+  (binders : finset variable_) :
   admits_aux v u binders P →
     simult_admits_aux (function.update_ite id v u) binders P :=
 begin
