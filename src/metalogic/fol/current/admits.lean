@@ -192,6 +192,95 @@ begin
 end
 
 
+lemma mem_binders_imp_simult_admits_aux
+  (P : formula)
+  (v u : variable_)
+  (binders : finset variable_)
+  (h1 : v ∈ binders) :
+  simult_admits_aux (function.update_ite id v u) binders P :=
+begin
+  induction P generalizing binders,
+  case formula.true_ : binders h1
+  { admit },
+  case formula.pred_ : name args binders h1
+  {
+    dunfold simult_admits_aux,
+    dunfold function.update_ite,
+    intros x a1,
+    cases a1,
+    split_ifs,
+    {
+      subst h,
+      contradiction,
+    },
+    {
+      simp only [id.def],
+      exact a1_right,
+    }
+  },
+  case formula.eq_ : P_ᾰ P_ᾰ_1 binders h1
+  { admit },
+  case formula.not_ : P_ᾰ P_ih binders h1
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1
+  { admit },
+  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih binders h1
+  { admit },
+end
+
+
+example
+  (P : formula)
+  (v u : variable_)
+  (binders : finset variable_) :
+  fast_admits_aux v u binders P →
+    simult_admits_aux (function.update_ite id v u) binders P :=
+begin
+  induction P generalizing binders,
+  case formula.true_ : binders
+  { admit },
+  case formula.pred_ : name args binders
+  {
+    dunfold simult_admits_aux,
+    dunfold fast_admits_aux,
+    dunfold function.update_ite,
+    intros a1 x a2,
+    cases a2,
+    split_ifs,
+    {
+      subst h,
+      exact a1 a2_left,
+    },
+    {
+      simp only [id.def],
+      exact a2_right,
+    }
+  },
+  case formula.eq_ : P_ᾰ P_ᾰ_1 binders
+  { admit },
+  case formula.not_ : P_ᾰ P_ih binders
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders
+  { admit },
+  case formula.forall_ : x P P_ih binders
+  {
+    dunfold simult_admits_aux,
+    dunfold fast_admits_aux,
+    intros a1,
+    cases a1,
+    {
+      subst a1,
+      apply mem_binders_imp_simult_admits_aux,
+      simp only [finset.mem_union, finset.mem_singleton, eq_self_iff_true, or_true],
+    },
+    {
+      apply P_ih,
+      exact a1,
+    }
+  },
+end
+
+
 lemma fast_admits_aux_self
   (P : formula)
   (v : variable_)
