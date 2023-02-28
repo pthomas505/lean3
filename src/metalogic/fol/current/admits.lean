@@ -1851,37 +1851,64 @@ example
 begin
   induction P generalizing binders,
   case formula.true_ : binders
-  { admit },
+  {
+    dunfold admits_alt,
+    dunfold fast_admits_aux,
+    exact dec_trivial,
+  },
   case formula.pred_ : name args binders
   {
-    unfold admits_alt,
-    unfold fast_admits_aux,
-    squeeze_simp,
+    dunfold admits_alt,
+    dunfold fast_admits_aux,
+    intros a1,
+    exact dec_trivial,
   },
-  case formula.eq_ : P_ᾰ P_ᾰ_1 binders
-  { admit },
-  case formula.not_ : P_ᾰ P_ih binders
-  { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders
-  { admit },
+  case formula.eq_ : x y binders
+  {
+    dunfold admits_alt,
+    dunfold fast_admits_aux,
+    intros a1,
+    exact dec_trivial,
+  },
+  case formula.not_ : P P_ih binders
+  {
+    dunfold admits_alt,
+    dunfold fast_admits_aux,
+    intros a1,
+    exact P_ih binders a1,
+  },
+  case formula.imp_ : P Q P_ih Q_ih binders
+  {
+    dunfold admits_alt,
+    dunfold fast_admits_aux,
+    tauto,
+  },
   case formula.forall_ : x P P_ih binders
   {
-    unfold admits_alt,
-    unfold fast_admits_aux,
+    dunfold admits_alt,
+    dunfold fast_admits_aux,
     intros a1,
     cases a1,
-    apply or.intro_left,
-    exact a1,
-    apply or.intro_right,
-    split,
-    intros a2,
-    apply fast_admits_aux_and_mem_binders_imp_not_is_free_in P v u (binders ∪ {x}) a1,
-    squeeze_simp,
-    apply or.intro_right,
-    symmetry,
-    exact a2,    
-    apply P_ih,
-    exact a1,
+    {
+      apply or.intro_left,
+      exact a1,
+    },
+    {
+      apply or.intro_right,
+      split,
+      {
+        intros a2,
+        apply fast_admits_aux_and_mem_binders_imp_not_is_free_in P v u (binders ∪ {x}) a1,
+        simp only [finset.mem_union, finset.mem_singleton],
+        apply or.intro_right,
+        symmetry,
+        exact a2,
+      },
+      {
+        apply P_ih,
+        exact a1,
+      },
+    }
   },
 end
 
