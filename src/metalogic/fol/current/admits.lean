@@ -104,6 +104,65 @@ def simult_admits (σ : variable_ → variable_) (P : formula) : Prop :=
 
 --
 
+example
+  (P : formula)
+  (v u : variable_)
+  (binders : finset variable_)
+  (h1 : v ∉ binders) :
+  simult_admits_aux (function.update_ite id v u) binders P →
+    fast_admits_aux v u binders P :=
+begin
+  induction P generalizing binders,
+  case formula.true_ : binders h1
+  { admit },
+  case formula.pred_ : name args binders h1
+  {
+    dunfold fast_admits_aux,
+    dunfold simult_admits_aux,
+    dunfold function.update_ite,
+    intros a1 a2,
+    specialize a1 v,
+    simp only [eq_self_iff_true, if_true, and_imp] at a1,
+    exact a1 a2 h1,
+  },
+  case formula.eq_ : P_ᾰ P_ᾰ_1 binders h1
+  { admit },
+  case formula.not_ : P_ᾰ P_ih binders h1
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1
+  { admit },
+  case formula.forall_ : x P P_ih binders h1
+  {
+    dunfold fast_admits_aux,
+    dunfold simult_admits_aux,
+    intros a1,
+    by_cases c1 : v = x,
+    {
+      apply or.intro_left,
+      exact c1,
+    },
+    {
+      apply or.intro_right,
+      apply P_ih,
+      {
+        simp only [finset.mem_union, finset.mem_singleton],
+        push_neg,
+        split,
+        {
+          exact h1,
+        },
+        {
+          exact c1,
+        }
+      },
+      {
+        exact a1,
+      }
+    }
+  },
+end
+
+
 lemma fast_admits_aux_self
   (P : formula)
   (v : variable_)
