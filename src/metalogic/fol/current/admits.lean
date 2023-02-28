@@ -728,7 +728,7 @@ end
 
 --
 
-lemma fast_replace_free_aux_admits_aux
+lemma replace_free_aux_fast_admits_aux
   (P : formula)
   (v t : variable_)
   (binders : finset variable_)
@@ -775,6 +775,17 @@ begin
     apply P_ih,
     exact h1_right,
   },
+end
+
+
+lemma replace_free_fast_admits
+  (P : formula)
+  (v t : variable_)
+  (h1 : ¬ occurs_in t P) :
+  fast_admits t v (replace_free v t P) :=
+begin
+  apply replace_free_aux_fast_admits_aux,
+  exact h1,
 end
 
 
