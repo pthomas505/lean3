@@ -104,201 +104,32 @@ def simult_admits (σ : variable_ → variable_) (P : formula) : Prop :=
 
 --
 
-example
+lemma admits_alt_self
   (P : formula)
-  (v u : variable_)
-  (binders : finset variable_)
-  (h1 : v ∉ binders) :
-  simult_admits_aux (function.update_ite id v u) binders P →
-    fast_admits_aux v u binders P :=
+  (v : variable_) :
+  admits_alt v v P :=
 begin
-  induction P generalizing binders,
-  case formula.true_ : binders h1
+  induction P,
+  case formula.true_
+  { admit },
+  case formula.pred_ : name args
   {
-    dunfold fast_admits_aux,
-    dunfold simult_admits_aux,
-    exact dec_trivial,
+    unfold admits_alt,
   },
-  case formula.pred_ : name args binders h1
+  case formula.eq_ : P_ᾰ P_ᾰ_1
+  { admit },
+  case formula.not_ : P_ᾰ P_ih
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
+  { admit },
+  case formula.forall_ : x P P_ih
   {
-    dunfold fast_admits_aux,
-    dunfold simult_admits_aux,
-    dunfold function.update_ite,
-    intros a1 a2,
-    specialize a1 v,
-    simp only [eq_self_iff_true, if_true, and_imp] at a1,
-    exact a1 a2 h1,
-  },
-  case formula.eq_ : x y binders h1
-  {
-    dunfold fast_admits_aux,
-    dunfold simult_admits_aux,
-    dunfold function.update_ite,
-    intros a1 a2,
-    cases a1,
-    cases a2,
-    {
-      subst a2,
-      simp only [eq_self_iff_true, if_true] at a1_left,
-      exact a1_left h1,
-    },
-    {
-      subst a2,
-      simp only [eq_self_iff_true, if_true] at a1_right,
-      exact a1_right h1,
-    }
-  },
-  case formula.not_ : P P_ih binders h1
-  {
-    dunfold fast_admits_aux,
-    dunfold simult_admits_aux,
-    exact P_ih binders h1,
-  },
-  case formula.imp_ : P Q P_ih Q_ih binders h1
-  {
-    dunfold fast_admits_aux,
-    dunfold simult_admits_aux,
+    unfold admits_alt,
     tauto,
-  },
-  case formula.forall_ : x P P_ih binders h1
-  {
-    dunfold fast_admits_aux,
-    dunfold simult_admits_aux,
-    intros a1,
-    by_cases c1 : v = x,
-    {
-      apply or.intro_left,
-      exact c1,
-    },
-    {
-      apply or.intro_right,
-      apply P_ih,
-      {
-        simp only [finset.mem_union, finset.mem_singleton],
-        push_neg,
-        split,
-        {
-          exact h1,
-        },
-        {
-          exact c1,
-        }
-      },
-      {
-        exact a1,
-      }
-    }
   },
 end
 
-
-lemma mem_binders_imp_simult_admits_aux
-  (P : formula)
-  (v u : variable_)
-  (binders : finset variable_)
-  (h1 : v ∈ binders) :
-  simult_admits_aux (function.update_ite id v u) binders P :=
-begin
-  induction P generalizing binders,
-  case formula.true_ : binders h1
-  { admit },
-  case formula.pred_ : name args binders h1
-  {
-    dunfold simult_admits_aux,
-    dunfold function.update_ite,
-    intros x a1,
-    cases a1,
-    split_ifs,
-    {
-      subst h,
-      contradiction,
-    },
-    {
-      simp only [id.def],
-      exact a1_right,
-    }
-  },
-  case formula.eq_ : P_ᾰ P_ᾰ_1 binders h1
-  { admit },
-  case formula.not_ : P_ᾰ P_ih binders h1
-  { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1
-  { admit },
-  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih binders h1
-  { admit },
-end
-
-
-example
-  (P : formula)
-  (v u : variable_)
-  (binders : finset variable_) :
-  fast_admits_aux v u binders P →
-    simult_admits_aux (function.update_ite id v u) binders P :=
-begin
-  induction P generalizing binders,
-  case formula.true_ : binders
-  {
-    dunfold simult_admits_aux,
-    dunfold fast_admits_aux,
-    exact dec_trivial,
-  },
-  case formula.pred_ : name args binders
-  {
-    dunfold simult_admits_aux,
-    dunfold fast_admits_aux,
-    dunfold function.update_ite,
-    intros a1 x a2,
-    cases a2,
-    split_ifs,
-    {
-      subst h,
-      exact a1 a2_left,
-    },
-    {
-      simp only [id.def],
-      exact a2_right,
-    }
-  },
-  case formula.eq_ : x y binders
-  {
-    dunfold simult_admits_aux,
-    dunfold fast_admits_aux,
-    dunfold function.update_ite,
-    intros a1,
-    split_ifs;
-    tauto,
-  },
-  case formula.not_ : P P_ih binders
-  {
-    dunfold simult_admits_aux,
-    dunfold fast_admits_aux,
-    exact P_ih binders,
-  },
-  case formula.imp_ : P Q P_ih Q_ih binders
-  {
-    dunfold simult_admits_aux,
-    dunfold fast_admits_aux,
-    tauto,
-  },
-  case formula.forall_ : x P P_ih binders
-  {
-    dunfold simult_admits_aux,
-    dunfold fast_admits_aux,
-    intros a1,
-    cases a1,
-    {
-      subst a1,
-      apply mem_binders_imp_simult_admits_aux,
-      simp only [finset.mem_union, finset.mem_singleton, eq_self_iff_true, or_true],
-    },
-    {
-      apply P_ih,
-      exact a1,
-    }
-  },
-end
-
+--
 
 lemma fast_admits_aux_self
   (P : formula)
@@ -430,6 +261,36 @@ end
 
 --
 
+lemma not_is_free_in_imp_admits_alt
+  (P : formula)
+  (v u : variable_)
+  (h1 : ¬ is_free_in v P) :
+  admits_alt v u P :=
+begin
+  induction P,
+  case formula.true_
+  { admit },
+  case formula.pred_ : name args
+  {
+    unfold admits_alt,
+  },
+  case formula.eq_ : P_ᾰ P_ᾰ_1
+  { admit },
+  case formula.not_ : P_ᾰ P_ih
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
+  { admit },
+  case formula.forall_ : x P P_ih
+  {
+    unfold is_free_in at h1,
+    push_neg at h1,
+
+    unfold admits_alt,
+    tauto,
+  },
+end
+
+
 lemma not_is_free_in_imp_fast_admits_aux
   (P : formula)
   (v u : variable_)
@@ -492,19 +353,9 @@ begin
   case formula.forall_ : x P P_ih
   {
     unfold is_free_in at h1,
-    push_neg at h1,
 
     unfold fast_admits_aux,
-    by_cases c1 : v = x,
-    {
-      apply or.intro_left,
-      exact c1,
-    },
-    {
-      apply or.intro_right,
-      apply P_ih,
-      exact h1 c1,
-    }
+    tauto,
   },
 end
 
@@ -666,6 +517,33 @@ end
 
 --
 
+lemma not_is_bound_in_imp_admits_alt
+  (P : formula)
+  (v u : variable_)
+  (h1 : ¬ is_bound_in u P) :
+  admits_alt v u P :=
+begin
+  induction P,
+  case formula.true_
+  { admit },
+  case formula.pred_ : P_ᾰ P_ᾰ_1
+  { admit },
+  case formula.eq_ : P_ᾰ P_ᾰ_1
+  { admit },
+  case formula.not_ : P_ᾰ P_ih
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
+  { admit },
+  case formula.forall_ : x P P_ih
+  {
+    unfold is_bound_in at h1,
+
+    unfold admits_alt,
+    tauto,
+  },
+end
+
+
 lemma not_is_bound_in_imp_fast_admits_aux
   (P : formula)
   (v u : variable_)
@@ -727,14 +605,7 @@ begin
     },
     {
       simp only [finset.mem_union, finset.mem_singleton],
-      push_neg,
-      split,
-      {
-        exact h2,
-      },
-      {
-        exact h1_left,
-      }
+      tauto,
     }
   },
 end
@@ -840,6 +711,56 @@ begin
 end
 
 --
+
+lemma fast_replace_free_aux_admits_aux
+  (P : formula)
+  (v t : variable_)
+  (binders : finset variable_)
+  (h1 : ¬ occurs_in t P) :
+  fast_admits_aux t v binders (replace_free_aux v t binders P) :=
+begin
+  induction P generalizing binders,
+  case formula.true_ : binders
+  { admit },
+  case formula.pred_ : name args binders
+  {
+    unfold occurs_in at h1,
+    simp only [list.mem_to_finset] at h1,
+
+    unfold replace_free_aux,
+    unfold fast_admits_aux,
+    simp only [list.mem_map, ite_eq_left_iff, not_and, not_not, forall_exists_index, and_imp],
+    intros x a1 a2 contra,
+
+    have s1 : x = t,
+    apply a2,
+    intros a3,
+    subst a3,
+    exact contra,
+
+    subst s1,
+    contradiction,
+  },
+  case formula.eq_ : P_ᾰ P_ᾰ_1 binders
+  { admit },
+  case formula.not_ : P_ᾰ P_ih binders
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders
+  { admit },
+  case formula.forall_ : x P P_ih binders
+  {
+    unfold occurs_in at h1,
+    push_neg at h1,
+    cases h1,
+
+    unfold replace_free_aux,
+    unfold fast_admits_aux,
+    apply or.intro_right,
+    apply P_ih,
+    exact h1_right,
+  },
+end
+
 
 lemma replace_free_aux_admits_aux
   (P : formula)
@@ -2105,6 +2026,202 @@ begin
         exact a1,
       },
     }
+  },
+end
+
+
+example
+  (P : formula)
+  (v u : variable_)
+  (binders : finset variable_)
+  (h1 : v ∉ binders) :
+  simult_admits_aux (function.update_ite id v u) binders P →
+    fast_admits_aux v u binders P :=
+begin
+  induction P generalizing binders,
+  case formula.true_ : binders h1
+  {
+    dunfold fast_admits_aux,
+    dunfold simult_admits_aux,
+    exact dec_trivial,
+  },
+  case formula.pred_ : name args binders h1
+  {
+    dunfold fast_admits_aux,
+    dunfold simult_admits_aux,
+    dunfold function.update_ite,
+    intros a1 a2,
+    specialize a1 v,
+    simp only [eq_self_iff_true, if_true, and_imp] at a1,
+    exact a1 a2 h1,
+  },
+  case formula.eq_ : x y binders h1
+  {
+    dunfold fast_admits_aux,
+    dunfold simult_admits_aux,
+    dunfold function.update_ite,
+    intros a1 a2,
+    cases a1,
+    cases a2,
+    {
+      subst a2,
+      simp only [eq_self_iff_true, if_true] at a1_left,
+      exact a1_left h1,
+    },
+    {
+      subst a2,
+      simp only [eq_self_iff_true, if_true] at a1_right,
+      exact a1_right h1,
+    }
+  },
+  case formula.not_ : P P_ih binders h1
+  {
+    dunfold fast_admits_aux,
+    dunfold simult_admits_aux,
+    exact P_ih binders h1,
+  },
+  case formula.imp_ : P Q P_ih Q_ih binders h1
+  {
+    dunfold fast_admits_aux,
+    dunfold simult_admits_aux,
+    tauto,
+  },
+  case formula.forall_ : x P P_ih binders h1
+  {
+    dunfold fast_admits_aux,
+    dunfold simult_admits_aux,
+    intros a1,
+    by_cases c1 : v = x,
+    {
+      apply or.intro_left,
+      exact c1,
+    },
+    {
+      apply or.intro_right,
+      apply P_ih,
+      {
+        simp only [finset.mem_union, finset.mem_singleton],
+        push_neg,
+        split,
+        {
+          exact h1,
+        },
+        {
+          exact c1,
+        }
+      },
+      {
+        exact a1,
+      }
+    }
+  },
+end
+
+
+example
+  (P : formula)
+  (v u : variable_)
+  (binders : finset variable_) :
+  fast_admits_aux v u binders P →
+    simult_admits_aux (function.update_ite id v u) binders P :=
+begin
+  induction P generalizing binders,
+  case formula.true_ : binders
+  {
+    dunfold simult_admits_aux,
+    dunfold fast_admits_aux,
+    exact dec_trivial,
+  },
+  case formula.pred_ : name args binders
+  {
+    dunfold simult_admits_aux,
+    dunfold fast_admits_aux,
+    dunfold function.update_ite,
+    intros a1 x a2,
+    cases a2,
+    split_ifs,
+    {
+      subst h,
+      exact a1 a2_left,
+    },
+    {
+      simp only [id.def],
+      exact a2_right,
+    }
+  },
+  case formula.eq_ : x y binders
+  {
+    dunfold simult_admits_aux,
+    dunfold fast_admits_aux,
+    dunfold function.update_ite,
+    intros a1,
+    split_ifs;
+    tauto,
+  },
+  case formula.not_ : P P_ih binders
+  {
+    dunfold simult_admits_aux,
+    dunfold fast_admits_aux,
+    exact P_ih binders,
+  },
+  case formula.imp_ : P Q P_ih Q_ih binders
+  {
+    dunfold simult_admits_aux,
+    dunfold fast_admits_aux,
+    tauto,
+  },
+  case formula.forall_ : x P P_ih binders
+  {
+    dunfold simult_admits_aux,
+    dunfold fast_admits_aux,
+    intros a1,
+    cases a1,
+    subst a1,
+    apply P_ih,
+    sorry,
+    sorry,
+  },
+end
+
+
+example
+  (P : formula)
+  (v u : variable_)
+  (binders : finset variable_) :
+  admits_aux v u binders P →
+    simult_admits_aux (function.update_ite id v u) binders P :=
+begin
+  induction P generalizing binders,
+  case formula.true_ : binders
+  { admit },
+  case formula.pred_ : name args binders
+  {
+    unfold simult_admits_aux,
+    unfold function.update_ite,
+    unfold admits_aux,
+    intros a1 x a2,
+    split_ifs,
+    {
+      subst h,
+      exact a1 a2,
+    },
+    {
+      simp only [id.def],
+      cases a2,
+      exact a2_right,
+    }
+  },
+  case formula.eq_ : P_ᾰ P_ᾰ_1 binders
+  { admit },
+  case formula.not_ : P_ᾰ P_ih binders
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders
+  { admit },
+  case formula.forall_ : x P P_ih binders
+  {
+    unfold simult_admits_aux,
+    unfold admits_aux,
+    apply P_ih,
   },
 end
 
