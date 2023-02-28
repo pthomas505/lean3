@@ -114,7 +114,11 @@ example
 begin
   induction P generalizing binders,
   case formula.true_ : binders h1
-  { admit },
+  {
+    dunfold fast_admits_aux,
+    dunfold simult_admits_aux,
+    exact dec_trivial,
+  },
   case formula.pred_ : name args binders h1
   {
     dunfold fast_admits_aux,
@@ -125,12 +129,37 @@ begin
     simp only [eq_self_iff_true, if_true, and_imp] at a1,
     exact a1 a2 h1,
   },
-  case formula.eq_ : P_ᾰ P_ᾰ_1 binders h1
-  { admit },
-  case formula.not_ : P_ᾰ P_ih binders h1
-  { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1
-  { admit },
+  case formula.eq_ : x y binders h1
+  {
+    dunfold fast_admits_aux,
+    dunfold simult_admits_aux,
+    dunfold function.update_ite,
+    intros a1 a2,
+    cases a1,
+    cases a2,
+    {
+      subst a2,
+      simp only [eq_self_iff_true, if_true] at a1_left,
+      exact a1_left h1,
+    },
+    {
+      subst a2,
+      simp only [eq_self_iff_true, if_true] at a1_right,
+      exact a1_right h1,
+    }
+  },
+  case formula.not_ : P P_ih binders h1
+  {
+    dunfold fast_admits_aux,
+    dunfold simult_admits_aux,
+    exact P_ih binders h1,
+  },
+  case formula.imp_ : P Q P_ih Q_ih binders h1
+  {
+    dunfold fast_admits_aux,
+    dunfold simult_admits_aux,
+    tauto,
+  },
   case formula.forall_ : x P P_ih binders h1
   {
     dunfold fast_admits_aux,
