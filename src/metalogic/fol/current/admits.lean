@@ -238,7 +238,11 @@ example
 begin
   induction P generalizing binders,
   case formula.true_ : binders
-  { admit },
+  {
+    dunfold simult_admits_aux,
+    dunfold fast_admits_aux,
+    exact dec_trivial,
+  },
   case formula.pred_ : name args binders
   {
     dunfold simult_admits_aux,
@@ -256,12 +260,27 @@ begin
       exact a2_right,
     }
   },
-  case formula.eq_ : P_ᾰ P_ᾰ_1 binders
-  { admit },
-  case formula.not_ : P_ᾰ P_ih binders
-  { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders
-  { admit },
+  case formula.eq_ : x y binders
+  {
+    dunfold simult_admits_aux,
+    dunfold fast_admits_aux,
+    dunfold function.update_ite,
+    intros a1,
+    split_ifs;
+    tauto,
+  },
+  case formula.not_ : P P_ih binders
+  {
+    dunfold simult_admits_aux,
+    dunfold fast_admits_aux,
+    exact P_ih binders,
+  },
+  case formula.imp_ : P Q P_ih Q_ih binders
+  {
+    dunfold simult_admits_aux,
+    dunfold fast_admits_aux,
+    tauto,
+  },
   case formula.forall_ : x P P_ih binders
   {
     dunfold simult_admits_aux,
