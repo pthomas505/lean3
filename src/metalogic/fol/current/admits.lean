@@ -712,6 +712,71 @@ end
 
 --
 
+lemma fast_replace_free_admits_alt
+  (P : formula)
+  (v t : variable_)
+  (h1 : ¬ occurs_in t P) :
+  admits_alt t v (fast_replace_free v t P) :=
+begin
+  induction P,
+  case formula.true_
+  { admit },
+  case formula.pred_ : name args
+  {
+    unfold fast_replace_free,
+  },
+  case formula.eq_ : P_ᾰ P_ᾰ_1
+  { admit },
+  case formula.not_ : P_ᾰ P_ih
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
+  { admit },
+  case formula.forall_ : x P P_ih
+  {
+    unfold occurs_in at h1,
+    push_neg at h1,
+    cases h1,
+
+    unfold fast_replace_free,
+    split_ifs,
+    {
+      unfold admits_alt,
+      subst h,
+      right,
+      simp only [eq_self_iff_true, forall_true_left],
+      split,
+      {
+        intros contra,
+        apply h1_right,
+        apply is_free_in_imp_occurs_in,
+        exact contra,
+      },
+      {
+        apply not_is_free_in_imp_admits_alt,
+        intros contra,
+        apply h1_right,
+        apply is_free_in_imp_occurs_in,
+        exact contra,
+      },
+    },
+    {
+      unfold admits_alt,
+      right,
+      split,
+      {
+        intros a1,
+        subst a1,
+        contradiction,
+      },
+      {
+        exact P_ih h1_right,
+      }
+    }
+  },
+end
+
+
+
 lemma replace_free_aux_fast_admits_aux
   (P : formula)
   (v t : variable_)
@@ -2272,7 +2337,7 @@ begin
   {
     unfold simult_replace_free_aux at h1,
     unfold to_is_bound_aux at h1,
-    squeeze_simp at h1,
+    simp only [list.map_map, eq_self_iff_true, true_and] at h1,
     unfold function.comp at h1,
 
     unfold simult_admits_aux,
@@ -2280,7 +2345,7 @@ begin
     cases a1,
     dsimp at *,
     simp only [list.map_eq_map_iff] at h1,
-    squeeze_simp at h1,
+    simp only [bool.to_bool_eq] at h1,
     specialize h1 v a1_left,
     cases h1,
     split_ifs at h1_mpr,
@@ -2296,7 +2361,7 @@ begin
   {
     unfold simult_replace_free_aux at h1,
     unfold to_is_bound_aux at h1,
-    squeeze_simp at h1,
+    simp only [eq_self_iff_true, true_and] at h1,
 
     unfold simult_admits_aux,
     apply P_ih,
