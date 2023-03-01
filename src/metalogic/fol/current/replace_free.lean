@@ -79,7 +79,7 @@ def fast_replace_free (v t : variable_) : formula → formula
     else forall_ x (fast_replace_free P)
 
 
-def simult_replace_free (σ : variable_ → variable_) : finset variable_ → formula → formula
+def simult_replace_free_aux (σ : variable_ → variable_) : finset variable_ → formula → formula
 | _ true_ := true_
 | binders (pred_ name args) :=
     pred_
@@ -89,13 +89,16 @@ def simult_replace_free (σ : variable_ → variable_) : finset variable_ → fo
     eq_
     (if x ∈ binders then x else σ x)
     (if y ∈ binders then y else σ y)
-| binders (not_ P) := not_ (simult_replace_free binders P)
+| binders (not_ P) := not_ (simult_replace_free_aux binders P)
 | binders (imp_ P Q) :=
     imp_
-    (simult_replace_free binders P)
-    (simult_replace_free binders Q)
+    (simult_replace_free_aux binders P)
+    (simult_replace_free_aux binders Q)
 | binders (forall_ x P) :=
-    forall_ x (simult_replace_free (binders ∪ {x}) P)
+    forall_ x (simult_replace_free_aux (binders ∪ {x}) P)
+
+
+def simult_replace_free (σ : variable_ → variable_) (P : formula) : formula := simult_replace_free_aux σ ∅ P
 
 
 /--

@@ -2218,7 +2218,7 @@ example
   (binders : finset variable_)
   (h1 : simult_admits_aux σ binders P) :
   to_is_bound_aux binders P =
-    to_is_bound_aux binders (simult_replace_free σ binders P) :=
+    to_is_bound_aux binders (simult_replace_free_aux σ binders P) :=
 begin
   induction P generalizing binders,
   case formula.true_ : binders h1
@@ -2227,7 +2227,7 @@ begin
   {
     unfold simult_admits_aux at h1,
 
-    unfold simult_replace_free,
+    unfold simult_replace_free_aux,
     unfold to_is_bound_aux,
     congr' 1,
     simp only [list.map_map],
@@ -2248,7 +2248,7 @@ begin
   {
     unfold simult_admits_aux at h1,
 
-    unfold simult_replace_free,
+    unfold simult_replace_free_aux,
     unfold to_is_bound_aux,
     simp only [eq_self_iff_true, true_and],
     apply P_ih,
@@ -2262,7 +2262,7 @@ example
   (σ : variable_ → variable_)
   (binders : finset variable_)
   (h1 : to_is_bound_aux binders P =
-    to_is_bound_aux binders (simult_replace_free σ binders P)) :
+    to_is_bound_aux binders (simult_replace_free_aux σ binders P)) :
   simult_admits_aux σ binders P :=
 begin
   induction P generalizing binders,
@@ -2270,7 +2270,7 @@ begin
   { admit },
   case formula.pred_ : name args binders h1
   {
-    unfold simult_replace_free at h1,
+    unfold simult_replace_free_aux at h1,
     unfold to_is_bound_aux at h1,
     squeeze_simp at h1,
     unfold function.comp at h1,
@@ -2294,7 +2294,7 @@ begin
   { admit },
   case formula.forall_ : x P P_ih binders h1
   {
-    unfold simult_replace_free at h1,
+    unfold simult_replace_free_aux at h1,
     unfold to_is_bound_aux at h1,
     squeeze_simp at h1,
 
