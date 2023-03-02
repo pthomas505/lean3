@@ -765,14 +765,13 @@ begin
 end
 
 
-lemma mem_binders_simult_replace_free_aux
+lemma huh
   (P : formula)
-  (σ : variable_ → variable_)
-  (x y : variable_)
+  (σ σ' : variable_ → variable_)
   (binders : finset variable_)
-  (h1 : x ∈ binders) :
-  simult_replace_free_aux (function.update_ite σ x y) binders P =
-    simult_replace_free_aux σ binders P :=
+  (h1 : ∀ (v : variable_), v ∉ binders → σ v = σ' v) :
+  simult_replace_free_aux σ binders P =
+    simult_replace_free_aux σ' binders P :=
 begin
   induction P generalizing binders,
   case formula.true_ : binders h1
@@ -782,16 +781,10 @@ begin
     unfold simult_replace_free_aux,
     congr' 1,
     simp only [list.map_eq_map_iff],
-    intros v a1,
-    unfold function.update_ite,
-    by_cases c1 : v = x,
-    {
-      subst c1,
-      simp only [if_pos h1],
-    },
-    {
-      simp only [if_neg c1],
-    },
+    intros x a1,
+    split_ifs,
+    refl,
+    exact h1 x h,
   },
   case formula.eq_ : P_ᾰ P_ᾰ_1 binders h1
   { admit },
@@ -804,9 +797,11 @@ begin
     unfold simult_replace_free_aux,
     congr' 1,
     apply P_ih,
-    simp only [finset.mem_union, finset.mem_singleton],
-    left,
-    exact h1,
+    intros v a1,
+    simp only [finset.mem_union, finset.mem_singleton] at a1,
+    push_neg at a1,
+    cases a1,
+    apply h1 v a1_left,
   },
 end
 
@@ -833,11 +828,11 @@ begin
     exact h1 x h,
     refl,
   },
-  case formula.eq_ : P_ᾰ P_ᾰ_1 binders h1
+  case formula.eq_ : P_ᾰ P_ᾰ_1 binders σ h1
   { admit },
-  case formula.not_ : P_ᾰ P_ih binders h1
+  case formula.not_ : P_ᾰ P_ih binders σ h1
   { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders σ h1
   { admit },
   case formula.forall_ : x P P_ih binders σ h1
   {
@@ -845,9 +840,9 @@ begin
     unfold simult_replace_free_aux,
     congr,
 
-    rewrite <- mem_binders_simult_replace_free_aux P σ x x,
+    rewrite huh P σ (function.update_ite σ x x),
+    apply P_ih,
     {
-      apply P_ih,
       intros v a1,
       unfold function.update_ite,
       split_ifs,
@@ -856,14 +851,18 @@ begin
       },
       {
         simp only [finset.mem_union, finset.mem_singleton] at a1,
-        cases a1,
-        apply h1,
-        exact a1,
-        contradiction,
+        tauto,
       },
     },
     {
       simp only [finset.mem_union, finset.mem_singleton, eq_self_iff_true, or_true],
+      push_neg,
+      intros v a1,
+      cases a1,
+      unfold function.update_ite,
+      split_ifs,
+      contradiction,
+      refl,
     }
   },
 end

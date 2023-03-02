@@ -1541,6 +1541,80 @@ def to_is_bound (P : formula) : bool_formula :=
   to_is_bound_aux ∅ P
 
 
+def simult_to_is_bound_aux : (variable_ → bool) → formula → bool_formula
+| _ true_ := bool_formula.true_
+| σ (pred_ name args) := bool_formula.pred_ name (args.map σ)
+| σ (eq_ x y) := bool_formula.eq_ (σ x) (σ y)
+| σ (not_ P) := bool_formula.not_ (simult_to_is_bound_aux σ P)
+| σ (imp_ P Q) := bool_formula.imp_ (simult_to_is_bound_aux σ P) (simult_to_is_bound_aux σ Q)
+| σ (forall_ x P) := bool_formula.forall_ true (simult_to_is_bound_aux (function.update_ite σ x bool.tt) P)
+
+def simult_to_is_bound (P : formula) : bool_formula :=
+  simult_to_is_bound_aux (fun _, bool.ff) P
+
+
+example
+  (P : formula)
+  (binders : finset variable_)
+  (σ : variable_ → bool)
+  (h1 : ∀ (v : variable_), v ∈ binders ↔ σ v = bool.tt) :
+  to_is_bound_aux binders P = simult_to_is_bound_aux σ P :=
+begin
+  induction P generalizing binders σ,
+  case formula.true_ : binders σ
+  { admit },
+  case formula.pred_ : name args binders σ
+  {
+    unfold simult_to_is_bound_aux,
+    unfold to_is_bound_aux,
+    congr' 1,
+    simp only [list.map_eq_map_iff],
+    intros v a1,
+    specialize h1 v,
+    simp only [h1],
+    simp only [bool.to_bool_coe],
+  },
+  case formula.eq_ : P_ᾰ P_ᾰ_1 binders σ
+  { admit },
+  case formula.not_ : P_ᾰ P_ih binders σ
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders σ
+  { admit },
+  case formula.forall_ : x P P_ih binders σ
+  {
+    unfold simult_to_is_bound_aux,
+    unfold to_is_bound_aux,
+    squeeze_simp,
+    apply P_ih,
+    intros v,
+    split,
+    intros a1,
+    squeeze_simp at a1,
+    cases a1,
+    unfold function.update_ite,
+    split_ifs,
+    refl,
+    specialize h1 v,
+    cases h1,
+    exact h1_mp a1,
+    unfold function.update_ite,
+    split_ifs,
+    refl,
+    unfold function.update_ite,
+    split_ifs,
+    squeeze_simp,
+    right,
+    exact h,
+    intros a1,
+    specialize h1 v,
+    cases h1,
+    squeeze_simp,
+    left,
+    exact h1_mpr a1,
+  },
+end
+
+
 lemma fast_admits_aux_imp_free_and_bound_unchanged
   (P : formula)
   (v u : variable_)
