@@ -765,4 +765,108 @@ begin
 end
 
 
+lemma mem_binders_simult_replace_free_aux
+  (P : formula)
+  (σ : variable_ → variable_)
+  (x y : variable_)
+  (binders : finset variable_)
+  (h1 : x ∈ binders) :
+  simult_replace_free_aux (function.update_ite σ x y) binders P =
+    simult_replace_free_aux σ binders P :=
+begin
+  induction P generalizing binders,
+  case formula.true_ : binders h1
+  { admit },
+  case formula.pred_ : name args binders h1
+  {
+    unfold simult_replace_free_aux,
+    congr' 1,
+    simp only [list.map_eq_map_iff],
+    intros v a1,
+    unfold function.update_ite,
+    by_cases c1 : v = x,
+    {
+      subst c1,
+      simp only [if_pos h1],
+    },
+    {
+      simp only [if_neg c1],
+    },
+  },
+  case formula.eq_ : P_ᾰ P_ᾰ_1 binders h1
+  { admit },
+  case formula.not_ : P_ᾰ P_ih binders h1
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1
+  { admit },
+  case formula.forall_ : x P P_ih binders h1
+  {
+    unfold simult_replace_free_aux,
+    congr' 1,
+    apply P_ih,
+    simp only [finset.mem_union, finset.mem_singleton],
+    left,
+    exact h1,
+  },
+end
+
+
+example
+  (P : formula)
+  (σ : variable_ → variable_)
+  (binders : finset variable_)
+  (h1 : ∀ (v : variable_), v ∈ binders → v = σ v) :
+  simult_replace_free_aux σ binders P =
+    fast_simult_replace_free σ P :=
+begin
+  induction P generalizing binders σ,
+  case formula.true_ : binders h1
+  { admit },
+  case formula.pred_ : name args binders σ h1
+  {
+    unfold fast_simult_replace_free,
+    unfold simult_replace_free_aux,
+    congr' 1,
+    simp only [list.map_eq_map_iff],
+    intros x a1,
+    split_ifs,
+    exact h1 x h,
+    refl,
+  },
+  case formula.eq_ : P_ᾰ P_ᾰ_1 binders h1
+  { admit },
+  case formula.not_ : P_ᾰ P_ih binders h1
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1
+  { admit },
+  case formula.forall_ : x P P_ih binders σ h1
+  {
+    unfold fast_simult_replace_free,
+    unfold simult_replace_free_aux,
+    congr,
+
+    rewrite <- mem_binders_simult_replace_free_aux P σ x x,
+    {
+      apply P_ih,
+      intros v a1,
+      unfold function.update_ite,
+      split_ifs,
+      {
+        exact h,
+      },
+      {
+        simp only [finset.mem_union, finset.mem_singleton] at a1,
+        cases a1,
+        apply h1,
+        exact a1,
+        contradiction,
+      },
+    },
+    {
+      simp only [finset.mem_union, finset.mem_singleton, eq_self_iff_true, or_true],
+    }
+  },
+end
+
+
 #lint
