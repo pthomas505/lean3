@@ -323,7 +323,7 @@ begin
 end
 
 
--- fast_admits_aux ↔ admits_alt
+-- admits_alt ↔ fast_admits
 
 lemma not_is_free_in_imp_fast_admits_aux
   (P : formula)
@@ -627,6 +627,24 @@ begin
     }
   },
 end
+
+
+theorem admits_alt_iff_fast_admits_
+  (P : formula)
+  (v u : variable_) :
+  admits_alt v u P ↔ fast_admits v u P :=
+begin
+  unfold fast_admits,
+  split,
+  {
+    apply admits_alt_imp_fast_admits_aux,
+    simp only [finset.not_mem_empty, not_false_iff],
+  },
+  {
+    apply fast_admits_aux_imp_admits_alt,
+  }
+end
+
 
 --
 
