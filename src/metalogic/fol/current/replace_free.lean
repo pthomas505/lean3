@@ -223,7 +223,7 @@ begin
       simp only [eq_self_iff_true, true_and],
       apply replace_free_aux_mem_binders,
       simp only [finset.mem_union, finset.mem_singleton],
-      apply or.intro_right,
+      right,
       exact h,
     },
     {
