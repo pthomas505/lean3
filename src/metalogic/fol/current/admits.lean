@@ -123,12 +123,11 @@ begin
     unfold admits_aux at h1,
 
     unfold fast_admits_aux,
-    exact P_ih binders h1 h2,
+    tauto,
   },
   case formula.imp_ : P Q P_ih Q_ih binders h1 h2
   {
     unfold admits_aux at h1,
-    cases h1,
 
     unfold fast_admits_aux,
     tauto,
