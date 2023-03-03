@@ -92,13 +92,9 @@ example
   occurs_in v P ↔ v ∈ P.var_set :=
 begin
   induction P,
-  case formula.true_
+  case [formula.true_, formula.pred_ : name args]
   {
-    refl,
-  },
-  case formula.pred_ : name args
-  {
-    refl,
+    all_goals {refl},
   },
   case formula.eq_ : x y
   {
@@ -133,17 +129,9 @@ example
   is_bound_in v P ↔ v ∈ P.bound_var_set :=
 begin
   induction P,
-  case formula.true_
+  case [formula.true_, formula.pred_ : name args, formula.eq_ : x y]
   {
-    refl,
-  },
-  case formula.pred_ : name args
-  {
-    refl,
-  },
-  case formula.eq_ : x y
-  {
-    refl,
+    all_goals {refl},
   },
   case formula.not_ : P P_ih
   {
@@ -172,13 +160,9 @@ example
   is_free_in v P ↔ v ∈ P.free_var_set :=
 begin
   induction P,
-  case formula.true_
+  case [formula.true_, formula.pred_ : name args]
   {
-    refl,
-  },
-  case formula.pred_ : name args
-  {
-    refl,
+    all_goals {refl},
   },
   case formula.eq_ : x y
   {
