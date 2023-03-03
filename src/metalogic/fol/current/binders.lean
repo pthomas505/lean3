@@ -213,37 +213,10 @@ theorem is_bound_in_imp_occurs_in
   (h1 : is_bound_in v P) :
   occurs_in v P :=
 begin
-  induction P,
-  case formula.true_
-  {
-    assumption,
-  },
-  case formula.pred_ : name args
-  {
-    cases h1,
-  },
-  case formula.eq_ : x y
-  {
-    cases h1,
-  },
-  case formula.not_ : P P_ih
-  {
-    solve_by_elim,
-  },
-  case formula.imp_ : P Q P_ih Q_ih
-  {
-    unfold is_bound_in at h1,
-
-    unfold occurs_in,
-    tauto,
-  },
-  case formula.forall_ : x P P_ih
-  {
-    unfold is_bound_in at h1,
-
-    unfold occurs_in,
-    tauto,
-  },
+  induction P;
+  unfold is_bound_in at h1;
+  unfold occurs_in;
+  tauto,
 end
 
 
@@ -253,37 +226,10 @@ theorem is_free_in_imp_occurs_in
   (h1 : is_free_in v P) :
   occurs_in v P :=
 begin
-  induction P,
-  case formula.true_
-  {
-    assumption,
-  },
-  case formula.pred_ : name args
-  {
-    assumption,
-  },
-  case formula.eq_ : x y
-  {
-    assumption,
-  },
-  case formula.not_ : P P_ih
-  {
-    solve_by_elim,
-  },
-  case formula.imp_ : P Q P_ih Q_ih
-  {
-    unfold is_free_in at h1,
-
-    unfold occurs_in,
-    tauto,
-  },
-  case formula.forall_ : x P P_ih
-  {
-    unfold is_free_in at h1,
-
-    unfold occurs_in,
-    tauto,
-  }
+  induction P;
+  unfold is_free_in at h1;
+  unfold occurs_in;
+  tauto,
 end
 
 

@@ -227,19 +227,13 @@ begin
   split,
   {
     intros a1,
-    apply admits_aux_imp_fast_admits_aux,
-    {
-      exact a1,
-    },
-    {
-      simp only [finset.not_mem_empty, not_false_iff],
-    }
+    apply admits_aux_imp_fast_admits_aux;
+    tauto,
   },
   {
     intros a1,
     apply fast_admits_aux_imp_admits_aux,
-    right,
-    exact a1,
+    tauto,
   }
 end
 
@@ -270,18 +264,9 @@ begin
   case formula.eq_ : x y binders
   {
     unfold is_free_in at h1,
-    push_neg at h1,
-    cases h1,
 
     unfold fast_admits_aux,
-    intros a1,
-    cases a1,
-    {
-      contradiction,
-    },
-    {
-      contradiction,
-    }
+    tauto,
   },
   case formula.not_ : P P_ih
   {
@@ -293,17 +278,9 @@ begin
   case formula.imp_ : P Q P_ih Q_ih
   {
     unfold is_free_in at h1,
-    push_neg at h1,
-    cases h1,
 
     unfold fast_admits_aux,
-    split,
-    {
-      exact P_ih h1_left binders,
-    },
-    {
-      exact Q_ih h1_right binders,
-    }
+    tauto,
   },
   case formula.forall_ : x P P_ih
   {
