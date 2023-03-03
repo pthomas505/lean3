@@ -863,24 +863,10 @@ lemma not_is_bound_in_imp_admits_alt
   (h1 : ¬ is_bound_in u P) :
   admits_alt v u P :=
 begin
-  induction P,
-  case formula.true_
-  { admit },
-  case formula.pred_ : P_ᾰ P_ᾰ_1
-  { admit },
-  case formula.eq_ : P_ᾰ P_ᾰ_1
-  { admit },
-  case formula.not_ : P_ᾰ P_ih
-  { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
-  { admit },
-  case formula.forall_ : x P P_ih
-  {
-    unfold is_bound_in at h1,
-
-    unfold admits_alt,
-    tauto,
-  },
+  induction P;
+  unfold is_bound_in at h1;
+  unfold admits_alt;
+  tauto,
 end
 
 
@@ -1060,17 +1046,33 @@ lemma fast_replace_free_admits_alt
 begin
   induction P,
   case formula.true_
-  { admit },
+  {
+    unfold fast_replace_free,
+  },
   case formula.pred_ : name args
   {
     unfold fast_replace_free,
   },
-  case formula.eq_ : P_ᾰ P_ᾰ_1
-  { admit },
-  case formula.not_ : P_ᾰ P_ih
-  { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
-  { admit },
+  case formula.eq_ : x y
+  {
+    unfold fast_replace_free,
+  },
+  case formula.not_ : P P_ih
+  {
+    unfold occurs_in at h1,
+
+    unfold fast_replace_free,
+    unfold admits_alt,
+    exact P_ih h1,
+  },
+  case formula.imp_ : P Q P_ih Q_ih
+  {
+    unfold occurs_in at h1,
+
+    unfold fast_replace_free,
+    unfold admits_alt,
+    tauto,
+  },
   case formula.forall_ : x P P_ih
   {
     unfold occurs_in at h1,
@@ -1114,7 +1116,6 @@ begin
     }
   },
 end
-
 
 
 lemma replace_free_aux_fast_admits_aux
