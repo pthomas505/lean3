@@ -239,7 +239,7 @@ begin
   {
     intros a1,
     apply fast_admits_aux_imp_admits_aux,
-    simp only [finset.not_mem_empty, false_or],
+    right,
     exact a1,
   }
 end
