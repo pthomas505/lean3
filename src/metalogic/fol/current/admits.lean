@@ -109,30 +109,14 @@ begin
     unfold admits_aux at h1,
 
     unfold fast_admits_aux,
-    intros a1,
-    apply h1,
-    split,
-    {
-      exact a1,
-    },
-    {
-      exact h2,
-    },
+    tauto,
   },
   case formula.eq_ : x y binders h1 h2
   {
     unfold admits_aux at h1,
 
     unfold fast_admits_aux,
-    intros a1,
-    apply h1,
-    split,
-    {
-      exact a1,
-    },
-    {
-      exact h2,
-    },
+    tauto,
   },
   case formula.not_ : P P_ih binders h1 h2
   {
@@ -147,13 +131,7 @@ begin
     cases h1,
 
     unfold fast_admits_aux,
-    split,
-    {
-      exact P_ih binders h1_left h2,
-    },
-    {
-      exact Q_ih binders h1_right h2,
-    }
+    tauto,
   },
   case formula.forall_ : x P P_ih binders h1 h2
   {
@@ -162,25 +140,18 @@ begin
     unfold fast_admits_aux,
     by_cases c1 : v = x,
     {
-      apply or.intro_left,
+      left,
       exact c1,
     },
     {
-      apply or.intro_right,
+      right,
       apply P_ih,
       {
         exact h1,
       },
       {
         simp only [finset.mem_union, finset.mem_singleton],
-        push_neg,
-        split,
-        {
-          exact h2,
-        },
-        {
-          exact c1,
-        }
+        tauto,
       }
     }
   },
