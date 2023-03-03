@@ -645,7 +645,6 @@ begin
   }
 end
 
-
 --
 
 lemma admits_alt_self
