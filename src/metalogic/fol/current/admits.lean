@@ -574,24 +574,9 @@ lemma admits_alt_self
   (v : variable_) :
   admits_alt v v P :=
 begin
-  induction P,
-  case formula.true_
-  { admit },
-  case formula.pred_ : name args
-  {
-    unfold admits_alt,
-  },
-  case formula.eq_ : P_ᾰ P_ᾰ_1
-  { admit },
-  case formula.not_ : P_ᾰ P_ih
-  { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
-  { admit },
-  case formula.forall_ : x P P_ih
-  {
-    unfold admits_alt,
-    tauto,
-  },
+  induction P;
+  unfold admits_alt;
+  tauto,
 end
 
 --
