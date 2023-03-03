@@ -78,7 +78,8 @@ def fast_replace_free (v t : variable_) : formula → formula
     then forall_ x P -- v is not free in P
     else forall_ x (fast_replace_free P)
 
---
+
+-- replace_free = fast_replace_free
 
 lemma replace_free_aux_mem_binders
   (P : formula)
