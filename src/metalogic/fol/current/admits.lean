@@ -173,30 +173,16 @@ begin
   case formula.pred_ : name args binders h1
   {
     unfold fast_admits_aux at h1,
+
     unfold admits_aux,
-    intros a1,
-    cases a1,
-    cases h1,
-    {
-      contradiction,
-    },
-    {
-      exact h1 a1_left,
-    }
+    tauto,
   },
   case formula.eq_ : x y binders h1
   {
     unfold fast_admits_aux at h1,
+
     unfold admits_aux,
-    intros a1,
-    cases a1,
-    cases h1,
-    {
-      contradiction,
-    },
-    {
-      exact h1 a1_left,
-    }
+    tauto,
   },
   case formula.not_ : P P_ih binders h1
   {
@@ -208,33 +194,16 @@ begin
   case formula.imp_ : P Q P_ih Q_ih binders h1
   {
     unfold fast_admits_aux at h1,
+
     unfold admits_aux,
     split,
     {
       apply P_ih,
-      cases h1,
-      {
-        apply or.intro_left,
-        exact h1,
-      },
-      {
-        cases h1,
-        apply or.intro_right,
-        exact h1_left,
-      }
+      tauto,
     },
     {
       apply Q_ih,
-      cases h1,
-      {
-        apply or.intro_left,
-        exact h1,
-      },
-      {
-        cases h1,
-        apply or.intro_right,
-        exact h1_right,
-      }
+      tauto,
     }
   },
   case formula.forall_ : x P P_ih binders h1
@@ -243,26 +212,8 @@ begin
 
     unfold admits_aux,
     apply P_ih,
-    cases h1,
-    {
-      apply or.intro_left,
-      simp only [finset.mem_union, finset.mem_singleton],
-      apply or.intro_left,
-      exact h1,
-    },
-    {
-      cases h1,
-      {
-        apply or.intro_left,
-        simp only [finset.mem_union, finset.mem_singleton],
-        apply or.intro_right,
-        exact h1,
-      },
-      {
-        apply or.intro_right,
-        exact h1,
-      }
-    }
+    simp only [finset.mem_union, finset.mem_singleton],
+    tauto,
   },
 end
 
