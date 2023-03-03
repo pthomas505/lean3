@@ -322,6 +322,312 @@ begin
   }
 end
 
+
+-- fast_admits_aux ↔ admits_alt
+
+lemma not_is_free_in_imp_fast_admits_aux
+  (P : formula)
+  (v u : variable_)
+  (binders : finset variable_)
+  (h1 : ¬ is_free_in v P) :
+  fast_admits_aux v u binders P :=
+begin
+  induction P generalizing binders,
+  case formula.true_ : binders
+  {
+    unfold fast_admits_aux,
+  },
+  case formula.pred_ : name args
+  {
+    unfold is_free_in at h1,
+    simp only [list.mem_to_finset] at h1,
+
+    unfold fast_admits_aux,
+    intros a1,
+    contradiction,
+  },
+  case formula.eq_ : x y binders
+  {
+    unfold is_free_in at h1,
+    push_neg at h1,
+    cases h1,
+
+    unfold fast_admits_aux,
+    intros a1,
+    cases a1,
+    {
+      contradiction,
+    },
+    {
+      contradiction,
+    }
+  },
+  case formula.not_ : P P_ih
+  {
+    unfold is_free_in at h1,
+
+    unfold fast_admits_aux,
+    exact P_ih h1 binders,
+  },
+  case formula.imp_ : P Q P_ih Q_ih
+  {
+    unfold is_free_in at h1,
+    push_neg at h1,
+    cases h1,
+
+    unfold fast_admits_aux,
+    split,
+    {
+      exact P_ih h1_left binders,
+    },
+    {
+      exact Q_ih h1_right binders,
+    }
+  },
+  case formula.forall_ : x P P_ih
+  {
+    unfold is_free_in at h1,
+
+    unfold fast_admits_aux,
+    tauto,
+  },
+end
+
+
+example
+  (P : formula)
+  (v u : variable_)
+  (binders : finset variable_)
+  (h1 : u ∉ binders) :
+  admits_alt v u P → fast_admits_aux v u binders P :=
+begin
+  induction P generalizing binders,
+  case formula.true_ : binders
+  {
+    dunfold fast_admits_aux,
+    dunfold admits_alt,
+    intros a1,
+    assumption,
+  },
+  case formula.pred_ : name args binders
+  {
+    dunfold fast_admits_aux,
+    dunfold admits_alt,
+    intros a1 a2 a3,
+    contradiction,
+  },
+  case formula.eq_ : x y binders h1
+  {
+    dunfold fast_admits_aux,
+    dunfold admits_alt,
+    intros a1 a2 a3,
+    contradiction,
+  },
+  case formula.not_ : P P_ih binders
+  {
+    dunfold fast_admits_aux,
+    dunfold admits_alt,
+    intros a1,
+    exact P_ih binders h1 a1,
+  },
+  case formula.imp_ : P Q P_ih Q_ih binders
+  {
+    dunfold fast_admits_aux,
+    dunfold admits_alt,
+    tauto,
+  },
+  case formula.forall_ : x P P_ih binders
+  {
+    dunfold fast_admits_aux,
+    dunfold admits_alt,
+    by_cases c1 : u = x,
+    {
+      subst c1,
+      simp only [eq_self_iff_true, forall_true_left],
+      intros a1,
+      cases a1,
+      {
+        apply or.intro_left,
+        exact a1,
+      },
+      {
+        cases a1,
+        apply or.intro_right,
+        apply not_is_free_in_imp_fast_admits_aux,
+        exact a1_left,
+      },
+    },
+    {
+      intros a1,
+      cases a1,
+      {
+        apply or.intro_left,
+        exact a1,
+      },
+      {
+        apply or.intro_right,
+        apply P_ih,
+        {
+          simp only [finset.mem_union, finset.mem_singleton],
+          tauto,
+        },
+        {
+          cases a1,
+          exact a1_right,
+        },
+      },
+    },
+  },
+end
+
+
+lemma fast_admits_aux_and_mem_binders_imp_not_is_free_in
+  (P : formula)
+  (v u : variable_)
+  (binders : finset variable_)
+  (h1 : fast_admits_aux v u binders P)
+  (h2 : u ∈ binders) :
+  ¬ is_free_in v P :=
+begin
+  induction P generalizing binders,
+  case formula.true_ : binders h1 h2
+  {
+    dunfold is_free_in,
+    exact dec_trivial,
+  },
+  case formula.pred_ : name args binders h1 h2
+  {
+    dunfold fast_admits_aux at h1,
+
+    dunfold is_free_in,
+    simp only [list.mem_to_finset],
+    intros contra,
+    exact h1 contra h2,
+  },
+  case formula.eq_ : x y binders h1 h2
+  {
+    dunfold fast_admits_aux at h1,
+
+    dunfold is_free_in,
+    tauto,
+  },
+  case formula.not_ : P P_ih binders h1 h2
+  {
+    dunfold fast_admits_aux at h1,
+
+    dunfold is_free_in,
+    exact P_ih binders h1 h2,
+  },
+  case formula.imp_ : P Q P_ih Q_ih binders h1 h2
+  {
+    dunfold fast_admits_aux at h1,
+    cases h1,
+
+    dunfold is_free_in,
+    push_neg,
+    split,
+    {
+      exact P_ih binders h1_left h2,
+    },
+    {
+      exact Q_ih binders h1_right h2,
+    }
+  },
+  case formula.forall_ : x P P_ih binders h1 h2
+  {
+    dunfold fast_admits_aux at h1,
+
+    dunfold is_free_in,
+    push_neg,
+    intros a1,
+    cases h1,
+    {
+      contradiction,
+    },
+    {
+      apply P_ih,
+      {
+        exact h1,
+      },
+      {
+        simp only [finset.mem_union, finset.mem_singleton],
+        apply or.intro_left,
+        exact h2,
+      },
+    },
+  },
+end
+
+
+example
+  (P : formula)
+  (v u : variable_)
+  (binders : finset variable_) :
+  fast_admits_aux v u binders P → admits_alt v u P :=
+begin
+  induction P generalizing binders,
+  case formula.true_ : binders
+  {
+    dunfold admits_alt,
+    dunfold fast_admits_aux,
+    exact dec_trivial,
+  },
+  case formula.pred_ : name args binders
+  {
+    dunfold admits_alt,
+    dunfold fast_admits_aux,
+    intros a1,
+    exact dec_trivial,
+  },
+  case formula.eq_ : x y binders
+  {
+    dunfold admits_alt,
+    dunfold fast_admits_aux,
+    intros a1,
+    exact dec_trivial,
+  },
+  case formula.not_ : P P_ih binders
+  {
+    dunfold admits_alt,
+    dunfold fast_admits_aux,
+    intros a1,
+    exact P_ih binders a1,
+  },
+  case formula.imp_ : P Q P_ih Q_ih binders
+  {
+    dunfold admits_alt,
+    dunfold fast_admits_aux,
+    tauto,
+  },
+  case formula.forall_ : x P P_ih binders
+  {
+    dunfold admits_alt,
+    dunfold fast_admits_aux,
+    intros a1,
+    cases a1,
+    {
+      apply or.intro_left,
+      exact a1,
+    },
+    {
+      apply or.intro_right,
+      split,
+      {
+        intros a2,
+        apply fast_admits_aux_and_mem_binders_imp_not_is_free_in P v u (binders ∪ {x}) a1,
+        simp only [finset.mem_union, finset.mem_singleton],
+        apply or.intro_right,
+        symmetry,
+        exact a2,
+      },
+      {
+        apply P_ih,
+        exact a1,
+      },
+    }
+  },
+end
+
 --
 
 lemma admits_alt_self
@@ -510,74 +816,6 @@ begin
   },
 end
 
-
-lemma not_is_free_in_imp_fast_admits_aux
-  (P : formula)
-  (v u : variable_)
-  (binders : finset variable_)
-  (h1 : ¬ is_free_in v P) :
-  fast_admits_aux v u binders P :=
-begin
-  induction P generalizing binders,
-  case formula.true_ : binders
-  {
-    unfold fast_admits_aux,
-  },
-  case formula.pred_ : name args
-  {
-    unfold is_free_in at h1,
-    simp only [list.mem_to_finset] at h1,
-
-    unfold fast_admits_aux,
-    intros a1,
-    contradiction,
-  },
-  case formula.eq_ : x y binders
-  {
-    unfold is_free_in at h1,
-    push_neg at h1,
-    cases h1,
-
-    unfold fast_admits_aux,
-    intros a1,
-    cases a1,
-    {
-      contradiction,
-    },
-    {
-      contradiction,
-    }
-  },
-  case formula.not_ : P P_ih
-  {
-    unfold is_free_in at h1,
-
-    unfold fast_admits_aux,
-    exact P_ih h1 binders,
-  },
-  case formula.imp_ : P Q P_ih Q_ih
-  {
-    unfold is_free_in at h1,
-    push_neg at h1,
-    cases h1,
-
-    unfold fast_admits_aux,
-    split,
-    {
-      exact P_ih h1_left binders,
-    },
-    {
-      exact Q_ih h1_right binders,
-    }
-  },
-  case formula.forall_ : x P P_ih
-  {
-    unfold is_free_in at h1,
-
-    unfold fast_admits_aux,
-    tauto,
-  },
-end
 
 theorem not_is_free_in_imp_fast_admits
   (P : formula)
@@ -1857,239 +2095,5 @@ begin
   }
 end
 
-
-example
-  (P : formula)
-  (v u : variable_)
-  (binders : finset variable_)
-  (h1 : u ∉ binders) :
-  admits_alt v u P → fast_admits_aux v u binders P :=
-begin
-  induction P generalizing binders,
-  case formula.true_ : binders
-  {
-    dunfold fast_admits_aux,
-    dunfold admits_alt,
-    intros a1,
-    assumption,
-  },
-  case formula.pred_ : name args binders
-  {
-    dunfold fast_admits_aux,
-    dunfold admits_alt,
-    intros a1 a2 a3,
-    contradiction,
-  },
-  case formula.eq_ : x y binders h1
-  {
-    dunfold fast_admits_aux,
-    dunfold admits_alt,
-    intros a1 a2 a3,
-    contradiction,
-  },
-  case formula.not_ : P P_ih binders
-  {
-    dunfold fast_admits_aux,
-    dunfold admits_alt,
-    intros a1,
-    exact P_ih binders h1 a1,
-  },
-  case formula.imp_ : P Q P_ih Q_ih binders
-  {
-    dunfold fast_admits_aux,
-    dunfold admits_alt,
-    tauto,
-  },
-  case formula.forall_ : x P P_ih binders
-  {
-    dunfold fast_admits_aux,
-    dunfold admits_alt,
-    by_cases c1 : u = x,
-    {
-      subst c1,
-      simp only [eq_self_iff_true, forall_true_left],
-      intros a1,
-      cases a1,
-      {
-        apply or.intro_left,
-        exact a1,
-      },
-      {
-        cases a1,
-        apply or.intro_right,
-        apply not_is_free_in_imp_fast_admits_aux,
-        exact a1_left,
-      },
-    },
-    {
-      intros a1,
-      cases a1,
-      {
-        apply or.intro_left,
-        exact a1,
-      },
-      {
-        apply or.intro_right,
-        apply P_ih,
-        {
-          simp only [finset.mem_union, finset.mem_singleton],
-          tauto,
-        },
-        {
-          cases a1,
-          exact a1_right,
-        },
-      },
-    },
-  },
-end
-
-
-lemma fast_admits_aux_and_mem_binders_imp_not_is_free_in
-  (P : formula)
-  (v u : variable_)
-  (binders : finset variable_)
-  (h1 : fast_admits_aux v u binders P)
-  (h2 : u ∈ binders) :
-  ¬ is_free_in v P :=
-begin
-  induction P generalizing binders,
-  case formula.true_ : binders h1 h2
-  {
-    dunfold is_free_in,
-    exact dec_trivial,
-  },
-  case formula.pred_ : name args binders h1 h2
-  {
-    dunfold fast_admits_aux at h1,
-
-    dunfold is_free_in,
-    simp only [list.mem_to_finset],
-    intros contra,
-    exact h1 contra h2,
-  },
-  case formula.eq_ : x y binders h1 h2
-  {
-    dunfold fast_admits_aux at h1,
-
-    dunfold is_free_in,
-    tauto,
-  },
-  case formula.not_ : P P_ih binders h1 h2
-  {
-    dunfold fast_admits_aux at h1,
-
-    dunfold is_free_in,
-    exact P_ih binders h1 h2,
-  },
-  case formula.imp_ : P Q P_ih Q_ih binders h1 h2
-  {
-    dunfold fast_admits_aux at h1,
-    cases h1,
-
-    dunfold is_free_in,
-    push_neg,
-    split,
-    {
-      exact P_ih binders h1_left h2,
-    },
-    {
-      exact Q_ih binders h1_right h2,
-    }
-  },
-  case formula.forall_ : x P P_ih binders h1 h2
-  {
-    dunfold fast_admits_aux at h1,
-
-    dunfold is_free_in,
-    push_neg,
-    intros a1,
-    cases h1,
-    {
-      contradiction,
-    },
-    {
-      apply P_ih,
-      {
-        exact h1,
-      },
-      {
-        simp only [finset.mem_union, finset.mem_singleton],
-        apply or.intro_left,
-        exact h2,
-      },
-    },
-  },
-end
-
-
-example
-  (P : formula)
-  (v u : variable_)
-  (binders : finset variable_) :
-  fast_admits_aux v u binders P → admits_alt v u P :=
-begin
-  induction P generalizing binders,
-  case formula.true_ : binders
-  {
-    dunfold admits_alt,
-    dunfold fast_admits_aux,
-    exact dec_trivial,
-  },
-  case formula.pred_ : name args binders
-  {
-    dunfold admits_alt,
-    dunfold fast_admits_aux,
-    intros a1,
-    exact dec_trivial,
-  },
-  case formula.eq_ : x y binders
-  {
-    dunfold admits_alt,
-    dunfold fast_admits_aux,
-    intros a1,
-    exact dec_trivial,
-  },
-  case formula.not_ : P P_ih binders
-  {
-    dunfold admits_alt,
-    dunfold fast_admits_aux,
-    intros a1,
-    exact P_ih binders a1,
-  },
-  case formula.imp_ : P Q P_ih Q_ih binders
-  {
-    dunfold admits_alt,
-    dunfold fast_admits_aux,
-    tauto,
-  },
-  case formula.forall_ : x P P_ih binders
-  {
-    dunfold admits_alt,
-    dunfold fast_admits_aux,
-    intros a1,
-    cases a1,
-    {
-      apply or.intro_left,
-      exact a1,
-    },
-    {
-      apply or.intro_right,
-      split,
-      {
-        intros a2,
-        apply fast_admits_aux_and_mem_binders_imp_not_is_free_in P v u (binders ∪ {x}) a1,
-        simp only [finset.mem_union, finset.mem_singleton],
-        apply or.intro_right,
-        symmetry,
-        exact a2,
-      },
-      {
-        apply P_ih,
-        exact a1,
-      },
-    }
-  },
-end
 
 #lint
