@@ -369,12 +369,12 @@ begin
       intros a1,
       cases a1,
       {
-        apply or.intro_left,
+        left,
         exact a1,
       },
       {
         cases a1,
-        apply or.intro_right,
+        right,
         apply not_is_free_in_imp_fast_admits_aux,
         exact a1_left,
       },
@@ -383,11 +383,11 @@ begin
       intros a1,
       cases a1,
       {
-        apply or.intro_left,
+        left,
         exact a1,
       },
       {
-        apply or.intro_right,
+        right,
         apply P_ih,
         {
           simp only [finset.mem_union, finset.mem_singleton],
@@ -473,7 +473,7 @@ begin
       },
       {
         simp only [finset.mem_union, finset.mem_singleton],
-        apply or.intro_left,
+        left,
         exact h2,
       },
     },
@@ -528,17 +528,17 @@ begin
     intros a1,
     cases a1,
     {
-      apply or.intro_left,
+      left,
       exact a1,
     },
     {
-      apply or.intro_right,
+      right,
       split,
       {
         intros a2,
         apply fast_admits_aux_and_mem_binders_imp_not_is_free_in P v u (binders ∪ {x}) a1,
         simp only [finset.mem_union, finset.mem_singleton],
-        apply or.intro_right,
+        right,
         symmetry,
         exact a2,
       },
