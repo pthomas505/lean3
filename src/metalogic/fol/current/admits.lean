@@ -394,7 +394,7 @@ begin
 end
 
 
-example
+lemma admits_alt_imp_fast_admits_aux
   (P : formula)
   (v u : variable_)
   (binders : finset variable_)
@@ -559,7 +559,7 @@ begin
 end
 
 
-example
+lemma fast_admits_aux_imp_admits_alt
   (P : formula)
   (v u : variable_)
   (binders : finset variable_) :
