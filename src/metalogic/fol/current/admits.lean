@@ -471,8 +471,14 @@ begin
       }
     },
   },
-  case formula.not_ : P_ᾰ P_ih binders
-  { admit },
+  case formula.not_ : P P_ih binders
+  {
+    unfold occurs_in at h1,
+
+    unfold replace_free_aux,
+    unfold fast_admits_aux,
+    exact P_ih h1 binders,
+  },
   case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders
   { admit },
   case formula.forall_ : x P P_ih binders
