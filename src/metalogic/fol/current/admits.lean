@@ -1307,7 +1307,7 @@ begin
     unfold admits_aux at h1,
 
     unfold admits_aux,
-    exact P_ih S h1,
+    tauto,
   },
   case formula.imp_ : P Q P_ih Q_ih S h1
   {
@@ -1323,8 +1323,7 @@ begin
     simp only [finset.union_right_comm S T {x}] at h1,
 
     unfold admits_aux,
-    apply P_ih,
-    exact h1,
+    tauto,
   },
 end
 
