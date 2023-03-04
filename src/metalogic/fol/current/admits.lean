@@ -537,6 +537,7 @@ begin
   },
 end
 
+--
 
 lemma fast_admits_aux_is_free_in
   (P : formula)
