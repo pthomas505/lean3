@@ -1011,26 +1011,15 @@ begin
     unfold admits_aux,
     tauto,
   },
-  case formula.eq_ : x y binders
+  case [formula.eq_, formula.not_, formula.imp_]
   {
-    unfold is_free_in at h1,
+    all_goals
+    {
+      unfold is_free_in at h1,
 
-    unfold admits_aux,
-    tauto,
-  },
-  case formula.not_ : P P_ih binders
-  {
-    unfold is_free_in at h1,
-
-    unfold admits_aux,
-    tauto,
-  },
-  case formula.imp_ : P Q P_ih Q_ih binders
-  {
-    unfold is_free_in at h1,
-
-    unfold admits_aux,
-    tauto,
+      unfold admits_aux,
+      tauto,
+    }
   },
   case formula.forall_ : x P P_ih binders
   {
