@@ -210,7 +210,9 @@ begin
   }
 end
 
+
 -- fast_admits
+
 
 lemma fast_admits_aux_self
   (P : formula)
@@ -1034,6 +1036,7 @@ begin
   },
 end
 
+
 theorem replace_free_admits
   (P : formula)
   (v t : variable_)
@@ -1045,7 +1048,6 @@ begin
   apply replace_free_aux_admits_aux,
   exact h1,
 end
-
 
 
 --
@@ -1225,9 +1227,9 @@ begin
   },
 end
 
---
 
 --
+
 
 @[derive [inhabited, decidable_eq]]
 inductive bool_formula : Type
