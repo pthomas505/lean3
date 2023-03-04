@@ -696,6 +696,62 @@ end
 -- admits
 
 
+lemma admits_aux_self
+  (P : formula)
+  (v : variable_)
+  (binders : finset variable_) :
+  admits_aux v v binders P :=
+begin
+  induction P generalizing binders,
+  case formula.true_ : binders
+  {
+    unfold admits_aux,
+  },
+  case formula.pred_ : name args binders
+  {
+    unfold admits_aux,
+    simp only [and_imp, imp_self, implies_true_iff],
+  },
+  case formula.eq_ : x y binders
+  {
+    unfold admits_aux,
+    simp only [and_imp, imp_self, implies_true_iff],
+  },
+  case formula.not_ : P P_ih binders
+  {
+    unfold admits_aux,
+    exact P_ih binders,
+  },
+  case formula.imp_ : P Q P_ih Q_ih binders
+  {
+    unfold admits_aux,
+    split,
+    {
+      exact P_ih binders,
+    },
+    {
+      exact Q_ih binders,
+    }
+  },
+  case formula.forall_ : x P P_ih binders
+  {
+    unfold admits_aux,
+    apply P_ih,
+  },
+end
+
+
+theorem admits_self
+  (P : formula)
+  (v : variable_) :
+  admits v v P :=
+begin
+  unfold admits,
+  apply admits_aux_self,
+end
+
+--
+
 lemma not_is_free_in_imp_admits_aux
   (P : formula)
   (v u : variable_)
@@ -776,6 +832,7 @@ begin
   },
 end
 
+
 theorem not_is_free_in_imp_admits
   (P : formula)
   (v u : variable_)
@@ -788,10 +845,6 @@ begin
 end
 
 --
-
-
-
-
 
 lemma not_is_bound_in_imp_admits_aux
   (P : formula)
@@ -877,7 +930,6 @@ begin
 end
 
 --
-
 
 lemma replace_free_aux_admits_aux
   (P : formula)
@@ -995,59 +1047,6 @@ begin
 end
 
 
-
-lemma admits_aux_self
-  (P : formula)
-  (v : variable_)
-  (binders : finset variable_) :
-  admits_aux v v binders P :=
-begin
-  induction P generalizing binders,
-  case formula.true_ : binders
-  {
-    unfold admits_aux,
-  },
-  case formula.pred_ : name args binders
-  {
-    unfold admits_aux,
-    simp only [and_imp, imp_self, implies_true_iff],
-  },
-  case formula.eq_ : x y binders
-  {
-    unfold admits_aux,
-    simp only [and_imp, imp_self, implies_true_iff],
-  },
-  case formula.not_ : P P_ih binders
-  {
-    unfold admits_aux,
-    exact P_ih binders,
-  },
-  case formula.imp_ : P Q P_ih Q_ih binders
-  {
-    unfold admits_aux,
-    split,
-    {
-      exact P_ih binders,
-    },
-    {
-      exact Q_ih binders,
-    }
-  },
-  case formula.forall_ : x P P_ih binders
-  {
-    unfold admits_aux,
-    apply P_ih,
-  },
-end
-
-theorem admits_self
-  (P : formula)
-  (v : variable_) :
-  admits v v P :=
-begin
-  unfold admits,
-  apply admits_aux_self,
-end
 
 --
 
