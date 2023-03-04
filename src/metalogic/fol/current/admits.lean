@@ -695,6 +695,9 @@ begin
 end
 
 
+--
+
+
 @[derive [inhabited, decidable_eq]]
 inductive bool_formula : Type
 | true_ : bool_formula
