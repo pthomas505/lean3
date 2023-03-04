@@ -104,33 +104,15 @@ begin
   {
     unfold fast_admits_aux,
   },
-  case formula.pred_ : name args binders h1 h2
+  case [formula.pred_, formula.eq_, formula.not_, formula.imp_]
   {
-    unfold admits_aux at h1,
+    all_goals
+    {
+      unfold admits_aux at h1,
 
-    unfold fast_admits_aux,
-    tauto,
-  },
-  case formula.eq_ : x y binders h1 h2
-  {
-    unfold admits_aux at h1,
-
-    unfold fast_admits_aux,
-    tauto,
-  },
-  case formula.not_ : P P_ih binders h1 h2
-  {
-    unfold admits_aux at h1,
-
-    unfold fast_admits_aux,
-    tauto,
-  },
-  case formula.imp_ : P Q P_ih Q_ih binders h1 h2
-  {
-    unfold admits_aux at h1,
-
-    unfold fast_admits_aux,
-    tauto,
+      unfold fast_admits_aux,
+      tauto,
+    },
   },
   case formula.forall_ : x P P_ih binders h1 h2
   {
