@@ -210,8 +210,7 @@ begin
   }
 end
 
-
--- admits_alt ↔ fast_admits
+--
 
 lemma not_is_free_in_imp_fast_admits_aux
   (P : formula)
