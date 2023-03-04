@@ -428,67 +428,66 @@ end
 lemma fast_admits_aux_imp_admits_alt
   (P : formula)
   (v u : variable_)
-  (binders : finset variable_) :
-  fast_admits_aux v u binders P → admits_alt v u P :=
+  (binders : finset variable_)
+  (h1 : fast_admits_aux v u binders P) :
+  admits_alt v u P :=
 begin
   induction P generalizing binders,
   case formula.true_ : binders
   {
-    dunfold admits_alt,
-    dunfold fast_admits_aux,
-    exact dec_trivial,
+    unfold admits_alt,
   },
   case formula.pred_ : name args binders
   {
-    dunfold admits_alt,
-    dunfold fast_admits_aux,
-    intros a1,
-    exact dec_trivial,
+    unfold admits_alt,
   },
   case formula.eq_ : x y binders
   {
-    dunfold admits_alt,
-    dunfold fast_admits_aux,
-    intros a1,
-    exact dec_trivial,
+    unfold admits_alt,
   },
   case formula.not_ : P P_ih binders
   {
-    dunfold admits_alt,
-    dunfold fast_admits_aux,
-    intros a1,
-    exact P_ih binders a1,
+    unfold fast_admits_aux at h1,
+
+    unfold admits_alt,
+    exact P_ih binders h1,
   },
   case formula.imp_ : P Q P_ih Q_ih binders
   {
-    dunfold admits_alt,
-    dunfold fast_admits_aux,
+    unfold fast_admits_aux at h1,
+    cases h1,
+
+    unfold admits_alt,
     tauto,
   },
   case formula.forall_ : x P P_ih binders
   {
-    dunfold admits_alt,
-    dunfold fast_admits_aux,
-    intros a1,
-    cases a1,
+    unfold fast_admits_aux at h1,
+
+    unfold admits_alt,
+    cases h1,
     {
       left,
-      exact a1,
+      exact h1,
     },
     {
       right,
       split,
       {
-        intros a2,
-        subst a2,
-
-        apply fast_admits_aux_and_mem_binders_imp_not_is_free_in P v x (binders ∪ {x}) a1,
-        simp only [finset.mem_union, finset.mem_singleton, eq_self_iff_true, or_true],
+        intros a1,
+        subst a1,
+        apply fast_admits_aux_and_mem_binders_imp_not_is_free_in P v x,
+        {
+          exact h1,
+        },
+        {
+          simp only [finset.mem_union, finset.mem_singleton, eq_self_iff_true, or_true],
+        }
       },
       {
         apply P_ih,
-        exact a1,
-      },
+        exact h1,
+      }
     }
   },
 end
