@@ -460,12 +460,11 @@ begin
 
     unfold replace_free_aux,
     unfold fast_admits_aux,
-    exact P_ih h1 binders,
+    tauto,
   },
   case formula.imp_ : P Q P_ih Q_ih binders
   {
     unfold occurs_in at h1,
-    push_neg at h1,
 
     unfold replace_free_aux,
     unfold fast_admits_aux,
@@ -479,9 +478,8 @@ begin
 
     unfold replace_free_aux,
     unfold fast_admits_aux,
-    apply or.intro_right,
-    apply P_ih,
-    exact h1_right,
+    right,
+    tauto,
   },
 end
 
