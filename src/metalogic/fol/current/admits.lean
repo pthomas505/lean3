@@ -1581,4 +1581,45 @@ begin
 end
 
 
+lemma admits_aux_is_free_in
+  (P : formula)
+  (v u : variable_)
+  (binders : finset variable_)
+  (h1 : admits_aux v u binders P)
+  (h2 : is_free_in v P)
+  (h3 : v ∉ binders) :
+  u ∉ binders :=
+begin
+  induction P generalizing binders,
+  case formula.true_ : binders h1
+  { admit },
+  case formula.pred_ : name args binders h1
+  {
+    unfold admits_aux at h1,
+    unfold is_free_in at h2,
+    squeeze_simp at h2,
+    tauto,
+  },
+  case formula.eq_ : P_ᾰ P_ᾰ_1 binders h1
+  { admit },
+  case formula.not_ : P_ᾰ P_ih binders h1
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1
+  { admit },
+  case formula.forall_ : x P P_ih binders h1
+  {
+    unfold admits_aux at h1,
+    unfold is_free_in at h2,
+    cases h2,
+    apply P_ih,
+    exact h2_right,
+    apply admits_aux_del_binders P v u binders {x},
+    exact h1,
+    squeeze_simp,
+    exact h2_left,
+    exact h3,
+  },
+end
+
+
 #lint
