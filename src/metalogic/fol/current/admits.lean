@@ -1087,17 +1087,9 @@ begin
   case formula.imp_ : P Q P_ih Q_ih binders h2
   {
     unfold is_bound_in at h1,
-    push_neg at h1,
-    cases h1,
 
     unfold admits_aux,
-    split,
-    {
-      exact P_ih h1_left binders h2,
-    },
-    {
-      exact Q_ih h1_right binders h2,
-    }
+    tauto,
   },
   case formula.forall_ : x P P_ih binders h2
   {
@@ -1108,16 +1100,10 @@ begin
     unfold admits_aux,
     apply P_ih h1_right,
     simp only [finset.mem_union, finset.mem_singleton],
-    push_neg,
-    split,
-    {
-      exact h2,
-    },
-    {
-      exact h1_left,
-    }
+    tauto,
   },
 end
+
 
 theorem not_is_bound_in_imp_admits
   (P : formula)
