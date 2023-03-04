@@ -695,6 +695,358 @@ begin
 end
 
 
+@[derive [inhabited, decidable_eq]]
+inductive bool_formula : Type
+| true_ : bool_formula
+| pred_ : pred_name_ → list bool → bool_formula
+| eq_ : bool → bool → bool_formula
+| not_ : bool_formula → bool_formula
+| imp_ : bool_formula → bool_formula → bool_formula
+| forall_ : bool → bool_formula → bool_formula
+
+
+def to_is_bound_aux : finset variable_ → formula → bool_formula
+| _ true_ := bool_formula.true_
+| binders (pred_ name args) := bool_formula.pred_ name (args.map (fun (v : variable_), v ∈ binders))
+| binders (eq_ x y) := bool_formula.eq_ (x ∈ binders) (y ∈ binders)
+| binders (not_ P) := bool_formula.not_ (to_is_bound_aux binders P)
+| binders (imp_ P Q) := bool_formula.imp_ (to_is_bound_aux binders P) (to_is_bound_aux binders Q)
+| binders (forall_ x P) := bool_formula.forall_ true (to_is_bound_aux (binders ∪ {x}) P)
+
+def to_is_bound (P : formula) : bool_formula :=
+  to_is_bound_aux ∅ P
+
+
+lemma fast_admits_aux_imp_free_and_bound_unchanged
+  (P : formula)
+  (v u : variable_)
+  (binders : finset variable_)
+  (h1 : v ∉ binders)
+  (h2 : fast_admits_aux v u binders P) :
+  to_is_bound_aux binders P = to_is_bound_aux binders (fast_replace_free v u P) :=
+begin
+  induction P generalizing binders,
+  case formula.true_ : binders h1 h2
+  {
+    refl,
+  },
+  case formula.pred_ : name args binders h1 h2
+  {
+    induction args,
+    case list.nil
+    {
+      unfold fast_replace_free,
+      simp only [list.map_nil],
+    },
+    case list.cons : args_hd args_tl args_ih
+    {
+      unfold fast_admits_aux at h2,
+      simp only [list.mem_cons_iff] at h2,
+
+      unfold fast_admits_aux at args_ih,
+      unfold fast_replace_free at args_ih,
+      unfold to_is_bound_aux at args_ih,
+      simp only [list.map_map, eq_self_iff_true, true_and] at args_ih,
+
+      unfold fast_replace_free,
+      unfold to_is_bound_aux,
+      simp only [list.map, list.map_map, eq_self_iff_true, bool.to_bool_eq, true_and],
+
+      split,
+      {
+        split_ifs,
+        {
+          subst h,
+          simp only [eq_self_iff_true, true_or, forall_true_left] at h2,
+          split,
+          {
+            intros a1,
+            contradiction,
+          },
+          {
+            intros a1,
+            contradiction,
+          }
+        },
+        {
+          refl,
+        }
+      },
+      {
+        apply args_ih,
+        intros a1,
+        apply h2,
+        apply or.intro_right,
+        exact a1,
+      }
+    },
+  },
+  case formula.eq_ : x y binders h1 h2
+  {
+    unfold fast_admits_aux at h2,
+
+    unfold fast_replace_free,
+    unfold to_is_bound_aux,
+    simp only [bool.to_bool_eq],
+    split,
+    {
+      split_ifs,
+      {
+        subst h,
+        simp only [eq_self_iff_true, true_or, forall_true_left] at h2,
+        split,
+        {
+          intros a1,
+          contradiction,
+        },
+        {
+          intros a1,
+          contradiction,
+        }
+      },
+      {
+        refl,
+      }
+    },
+    {
+      split_ifs,
+      {
+        subst h,
+        simp only [eq_self_iff_true, or_true, forall_true_left] at h2,
+        split,
+        {
+          intros a1,
+          contradiction,
+        },
+        {
+          intros a1,
+          contradiction,
+        }
+      },
+      {
+        refl,
+      }
+    }
+  },
+  case formula.not_ : P P_ih binders h1 h2
+  {
+    unfold fast_admits_aux at h2,
+
+    unfold fast_replace_free,
+    unfold to_is_bound_aux,
+    congr' 1,
+    exact P_ih binders h1 h2,
+  },
+  case formula.imp_ : P Q P_ih Q_ih binders h1 h2
+  {
+    unfold fast_admits_aux at h2,
+    cases h2,
+
+    unfold fast_replace_free,
+    unfold to_is_bound_aux,
+    congr' 1,
+    {
+      exact P_ih binders h1 h2_left,
+    },
+    {
+      exact Q_ih binders h1 h2_right,
+    }
+  },
+  case formula.forall_ : x P P_ih binders h1 h2
+  {
+    unfold fast_admits_aux at h2,
+
+    unfold fast_replace_free,
+    split_ifs,
+    {
+      refl,
+    },
+    {
+      unfold to_is_bound_aux,
+      simp only [eq_self_iff_true, true_and],
+      apply P_ih,
+      {
+        simp only [finset.mem_union, finset.mem_singleton],
+        push_neg,
+        split,
+        {
+          exact h1,
+        },
+        {
+          exact h,
+        }
+      },
+      {
+        cases h2,
+        {
+          contradiction,
+        },
+        {
+          exact h2,
+        }
+      }
+    }
+  },
+end
+
+
+lemma free_and_bound_unchanged_imp_fast_admits_aux
+  (P : formula)
+  (v u : variable_)
+  (binders : finset variable_)
+  (h1 : v ∉ binders)
+  (h2 : to_is_bound_aux binders P = to_is_bound_aux binders (fast_replace_free v u P)) :
+  fast_admits_aux v u binders P :=
+begin
+  induction P generalizing binders,
+  case formula.true_ : binders h1 h2
+  {
+    unfold fast_admits_aux,
+  },
+  case formula.pred_ : name args binders h1 h2
+  {
+    induction args,
+    case list.nil
+    {
+      unfold fast_admits_aux,
+      simp only [list.not_mem_nil, is_empty.forall_iff],
+    },
+    case list.cons : args_hd args_tl args_ih
+    {
+      unfold fast_replace_free at h2,
+      unfold to_is_bound_aux at h2,
+      simp only [list.map, list.map_map, eq_self_iff_true, bool.to_bool_eq, true_and] at h2,
+      cases h2,
+
+      unfold fast_admits_aux at args_ih,
+      unfold fast_replace_free at args_ih,
+      unfold to_is_bound_aux at args_ih,
+      simp only [list.map_map, eq_self_iff_true, true_and] at args_ih,
+
+      specialize args_ih h2_right,
+
+      unfold fast_admits_aux,
+      simp only [list.mem_cons_iff],
+      intros a1,
+      cases a1,
+      {
+        subst a1,
+        simp only [eq_self_iff_true, if_true] at h2_left,
+        cases h2_left,
+        by_contradiction contra,
+        apply h1,
+        apply h2_left_mpr,
+        exact contra,
+      },
+      {
+        apply args_ih,
+        exact a1,
+      }
+    },
+  },
+  case formula.eq_ : x y binders h1 h2
+  {
+    unfold fast_replace_free at h2,
+    unfold to_is_bound_aux at h2,
+    simp only [bool.to_bool_eq] at h2,
+    cases h2,
+
+    unfold fast_admits_aux,
+    intros a1 contra,
+    cases a1,
+    {
+      subst a1,
+      simp only [eq_self_iff_true, if_true] at h2_left,
+      cases h2_left,
+      apply h1,
+      exact h2_left_mpr contra,
+    },
+    {
+      subst a1,
+      simp only [eq_self_iff_true, if_true] at h2_right,
+      cases h2_right,
+      apply h1,
+      exact h2_right_mpr contra,
+    },
+  },
+  case formula.not_ : P P_ih binders h1 h2
+  {
+    unfold fast_replace_free at h2,
+    unfold to_is_bound_aux at h2,
+    simp only at h2,
+
+    unfold fast_admits_aux,
+    exact P_ih binders h1 h2,
+  },
+  case formula.imp_ : P Q P_ih Q_ih binders h1 h2
+  {
+    unfold fast_replace_free at h2,
+    unfold to_is_bound_aux at h2,
+    simp only at h2,
+    cases h2,
+
+    unfold fast_admits_aux,
+    split,
+    {
+      exact P_ih binders h1 h2_left,
+    },
+    {
+      exact Q_ih binders h1 h2_right,
+    }
+  },
+  case formula.forall_ : x P P_ih binders h1 h2
+  {
+    unfold fast_replace_free at h2,
+
+    unfold fast_admits_aux,
+    split_ifs at h2,
+    {
+      apply or.intro_left,
+      exact h,
+    },
+    {
+      apply or.intro_right,
+      apply P_ih,
+      {
+        simp only [finset.mem_union, finset.mem_singleton],
+        push_neg,
+        split,
+        {
+          exact h1,
+        },
+        {
+          exact h,
+        }
+      },
+      {
+        unfold to_is_bound_aux at h2,
+        simp only [eq_self_iff_true, true_and] at h2,
+        exact h2,
+      }
+    }
+  },
+end
+
+
+example
+  (P : formula)
+  (v u : variable_) :
+  fast_admits v u P ↔ to_is_bound P = to_is_bound (fast_replace_free v u P) :=
+begin
+  unfold fast_admits,
+  unfold to_is_bound,
+  split,
+  {
+    apply fast_admits_aux_imp_free_and_bound_unchanged,
+    simp only [finset.not_mem_empty, not_false_iff],
+  },
+  {
+    apply free_and_bound_unchanged_imp_fast_admits_aux,
+    simp only [finset.not_mem_empty, not_false_iff],
+  }
+end
+
+
 -- admits
 
 
@@ -1230,357 +1582,6 @@ end
 
 --
 
-
-@[derive [inhabited, decidable_eq]]
-inductive bool_formula : Type
-| true_ : bool_formula
-| pred_ : pred_name_ → list bool → bool_formula
-| eq_ : bool → bool → bool_formula
-| not_ : bool_formula → bool_formula
-| imp_ : bool_formula → bool_formula → bool_formula
-| forall_ : bool → bool_formula → bool_formula
-
-
-def to_is_bound_aux : finset variable_ → formula → bool_formula
-| _ true_ := bool_formula.true_
-| binders (pred_ name args) := bool_formula.pred_ name (args.map (fun (v : variable_), v ∈ binders))
-| binders (eq_ x y) := bool_formula.eq_ (x ∈ binders) (y ∈ binders)
-| binders (not_ P) := bool_formula.not_ (to_is_bound_aux binders P)
-| binders (imp_ P Q) := bool_formula.imp_ (to_is_bound_aux binders P) (to_is_bound_aux binders Q)
-| binders (forall_ x P) := bool_formula.forall_ true (to_is_bound_aux (binders ∪ {x}) P)
-
-def to_is_bound (P : formula) : bool_formula :=
-  to_is_bound_aux ∅ P
-
-
-lemma fast_admits_aux_imp_free_and_bound_unchanged
-  (P : formula)
-  (v u : variable_)
-  (binders : finset variable_)
-  (h1 : v ∉ binders)
-  (h2 : fast_admits_aux v u binders P) :
-  to_is_bound_aux binders P = to_is_bound_aux binders (fast_replace_free v u P) :=
-begin
-  induction P generalizing binders,
-  case formula.true_ : binders h1 h2
-  {
-    refl,
-  },
-  case formula.pred_ : name args binders h1 h2
-  {
-    induction args,
-    case list.nil
-    {
-      unfold fast_replace_free,
-      simp only [list.map_nil],
-    },
-    case list.cons : args_hd args_tl args_ih
-    {
-      unfold fast_admits_aux at h2,
-      simp only [list.mem_cons_iff] at h2,
-
-      unfold fast_admits_aux at args_ih,
-      unfold fast_replace_free at args_ih,
-      unfold to_is_bound_aux at args_ih,
-      simp only [list.map_map, eq_self_iff_true, true_and] at args_ih,
-
-      unfold fast_replace_free,
-      unfold to_is_bound_aux,
-      simp only [list.map, list.map_map, eq_self_iff_true, bool.to_bool_eq, true_and],
-
-      split,
-      {
-        split_ifs,
-        {
-          subst h,
-          simp only [eq_self_iff_true, true_or, forall_true_left] at h2,
-          split,
-          {
-            intros a1,
-            contradiction,
-          },
-          {
-            intros a1,
-            contradiction,
-          }
-        },
-        {
-          refl,
-        }
-      },
-      {
-        apply args_ih,
-        intros a1,
-        apply h2,
-        apply or.intro_right,
-        exact a1,
-      }
-    },
-  },
-  case formula.eq_ : x y binders h1 h2
-  {
-    unfold fast_admits_aux at h2,
-
-    unfold fast_replace_free,
-    unfold to_is_bound_aux,
-    simp only [bool.to_bool_eq],
-    split,
-    {
-      split_ifs,
-      {
-        subst h,
-        simp only [eq_self_iff_true, true_or, forall_true_left] at h2,
-        split,
-        {
-          intros a1,
-          contradiction,
-        },
-        {
-          intros a1,
-          contradiction,
-        }
-      },
-      {
-        refl,
-      }
-    },
-    {
-      split_ifs,
-      {
-        subst h,
-        simp only [eq_self_iff_true, or_true, forall_true_left] at h2,
-        split,
-        {
-          intros a1,
-          contradiction,
-        },
-        {
-          intros a1,
-          contradiction,
-        }
-      },
-      {
-        refl,
-      }
-    }
-  },
-  case formula.not_ : P P_ih binders h1 h2
-  {
-    unfold fast_admits_aux at h2,
-
-    unfold fast_replace_free,
-    unfold to_is_bound_aux,
-    congr' 1,
-    exact P_ih binders h1 h2,
-  },
-  case formula.imp_ : P Q P_ih Q_ih binders h1 h2
-  {
-    unfold fast_admits_aux at h2,
-    cases h2,
-
-    unfold fast_replace_free,
-    unfold to_is_bound_aux,
-    congr' 1,
-    {
-      exact P_ih binders h1 h2_left,
-    },
-    {
-      exact Q_ih binders h1 h2_right,
-    }
-  },
-  case formula.forall_ : x P P_ih binders h1 h2
-  {
-    unfold fast_admits_aux at h2,
-
-    unfold fast_replace_free,
-    split_ifs,
-    {
-      refl,
-    },
-    {
-      unfold to_is_bound_aux,
-      simp only [eq_self_iff_true, true_and],
-      apply P_ih,
-      {
-        simp only [finset.mem_union, finset.mem_singleton],
-        push_neg,
-        split,
-        {
-          exact h1,
-        },
-        {
-          exact h,
-        }
-      },
-      {
-        cases h2,
-        {
-          contradiction,
-        },
-        {
-          exact h2,
-        }
-      }
-    }
-  },
-end
-
-
-lemma free_and_bound_unchanged_imp_fast_admits_aux
-  (P : formula)
-  (v u : variable_)
-  (binders : finset variable_)
-  (h1 : v ∉ binders)
-  (h2 : to_is_bound_aux binders P = to_is_bound_aux binders (fast_replace_free v u P)) :
-  fast_admits_aux v u binders P :=
-begin
-  induction P generalizing binders,
-  case formula.true_ : binders h1 h2
-  {
-    unfold fast_admits_aux,
-  },
-  case formula.pred_ : name args binders h1 h2
-  {
-    induction args,
-    case list.nil
-    {
-      unfold fast_admits_aux,
-      simp only [list.not_mem_nil, is_empty.forall_iff],
-    },
-    case list.cons : args_hd args_tl args_ih
-    {
-      unfold fast_replace_free at h2,
-      unfold to_is_bound_aux at h2,
-      simp only [list.map, list.map_map, eq_self_iff_true, bool.to_bool_eq, true_and] at h2,
-      cases h2,
-
-      unfold fast_admits_aux at args_ih,
-      unfold fast_replace_free at args_ih,
-      unfold to_is_bound_aux at args_ih,
-      simp only [list.map_map, eq_self_iff_true, true_and] at args_ih,
-
-      specialize args_ih h2_right,
-
-      unfold fast_admits_aux,
-      simp only [list.mem_cons_iff],
-      intros a1,
-      cases a1,
-      {
-        subst a1,
-        simp only [eq_self_iff_true, if_true] at h2_left,
-        cases h2_left,
-        by_contradiction contra,
-        apply h1,
-        apply h2_left_mpr,
-        exact contra,
-      },
-      {
-        apply args_ih,
-        exact a1,
-      }
-    },
-  },
-  case formula.eq_ : x y binders h1 h2
-  {
-    unfold fast_replace_free at h2,
-    unfold to_is_bound_aux at h2,
-    simp only [bool.to_bool_eq] at h2,
-    cases h2,
-
-    unfold fast_admits_aux,
-    intros a1 contra,
-    cases a1,
-    {
-      subst a1,
-      simp only [eq_self_iff_true, if_true] at h2_left,
-      cases h2_left,
-      apply h1,
-      exact h2_left_mpr contra,
-    },
-    {
-      subst a1,
-      simp only [eq_self_iff_true, if_true] at h2_right,
-      cases h2_right,
-      apply h1,
-      exact h2_right_mpr contra,
-    },
-  },
-  case formula.not_ : P P_ih binders h1 h2
-  {
-    unfold fast_replace_free at h2,
-    unfold to_is_bound_aux at h2,
-    simp only at h2,
-
-    unfold fast_admits_aux,
-    exact P_ih binders h1 h2,
-  },
-  case formula.imp_ : P Q P_ih Q_ih binders h1 h2
-  {
-    unfold fast_replace_free at h2,
-    unfold to_is_bound_aux at h2,
-    simp only at h2,
-    cases h2,
-
-    unfold fast_admits_aux,
-    split,
-    {
-      exact P_ih binders h1 h2_left,
-    },
-    {
-      exact Q_ih binders h1 h2_right,
-    }
-  },
-  case formula.forall_ : x P P_ih binders h1 h2
-  {
-    unfold fast_replace_free at h2,
-
-    unfold fast_admits_aux,
-    split_ifs at h2,
-    {
-      apply or.intro_left,
-      exact h,
-    },
-    {
-      apply or.intro_right,
-      apply P_ih,
-      {
-        simp only [finset.mem_union, finset.mem_singleton],
-        push_neg,
-        split,
-        {
-          exact h1,
-        },
-        {
-          exact h,
-        }
-      },
-      {
-        unfold to_is_bound_aux at h2,
-        simp only [eq_self_iff_true, true_and] at h2,
-        exact h2,
-      }
-    }
-  },
-end
-
-
-example
-  (P : formula)
-  (v u : variable_) :
-  fast_admits v u P ↔ to_is_bound P = to_is_bound (fast_replace_free v u P) :=
-begin
-  unfold fast_admits,
-  unfold to_is_bound,
-  split,
-  {
-    apply fast_admits_aux_imp_free_and_bound_unchanged,
-    simp only [finset.not_mem_empty, not_false_iff],
-  },
-  {
-    apply free_and_bound_unchanged_imp_fast_admits_aux,
-    simp only [finset.not_mem_empty, not_false_iff],
-  }
-end
 
 
 #lint
