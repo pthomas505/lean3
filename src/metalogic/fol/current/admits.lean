@@ -1622,23 +1622,7 @@ begin
     simp only [finset.mem_union, and_imp] at h1,
 
     unfold admits_aux,
-    intros a1 contra,
-    cases a1,
-    apply h1 a1_left,
-    {
-      push_neg,
-      split,
-      {
-        exact a1_right,
-      },
-      {
-        exact h2,
-      }
-    },
-    {
-      apply or.intro_left,
-      exact contra,
-    }
+    tauto,
   },
   case formula.eq_ : x y S h1
   {
@@ -1646,23 +1630,7 @@ begin
     simp only [finset.mem_union, and_imp] at h1,
 
     unfold admits_aux,
-    intros a1 contra,
-    cases a1,
-    apply h1 a1_left,
-    {
-      push_neg,
-      split,
-      {
-        exact a1_right,
-      },
-      {
-        exact h2,
-      }
-    },
-    {
-      apply or.intro_left,
-      exact contra,
-    }
+    tauto,
   },
   case formula.not_ : P P_ih S h1
   {
@@ -1677,13 +1645,7 @@ begin
     cases h1,
 
     unfold admits_aux,
-    split,
-    {
-      exact P_ih S h1_left,
-    },
-    {
-      exact Q_ih S h1_right,
-    },
+    tauto,
   },
   case formula.forall_ : x P P_ih S h1
   {
