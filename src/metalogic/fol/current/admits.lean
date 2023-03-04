@@ -1165,7 +1165,7 @@ begin
     unfold admits_aux,
     intros a1,
     cases a1,
-    cases a1_left,
+    cases a1_left;
     {
       split_ifs at a1_left,
       {
@@ -1177,17 +1177,6 @@ begin
         contradiction,
       }
     },
-    {
-      split_ifs at a1_left,
-      {
-        cases h,
-        subst h_left,
-        exact h_right,
-      },
-      {
-        contradiction,
-      }
-    }
   },
   case formula.not_ : P P_ih binders
   {
@@ -1195,34 +1184,23 @@ begin
 
     unfold replace_free_aux,
     unfold admits_aux,
-    exact P_ih h1 binders,
+    tauto,
   },
   case formula.imp_ : P Q P_ih Q_ih binders
   {
     unfold occurs_in at h1,
-    push_neg at h1,
-    cases h1,
 
     unfold replace_free_aux,
     unfold admits_aux,
-    split,
-    {
-      exact P_ih h1_left binders,
-    },
-    {
-      exact Q_ih h1_right binders,
-    }
+    tauto,
   },
   case formula.forall_ : x P P_ih binders
   {
     unfold occurs_in at h1,
-    push_neg at h1,
-    cases h1,
 
     unfold replace_free_aux,
     unfold admits_aux,
-    apply P_ih,
-    exact h1_right,
+    tauto,
   },
 end
 
