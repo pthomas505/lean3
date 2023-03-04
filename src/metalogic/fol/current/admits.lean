@@ -1404,7 +1404,6 @@ begin
   exact h1,
 end
 
-
 --
 
 example
