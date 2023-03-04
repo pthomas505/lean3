@@ -530,7 +530,7 @@ begin
     unfold fast_admits_aux at h1,
 
     unfold fast_admits_aux,
-    exact P_ih S h1,
+    tauto,
   },
   case formula.imp_ : P Q P_ih Q_ih S h1
   {
@@ -546,8 +546,7 @@ begin
     unfold fast_admits_aux,
     cases h1,
     {
-      left,
-      exact h1,
+      tauto,
     },
     {
       right,
