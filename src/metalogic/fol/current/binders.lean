@@ -92,7 +92,7 @@ example
   occurs_in v P ↔ v ∈ P.var_set :=
 begin
   induction P,
-  case [formula.true_, formula.pred_ : name args]
+  case [formula.true_, formula.pred_]
   {
     all_goals {refl},
   },
@@ -129,7 +129,7 @@ example
   is_bound_in v P ↔ v ∈ P.bound_var_set :=
 begin
   induction P,
-  case [formula.true_, formula.pred_ : name args, formula.eq_ : x y]
+  case [formula.true_, formula.pred_, formula.eq_]
   {
     all_goals {refl},
   },
