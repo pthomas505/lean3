@@ -574,32 +574,23 @@ begin
   {
     unfold fast_admits_aux at h1,
     simp only [finset.mem_union] at h1,
-    push_neg at h1,
 
-    unfold fast_admits_aux,
-    intros a1,
-    specialize h1 a1,
-    cases h1,
-    exact h1_left,
+    tauto,
   },
   case formula.eq_ : x y S h1
   {
     unfold fast_admits_aux at h1,
     simp only [finset.mem_union] at h1,
-    push_neg at h1,
 
     unfold fast_admits_aux,
-    intros a1,
-    specialize h1 a1,
-    cases h1,
-    exact h1_left,
+    tauto,
   },
   case formula.not_ : P P_ih S h1
   {
     unfold fast_admits_aux at h1,
 
     unfold fast_admits_aux,
-    exact P_ih S h1,
+    tauto,
   },
   case formula.imp_ : P Q P_ih Q_ih S h1
   {
@@ -607,13 +598,7 @@ begin
     cases h1,
 
     unfold fast_admits_aux,
-    split,
-    {
-      exact P_ih S h1_left,
-    },
-    {
-      exact Q_ih S h1_right,
-    }
+    tauto,
   },
   case formula.forall_ : x P P_ih S h1
   {
@@ -621,16 +606,7 @@ begin
     simp only [finset.union_right_comm S T {x}] at h1,
 
     unfold fast_admits_aux,
-    cases h1,
-    {
-      apply or.intro_left,
-      exact h1,
-    },
-    {
-      apply or.intro_right,
-      apply P_ih,
-      exact h1,
-    }
+    tauto,
   },
 end
 
