@@ -1339,32 +1339,74 @@ lemma admits_aux_is_free_in
 begin
   induction P generalizing binders,
   case formula.true_ : binders h1
-  { admit },
+  {
+    unfold is_free_in at h2,
+    contradiction,
+  },
   case formula.pred_ : name args binders h1
   {
     unfold admits_aux at h1,
+
     unfold is_free_in at h2,
-    squeeze_simp at h2,
+    simp only [list.mem_to_finset] at h2,
+
     tauto,
   },
-  case formula.eq_ : P_ᾰ P_ᾰ_1 binders h1
-  { admit },
-  case formula.not_ : P_ᾰ P_ih binders h1
-  { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders h1
-  { admit },
+  case formula.eq_ : x y binders h1
+  {
+    unfold admits_aux at h1,
+
+    unfold is_free_in at h2,
+
+    tauto,
+  },
+  case formula.not_ : P P_ih binders h1
+  {
+    unfold admits_aux at h1,
+
+    unfold is_free_in at h2,
+
+    exact P_ih h2 binders h1 h3,
+  },
+  case formula.imp_ : P Q P_ih Q_ih binders h1
+  {
+    unfold admits_aux at h1,
+    cases h1,
+
+    unfold is_free_in at h2,
+
+    cases h2,
+    {
+      exact P_ih h2 binders h1_left h3,
+    },
+    {
+      exact Q_ih h2 binders h1_right h3,
+    }
+  },
   case formula.forall_ : x P P_ih binders h1
   {
     unfold admits_aux at h1,
+
     unfold is_free_in at h2,
     cases h2,
+
     apply P_ih,
-    exact h2_right,
-    apply admits_aux_del_binders P v u binders {x},
-    exact h1,
-    squeeze_simp,
-    exact h2_left,
-    exact h3,
+    {
+      exact h2_right,
+    },
+    {
+      apply admits_aux_del_binders P v u binders {x},
+      {
+        exact h1,
+      },
+      {
+        simp only [finset.mem_singleton],
+        exact h2_left,
+      },
+    },
+    {
+      exact h3,
+    },
   },
 end
 
