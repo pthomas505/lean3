@@ -239,8 +239,7 @@ begin
     unfold fast_admits_aux,
     by_cases c1 : v = x,
     {
-      left,
-      exact c1,
+      tauto,
     },
     {
       right,
@@ -1165,15 +1164,28 @@ begin
     unfold admits_aux,
     intros a1,
     cases a1,
-    cases a1_left;
+    cases a1_left,
     {
-      split_ifs at a1_left,
+      by_cases c1 : x = v ∧ x ∉ binders,
       {
-        cases h,
-        subst h_left,
-        exact h_right,
+        cases c1,
+        subst c1_left,
+        exact c1_right,
       },
       {
+        simp only [if_neg c1] at a1_left,
+        contradiction,
+      }
+    },
+    {
+      by_cases c1 : y = v ∧ y ∉ binders,
+      {
+        cases c1,
+        subst c1_left,
+        exact c1_right,
+      },
+      {
+        simp only [if_neg c1] at a1_left,
         contradiction,
       }
     },
