@@ -1068,21 +1068,19 @@ begin
   case formula.pred_ : name args binders h2
   {
     unfold admits_aux,
-    intros a1,
-    exact h2,
+    tauto,
   },
   case formula.eq_ : x y binders h2
   {
     unfold admits_aux,
-    intros a1,
-    exact h2,
+    tauto,
   },
   case formula.not_ : P P_ih binders h2
   {
     unfold is_bound_in at h1,
 
     unfold admits_aux,
-    exact P_ih h1 binders h2,
+    tauto,
   },
   case formula.imp_ : P Q P_ih Q_ih binders h2
   {
