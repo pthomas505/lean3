@@ -753,27 +753,14 @@ begin
         split_ifs,
         {
           subst h,
-          simp only [eq_self_iff_true, true_or, forall_true_left] at h2,
-          split,
-          {
-            intros a1,
-            contradiction,
-          },
-          {
-            intros a1,
-            contradiction,
-          }
+          tauto,
         },
         {
           refl,
         }
       },
       {
-        apply args_ih,
-        intros a1,
-        apply h2,
-        apply or.intro_right,
-        exact a1,
+        tauto,
       }
     },
   },
@@ -784,40 +771,12 @@ begin
     unfold fast_replace_free,
     unfold to_is_bound_aux,
     simp only [bool.to_bool_eq],
-    split,
+    split;
     {
       split_ifs,
       {
         subst h,
-        simp only [eq_self_iff_true, true_or, forall_true_left] at h2,
-        split,
-        {
-          intros a1,
-          contradiction,
-        },
-        {
-          intros a1,
-          contradiction,
-        }
-      },
-      {
-        refl,
-      }
-    },
-    {
-      split_ifs,
-      {
-        subst h,
-        simp only [eq_self_iff_true, or_true, forall_true_left] at h2,
-        split,
-        {
-          intros a1,
-          contradiction,
-        },
-        {
-          intros a1,
-          contradiction,
-        }
+        tauto,
       },
       {
         refl,
@@ -863,23 +822,10 @@ begin
       apply P_ih,
       {
         simp only [finset.mem_union, finset.mem_singleton],
-        push_neg,
-        split,
-        {
-          exact h1,
-        },
-        {
-          exact h,
-        }
+        tauto,
       },
       {
-        cases h2,
-        {
-          contradiction,
-        },
-        {
-          exact h2,
-        }
+        tauto,
       }
     }
   },
