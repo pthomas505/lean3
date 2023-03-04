@@ -383,6 +383,76 @@ end
 
 --
 
+lemma fast_replace_free_aux_fast_admits_aux
+  (P : formula)
+  (v t : variable_)
+  (binders : finset variable_)
+  (h1 : ¬ occurs_in t P)
+  (h2 : v ∉ binders) :
+  fast_admits_aux t v binders (fast_replace_free v t P) :=
+begin
+  induction P generalizing binders,
+  case formula.true_ : binders h2
+  {
+    unfold fast_replace_free,
+  },
+  case formula.pred_ : name args binders h2
+  {
+    unfold fast_replace_free,
+    unfold fast_admits_aux,
+    tauto,
+  },
+  case formula.eq_ : x y binders h2
+  {
+    unfold fast_replace_free,
+    unfold fast_admits_aux,
+    tauto,
+  },
+  case formula.not_ : P P_ih binders h2
+  {
+    unfold occurs_in at h1,
+
+    unfold fast_replace_free,
+    unfold fast_admits_aux,
+    tauto,
+  },
+  case formula.imp_ : P Q P_ih Q_ih binders h2
+  {
+    unfold occurs_in at h1,
+
+    unfold fast_replace_free,
+    unfold fast_admits_aux,
+    tauto,
+  },
+  case formula.forall_ : x P P_ih binders h2
+  {
+    unfold occurs_in at h1,
+    push_neg at h1,
+    cases h1,
+
+    unfold fast_replace_free,
+    split_ifs,
+    {
+      unfold fast_admits_aux,
+      subst h,
+      right,
+      apply not_is_free_in_imp_fast_admits_aux,
+      intros contra,
+      apply h1_right,
+      apply is_free_in_imp_occurs_in,
+      exact contra,
+    },
+    {
+      unfold fast_admits_aux,
+      right,
+      apply P_ih h1_right,
+      simp only [finset.mem_union, finset.mem_singleton],
+      tauto,
+    },
+  },
+end
+
+
 lemma replace_free_aux_fast_admits_aux
   (P : formula)
   (v t : variable_)
