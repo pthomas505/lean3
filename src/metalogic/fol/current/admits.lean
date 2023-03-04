@@ -549,8 +549,7 @@ begin
     {
       right,
       simp only [finset.union_right_comm S T {x}],
-      apply P_ih,
-      exact h1,
+      tauto,
     }
   },
 end
