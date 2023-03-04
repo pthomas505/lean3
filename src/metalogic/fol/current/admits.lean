@@ -210,7 +210,7 @@ begin
   }
 end
 
---
+-- fast_admits
 
 lemma fast_admits_aux_self
   (P : formula)
@@ -461,7 +461,6 @@ end
 
 --
 
-
 lemma fast_admits_aux_del_binders
   (P : formula)
   (v u : variable_)
@@ -614,9 +613,6 @@ begin
   },
 end
 
-
-
-
 --
 
 lemma fast_admits_aux_and_mem_binders_imp_not_is_free_in
@@ -696,6 +692,7 @@ begin
 end
 
 
+-- admits
 
 
 lemma not_is_free_in_imp_admits_aux
