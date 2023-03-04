@@ -632,7 +632,7 @@ begin
     unfold is_free_in at h2,
     simp only [list.mem_to_finset] at h2,
 
-    exact h1 h2,
+    tauto,
   },
   case formula.eq_ : x y binders h1
   {
@@ -640,7 +640,7 @@ begin
 
     unfold is_free_in at h2,
 
-    exact h1 h2,
+    tauto,
   },
   case formula.not_ : P P_ih binders h1
   {
@@ -1352,6 +1352,7 @@ begin
   case formula.true_ : binders h1
   {
     unfold is_free_in at h2,
+
     contradiction,
   },
   case formula.pred_ : name args binders h1
@@ -1401,10 +1402,7 @@ begin
     unfold is_free_in at h2,
     cases h2,
 
-    apply P_ih,
-    {
-      exact h2_right,
-    },
+    apply P_ih h2_right,
     {
       apply admits_aux_del_binders P v u binders {x},
       {
