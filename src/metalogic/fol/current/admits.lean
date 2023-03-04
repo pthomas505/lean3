@@ -268,85 +268,82 @@ lemma admits_alt_imp_fast_admits_aux
   (P : formula)
   (v u : variable_)
   (binders : finset variable_)
-  (h1 : u ∉ binders) :
-  admits_alt v u P → fast_admits_aux v u binders P :=
+  (h1 : u ∉ binders)
+  (h2 : admits_alt v u P) :
+  fast_admits_aux v u binders P :=
 begin
   induction P generalizing binders,
   case formula.true_ : binders
   {
-    dunfold fast_admits_aux,
-    dunfold admits_alt,
-    intros a1,
-    assumption,
+    unfold fast_admits_aux,
   },
   case formula.pred_ : name args binders
   {
-    dunfold fast_admits_aux,
-    dunfold admits_alt,
-    intros a1 a2 a3,
-    contradiction,
+    unfold fast_admits_aux,
+    intros a1,
+    exact h1,
   },
   case formula.eq_ : x y binders h1
   {
-    dunfold fast_admits_aux,
-    dunfold admits_alt,
-    intros a1 a2 a3,
-    contradiction,
+    unfold fast_admits_aux,
+    intros a1,
+    exact h1,
   },
   case formula.not_ : P P_ih binders
   {
-    dunfold fast_admits_aux,
-    dunfold admits_alt,
-    intros a1,
-    exact P_ih binders h1 a1,
+    unfold admits_alt at h2,
+
+    unfold fast_admits_aux,
+    exact P_ih h2 binders h1,
   },
   case formula.imp_ : P Q P_ih Q_ih binders
   {
-    dunfold fast_admits_aux,
-    dunfold admits_alt,
+    unfold admits_alt at h2,
+
+    unfold fast_admits_aux,
     tauto,
   },
   case formula.forall_ : x P P_ih binders
   {
-    dunfold fast_admits_aux,
-    dunfold admits_alt,
-    by_cases c1 : u = x,
+    unfold admits_alt at h2,
+
+    unfold fast_admits_aux,
+    by_cases c1 : x = u,
     {
-      subst c1,
-      simp only [eq_self_iff_true, forall_true_left],
-      intros a1,
-      cases a1,
+      cases h2,
       {
         left,
-        exact a1,
+        exact h2,
       },
       {
-        cases a1,
         right,
+        subst c1,
+        simp only [eq_self_iff_true, forall_true_left] at h2,
+        cases h2,
         apply not_is_free_in_imp_fast_admits_aux,
-        exact a1_left,
-      },
+        exact h2_left,
+      }
     },
     {
-      intros a1,
-      cases a1,
+      cases h2,
       {
         left,
-        exact a1,
+        exact h2,
       },
       {
         right,
+        cases h2,
         apply P_ih,
         {
-          simp only [finset.mem_union, finset.mem_singleton],
-          tauto,
+          exact h2_right,
         },
         {
-          cases a1,
-          exact a1_right,
-        },
-      },
-    },
+          simp only [finset.mem_union, finset.mem_singleton],
+          push_neg,
+          tauto,
+        }
+      }
+    }
   },
 end
 
