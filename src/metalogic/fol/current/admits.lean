@@ -410,7 +410,9 @@ lemma replace_free_aux_fast_admits_aux
 begin
   induction P generalizing binders,
   case formula.true_ : binders
-  { admit },
+  {
+    unfold replace_free_aux,
+  },
   case formula.pred_ : name args binders
   {
     unfold occurs_in at h1,
@@ -430,8 +432,41 @@ begin
     subst s1,
     contradiction,
   },
-  case formula.eq_ : P_ᾰ P_ᾰ_1 binders
-  { admit },
+  case formula.eq_ : x y binders
+  {
+    unfold occurs_in at h1,
+    push_neg at h1,
+    cases h1,
+
+    unfold replace_free_aux,
+    unfold fast_admits_aux,
+    intros a1,
+    cases a1,
+    {
+      by_cases c1 : x = v ∧ x ∉ binders,
+      {
+        cases c1,
+        subst c1_left,
+        exact c1_right,
+      },
+      {
+        simp only [if_neg c1] at a1,
+        contradiction,
+      }
+    },
+    {
+      by_cases c1 : y = v ∧ y ∉ binders,
+      {
+        cases c1,
+        subst c1_left,
+        exact c1_right,
+      },
+      {
+        simp only [if_neg c1] at a1,
+        contradiction,
+      }
+    },
+  },
   case formula.not_ : P_ᾰ P_ih binders
   { admit },
   case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders
