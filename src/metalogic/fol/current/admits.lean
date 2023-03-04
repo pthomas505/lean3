@@ -453,6 +453,19 @@ begin
 end
 
 
+lemma fast_replace_free_fast_admits
+  (P : formula)
+  (v t : variable_)
+  (h1 : ¬ occurs_in t P) :
+  fast_admits t v (fast_replace_free v t P) :=
+begin
+  unfold fast_admits,
+  apply fast_replace_free_aux_fast_admits_aux P v t ∅ h1,
+  simp only [finset.not_mem_empty, not_false_iff],
+end
+
+--
+
 lemma replace_free_aux_fast_admits_aux
   (P : formula)
   (v t : variable_)
