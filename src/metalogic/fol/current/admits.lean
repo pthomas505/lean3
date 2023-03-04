@@ -486,6 +486,8 @@ lemma replace_free_fast_admits
   (h1 : ¬ occurs_in t P) :
   fast_admits t v (replace_free v t P) :=
 begin
+  unfold replace_free,
+  unfold fast_admits,
   apply replace_free_aux_fast_admits_aux,
   exact h1,
 end
