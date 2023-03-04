@@ -572,6 +572,7 @@ begin
     unfold fast_admits_aux at h1,
     simp only [finset.mem_union] at h1,
 
+    unfold fast_admits_aux,
     tauto,
   },
   case formula.eq_ : x y S h1
