@@ -1009,64 +1009,42 @@ begin
     simp only [list.mem_to_finset] at h1,
 
     unfold admits_aux,
-    intros a1,
-    cases a1,
-    contradiction,
+    tauto,
   },
   case formula.eq_ : x y binders
   {
     unfold is_free_in at h1,
-    push_neg at h1,
-    cases h1,
 
     unfold admits_aux,
-    intros a1,
-    cases a1,
-    cases a1_left,
-    {
-      contradiction,
-    },
-    {
-      contradiction,
-    }
+    tauto,
   },
   case formula.not_ : P P_ih binders
   {
     unfold is_free_in at h1,
 
-    exact P_ih h1 binders,
+    unfold admits_aux,
+    tauto,
   },
   case formula.imp_ : P Q P_ih Q_ih binders
   {
     unfold is_free_in at h1,
-    push_neg at h1,
-    cases h1,
 
     unfold admits_aux,
-    split,
-    {
-      exact P_ih h1_left binders,
-    },
-    {
-      exact Q_ih h1_right binders,
-    }
+    tauto,
   },
   case formula.forall_ : x P P_ih binders
   {
     unfold is_free_in at h1,
-    simp only [not_and] at h1,
 
     unfold admits_aux,
     by_cases c1 : v = x,
     {
       apply mem_binders_imp_admits_aux,
       simp only [finset.mem_union, finset.mem_singleton],
-      apply or.intro_right,
-      exact c1,
+      tauto,
     },
     {
-      apply P_ih,
-      exact h1 c1,
+      tauto,
     },
   },
 end
