@@ -865,8 +865,6 @@ begin
       unfold to_is_bound_aux at args_ih,
       simp only [list.map_map, eq_self_iff_true, true_and] at args_ih,
 
-      specialize args_ih h2_right,
-
       unfold fast_admits_aux,
       simp only [list.mem_cons_iff],
       intros a1,
@@ -874,15 +872,10 @@ begin
       {
         subst a1,
         simp only [eq_self_iff_true, if_true] at h2_left,
-        cases h2_left,
-        by_contradiction contra,
-        apply h1,
-        apply h2_left_mpr,
-        exact contra,
+        tauto,
       },
       {
-        apply args_ih,
-        exact a1,
+        tauto,
       }
     },
   },
@@ -899,16 +892,12 @@ begin
     {
       subst a1,
       simp only [eq_self_iff_true, if_true] at h2_left,
-      cases h2_left,
-      apply h1,
-      exact h2_left_mpr contra,
+      tauto,
     },
     {
       subst a1,
       simp only [eq_self_iff_true, if_true] at h2_right,
-      cases h2_right,
-      apply h1,
-      exact h2_right_mpr contra,
+      tauto,
     },
   },
   case formula.not_ : P P_ih binders h1 h2
@@ -928,13 +917,7 @@ begin
     cases h2,
 
     unfold fast_admits_aux,
-    split,
-    {
-      exact P_ih binders h1 h2_left,
-    },
-    {
-      exact Q_ih binders h1 h2_right,
-    }
+    tauto,
   },
   case formula.forall_ : x P P_ih binders h1 h2
   {
@@ -943,22 +926,15 @@ begin
     unfold fast_admits_aux,
     split_ifs at h2,
     {
-      apply or.intro_left,
+      left,
       exact h,
     },
     {
-      apply or.intro_right,
+      right,
       apply P_ih,
       {
         simp only [finset.mem_union, finset.mem_singleton],
-        push_neg,
-        split,
-        {
-          exact h1,
-        },
-        {
-          exact h,
-        }
+        tauto,
       },
       {
         unfold to_is_bound_aux at h2,
