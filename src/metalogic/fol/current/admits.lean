@@ -472,12 +472,9 @@ begin
   case formula.forall_ : x P P_ih binders
   {
     unfold occurs_in at h1,
-    push_neg at h1,
-    cases h1,
 
     unfold replace_free_aux,
     unfold fast_admits_aux,
-    right,
     tauto,
   },
 end
