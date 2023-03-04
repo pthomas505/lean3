@@ -1235,7 +1235,6 @@ begin
   case formula.pred_ : name args S h1
   {
     unfold admits_aux at h1,
-    simp only [and_imp] at h1,
 
     unfold admits_aux,
     simp only [finset.mem_union, and_imp],
@@ -1244,7 +1243,6 @@ begin
   case formula.eq_ : x y S h1
   {
     unfold admits_aux at h1,
-    simp only [and_imp] at h1,
 
     unfold admits_aux,
     simp only [finset.mem_union, and_imp],
