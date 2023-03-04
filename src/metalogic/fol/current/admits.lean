@@ -484,11 +484,10 @@ begin
       split,
       {
         intros a2,
-        apply fast_admits_aux_and_mem_binders_imp_not_is_free_in P v u (binders ∪ {x}) a1,
-        simp only [finset.mem_union, finset.mem_singleton],
-        right,
-        symmetry,
-        exact a2,
+        subst a2,
+
+        apply fast_admits_aux_and_mem_binders_imp_not_is_free_in P v x (binders ∪ {x}) a1,
+        simp only [finset.mem_union, finset.mem_singleton, eq_self_iff_true, or_true],
       },
       {
         apply P_ih,
