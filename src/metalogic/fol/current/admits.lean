@@ -1140,18 +1140,20 @@ begin
 
     unfold replace_free_aux,
     unfold admits_aux,
-    simp only [list.mem_map, ite_eq_left_iff, not_and, not_not, and_imp, forall_exists_index],
-    intros x a1 a2 a3 contra,
+    simp only [list.mem_map, not_and, not_not, and_imp, forall_exists_index],
+    intros x a1 a2 a3,
 
-    have s1 : x = t,
-    apply a2,
-    intros a4,
-    subst a4,
-    exact contra,
-
-    subst s1,
-    apply h1,
-    exact a1,
+    by_cases c1 : x = v ∧ x ∉ binders,
+    {
+      cases c1,
+      subst c1_left,
+      exact c1_right,
+    },
+    {
+      simp only [if_neg c1] at a2,
+      subst a2,
+      contradiction,
+    }
   },
   case formula.eq_ : x y binders
   {
