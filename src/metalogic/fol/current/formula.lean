@@ -1,5 +1,4 @@
 import tactic
-import data.fin.vec_notation
 
 
 set_option pp.parens true
@@ -14,11 +13,29 @@ inductive variable_ : Type
 
 
 /--
+  The string representation of FOL variables.
+-/
+def variable_.to_string : variable_ → string
+| (variable_.variable_ name) := name
+
+instance variable_.has_to_string : has_to_string variable_ := has_to_string.mk variable_.to_string
+
+
+/--
   The type of FOL predicate names.
 -/
 @[derive [inhabited, decidable_eq]]
 inductive pred_name_ : Type
 | pred_name_ : string → pred_name_
+
+
+/--
+  The string representation of FOL predicate names.
+-/
+def pred_name_.to_string : pred_name_ → string
+| (pred_name_.pred_name_ name) := name
+
+instance pred_name_.has_to_string : has_to_string pred_name_ := has_to_string.mk pred_name_.to_string
 
 
 /--
@@ -62,18 +79,14 @@ def formula.iff_ (P Q : formula) : formula := (P.imp_ Q).and_ (Q.imp_ P)
 def formula.exists_ (x : variable_) (P : formula) : formula := not_ (forall_ x (not_ P))
 
 
-open matrix
-
 /--
-  And 0 [] = ⊤
+  And [] = ⊤
 
-  And 1 [P] = P ∧ ⊤
+  And [P] = P ∧ ⊤
 
-  And n [P_1 ... P_n] := P_1 ∧ ... ∧ P_n ∧ ⊤ 
+  And [P_1 ... P_n] := P_1 ∧ ... ∧ P_n ∧ ⊤ 
 -/
-def And : Π (n : ℕ), (fin n → formula) → formula
-| 0 _ := true_
-| (n + 1) Ps := formula.and_ (vec_head Ps) (And n (vec_tail Ps))
+def And (l : list formula) : formula := list.foldr formula.and_ true_ l
 
 
 /--
@@ -82,6 +95,16 @@ def And : Π (n : ℕ), (fin n → formula) → formula
 def formula.Forall_ : list variable_ → formula → formula
 | [] P := P
 | (x :: xs) P := forall_ x (formula.Forall_ xs P)
+
+
+def formula.to_string : formula → string
+| true_ := "⊤"
+| (pred_ name args) := sformat!"({name.to_string} {args.to_string})"
+| (eq_ x y) := sformat!"({x.to_string} = {y.to_string})"
+| (not_ P) := sformat!"(¬ {P.to_string})"
+| (imp_ P Q) := sformat!"({P.to_string} → {Q.to_string})"
+| (forall_ x P) := sformat!"(∀ {x.to_string}. {P.to_string})"
+
 
 
 #lint
