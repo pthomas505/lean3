@@ -20,6 +20,11 @@ inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
   (v t : variable_) :
     is_prop_sub (pred_ name args) v t (pred_ name (args.map (fun (x : variable_), if x = v then t else x)))
 
+| eq_
+  (x y : variable_)
+  (v t : variable_) :
+    is_prop_sub (eq_ x y) v t (eq_ (if x = v then t else x) (if y = v then t else y))
+
 | not_
   (P : formula)
   (v t : variable_)
@@ -80,6 +85,11 @@ begin
     unfold fast_replace_free,
     apply is_prop_sub.pred_,
   },
+  case formula.eq_ : x y binders h1
+  {
+    unfold fast_replace_free,
+    apply is_prop_sub.eq_,
+  },
   case formula.not_ : P P_ih binders h1
   {
     unfold fast_admits_aux at h1,
@@ -108,33 +118,31 @@ begin
     {
       unfold fast_replace_free,
       split_ifs,
-      apply is_prop_sub.forall_same_ x P v u P h1,
+      apply is_prop_sub.forall_same_ x P v u h1,
     },
     {
       unfold fast_replace_free,
       split_ifs,
       {
-        apply is_prop_sub.forall_same_ x P v u P h,
+        apply is_prop_sub.forall_same_ x P v u h,
       },
       {
-        by_cases c1 : v ∈ (forall_ x P).free_var_set,
+        by_cases c1 : is_free_in v (forall_ x P),
         {
           apply is_prop_sub.forall_diff_,
           {
             exact h,
           },
           {
-            unfold formula.free_var_set at c1,
-            simp only [finset.mem_sdiff, finset.mem_singleton] at c1,
-
+            unfold is_free_in at c1,
             cases c1,
             have s1 : u ∉ binders ∪ {x},
-            apply fast_admits_aux_mem_free P v u,
+            apply fast_admits_aux_is_free_in P v u,
             {
               exact h1,
             },
             {
-              exact c1_left,
+              exact c1_right,
             },
 
             simp only [finset.mem_union, finset.mem_singleton] at s1,
@@ -188,6 +196,12 @@ begin
     intros a1,
     exact h2,
   },
+  case is_prop_sub.eq_ : h1_1_x h1_1_y h1_1_v h1_1_t binders h2
+  {
+    unfold fast_admits_aux,
+    intros a1,
+    exact h2,
+  },
   case is_prop_sub.not_ : h1_1_P h1_1_v h1_1_t h1_1_P' h1_1_1 h1_1_ih binders h2
   {
     unfold fast_admits_aux,
@@ -204,7 +218,7 @@ begin
       exact h1_1_ih_2 binders h2,
     }
   },
-  case is_prop_sub.forall_same_ : h1_1_x h1_1_P h1_1_v h1_1_t h1_1_P' h1_1_1 binders h2
+  case is_prop_sub.forall_same_ : h1_1_x h1_1_P h1_1_v h1_1_t h1_1_1 binders h2
   {
     unfold fast_admits_aux,
     apply or.intro_left,
@@ -212,17 +226,15 @@ begin
   },
   case is_prop_sub.forall_diff_nel_ : h1_1_x h1_1_P h1_1_v h1_1_t h1_1_P' h1_1_1 h1_1_2 h1_1_3 h1_1_ih binders h2
   {
-    unfold formula.free_var_set at h1_1_2,
-    simp only [finset.mem_sdiff, finset.mem_singleton, not_and, not_not] at h1_1_2,
+    unfold is_free_in at h1_1_2,
+    push_neg at h1_1_2,
 
     unfold fast_admits_aux,
 
     apply or.intro_right,
-    apply not_mem_free_imp_fast_admits_aux,
-    intros contra,
-    apply h1_1_1,
+    apply not_is_free_in_imp_fast_admits_aux,
     apply h1_1_2,
-    exact contra,
+    exact h1_1_1,
   },
   case is_prop_sub.forall_diff_ : h1_1_x h1_1_P h1_1_v h1_1_t h1_1_P' h1_1_1 h1_1_2 h1_1_3 h1_1_ih binders h2
   {
@@ -257,6 +269,10 @@ begin
   {
     unfold fast_replace_free,
   },
+  case is_prop_sub.eq_ : h1_x h1_y h1_v h1_t
+  {
+    unfold fast_replace_free,
+  },
   case is_prop_sub.not_ : h1_P h1_v h1_t h1_P' h1_1 h1_ih
   {
     unfold fast_replace_free,
@@ -274,7 +290,7 @@ begin
       exact h1_ih_2,
     }
   },
-  case is_prop_sub.forall_same_ : h1_x h1_P h1_v h1_t h1_P' h1_1
+  case is_prop_sub.forall_same_ : h1_x h1_P h1_v h1_t h1_1
   {
     apply not_free_in_fast_replace_free_id,
     unfold is_free_in,
