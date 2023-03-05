@@ -80,8 +80,8 @@ inductive is_axiom : formula → Prop
 -- ⊢ (∀ v P) → P(t/v)  provided P admits t for v
 | pred_2_
   (v t : variable_) (P P' : formula) :
-  admits v t P →
-  replace_free v t P = P' →
+  fast_admits v t P →
+  fast_replace_free v t P = P' →
   is_axiom ((forall_ v P).imp_ P')
 
 -- ⊢ P → (∀ v P)  provided v is not free in P
@@ -148,8 +148,8 @@ inductive is_proof_alt : formula → Prop
 -- ⊢ (∀ v P) → P(t/v)  provided P admits t for v
 | pred_2_
   (v t : variable_) (P P' : formula) :
-  admits v t P →
-  replace_free v t P = P' →
+  fast_admits v t P →
+  fast_replace_free v t P = P' →
   is_proof_alt ((forall_ v P).imp_ P')
 
 -- ⊢ P → (∀ v P)  provided v is not free in P
