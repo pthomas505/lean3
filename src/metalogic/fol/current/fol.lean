@@ -540,6 +540,7 @@ end
 def formula.is_prime : formula → Prop
 | (true_) := true
 | (pred_ name args) := true
+| (eq_ x y) := true
 | (not_ P) := false
 | (imp_ P Q) := false
 | (forall_ x P) := true
@@ -547,6 +548,7 @@ def formula.is_prime : formula → Prop
 def formula.prime_constituent_set : formula → finset formula
 | (true_) := {true_}
 | (pred_ name args) := {pred_ name args}
+| (eq_ x y) := {eq_ x y}
 | (not_ P) := P.prime_constituent_set
 | (imp_ P Q) := P.prime_constituent_set ∪ Q.prime_constituent_set
 | (forall_ x P) := {forall_ x P}
@@ -558,6 +560,7 @@ def valuation : Type := formula → bool
 def formula.eval (val : valuation) : formula → bool
 | (true_) := bool.tt
 | (pred_ name args) := val (pred_ name args)
+| (eq_ x y) := val (eq_ x y)
 | (not_ P) := ! P.eval
 | (imp_ P Q) := (! P.eval) || Q.eval
 | (forall_ x P) := val (forall_ x P)
@@ -700,13 +703,13 @@ theorem T_17_1
   (v t : variable_)
   (Δ : set formula)
   (h1 : is_deduct Δ (forall_ v P))
-  (h2 : admits v t P) :
-  is_deduct Δ (replace_free v t P) :=
+  (h2 : fast_admits v t P) :
+  is_deduct Δ (fast_replace_free v t P) :=
 begin
   apply is_deduct.mp_ (forall_ v P),
   {
     apply is_deduct.axiom_,
-    apply is_axiom.pred_2_ v t P (replace_free v t P) h2,
+    apply is_axiom.pred_2_ v t P (fast_replace_free v t P) h2,
     refl,
   },
   {
@@ -729,10 +732,10 @@ begin
     apply is_deduct.axiom_,
     apply is_axiom.pred_2_ v v P,
     {
-      exact admits_id P v,
+      exact fast_admits_self P v,
     },
     {
-      exact replace_free_id P v,
+      exact fast_replace_free_self P v,
     },
   },
   {
@@ -757,8 +760,8 @@ end
 theorem T_17_3
   (P : formula)
   (v t : variable_)
-  (h1 : admits v t P) :
-  is_proof ((replace_free v t P).imp_ (exists_ v P)) :=
+  (h1 : fast_admits v t P) :
+  is_proof ((fast_replace_free v t P).imp_ (exists_ v P)) :=
 begin
   unfold formula.exists_,
   unfold is_proof,
@@ -767,13 +770,13 @@ begin
     apply SC_1,
   },
   {
-    unfold admits at h1,
+    unfold fast_admits at h1,
 
     apply is_deduct.axiom_,
     apply is_axiom.pred_2_ v t,
     {
-      unfold admits,
-      unfold admits_aux,
+      unfold fast_admits,
+      unfold fast_admits_aux,
       exact h1,
     },
     {
@@ -788,11 +791,11 @@ theorem T_17_4
   (P : formula)
   (v t : variable_)
   (Δ : set formula)
-  (h1 : admits v t P)
-  (h2 : is_deduct Δ (replace_free v t P)) :
+  (h1 : fast_admits v t P)
+  (h2 : is_deduct Δ (fast_replace_free v t P)) :
   is_deduct Δ (exists_ v P) :=
 begin
-  apply is_deduct.mp_ (replace_free v t P) (exists_ v P),
+  apply is_deduct.mp_ (fast_replace_free v t P) (exists_ v P),
   {
     apply proof_imp_deduct,
     apply T_17_3,
@@ -815,10 +818,10 @@ lemma exists_intro_id
 begin
   apply T_17_4 P v v Δ,
   {
-    exact admits_id P v,
+    exact fast_admits_self P v,
   },
   {
-    simp only [replace_free_id],
+    simp only [fast_replace_free_self],
     exact h1,
   }
 end
@@ -894,30 +897,30 @@ example
   (v t : variable_)
   (Δ : set formula)
   (h1 : ¬ occurs_in t P)
-  (h2 : is_deduct Δ (replace_free v t P))
+  (h2 : is_deduct Δ (fast_replace_free v t P))
   (h3 : ∀ (H : formula), H ∈ Δ → ¬ is_free_in t H) :
   is_deduct Δ (forall_ v P) :=
 begin
-  apply is_deduct.mp_ (forall_ t (replace_free v t P)),
+  apply is_deduct.mp_ (forall_ t (fast_replace_free v t P)),
   {
     apply proof_imp_deduct,
     apply deduction_theorem,
     simp only [set.union_singleton, insert_emptyc_eq],
     apply generalization,
     {
-      have s1 : is_deduct {forall_ t (replace_free v t P)} (replace_free t v (replace_free v t P)),
+      have s1 : is_deduct {forall_ t (fast_replace_free v t P)} (fast_replace_free t v (fast_replace_free v t P)),
       apply spec,
       {
         apply is_deduct.assume_,
         simp only [set.mem_singleton],
       },
       {
-        apply replace_free_admits,
+        apply fast_replace_free_fast_admits,
         exact h1,
       },
 
-      have s2 : (replace_free t v (replace_free v t P)) = P,
-      exact replace_free_inverse P v t h1,
+      have s2 : (fast_replace_free t v (fast_replace_free v t P)) = P,
+      exact fast_replace_free_inverse P v t h1,
 
       simp only [s2] at s1,
       exact s1,
@@ -927,11 +930,11 @@ begin
       unfold is_free_in,
       simp only [not_and],
       intros a1 contra,
-      exact is_free_in_replace_free P v t a1 contra,
+      exact not_is_free_in_fast_replace_free P v t a1 contra,
     }
   },
   {
-    exact generalization (replace_free v t P) t Δ h2 h3,
+    exact generalization (fast_replace_free v t P) t Δ h2 h3,
   },
 end
 
@@ -1299,10 +1302,10 @@ begin
       {
         apply exists_intro P v v,
         {
-          apply admits_id,
+          apply fast_admits_self,
         },
         {
-          simp only [replace_free_id],
+          simp only [fast_replace_free_self],
           apply is_deduct.mp_,
           {
             apply and_elim_left P Q,
@@ -1317,10 +1320,10 @@ begin
     {
       apply exists_intro Q v v,
       {
-        apply admits_id,
+        apply fast_admits_self,
       },
       {
-        simp only [replace_free_id],
+        simp only [fast_replace_free_self],
         apply is_deduct.mp_,
         {
           apply and_elim_right P Q,

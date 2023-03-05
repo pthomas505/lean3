@@ -254,7 +254,7 @@ end
 
 --
 
-theorem fast_replace_free_id
+theorem fast_replace_free_self
   (P : formula)
   (v : variable_) :
   fast_replace_free v v P = P :=
@@ -295,7 +295,7 @@ begin
 end
 
 
-theorem not_free_in_fast_replace_free_id
+theorem not_free_in_fast_replace_free_self
   (P : formula)
   (v t : variable_)
   (h1 : ¬ is_free_in v P) :
@@ -465,7 +465,7 @@ begin
     {
       unfold fast_replace_free,
       simp [if_neg h1_left],
-      apply not_free_in_fast_replace_free_id,
+      apply not_free_in_fast_replace_free_self,
       contrapose! h1_right,
       exact is_free_in_imp_occurs_in P t h1_right,
     },
