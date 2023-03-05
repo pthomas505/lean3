@@ -784,7 +784,9 @@ end
 
 --
 
-
+/--
+  Used to label each occurrence of a variable in a formula as free or bound.
+-/
 @[derive [inhabited, decidable_eq]]
 inductive bool_formula : Type
 | true_ : bool_formula
@@ -795,6 +797,9 @@ inductive bool_formula : Type
 | forall_ : bool → bool_formula → bool_formula
 
 
+/--
+  Helper function for to_is_bound.
+-/
 def to_is_bound_aux : finset variable_ → formula → bool_formula
 | _ true_ := bool_formula.true_
 | binders (pred_ name args) := bool_formula.pred_ name (args.map (fun (v : variable_), v ∈ binders))
@@ -803,6 +808,9 @@ def to_is_bound_aux : finset variable_ → formula → bool_formula
 | binders (imp_ P Q) := bool_formula.imp_ (to_is_bound_aux binders P) (to_is_bound_aux binders Q)
 | binders (forall_ x P) := bool_formula.forall_ true (to_is_bound_aux (binders ∪ {x}) P)
 
+/--
+  Creates a bool_formula from a formula. Each bound occurence of a variable in the formula is mapped to true in the bool formula. Each free occurence of a variable in the formula is mapped to false in the bool formula.
+-/
 def to_is_bound (P : formula) : bool_formula :=
   to_is_bound_aux ∅ P
 
