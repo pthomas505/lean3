@@ -51,6 +51,14 @@ inductive is_prop_deduct (Δ : set formula) : formula → Prop
 def is_prop_proof (P : formula) : Prop := is_prop_deduct ∅ P
 
 
+/--
+  eq_subst_pred name n [x_0 ... x_n] [y_0 ... y_n] := ((x_0 = y_0) ∧ ... ∧ (x_n = y_n) ∧ ⊤) → (pred_ name [x_0 ... x_n] = pred_ name [y_0 ... y_n])
+-/
+def eq_subst_pred (name : pred_name_) (n : ℕ) (xs ys : fin n → variable_) : formula :=
+(And n (fun (i : fin n), eq_ (xs i) (ys i))).imp_
+((pred_ name (list.of_fn xs)).imp_ (pred_ name (list.of_fn ys)))
+
+
 inductive is_axiom : formula → Prop
 
 -- ⊢ ⊤

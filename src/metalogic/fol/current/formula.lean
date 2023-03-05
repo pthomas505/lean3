@@ -1,4 +1,5 @@
 import tactic
+import data.fin.vec_notation
 
 
 set_option pp.parens true
@@ -59,6 +60,20 @@ def formula.iff_ (P Q : formula) : formula := (P.imp_ Q).and_ (Q.imp_ P)
   ∃ x P := ~ ∀ x ~ P
 -/
 def formula.exists_ (x : variable_) (P : formula) : formula := not_ (forall_ x (not_ P))
+
+
+open matrix
+
+/--
+  And 0 [] = ⊤
+
+  And 1 [P] = P ∧ ⊤
+
+  And n [P_1 ... P_n] := P_1 ∧ ... ∧ P_n ∧ ⊤ 
+-/
+def And : Π (n : ℕ), (fin n → formula) → formula
+| 0 _ := true_
+| (n + 1) Ps := formula.and_ (vec_head Ps) (And n (vec_tail Ps))
 
 
 /--
