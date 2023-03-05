@@ -172,4 +172,30 @@ inductive is_proof_alt : formula → Prop
   is_proof_alt Q
 
 
+lemma proof_imp_deduct
+  (P : formula)
+  (h1 : is_proof P) :
+  ∀ (Δ : set formula), is_deduct Δ P :=
+begin
+  unfold is_proof at h1,
+
+  intros Δ,
+  induction h1,
+  case is_deduct.axiom_ : h1_P h1_1
+  {
+    apply is_deduct.axiom_,
+    exact h1_1,
+  },
+  case is_deduct.assume_ : h1_P h1_1
+  {
+    simp only [set.mem_empty_eq] at h1_1,
+    contradiction,
+  },
+  case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
+  {
+    exact is_deduct.mp_ h1_P h1_Q h1_ih_1 h1_ih_2,
+  },
+end
+
+
 #lint
