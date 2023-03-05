@@ -1,4 +1,4 @@
-import .subst
+import .admits
 
 
 set_option pp.parens true
