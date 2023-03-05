@@ -769,6 +769,19 @@ begin
 end
 
 
+lemma fast_admits_aux_mem_binders
+  (P : formula)
+  (v u : variable_)
+  (binders : finset variable_)
+  (h1 : fast_admits_aux v u binders P)
+  (h2 : u ∈ binders) :
+  ¬ is_free_in v P :=
+begin
+  contrapose! h2,
+  exact fast_admits_aux_is_free_in P v u binders h1 h2,
+end
+
+
 --
 
 

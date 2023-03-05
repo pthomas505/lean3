@@ -45,21 +45,19 @@ begin
   case formula.pred_ : name args binders
   {
     unfold fast_admits_aux,
-    intros a1,
-    exact h1,
+    tauto,
   },
   case formula.eq_ : x y binders h1
   {
     unfold fast_admits_aux,
-    intros a1,
-    exact h1,
+    tauto,
   },
   case formula.not_ : P P_ih binders
   {
     unfold admits_alt at h2,
 
     unfold fast_admits_aux,
-    exact P_ih h2 binders h1,
+    tauto,
   },
   case formula.imp_ : P Q P_ih Q_ih binders
   {
@@ -104,7 +102,6 @@ begin
         },
         {
           simp only [finset.mem_union, finset.mem_singleton],
-          push_neg,
           tauto,
         }
       }
@@ -138,12 +135,11 @@ begin
     unfold fast_admits_aux at h1,
 
     unfold admits_alt,
-    exact P_ih binders h1,
+    tauto,
   },
   case formula.imp_ : P Q P_ih Q_ih binders
   {
     unfold fast_admits_aux at h1,
-    cases h1,
 
     unfold admits_alt,
     tauto,
@@ -164,10 +160,7 @@ begin
       {
         intros a1,
         subst a1,
-        apply fast_admits_aux_and_mem_binders_imp_not_is_free_in P v x,
-        {
-          exact h1,
-        },
+        apply fast_admits_aux_mem_binders P v x (binders ∪ {x}) h1,
         {
           simp only [finset.mem_union, finset.mem_singleton, eq_self_iff_true, or_true],
         }
@@ -209,6 +202,7 @@ begin
   tauto,
 end
 
+
 lemma not_is_free_in_imp_admits_alt
   (P : formula)
   (v u : variable_)
@@ -233,7 +227,6 @@ begin
   unfold admits_alt;
   tauto,
 end
-
 
 
 lemma fast_replace_free_admits_alt

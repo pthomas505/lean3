@@ -1,3 +1,15 @@
+import .admits
+import .misc_list
+
+import data.finset
+
+
+set_option pp.parens true
+
+
+open formula
+
+
 inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
 | true_
   (v t : variable_) :
@@ -6,7 +18,7 @@ inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
 | pred_
   (name : pred_name_) (args : list variable_)
   (v t : variable_) :
-  is_prop_sub (pred_ name args) v t (pred_ name (args.map (replace v t)))
+    is_prop_sub (pred_ name args) v t (pred_ name (args.map (fun (x : variable_), if x = v then t else x)))
 
 | not_
   (P : formula)
@@ -25,8 +37,7 @@ inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
 
 | forall_same_
   (x : variable_) (P : formula)
-  (v t : variable_)
-  (P' : formula) :
+  (v t : variable_) :
   v = x →
   is_prop_sub (forall_ x P) v t (forall_ x P)
 
@@ -35,7 +46,7 @@ inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
   (v t : variable_)
   (P' : formula) :
   ¬ v = x →
-  v ∉ (forall_ x P).free_var_set →
+  ¬ is_free_in v (forall_ x P) →
   is_prop_sub P v t P' →
   is_prop_sub (forall_ x P) v t (forall_ x P')
 
@@ -47,7 +58,6 @@ inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
   ¬ t = x →
   is_prop_sub P v t P' →
   is_prop_sub (forall_ x P) v t (forall_ x P')
-
 
 
 lemma fast_admits_aux_and_fast_replace_free_imp_is_prop_sub
