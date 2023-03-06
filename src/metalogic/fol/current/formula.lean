@@ -95,6 +95,9 @@ def formula.And_ (l : list formula) : formula := list.foldr formula.and_ true_ l
 def formula.Forall_ (xs : list variable_) (P : formula) : formula := list.foldr formula.forall_ P xs
 
 
+/--
+  The string representation of FOL formulas.
+-/
 def formula.repr : formula → string
 | true_ := "⊤"
 | (pred_ name args) := sformat!"({name.repr} {args.repr})"
