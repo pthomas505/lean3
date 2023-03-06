@@ -955,6 +955,16 @@ begin
     apply is_axiom.pred_3_,
     exact h1_1,
   },
+  case is_proof_alt.eq_1_ : h1
+  {
+    apply is_deduct.axiom_,
+    apply is_axiom.eq_1_,
+  },
+  case is_proof_alt.eq_2 : h1_name h1_n h1_xs h1_ys
+  {
+    apply is_deduct.axiom_,
+    apply is_axiom.eq_2,
+  },
   case is_proof_alt.gen_ : h1_v h1_P h1_1 h1_ih
   {
     apply generalization,
@@ -1009,6 +1019,14 @@ begin
     {
       apply is_proof_alt.pred_3_,
       exact h1_1_1,
+    },
+    case is_axiom.eq_1_ : h1_1
+    {
+      apply is_proof_alt.eq_1_,
+    },
+    case is_axiom.eq_2 : h1_1_name h1_1_n h1_1_xs h1_1_ys
+    {
+      apply is_proof_alt.eq_2,
     },
     case is_axiom.gen_ : h1_1_v h1_1_P h1_1_1 h1_1_ih
     {
@@ -1427,7 +1445,7 @@ inductive is_repl_of (U V : formula) : formula → formula → Prop
 lemma Forall_spec_id
   (xs : list variable_)
   (P : formula) :
-  is_proof ((Forall_ xs P).imp_ P) :=
+  is_proof ((formula.Forall_ xs P).imp_ P) :=
 begin
   induction xs,
   case list.nil
