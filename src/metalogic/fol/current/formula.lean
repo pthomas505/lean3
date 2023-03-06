@@ -9,14 +9,14 @@ set_option pp.parens true
 -/
 @[derive [inhabited, decidable_eq]]
 inductive variable_ : Type
-| variable_ : string → variable_
+| mk : string → variable_
 
 
 /--
   The string representation of FOL variables.
 -/
 def variable_.repr : variable_ → string
-| (variable_.variable_ name) := name
+| (variable_.mk name) := name
 
 instance variable_.has_repr : has_repr variable_ := has_repr.mk variable_.repr
 
@@ -26,14 +26,14 @@ instance variable_.has_repr : has_repr variable_ := has_repr.mk variable_.repr
 -/
 @[derive [inhabited, decidable_eq]]
 inductive pred_name_ : Type
-| pred_name_ : string → pred_name_
+| mk : string → pred_name_
 
 
 /--
   The string representation of FOL predicate names.
 -/
 def pred_name_.repr : pred_name_ → string
-| (pred_name_.pred_name_ name) := name
+| (pred_name_.mk name) := name
 
 instance pred_name_.has_repr : has_repr pred_name_ := has_repr.mk pred_name_.repr
 
@@ -92,9 +92,7 @@ def formula.And (l : list formula) : formula := list.foldr formula.and_ true_ l
 /--
   Forall [x0 ... xn] P := ∀ x0 ... ∀ xn P
 -/
-def formula.Forall_ : list variable_ → formula → formula
-| [] P := P
-| (x :: xs) P := forall_ x (formula.Forall_ xs P)
+def formula.Forall (xs : list variable_) (P : formula) : formula := list.foldr formula.forall_ P xs
 
 
 def formula.repr : formula → string
@@ -106,6 +104,9 @@ def formula.repr : formula → string
 | (forall_ x P) := sformat!"(∀ {x.repr}. {P.repr})"
 
 instance formula.has_repr : has_repr formula := has_repr.mk formula.repr
+
+
+#eval formula.Forall [(variable_.mk "x"), (variable_.mk "y")] (formula.pred_ (pred_name_.mk "P") [])
 
 
 #lint
