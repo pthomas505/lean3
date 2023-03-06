@@ -105,7 +105,7 @@ inductive is_axiom : formula → Prop
   (v : variable_) :
   is_axiom (eq_ v v)
 
--- ⊢ ((x_0 = y_0) ∧ ... ∧ (x_n = y_n) ∧ ⊤) → (pred_ name [x_0 ... x_n] = pred_ name [y_0 ... y_n])
+-- ⊢ ((x_0 = y_0) ∧ ... ∧ (x_n = y_n) ∧ ⊤) → (pred_ name [x_0 ... x_n] → pred_ name [y_0 ... y_n])
 | eq_2
   (name : pred_name_) (n : ℕ) (xs ys : fin n → variable_) :
   is_axiom (eq_subst_pred name n xs ys)
@@ -183,7 +183,7 @@ inductive is_proof_alt : formula → Prop
   (v : variable_) :
   is_proof_alt (eq_ v v)
 
--- ⊢ ((x_0 = y_0) ∧ ... ∧ (x_n = y_n) ∧ ⊤) → (pred_ name [x_0 ... x_n] = pred_ name [y_0 ... y_n])
+-- ⊢ ((x_0 = y_0) ∧ ... ∧ (x_n = y_n) ∧ ⊤) → (pred_ name [x_0 ... x_n] → pred_ name [y_0 ... y_n])
 | eq_2
   (name : pred_name_) (n : ℕ) (xs ys : fin n → variable_) :
   is_proof_alt (eq_subst_pred name n xs ys)
