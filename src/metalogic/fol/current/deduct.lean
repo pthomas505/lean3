@@ -178,6 +178,16 @@ inductive is_proof_alt : formula → Prop
   ¬ is_free_in v P →
   is_proof_alt (P.imp_ (forall_ v P))
 
+-- ⊢ v = v
+| eq_1_
+  (v : variable_) :
+  is_proof_alt (eq_ v v)
+
+-- ⊢ ((x_0 = y_0) ∧ ... ∧ (x_n = y_n) ∧ ⊤) → (pred_ name [x_0 ... x_n] = pred_ name [y_0 ... y_n])
+| eq_2
+  (name : pred_name_) (n : ℕ) (xs ys : fin n → variable_) :
+  is_proof_alt (eq_subst_pred name n xs ys)
+
 -- ⊢ P ⇒ ⊢ ∀ v P
 | gen_
   (v : variable_) (P : formula) :
