@@ -15,10 +15,10 @@ inductive variable_ : Type
 /--
   The string representation of FOL variables.
 -/
-def variable_.to_string : variable_ → string
+def variable_.repr : variable_ → string
 | (variable_.variable_ name) := name
 
-instance variable_.has_to_string : has_to_string variable_ := has_to_string.mk variable_.to_string
+instance variable_.has_repr : has_repr variable_ := has_repr.mk variable_.repr
 
 
 /--
@@ -32,10 +32,10 @@ inductive pred_name_ : Type
 /--
   The string representation of FOL predicate names.
 -/
-def pred_name_.to_string : pred_name_ → string
+def pred_name_.repr : pred_name_ → string
 | (pred_name_.pred_name_ name) := name
 
-instance pred_name_.has_to_string : has_to_string pred_name_ := has_to_string.mk pred_name_.to_string
+instance pred_name_.has_repr : has_repr pred_name_ := has_repr.mk pred_name_.repr
 
 
 /--
@@ -86,7 +86,7 @@ def formula.exists_ (x : variable_) (P : formula) : formula := not_ (forall_ x (
 
   And [P_1 ... P_n] := P_1 ∧ ... ∧ P_n ∧ ⊤ 
 -/
-def And (l : list formula) : formula := list.foldr formula.and_ true_ l
+def formula.And (l : list formula) : formula := list.foldr formula.and_ true_ l
 
 
 /--
@@ -97,14 +97,15 @@ def formula.Forall_ : list variable_ → formula → formula
 | (x :: xs) P := forall_ x (formula.Forall_ xs P)
 
 
-def formula.to_string : formula → string
+def formula.repr : formula → string
 | true_ := "⊤"
-| (pred_ name args) := sformat!"({name.to_string} {args.to_string})"
-| (eq_ x y) := sformat!"({x.to_string} = {y.to_string})"
-| (not_ P) := sformat!"(¬ {P.to_string})"
-| (imp_ P Q) := sformat!"({P.to_string} → {Q.to_string})"
-| (forall_ x P) := sformat!"(∀ {x.to_string}. {P.to_string})"
+| (pred_ name args) := sformat!"({name.repr} {args.repr})"
+| (eq_ x y) := sformat!"({x.repr} = {y.repr})"
+| (not_ P) := sformat!"(¬ {P.repr})"
+| (imp_ P Q) := sformat!"({P.repr} → {Q.repr})"
+| (forall_ x P) := sformat!"(∀ {x.repr}. {P.repr})"
 
+instance formula.has_repr : has_repr formula := has_repr.mk formula.repr
 
 
 #lint
