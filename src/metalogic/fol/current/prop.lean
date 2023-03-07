@@ -519,7 +519,7 @@ def formula.is_prime : formula → Prop
 | (imp_ P Q) := false
 | (forall_ x P) := true
 
-def formula.prime_constituent_set : formula → finset formula
+def formula.prime_constituent_set : formula → set formula
 | (true_) := {true_}
 | (pred_ name args) := {pred_ name args}
 | (eq_ x y) := {eq_ x y}
@@ -663,6 +663,36 @@ begin
     exact is_tauto_mp h1_P h1_Q h1_ih_1 h1_ih_2,
   },
 end
+
+
+def map_val (val : valuation) (P : formula) : formula :=
+if val P = bool.tt then P else P.not_
+
+lemma L_15_7
+  (P P' : formula)
+  (Δ_U Δ_U' : set formula)
+  (val : valuation)
+  (h1 : P.prime_constituent_set ⊆ Δ_U) 
+  (h2 : ∀ (U : formula), U ∈ Δ_U ↔ map_val val U ∈ Δ_U')
+  (h3 : if formula.eval val P = bool.tt then P' = P else P' = P.not_) :
+  is_deduct Δ_U P' :=
+begin
+  induction P,
+  case formula.true_
+  { admit },
+  case formula.pred_ : P_ᾰ P_ᾰ_1
+  { admit },
+  case formula.eq_ : P_ᾰ P_ᾰ_1
+  { admit },
+  case formula.not_ : P_ᾰ P_ih
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
+  { admit },
+  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih
+  { admit },
+end
+
+
 
 
 theorem prop_complete
