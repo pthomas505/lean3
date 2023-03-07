@@ -680,23 +680,28 @@ begin
   induction P,
   case formula.true_
   {
+    let P := true_,
+
     unfold formula.prime_constituent_set at h1,
     simp only [set.singleton_subset_iff] at h1,
 
     unfold map_val at h2,
-    specialize h2 P',
-
-    unfold formula.eval at h3,
-    squeeze_simp at h3,
-
-    subst h3,
-
-    unfold formula.eval at h2,
-    squeeze_simp at h2,
-    cases h2,
+    specialize h2 P,
 
     apply is_deduct.assume_,
-    exact h2_mp h1,
+    split_ifs at h3,
+    {
+      subst h3,
+      simp only [if_pos h] at h2,
+      cases h2,
+      exact h2_mp h1,
+    },
+    {
+      subst h3,
+      simp only [if_neg h] at h2,
+      cases h2,
+      exact h2_mp h1,
+    }
   },
   case formula.pred_ : name args
   {
