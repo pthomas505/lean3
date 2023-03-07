@@ -666,7 +666,7 @@ end
 
 
 def map_val (val : valuation) (P : formula) : formula :=
-if val P = bool.tt then P else P.not_
+if formula.eval val P = bool.tt then P else P.not_
 
 lemma L_15_7
   (P P' : formula)
@@ -675,7 +675,7 @@ lemma L_15_7
   (h1 : P.prime_constituent_set ⊆ Δ_U) 
   (h2 : ∀ (U : formula), U ∈ Δ_U ↔ map_val val U ∈ Δ_U')
   (h3 : if formula.eval val P = bool.tt then P' = P else P' = P.not_) :
-  is_deduct Δ_U P' :=
+  is_deduct Δ_U' P' :=
 begin
   induction P,
   case formula.true_
@@ -683,15 +683,44 @@ begin
     unfold formula.prime_constituent_set at h1,
     simp only [set.singleton_subset_iff] at h1,
 
+    unfold map_val at h2,
+    specialize h2 P',
+
     unfold formula.eval at h3,
-    simp only [eq_self_iff_true, if_true] at h3,
+    squeeze_simp at h3,
+
     subst h3,
 
+    unfold formula.eval at h2,
+    squeeze_simp at h2,
+    cases h2,
+
     apply is_deduct.assume_,
-    exact h1,
+    exact h2_mp h1,
   },
-  case formula.pred_ : P_ᾰ P_ᾰ_1
-  { admit },
+  case formula.pred_ : name args
+  {
+    unfold formula.prime_constituent_set at h1,
+    simp only [set.singleton_subset_iff] at h1,
+
+    unfold map_val at h2,
+    specialize h2 (pred_ name args),
+
+    apply is_deduct.assume_,
+    split_ifs at h3,
+    {
+      subst h3,
+      simp only [if_pos h] at h2,
+      cases h2,
+      exact h2_mp h1,
+    },
+    {
+      subst h3,
+      simp only [if_neg h] at h2,
+      cases h2,
+      exact h2_mp h1,
+    }
+  },
   case formula.eq_ : P_ᾰ P_ᾰ_1
   { admit },
   case formula.not_ : P_ᾰ P_ih
