@@ -700,11 +700,13 @@ begin
   },
   case formula.pred_ : name args
   {
+    let P := pred_ name args,
+
     unfold formula.prime_constituent_set at h1,
     simp only [set.singleton_subset_iff] at h1,
 
     unfold map_val at h2,
-    specialize h2 (pred_ name args),
+    specialize h2 P,
 
     apply is_deduct.assume_,
     split_ifs at h3,
