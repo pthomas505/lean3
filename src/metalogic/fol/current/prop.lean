@@ -728,8 +728,31 @@ begin
       exact h2_mp h1,
     }
   },
-  case formula.eq_ : P_ᾰ P_ᾰ_1
-  { admit },
+  case formula.eq_ : x y
+  {
+    let P := eq_ x y,
+
+    unfold formula.prime_constituent_set at h1,
+    simp only [set.singleton_subset_iff] at h1,
+
+    unfold map_val at h2,
+    specialize h2 P,
+
+    apply is_deduct.assume_,
+    split_ifs at h3,
+    {
+      subst h3,
+      simp only [if_pos h] at h2,
+      cases h2,
+      exact h2_mp h1,
+    },
+    {
+      subst h3,
+      simp only [if_neg h] at h2,
+      cases h2,
+      exact h2_mp h1,
+    }
+  },
   case formula.not_ : P_ᾰ P_ih
   { admit },
   case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
