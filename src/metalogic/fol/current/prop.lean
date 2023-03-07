@@ -679,7 +679,17 @@ lemma L_15_7
 begin
   induction P,
   case formula.true_
-  { admit },
+  {
+    unfold formula.prime_constituent_set at h1,
+    simp only [set.singleton_subset_iff] at h1,
+
+    unfold formula.eval at h3,
+    simp only [eq_self_iff_true, if_true] at h3,
+    subst h3,
+
+    apply is_deduct.assume_,
+    exact h1,
+  },
   case formula.pred_ : P_ᾰ P_ᾰ_1
   { admit },
   case formula.eq_ : P_ᾰ P_ᾰ_1
