@@ -756,7 +756,9 @@ begin
 
     split_ifs,
     {
-      simp only [if_neg sorry] at P_ih,
+      simp only [bnot_eq_true_eq_eq_ff] at h,
+      simp only [h] at P_ih,
+      simp only [if_false] at P_ih,
       exact P_ih,
     },
     {
