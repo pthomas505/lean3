@@ -664,6 +664,13 @@ begin
   },
 end
 
+example
+  (b : bool) :
+  b = bool.ff ↔ ¬ b = bool.tt :=
+begin
+  simp only [eq_ff_eq_not_eq_tt],
+end
+
 
 def map_val (val : valuation) (P : formula) : formula :=
 if val P = bool.tt then P else P.not_
@@ -774,8 +781,68 @@ begin
       },
     }
   },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
-  { admit },
+  case formula.imp_ : P Q P_ih Q_ih
+  {
+    unfold formula.prime_constituent_set at h1,
+    simp only [set.union_subset_iff] at h1,
+    cases h1,
+
+    unfold formula.eval,
+    split_ifs,
+    {
+      simp only [bor_eq_true_eq_eq_tt_or_eq_tt, bnot_eq_true_eq_eq_ff] at h,
+      cases h,
+      {
+        rewrite <- eq_ff_eq_not_eq_tt at h,
+        simp only [if_neg h] at P_ih,
+
+        apply is_deduct.mp_ P.not_,
+        {
+          apply proof_imp_deduct,
+          apply T_13_6,
+        },
+        {
+          exact P_ih h1_left,
+        }
+      },
+      {
+        simp only [if_pos h] at Q_ih,
+
+        apply is_deduct.mp_ Q,
+        {
+          apply is_deduct.axiom_,
+          apply is_axiom.prop_1_,
+        },
+        {
+          exact Q_ih h1_right,
+        }
+      }
+    },
+    {
+      simp only [bor_eq_true_eq_eq_tt_or_eq_tt, bnot_eq_true_eq_eq_ff] at h,
+      push_neg at h,
+      simp only [ne.def, eq_tt_eq_not_eq_ff, eq_ff_eq_not_eq_tt] at h,
+      rewrite <- eq_ff_eq_not_eq_tt at h,
+      cases h,
+      simp only [if_pos h_left] at P_ih,
+      simp only [if_neg h_right] at Q_ih,
+
+      apply is_deduct.mp_ Q.not_,
+      {
+        apply is_deduct.mp_ P,
+        {
+          apply proof_imp_deduct,
+          apply T_14_8,
+        },
+        {
+          exact P_ih h1_left,
+        }
+      },
+      {
+        exact Q_ih h1_right,
+      }
+    }
+  },
   case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih
   { admit },
 end
