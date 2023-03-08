@@ -519,7 +519,7 @@ def formula.is_prime : formula → Prop
 | (imp_ P Q) := false
 | (forall_ x P) := true
 
-def formula.prime_constituent_set : formula → set formula
+def formula.prime_constituent_set : formula → finset formula
 | (true_) := {true_}
 | (pred_ name args) := {pred_ name args}
 | (eq_ x y) := {eq_ x y}
@@ -679,7 +679,7 @@ lemma L_15_7
   (P : formula)
   (Δ_U Δ_U' : set formula)
   (val : valuation)
-  (h1 : P.prime_constituent_set ⊆ Δ_U) 
+  (h1 : coe P.prime_constituent_set ⊆ Δ_U)
   (h2 : ∀ (U : formula), U ∈ Δ_U ↔ map_val val U ∈ Δ_U')
   (h3 : val true_ = bool.tt) :
   if formula.eval val P = bool.tt then is_deduct Δ_U' P else is_deduct Δ_U' P.not_ :=
@@ -688,7 +688,7 @@ begin
   case formula.true_
   {
     unfold formula.prime_constituent_set at h1,
-    simp only [set.singleton_subset_iff] at h1,
+    simp only [finset.coe_singleton, set.singleton_subset_iff] at h1,
 
     unfold map_val at h2,
     specialize h2 true_,
@@ -706,7 +706,7 @@ begin
     let P := pred_ name args,
 
     unfold formula.prime_constituent_set at h1,
-    simp only [set.singleton_subset_iff] at h1,
+    simp only [finset.coe_singleton, set.singleton_subset_iff] at h1,
 
     unfold map_val at h2,
     specialize h2 P,
@@ -732,7 +732,7 @@ begin
     let P := eq_ x y,
 
     unfold formula.prime_constituent_set at h1,
-    simp only [set.singleton_subset_iff] at h1,
+    simp only [finset.coe_singleton, set.singleton_subset_iff] at h1,
 
     unfold map_val at h2,
     specialize h2 P,
@@ -784,7 +784,7 @@ begin
   case formula.imp_ : P Q P_ih Q_ih
   {
     unfold formula.prime_constituent_set at h1,
-    simp only [set.union_subset_iff] at h1,
+    simp only [finset.coe_union, set.union_subset_iff] at h1,
     cases h1,
 
     unfold formula.eval,
@@ -848,7 +848,7 @@ begin
     let P := forall_ x P,
 
     unfold formula.prime_constituent_set at h1,
-    simp only [set.singleton_subset_iff] at h1,
+    simp only [finset.coe_singleton, set.singleton_subset_iff] at h1,
 
     unfold map_val at h2,
     specialize h2 P,
@@ -870,8 +870,6 @@ begin
     }
   },
 end
-
-
 
 
 theorem prop_complete
