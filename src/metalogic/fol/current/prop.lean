@@ -843,8 +843,32 @@ begin
       }
     }
   },
-  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih
-  { admit },
+  case formula.forall_ : x P P_ih
+  {
+    let P := forall_ x P,
+
+    unfold formula.prime_constituent_set at h1,
+    simp only [set.singleton_subset_iff] at h1,
+
+    unfold map_val at h2,
+    specialize h2 P,
+
+    unfold formula.eval,
+
+    split_ifs,
+    {
+      simp only [if_pos h] at h2,
+      cases h2,
+      apply is_deduct.assume_,
+      exact h2_mp h1,
+    },
+    {
+      simp only [if_neg h] at h2,
+      cases h2,
+      apply is_deduct.assume_,
+      exact h2_mp h1,
+    }
+  },
 end
 
 
