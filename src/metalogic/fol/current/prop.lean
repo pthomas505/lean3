@@ -872,7 +872,37 @@ begin
 end
 
 
+example
+  (P U : formula)
+  (Δ : set formula)
+  (h1 : is_deduct (Δ ∪ {U}) P)
+  (h2 : is_deduct (Δ ∪ {U.not_}) P) :
+  is_deduct Δ P :=
+begin
+  apply is_deduct.mp_ (U.not_.imp_ P),
+  {
+    apply is_deduct.mp_ (U.imp_ P),
+    {
+      apply proof_imp_deduct,
+      apply T_14_9,
+    },
+    {
+      apply deduction_theorem,
+      exact h1,
+    },
+  },
+  {
+    apply deduction_theorem,
+    exact h2,
+  }
+end
+
+
 theorem prop_complete
   (P : formula)
   (h1 : P.is_tauto) :
-  is_proof P := sorry
+  is_proof P :=
+begin
+  unfold formula.is_tauto at h1,
+  sorry,
+end
