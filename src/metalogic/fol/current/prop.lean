@@ -897,7 +897,13 @@ begin
   subst h3,
   induction P,
   case formula.true_
-  { admit },
+  {
+    unfold eval_ff_to_not,
+    unfold formula.eval,
+    simp only [if_false],
+    apply is_deduct.axiom_,
+    exact is_axiom.prop_true_,
+  },
   case formula.pred_ : P_ᾰ P_ᾰ_1
   { admit },
   case formula.eq_ : P_ᾰ P_ᾰ_1
