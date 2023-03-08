@@ -872,6 +872,60 @@ begin
 end
 
 
+def formula.prime_constituent_list : formula → list formula
+| (true_) := [true_]
+| (pred_ name args) := [pred_ name args]
+| (eq_ x y) := [eq_ x y]
+| (not_ P) := P.prime_constituent_list
+| (imp_ P Q) := P.prime_constituent_list ∪ Q.prime_constituent_list
+| (forall_ x P) := [forall_ x P]
+
+def eval_ff_to_not (val : valuation) (P : formula) : formula :=
+if formula.eval val P = bool.ff then P.not_ else P
+
+
+example
+  (P P' : formula)
+  (Δ_U Δ_U' : list formula)
+  (val : valuation)
+  (h1 : P.prime_constituent_list ⊆ Δ_U)
+  (h2 : Δ_U' = Δ_U.map (eval_ff_to_not val))
+  (h3 : P' = eval_ff_to_not val P) :
+  is_deduct Δ_U'.to_finset P' :=
+begin
+  subst h2,
+  subst h3,
+  induction P,
+  case formula.true_
+  { admit },
+  case formula.pred_ : P_ᾰ P_ᾰ_1
+  { admit },
+  case formula.eq_ : P_ᾰ P_ᾰ_1
+  { admit },
+  case formula.not_ : P_ᾰ P_ih
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
+  { admit },
+  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih
+  { admit },
+end
+
+
+example
+  (P : formula)
+  (Δ_U Δ_U' : list formula)
+  (U U' : formula)
+  (val : valuation)
+  (h1 : P.prime_constituent_list ⊆ (Δ_U ++ [U]))
+  (h2 : Δ_U' ++ [U'] = (Δ_U ++ [U]).map (eval_ff_to_not val))
+  (h3 : P.is_tauto) :
+  is_deduct (Δ_U' ++ [U]).to_finset P ∧
+  is_deduct (Δ_U' ++ [U.not_]).to_finset P :=
+begin
+  sorry,
+end
+
+
 example
   (P U : formula)
   (Δ : set formula)
