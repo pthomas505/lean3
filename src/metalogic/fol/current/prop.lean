@@ -877,14 +877,42 @@ def formula.prime_constituent_list : formula → list formula
 | (pred_ name args) := [pred_ name args]
 | (eq_ x y) := [eq_ x y]
 | (not_ P) := P.prime_constituent_list
-| (imp_ P Q) := P.prime_constituent_list ∪ Q.prime_constituent_list
+| (imp_ P Q) := P.prime_constituent_list ++ Q.prime_constituent_list
 | (forall_ x P) := [forall_ x P]
 
 def eval_ff_to_not (val : valuation) (P : formula) : formula :=
 if formula.eval val P = bool.ff then P.not_ else P
 
 
-example
+lemma prime_constituent_list_not_nil
+  (P : formula) :
+  ¬ P.prime_constituent_list = list.nil :=
+begin
+  induction P,
+  case [formula.true_, formula.pred_, formula.eq_, formula.forall_]
+  {
+    all_goals
+    {
+      unfold formula.prime_constituent_list,
+      simp only [not_false_iff],
+    },
+  },
+  case formula.not_ : P P_ih
+  {
+    unfold formula.prime_constituent_list,
+    exact P_ih,
+  },
+  case formula.imp_ : P Q P_ih Q_ih
+  {
+    unfold formula.prime_constituent_list,
+    simp only [list.append_eq_nil, not_and],
+    intros a1,
+    exact Q_ih,
+  },
+end
+
+
+lemma lem_1
   (P P' : formula)
   (Δ_U Δ_U' : list formula)
   (val : valuation)
@@ -955,6 +983,26 @@ begin
     apply deduction_theorem,
     exact h2,
   }
+end
+
+
+example
+  (P : formula)
+  (Δ_U : list formula)
+  (h1 : P.is_tauto)
+  (h2 : P.prime_constituent_list = Δ_U) :
+  is_proof P :=
+begin
+  unfold formula.is_tauto at h1,
+
+  induction Δ_U,
+  case list.nil
+  {
+    exfalso,
+    exact prime_constituent_list_not_nil P h2,
+  },
+  case list.cons : Δ_U_hd Δ_U_tl Δ_U_ih
+  { admit },
 end
 
 
