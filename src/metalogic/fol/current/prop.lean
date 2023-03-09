@@ -914,8 +914,9 @@ end
 
 lemma lem_1
   (P P' : formula)
-  (Δ_U Δ_U' : list formula)
+  (Δ_U : list formula)
   (val : valuation)
+  (Δ_U' : list formula)
   (h1 : P.prime_constituent_list ⊆ Δ_U)
   (h2 : Δ_U' = Δ_U.map (eval_ff_to_not val))
   (h3 : P' = eval_ff_to_not val P) :
@@ -960,7 +961,7 @@ begin
 end
 
 
-example
+lemma lem_2
   (P U : formula)
   (Δ : set formula)
   (h1 : is_deduct (Δ ∪ {U}) P)
@@ -995,6 +996,22 @@ example
 begin
   unfold formula.is_tauto at h1,
 
+  have s1 : ∀ (val : valuation),
+    is_deduct (Δ_U.map (eval_ff_to_not val)).to_finset P,
+  intros val,
+  apply lem_1 P P P.prime_constituent_list val,
+  {
+    simp only [list.subset.refl],
+  },
+  {
+    subst h2,
+  },
+  {
+    unfold eval_ff_to_not,
+    rewrite h1 val,
+    simp only [if_false],
+  },
+
   induction Δ_U,
   case list.nil
   {
@@ -1002,7 +1019,9 @@ begin
     exact prime_constituent_list_not_nil P h2,
   },
   case list.cons : Δ_U_hd Δ_U_tl Δ_U_ih
-  { admit },
+  {
+    sorry,
+  },
 end
 
 
