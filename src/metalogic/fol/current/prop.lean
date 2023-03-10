@@ -1008,31 +1008,73 @@ end
 
 
 lemma lem_3
-  (P : formula)
+  (P P' : formula)
   (val : valuation)
   (h1 : P.is_prime) :
-  formula.eval (function.update_ite val P tt) P = tt :=
+  formula.eval (function.update_ite val P' tt) P =
+    function.update_ite (formula.eval val) P' tt P
+ :=
 begin
   induction P,
   case formula.true_
   {
+    unfold function.update_ite,
     unfold formula.eval,
+    simp only [if_t_t],
   },
   case [formula.pred_, formula.eq_, formula.forall_]
   {
     all_goals
     {
+      unfold function.update_ite,
       unfold formula.eval,
       unfold function.update_ite,
-      simp only [eq_self_iff_true, and_self, if_true],
-    }
+    },
   },
   case [formula.not_, formula.imp_]
   {
     all_goals
     {
       unfold formula.is_prime at h1,
+      contradiction,
+    },
+  },
+end
 
+
+lemma lem_3'
+  (P P' : formula)
+  (val : valuation)
+  (h1 : P.is_prime) :
+  eval_ff_to_not (function.update_ite val P' tt) P =
+    function.update_ite (eval_ff_to_not val) P' P P
+ :=
+begin
+  induction P,
+  case formula.true_
+  {
+    unfold function.update_ite,
+    unfold eval_ff_to_not,
+    unfold formula.eval,
+    simp only [eq_self_iff_true, if_true, if_t_t],
+  },
+  case [formula.pred_, formula.eq_, formula.forall_]
+  {
+    all_goals
+    {
+      unfold function.update_ite,
+      unfold eval_ff_to_not,
+      unfold formula.eval,
+      unfold function.update_ite,
+      split_ifs,
+      all_goals {tauto},
+    },
+  },
+  case [formula.not_, formula.imp_]
+  {
+    all_goals
+    {
+      unfold formula.is_prime at h1,
       contradiction,
     }
   },
@@ -1046,53 +1088,44 @@ example
   ∀ (val : valuation), is_deduct {U} P :=
 begin
   intros val,
-  by_cases c1 : eval_ff_to_not val U = U,
-  {
-    rewrite <- c1,
-    exact h1 val,
-  },
-  {
-    unfold eval_ff_to_not at *,
-    split_ifs at c1,
-    {
-      contradiction,
-    },
-    {
-      specialize h1 (function.update_ite val U bool.tt),
-      split_ifs at h1,
-      {
-        exact h1,
-      },
-      {
-        exfalso,
-        apply h_1,
-        apply lem_3,
-        exact h2,
-      }
-    }
-  }
+  specialize h1 (function.update_ite val U bool.tt),
+  simp only [lem_3' U U val h2] at h1,
+  unfold function.update_ite at h1,
+  simp only [eq_self_iff_true, if_true] at h1,
+  exact h1,
 end
 
 
 example
   (P U : formula)
-  (Δ : finset formula)
-  (h1 : U ∉ Δ)
-  (h2 : ∀ (val : valuation), is_deduct (Δ.image (eval_ff_to_not val) ∪ {eval_ff_to_not val U}) P)
-  (h3 : ∀ (U' : formula), U' ∈ Δ → U'.is_prime)
-  (h4 : U.is_prime) :
-  ∀ (val : valuation), is_deduct (Δ.image (eval_ff_to_not val) ∪
-{U}) P :=
+  (Δ : list formula)
+  (h1_Δ : ∀ (U' : formula), U' ∈ Δ → U'.is_prime)
+  (h1_U : U.is_prime)
+  (h2 : U ∉ Δ)
+  (h3 : ∀ (val : valuation), is_deduct ((eval_ff_to_not val U) :: (Δ.map (eval_ff_to_not val))).to_finset P) :
+  ∀ (val : valuation), is_deduct (U :: (Δ.map (eval_ff_to_not val))).to_finset P :=
 begin
   intros val,
-  by_cases c1 : val U = bool.tt,
+  specialize h3 (function.update_ite val U bool.tt),
+  simp only [lem_3' U U val h1_U] at h3,
+  unfold function.update_ite at h3,
+  simp only [eq_self_iff_true, if_true] at h3,
+
+  have s1 : list.map (eval_ff_to_not (function.update_ite val U tt)) Δ = list.map (eval_ff_to_not val) Δ,
   {
-    sorry,
+    simp only [list.map_eq_map_iff],
+    intros U' a1,
+    specialize h1_Δ U' a1,
+    simp only [lem_3' U' U val h1_Δ],
+    unfold function.update_ite,
+    simp only [ite_eq_right_iff],
+    intros a2,
+    subst a2,
+    contradiction,
   },
-  {
-    specialize h2 (function.update val U bool.tt),
-    sorry,
-  },
+
+  rewrite <- s1,
+  exact h3,
 end
 
 
@@ -1143,6 +1176,9 @@ begin
       squeeze_simp,
       split,
       {
+        rewrite lem_3',
+        unfold function.update_ite,
+        squeeze_simp,
         sorry,
       },
       {
