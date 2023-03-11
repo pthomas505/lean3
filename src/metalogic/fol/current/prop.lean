@@ -26,6 +26,7 @@ def formula.is_atomic : formula → Prop
 | (imp_ P Q) := false
 | (forall_ x P) := true
 
+
 def formula.atomic_set : formula → finset formula
 | (true_) := {true_}
 | (pred_ name args) := {pred_ name args}
@@ -33,6 +34,7 @@ def formula.atomic_set : formula → finset formula
 | (not_ P) := P.atomic_set
 | (imp_ P Q) := P.atomic_set ∪ Q.atomic_set
 | (forall_ x P) := {forall_ x P}
+
 
 def formula.atomic_list : formula → list formula
 | (true_) := [true_]
@@ -46,6 +48,7 @@ def formula.atomic_list : formula → list formula
 @[derive inhabited]
 def valuation : Type := formula → bool
 
+
 def formula.eval (val : valuation) : formula → bool
 | (true_) := bool.tt
 | (pred_ name args) := val (pred_ name args)
@@ -54,12 +57,14 @@ def formula.eval (val : valuation) : formula → bool
 | (imp_ P Q) := (! P.eval) || Q.eval
 | (forall_ x P) := val (forall_ x P)
 
+
 def formula.is_tauto (P : formula) : Prop :=
   ∀ (val : valuation), P.eval val = bool.tt
 
 
 @[derive inhabited]
 def assignment : Type := formula → bool
+
 
 def formula.assign (f : assignment) : formula → bool
 | (true_) := f true_
@@ -68,6 +73,7 @@ def formula.assign (f : assignment) : formula → bool
 | (not_ P) := ! P.assign
 | (imp_ P Q) := (! P.assign) || Q.assign
 | (forall_ x P) := f (forall_ x P)
+
 
 def assign_ff_to_not (f : assignment) (P : formula) : formula :=
 if formula.assign f P = bool.tt then P else P.not_
