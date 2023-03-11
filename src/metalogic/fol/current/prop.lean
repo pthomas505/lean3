@@ -1020,8 +1020,8 @@ example
   (h1_Δ : ∀ (U' : formula), U' ∈ Δ → U'.is_atomic)
   (h1_U : U.is_atomic)
   (h2 : U ∉ Δ)
-  (h3 : ∀ (f : assignment), is_deduct ({assign_ff_to_not f U} ∪ (Δ.image (assign_ff_to_not f))) P) :
-  ∀ (f : assignment), is_deduct ({U} ∪ (Δ.image (assign_ff_to_not f))) P :=
+  (h3 : ∀ (f : assignment), is_deduct ((Δ.image (assign_ff_to_not f) ∪ {assign_ff_to_not f U})) P) :
+  ∀ (f : assignment), is_deduct ((Δ.image (assign_ff_to_not f)) ∪ {U}) P :=
 begin
   intros val,
   specialize h3 (function.update_ite val U bool.tt),
@@ -1053,8 +1053,8 @@ example
   (h1_Δ : ∀ (U' : formula), U' ∈ Δ → U'.is_atomic)
   (h1_U : U.is_atomic)
   (h2 : U ∉ Δ)
-  (h3 : ∀ (f : assignment), is_deduct ({assign_ff_to_not f U} ∪ (Δ.image (assign_ff_to_not f))) P) :
-  ∀ (f : assignment), is_deduct ({U.not_} ∪ (Δ.image (assign_ff_to_not f))) P :=
+  (h3 : ∀ (f : assignment), is_deduct ((Δ.image (assign_ff_to_not f) ∪ {assign_ff_to_not f U})) P) :
+  ∀ (f : assignment), is_deduct ((Δ.image (assign_ff_to_not f)) ∪ {U.not_}) P :=
 begin
   intros val,
   specialize h3 (function.update_ite val U bool.ff),
@@ -1077,6 +1077,26 @@ begin
 
   rewrite <- s1,
   exact h3,
+end
+
+
+example
+  (P U : formula)
+  (Δ : set formula)
+  (h1_Δ : ∀ (U' : formula), U' ∈ Δ → U'.is_atomic)
+  (h1_U : U.is_atomic)
+  (h2 : U ∉ Δ)
+  (h3 : ∀ (f : assignment), is_deduct ({assign_ff_to_not f U} ∪ (Δ.image (assign_ff_to_not f))) P) :
+  ∀ (f : assignment), is_deduct (Δ.image (assign_ff_to_not f)) P :=
+begin
+  intros f,
+  apply lem_1 P U (Δ.image (assign_ff_to_not f)),
+  {
+    sorry,
+  },
+  {
+    sorry,
+  }
 end
 
 
