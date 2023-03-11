@@ -27,7 +27,7 @@ def formula.is_atomic : formula → Prop
 | (forall_ x P) := true
 
 
-def formula.atomic_set : formula → finset formula
+def formula.atomic_set : formula → set formula
 | (true_) := {true_}
 | (pred_ name args) := {pred_ name args}
 | (eq_ x y) := {eq_ x y}
@@ -36,18 +36,8 @@ def formula.atomic_set : formula → finset formula
 | (forall_ x P) := {forall_ x P}
 
 
-def formula.atomic_list : formula → list formula
-| (true_) := [true_]
-| (pred_ name args) := [pred_ name args]
-| (eq_ x y) := [eq_ x y]
-| (not_ P) := P.atomic_list
-| (imp_ P Q) := P.atomic_list ++ Q.atomic_list
-| (forall_ x P) := [forall_ x P]
-
-
 @[derive inhabited]
 def valuation : Type := formula → bool
-
 
 def formula.eval (val : valuation) : formula → bool
 | (true_) := bool.tt
@@ -57,14 +47,12 @@ def formula.eval (val : valuation) : formula → bool
 | (imp_ P Q) := (! P.eval) || Q.eval
 | (forall_ x P) := val (forall_ x P)
 
-
 def formula.is_tauto (P : formula) : Prop :=
   ∀ (val : valuation), P.eval val = bool.tt
 
 
 @[derive inhabited]
 def assignment : Type := formula → bool
-
 
 def formula.assign (f : assignment) : formula → bool
 | (true_) := f true_
@@ -73,7 +61,6 @@ def formula.assign (f : assignment) : formula → bool
 | (not_ P) := ! P.assign
 | (imp_ P Q) := (! P.assign) || Q.assign
 | (forall_ x P) := f (forall_ x P)
-
 
 def assign_ff_to_not (f : assignment) (P : formula) : formula :=
 if formula.assign f P = bool.tt then P else P.not_
@@ -705,34 +692,6 @@ begin
 end
 
 
-lemma atomic_list_not_nil
-  (P : formula) :
-  ¬ P.atomic_list = list.nil :=
-begin
-  induction P,
-  case [formula.true_, formula.pred_, formula.eq_, formula.forall_]
-  {
-    all_goals
-    {
-      unfold formula.atomic_list,
-      simp only [not_false_iff],
-    },
-  },
-  case formula.not_ : P P_ih
-  {
-    unfold formula.atomic_list,
-    exact P_ih,
-  },
-  case formula.imp_ : P Q P_ih Q_ih
-  {
-    unfold formula.atomic_list,
-    simp only [list.append_eq_nil, not_and],
-    intros a1,
-    exact Q_ih,
-  },
-end
-
-
 lemma mem_atomic_set_is_atomic
   (P P' : formula)
   (h1 : P' ∈ P.atomic_set) :
@@ -744,7 +703,7 @@ begin
     all_goals
     {
       unfold formula.atomic_set at h1,
-      simp only [finset.mem_singleton] at h1,
+      squeeze_simp at h1,
       subst h1,
       unfold formula.is_atomic,
     }
@@ -758,7 +717,7 @@ begin
   case formula.imp_ : P Q P_ih Q_ih
   {
     unfold formula.atomic_set at h1,
-    simp only [finset.mem_union] at h1,
+    squeeze_simp at h1,
     tauto,
   },
 end
@@ -774,9 +733,9 @@ end
 
 lemma L_15_7
   (P P' : formula)
-  (Δ_U : finset formula)
+  (Δ_U : set formula)
   (f : assignment)
-  (Δ_U' : finset formula)
+  (Δ_U' : set formula)
   (h1 : P.atomic_set ⊆ Δ_U)
   (h2 : Δ_U' = Δ_U.image (assign_ff_to_not f))
   (h3 : P' = assign_ff_to_not f P) :
@@ -790,7 +749,7 @@ begin
     let P := true_,
 
     unfold formula.atomic_set at h1,
-    simp only [finset.singleton_subset_iff] at h1,
+    squeeze_simp at h1,
 
     unfold assign_ff_to_not,
     unfold formula.assign,
@@ -805,7 +764,7 @@ begin
     let P := pred_ name args,
 
     unfold formula.atomic_set at h1,
-    simp only [finset.singleton_subset_iff] at h1,
+    squeeze_simp at h1,
 
     unfold assign_ff_to_not,
     unfold formula.assign,
@@ -820,7 +779,7 @@ begin
     let P := eq_ x y,
 
     unfold formula.atomic_set at h1,
-    simp only [finset.singleton_subset_iff] at h1,
+    squeeze_simp at h1,
 
     unfold assign_ff_to_not,
     unfold formula.assign,
@@ -860,7 +819,7 @@ begin
   case formula.imp_ : P Q P_ih Q_ih
   {
     unfold formula.atomic_set at h1,
-    simp only [finset.union_subset_iff] at h1,
+    squeeze_simp at h1,
     cases h1,
 
     unfold assign_ff_to_not at P_ih,
@@ -924,7 +883,7 @@ begin
     let P := forall_ x P,
 
     unfold formula.atomic_set at h1,
-    simp only [finset.singleton_subset_iff] at h1,
+    squeeze_simp at h1,
 
     unfold assign_ff_to_not,
     unfold formula.assign,
