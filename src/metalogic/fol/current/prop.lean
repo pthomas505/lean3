@@ -984,7 +984,7 @@ begin
 end
 
 
-lemma lem_4
+example
   (P U : formula)
   (h1 : ∀ (f : assignment), is_deduct {assign_ff_to_not f U} P)
   (h2 : U.is_atomic) :
@@ -999,7 +999,7 @@ begin
 end
 
 
-lemma lem_5
+example
   (P U : formula)
   (h1 : ∀ (f : assignment), is_deduct {assign_ff_to_not f U} P)
   (h2 : U.is_atomic) :
