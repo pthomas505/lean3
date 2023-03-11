@@ -1016,12 +1016,12 @@ end
 
 example
   (P U : formula)
-  (Δ : list formula)
+  (Δ : set formula)
   (h1_Δ : ∀ (U' : formula), U' ∈ Δ → U'.is_atomic)
   (h1_U : U.is_atomic)
   (h2 : U ∉ Δ)
-  (h3 : ∀ (f : assignment), is_deduct ((assign_ff_to_not f U) :: (Δ.map (assign_ff_to_not f))).to_finset P) :
-  ∀ (f : assignment), is_deduct (U :: (Δ.map (assign_ff_to_not f))).to_finset P :=
+  (h3 : ∀ (f : assignment), is_deduct ({assign_ff_to_not f U} ∪ (Δ.image (assign_ff_to_not f))) P) :
+  ∀ (f : assignment), is_deduct ({U} ∪ (Δ.image (assign_ff_to_not f))) P :=
 begin
   intros val,
   specialize h3 (function.update_ite val U bool.tt),
@@ -1029,9 +1029,9 @@ begin
   unfold function.update_ite at h3,
   simp only [eq_self_iff_true, if_true] at h3,
 
-  have s1 : list.map (assign_ff_to_not (function.update_ite val U tt)) Δ = list.map (assign_ff_to_not val) Δ,
+  have s1 : Δ.image (assign_ff_to_not (function.update_ite val U tt)) = Δ.image (assign_ff_to_not val),
   {
-    simp only [list.map_eq_map_iff],
+    apply set.image_congr,
     intros U' a1,
     specialize h1_Δ U' a1,
     simp only [lem_2 U' U val h1_Δ],
@@ -1049,12 +1049,12 @@ end
 
 example
   (P U : formula)
-  (Δ : list formula)
+  (Δ : set formula)
   (h1_Δ : ∀ (U' : formula), U' ∈ Δ → U'.is_atomic)
   (h1_U : U.is_atomic)
   (h2 : U ∉ Δ)
-  (h3 : ∀ (f : assignment), is_deduct ((assign_ff_to_not f U) :: (Δ.map (assign_ff_to_not f))).to_finset P) :
-  ∀ (f : assignment), is_deduct (U.not_ :: (Δ.map (assign_ff_to_not f))).to_finset P :=
+  (h3 : ∀ (f : assignment), is_deduct ({assign_ff_to_not f U} ∪ (Δ.image (assign_ff_to_not f))) P) :
+  ∀ (f : assignment), is_deduct ({U.not_} ∪ (Δ.image (assign_ff_to_not f))) P :=
 begin
   intros val,
   specialize h3 (function.update_ite val U bool.ff),
@@ -1062,9 +1062,9 @@ begin
   unfold function.update_ite at h3,
   simp only [eq_self_iff_true, if_true] at h3,
 
-  have s1 : list.map (assign_ff_to_not (function.update_ite val U ff)) Δ = list.map (assign_ff_to_not val) Δ,
+  have s1 : Δ.image (assign_ff_to_not (function.update_ite val U ff)) = Δ.image (assign_ff_to_not val),
   {
-    simp only [list.map_eq_map_iff],
+    apply set.image_congr,
     intros U' a1,
     specialize h1_Δ U' a1,
     simp only [lem_3 U' U val h1_Δ],
