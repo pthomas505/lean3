@@ -18,7 +18,7 @@ def function.update_ite
   if a = a' then b else f a
 
 
-def formula.is_prime : formula → Prop
+def formula.is_atomic : formula → Prop
 | (true_) := true
 | (pred_ name args) := true
 | (eq_ x y) := true
@@ -26,20 +26,20 @@ def formula.is_prime : formula → Prop
 | (imp_ P Q) := false
 | (forall_ x P) := true
 
-def formula.prime_set : formula → finset formula
+def formula.atomic_set : formula → finset formula
 | (true_) := {true_}
 | (pred_ name args) := {pred_ name args}
 | (eq_ x y) := {eq_ x y}
-| (not_ P) := P.prime_set
-| (imp_ P Q) := P.prime_set ∪ Q.prime_set
+| (not_ P) := P.atomic_set
+| (imp_ P Q) := P.atomic_set ∪ Q.atomic_set
 | (forall_ x P) := {forall_ x P}
 
-def formula.prime_constituent_list : formula → list formula
+def formula.atomic_list : formula → list formula
 | (true_) := [true_]
 | (pred_ name args) := [pred_ name args]
 | (eq_ x y) := [eq_ x y]
-| (not_ P) := P.prime_constituent_list
-| (imp_ P Q) := P.prime_constituent_list ++ Q.prime_constituent_list
+| (not_ P) := P.atomic_list
+| (imp_ P Q) := P.atomic_list ++ Q.atomic_list
 | (forall_ x P) := [forall_ x P]
 
 
@@ -691,101 +691,136 @@ begin
 end
 
 
-lemma L_15_7
-  (P : formula)
-  (Δ_U Δ_U' : set formula)
-  (val : valuation)
-  (h1 : coe P.prime_set ⊆ Δ_U)
-  (h2 : ∀ (U : formula), U ∈ Δ_U ↔ map_val val U ∈ Δ_U')
-  (h3 : val true_ = bool.tt) :
-  if formula.eval val P = bool.tt then is_deduct Δ_U' P else is_deduct Δ_U' P.not_ :=
+lemma atomic_list_not_nil
+  (P : formula) :
+  ¬ P.atomic_list = list.nil :=
 begin
+  induction P,
+  case [formula.true_, formula.pred_, formula.eq_, formula.forall_]
+  {
+    all_goals
+    {
+      unfold formula.atomic_list,
+      simp only [not_false_iff],
+    },
+  },
+  case formula.not_ : P P_ih
+  {
+    unfold formula.atomic_list,
+    exact P_ih,
+  },
+  case formula.imp_ : P Q P_ih Q_ih
+  {
+    unfold formula.atomic_list,
+    simp only [list.append_eq_nil, not_and],
+    intros a1,
+    exact Q_ih,
+  },
+end
+
+
+lemma mem_atomic_set_is_atomic
+  (P P' : formula)
+  (h1 : P' ∈ P.atomic_set) :
+  P'.is_atomic :=
+begin
+  induction P,
+  case [formula.true_, formula.pred_, formula.eq_, formula.forall_]
+  {
+    all_goals
+    {
+      unfold formula.atomic_set at h1,
+      simp only [finset.mem_singleton] at h1,
+      subst h1,
+      unfold formula.is_atomic,
+    }
+  },
+  case formula.not_ : P P_ih
+  {
+    unfold formula.atomic_set at h1,
+
+    exact P_ih h1,
+  },
+  case formula.imp_ : P Q P_ih Q_ih
+  {
+    unfold formula.atomic_set at h1,
+    simp only [finset.mem_union] at h1,
+    tauto,
+  },
+end
+
+
+lemma bnot_eq_tt_iff_not_eq_tt
+  (b : bool) :
+  !b = bool.tt ↔ ¬ b = bool.tt :=
+begin
+  simp only [bnot_eq_true_eq_eq_ff, eq_ff_eq_not_eq_tt],
+end
+
+
+lemma L_15_7
+  (P P' : formula)
+  (Δ_U : finset formula)
+  (val : valuation)
+  (Δ_U' : finset formula)
+  (h1 : P.atomic_set ⊆ Δ_U)
+  (h2 : Δ_U' = Δ_U.image (eval_ff_to_not val))
+  (h3 : P' = eval_ff_to_not val P) :
+  is_deduct Δ_U' P' :=
+begin
+  subst h2,
+  subst h3,
   induction P,
   case formula.true_
   {
-    unfold formula.prime_set at h1,
-    simp only [finset.coe_singleton, set.singleton_subset_iff] at h1,
-
-    unfold map_val at h2,
-    specialize h2 true_,
-    simp only [if_pos h3] at h2,
-    cases h2,
-
+    unfold eval_ff_to_not,
     unfold formula.eval,
     simp only [eq_self_iff_true, if_true],
-
-    apply is_deduct.assume_,
-    exact h2_mp h1,
+    apply is_deduct.axiom_,
+    exact is_axiom.prop_true_,
   },
   case formula.pred_ : name args
   {
     let P := pred_ name args,
 
-    unfold formula.prime_set at h1,
-    simp only [finset.coe_singleton, set.singleton_subset_iff] at h1,
+    unfold formula.atomic_set at h1,
+    simp only [finset.singleton_subset_iff] at h1,
 
-    unfold map_val at h2,
-    specialize h2 P,
-
+    unfold eval_ff_to_not,
     unfold formula.eval,
 
-    split_ifs,
-    {
-      simp only [if_pos h] at h2,
-      cases h2,
-      apply is_deduct.assume_,
-      exact h2_mp h1,
-    },
-    {
-      simp only [if_neg h] at h2,
-      cases h2,
-      apply is_deduct.assume_,
-      exact h2_mp h1,
-    }
+    apply is_deduct.assume_,
+    simp only [finset.coe_image, set.mem_image, finset.mem_coe],
+    apply exists.intro P,
+    tauto,
   },
   case formula.eq_ : x y
   {
     let P := eq_ x y,
 
-    unfold formula.prime_set at h1,
-    simp only [finset.coe_singleton, set.singleton_subset_iff] at h1,
+    unfold formula.atomic_set at h1,
+    simp only [finset.singleton_subset_iff] at h1,
 
-    unfold map_val at h2,
-    specialize h2 P,
-
+    unfold eval_ff_to_not,
     unfold formula.eval,
 
-    split_ifs,
-    {
-      simp only [if_pos h] at h2,
-      cases h2,
-      apply is_deduct.assume_,
-      exact h2_mp h1,
-    },
-    {
-      simp only [if_neg h] at h2,
-      cases h2,
-      apply is_deduct.assume_,
-      exact h2_mp h1,
-    }
+    apply is_deduct.assume_,
+    simp only [finset.coe_image, set.mem_image, finset.mem_coe],
+    apply exists.intro P,
+    tauto,
   },
   case formula.not_ : P P_ih
   {
-    unfold formula.prime_set at h1,
+    unfold formula.atomic_set at h1,
 
-    specialize P_ih h1,
+    unfold eval_ff_to_not at P_ih,
 
+    unfold eval_ff_to_not,
     unfold formula.eval,
 
+    simp only [bnot_eq_tt_iff_not_eq_tt],
     split_ifs,
     {
-      simp only [bnot_eq_true_eq_eq_ff] at h,
-      simp only [h] at P_ih,
-      simp only [if_false] at P_ih,
-      exact P_ih,
-    },
-    {
-      simp only [bnot_eq_true_eq_eq_ff, eq_tt_eq_not_eq_ff] at h,
       simp only [if_pos h] at P_ih,
       apply is_deduct.mp_ P,
       {
@@ -793,25 +828,32 @@ begin
         apply T_14_6,
       },
       {
-        exact P_ih,
+        exact P_ih h1,
       },
-    }
+    },
+    {
+      simp only [if_neg h] at P_ih,
+      exact P_ih h1,
+    },
   },
   case formula.imp_ : P Q P_ih Q_ih
   {
-    unfold formula.prime_set at h1,
-    simp only [finset.coe_union, set.union_subset_iff] at h1,
+    unfold formula.atomic_set at h1,
+    simp only [finset.union_subset_iff] at h1,
     cases h1,
 
+    unfold eval_ff_to_not at P_ih,
+    unfold eval_ff_to_not at Q_ih,
+
+    unfold eval_ff_to_not,
     unfold formula.eval,
+    simp only [bor_eq_true_eq_eq_tt_or_eq_tt],
+    simp only [bnot_eq_tt_iff_not_eq_tt],
     split_ifs,
     {
-      simp only [bor_eq_true_eq_eq_tt_or_eq_tt, bnot_eq_true_eq_eq_ff] at h,
       cases h,
       {
-        rewrite <- eq_ff_eq_not_eq_tt at h,
         simp only [if_neg h] at P_ih,
-
         apply is_deduct.mp_ P.not_,
         {
           apply proof_imp_deduct,
@@ -819,7 +861,7 @@ begin
         },
         {
           exact P_ih h1_left,
-        }
+        },
       },
       {
         simp only [if_pos h] at Q_ih,
@@ -831,18 +873,15 @@ begin
         },
         {
           exact Q_ih h1_right,
-        }
+        },
       }
     },
     {
-      simp only [bor_eq_true_eq_eq_tt_or_eq_tt, bnot_eq_true_eq_eq_ff] at h,
       push_neg at h,
-      simp only [ne.def, eq_tt_eq_not_eq_ff, eq_ff_eq_not_eq_tt] at h,
-      rewrite <- eq_ff_eq_not_eq_tt at h,
+      dsimp at h,
       cases h,
       simp only [if_pos h_left] at P_ih,
       simp only [if_neg h_right] at Q_ih,
-
       apply is_deduct.mp_ Q.not_,
       {
         apply is_deduct.mp_ P,
@@ -856,132 +895,28 @@ begin
       },
       {
         exact Q_ih h1_right,
-      }
+      },
     }
   },
   case formula.forall_ : x P P_ih
   {
     let P := forall_ x P,
 
-    unfold formula.prime_set at h1,
-    simp only [finset.coe_singleton, set.singleton_subset_iff] at h1,
+    unfold formula.atomic_set at h1,
+    simp only [finset.singleton_subset_iff] at h1,
 
-    unfold map_val at h2,
-    specialize h2 P,
-
+    unfold eval_ff_to_not,
     unfold formula.eval,
 
-    split_ifs,
-    {
-      simp only [if_pos h] at h2,
-      cases h2,
-      apply is_deduct.assume_,
-      exact h2_mp h1,
-    },
-    {
-      simp only [if_neg h] at h2,
-      cases h2,
-      apply is_deduct.assume_,
-      exact h2_mp h1,
-    }
-  },
-end
-
-
-lemma prime_constituent_list_not_nil
-  (P : formula) :
-  ¬ P.prime_constituent_list = list.nil :=
-begin
-  induction P,
-  case [formula.true_, formula.pred_, formula.eq_, formula.forall_]
-  {
-    all_goals
-    {
-      unfold formula.prime_constituent_list,
-      simp only [not_false_iff],
-    },
-  },
-  case formula.not_ : P P_ih
-  {
-    unfold formula.prime_constituent_list,
-    exact P_ih,
-  },
-  case formula.imp_ : P Q P_ih Q_ih
-  {
-    unfold formula.prime_constituent_list,
-    simp only [list.append_eq_nil, not_and],
-    intros a1,
-    exact Q_ih,
-  },
-end
-
-
-lemma mem_prime_set_imp_is_prime
-  (P P' : formula)
-  (h1 : P' ∈ P.prime_set) :
-  P'.is_prime :=
-begin
-  induction P,
-  case [formula.true_, formula.pred_, formula.eq_, formula.forall_]
-  {
-    all_goals
-    {
-      unfold formula.prime_set at h1,
-      simp only [finset.mem_singleton] at h1,
-      subst h1,
-      unfold formula.is_prime,
-    }
-  },
-  case formula.not_ : P P_ih
-  {
-    unfold formula.prime_set at h1,
-
-    exact P_ih h1,
-  },
-  case formula.imp_ : P Q P_ih Q_ih
-  {
-    unfold formula.prime_set at h1,
-    simp only [finset.mem_union] at h1,
+    apply is_deduct.assume_,
+    simp only [finset.coe_image, set.mem_image, finset.mem_coe],
+    apply exists.intro P,
     tauto,
   },
 end
 
 
 lemma lem_1
-  (P P' : formula)
-  (Δ_U : list formula)
-  (val : valuation)
-  (Δ_U' : list formula)
-  (h1 : P.prime_constituent_list ⊆ Δ_U)
-  (h2 : Δ_U' = Δ_U.map (eval_ff_to_not val))
-  (h3 : P' = eval_ff_to_not val P) :
-  is_deduct Δ_U'.to_finset P' :=
-begin
-  subst h2,
-  subst h3,
-  induction P,
-  case formula.true_
-  {
-    unfold eval_ff_to_not,
-    unfold formula.eval,
-    simp only [eq_self_iff_true, if_true],
-    apply is_deduct.axiom_,
-    exact is_axiom.prop_true_,
-  },
-  case formula.pred_ : P_ᾰ P_ᾰ_1
-  { admit },
-  case formula.eq_ : P_ᾰ P_ᾰ_1
-  { admit },
-  case formula.not_ : P_ᾰ P_ih
-  { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
-  { admit },
-  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih
-  { admit },
-end
-
-
-lemma lem_2
   (P U : formula)
   (Δ : set formula)
   (h1 : is_deduct (Δ ∪ {U}) P)
@@ -1007,48 +942,12 @@ begin
 end
 
 
-lemma lem_3
+lemma lem_2
   (P P' : formula)
   (val : valuation)
-  (h1 : P.is_prime) :
-  formula.eval (function.update_ite val P' tt) P =
-    function.update_ite (formula.eval val) P' tt P
- :=
-begin
-  induction P,
-  case formula.true_
-  {
-    unfold function.update_ite,
-    unfold formula.eval,
-    simp only [if_t_t],
-  },
-  case [formula.pred_, formula.eq_, formula.forall_]
-  {
-    all_goals
-    {
-      unfold function.update_ite,
-      unfold formula.eval,
-      unfold function.update_ite,
-    },
-  },
-  case [formula.not_, formula.imp_]
-  {
-    all_goals
-    {
-      unfold formula.is_prime at h1,
-      contradiction,
-    },
-  },
-end
-
-
-lemma lem_3'
-  (P P' : formula)
-  (val : valuation)
-  (h1 : P.is_prime) :
+  (h1 : P.is_atomic) :
   eval_ff_to_not (function.update_ite val P' tt) P =
-    function.update_ite (eval_ff_to_not val) P' P P
- :=
+    function.update_ite (eval_ff_to_not val) P' P P :=
 begin
   induction P,
   case formula.true_
@@ -1074,7 +973,7 @@ begin
   {
     all_goals
     {
-      unfold formula.is_prime at h1,
+      unfold formula.is_atomic at h1,
       contradiction,
     }
   },
@@ -1084,12 +983,12 @@ end
 example
   (P U : formula)
   (h1 : ∀ (val : valuation), is_deduct {eval_ff_to_not val U} P)
-  (h2 : U.is_prime) :
+  (h2 : U.is_atomic) :
   ∀ (val : valuation), is_deduct {U} P :=
 begin
   intros val,
   specialize h1 (function.update_ite val U bool.tt),
-  simp only [lem_3' U U val h2] at h1,
+  simp only [lem_2 U U val h2] at h1,
   unfold function.update_ite at h1,
   simp only [eq_self_iff_true, if_true] at h1,
   exact h1,
@@ -1099,15 +998,15 @@ end
 example
   (P U : formula)
   (Δ : list formula)
-  (h1_Δ : ∀ (U' : formula), U' ∈ Δ → U'.is_prime)
-  (h1_U : U.is_prime)
+  (h1_Δ : ∀ (U' : formula), U' ∈ Δ → U'.is_atomic)
+  (h1_U : U.is_atomic)
   (h2 : U ∉ Δ)
   (h3 : ∀ (val : valuation), is_deduct ((eval_ff_to_not val U) :: (Δ.map (eval_ff_to_not val))).to_finset P) :
   ∀ (val : valuation), is_deduct (U :: (Δ.map (eval_ff_to_not val))).to_finset P :=
 begin
   intros val,
   specialize h3 (function.update_ite val U bool.tt),
-  simp only [lem_3' U U val h1_U] at h3,
+  simp only [lem_2 U U val h1_U] at h3,
   unfold function.update_ite at h3,
   simp only [eq_self_iff_true, if_true] at h3,
 
@@ -1116,7 +1015,7 @@ begin
     simp only [list.map_eq_map_iff],
     intros U' a1,
     specialize h1_Δ U' a1,
-    simp only [lem_3' U' U val h1_Δ],
+    simp only [lem_2 U' U val h1_Δ],
     unfold function.update_ite,
     simp only [ite_eq_right_iff],
     intros a2,
@@ -1129,75 +1028,17 @@ begin
 end
 
 
-example
-  (P : formula)
-  (Δ_U : list formula)
-  (h1 : P.is_tauto)
-  (h2 : P.prime_constituent_list = Δ_U)
-  (h3 : list.nodup Δ_U) :
-  is_proof P :=
+def finset.decreasing_induction
+  {α : Type}
+  [decidable_eq α]
+  (P : finset α → Prop)
+  (U V : finset α)
+  (h1 : ∀ (S : finset α) (x : α), P S → P (S \ {x}))
+  (h2 : U ⊆ V)
+  (h3 : P V) :
+  P U :=
 begin
-  unfold formula.is_tauto at h1,
-
-  have s1 : ∀ (val : valuation),
-    is_deduct (Δ_U.map (eval_ff_to_not val)).to_finset P,
-  intros val,
-  apply lem_1 P P P.prime_constituent_list val,
-  {
-    simp only [list.subset.refl],
-  },
-  {
-    subst h2,
-  },
-  {
-    unfold eval_ff_to_not,
-    rewrite h1 val,
-    squeeze_simp,
-  },
-
-  induction Δ_U,
-  case list.nil
-  {
-    exfalso,
-    exact prime_constituent_list_not_nil P h2,
-  },
-  case list.cons : Δ_U_hd Δ_U_tl Δ_U_ih
-  {
-    have s2 : ∀ (val : valuation),
-      is_deduct (Δ_U_hd :: (Δ_U_tl.map (eval_ff_to_not val))).to_finset P,
-    intros val,
-
-    apply lem_1 P P P.prime_constituent_list (function.update_ite val Δ_U_hd bool.tt),
-    {
-      squeeze_simp,
-    },
-    {
-      rewrite h2,
-      squeeze_simp,
-      split,
-      {
-        rewrite lem_3',
-        unfold function.update_ite,
-        squeeze_simp,
-        sorry,
-      },
-      {
-        simp only [list.map_eq_map_iff],
-        intros Q a1,
-        squeeze_simp at h3,
-        cases h3,
-        sorry,
-      },
-
-    },
-    {
-      unfold eval_ff_to_not,
-      sorry,
-    },
-    {
-      sorry,
-    }
-  },
+  sorry,
 end
 
 
@@ -1206,6 +1047,29 @@ theorem prop_complete
   (h1 : P.is_tauto) :
   is_proof P :=
 begin
-  unfold formula.is_tauto at h1,
+  unfold is_proof,
+
+  let Δ_U := P.atomic_set,
+  let Δ_U' := fun (val : valuation), Δ_U.image (eval_ff_to_not val),
+  let P' := fun (val : valuation), eval_ff_to_not val P,
+
+  have s1 : ∀ (val : valuation), is_deduct (Δ_U' val) (P' val),
+  sorry,
+
+  have s2 : ∀ (val : valuation), is_deduct (Δ_U' val) P,
+  sorry,
+
+  have s3 : ∀ (val : valuation) (U : formula),
+    U ∈ Δ_U → is_deduct (Δ_U' val \ {eval_ff_to_not val U} ∪ {U}) P,
+  sorry,
+
+  have s4 : ∀ (val : valuation) (U : formula),
+    U ∈ Δ_U → is_deduct (Δ_U' val \ {eval_ff_to_not val U} ∪ {U.not_}) P,
+  sorry,
+
+  have s5 : ∀ (val : valuation) (U : formula),
+    U ∈ Δ_U → is_deduct (Δ_U' val \ {eval_ff_to_not val U}) P,
+  sorry,
+
   sorry,
 end
