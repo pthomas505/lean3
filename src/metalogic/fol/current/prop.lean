@@ -1127,7 +1127,9 @@ begin
   intros f,
   induction S using finset.induction_on,
   case h₁
-  { admit },
+  {
+    simp only [finset.image_empty, finset.coe_empty, imp_self],
+  },
   case h₂ : S_a S_s S_ᾰ S_ᾰ_1
   { admit },
 end
