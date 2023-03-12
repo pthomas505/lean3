@@ -939,6 +939,7 @@ begin
     all_goals
     {
       unfold formula.is_atomic at h1,
+
       contradiction,
     }
   },
@@ -975,6 +976,7 @@ begin
     all_goals
     {
       unfold formula.is_atomic at h1,
+
       contradiction,
     }
   },
