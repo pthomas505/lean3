@@ -1122,7 +1122,7 @@ theorem prop_complete_aux
   (Δ_U : finset formula)
   (f : assignment)
   (h1 : P.is_tauto)
-  (h2 : Δ_U = P.atomic_set)
+  (h2 : Δ_U ⊆ P.atomic_set)
   (h3 : is_deduct (Δ_U.image (assign_ff_to_not f)) P) :
   is_deduct ∅ P :=
 begin
@@ -1133,7 +1133,18 @@ begin
     exact h3,
   },
   case h₂ : U Δ_U Δ_U_1 Δ_U_2
-  { admit },
+  {
+    apply Δ_U_2,
+    clear Δ_U_2,
+    {
+      simp only [finset.insert_subset] at h2,
+      cases h2,
+      exact h2_right,
+    },
+    {
+      sorry,
+    }
+  },
 end
 
 
