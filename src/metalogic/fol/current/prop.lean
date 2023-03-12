@@ -1139,7 +1139,17 @@ begin
     {
       clear Δ_U_2,
       squeeze_simp at h3,
-      sorry,
+      squeeze_simp,
+      apply lem_12 P U Δ_U,
+      {
+
+      },
+      {
+
+      },
+      {
+
+      }
     }
   },
 end
