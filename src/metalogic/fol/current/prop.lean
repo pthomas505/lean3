@@ -699,8 +699,8 @@ begin
     {
       unfold formula.atomic_set at h1,
       simp only [finset.mem_singleton] at h1,
-      subst h1,
 
+      subst h1,
       unfold formula.is_atomic,
     }
   },
