@@ -27,7 +27,7 @@ def formula.is_atomic : formula → Prop
 | (forall_ x P) := true
 
 
-def formula.atomic_set : formula → set formula
+def formula.atomic_set : formula → finset formula
 | (true_) := {true_}
 | (pred_ name args) := {pred_ name args}
 | (eq_ x y) := {eq_ x y}
@@ -736,7 +736,7 @@ lemma L_15_7
   (Δ_U : set formula)
   (f : assignment)
   (Δ_U' : set formula)
-  (h1 : P.atomic_set ⊆ Δ_U)
+  (h1 : coe P.atomic_set ⊆ Δ_U)
   (h2 : Δ_U' = Δ_U.image (assign_ff_to_not f))
   (h3 : P' = assign_ff_to_not f P) :
   is_deduct Δ_U' P' :=
@@ -1097,7 +1097,7 @@ begin
 end
 
 
-example
+lemma lem_12
   (P U : formula)
   (Δ : set formula)
   (h1_Δ : ∀ (U' : formula), U' ∈ Δ → U'.is_atomic)
@@ -1117,13 +1117,24 @@ begin
 end
 
 
-lemma finset.decreasing_induction_on
+theorem prop_complete_aux
+  (P : formula)
   (S : finset formula)
-  (P : finset formula → Prop)
-  (h1 : P S)
-  (h2 : ∀ (S' : finset formula) (U : formula),
-    S' ⊆ S → P S' → U ∈ S' → P (S' \ {U})) :
-  ∀ (S' : finset formula), S' ⊆ S → P S' := sorry
+  (h1 : P.is_tauto)
+  (h2 : S = P.atomic_set) :
+  ∀ (f : assignment), is_deduct (S.image (assign_ff_to_not f)) P → is_deduct ∅ P :=
+begin
+  intros f,
+  apply finset.induction_on S,
+  {
+    simp only [finset.image_empty, finset.coe_empty, imp_self],
+  },
+  {
+    intros S a1 a2 a3 a4,
+    apply a3,
+    sorry,
+  }
+end
 
 
 theorem prop_complete
@@ -1134,6 +1145,5 @@ begin
   unfold formula.is_tauto at h1,
 
   unfold is_proof,
-
   sorry,
 end
