@@ -1157,6 +1157,18 @@ begin
     refl,
   },
   {
-    sorry,
+    apply L_15_7 P P P.atomic_set valuation.inhabited.default (P.atomic_set.image (eval_ff_to_not valuation.inhabited.default)),
+    {
+      refl,
+    },
+    {
+      squeeze_simp,
+    },
+    {
+      unfold formula.is_tauto at h1,
+      unfold eval_ff_to_not,
+      specialize h1 valuation.inhabited.default,
+      simp only [if_pos h1],
+    }
   }
 end
