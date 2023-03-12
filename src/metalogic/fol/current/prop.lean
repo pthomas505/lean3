@@ -689,7 +689,7 @@ begin
   case formula.true_
   {
     unfold formula.atomic_set at h1,
-    squeeze_simp at h1,
+    simp only [finset.not_mem_empty] at h1,
 
     contradiction,
   },
@@ -698,7 +698,7 @@ begin
     all_goals
     {
       unfold formula.atomic_set at h1,
-      squeeze_simp at h1,
+      simp only [finset.mem_singleton] at h1,
       subst h1,
 
       unfold formula.is_atomic,
@@ -713,7 +713,7 @@ begin
   case formula.imp_ : P Q P_ih Q_ih
   {
     unfold formula.atomic_set at h1,
-    squeeze_simp at h1,
+    simp only [finset.mem_union] at h1,
 
     tauto,
   },
@@ -751,7 +751,7 @@ begin
     let P := pred_ name args,
 
     unfold formula.atomic_set at h1,
-    squeeze_simp at h1,
+    simp only [finset.coe_singleton, set.singleton_subset_iff] at h1,
 
     unfold eval_ff_to_not,
     unfold formula.eval,
@@ -766,7 +766,7 @@ begin
     let P := eq_ x y,
 
     unfold formula.atomic_set at h1,
-    squeeze_simp at h1,
+    simp only [finset.coe_singleton, set.singleton_subset_iff] at h1,
 
     unfold eval_ff_to_not,
     unfold formula.eval,
@@ -806,7 +806,7 @@ begin
   case formula.imp_ : P Q P_ih Q_ih
   {
     unfold formula.atomic_set at h1,
-    squeeze_simp at h1,
+    simp only [finset.coe_union, set.union_subset_iff] at h1,
     cases h1,
 
     unfold eval_ff_to_not at P_ih,
@@ -870,7 +870,7 @@ begin
     let P := forall_ x P,
 
     unfold formula.atomic_set at h1,
-    squeeze_simp at h1,
+    simp only [finset.coe_singleton, set.singleton_subset_iff] at h1,
 
     unfold eval_ff_to_not,
     unfold formula.eval,
@@ -1097,7 +1097,7 @@ begin
   induction Δ_U using finset.induction_on,
   case h₁
   {
-    squeeze_simp at h3,
+    simp only [finset.image_empty, finset.coe_empty, forall_const] at h3,
     exact h3,
   },
   case h₂ : U Δ_U Δ_U_1 Δ_U_2
@@ -1158,7 +1158,7 @@ begin
       refl,
     },
     {
-      squeeze_simp,
+      simp only [finset.coe_image],
     },
     {
       unfold formula.is_tauto at h1,
