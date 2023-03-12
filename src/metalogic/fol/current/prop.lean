@@ -755,7 +755,6 @@ begin
 
     unfold eval_ff_to_not,
     unfold formula.eval,
-
     apply is_deduct.assume_,
     simp only [finset.coe_image, set.mem_image, finset.mem_coe],
     apply exists.intro P,
@@ -770,7 +769,6 @@ begin
 
     unfold eval_ff_to_not,
     unfold formula.eval,
-
     apply is_deduct.assume_,
     simp only [finset.coe_image, set.mem_image, finset.mem_coe],
     apply exists.intro P,
@@ -874,7 +872,6 @@ begin
 
     unfold eval_ff_to_not,
     unfold formula.eval,
-
     apply is_deduct.assume_,
     simp only [finset.coe_image, set.mem_image, finset.mem_coe],
     apply exists.intro P,
