@@ -1125,15 +1125,11 @@ theorem prop_complete_aux
   ∀ (f : assignment), is_deduct (S.image (assign_ff_to_not f)) P → is_deduct ∅ P :=
 begin
   intros f,
-  apply finset.induction_on S,
-  {
-    simp only [finset.image_empty, finset.coe_empty, imp_self],
-  },
-  {
-    intros S a1 a2 a3 a4,
-    apply a3,
-    sorry,
-  }
+  induction S using finset.induction_on,
+  case h₁
+  { admit },
+  case h₂ : S_a S_s S_ᾰ S_ᾰ_1
+  { admit },
 end
 
 
