@@ -1129,7 +1129,7 @@ begin
   induction Δ_U using finset.induction_on,
   case h₁
   { admit },
-  case h₂ : Δ_U_a Δ_U_s Δ_U_ᾰ Δ_U_ᾰ_1
+  case h₂ : U Δ_U Δ_U_1 Δ_U_2
   { admit },
 end
 
