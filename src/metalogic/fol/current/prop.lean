@@ -1162,6 +1162,7 @@ begin
     },
     {
       unfold formula.is_tauto at h1,
+
       unfold eval_ff_to_not,
       specialize h1 val,
       simp only [if_pos h1],
