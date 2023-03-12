@@ -1098,6 +1098,7 @@ begin
   case h₁
   {
     simp only [finset.image_empty, finset.coe_empty, forall_const] at h3,
+
     exact h3,
   },
   case h₂ : U Δ_U Δ_U_1 Δ_U_2
@@ -1106,25 +1107,24 @@ begin
     {
       simp only [finset.insert_subset] at h2,
       cases h2,
+
       exact h2_right,
     },
     {
-      squeeze_simp at h3,
-      squeeze_simp,
+      simp only [finset.insert_subset] at h2,
+      cases h2,
+
+      simp only [finset.image_insert, finset.coe_insert, finset.coe_image] at h3,
+
+      simp only [finset.coe_image],
       apply lem_12 P U Δ_U,
       {
         intros U' a1,
-        squeeze_simp at h2,
-        simp only [finset.insert_subset] at h2,
-        cases h2,
         apply mem_atomic_set_is_atomic P U',
         apply h2_right,
         exact a1,
       },
       {
-        squeeze_simp at h2,
-        simp only [finset.insert_subset] at h2,
-        cases h2,
         apply mem_atomic_set_is_atomic P U,
         exact h2_left,
       },
@@ -1132,7 +1132,7 @@ begin
         exact Δ_U_1,
       },
       {
-        squeeze_simp,
+        simp only [set.union_singleton],
         exact h3,
       }
     }
