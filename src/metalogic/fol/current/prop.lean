@@ -984,6 +984,23 @@ begin
 end
 
 
+lemma comp_update_ite
+  {α α' β : Sort*}
+  [decidable_eq α]
+  (f : α' → β)
+  (g : α → α')
+  (i : α)
+  (v : α') :
+  f ∘ (function.update_ite g i v) =
+    function.update_ite (f ∘ g) i (f v) :=
+begin
+  funext,
+  simp only [function.comp_app],
+  unfold function.update_ite,
+  split_ifs; refl,
+end
+
+
 example
   (P U : formula)
   (h1 : ∀ (f : assignment), is_deduct {assign_ff_to_not f U} P)
@@ -1014,7 +1031,7 @@ begin
 end
 
 
-example
+lemma lem_10
   (P U : formula)
   (Δ : set formula)
   (h1_Δ : ∀ (U' : formula), U' ∈ Δ → U'.is_atomic)
@@ -1023,18 +1040,18 @@ example
   (h3 : ∀ (f : assignment), is_deduct ((Δ.image (assign_ff_to_not f) ∪ {assign_ff_to_not f U})) P) :
   ∀ (f : assignment), is_deduct ((Δ.image (assign_ff_to_not f)) ∪ {U}) P :=
 begin
-  intros val,
-  specialize h3 (function.update_ite val U bool.tt),
-  simp only [lem_2 U U val h1_U] at h3,
+  intros f,
+  specialize h3 (function.update_ite f U bool.tt),
+  simp only [lem_2 U U f h1_U] at h3,
   unfold function.update_ite at h3,
   simp only [eq_self_iff_true, if_true] at h3,
 
-  have s1 : Δ.image (assign_ff_to_not (function.update_ite val U tt)) = Δ.image (assign_ff_to_not val),
+  have s1 : Δ.image (assign_ff_to_not (function.update_ite f U tt)) = Δ.image (assign_ff_to_not f),
   {
     apply set.image_congr,
     intros U' a1,
     specialize h1_Δ U' a1,
-    simp only [lem_2 U' U val h1_Δ],
+    simp only [lem_2 U' U f h1_Δ],
     unfold function.update_ite,
     simp only [ite_eq_right_iff],
     intros a2,
@@ -1047,7 +1064,7 @@ begin
 end
 
 
-example
+lemma lem_11
   (P U : formula)
   (Δ : set formula)
   (h1_Δ : ∀ (U' : formula), U' ∈ Δ → U'.is_atomic)
@@ -1056,18 +1073,18 @@ example
   (h3 : ∀ (f : assignment), is_deduct ((Δ.image (assign_ff_to_not f) ∪ {assign_ff_to_not f U})) P) :
   ∀ (f : assignment), is_deduct ((Δ.image (assign_ff_to_not f)) ∪ {U.not_}) P :=
 begin
-  intros val,
-  specialize h3 (function.update_ite val U bool.ff),
-  simp only [lem_3 U U val h1_U] at h3,
+  intros f,
+  specialize h3 (function.update_ite f U bool.ff),
+  simp only [lem_3 U U f h1_U] at h3,
   unfold function.update_ite at h3,
   simp only [eq_self_iff_true, if_true] at h3,
 
-  have s1 : Δ.image (assign_ff_to_not (function.update_ite val U ff)) = Δ.image (assign_ff_to_not val),
+  have s1 : Δ.image (assign_ff_to_not (function.update_ite f U ff)) = Δ.image (assign_ff_to_not f),
   {
     apply set.image_congr,
     intros U' a1,
     specialize h1_Δ U' a1,
-    simp only [lem_3 U' U val h1_Δ],
+    simp only [lem_3 U' U f h1_Δ],
     unfold function.update_ite,
     simp only [ite_eq_right_iff],
     intros a2,
@@ -1086,16 +1103,16 @@ example
   (h1_Δ : ∀ (U' : formula), U' ∈ Δ → U'.is_atomic)
   (h1_U : U.is_atomic)
   (h2 : U ∉ Δ)
-  (h3 : ∀ (f : assignment), is_deduct ({assign_ff_to_not f U} ∪ (Δ.image (assign_ff_to_not f))) P) :
+  (h3 : ∀ (f : assignment), is_deduct ((Δ.image (assign_ff_to_not f)) ∪ {assign_ff_to_not f U}) P) :
   ∀ (f : assignment), is_deduct (Δ.image (assign_ff_to_not f)) P :=
 begin
   intros f,
   apply lem_1 P U (Δ.image (assign_ff_to_not f)),
   {
-    sorry,
+    apply lem_10 P U Δ h1_Δ h1_U h2 h3,
   },
   {
-    sorry,
+    apply lem_11 P U Δ h1_Δ h1_U h2 h3,
   }
 end
 
