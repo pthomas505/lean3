@@ -1119,18 +1119,17 @@ end
 
 theorem prop_complete_aux
   (P : formula)
-  (S : finset formula)
+  (Δ_U : finset formula)
+  (f : assignment)
   (h1 : P.is_tauto)
-  (h2 : S = P.atomic_set) :
-  ∀ (f : assignment), is_deduct (S.image (assign_ff_to_not f)) P → is_deduct ∅ P :=
+  (h2 : Δ_U = P.atomic_set)
+  (h3 : is_deduct (Δ_U.image (assign_ff_to_not f)) P) :
+  is_deduct ∅ P :=
 begin
-  intros f,
-  induction S using finset.induction_on,
+  induction Δ_U using finset.induction_on,
   case h₁
-  {
-    simp only [finset.image_empty, finset.coe_empty, imp_self],
-  },
-  case h₂ : S_a S_s S_ᾰ S_ᾰ_1
+  { admit },
+  case h₂ : Δ_U_a Δ_U_s Δ_U_ᾰ Δ_U_ᾰ_1
   { admit },
 end
 
