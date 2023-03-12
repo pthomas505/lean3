@@ -1128,7 +1128,10 @@ theorem prop_complete_aux
 begin
   induction Δ_U using finset.induction_on,
   case h₁
-  { admit },
+  {
+    squeeze_simp at h3,
+    exact h3,
+  },
   case h₂ : U Δ_U Δ_U_1 Δ_U_2
   { admit },
 end
