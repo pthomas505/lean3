@@ -1114,10 +1114,9 @@ end
 theorem prop_complete_aux
   (P : formula)
   (Δ_U : finset formula)
-  (val : valuation)
   (h1 : P.is_tauto)
   (h2 : Δ_U ⊆ P.atomic_set)
-  (h3 : is_deduct (Δ_U.image (eval_ff_to_not val)) P) :
+  (h3 : ∀ (val : valuation), is_deduct (Δ_U.image (eval_ff_to_not val)) P) :
   is_deduct ∅ P :=
 begin
   induction Δ_U using finset.induction_on,
@@ -1142,13 +1141,27 @@ begin
       squeeze_simp,
       apply lem_12 P U Δ_U,
       {
-
+        intros U' a1,
+        squeeze_simp at h2,
+        simp only [finset.insert_subset] at h2,
+        cases h2,
+        apply mem_atomic_set_is_atomic P U',
+        apply h2_right,
+        exact a1,
       },
       {
-
+        squeeze_simp at h2,
+        simp only [finset.insert_subset] at h2,
+        cases h2,
+        apply mem_atomic_set_is_atomic P U,
+        exact h2_left,
       },
       {
-
+        exact Δ_U_1,
+      },
+      {
+        squeeze_simp,
+        exact h3,
       }
     }
   },
@@ -1162,12 +1175,13 @@ theorem prop_complete
 begin
   unfold is_proof,
 
-  apply prop_complete_aux P P.atomic_set valuation.inhabited.default h1,
+  apply prop_complete_aux P P.atomic_set h1,
   {
     refl,
   },
   {
-    apply L_15_7 P P P.atomic_set valuation.inhabited.default (P.atomic_set.image (eval_ff_to_not valuation.inhabited.default)),
+    intros val,
+    apply L_15_7 P P P.atomic_set val (P.atomic_set.image (eval_ff_to_not val)),
     {
       refl,
     },
@@ -1177,7 +1191,7 @@ begin
     {
       unfold formula.is_tauto at h1,
       unfold eval_ff_to_not,
-      specialize h1 valuation.inhabited.default,
+      specialize h1 val,
       simp only [if_pos h1],
     }
   }
