@@ -690,6 +690,7 @@ begin
   {
     unfold formula.atomic_set at h1,
     squeeze_simp at h1,
+
     contradiction,
   },
   case [formula.pred_, formula.eq_, formula.forall_]
@@ -699,6 +700,7 @@ begin
       unfold formula.atomic_set at h1,
       squeeze_simp at h1,
       subst h1,
+
       unfold formula.is_atomic,
     }
   },
@@ -712,6 +714,7 @@ begin
   {
     unfold formula.atomic_set at h1,
     squeeze_simp at h1,
+
     tauto,
   },
 end
@@ -995,36 +998,6 @@ begin
 end
 
 
-example
-  (P U : formula)
-  (h1 : ∀ (val : valuation), is_deduct {eval_ff_to_not val U} P)
-  (h2 : U.is_atomic) :
-  ∀ (val : valuation), is_deduct {U} P :=
-begin
-  intros val,
-  specialize h1 (function.update_ite val U bool.tt),
-  simp only [lem_2 U U val h2] at h1,
-  unfold function.update_ite at h1,
-  simp only [eq_self_iff_true, if_true] at h1,
-  exact h1,
-end
-
-
-example
-  (P U : formula)
-  (h1 : ∀ (val : valuation), is_deduct {eval_ff_to_not val U} P)
-  (h2 : U.is_atomic) :
-  ∀ (f : valuation), is_deduct {U.not_} P :=
-begin
-  intros val,
-  specialize h1 (function.update_ite val U bool.ff),
-  simp only [lem_3 U U val h2] at h1,
-  unfold function.update_ite at h1,
-  simp only [eq_self_iff_true, if_true] at h1,
-  exact h1,
-end
-
-
 lemma lem_10
   (P U : formula)
   (Δ : set formula)
@@ -1034,18 +1007,19 @@ lemma lem_10
   (h3 : ∀ (val : valuation), is_deduct ((Δ.image (eval_ff_to_not val) ∪ {eval_ff_to_not val U})) P) :
   ∀ (val : valuation), is_deduct ((Δ.image (eval_ff_to_not val)) ∪ {U}) P :=
 begin
-  intros f,
-  specialize h3 (function.update_ite f U bool.tt),
-  simp only [lem_2 U U f h1_U] at h3,
+  intros val,
+  specialize h3 (function.update_ite val U bool.tt),
+  simp only [lem_2 U U val h1_U] at h3,
   unfold function.update_ite at h3,
   simp only [eq_self_iff_true, if_true] at h3,
 
-  have s1 : Δ.image (eval_ff_to_not (function.update_ite f U tt)) = Δ.image (eval_ff_to_not f),
+  have s1 : Δ.image (eval_ff_to_not (function.update_ite val U bool.tt)) =
+    Δ.image (eval_ff_to_not val),
   {
     apply set.image_congr,
     intros U' a1,
     specialize h1_Δ U' a1,
-    simp only [lem_2 U' U f h1_Δ],
+    simp only [lem_2 U' U val h1_Δ],
     unfold function.update_ite,
     simp only [ite_eq_right_iff],
     intros a2,
@@ -1067,18 +1041,19 @@ lemma lem_11
   (h3 : ∀ (val : valuation), is_deduct ((Δ.image (eval_ff_to_not val) ∪ {eval_ff_to_not val U})) P) :
   ∀ (val : valuation), is_deduct ((Δ.image (eval_ff_to_not val)) ∪ {U.not_}) P :=
 begin
-  intros f,
-  specialize h3 (function.update_ite f U bool.ff),
-  simp only [lem_3 U U f h1_U] at h3,
+  intros val,
+  specialize h3 (function.update_ite val U bool.ff),
+  simp only [lem_3 U U val h1_U] at h3,
   unfold function.update_ite at h3,
   simp only [eq_self_iff_true, if_true] at h3,
 
-  have s1 : Δ.image (eval_ff_to_not (function.update_ite f U ff)) = Δ.image (eval_ff_to_not f),
+  have s1 : Δ.image (eval_ff_to_not (function.update_ite val U bool.ff)) =
+    Δ.image (eval_ff_to_not val),
   {
     apply set.image_congr,
     intros U' a1,
     specialize h1_Δ U' a1,
-    simp only [lem_3 U' U f h1_Δ],
+    simp only [lem_3 U' U val h1_Δ],
     unfold function.update_ite,
     simp only [ite_eq_right_iff],
     intros a2,
@@ -1100,13 +1075,13 @@ lemma lem_12
   (h3 : ∀ (val : valuation), is_deduct ((Δ.image (eval_ff_to_not val)) ∪ {eval_ff_to_not val U}) P) :
   ∀ (val : valuation), is_deduct (Δ.image (eval_ff_to_not val)) P :=
 begin
-  intros f,
-  apply lem_1 P U (Δ.image (eval_ff_to_not f)),
+  intros val,
+  apply lem_1 P U (Δ.image (eval_ff_to_not val)),
   {
-    apply lem_10 P U Δ h1_Δ h1_U h2 h3,
+    exact lem_10 P U Δ h1_Δ h1_U h2 h3 val,
   },
   {
-    apply lem_11 P U Δ h1_Δ h1_U h2 h3,
+    exact lem_11 P U Δ h1_Δ h1_U h2 h3 val,
   }
 end
 
@@ -1129,14 +1104,11 @@ begin
   {
     apply Δ_U_2,
     {
-      clear Δ_U_2,
-
       simp only [finset.insert_subset] at h2,
       cases h2,
       exact h2_right,
     },
     {
-      clear Δ_U_2,
       squeeze_simp at h3,
       squeeze_simp,
       apply lem_12 P U Δ_U,
