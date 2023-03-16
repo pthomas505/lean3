@@ -1004,7 +1004,7 @@ begin
 end
 
 
-lemma lem_12
+lemma prop_complete_aux_aux
   (P U : formula)
   (Δ : set formula)
   (h1_Δ : ∀ (U' : formula), U' ∈ Δ → U'.is_atomic)
@@ -1065,7 +1065,7 @@ begin
       simp only [finset.image_insert, finset.coe_insert, finset.coe_image] at h3,
 
       simp only [finset.coe_image],
-      apply lem_12 P U Δ_U,
+      apply prop_complete_aux_aux P U Δ_U,
       {
         intros U' a1,
         apply mem_atomic_set_is_atomic P U',
