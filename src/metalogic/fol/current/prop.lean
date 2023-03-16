@@ -870,7 +870,7 @@ begin
 end
 
 
-lemma lem_1
+lemma T_14_9_deduct
   (P U : formula)
   (Δ : set formula)
   (h1 : is_deduct (Δ ∪ {U}) P)
@@ -896,7 +896,7 @@ begin
 end
 
 
-lemma lem_2
+lemma eval_ff_to_not_of_function_update_ite_tt
   (P P' : formula)
   (val : valuation)
   (h1 : P.is_atomic) :
@@ -933,7 +933,7 @@ begin
 end
 
 
-lemma lem_3
+lemma eval_ff_to_not_of_function_update_ite_ff
   (P P' : formula)
   (val : valuation)
   (h1 : P.is_atomic) :
@@ -981,7 +981,7 @@ lemma lem_10
 begin
   intros val,
   specialize h3 (function.update_ite val U bool.tt),
-  simp only [lem_2 U U val h1_U] at h3,
+  simp only [eval_ff_to_not_of_function_update_ite_tt U U val h1_U] at h3,
   unfold function.update_ite at h3,
   simp only [eq_self_iff_true, if_true] at h3,
 
@@ -991,7 +991,7 @@ begin
     apply set.image_congr,
     intros U' a1,
     specialize h1_Δ U' a1,
-    simp only [lem_2 U' U val h1_Δ],
+    simp only [eval_ff_to_not_of_function_update_ite_tt U' U val h1_Δ],
     unfold function.update_ite,
     simp only [ite_eq_right_iff],
     intros a2,
@@ -1015,7 +1015,7 @@ lemma lem_11
 begin
   intros val,
   specialize h3 (function.update_ite val U bool.ff),
-  simp only [lem_3 U U val h1_U] at h3,
+  simp only [eval_ff_to_not_of_function_update_ite_ff U U val h1_U] at h3,
   unfold function.update_ite at h3,
   simp only [eq_self_iff_true, if_true] at h3,
 
@@ -1025,7 +1025,7 @@ begin
     apply set.image_congr,
     intros U' a1,
     specialize h1_Δ U' a1,
-    simp only [lem_3 U' U val h1_Δ],
+    simp only [eval_ff_to_not_of_function_update_ite_ff U' U val h1_Δ],
     unfold function.update_ite,
     simp only [ite_eq_right_iff],
     intros a2,
@@ -1048,7 +1048,7 @@ lemma lem_12
   ∀ (val : valuation), is_deduct (Δ.image (eval_ff_to_not val)) P :=
 begin
   intros val,
-  apply lem_1 P U (Δ.image (eval_ff_to_not val)),
+  apply T_14_9_deduct P U (Δ.image (eval_ff_to_not val)),
   {
     exact lem_10 P U Δ h1_Δ h1_U h2 h3 val,
   },
