@@ -900,7 +900,7 @@ lemma eval_ff_to_not_of_function_update_ite_tt
   (P P' : formula)
   (val : valuation)
   (h1 : P.is_atomic) :
-  eval_ff_to_not (function.update_ite val P' tt) P =
+  eval_ff_to_not (function.update_ite val P' bool.tt) P =
     function.update_ite (eval_ff_to_not val) P' P P :=
 begin
   induction P,
@@ -937,7 +937,7 @@ lemma eval_ff_to_not_of_function_update_ite_ff
   (P P' : formula)
   (val : valuation)
   (h1 : P.is_atomic) :
-  eval_ff_to_not (function.update_ite val P' ff) P =
+  eval_ff_to_not (function.update_ite val P' bool.ff) P =
     function.update_ite (eval_ff_to_not val) P' P.not_ P :=
 begin
   induction P,
