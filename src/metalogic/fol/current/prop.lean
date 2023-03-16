@@ -933,35 +933,6 @@ begin
 end
 
 
-example
-  (U : formula)
-  (Δ : set formula)
-  (val : valuation)
-  (b : bool)
-  (h1_Δ: ∀ (U' : formula), (U' ∈ Δ) → U'.is_atomic)
-  (h1_U: U.is_atomic)
-  (h2: U ∉ Δ) :
-  Δ.image (eval_ff_to_not (function.update_ite val U b)) =
-    Δ.image (eval_ff_to_not val) :=
-begin
-  apply set.image_congr,
-  intros U' a1,
-  induction U',
-  case formula.true_
-  { admit },
-  case formula.pred_ : U'_ᾰ U'_ᾰ_1
-  { admit },
-  case formula.eq_ : U'_ᾰ U'_ᾰ_1
-  { admit },
-  case formula.not_ : U'_ᾰ U'_ih
-  { admit },
-  case formula.imp_ : U'_ᾰ U'_ᾰ_1 U'_ih_ᾰ U'_ih_ᾰ_1
-  { admit },
-  case formula.forall_ : U'_ᾰ U'_ᾰ_1 U'_ih
-  { admit },
-end
-
-
 lemma eval_ff_to_not_of_function_update_ite_ff
   (P P' : formula)
   (val : valuation)
@@ -996,6 +967,40 @@ begin
       contradiction,
     }
   },
+end
+
+
+lemma image_of_eval_ff_to_not_of_function_update_ite
+  (U : formula)
+  (Δ : set formula)
+  (val : valuation)
+  (b : bool)
+  (h1_Δ: ∀ (U' : formula), (U' ∈ Δ) → U'.is_atomic)
+  (h1_U: U.is_atomic)
+  (h2: U ∉ Δ) :
+  Δ.image (eval_ff_to_not (function.update_ite val U b)) =
+    Δ.image (eval_ff_to_not val) :=
+begin
+  apply set.image_congr,
+  intros U' a1,
+  specialize h1_Δ U' a1,
+  cases b,
+  {
+    simp only [eval_ff_to_not_of_function_update_ite_ff U' U val h1_Δ],
+    unfold function.update_ite,
+    simp only [ite_eq_right_iff],
+    intros a2,
+    subst a2,
+    contradiction,
+  },
+  {
+    simp only [eval_ff_to_not_of_function_update_ite_tt U' U val h1_Δ],
+    unfold function.update_ite,
+    simp only [ite_eq_right_iff],
+    intros a2,
+    subst a2,
+    contradiction,
+  }
 end
 
 
