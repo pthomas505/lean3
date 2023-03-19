@@ -146,6 +146,21 @@ begin
 end
 
 
+theorem thm_2_4_gen
+  (P : formula)
+  (h1 : P.is_tauto_atomic)
+  (σ : formula → formula) :
+  (formula.subst_atomic σ P).is_tauto_atomic :=
+begin
+  unfold formula.is_tauto_atomic at h1,
+
+  unfold formula.is_tauto_atomic,
+  intros val,
+  simp only [thm_2_3_gen P σ val],
+  apply h1,
+end
+
+
 theorem T_13_5
   (P : formula) :
   is_proof (P.imp_ P) :=
