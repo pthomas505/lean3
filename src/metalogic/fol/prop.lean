@@ -29,19 +29,19 @@ def formula.atomic_set : formula → finset formula
 @[derive inhabited]
 def valuation : Type := formula → bool
 
-def formula.eval (val : valuation) : formula → bool
+def formula.eval_atomic (val : valuation) : formula → bool
 | (true_) := bool.tt
 | (pred_ name args) := val (pred_ name args)
 | (eq_ x y) := val (eq_ x y)
-| (not_ P) := ! P.eval
-| (imp_ P Q) := (! P.eval) || Q.eval
+| (not_ P) := ! P.eval_atomic
+| (imp_ P Q) := (! P.eval_atomic) || Q.eval_atomic
 | (forall_ x P) := val (forall_ x P)
 
-def formula.is_tauto (P : formula) : Prop :=
-  ∀ (val : valuation), P.eval val = bool.tt
+def formula.is_tauto_atomic (P : formula) : Prop :=
+  ∀ (val : valuation), P.eval_atomic val = bool.tt
 
-def eval_ff_to_not (val : valuation) (P : formula) : formula :=
-if formula.eval val P = bool.tt then P else P.not_
+def eval_atomic_ff_to_not (val : valuation) (P : formula) : formula :=
+if formula.eval_atomic val P = bool.tt then P else P.not_
 
 
 theorem T_13_5
@@ -551,11 +551,11 @@ end
 theorem eval_not
   (P : formula)
   (val : valuation) :
-  formula.eval val (not_ P) = bool.tt ↔
-    ¬ (formula.eval val P = bool.tt) :=
+  formula.eval_atomic val (not_ P) = bool.tt ↔
+    ¬ (formula.eval_atomic val P = bool.tt) :=
 begin
-  unfold formula.eval,
-  cases formula.eval val P;
+  unfold formula.eval_atomic,
+  cases formula.eval_atomic val P;
   exact dec_trivial,
 end
 
@@ -563,30 +563,30 @@ end
 theorem eval_imp
   (P Q : formula)
   (val : valuation) :
-  formula.eval val (imp_ P Q) = bool.tt ↔
-    ((formula.eval val P = bool.tt) → (formula.eval val Q = bool.tt)) :=
+  formula.eval_atomic val (imp_ P Q) = bool.tt ↔
+    ((formula.eval_atomic val P = bool.tt) → (formula.eval_atomic val Q = bool.tt)) :=
 begin
-  unfold formula.eval,
-  cases formula.eval val P;
-  cases formula.eval val Q;
+  unfold formula.eval_atomic,
+  cases formula.eval_atomic val P;
+  cases formula.eval_atomic val Q;
   exact dec_trivial,
 end
 
 
 theorem is_tauto_prop_true :
-  true_.is_tauto :=
+  true_.is_tauto_atomic :=
 begin
-  unfold formula.is_tauto,
+  unfold formula.is_tauto_atomic,
   intro val,
-  unfold formula.eval,
+  unfold formula.eval_atomic,
 end
 
 
 theorem is_tauto_prop_1
   (P Q : formula) :
-  (P.imp_ (Q.imp_ P)).is_tauto :=
+  (P.imp_ (Q.imp_ P)).is_tauto_atomic :=
 begin
-  unfold formula.is_tauto,
+  unfold formula.is_tauto_atomic,
   intro val,
   simp only [eval_imp],
   tauto,
@@ -595,9 +595,9 @@ end
 
 theorem is_tauto_prop_2
   (P Q R : formula) :
-  ((P.imp_ (Q.imp_ R)).imp_ ((P.imp_ Q).imp_ (P.imp_ R))).is_tauto :=
+  ((P.imp_ (Q.imp_ R)).imp_ ((P.imp_ Q).imp_ (P.imp_ R))).is_tauto_atomic :=
 begin
-  unfold formula.is_tauto,
+  unfold formula.is_tauto_atomic,
   intro val,
   simp only [eval_imp],
   tauto,
@@ -606,9 +606,9 @@ end
 
 theorem is_tauto_prop_3
   (P Q : formula) :
-  (((not_ P).imp_ (not_ Q)).imp_ (Q.imp_ P)).is_tauto :=
+  (((not_ P).imp_ (not_ Q)).imp_ (Q.imp_ P)).is_tauto_atomic :=
 begin
-  unfold formula.is_tauto,
+  unfold formula.is_tauto_atomic,
   intro val,
   simp only [eval_not, eval_imp],
   tauto,
@@ -617,14 +617,14 @@ end
 
 theorem is_tauto_mp
   (P Q : formula)
-  (h1 : (P.imp_ Q).is_tauto)
-  (h2 : P.is_tauto) :
-  Q.is_tauto :=
+  (h1 : (P.imp_ Q).is_tauto_atomic)
+  (h2 : P.is_tauto_atomic) :
+  Q.is_tauto_atomic :=
 begin
-  unfold formula.is_tauto at h1,
-  unfold formula.is_tauto at h2,
+  unfold formula.is_tauto_atomic at h1,
+  unfold formula.is_tauto_atomic at h2,
 
-  unfold formula.is_tauto,
+  unfold formula.is_tauto_atomic,
   intro val,
   simp only [eval_imp] at h1,
   apply h1,
@@ -635,7 +635,7 @@ end
 example
   (P : formula)
   (h1 : is_prop_proof P) :
-  P.is_tauto :=
+  P.is_tauto_atomic :=
 begin
   induction h1,
   case is_prop_deduct.axiom_ : h1_P h1_1
@@ -724,8 +724,8 @@ lemma L_15_7
   (val : valuation)
   (Δ_U' : set formula)
   (h1 : coe P.atomic_set ⊆ Δ_U)
-  (h2 : Δ_U' = Δ_U.image (eval_ff_to_not val))
-  (h3 : P' = eval_ff_to_not val P) :
+  (h2 : Δ_U' = Δ_U.image (eval_atomic_ff_to_not val))
+  (h3 : P' = eval_atomic_ff_to_not val P) :
   is_deduct Δ_U' P' :=
 begin
   subst h2,
@@ -743,8 +743,8 @@ begin
     unfold formula.atomic_set at h1,
     simp only [finset.coe_singleton, set.singleton_subset_iff] at h1,
 
-    unfold eval_ff_to_not,
-    unfold formula.eval,
+    unfold eval_atomic_ff_to_not,
+    unfold formula.eval_atomic,
     apply is_deduct.assume_,
     simp only [finset.coe_image, set.mem_image, finset.mem_coe],
     apply exists.intro P,
@@ -757,8 +757,8 @@ begin
     unfold formula.atomic_set at h1,
     simp only [finset.coe_singleton, set.singleton_subset_iff] at h1,
 
-    unfold eval_ff_to_not,
-    unfold formula.eval,
+    unfold eval_atomic_ff_to_not,
+    unfold formula.eval_atomic,
     apply is_deduct.assume_,
     simp only [finset.coe_image, set.mem_image, finset.mem_coe],
     apply exists.intro P,
@@ -768,10 +768,10 @@ begin
   {
     unfold formula.atomic_set at h1,
 
-    unfold eval_ff_to_not at P_ih,
+    unfold eval_atomic_ff_to_not at P_ih,
 
-    unfold eval_ff_to_not,
-    unfold formula.eval,
+    unfold eval_atomic_ff_to_not,
+    unfold formula.eval_atomic,
 
     simp only [bnot_eq_tt_iff_not_eq_tt],
     split_ifs,
@@ -797,11 +797,11 @@ begin
     simp only [finset.coe_union, set.union_subset_iff] at h1,
     cases h1,
 
-    unfold eval_ff_to_not at P_ih,
-    unfold eval_ff_to_not at Q_ih,
+    unfold eval_atomic_ff_to_not at P_ih,
+    unfold eval_atomic_ff_to_not at Q_ih,
 
-    unfold eval_ff_to_not,
-    unfold formula.eval,
+    unfold eval_atomic_ff_to_not,
+    unfold formula.eval_atomic,
     simp only [bor_eq_true_eq_eq_tt_or_eq_tt],
     simp only [bnot_eq_tt_iff_not_eq_tt],
     split_ifs,
@@ -860,8 +860,8 @@ begin
     unfold formula.atomic_set at h1,
     simp only [finset.coe_singleton, set.singleton_subset_iff] at h1,
 
-    unfold eval_ff_to_not,
-    unfold formula.eval,
+    unfold eval_atomic_ff_to_not,
+    unfold formula.eval_atomic,
     apply is_deduct.assume_,
     simp only [finset.coe_image, set.mem_image, finset.mem_coe],
     apply exists.intro P,
@@ -896,18 +896,18 @@ begin
 end
 
 
-lemma eval_ff_to_not_of_function_update_ite_tt
+lemma eval_atomic_ff_to_not_of_function_update_ite_tt
   (P P' : formula)
   (val : valuation)
   (h1 : P.is_atomic) :
-  eval_ff_to_not (function.update_ite val P' bool.tt) P =
-    function.update_ite (eval_ff_to_not val) P' P P :=
+  eval_atomic_ff_to_not (function.update_ite val P' bool.tt) P =
+    function.update_ite (eval_atomic_ff_to_not val) P' P P :=
 begin
   induction P,
   case formula.true_
   {
     unfold function.update_ite,
-    unfold eval_ff_to_not,
+    unfold eval_atomic_ff_to_not,
     tauto,
   },
   case [formula.pred_, formula.eq_, formula.forall_]
@@ -915,8 +915,8 @@ begin
     all_goals
     {
       unfold function.update_ite,
-      unfold eval_ff_to_not,
-      unfold formula.eval,
+      unfold eval_atomic_ff_to_not,
+      unfold formula.eval_atomic,
       unfold function.update_ite,
       split_ifs; tauto,
     }
@@ -933,18 +933,18 @@ begin
 end
 
 
-lemma eval_ff_to_not_of_function_update_ite_ff
+lemma eval_atomic_ff_to_not_of_function_update_ite_ff
   (P P' : formula)
   (val : valuation)
   (h1 : P.is_atomic) :
-  eval_ff_to_not (function.update_ite val P' bool.ff) P =
-    function.update_ite (eval_ff_to_not val) P' P.not_ P :=
+  eval_atomic_ff_to_not (function.update_ite val P' bool.ff) P =
+    function.update_ite (eval_atomic_ff_to_not val) P' P.not_ P :=
 begin
   induction P,
   case formula.true_
   {
     unfold function.update_ite,
-    unfold eval_ff_to_not,
+    unfold eval_atomic_ff_to_not,
     tauto,
   },
   case [formula.pred_, formula.eq_, formula.forall_]
@@ -952,8 +952,8 @@ begin
     all_goals
     {
       unfold function.update_ite,
-      unfold eval_ff_to_not,
-      unfold formula.eval,
+      unfold eval_atomic_ff_to_not,
+      unfold formula.eval_atomic,
       unfold function.update_ite,
       split_ifs; tauto,
     }
@@ -970,7 +970,7 @@ begin
 end
 
 
-lemma image_of_eval_ff_to_not_of_function_update_ite
+lemma image_of_eval_atomic_ff_to_not_of_function_update_ite
   (U : formula)
   (Δ : set formula)
   (val : valuation)
@@ -978,15 +978,15 @@ lemma image_of_eval_ff_to_not_of_function_update_ite
   (h1_Δ: ∀ (U' : formula), (U' ∈ Δ) → U'.is_atomic)
   (h1_U: U.is_atomic)
   (h2: U ∉ Δ) :
-  Δ.image (eval_ff_to_not (function.update_ite val U b)) =
-    Δ.image (eval_ff_to_not val) :=
+  Δ.image (eval_atomic_ff_to_not (function.update_ite val U b)) =
+    Δ.image (eval_atomic_ff_to_not val) :=
 begin
   apply set.image_congr,
   intros U' a1,
   specialize h1_Δ U' a1,
   cases b,
   {
-    simp only [eval_ff_to_not_of_function_update_ite_ff U' U val h1_Δ],
+    simp only [eval_atomic_ff_to_not_of_function_update_ite_ff U' U val h1_Δ],
     unfold function.update_ite,
     simp only [ite_eq_right_iff],
     intros a2,
@@ -994,7 +994,7 @@ begin
     contradiction,
   },
   {
-    simp only [eval_ff_to_not_of_function_update_ite_tt U' U val h1_Δ],
+    simp only [eval_atomic_ff_to_not_of_function_update_ite_tt U' U val h1_Δ],
     unfold function.update_ite,
     simp only [ite_eq_right_iff],
     intros a2,
@@ -1010,23 +1010,23 @@ lemma prop_complete_aux_aux
   (h1_Δ : ∀ (U' : formula), U' ∈ Δ → U'.is_atomic)
   (h1_U : U.is_atomic)
   (h2 : U ∉ Δ)
-  (h3 : ∀ (val : valuation), is_deduct ((Δ.image (eval_ff_to_not val)) ∪ {eval_ff_to_not val U}) P) :
-  ∀ (val : valuation), is_deduct (Δ.image (eval_ff_to_not val)) P :=
+  (h3 : ∀ (val : valuation), is_deduct ((Δ.image (eval_atomic_ff_to_not val)) ∪ {eval_atomic_ff_to_not val U}) P) :
+  ∀ (val : valuation), is_deduct (Δ.image (eval_atomic_ff_to_not val)) P :=
 begin
   intros val,
-  apply T_14_9_deduct P U (Δ.image (eval_ff_to_not val)),
+  apply T_14_9_deduct P U (Δ.image (eval_atomic_ff_to_not val)),
   {
     specialize h3 (function.update_ite val U bool.tt),
-    simp only [image_of_eval_ff_to_not_of_function_update_ite U Δ val bool.tt h1_Δ h1_U h2] at h3,
-    simp only [eval_ff_to_not_of_function_update_ite_tt U U val h1_U] at h3,
+    simp only [image_of_eval_atomic_ff_to_not_of_function_update_ite U Δ val bool.tt h1_Δ h1_U h2] at h3,
+    simp only [eval_atomic_ff_to_not_of_function_update_ite_tt U U val h1_U] at h3,
     unfold function.update_ite at h3,
     simp only [eq_self_iff_true, if_true] at h3,
     exact h3,
   },
   {
     specialize h3 (function.update_ite val U bool.ff),
-    simp only [image_of_eval_ff_to_not_of_function_update_ite U Δ val bool.ff h1_Δ h1_U h2] at h3,
-    simp only [eval_ff_to_not_of_function_update_ite_ff U U val h1_U] at h3,
+    simp only [image_of_eval_atomic_ff_to_not_of_function_update_ite U Δ val bool.ff h1_Δ h1_U h2] at h3,
+    simp only [eval_atomic_ff_to_not_of_function_update_ite_ff U U val h1_U] at h3,
     unfold function.update_ite at h3,
     simp only [eq_self_iff_true, if_true] at h3,
     exact h3,
@@ -1037,9 +1037,9 @@ end
 theorem prop_complete_aux
   (P : formula)
   (Δ_U : finset formula)
-  (h1 : P.is_tauto)
+  (h1 : P.is_tauto_atomic)
   (h2 : Δ_U ⊆ P.atomic_set)
-  (h3 : ∀ (val : valuation), is_deduct (Δ_U.image (eval_ff_to_not val)) P) :
+  (h3 : ∀ (val : valuation), is_deduct (Δ_U.image (eval_atomic_ff_to_not val)) P) :
   is_deduct ∅ P :=
 begin
   induction Δ_U using finset.induction_on,
@@ -1090,7 +1090,7 @@ end
 
 theorem prop_complete
   (P : formula)
-  (h1 : P.is_tauto) :
+  (h1 : P.is_tauto_atomic) :
   is_proof P :=
 begin
   unfold is_proof,
@@ -1101,7 +1101,7 @@ begin
   },
   {
     intros val,
-    apply L_15_7 P P P.atomic_set val (P.atomic_set.image (eval_ff_to_not val)),
+    apply L_15_7 P P P.atomic_set val (P.atomic_set.image (eval_atomic_ff_to_not val)),
     {
       refl,
     },
@@ -1109,9 +1109,9 @@ begin
       simp only [finset.coe_image],
     },
     {
-      unfold formula.is_tauto at h1,
+      unfold formula.is_tauto_atomic at h1,
 
-      unfold eval_ff_to_not,
+      unfold eval_atomic_ff_to_not,
       specialize h1 val,
       simp only [if_pos h1],
     }
