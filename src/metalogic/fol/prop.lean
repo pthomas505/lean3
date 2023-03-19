@@ -30,8 +30,8 @@ def formula.subst_atomic (σ : formula → formula) : formula → formula
 | (true_) := true_
 | (pred_ name args) := σ (pred_ name args)
 | (eq_ x y) := σ (eq_ x y)
-| (not_ P) := P.subst_atomic.not_
-| (imp_ P Q) := P.subst_atomic.imp_ Q.subst_atomic
+| (not_ P) := not_ P.subst_atomic
+| (imp_ P Q) := imp_ P.subst_atomic Q.subst_atomic
 | (forall_ x P) := σ (forall_ x P)
 
 
@@ -117,18 +117,32 @@ theorem thm_2_3_gen
     P.eval_atomic (fun (Q : formula), (σ Q).eval_atomic val) :=
 begin
   induction P,
-  case formula.true_
-  { admit },
-  case formula.pred_ : P_ᾰ P_ᾰ_1
-  { admit },
-  case formula.eq_ : P_ᾰ P_ᾰ_1
-  { admit },
-  case formula.not_ : P_ᾰ P_ih
-  { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
-  { admit },
-  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih
-  { admit },
+  case [formula.true_, formula.pred_, formula.eq_, formula.forall_]
+  {
+    all_goals
+    {
+      refl,
+    }
+  },
+  case formula.not_ : P P_ih
+  {
+    unfold formula.subst_atomic,
+    unfold formula.eval_atomic,
+    congr,
+    exact P_ih,
+  },
+  case formula.imp_ : P Q P_ih Q_ih
+  {
+    unfold formula.subst_atomic,
+    unfold formula.eval_atomic,
+    congr,
+    {
+      exact P_ih,
+    },
+    {
+      exact Q_ih,
+    }
+  },
 end
 
 
