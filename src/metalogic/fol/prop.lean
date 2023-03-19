@@ -44,6 +44,28 @@ def eval_atomic_ff_to_not (val : valuation) (P : formula) : formula :=
 if formula.eval_atomic val P = bool.tt then P else P.not_
 
 
+example
+  (P : formula)
+  (val val' : valuation)
+  (h1 : ∀ (Q : formula), Q ∈ P.atomic_set → val Q = val' Q) :
+  P.eval_atomic val = P.eval_atomic val' :=
+begin
+  induction P,
+  case formula.true_
+  { admit },
+  case formula.pred_ : P_ᾰ P_ᾰ_1
+  { admit },
+  case formula.eq_ : P_ᾰ P_ᾰ_1
+  { admit },
+  case formula.not_ : P_ᾰ P_ih
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
+  { admit },
+  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih
+  { admit },
+end
+
+
 theorem T_13_5
   (P : formula) :
   is_proof (P.imp_ P) :=
