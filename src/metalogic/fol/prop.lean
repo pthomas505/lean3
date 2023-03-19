@@ -26,6 +26,15 @@ def formula.atomic_set : formula → finset formula
 | (forall_ x P) := {forall_ x P}
 
 
+def formula.subst_atomic (σ : formula → formula) : formula → formula
+| (true_) := true_
+| (pred_ name args) := σ (pred_ name args)
+| (eq_ x y) := σ (eq_ x y)
+| (not_ P) := P.subst_atomic.not_
+| (imp_ P Q) := P.subst_atomic.imp_ Q.subst_atomic
+| (forall_ x P) := σ (forall_ x P)
+
+
 @[derive inhabited]
 def valuation : Type := formula → bool
 
@@ -97,6 +106,29 @@ begin
       exact a1,
     }
   },
+end
+
+
+theorem thm_2_3_gen
+  (P : formula)
+  (σ : formula → formula)
+  (val : valuation) :
+  (P.subst_atomic σ).eval_atomic val =
+    P.eval_atomic (fun (Q : formula), (σ Q).eval_atomic val) :=
+begin
+  induction P,
+  case formula.true_
+  { admit },
+  case formula.pred_ : P_ᾰ P_ᾰ_1
+  { admit },
+  case formula.eq_ : P_ᾰ P_ᾰ_1
+  { admit },
+  case formula.not_ : P_ᾰ P_ih
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
+  { admit },
+  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih
+  { admit },
 end
 
 
