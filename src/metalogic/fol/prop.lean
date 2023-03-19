@@ -52,17 +52,51 @@ example
 begin
   induction P,
   case formula.true_
-  { admit },
-  case formula.pred_ : P_ᾰ P_ᾰ_1
-  { admit },
-  case formula.eq_ : P_ᾰ P_ᾰ_1
-  { admit },
-  case formula.not_ : P_ᾰ P_ih
-  { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
-  { admit },
-  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih
-  { admit },
+  {
+    unfold formula.eval_atomic,
+  },
+  case [formula.pred_, formula.eq_, formula.forall_]
+  {
+    all_goals
+    {
+      unfold formula.atomic_set at h1,
+
+      unfold formula.eval_atomic,
+      apply h1,
+      simp only [finset.mem_singleton, eq_self_iff_true, and_self],
+    },
+  },
+  case formula.not_ : P P_ih
+  {
+    unfold formula.atomic_set at h1,
+
+    unfold formula.eval_atomic,
+    congr' 1,
+    exact P_ih h1,
+  },
+  case formula.imp_ : P Q P_ih Q_ih
+  {
+    unfold formula.atomic_set at h1,
+    simp only [finset.mem_union] at h1,
+
+    unfold formula.eval_atomic,
+    congr' 1,
+    {
+      congr' 1,
+      apply P_ih,
+      intros Q' a1,
+      apply h1,
+      left,
+      exact a1,
+    },
+    {
+      apply Q_ih,
+      intros Q' a1,
+      apply h1,
+      right,
+      exact a1,
+    }
+  },
 end
 
 
