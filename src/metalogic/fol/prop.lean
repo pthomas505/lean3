@@ -53,6 +53,32 @@ def eval_atomic_ff_to_not (val : valuation) (P : formula) : formula :=
 if formula.eval_atomic val P = bool.tt then P else P.not_
 
 
+lemma eval_atomic_atomic
+  (P : formula)
+  (val : valuation)
+  (h1 : P.is_atomic) :
+  P.eval_atomic val = val P :=
+begin
+  induction P,
+  case [formula.true_, formula.not_, formula.imp_]
+  {
+    all_goals
+    {
+      unfold formula.is_atomic at h1,
+
+      contradiction,
+    }
+  },
+  case [formula.pred_, formula.eq_, formula.forall_]
+  {
+    all_goals
+    {
+      refl,
+    }
+  },
+end
+
+
 example
   (P : formula)
   (val val' : valuation)
@@ -158,6 +184,28 @@ begin
   intros val,
   simp only [eval_atomic_subst_atomic_eq_eval_atomic_eval_atomic P σ val],
   apply h1,
+end
+
+
+example
+  (P Q R S : formula)
+  (val : valuation)
+  (σ : formula → formula)
+  (h1 : P.eval_atomic val = Q.eval_atomic val) :
+  (S.subst_atomic (function.update_ite σ R P)).eval_atomic val =
+    (S.subst_atomic (function.update_ite σ R Q)).eval_atomic val :=
+begin
+  simp only [eval_atomic_subst_atomic_eq_eval_atomic_eval_atomic],
+  congr' 1,
+  funext Q',
+  unfold function.update_ite,
+  split_ifs,
+  {
+    exact h1,
+  },
+  {
+    refl,
+  }
 end
 
 
