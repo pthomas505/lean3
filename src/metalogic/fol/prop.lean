@@ -109,7 +109,7 @@ begin
 end
 
 
-theorem thm_2_3_gen
+lemma eval_atomic_subst_atomic_eq_eval_atomic_eval_atomic
   (P : formula)
   (σ : formula → formula)
   (val : valuation) :
@@ -146,7 +146,7 @@ begin
 end
 
 
-theorem thm_2_4_gen
+theorem is_tauto_atomic_imp_is_tauto_atomic_subst_atomic
   (P : formula)
   (h1 : P.is_tauto_atomic)
   (σ : formula → formula) :
@@ -156,7 +156,7 @@ begin
 
   unfold formula.is_tauto_atomic,
   intros val,
-  simp only [thm_2_3_gen P σ val],
+  simp only [eval_atomic_subst_atomic_eq_eval_atomic_eval_atomic P σ val],
   apply h1,
 end
 
