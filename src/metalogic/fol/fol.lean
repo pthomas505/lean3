@@ -873,10 +873,62 @@ begin
   },
   case is_repl_of.not_ : h1_P h1_P' h1_1 h1_ih
   {
-    sorry,
+    unfold is_bound_in at h2,
+
+    apply is_deduct.mp_ ((Forall_ l (U.iff_ V)).imp_ (h1_P.iff_ h1_P')),
+    {
+      unfold formula.iff_,
+      unfold formula.and_,
+      apply prop_complete,
+      unfold formula.is_tauto_atomic,
+      simp only [eval_not, eval_imp],
+      tauto,
+    },
+    {
+      exact h1_ih h2,
+    },
   },
-  case is_repl_of.imp_ : h1_P h1_Q h1_P' h1_Q' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
-  { admit },
+  case is_repl_of.imp_ : h1_P h1_Q h1_P' h1_Q' h1_1 h1_2 h1_ih_1 h1_ih_2
+  {
+    unfold is_bound_in at h2,
+
+    have s1 : is_proof ((Forall_ l (U.iff_ V)).imp_ (h1_P.iff_ h1_P')),
+    apply h1_ih_1,
+    intros v a1,
+    apply h2 v,
+    tauto,
+
+    have s2 : is_proof ((Forall_ l (U.iff_ V)).imp_ (h1_Q.iff_ h1_Q')),
+    apply h1_ih_2,
+    intros v a2,
+    apply h2 v,
+    tauto,
+
+    apply is_deduct.mp_ ((Forall_ l (U.iff_ V)).imp_ (h1_P.iff_ h1_P')),
+    {
+      apply is_deduct.mp_ ((Forall_ l (U.iff_ V)).imp_ (h1_Q.iff_ h1_Q')),
+      {
+        unfold formula.iff_,
+        unfold formula.and_,
+        apply prop_complete,
+        unfold formula.is_tauto_atomic,
+        simp only [eval_not, eval_imp],
+        tauto,
+      },
+      {
+        apply h1_ih_2,
+        intros v a2,
+        apply h2 v,
+        tauto,
+      }
+    },
+    {
+      apply h1_ih_1,
+      intros v a1,
+      apply h2 v,
+      tauto,
+    },
+  },
   case is_repl_of.forall_ : h1_x h1_P h1_P' h1_ᾰ h1_ih
   { admit },
 end
