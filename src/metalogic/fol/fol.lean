@@ -938,18 +938,6 @@ begin
   {
     unfold is_bound_in at h2,
 
-    have s1 : is_proof ((Forall_ l (U.iff_ V)).imp_ (h1_P.iff_ h1_P')),
-    apply h1_ih_1,
-    intros v a1,
-    apply h2 v,
-    tauto,
-
-    have s2 : is_proof ((Forall_ l (U.iff_ V)).imp_ (h1_Q.iff_ h1_Q')),
-    apply h1_ih_2,
-    intros v a2,
-    apply h2 v,
-    tauto,
-
     apply is_deduct.mp_ ((Forall_ l (U.iff_ V)).imp_ (h1_P.iff_ h1_P')),
     {
       apply is_deduct.mp_ ((Forall_ l (U.iff_ V)).imp_ (h1_Q.iff_ h1_Q')),
@@ -979,13 +967,6 @@ begin
   {
     unfold is_bound_in at h2,
 
-    have s1 : is_proof ((Forall_ l (U.iff_ V)).imp_ (h1_P.iff_ h1_P')),
-    apply h1_ih,
-    intros v a1,
-    cases a1,
-    apply h2 v,
-    tauto,
-
     apply deduction_theorem,
     simp only [set.union_singleton, insert_emptyc_eq],
     apply is_deduct.mp_ (forall_ h1_x (h1_P.iff_ h1_P')),
@@ -999,7 +980,11 @@ begin
         apply is_deduct.mp_ (Forall_ l (U.iff_ V)),
         {
           apply proof_imp_deduct,
-          exact s1,
+          apply h1_ih,
+          intros v a1,
+          cases a1,
+          apply h2 v,
+          tauto,
         },
         {
           apply is_deduct.assume_,
