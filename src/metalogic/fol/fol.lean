@@ -539,29 +539,16 @@ begin
 end
 
 
-theorem eval_and
-  (P Q : formula)
-  (val : valuation) :
-  formula.eval_atomic val (and_ P Q) = bool.tt ↔
-    ((formula.eval_atomic val P = bool.tt) ∧ (formula.eval_atomic val Q = bool.tt)) :=
-begin
-  unfold formula.and_,
-  unfold formula.eval_atomic,
-  cases formula.eval_atomic val P;
-  cases formula.eval_atomic val Q;
-  exact dec_trivial,
-end
-
-
 lemma and_intro
   (P Q : formula)
   (Δ : set formula) :
   is_deduct Δ (P.imp_ (Q.imp_ (P.and_ Q))) :=
 begin
+  unfold formula.and_,
   apply proof_imp_deduct,
   apply prop_complete,
   unfold formula.is_tauto_atomic,
-  simp only [eval_and, eval_imp],
+  simp only [eval_not, eval_imp],
   tauto,
 end
 
@@ -571,10 +558,11 @@ lemma and_elim_left
   (Δ : set formula) :
   is_deduct Δ ((P.and_ Q).imp_ P) :=
 begin
+  unfold formula.and_,
   apply proof_imp_deduct,
   apply prop_complete,
   unfold formula.is_tauto_atomic,
-  simp only [eval_and, eval_imp],
+  simp only [eval_not, eval_imp],
   tauto,
 end
 
@@ -584,10 +572,11 @@ lemma and_elim_right
   (Δ : set formula) :
   is_deduct Δ ((P.and_ Q).imp_ Q) :=
 begin
+  unfold formula.and_,
   apply proof_imp_deduct,
   apply prop_complete,
   unfold formula.is_tauto_atomic,
-  simp only [eval_and, eval_imp],
+  simp only [eval_not, eval_imp],
   tauto,
 end
 
@@ -756,24 +745,29 @@ begin
 end
 
 
-lemma iff_intro
-  (P Q R : formula) :
-  is_proof ((P.imp_ Q).imp_ ((Q.imp_ P).imp_ (P.iff_ Q))) :=
-begin
-  unfold formula.iff_,
-  apply prop_complete,
-  unfold formula.is_tauto_atomic,
-  simp only [eval_and, eval_imp],
-  tauto,
-end
-
-
 theorem T_18_1
   (P Q : formula)
   (v : variable_) :
   is_proof ((forall_ v (P.iff_ Q)).imp_ ((forall_ v P).iff_ (forall_ v Q))) :=
 begin
-  sorry,
+  apply is_deduct.mp_ ((forall_ v (P.iff_ Q)).imp_ ((forall_ v Q).imp_ (forall_ v P))),
+  {
+    apply is_deduct.mp_ ((forall_ v (P.iff_ Q)).imp_ ((forall_ v P).imp_ (forall_ v Q))),
+    {
+      unfold formula.iff_,
+      unfold formula.and_,
+      apply prop_complete,
+      unfold formula.is_tauto_atomic,
+      simp only [eval_not, eval_imp],
+      tauto,
+    },
+    {
+      apply T_18_1_left,
+    }
+  },
+  {
+    apply T_18_1_right,
+  }
 end
 
 
@@ -847,10 +841,11 @@ lemma prop_iff_id
   is_proof (P.iff_ P) :=
 begin
   unfold formula.iff_,
+  unfold formula.and_,
   apply prop_complete,
   unfold formula.is_tauto_atomic,
-  simp only [eval_and, eval_imp],
-  squeeze_simp,
+  simp only [eval_not, eval_imp],
+  simp only [imp_self, not_true, not_false_iff, forall_const],
 end
 
 
