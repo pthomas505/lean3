@@ -872,6 +872,29 @@ begin
 end
 
 
+lemma Forall_is_free_in
+  (P : formula)
+  (xs : list variable_)
+  (x : variable_) :
+  is_free_in x (Forall_ xs P) ↔ (x ∉ xs ∧ is_free_in x P) :=
+begin
+  unfold formula.Forall_,
+
+  induction xs,
+  case list.nil
+  {
+    simp only [list.foldr_nil, list.not_mem_nil, not_false_iff, true_and],
+  },
+  case list.cons : xs_hd xs_tl xs_ih
+  {
+    simp only [list.foldr_cons, list.mem_cons_iff],
+    unfold is_free_in,
+    simp only [xs_ih],
+    tauto,
+  },
+end
+
+
 theorem T_18_2
   (U V : formula)
   (P_U P_V : formula)
