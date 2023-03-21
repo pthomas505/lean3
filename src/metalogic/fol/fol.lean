@@ -849,6 +849,29 @@ begin
 end
 
 
+lemma Forall_is_bound_in
+  (P : formula)
+  (xs : list variable_)
+  (x : variable_) :
+  is_bound_in x (Forall_ xs P) ↔ (x ∈ xs ∨ is_bound_in x P) :=
+begin
+  unfold formula.Forall_,
+
+  induction xs,
+  case list.nil
+  {
+    simp only [list.foldr_nil, list.not_mem_nil, false_or],
+  },
+  case list.cons : xs_hd xs_tl xs_ih
+  {
+    simp only [list.foldr_cons, list.mem_cons_iff],
+    unfold is_bound_in,
+    simp only [xs_ih],
+    tauto,
+  },
+end
+
+
 theorem T_18_2
   (U V : formula)
   (P_U P_V : formula)
@@ -929,8 +952,37 @@ begin
       tauto,
     },
   },
-  case is_repl_of.forall_ : h1_x h1_P h1_P' h1_ᾰ h1_ih
-  { admit },
+  case is_repl_of.forall_ : h1_x h1_P h1_P' h1_1 h1_ih
+  {
+    unfold is_bound_in at h2,
+
+    have s1 : is_proof ((Forall_ l (U.iff_ V)).imp_ (h1_P.iff_ h1_P')),
+    apply h1_ih,
+    intros v a1,
+    cases a1,
+    apply h2 v,
+    tauto,
+
+    apply deduction_theorem,
+    squeeze_simp,
+    apply is_deduct.mp_ (forall_ h1_x (h1_P.iff_ h1_P')),
+    {
+      apply proof_imp_deduct,
+      apply T_18_1,
+    },
+    {
+      apply generalization,
+      {
+        sorry,
+      },
+      {
+        intros H a1 contra,
+        squeeze_simp at a1,
+        subst a1,
+        sorry,
+      }
+    }
+  },
 end
 
 
