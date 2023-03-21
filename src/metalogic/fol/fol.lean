@@ -719,6 +719,43 @@ begin
 end
 
 
+theorem T_18_1_right
+  (P Q : formula)
+  (v : variable_) :
+  is_proof ((forall_ v (P.iff_ Q)).imp_ ((forall_ v Q).imp_ (forall_ v P))) :=
+begin
+  unfold iff_,
+  apply deduction_theorem,
+  apply deduction_theorem,
+  simp only [set.union_singleton, insert_emptyc_eq],
+  apply generalization,
+  {
+    apply is_deduct.mp_ Q,
+    {
+      apply is_deduct.mp_ ((P.imp_ Q).and_ (Q.imp_ P)),
+      {
+        apply and_elim_right,
+      },
+      {
+        apply spec_id v ((P.imp_ Q).and_ (Q.imp_ P)),
+        apply is_deduct.assume_,
+        simp only [set.mem_insert_iff, set.mem_singleton, or_true],
+      }
+    },
+    {
+      apply spec_id v Q,
+      apply is_deduct.assume_,
+      simp only [set.mem_insert_iff, eq_self_iff_true, true_and, true_or],
+    }
+  },
+  {
+    simp only [set.mem_insert_iff, set.mem_singleton_iff, forall_eq_or_imp, forall_eq],
+    unfold is_free_in,
+    simp only [eq_self_iff_true, not_true, false_and, not_false_iff, and_self],
+  }
+end
+
+
 lemma iff_intro
   (P Q R : formula) :
   is_proof ((P.imp_ Q).imp_ ((Q.imp_ P).imp_ (P.iff_ Q))) :=
