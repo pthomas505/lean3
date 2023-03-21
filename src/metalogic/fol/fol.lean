@@ -61,7 +61,7 @@ lemma SC_1
   is_proof ((P.imp_ Q.not_).imp_ (Q.imp_ P.not_)) :=
 begin
   apply prop_complete,
-  unfold formula.is_tauto,
+  unfold formula.is_tauto_atomic,
   simp only [eval_not, eval_imp],
   tauto,
 end
@@ -425,7 +425,7 @@ begin
     {
       apply proof_imp_deduct,
       apply prop_complete,
-      unfold formula.is_tauto,
+      unfold formula.is_tauto_atomic,
       simp only [eval_imp, eval_not],
       tauto,
     },
@@ -542,13 +542,13 @@ end
 theorem eval_and
   (P Q : formula)
   (val : valuation) :
-  formula.eval val (and_ P Q) = bool.tt ↔
-    ((formula.eval val P = bool.tt) ∧ (formula.eval val Q = bool.tt)) :=
+  formula.eval_atomic val (and_ P Q) = bool.tt ↔
+    ((formula.eval_atomic val P = bool.tt) ∧ (formula.eval_atomic val Q = bool.tt)) :=
 begin
   unfold formula.and_,
-  unfold formula.eval,
-  cases formula.eval val P;
-  cases formula.eval val Q;
+  unfold formula.eval_atomic,
+  cases formula.eval_atomic val P;
+  cases formula.eval_atomic val Q;
   exact dec_trivial,
 end
 
@@ -560,7 +560,7 @@ lemma and_intro
 begin
   apply proof_imp_deduct,
   apply prop_complete,
-  unfold formula.is_tauto,
+  unfold formula.is_tauto_atomic,
   simp only [eval_and, eval_imp],
   tauto,
 end
@@ -573,7 +573,7 @@ lemma and_elim_left
 begin
   apply proof_imp_deduct,
   apply prop_complete,
-  unfold formula.is_tauto,
+  unfold formula.is_tauto_atomic,
   simp only [eval_and, eval_imp],
   tauto,
 end
@@ -586,7 +586,7 @@ lemma and_elim_right
 begin
   apply proof_imp_deduct,
   apply prop_complete,
-  unfold formula.is_tauto,
+  unfold formula.is_tauto_atomic,
   simp only [eval_and, eval_imp],
   tauto,
 end
@@ -725,7 +725,7 @@ lemma iff_intro
 begin
   unfold formula.iff_,
   apply prop_complete,
-  unfold formula.is_tauto,
+  unfold formula.is_tauto_atomic,
   simp only [eval_and, eval_imp],
   tauto,
 end
@@ -800,6 +800,7 @@ begin
     apply spec_id xs_hd,
     apply is_deduct.assume_,
     squeeze_simp,
+    sorry,
   },
 end
 
@@ -810,7 +811,7 @@ lemma prop_iff_id
 begin
   unfold formula.iff_,
   apply prop_complete,
-  unfold formula.is_tauto,
+  unfold formula.is_tauto_atomic,
   simp only [eval_and, eval_imp],
   squeeze_simp,
 end
