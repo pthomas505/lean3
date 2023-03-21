@@ -824,14 +824,14 @@ begin
   {
     unfold Forall_,
     apply deduction_theorem,
-    squeeze_simp,
+    simp only [list.foldr_cons, set.union_singleton, insert_emptyc_eq],
     apply is_deduct.mp_ (Forall_ xs_tl P),
     apply proof_imp_deduct,
     exact xs_ih,
     apply spec_id xs_hd,
     apply is_deduct.assume_,
-    squeeze_simp,
-    sorry,
+    simp only [set.mem_singleton_iff, eq_self_iff_true, true_and],
+    refl,
   },
 end
 
