@@ -999,10 +999,19 @@ begin
         sorry,
       },
       {
-        intros H a1 contra,
+        intros H a1,
         squeeze_simp at a1,
         subst a1,
-        sorry,
+        simp only [Forall_is_free_in],
+        unfold formula.iff_,
+        unfold formula.and_,
+        unfold is_free_in,
+        squeeze_simp,
+        contrapose,
+        push_neg,
+        intros a2,
+        apply h2,
+        tauto,
       }
     }
   },
