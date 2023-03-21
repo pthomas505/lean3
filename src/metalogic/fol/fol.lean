@@ -987,7 +987,7 @@ begin
     tauto,
 
     apply deduction_theorem,
-    squeeze_simp,
+    simp only [set.union_singleton, insert_emptyc_eq],
     apply is_deduct.mp_ (forall_ h1_x (h1_P.iff_ h1_P')),
     {
       apply proof_imp_deduct,
@@ -996,17 +996,25 @@ begin
     {
       apply generalization,
       {
-        sorry,
+        apply is_deduct.mp_ (Forall_ l (U.iff_ V)),
+        {
+          apply proof_imp_deduct,
+          exact s1,
+        },
+        {
+          apply is_deduct.assume_,
+          simp only [set.mem_singleton],
+        }
       },
       {
         intros H a1,
-        squeeze_simp at a1,
+        simp only [set.mem_singleton_iff] at a1,
         subst a1,
         simp only [Forall_is_free_in],
         unfold formula.iff_,
         unfold formula.and_,
         unfold is_free_in,
-        squeeze_simp,
+        simp only [not_and],
         contrapose,
         push_neg,
         intros a2,
