@@ -1054,4 +1054,36 @@ begin
 end
 
 
+theorem C_18_4
+  (U V : formula)
+  (P_U P_V : formula)
+  (Δ : set formula)
+  (h1 : is_repl_of U V P_U P_V)
+  (h2 : is_proof (U.iff_ V))
+  (h3 : is_deduct Δ P_U) :
+  is_deduct Δ P_V :=
+begin
+  apply is_deduct.mp_ P_U,
+  {
+    apply is_deduct.mp_ (P_U.iff_ P_V),
+    {
+      unfold formula.iff_,
+      unfold formula.and_,
+      apply proof_imp_deduct,
+      apply prop_complete,
+      unfold formula.is_tauto_atomic,
+      simp only [eval_not, eval_imp],
+      tauto,
+    },
+    {
+      apply proof_imp_deduct,
+      exact C_18_3 U V P_U P_V h1 h2,
+    }
+  },
+  {
+    exact h3,
+  }
+end
+
+
 #lint
