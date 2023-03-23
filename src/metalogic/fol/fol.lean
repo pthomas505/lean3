@@ -1086,4 +1086,14 @@ begin
 end
 
 
+def similar (P_u P_v : formula) (u v : variable_) : Prop :=
+  ¬ u = v ∧
+  ¬ is_free_in v P_u ∧
+  ¬ is_free_in u P_v ∧
+  fast_admits u v P_u ∧
+  fast_admits v u P_v ∧
+  P_v = fast_replace_free u v P_u ∧
+  P_u = fast_replace_free v u P_v
+
+
 #lint
