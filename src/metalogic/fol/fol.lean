@@ -1096,4 +1096,85 @@ def similar (P_u P_v : formula) (u v : variable_) : Prop :=
   P_u = fast_replace_free v u P_v
 
 
+theorem T_18_6
+  (P_u P_v : formula)
+  (u v : variable_)
+  (h1 : similar P_u P_v u v) :
+  is_proof ((forall_ u P_u).iff_ (forall_ v P_v)) :=
+begin
+  unfold similar at h1;
+  cases h1, cases h1_right, cases h1_right_right, cases h1_right_right_right, cases h1_right_right_right_right, cases h1_right_right_right_right_right,
+
+  have s1 : is_proof ((forall_ u P_u).imp_ (forall_ v P_v)),
+  apply deduction_theorem,
+  simp only [set.union_singleton, insert_emptyc_eq],
+  apply generalization,
+  {
+    subst h1_right_right_right_right_right_left,
+    apply spec,
+    {
+      apply is_deduct.assume_,
+      simp only [set.mem_singleton],
+    },
+    {
+      exact h1_right_right_right_left,
+    }
+  },
+  {
+    intros H a1,
+    simp only [set.mem_singleton_iff] at a1,
+    subst a1,
+    unfold is_free_in,
+    simp only [not_and],
+    intros a2,
+    exact h1_right_left,
+  },
+
+  have s2 : is_proof ((forall_ v P_v).imp_ (forall_ u P_u)),
+  apply deduction_theorem,
+  simp only [set.union_singleton, insert_emptyc_eq],
+  apply generalization,
+  {
+    subst h1_right_right_right_right_right_right,
+    apply spec,
+    {
+      apply is_deduct.assume_,
+      simp only [set.mem_singleton],
+    },
+    {
+      exact h1_right_right_right_right_left,
+    }
+  },
+  {
+    intros H a1,
+    simp only [set.mem_singleton_iff] at a1,
+    subst a1,
+    unfold is_free_in,
+    simp only [not_and],
+    intros a2,
+    exact h1_right_right_left,
+  },
+
+  apply is_deduct.mp_ ((forall_ v P_v).imp_ (forall_ u P_u)),
+  {
+    apply is_deduct.mp_ ((forall_ u P_u).imp_ (forall_ v P_v)),
+    {
+      unfold formula.iff_,
+      unfold formula.and_,
+      apply proof_imp_deduct,
+      apply prop_complete,
+      unfold formula.is_tauto_atomic,
+      simp only [eval_not, eval_imp],
+      tauto,
+    },
+    {
+      exact s1,
+    }
+  },
+  {
+    exact s2,
+  }
+end
+
+
 #lint
