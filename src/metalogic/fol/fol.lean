@@ -1177,4 +1177,23 @@ begin
 end
 
 
+theorem T_18_7
+  (P_u P_v Q Q' : formula)
+  (u v : variable_)
+  (Δ : set formula)
+  (h1 : is_deduct Δ Q)
+  (h2 : is_repl_of (forall_ u P_u) (forall_ v P_v) Q Q')
+  (h3 : similar P_u P_v u v) :
+  is_deduct Δ Q' :=
+begin
+  apply C_18_4 (forall_ u P_u) (forall_ v P_v) Q Q' Δ h2,
+  {
+    apply T_18_6 P_u P_v u v h3,
+  },
+  {
+    exact h1,
+  }
+end
+
+
 #lint
