@@ -86,7 +86,7 @@ def is_free_in (v : variable_) : formula → Prop
 | (forall_ x P) := ¬ v = x ∧ is_free_in P
 
 
-example
+lemma occurs_in_iff_mem_var_set
   (v : variable_)
   (P : formula) :
   occurs_in v P ↔ v ∈ P.var_set :=
@@ -123,7 +123,7 @@ begin
 end
 
 
-example
+lemma is_bound_in_iff_mem_bound_var_set
   (v : variable_)
   (P : formula) :
   is_bound_in v P ↔ v ∈ P.bound_var_set :=
@@ -154,7 +154,7 @@ begin
 end
 
 
-example
+lemma is_free_in_iff_mem_free_var_set
   (v : variable_)
   (P : formula) :
   is_free_in v P ↔ v ∈ P.free_var_set :=

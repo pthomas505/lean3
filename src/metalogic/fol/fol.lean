@@ -778,12 +778,17 @@ def is_repl (U V : formula) : formula → formula → Prop
 | P P' := P = P' ∨ (P = U ∧ P' = V)
 
 
+/--
+is_repl_of U V P P' = True if and only if P' is the result of replacing one or more specified occurrences (but not necessarily all occurrences) of U in P by occurrences of V.
+-/
 inductive is_repl_of (U V : formula) : formula → formula → Prop
+-- not replacing an occurrence
 | same_
   (P P' : formula) :
   P = P' →
   is_repl_of P P'
 
+-- replacing an occurrence
 | diff_
   (P P' : formula) :
   P = U →
@@ -1008,6 +1013,44 @@ begin
       }
     }
   },
+end
+
+
+theorem C_18_3
+  (U V : formula)
+  (P_U P_V : formula)
+  (h1 : is_repl_of U V P_U P_V)
+  (h2 : is_proof (U.iff_ V)) :
+  is_proof (P_U.iff_ P_V) :=
+begin
+  apply is_deduct.mp_,
+  {
+    apply T_18_2 U V P_U P_V ((U.free_var_set ∪ V.free_var_set) ∩ P_U.bound_var_set).to_list h1,
+    intros v a1,
+    simp only [finset.mem_to_list, finset.mem_inter, finset.mem_union],
+    simp only [is_free_in_iff_mem_free_var_set, is_bound_in_iff_mem_bound_var_set] at a1,
+    exact a1,
+  },
+  {
+    unfold formula.Forall_,
+    induction ((U.free_var_set ∪ V.free_var_set) ∩ P_U.bound_var_set).to_list,
+    case list.nil
+    {
+      simp only [list.foldr_nil],
+      exact h2,
+    },
+    case list.cons : hd tl ih
+    {
+      simp only [list.foldr_cons],
+      apply generalization,
+      {
+        exact ih,
+      },
+      {
+        simp only [set.mem_empty_eq, is_empty.forall_iff, forall_const],
+      }
+    },
+  }
 end
 
 
