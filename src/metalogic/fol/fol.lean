@@ -18,6 +18,52 @@ def is_repl (U V : formula) : formula → formula → Prop
 
 
 /--
+is_repl_of_list r s l l' = True if and only if l' is the result of replacing one or more specified occurrences (but not necessarily all occurrences) of r in l by occurrences of s.
+-/
+def is_repl_of_list {α : Type} (r s : α) : list α → list α → Prop
+| [] [] := true
+| (hd :: tl) (hd' :: tl') :=
+  (hd = hd' ∨ (hd = r ∧ hd' = s)) ∧ is_repl_of_list tl tl'
+| _ _ := false
+
+
+inductive is_repl_of_var (r s : variable_) : formula → formula → Prop
+| true_ :
+  is_repl_of_var true_ true_
+
+| pred_
+  (name : pred_name_)
+  (args args' : list variable_) :
+  is_repl_of_list r s args args' →
+  is_repl_of_var (pred_ name args) (pred_ name args)
+
+| eq_
+  (x y : variable_)
+  (x' y' : variable_) :
+  (x = x') ∨ (x = r ∧ x' = s) →
+  (y = y') ∨ (y = r ∧ y' = s) →
+  is_repl_of_var (eq_ x y) (eq_ x' y')
+
+| not_
+  (P P' : formula) :
+  is_repl_of_var P P' →
+  is_repl_of_var P.not_ P'.not_
+
+| imp_
+  (P Q : formula)
+  (P' Q' : formula) :
+  is_repl_of_var P P' →
+  is_repl_of_var Q Q' →
+  is_repl_of_var (P.imp_ Q) (P'.imp_ Q')
+
+| forall_
+  (x : variable_)
+  (P P' : formula) :
+  is_repl_of_var P P' →
+  is_repl_of_var (forall_ x P) (forall_ x P')
+
+
+/--
 is_repl_of U V P P' = True if and only if P' is the result of replacing one or more specified occurrences (but not necessarily all occurrences) of U in P by occurrences of V.
 -/
 inductive is_repl_of (U V : formula) : formula → formula → Prop
@@ -1203,5 +1249,25 @@ theorem T_21_8
   (P_r P_s : formula)
   (r s : variable_)
   (h1 : occurs_in r P_r)
+  (h2 : is_repl_of_var r s P_r P_s)
+  (h3 : ¬ is_bound_in r P_r)
+  (h4 : ¬ is_bound_in s P_r) :
+  is_proof ((eq_ r s).imp_ (P_r.iff_ P_s)) :=
+begin
+  induction P_r,
+  case formula.true_
+  { admit },
+  case formula.pred_ : P_r_ᾰ P_r_ᾰ_1
+  { admit },
+  case formula.eq_ : P_r_ᾰ P_r_ᾰ_1
+  { admit },
+  case formula.not_ : P_r_ᾰ P_r_ih
+  { admit },
+  case formula.imp_ : P_r_ᾰ P_r_ᾰ_1 P_r_ih_ᾰ P_r_ih_ᾰ_1
+  { admit },
+  case formula.forall_ : P_r_ᾰ P_r_ᾰ_1 P_r_ih
+  { admit },
+end
+
 
 #lint
