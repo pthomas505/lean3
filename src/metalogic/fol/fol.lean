@@ -7,6 +7,52 @@ set_option pp.parens true
 open formula
 
 
+def proof_equiv (P Q : formula) : Prop := is_proof (P.iff_ Q)
+
+
+def is_repl (U V : formula) : formula → formula → Prop
+| (not_ P) (not_ P') := is_repl P P'
+| (imp_ P Q) (imp_ P' Q') := is_repl P P' ∧ is_repl Q Q'
+| (forall_ x P) (forall_ x' P') := x = x' ∧ is_repl P P'
+| P P' := P = P' ∨ (P = U ∧ P' = V)
+
+
+/--
+is_repl_of U V P P' = True if and only if P' is the result of replacing one or more specified occurrences (but not necessarily all occurrences) of U in P by occurrences of V.
+-/
+inductive is_repl_of (U V : formula) : formula → formula → Prop
+-- not replacing an occurrence
+| same_
+  (P P' : formula) :
+  P = P' →
+  is_repl_of P P'
+
+-- replacing an occurrence
+| diff_
+  (P P' : formula) :
+  P = U →
+  P' = V →
+  is_repl_of P P'
+
+| not_
+  (P P' : formula) :
+  is_repl_of P P' →
+  is_repl_of P.not_ P'.not_
+
+| imp_
+  (P Q : formula)
+  (P' Q' : formula) :
+  is_repl_of P P' →
+  is_repl_of Q Q' →
+  is_repl_of (P.imp_ Q) (P'.imp_ Q')
+
+| forall_
+  (x : variable_)
+  (P P' : formula) :
+  is_repl_of P P' →
+  is_repl_of (forall_ x P) (forall_ x P')
+
+
 -- Universal Elimination
 theorem T_17_1
   (P : formula)
@@ -668,9 +714,6 @@ begin
 end
 
 
-def proof_equiv (P Q : formula) : Prop := is_proof (P.iff_ Q)
-
-
 theorem T_18_1_left
   (P Q : formula)
   (v : variable_) :
@@ -769,49 +812,6 @@ begin
     apply T_18_1_right,
   }
 end
-
-
-def is_repl (U V : formula) : formula → formula → Prop
-| (not_ P) (not_ P') := is_repl P P'
-| (imp_ P Q) (imp_ P' Q') := is_repl P P' ∧ is_repl Q Q'
-| (forall_ x P) (forall_ x' P') := x = x' ∧ is_repl P P'
-| P P' := P = P' ∨ (P = U ∧ P' = V)
-
-
-/--
-is_repl_of U V P P' = True if and only if P' is the result of replacing one or more specified occurrences (but not necessarily all occurrences) of U in P by occurrences of V.
--/
-inductive is_repl_of (U V : formula) : formula → formula → Prop
--- not replacing an occurrence
-| same_
-  (P P' : formula) :
-  P = P' →
-  is_repl_of P P'
-
--- replacing an occurrence
-| diff_
-  (P P' : formula) :
-  P = U →
-  P' = V →
-  is_repl_of P P'
-
-| not_
-  (P P' : formula) :
-  is_repl_of P P' →
-  is_repl_of P.not_ P'.not_
-
-| imp_
-  (P Q : formula)
-  (P' Q' : formula) :
-  is_repl_of P P' →
-  is_repl_of Q Q' →
-  is_repl_of (P.imp_ Q) (P'.imp_ Q')
-
-| forall_
-  (x : variable_)
-  (P P' : formula) :
-  is_repl_of P P' →
-  is_repl_of (forall_ x P) (forall_ x P')
 
 
 lemma Forall_spec_id
@@ -1198,5 +1198,10 @@ begin
   }
 end
 
+
+theorem T_21_8
+  (P_r P_s : formula)
+  (r s : variable_)
+  (h1 : occurs_in r P_r)
 
 #lint
