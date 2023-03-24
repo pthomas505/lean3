@@ -900,6 +900,7 @@ begin
 end
 
 
+-- The equivalence theorem
 theorem T_18_2
   (U V : formula)
   (P_U P_V : formula)
@@ -1054,6 +1055,7 @@ begin
 end
 
 
+-- The replacement theorem
 theorem C_18_4
   (U V : formula)
   (P_U P_V : formula)
@@ -1177,6 +1179,7 @@ begin
 end
 
 
+-- Change of bound variable
 theorem T_18_7
   (P_u P_v Q Q' : formula)
   (u v : variable_)
