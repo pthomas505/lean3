@@ -35,7 +35,7 @@ inductive is_repl_of_var (r s : variable_) : formula → formula → Prop
   (name : pred_name_)
   (args args' : list variable_) :
   is_repl_of_list r s args args' →
-  is_repl_of_var (pred_ name args) (pred_ name args)
+  is_repl_of_var (pred_ name args) (pred_ name args')
 
 | eq_
   (x y : variable_)
@@ -1248,24 +1248,24 @@ end
 theorem T_21_8
   (P_r P_s : formula)
   (r s : variable_)
-  (h1 : occurs_in r P_r)
-  (h2 : is_repl_of_var r s P_r P_s)
+  (h1 : is_repl_of_var r s P_r P_s)
+  (h2 : occurs_in r P_r)
   (h3 : ¬ is_bound_in r P_r)
   (h4 : ¬ is_bound_in s P_r) :
   is_proof ((eq_ r s).imp_ (P_r.iff_ P_s)) :=
 begin
-  induction P_r,
-  case formula.true_
+  induction h1,
+  case is_repl_of_var.true_
   { admit },
-  case formula.pred_ : P_r_ᾰ P_r_ᾰ_1
+  case is_repl_of_var.pred_ : h1_name h1_args h1_args' h1_ᾰ
   { admit },
-  case formula.eq_ : P_r_ᾰ P_r_ᾰ_1
+  case is_repl_of_var.eq_ : h1_x h1_y h1_x' h1_y' h1_ᾰ h1_ᾰ_1
   { admit },
-  case formula.not_ : P_r_ᾰ P_r_ih
+  case is_repl_of_var.not_ : h1_P h1_P' h1_ᾰ h1_ih
   { admit },
-  case formula.imp_ : P_r_ᾰ P_r_ᾰ_1 P_r_ih_ᾰ P_r_ih_ᾰ_1
+  case is_repl_of_var.imp_ : h1_P h1_Q h1_P' h1_Q' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
   { admit },
-  case formula.forall_ : P_r_ᾰ P_r_ᾰ_1 P_r_ih
+  case is_repl_of_var.forall_ : h1_x h1_P h1_P' h1_ᾰ h1_ih
   { admit },
 end
 
