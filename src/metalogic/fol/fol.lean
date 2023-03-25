@@ -874,7 +874,7 @@ end
 lemma Forall_spec_id
   (xs : list variable_)
   (P : formula) :
-  is_proof ((formula.Forall_ xs P).imp_ P) :=
+  is_proof ((Forall_ xs P).imp_ P) :=
 begin
   induction xs,
   case list.nil
@@ -1267,14 +1267,14 @@ begin
 end
 
 
-theorem T_21_8_left
+theorem T_21_8
   (P_r P_s : formula)
   (r s : variable_)
   (h1 : is_repl_of_var r s P_r P_s)
   (h2 : occurs_in r P_r)
   (h3 : ¬ is_bound_in r P_r)
   (h4 : ¬ is_bound_in s P_r) :
-  is_proof ((eq_ r s).imp_ (P_r.imp_ P_s)) :=
+  is_proof ((eq_ r s).imp_ (P_r.iff_ P_s)) :=
 begin
   induction h1,
   case is_repl_of_var.true_
@@ -1290,7 +1290,17 @@ begin
     case nat.zero
     {
       squeeze_simp at *,
-      sorry,
+      apply is_deduct.mp_ (true_.imp_ ((pred_ h1_name list.nil).imp_ (pred_ h1_name list.nil))),
+      {
+        apply proof_imp_deduct,
+        apply prop_complete,
+        unfold formula.is_tauto_atomic,
+        simp only [eval_not, eval_imp],
+        tauto,
+      },
+      {
+        exact s1,
+      }
     },
     case nat.succ : h1_n_n h1_n_ih
     {
