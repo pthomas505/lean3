@@ -33,9 +33,10 @@ inductive is_repl_of_var (r s : variable_) : formula → formula → Prop
 
 | pred_
   (name : pred_name_)
-  (args args' : list variable_) :
-  is_repl_of_list r s args args' →
-  is_repl_of_var (pred_ name args) (pred_ name args')
+  (n : ℕ)
+  (args args' : fin n → variable_) :
+  (∀ (i : fin n), (args i = args' i) ∨ (args i = r ∧ args' i = s)) →
+  is_repl_of_var (pred_ name (list.of_fn args)) (pred_ name (list.of_fn args'))
 
 | eq_
   (x y : variable_)
@@ -97,6 +98,16 @@ inductive is_repl_of (U V : formula) : formula → formula → Prop
   (P P' : formula) :
   is_repl_of P P' →
   is_repl_of (forall_ x P) (forall_ x P')
+
+
+def similar (P_u P_v : formula) (u v : variable_) : Prop :=
+  ¬ u = v ∧
+  ¬ is_free_in v P_u ∧
+  ¬ is_free_in u P_v ∧
+  fast_admits u v P_u ∧
+  fast_admits v u P_v ∧
+  P_v = fast_replace_free u v P_u ∧
+  P_u = fast_replace_free v u P_v
 
 
 -- Universal Elimination
@@ -1134,16 +1145,6 @@ begin
 end
 
 
-def similar (P_u P_v : formula) (u v : variable_) : Prop :=
-  ¬ u = v ∧
-  ¬ is_free_in v P_u ∧
-  ¬ is_free_in u P_v ∧
-  fast_admits u v P_u ∧
-  fast_admits v u P_v ∧
-  P_v = fast_replace_free u v P_u ∧
-  P_u = fast_replace_free v u P_v
-
-
 theorem T_18_6
   (P_u P_v : formula)
   (u v : variable_)
@@ -1245,20 +1246,58 @@ begin
 end
 
 
-theorem T_21_8
+example
+  (name : pred_name_)
+  (r s : variable_) :
+  is_proof ((eq_ r s).imp_ ((pred_ name [r]).imp_ (pred_ name [s]))) :=
+begin
+  apply is_deduct.mp_ (((eq_ r s).and_ true_).imp_ ((pred_ name ([r])).imp_ (pred_ name ([s])))),
+  {
+    unfold formula.and_,
+    apply proof_imp_deduct,
+    apply prop_complete,
+    unfold formula.is_tauto_atomic,
+    simp only [eval_not, eval_imp],
+    tauto,
+  },
+  {
+    apply is_deduct.axiom_,
+    exact is_axiom.eq_2 name 1 (fun (i : fin 1), r) (fun (i : fin 1), s),
+  }
+end
+
+
+theorem T_21_8_left
   (P_r P_s : formula)
   (r s : variable_)
   (h1 : is_repl_of_var r s P_r P_s)
   (h2 : occurs_in r P_r)
   (h3 : ¬ is_bound_in r P_r)
   (h4 : ¬ is_bound_in s P_r) :
-  is_proof ((eq_ r s).imp_ (P_r.iff_ P_s)) :=
+  is_proof ((eq_ r s).imp_ (P_r.imp_ P_s)) :=
 begin
   induction h1,
   case is_repl_of_var.true_
   { admit },
-  case is_repl_of_var.pred_ : h1_name h1_args h1_args' h1_ᾰ
-  { admit },
+  case is_repl_of_var.pred_ : h1_name h1_n h1_args h1_args' h1_1
+  {
+    have s1 : is_proof ((And_ (list.of_fn (fun (i : fin h1_n), eq_ (h1_args i) (h1_args' i)))).imp_ ((pred_ h1_name (list.of_fn h1_args)).imp_ (pred_ h1_name (list.of_fn h1_args')))),
+    apply is_deduct.axiom_,
+    apply is_axiom.eq_2,
+
+    unfold formula.And_ at s1,
+    induction h1_n,
+    case nat.zero
+    {
+      squeeze_simp at *,
+      sorry,
+    },
+    case nat.succ : h1_n_n h1_n_ih
+    {
+      squeeze_simp at *,
+      sorry,
+    },
+  },
   case is_repl_of_var.eq_ : h1_x h1_y h1_x' h1_y' h1_ᾰ h1_ᾰ_1
   { admit },
   case is_repl_of_var.not_ : h1_P h1_P' h1_ᾰ h1_ih
