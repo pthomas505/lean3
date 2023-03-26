@@ -1248,27 +1248,6 @@ end
 
 example
   (name : pred_name_)
-  (r s : variable_) :
-  is_proof ((eq_ r s).imp_ ((pred_ name [r]).imp_ (pred_ name [s]))) :=
-begin
-  apply is_deduct.mp_ (((eq_ r s).and_ true_).imp_ ((pred_ name ([r])).imp_ (pred_ name ([s])))),
-  {
-    unfold formula.and_,
-    apply proof_imp_deduct,
-    apply prop_complete,
-    unfold formula.is_tauto_atomic,
-    simp only [eval_not, eval_imp],
-    tauto,
-  },
-  {
-    apply is_deduct.axiom_,
-    exact is_axiom.eq_2 name 1 (fun (i : fin 1), r) (fun (i : fin 1), s),
-  }
-end
-
-
-example
-  (name : pred_name_)
   (n : ℕ)
   (args_r args_s : fin n → variable_)
   (r s : variable_)
@@ -1302,8 +1281,37 @@ begin
       },
       case nat.succ : n ih
       {
-        specialize ih (λ (i : fin n), (args_r i)) (λ (i : fin n), (args_s i)),
-        sorry,
+        specialize ih (λ (i : fin n), (args_r i.succ)) (λ (i : fin n), (args_s i.succ)),
+        unfold And_ at *,
+        squeeze_simp,
+        apply is_deduct.mp_ (list.foldr and_ true_ (list.of_fn (λ (i : fin n), eq_ (args_r i.succ) (args_s i.succ)))),
+        {
+          apply is_deduct.mp_ (eq_ (args_r 0) (args_s 0)),
+          {
+            apply and_intro,
+          },
+          {
+            specialize h1 0,
+            cases h1,
+            {
+              rewrite h1,
+              apply is_deduct.axiom_,
+              apply is_axiom.eq_1_,
+            },
+            {
+              cases h1,
+              subst h1_left,
+              subst h1_right,
+              apply is_deduct.assume_,
+              squeeze_simp,
+            }
+          }
+        },
+        {
+          apply ih,
+          intros i,
+          apply h1,
+        },
       },
     },
   },
