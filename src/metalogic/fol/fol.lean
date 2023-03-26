@@ -1276,9 +1276,6 @@ example
   is_proof ((eq_ r s).imp_ ((pred_ name (list.of_fn args_r)).imp_
     (pred_ name (list.of_fn args_s)))) :=
 begin
-  obtain s1 := is_axiom.eq_2 name n args_r args_s,
-
-  unfold eq_subst_pred at s1,
   apply deduction_theorem,
   apply is_deduct.mp_ ((pred_ name (list.of_fn args_r)).imp_ (pred_ name (list.of_fn args_s))),
   {
@@ -1292,7 +1289,7 @@ begin
     apply is_deduct.mp_ (And_ (list.of_fn (λ (i : fin n), eq_ (args_r i) (args_s i)))),
     {
       apply is_deduct.axiom_,
-      exact s1,
+      apply is_axiom.eq_2 name n args_r args_s,
     },
     {
       simp only [set.union_singleton, insert_emptyc_eq],
