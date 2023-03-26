@@ -1283,7 +1283,7 @@ begin
       {
         specialize ih (λ (i : fin n), (args_r i.succ)) (λ (i : fin n), (args_s i.succ)),
         unfold And_ at *,
-        squeeze_simp,
+        simp only [list.of_fn_succ, list.foldr_cons],
         apply is_deduct.mp_ (list.foldr and_ true_ (list.of_fn (λ (i : fin n), eq_ (args_r i.succ) (args_s i.succ)))),
         {
           apply is_deduct.mp_ (eq_ (args_r 0) (args_s 0)),
@@ -1303,7 +1303,7 @@ begin
               subst h1_left,
               subst h1_right,
               apply is_deduct.assume_,
-              squeeze_simp,
+              simp only [set.mem_singleton],
             }
           }
         },
