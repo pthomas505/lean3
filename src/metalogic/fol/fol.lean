@@ -1267,6 +1267,52 @@ begin
 end
 
 
+example
+  (name : pred_name_)
+  (n : ℕ)
+  (args_r args_s : fin n → variable_)
+  (r s : variable_)
+  (h1 : (∀ (i : fin n), (args_r i = args_s i) ∨ (args_r i = r ∧ args_s i = s))) :
+  is_proof ((eq_ r s).imp_ ((pred_ name (list.of_fn args_r)).imp_
+    (pred_ name (list.of_fn args_s)))) :=
+begin
+  obtain s1 := is_axiom.eq_2 name n args_r args_s,
+
+  unfold eq_subst_pred at s1,
+  apply deduction_theorem,
+  apply is_deduct.mp_ ((pred_ name (list.of_fn args_r)).imp_ (pred_ name (list.of_fn args_s))),
+  {
+    apply proof_imp_deduct,
+    apply prop_complete,
+    unfold formula.is_tauto_atomic,
+    simp only [eval_not, eval_imp],
+    tauto,
+  },
+  {
+    apply is_deduct.mp_ (And_ (list.of_fn (λ (i : fin n), eq_ (args_r i) (args_s i)))),
+    {
+      apply is_deduct.axiom_,
+      exact s1,
+    },
+    {
+      simp only [set.union_singleton, insert_emptyc_eq],
+      induction n,
+      case nat.zero
+      {
+        simp only [list.of_fn_zero],
+        apply is_deduct.axiom_,
+        apply is_axiom.prop_true_,
+      },
+      case nat.succ : n ih
+      {
+        specialize ih (λ (i : fin n), (args_r i)) (λ (i : fin n), (args_s i)),
+        sorry,
+      },
+    },
+  },
+end
+
+
 theorem T_21_8
   (P_r P_s : formula)
   (r s : variable_)
