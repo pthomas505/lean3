@@ -1254,23 +1254,6 @@ lemma T_21_8_pred
   (h1 : (∀ (i : fin n), (args_r i = args_s i) ∨ (args_r i = r ∧ args_s i = s))) :
   is_proof ((eq_ r s).imp_ ((pred_ name (list.of_fn args_r)).iff_ (pred_ name (list.of_fn args_s)))) :=
 begin
-  have s1 : is_proof ((And_ (list.of_fn (λ (i : fin n), eq_ (args_r i) (args_s i)))).imp_ ((pred_ name (list.of_fn args_r)).iff_ (pred_ name (list.of_fn args_s)))),
-  apply is_deduct.mp_ (Forall_ (list.of_fn args_s) ((And_ (list.of_fn (λ (i : fin n), eq_ (args_r i) (args_s i)))).imp_ ((pred_ name (list.of_fn args_r)).iff_ (pred_ name (list.of_fn args_s))))),
-  {
-    apply Forall_spec_id,
-  },
-  {
-    apply proof_imp_deduct,
-    apply is_deduct.mp_ (Forall_ (list.of_fn args_r) (Forall_ (list.of_fn args_s) ((And_ (list.of_fn (λ (i : fin n), eq_ (args_r i) (args_s i)))).imp_ ((pred_ name (list.of_fn args_r)).iff_ (pred_ name (list.of_fn args_s)))))),
-    {
-      apply Forall_spec_id,
-    },
-    {
-      apply is_deduct.axiom_,
-      exact is_axiom.eq_2 name n args_r args_s,
-    },
-  },
-
   apply deduction_theorem,
   simp only [set.union_singleton, insert_emptyc_eq],
   apply is_deduct.mp_ ((pred_ name (list.of_fn args_r)).iff_ (pred_ name (list.of_fn args_s))),
@@ -1285,10 +1268,23 @@ begin
     apply is_deduct.mp_ (And_ (list.of_fn (λ (i : fin n), eq_ (args_r i) (args_s i)))),
     {
       apply proof_imp_deduct,
-      exact s1,
+      apply is_deduct.mp_ (Forall_ (list.of_fn args_s) ((And_ (list.of_fn (λ (i : fin n), eq_ (args_r i) (args_s i)))).imp_ ((pred_ name (list.of_fn args_r)).iff_ (pred_ name (list.of_fn args_s))))),
+      {
+        apply Forall_spec_id,
+      },
+      {
+        apply proof_imp_deduct,
+        apply is_deduct.mp_ (Forall_ (list.of_fn args_r) (Forall_ (list.of_fn args_s) ((And_ (list.of_fn (λ (i : fin n), eq_ (args_r i) (args_s i)))).imp_ ((pred_ name (list.of_fn args_r)).iff_ (pred_ name (list.of_fn args_s)))))),
+        {
+          apply Forall_spec_id,
+        },
+        {
+          apply is_deduct.axiom_,
+          exact is_axiom.eq_2 name n args_r args_s,
+        },
+      },
     },
     {
-      clear s1,
       induction n,
       case nat.zero
       {
