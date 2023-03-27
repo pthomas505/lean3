@@ -1258,20 +1258,28 @@ begin
 
   have s2 : is_proof (Forall_ (list.of_fn args_s) ((And_ (list.of_fn (λ (i : fin n), eq_ (args_r i) (args_s i)))).imp_ ((pred_ name (list.of_fn args_r)).iff_ (pred_ name (list.of_fn args_s))))),
   apply is_deduct.mp_ (Forall_ (list.of_fn args_r) (Forall_ (list.of_fn args_s) ((And_ (list.of_fn (λ (i : fin n), eq_ (args_r i) (args_s i)))).imp_ ((pred_ name (list.of_fn args_r)).iff_ (pred_ name (list.of_fn args_s)))))),
-  apply Forall_spec_id,
-  apply is_deduct.axiom_,
-  exact s1,
+  {
+    apply Forall_spec_id,
+  },
+  {
+    apply is_deduct.axiom_,
+    exact s1,
+  },
   clear s1,
 
   have s3 : is_proof ((And_ (list.of_fn (λ (i : fin n), eq_ (args_r i) (args_s i)))).imp_ ((pred_ name (list.of_fn args_r)).iff_ (pred_ name (list.of_fn args_s)))),
   apply is_deduct.mp_ (Forall_ (list.of_fn args_s) ((And_ (list.of_fn (λ (i : fin n), eq_ (args_r i) (args_s i)))).imp_ ((pred_ name (list.of_fn args_r)).iff_ (pred_ name (list.of_fn args_s))))),
-  apply Forall_spec_id,
-  apply proof_imp_deduct,
-  exact s2,
+  {
+    apply Forall_spec_id,
+  },
+  {
+    apply proof_imp_deduct,
+    exact s2,
+  },
   clear s2,
 
   apply deduction_theorem,
-  squeeze_simp,
+  simp only [set.union_singleton, insert_emptyc_eq],
   apply is_deduct.mp_ ((pred_ name (list.of_fn args_r)).iff_ (pred_ name (list.of_fn args_s))),
   {
     apply proof_imp_deduct,
@@ -1291,14 +1299,16 @@ begin
       induction n,
       case nat.zero
       {
-        squeeze_simp,
+        simp only [list.of_fn_zero],
         apply is_deduct.axiom_,
         apply is_axiom.prop_true_,
       },
       case nat.succ : n ih
       {
-        unfold And_ at *,
-        squeeze_simp,
+        unfold And_ at ih,
+
+        unfold And_,
+        simp only [list.of_fn_succ, list.foldr_cons],
         apply is_deduct.mp_ (list.foldr and_ true_ (list.of_fn (λ (i : fin n), eq_ (args_r i.succ) (args_s i.succ)))),
         {
           apply is_deduct.mp_ (eq_ (args_r 0) (args_s 0)),
