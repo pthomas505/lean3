@@ -51,16 +51,6 @@ inductive is_prop_deduct (Δ : set formula) : formula → Prop
 def is_prop_proof (P : formula) : Prop := is_prop_deduct ∅ P
 
 
-/--
-  eq_subst_pred name n [x_0 ... x_n] [y_0 ... y_n] :=
-  ((x_0 = y_0) ∧ ... ∧ (x_n = y_n) ∧ ⊤) →
-    (pred_ name [x_0 ... x_n] → pred_ name [y_0 ... y_n])
--/
-def eq_subst_pred (name : pred_name_) (n : ℕ) (xs ys : fin n → variable_) : formula :=
-(And_ (list.of_fn (fun (i : fin n), eq_ (xs i) (ys i)))).imp_
-((pred_ name (list.of_fn xs)).imp_ (pred_ name (list.of_fn ys)))
-
-
 inductive is_axiom : formula → Prop
 
 -- ⊢ ⊤
@@ -100,15 +90,20 @@ inductive is_axiom : formula → Prop
   ¬ is_free_in v P →
   is_axiom (P.imp_ (forall_ v P))
 
--- ⊢ v = v
+-- ⊢ ∀ v (v = v)
 | eq_1_
   (v : variable_) :
-  is_axiom (eq_ v v)
+  is_axiom (forall_ v (eq_ v v))
 
--- ⊢ ((x_0 = y_0) ∧ ... ∧ (x_n = y_n) ∧ ⊤) → (pred_ name [x_0 ... x_n] → pred_ name [y_0 ... y_n])
+/-
+⊢ ∀ x_0 ... ∀ x_n ∀ y_0 ... y_n ((x_0 = y_0) ∧ ... ∧ (x_n = y_n) ∧ ⊤) →
+    ((pred_ name [x_0 ... x_n] ↔ pred_ name [y_0 ... y_n]))
+-/
 | eq_2
   (name : pred_name_) (n : ℕ) (xs ys : fin n → variable_) :
-  is_axiom (eq_subst_pred name n xs ys)
+  is_axiom (Forall_ (list.of_fn xs) (Forall_ (list.of_fn ys)
+    ((And_ (list.of_fn (fun (i : fin n), eq_ (xs i) (ys i)))).imp_
+      ((pred_ name (list.of_fn xs)).iff_ (pred_ name (list.of_fn ys))))))
 
 -- ⊢ P ⇒ ⊢ ∀ v P
 | gen_
@@ -178,15 +173,20 @@ inductive is_proof_alt : formula → Prop
   ¬ is_free_in v P →
   is_proof_alt (P.imp_ (forall_ v P))
 
--- ⊢ v = v
+-- ⊢ ∀ v (v = v)
 | eq_1_
   (v : variable_) :
-  is_proof_alt (eq_ v v)
+  is_proof_alt (forall_ v (eq_ v v))
 
--- ⊢ ((x_0 = y_0) ∧ ... ∧ (x_n = y_n) ∧ ⊤) → (pred_ name [x_0 ... x_n] → pred_ name [y_0 ... y_n])
+/-
+⊢ ∀ x_0 ... ∀ x_n ∀ y_0 ... y_n ((x_0 = y_0) ∧ ... ∧ (x_n = y_n) ∧ ⊤) →
+    ((pred_ name [x_0 ... x_n] ↔ pred_ name [y_0 ... y_n]))
+-/
 | eq_2
   (name : pred_name_) (n : ℕ) (xs ys : fin n → variable_) :
-  is_proof_alt (eq_subst_pred name n xs ys)
+  is_proof_alt (Forall_ (list.of_fn xs) (Forall_ (list.of_fn ys)
+    ((And_ (list.of_fn (fun (i : fin n), eq_ (xs i) (ys i)))).imp_
+      ((pred_ name (list.of_fn xs)).iff_ (pred_ name (list.of_fn ys))))))
 
 -- ⊢ P ⇒ ⊢ ∀ v P
 | gen_

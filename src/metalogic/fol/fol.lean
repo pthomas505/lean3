@@ -1246,17 +1246,33 @@ begin
 end
 
 
-example
+lemma T_21_8_pred
   (name : pred_name_)
   (n : ℕ)
   (args_r args_s : fin n → variable_)
   (r s : variable_)
   (h1 : (∀ (i : fin n), (args_r i = args_s i) ∨ (args_r i = r ∧ args_s i = s))) :
-  is_proof ((eq_ r s).imp_ ((pred_ name (list.of_fn args_r)).imp_
-    (pred_ name (list.of_fn args_s)))) :=
+  is_proof ((eq_ r s).imp_ ((pred_ name (list.of_fn args_r)).iff_ (pred_ name (list.of_fn args_s)))) :=
 begin
+  obtain s1 := is_axiom.eq_2 name n args_r args_s,
+
+  have s2 : is_proof (Forall_ (list.of_fn args_s) ((And_ (list.of_fn (λ (i : fin n), eq_ (args_r i) (args_s i)))).imp_ ((pred_ name (list.of_fn args_r)).iff_ (pred_ name (list.of_fn args_s))))),
+  apply is_deduct.mp_ (Forall_ (list.of_fn args_r) (Forall_ (list.of_fn args_s) ((And_ (list.of_fn (λ (i : fin n), eq_ (args_r i) (args_s i)))).imp_ ((pred_ name (list.of_fn args_r)).iff_ (pred_ name (list.of_fn args_s)))))),
+  apply Forall_spec_id,
+  apply is_deduct.axiom_,
+  exact s1,
+  clear s1,
+
+  have s3 : is_proof ((And_ (list.of_fn (λ (i : fin n), eq_ (args_r i) (args_s i)))).imp_ ((pred_ name (list.of_fn args_r)).iff_ (pred_ name (list.of_fn args_s)))),
+  apply is_deduct.mp_ (Forall_ (list.of_fn args_s) ((And_ (list.of_fn (λ (i : fin n), eq_ (args_r i) (args_s i)))).imp_ ((pred_ name (list.of_fn args_r)).iff_ (pred_ name (list.of_fn args_s))))),
+  apply Forall_spec_id,
+  apply proof_imp_deduct,
+  exact s2,
+  clear s2,
+
   apply deduction_theorem,
-  apply is_deduct.mp_ ((pred_ name (list.of_fn args_r)).imp_ (pred_ name (list.of_fn args_s))),
+  squeeze_simp,
+  apply is_deduct.mp_ ((pred_ name (list.of_fn args_r)).iff_ (pred_ name (list.of_fn args_s))),
   {
     apply proof_imp_deduct,
     apply prop_complete,
@@ -1267,23 +1283,22 @@ begin
   {
     apply is_deduct.mp_ (And_ (list.of_fn (λ (i : fin n), eq_ (args_r i) (args_s i)))),
     {
-      apply is_deduct.axiom_,
-      apply is_axiom.eq_2 name n args_r args_s,
+      apply proof_imp_deduct,
+      exact s3,
     },
     {
-      simp only [set.union_singleton, insert_emptyc_eq],
+      clear s3,
       induction n,
       case nat.zero
       {
-        simp only [list.of_fn_zero],
+        squeeze_simp,
         apply is_deduct.axiom_,
         apply is_axiom.prop_true_,
       },
       case nat.succ : n ih
       {
-        specialize ih (λ (i : fin n), (args_r i.succ)) (λ (i : fin n), (args_s i.succ)),
         unfold And_ at *,
-        simp only [list.of_fn_succ, list.foldr_cons],
+        squeeze_simp,
         apply is_deduct.mp_ (list.foldr and_ true_ (list.of_fn (λ (i : fin n), eq_ (args_r i.succ) (args_s i.succ)))),
         {
           apply is_deduct.mp_ (eq_ (args_r 0) (args_s 0)),
@@ -1295,6 +1310,7 @@ begin
             cases h1,
             {
               rewrite h1,
+              apply spec_id (args_s 0),
               apply is_deduct.axiom_,
               apply is_axiom.eq_1_,
             },
@@ -1308,6 +1324,7 @@ begin
           }
         },
         {
+          specialize ih (λ (i : fin n), (args_r i.succ)) (λ (i : fin n), (args_s i.succ)),
           apply ih,
           intros i,
           apply h1,
@@ -1332,32 +1349,7 @@ begin
   { admit },
   case is_repl_of_var.pred_ : h1_name h1_n h1_args h1_args' h1_1
   {
-    have s1 : is_proof ((And_ (list.of_fn (fun (i : fin h1_n), eq_ (h1_args i) (h1_args' i)))).imp_ ((pred_ h1_name (list.of_fn h1_args)).imp_ (pred_ h1_name (list.of_fn h1_args')))),
-    apply is_deduct.axiom_,
-    apply is_axiom.eq_2,
-
-    unfold formula.And_ at s1,
-    induction h1_n,
-    case nat.zero
-    {
-      squeeze_simp at *,
-      apply is_deduct.mp_ (true_.imp_ ((pred_ h1_name list.nil).imp_ (pred_ h1_name list.nil))),
-      {
-        apply proof_imp_deduct,
-        apply prop_complete,
-        unfold formula.is_tauto_atomic,
-        simp only [eval_not, eval_imp],
-        tauto,
-      },
-      {
-        exact s1,
-      }
-    },
-    case nat.succ : h1_n_n h1_n_ih
-    {
-      squeeze_simp at *,
-      sorry,
-    },
+    exact T_21_8_pred h1_name h1_n h1_args h1_args' r s h1_1,
   },
   case is_repl_of_var.eq_ : h1_x h1_y h1_x' h1_y' h1_ᾰ h1_ᾰ_1
   { admit },

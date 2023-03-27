@@ -84,13 +84,13 @@ def formula.exists_ (x : variable_) (P : formula) : formula := not_ (forall_ x (
 
   And_ [P] = P ∧ ⊤
 
-  And_ [P_1 ... P_n] := P_1 ∧ ... ∧ P_n ∧ ⊤ 
+  And_ [P_0 ... P_n] := P_0 ∧ ... ∧ P_n ∧ ⊤
 -/
 def formula.And_ (l : list formula) : formula := list.foldr formula.and_ true_ l
 
 
 /--
-  Forall_ [x0 ... xn] P := ∀ x0 ... ∀ xn P
+  Forall_ [x_0 ... x_n] P := ∀ x_0 ... ∀ x_n P
 -/
 def formula.Forall_ (xs : list variable_) (P : formula) : formula := list.foldr formula.forall_ P xs
 
