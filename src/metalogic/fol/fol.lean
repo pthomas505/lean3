@@ -1246,6 +1246,177 @@ begin
 end
 
 
+theorem T_19_1
+  (P : formula)
+  (v : variable_)
+  (h1 : ¬ is_free_in v P) :
+  is_proof ((forall_ v P).iff_ P) :=
+begin
+  apply is_deduct.mp_ ((forall_ v P).imp_ P),
+  {
+    apply is_deduct.mp_ (P.imp_ (forall_ v P)),
+    {
+      unfold formula.iff_,
+      unfold formula.and_,
+      apply proof_imp_deduct,
+      apply prop_complete,
+      unfold formula.is_tauto_atomic,
+      simp only [eval_not, eval_imp],
+      tauto,
+    },
+    {
+      apply is_deduct.axiom_,
+      exact is_axiom.pred_3_ v P h1,
+    },
+  },
+  {
+    apply is_deduct.axiom_,
+    apply is_axiom.pred_2_ v v P P,
+    {
+      apply fast_admits_self,
+    },
+    {
+      apply fast_replace_free_self,
+    }
+  },
+end
+
+
+theorem T_19_2
+  (P : formula)
+  (u v : variable_) :
+  is_proof ((forall_ u (forall_ v P)).iff_ ((forall_ v (forall_ u P)))) :=
+begin
+  apply is_deduct.mp_ ((forall_ u (forall_ v P)).imp_ ((forall_ v (forall_ u P)))),
+  {
+    apply is_deduct.mp_ ((forall_ v (forall_ u P)).imp_ ((forall_ u (forall_ v P)))),
+    {
+      unfold formula.iff_,
+      unfold formula.and_,
+      apply proof_imp_deduct,
+      apply prop_complete,
+      unfold formula.is_tauto_atomic,
+      simp only [eval_not, eval_imp],
+      tauto,
+    },
+    {
+      apply T_17_10,
+    },
+  },
+  {
+    apply T_17_10,
+  },
+end
+
+
+theorem T_19_TS_21_left
+  (P Q : formula)
+  (v : variable_)
+  (h1 : ¬ is_free_in v P) :
+  is_proof ((forall_ v (P.imp_ Q)).imp_ (P.imp_ (forall_ v Q))) :=
+begin
+  apply C_18_4 (forall_ v P) P ((forall_ v (P.imp_ Q)).imp_ ((forall_ v P).imp_ (forall_ v Q))),
+  {
+    apply is_repl_of.imp_,
+    {
+      apply is_repl_of.same_,
+      refl,
+    },
+    {
+      apply is_repl_of.imp_,
+      {
+        apply is_repl_of.diff_,
+        {
+          refl,
+        },
+        {
+          refl,
+        },
+      },
+      {
+        apply is_repl_of.same_,
+        refl,
+      },
+    }
+  },
+  {
+    exact T_19_1 P v h1,
+  },
+  {
+    apply is_deduct.axiom_,
+    apply is_axiom.pred_1_,
+  },
+end
+
+
+theorem T_19_TS_21_right
+  (P Q : formula)
+  (v : variable_)
+  (h1 : ¬ is_free_in v P) :
+  is_proof ((P.imp_ (forall_ v Q)).imp_ (forall_ v (P.imp_ Q))) :=
+begin
+  apply deduction_theorem,
+  simp only [set.union_singleton, insert_emptyc_eq],
+  apply generalization,
+  {
+    apply deduction_theorem,
+    apply spec_id v,
+    apply is_deduct.mp_ P,
+    {
+      apply is_deduct.assume_,
+      simp only [set.union_singleton, set.mem_insert_iff, set.mem_singleton, or_true],
+    },
+    {
+      apply is_deduct.assume_,
+      simp only [set.union_singleton, set.mem_insert_iff, eq_self_iff_true, true_or],
+    },
+  },
+  {
+    intros H a1,
+    simp only [set.mem_singleton_iff] at a1,
+    subst a1,
+    unfold is_free_in,
+    push_neg,
+    split,
+    {
+      exact h1,
+    },
+    {
+      intros a1,
+      contradiction,
+    }
+  },
+end
+
+
+theorem T_19_TS_21
+  (P Q : formula)
+  (v : variable_)
+  (h1 : ¬ is_free_in v P) :
+  is_proof ((forall_ v (P.imp_ Q)).iff_ (P.imp_ (forall_ v Q))) :=
+begin
+  apply is_deduct.mp_ ((forall_ v (P.imp_ Q)).imp_ (P.imp_ (forall_ v Q))),
+  {
+    apply is_deduct.mp_ ((P.imp_ (forall_ v Q)).imp_ (forall_ v (P.imp_ Q))),
+    {
+      unfold formula.iff_,
+      unfold formula.and_,
+      apply proof_imp_deduct,
+      apply prop_complete,
+      unfold formula.is_tauto_atomic,
+      simp only [eval_not, eval_imp],
+      tauto,
+    },
+    {
+      exact T_19_TS_21_right P Q v h1,
+    },
+  },
+  {
+    exact T_19_TS_21_left P Q v h1,
+  },
+end
+
+
 lemma T_21_8_pred
   (name : pred_name_)
   (n : ℕ)
@@ -1356,8 +1527,71 @@ begin
   { admit },
   case is_repl_of_var.imp_ : h1_P h1_Q h1_P' h1_Q' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
   { admit },
-  case is_repl_of_var.forall_ : h1_x h1_P h1_P' h1_ᾰ h1_ih
-  { admit },
+  case is_repl_of_var.forall_ : h1_x h1_P h1_P' h1_1 h1_ih
+  {
+    unfold occurs_in at h2,
+
+    unfold is_bound_in at h3,
+    push_neg at h3,
+    cases h3,
+
+    unfold is_bound_in at h4,
+    push_neg at h4,
+    cases h4,
+
+    cases h2,
+    {
+      subst h2,
+      contradiction,
+    },
+    {
+      apply deduction_theorem,
+      simp only [set.union_singleton, insert_emptyc_eq],
+      apply is_deduct.mp_ (forall_ h1_x (h1_P.iff_ h1_P')),
+      {
+        apply proof_imp_deduct,
+        apply T_18_1,
+      },
+      {
+        apply is_deduct.mp_ (eq_ r s),
+        {
+          apply proof_imp_deduct,
+          apply is_deduct.mp_ (forall_ h1_x ((eq_ r s).imp_ (h1_P.iff_ h1_P'))),
+          {
+            apply T_19_TS_21_left,
+            {
+              unfold is_free_in,
+              push_neg,
+              split,
+              {
+                simp only [ne_comm],
+                exact h3_left,
+              },
+              {
+                simp only [ne_comm],
+                exact h4_left,
+              },
+            },
+          },
+          {
+            apply generalization,
+            {
+              exact h1_ih h2 h3_right h4_right,
+            },
+            {
+              intros H a1,
+              simp only [set.mem_empty_eq] at a1,
+              contradiction,
+            },
+          },
+        },
+        {
+          apply is_deduct.assume_,
+          simp only [set.mem_singleton],
+        }
+      },
+    },
+  },
 end
 
 
