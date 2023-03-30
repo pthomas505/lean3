@@ -1532,7 +1532,15 @@ theorem T_21_8
 begin
   induction h1,
   case is_repl_of_var_in_formula.true_
-  { admit },
+  {
+    unfold formula.iff_,
+    unfold formula.and_,
+    apply proof_imp_deduct,
+    apply prop_complete,
+    unfold formula.is_tauto_atomic,
+    simp only [eval_not, eval_imp],
+    tauto,
+  },
   case is_repl_of_var_in_formula.pred_ : h1_name h1_n h1_args_u h1_args_v h1_1
   {
     exact T_21_8_pred h1_name h1_n h1_args_u h1_args_v r s h1_1,
