@@ -93,17 +93,7 @@ inductive is_repl_of_formula (U V : formula) : formula → formula → Prop
   is_repl_of_formula (forall_ x P_u) (forall_ x P_v)
 
 
-example
-  (U V P_u P_v : formula)
-  (h1 : is_repl_of_formula_alt U V P_u P_v) :
-  is_repl_of_formula U V P_u P_v :=
-begin
-  sorry
-end
-
-
 def similar (P_u P_v : formula) (u v : variable_) : Prop :=
-  ¬ u = v ∧
   ¬ is_free_in v P_u ∧
   ¬ is_free_in u P_v ∧
   fast_admits u v P_u ∧
@@ -1154,14 +1144,39 @@ theorem T_18_6
   is_proof ((forall_ u P_u).iff_ (forall_ v P_v)) :=
 begin
   unfold similar at h1;
-  cases h1, cases h1_right, cases h1_right_right, cases h1_right_right_right, cases h1_right_right_right_right, cases h1_right_right_right_right_right,
+  cases h1, cases h1_right, cases h1_right_right, cases h1_right_right_right, cases h1_right_right_right_right,
 
   have s1 : is_proof ((forall_ u P_u).imp_ (forall_ v P_v)),
   apply deduction_theorem,
   simp only [set.union_singleton, insert_emptyc_eq],
   apply generalization,
   {
-    subst h1_right_right_right_right_right_left,
+    subst h1_right_right_right_right_left,
+    apply spec,
+    {
+      apply is_deduct.assume_,
+      simp only [set.mem_singleton],
+    },
+    {
+      exact h1_right_right_left,
+    }
+  },
+  {
+    intros H a1,
+    simp only [set.mem_singleton_iff] at a1,
+    subst a1,
+    unfold is_free_in,
+    simp only [not_and],
+    intros a2,
+    exact h1_left,
+  },
+
+  have s2 : is_proof ((forall_ v P_v).imp_ (forall_ u P_u)),
+  apply deduction_theorem,
+  simp only [set.union_singleton, insert_emptyc_eq],
+  apply generalization,
+  {
+    subst h1_right_right_right_right_right,
     apply spec,
     {
       apply is_deduct.assume_,
@@ -1179,31 +1194,6 @@ begin
     simp only [not_and],
     intros a2,
     exact h1_right_left,
-  },
-
-  have s2 : is_proof ((forall_ v P_v).imp_ (forall_ u P_u)),
-  apply deduction_theorem,
-  simp only [set.union_singleton, insert_emptyc_eq],
-  apply generalization,
-  {
-    subst h1_right_right_right_right_right_right,
-    apply spec,
-    {
-      apply is_deduct.assume_,
-      simp only [set.mem_singleton],
-    },
-    {
-      exact h1_right_right_right_right_left,
-    }
-  },
-  {
-    intros H a1,
-    simp only [set.mem_singleton_iff] at a1,
-    subst a1,
-    unfold is_free_in,
-    simp only [not_and],
-    intros a2,
-    exact h1_right_right_left,
   },
 
   apply is_deduct.mp_ ((forall_ v P_v).imp_ (forall_ u P_u)),
