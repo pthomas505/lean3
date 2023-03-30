@@ -1546,7 +1546,39 @@ begin
     exact T_21_8_pred h1_name h1_n h1_args_u h1_args_v r s h1_1,
   },
   case is_repl_of_var_in_formula.eq_ : h1_x_u h1_y_u h1_x_v h1_y_v h1_1 h1_2
-  { admit },
+  {
+    cases h1_1,
+    {
+      subst h1_1,
+      cases h1_2,
+      {
+        subst h1_2,
+
+        unfold formula.iff_,
+        unfold formula.and_,
+        apply proof_imp_deduct,
+        apply prop_complete,
+        unfold formula.is_tauto_atomic,
+        simp only [eval_not, eval_imp],
+        tauto,
+      },
+      {
+        cases h1_2,
+        subst h1_2_left,
+        subst h1_2_right,
+        sorry,
+      }
+    },
+    {
+      cases h1_2,
+      {
+        sorry,
+      },
+      {
+        sorry,
+      }
+    }
+  },
   case is_repl_of_var_in_formula.not_ : h1_P_u h1_P_v h1_1 h1_ih
   {
     unfold is_bound_in at h2,
