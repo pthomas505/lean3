@@ -1526,30 +1526,27 @@ theorem T_21_8
   (P_r P_s : formula)
   (r s : variable_)
   (h1 : is_repl_of_var_in_formula r s P_r P_s)
-  (h2 : occurs_in r P_r)
-  (h3 : ¬ is_bound_in r P_r)
-  (h4 : ¬ is_bound_in s P_r) :
+  (h2 : ¬ is_bound_in r P_r)
+  (h3 : ¬ is_bound_in s P_r) :
   is_proof ((eq_ r s).imp_ (P_r.iff_ P_s)) :=
 begin
   induction h1,
   case is_repl_of_var_in_formula.true_
   { admit },
-  case is_repl_of_var_in_formula.pred_ : h1_name h1_n h1_args h1_args' h1_1
+  case is_repl_of_var_in_formula.pred_ : h1_name h1_n h1_args_u h1_args_v h1_1
   {
-    exact T_21_8_pred h1_name h1_n h1_args h1_args' r s h1_1,
+    exact T_21_8_pred h1_name h1_n h1_args_u h1_args_v r s h1_1,
   },
-  case is_repl_of_var_in_formula.eq_ : h1_x h1_y h1_x' h1_y' h1_ᾰ h1_ᾰ_1
+  case is_repl_of_var_in_formula.eq_ : h1_x_u h1_y_u h1_x_v h1_y_v h1_ᾰ h1_ᾰ_1
   { admit },
-  case is_repl_of_var_in_formula.not_ : h1_P h1_P' h1_1 h1_ih
+  case is_repl_of_var_in_formula.not_ : h1_P_u h1_P_v h1_1 h1_ih
   {
-    unfold occurs_in at h2,
+    unfold is_bound_in at h2,
 
     unfold is_bound_in at h3,
 
-    unfold is_bound_in at h4,
-
-    specialize h1_ih h2 h3 h4,
-    apply is_deduct.mp_ ((eq_ r s).imp_ (h1_P.iff_ h1_P')),
+    specialize h1_ih h2 h3,
+    apply is_deduct.mp_ ((eq_ r s).imp_ (h1_P_u.iff_ h1_P_v)),
     {
       unfold formula.iff_,
       unfold formula.and_,
@@ -1563,71 +1560,92 @@ begin
       exact h1_ih,
     }
   },
-  case is_repl_of_var_in_formula.imp_ : h1_P h1_Q h1_P' h1_Q' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
-  { admit },
-  case is_repl_of_var_in_formula.forall_ : h1_x h1_P h1_P' h1_1 h1_ih
+  case is_repl_of_var_in_formula.imp_ : h1_P_u h1_Q_u h1_P_v h1_Q_v h1_1 h1_2 h1_ih_1 h1_ih_2
   {
-    unfold occurs_in at h2,
+    unfold is_bound_in at h2,
+    push_neg at h2,
+    cases h2,
 
     unfold is_bound_in at h3,
     push_neg at h3,
     cases h3,
 
-    unfold is_bound_in at h4,
-    push_neg at h4,
-    cases h4,
-
-    cases h2,
+    specialize h1_ih_1 h2_left h3_left,
+    specialize h1_ih_2 h2_right h3_right,
+    apply is_deduct.mp_ ((eq_ r s).imp_ (h1_Q_u.iff_ h1_Q_v)),
     {
-      subst h2,
-      contradiction,
-    },
-    {
-      apply deduction_theorem,
-      simp only [set.union_singleton, insert_emptyc_eq],
-      apply is_deduct.mp_ (forall_ h1_x (h1_P.iff_ h1_P')),
+      apply is_deduct.mp_ ((eq_ r s).imp_ (h1_P_u.iff_ h1_P_v)),
       {
+        unfold formula.iff_,
+        unfold formula.and_,
         apply proof_imp_deduct,
-        apply T_18_1,
+        apply prop_complete,
+        unfold formula.is_tauto_atomic,
+        simp only [eval_not, eval_imp],
+        tauto,
       },
       {
-        apply is_deduct.mp_ (eq_ r s),
+        exact h1_ih_1,
+      }
+    },
+    {
+      exact h1_ih_2,
+    }
+  },
+  case is_repl_of_var_in_formula.forall_ : h1_x h1_P_u h1_P_v h1_1 h1_ih
+  {
+    unfold is_bound_in at h2,
+    push_neg at h2,
+    cases h2,
+
+    unfold is_bound_in at h3,
+    push_neg at h3,
+    cases h3,
+
+    apply deduction_theorem,
+    simp only [set.union_singleton, insert_emptyc_eq],
+    apply is_deduct.mp_ (forall_ h1_x (h1_P_u.iff_ h1_P_v)),
+    {
+      apply proof_imp_deduct,
+      apply T_18_1,
+    },
+    {
+      apply is_deduct.mp_ (eq_ r s),
+      {
+        apply proof_imp_deduct,
+        apply is_deduct.mp_ (forall_ h1_x ((eq_ r s).imp_ (h1_P_u.iff_ h1_P_v))),
         {
-          apply proof_imp_deduct,
-          apply is_deduct.mp_ (forall_ h1_x ((eq_ r s).imp_ (h1_P.iff_ h1_P'))),
+          apply T_19_TS_21_left,
           {
-            apply T_19_TS_21_left,
+            unfold is_free_in,
+            push_neg,
+            split,
             {
-              unfold is_free_in,
-              push_neg,
-              split,
-              {
-                simp only [ne_comm],
-                exact h3_left,
-              },
-              {
-                simp only [ne_comm],
-                exact h4_left,
-              },
-            },
-          },
-          {
-            apply generalization,
-            {
-              exact h1_ih h2 h3_right h4_right,
+              simp only [ne_comm],
+              exact h2_left,
             },
             {
-              intros H a1,
-              simp only [set.mem_empty_eq] at a1,
-              contradiction,
+              simp only [ne_comm],
+              exact h3_left,
             },
           },
         },
         {
-          apply is_deduct.assume_,
-          simp only [set.mem_singleton],
-        }
+          apply generalization,
+          {
+            exact h1_ih h2_right h3_right,
+          },
+          {
+            intros H a1,
+            simp only [set.mem_empty_eq] at a1,
+            contradiction,
+          },
+        },
       },
+      {
+        apply is_deduct.assume_,
+        simp only [set.mem_singleton],
+      }
     },
   },
 end
