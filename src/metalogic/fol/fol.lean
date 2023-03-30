@@ -30,7 +30,7 @@ def is_repl_of_var_fun (u v : variable_) : formula → formula → Prop
 
 
 /--
-is_repl_of_var_fun u v P_u P_v = True if and only if P_v is the result of replacing one or more specified occurrences (but not necessarily all occurrences) of u in P_u by occurrences of v.
+is_repl_of_var u v P_u P_v = True if and only if P_v is the result of replacing one or more specified occurrences (but not necessarily all occurrences) of u in P_u by occurrences of v.
 -/
 inductive is_repl_of_var (u v : variable_) : formula → formula → Prop
 | true_ :
