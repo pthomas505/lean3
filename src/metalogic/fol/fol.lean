@@ -10,94 +10,96 @@ open formula
 def proof_equiv (P Q : formula) : Prop := is_proof (P.iff_ Q)
 
 
-def is_repl (U V : formula) : formula → formula → Prop
-| (not_ P) (not_ P') := is_repl P P'
-| (imp_ P Q) (imp_ P' Q') := is_repl P P' ∧ is_repl Q Q'
-| (forall_ x P) (forall_ x' P') := x = x' ∧ is_repl P P'
-| P P' := P = P' ∨ (P = U ∧ P' = V)
-
-
-/--
-is_repl_of_list r s l l' = True if and only if l' is the result of replacing one or more specified occurrences (but not necessarily all occurrences) of r in l by occurrences of s.
--/
-def is_repl_of_list {α : Type} (r s : α) : list α → list α → Prop
-| [] [] := true
-| (hd :: tl) (hd' :: tl') :=
-  (hd = hd' ∨ (hd = r ∧ hd' = s)) ∧ is_repl_of_list tl tl'
-| _ _ := false
-
-
-inductive is_repl_of_var (r s : variable_) : formula → formula → Prop
+inductive is_repl_of_var (u v : variable_) : formula → formula → Prop
 | true_ :
   is_repl_of_var true_ true_
 
 | pred_
   (name : pred_name_)
   (n : ℕ)
-  (args args' : fin n → variable_) :
-  (∀ (i : fin n), (args i = args' i) ∨ (args i = r ∧ args' i = s)) →
-  is_repl_of_var (pred_ name (list.of_fn args)) (pred_ name (list.of_fn args'))
+  (args_u args_v : fin n → variable_) :
+  (∀ (i : fin n), (args_u i = args_v i) ∨ (args_u i = u ∧ args_v i = v)) →
+  is_repl_of_var (pred_ name (list.of_fn args_u)) (pred_ name (list.of_fn args_v))
 
 | eq_
   (x y : variable_)
   (x' y' : variable_) :
-  (x = x') ∨ (x = r ∧ x' = s) →
-  (y = y') ∨ (y = r ∧ y' = s) →
+  (x = x') ∨ (x = u ∧ x' = v) →
+  (y = y') ∨ (y = u ∧ y' = v) →
   is_repl_of_var (eq_ x y) (eq_ x' y')
 
 | not_
-  (P P' : formula) :
-  is_repl_of_var P P' →
-  is_repl_of_var P.not_ P'.not_
+  (P_u P_v : formula) :
+  is_repl_of_var P_u P_v →
+  is_repl_of_var P_u.not_ P_v.not_
 
 | imp_
-  (P Q : formula)
-  (P' Q' : formula) :
-  is_repl_of_var P P' →
-  is_repl_of_var Q Q' →
-  is_repl_of_var (P.imp_ Q) (P'.imp_ Q')
+  (P_u Q_u : formula)
+  (P_v Q_v : formula) :
+  is_repl_of_var P_u P_v →
+  is_repl_of_var Q_u Q_v →
+  is_repl_of_var (P_u.imp_ Q_u) (P_v.imp_ Q_v)
 
 | forall_
   (x : variable_)
-  (P P' : formula) :
-  is_repl_of_var P P' →
-  is_repl_of_var (forall_ x P) (forall_ x P')
+  (P_u P_v : formula) :
+  is_repl_of_var P_u P_v →
+  is_repl_of_var (forall_ x P_u) (forall_ x P_v)
 
 
 /--
-is_repl_of U V P P' = True if and only if P' is the result of replacing one or more specified occurrences (but not necessarily all occurrences) of U in P by occurrences of V.
+is_repl U V P_u P_v = True if and only if P_v is the result of replacing one or more specified occurrences (but not necessarily all occurrences) of U in P_u by occurrences of V.
 -/
-inductive is_repl_of (U V : formula) : formula → formula → Prop
+def is_repl_of_formula_alt (U V : formula) : formula → formula → Prop
+| (not_ P_u) (not_ P_v) := is_repl_of_formula_alt P_u P_v
+| (imp_ P_u Q_u) (imp_ P_v Q_v) := is_repl_of_formula_alt P_u P_v ∧ is_repl_of_formula_alt Q_u Q_v
+| (forall_ x P_u) (forall_ x' P_v) := x = x' ∧ is_repl_of_formula_alt P_u P_v
+| P_u P_v := P_u = P_v ∨ (P_u = U ∧ P_v = V)
+
+
+/--
+is_repl_of_formula U V P_u P_v = True if and only if P_v is the result of replacing one or more specified occurrences (but not necessarily all occurrences) of U in P_u by occurrences of V.
+-/
+inductive is_repl_of_formula (U V : formula) : formula → formula → Prop
 -- not replacing an occurrence
 | same_
-  (P P' : formula) :
-  P = P' →
-  is_repl_of P P'
+  (P_u P_v : formula) :
+  P_u = P_v →
+  is_repl_of_formula P_u P_v
 
 -- replacing an occurrence
 | diff_
-  (P P' : formula) :
-  P = U →
-  P' = V →
-  is_repl_of P P'
+  (P_u P_v : formula) :
+  P_u = U →
+  P_v = V →
+  is_repl_of_formula P_u P_v
 
 | not_
-  (P P' : formula) :
-  is_repl_of P P' →
-  is_repl_of P.not_ P'.not_
+  (P_u P_v : formula) :
+  is_repl_of_formula P_u P_v →
+  is_repl_of_formula P_u.not_ P_v.not_
 
 | imp_
-  (P Q : formula)
-  (P' Q' : formula) :
-  is_repl_of P P' →
-  is_repl_of Q Q' →
-  is_repl_of (P.imp_ Q) (P'.imp_ Q')
+  (P_u Q_u : formula)
+  (P_v Q_v : formula) :
+  is_repl_of_formula P_u P_v →
+  is_repl_of_formula Q_u Q_v →
+  is_repl_of_formula (P_u.imp_ Q_u) (P_v.imp_ Q_v)
 
 | forall_
   (x : variable_)
-  (P P' : formula) :
-  is_repl_of P P' →
-  is_repl_of (forall_ x P) (forall_ x P')
+  (P_u P_v : formula) :
+  is_repl_of_formula P_u P_v →
+  is_repl_of_formula (forall_ x P_u) (forall_ x P_v)
+
+
+example
+  (U V P_u P_v : formula)
+  (h1 : is_repl_of_formula_alt U V P_u P_v) :
+  is_repl_of_formula U V P_u P_v :=
+begin
+  sorry
+end
 
 
 def similar (P_u P_v : formula) (u v : variable_) : Prop :=
@@ -962,25 +964,25 @@ theorem T_18_2
   (U V : formula)
   (P_U P_V : formula)
   (l : list variable_)
-  (h1 : is_repl_of U V P_U P_V)
+  (h1 : is_repl_of_formula U V P_U P_V)
   (h2 : ∀ (v : variable_), ((is_free_in v U ∨ is_free_in v V) ∧ is_bound_in v P_U) → v ∈ l) :
   is_proof ((Forall_ l (U.iff_ V)).imp_ (P_U.iff_ P_V)) :=
 begin
   induction h1,
-  case is_repl_of.same_ : h1_P h1_P' h1_1
+  case is_repl_of_formula.same_ : h1_P h1_P' h1_1
   {
     subst h1_1,
     apply deduction_theorem,
     apply proof_imp_deduct,
     apply prop_iff_id,
   },
-  case is_repl_of.diff_ : h1_P h1_P' h1_1 h1_2
+  case is_repl_of_formula.diff_ : h1_P h1_P' h1_1 h1_2
   {
     subst h1_1,
     subst h1_2,
     apply Forall_spec_id,
   },
-  case is_repl_of.not_ : h1_P h1_P' h1_1 h1_ih
+  case is_repl_of_formula.not_ : h1_P h1_P' h1_1 h1_ih
   {
     unfold is_bound_in at h2,
 
@@ -997,7 +999,7 @@ begin
       exact h1_ih h2,
     },
   },
-  case is_repl_of.imp_ : h1_P h1_Q h1_P' h1_Q' h1_1 h1_2 h1_ih_1 h1_ih_2
+  case is_repl_of_formula.imp_ : h1_P h1_Q h1_P' h1_Q' h1_1 h1_2 h1_ih_1 h1_ih_2
   {
     unfold is_bound_in at h2,
 
@@ -1026,7 +1028,7 @@ begin
       tauto,
     },
   },
-  case is_repl_of.forall_ : h1_x h1_P h1_P' h1_1 h1_ih
+  case is_repl_of_formula.forall_ : h1_x h1_P h1_P' h1_1 h1_ih
   {
     unfold is_bound_in at h2,
 
@@ -1077,7 +1079,7 @@ end
 theorem C_18_3
   (U V : formula)
   (P_U P_V : formula)
-  (h1 : is_repl_of U V P_U P_V)
+  (h1 : is_repl_of_formula U V P_U P_V)
   (h2 : is_proof (U.iff_ V)) :
   is_proof (P_U.iff_ P_V) :=
 begin
@@ -1117,7 +1119,7 @@ theorem C_18_4
   (U V : formula)
   (P_U P_V : formula)
   (Δ : set formula)
-  (h1 : is_repl_of U V P_U P_V)
+  (h1 : is_repl_of_formula U V P_U P_V)
   (h2 : is_proof (U.iff_ V))
   (h3 : is_deduct Δ P_U) :
   is_deduct Δ P_V :=
@@ -1232,7 +1234,7 @@ theorem T_18_7
   (u v : variable_)
   (Δ : set formula)
   (h1 : is_deduct Δ Q)
-  (h2 : is_repl_of (forall_ u P_u) (forall_ v P_v) Q Q')
+  (h2 : is_repl_of_formula (forall_ u P_u) (forall_ v P_v) Q Q')
   (h3 : similar P_u P_v u v) :
   is_deduct Δ Q' :=
 begin
@@ -1317,15 +1319,15 @@ theorem T_19_TS_21_left
 begin
   apply C_18_4 (forall_ v P) P ((forall_ v (P.imp_ Q)).imp_ ((forall_ v P).imp_ (forall_ v Q))),
   {
-    apply is_repl_of.imp_,
+    apply is_repl_of_formula.imp_,
     {
-      apply is_repl_of.same_,
+      apply is_repl_of_formula.same_,
       refl,
     },
     {
-      apply is_repl_of.imp_,
+      apply is_repl_of_formula.imp_,
       {
-        apply is_repl_of.diff_,
+        apply is_repl_of_formula.diff_,
         {
           refl,
         },
@@ -1334,7 +1336,7 @@ begin
         },
       },
       {
-        apply is_repl_of.same_,
+        apply is_repl_of_formula.same_,
         refl,
       },
     }
