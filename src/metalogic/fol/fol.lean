@@ -10,6 +10,9 @@ open formula
 def proof_equiv (P Q : formula) : Prop := is_proof (P.iff_ Q)
 
 
+/--
+is_repl_of_var_in_list u v l_u l_v = True if and only if l_v is the result of replacing one or more specified occurrences (but not necessarily all occurrences) of u in l_u by occurrences of v.
+-/
 def is_repl_of_var_in_list_fun (u v : variable_) : list variable_ → list variable_ → Prop
 | [] [] := true
 | (hd_u :: tl_u) (hd_v :: tl_v) := (hd_u = hd_v ∨ (hd_u = u ∧ hd_v = v)) ∧ is_repl_of_var_in_list_fun tl_u tl_v
@@ -26,6 +29,9 @@ def is_repl_of_var_fun (u v : variable_) : formula → formula → Prop
 | _ _ := false
 
 
+/--
+is_repl_of_var_fun u v P_u P_v = True if and only if P_v is the result of replacing one or more specified occurrences (but not necessarily all occurrences) of u in P_u by occurrences of v.
+-/
 inductive is_repl_of_var (u v : variable_) : formula → formula → Prop
 | true_ :
   is_repl_of_var true_ true_
