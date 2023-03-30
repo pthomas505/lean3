@@ -19,6 +19,9 @@ def is_repl_of_var_in_list_fun (u v : variable_) : list variable_ → list varia
 | _ _ := false
 
 
+/--
+is_repl_of_var_in_formula_fun u v P_u P_v = True if and only if P_v is the result of replacing one or more specified occurrences (but not necessarily all occurrences) of u in P_u by occurrences of v.
+-/
 def is_repl_of_var_in_formula_fun (u v : variable_) : formula → formula → Prop
 | true_ true_ := true
 | (pred_ name_u args_u) (pred_ name_v args_v) := name_u = name_v ∧ is_repl_of_var_in_list_fun u v args_u args_v
