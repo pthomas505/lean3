@@ -1540,8 +1540,29 @@ begin
   },
   case is_repl_of_var_in_formula.eq_ : h1_x h1_y h1_x' h1_y' h1_ᾰ h1_ᾰ_1
   { admit },
-  case is_repl_of_var_in_formula.not_ : h1_P h1_P' h1_ᾰ h1_ih
-  { admit },
+  case is_repl_of_var_in_formula.not_ : h1_P h1_P' h1_1 h1_ih
+  {
+    unfold occurs_in at h2,
+
+    unfold is_bound_in at h3,
+
+    unfold is_bound_in at h4,
+
+    specialize h1_ih h2 h3 h4,
+    apply is_deduct.mp_ ((eq_ r s).imp_ (h1_P.iff_ h1_P')),
+    {
+      unfold formula.iff_,
+      unfold formula.and_,
+      apply proof_imp_deduct,
+      apply prop_complete,
+      unfold formula.is_tauto_atomic,
+      simp only [eval_not, eval_imp],
+      tauto,
+    },
+    {
+      exact h1_ih,
+    }
+  },
   case is_repl_of_var_in_formula.imp_ : h1_P h1_Q h1_P' h1_Q' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
   { admit },
   case is_repl_of_var_in_formula.forall_ : h1_x h1_P h1_P' h1_1 h1_ih
