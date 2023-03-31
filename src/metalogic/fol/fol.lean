@@ -1624,15 +1624,7 @@ begin
         cases h1_2,
         subst h1_2_left,
         subst h1_2_right,
-
-        have s1 : is_proof (((eq_ h1_x_u h1_y_u).and_ (eq_ h1_x_u h1_y_v)).imp_ ((eq_ h1_x_u h1_y_u).iff_ (eq_ h1_x_u h1_y_v))),
-        apply spec_id h1_y_v,
-        apply spec_id h1_y_u,
-        apply spec_id h1_x_u,
-        apply spec_id h1_x_u,
-        apply is_deduct.axiom_,
-        exact is_axiom.eq_2_eq_ h1_x_u h1_y_u h1_x_u h1_y_v,
-
+        sorry,
       }
     },
     {
