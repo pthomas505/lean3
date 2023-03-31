@@ -924,6 +924,33 @@ begin
 end
 
 
+lemma Forall_spec_id'
+  (xs : list variable_)
+  (P : formula)
+  (Δ : set formula)
+  (h1 : is_deduct Δ (Forall_ xs P)) :
+  is_deduct Δ P :=
+begin
+  induction xs,
+  case list.nil
+  {
+    unfold Forall_ at h1,
+    simp only [list.foldr_nil] at h1,
+    exact h1,
+  },
+  case list.cons : xs_hd xs_tl xs_ih
+  {
+    unfold Forall_ at h1,
+    simp only [list.foldr_cons] at h1,
+
+    apply xs_ih,
+    unfold Forall_,
+    apply spec_id xs_hd,
+    exact h1,
+  },
+end
+
+
 lemma prop_iff_id
   (P : formula) :
   is_proof (P.iff_ P) :=
@@ -1570,6 +1597,13 @@ begin
   },
   case is_repl_of_var_in_formula.pred_ : name n args_u args_v h1_1
   {
+    have s1 : is_proof ((And_ (list.of_fn (λ (i : fin n), eq_ (args_u i) (args_v i)))).imp_ ((pred_ name (list.of_fn args_u)).iff_ (pred_ name (list.of_fn args_v)))),
+    apply Forall_spec_id' (list.of_fn args_v),
+    apply Forall_spec_id' (list.of_fn args_u),
+    apply is_deduct.axiom_,
+    exact is_axiom.eq_2_pred_ name n args_u args_v,
+    clear s1,
+
     apply deduction_theorem,
     simp only [set.union_singleton, insert_emptyc_eq],
     apply is_deduct.mp_ ((pred_ name (list.of_fn args_u)).iff_ (pred_ name (list.of_fn args_v))),
