@@ -99,11 +99,17 @@ inductive is_axiom : formula → Prop
 ⊢ ∀ x_0 ... ∀ x_n ∀ y_0 ... y_n ((x_0 = y_0) ∧ ... ∧ (x_n = y_n) ∧ ⊤) →
     ((pred_ name [x_0 ... x_n] ↔ pred_ name [y_0 ... y_n]))
 -/
-| eq_2
+| eq_2_pred_
   (name : pred_name_) (n : ℕ) (xs ys : fin n → variable_) :
   is_axiom (Forall_ (list.of_fn xs) (Forall_ (list.of_fn ys)
     ((And_ (list.of_fn (fun (i : fin n), eq_ (xs i) (ys i)))).imp_
       ((pred_ name (list.of_fn xs)).iff_ (pred_ name (list.of_fn ys))))))
+
+| eq_2_eq_
+  (x_0 y_0 x_1 y_1 : variable_) :
+  is_axiom (forall_ x_0 (forall_ x_1 (forall_ y_0 (forall_ y_1 ((and_ (eq_ x_0 y_0) (eq_ x_1 y_1)).imp_
+    ((eq_ x_0 y_0).iff_ (eq_ x_1 y_1)))))))
+
 
 -- ⊢ P ⇒ ⊢ ∀ v P
 | gen_
@@ -182,11 +188,17 @@ inductive is_proof_alt : formula → Prop
 ⊢ ∀ x_0 ... ∀ x_n ∀ y_0 ... y_n ((x_0 = y_0) ∧ ... ∧ (x_n = y_n) ∧ ⊤) →
     ((pred_ name [x_0 ... x_n] ↔ pred_ name [y_0 ... y_n]))
 -/
-| eq_2
+| eq_2_pred_
   (name : pred_name_) (n : ℕ) (xs ys : fin n → variable_) :
   is_proof_alt (Forall_ (list.of_fn xs) (Forall_ (list.of_fn ys)
     ((And_ (list.of_fn (fun (i : fin n), eq_ (xs i) (ys i)))).imp_
       ((pred_ name (list.of_fn xs)).iff_ (pred_ name (list.of_fn ys))))))
+
+| eq_2_eq_
+  (x_0 y_0 x_1 y_1 : variable_) :
+  is_proof_alt (forall_ x_0 (forall_ x_1 (forall_ y_0 (forall_ y_1 ((and_ (eq_ x_0 y_0) (eq_ x_1 y_1)).imp_
+    ((eq_ x_0 y_0).iff_ (eq_ x_1 y_1)))))))
+
 
 -- ⊢ P ⇒ ⊢ ∀ v P
 | gen_

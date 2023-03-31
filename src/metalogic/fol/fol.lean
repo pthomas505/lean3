@@ -416,10 +416,15 @@ begin
     apply is_deduct.axiom_,
     apply is_axiom.eq_1_,
   },
-  case is_proof_alt.eq_2 : h1_name h1_n h1_xs h1_ys
+  case is_proof_alt.eq_2_pred_ : h1_name h1_n h1_xs h1_ys
   {
     apply is_deduct.axiom_,
-    apply is_axiom.eq_2,
+    apply is_axiom.eq_2_pred_,
+  },
+  case is_proof_alt.eq_2_eq_ : h1_x_0 h1_y_0 h1_x_1 h1_y_1
+  {
+    apply is_deduct.axiom_,
+    apply is_axiom.eq_2_eq_,
   },
   case is_proof_alt.gen_ : h1_v h1_P h1_1 h1_ih
   {
@@ -480,9 +485,13 @@ begin
     {
       apply is_proof_alt.eq_1_,
     },
-    case is_axiom.eq_2 : h1_1_name h1_1_n h1_1_xs h1_1_ys
+    case is_axiom.eq_2_pred_ : h1_1_name h1_1_n h1_1_xs h1_1_ys
     {
-      apply is_proof_alt.eq_2,
+      apply is_proof_alt.eq_2_pred_,
+    },
+    case is_axiom.eq_2_eq_ : h1_1_x_0 h1_1_y_0 h1_1_x_1 h1_1_y_1
+    {
+      apply is_proof_alt.eq_2_eq_,
     },
     case is_axiom.gen_ : h1_1_v h1_1_P h1_1_1 h1_1_ih
     {
@@ -1468,7 +1477,7 @@ begin
         },
         {
           apply is_deduct.axiom_,
-          exact is_axiom.eq_2 name n args_r args_s,
+          exact is_axiom.eq_2_pred_ name n args_r args_s,
         },
       },
     },
