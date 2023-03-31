@@ -1635,7 +1635,12 @@ begin
           {
             apply is_deduct.mp_ (eq_ (args_u 0) (args_v 0)),
             {
-              apply and_intro,
+              unfold formula.and_,
+              apply proof_imp_deduct,
+              apply prop_complete,
+              unfold formula.is_tauto_atomic,
+              simp only [eval_not, eval_imp],
+              tauto,
             },
             {
               specialize h1_1 0,
@@ -1656,7 +1661,6 @@ begin
             }
           },
           {
-            specialize ih (λ (i : fin n), (args_u i.succ)) (λ (i : fin n), (args_v i.succ)),
             apply ih,
             intros i,
             apply h1_1,
