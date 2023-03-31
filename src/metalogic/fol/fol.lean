@@ -1681,7 +1681,33 @@ begin
         cases h1_2,
         subst h1_2_left,
         subst h1_2_right,
-        sorry,
+
+        apply is_deduct.mp_ (eq_ h1_x_u h1_x_u),
+        {
+          apply is_deduct.mp_ (((eq_ h1_x_u h1_x_u).and_ (eq_ h1_y_u h1_y_v)).imp_ ((eq_ h1_x_u h1_y_u).iff_ (eq_ h1_x_u h1_y_v))),
+          {
+            unfold formula.iff_,
+            unfold formula.and_,
+            apply proof_imp_deduct,
+            apply prop_complete,
+            unfold formula.is_tauto_atomic,
+            simp only [eval_not, eval_imp],
+            tauto,
+          },
+          {
+            apply spec_id h1_y_v,
+            apply spec_id h1_x_u,
+            apply spec_id h1_y_u,
+            apply spec_id h1_x_u,
+            apply is_deduct.axiom_,
+            exact is_axiom.eq_2_eq_ h1_x_u h1_y_u h1_x_u h1_y_v,
+          }
+        },
+        {
+          apply spec_id h1_x_u,
+          apply is_deduct.axiom_,
+          exact is_axiom.eq_1_ h1_x_u,
+        }
       }
     },
     {
