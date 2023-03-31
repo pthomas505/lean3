@@ -1443,6 +1443,55 @@ begin
 end
 
 
+theorem T_21_1
+  (x y : variable_) :
+  is_proof (forall_ x (forall_ y ((eq_ x y).imp_ (eq_ y x)))) :=
+begin
+  apply generalization,
+  {
+    apply generalization,
+    {
+      apply is_deduct.mp_ (eq_ y y),
+      {
+        apply is_deduct.mp_ (((eq_ y y).and_ (eq_ x y)).imp_ ((eq_ y x).iff_ (eq_ y y))),
+        {
+          unfold formula.iff_,
+          unfold formula.and_,
+          apply proof_imp_deduct,
+          apply prop_complete,
+          unfold formula.is_tauto_atomic,
+          simp only [eval_not, eval_imp],
+          tauto,
+        },
+        {
+          apply spec_id y,
+          apply spec_id y,
+          apply spec_id x,
+          apply spec_id y,
+          apply is_deduct.axiom_,
+          exact is_axiom.eq_2_eq_ y x y y,
+        }
+      },
+      {
+        apply spec_id y,
+        apply is_deduct.axiom_,
+        exact is_axiom.eq_1_ y,
+      }
+    },
+    {
+      intros H a1,
+      simp only [set.mem_empty_eq] at a1,
+      contradiction,
+    }
+  },
+  {
+    intros H a1,
+    simp only [set.mem_empty_eq] at a1,
+    contradiction,
+  }
+end
+
+
 lemma T_21_8_pred
   (name : pred_name_)
   (n : ℕ)
@@ -1575,7 +1624,15 @@ begin
         cases h1_2,
         subst h1_2_left,
         subst h1_2_right,
-        sorry,
+
+        have s1 : is_proof (((eq_ h1_x_u h1_y_u).and_ (eq_ h1_x_u h1_y_v)).imp_ ((eq_ h1_x_u h1_y_u).iff_ (eq_ h1_x_u h1_y_v))),
+        apply spec_id h1_y_v,
+        apply spec_id h1_y_u,
+        apply spec_id h1_x_u,
+        apply spec_id h1_x_u,
+        apply is_deduct.axiom_,
+        exact is_axiom.eq_2_eq_ h1_x_u h1_y_u h1_x_u h1_y_v,
+
       }
     },
     {
