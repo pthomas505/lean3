@@ -1662,92 +1662,6 @@ begin
   },
   case is_repl_of_var_in_formula.eq_ : h1_x_u h1_y_u h1_x_v h1_y_v h1_1 h1_2
   {
-    have s1 : is_proof ((eq_ r s).imp_ ((eq_ h1_x_u h1_x_v).and_ (eq_ h1_y_u h1_y_v))),
-    cases h1_1,
-    {
-      subst h1_1,
-      cases h1_2,
-      {
-        subst h1_2,
-        apply is_deduct.mp_ (eq_ h1_x_u h1_x_u),
-        {
-          apply is_deduct.mp_ (eq_ h1_y_u h1_y_u),
-          {
-            unfold formula.and_,
-            apply proof_imp_deduct,
-            apply prop_complete,
-            unfold formula.is_tauto_atomic,
-            simp only [eval_not, eval_imp],
-            tauto,
-          },
-          {
-            apply spec_id h1_y_u,
-            apply is_deduct.axiom_,
-            exact is_axiom.eq_1_ h1_y_u,
-          }
-        },
-        {
-          apply spec_id h1_x_u,
-          apply is_deduct.axiom_,
-          exact is_axiom.eq_1_ h1_x_u,
-        }
-      },
-      {
-        cases h1_2,
-        subst h1_2_left,
-        subst h1_2_right,
-        apply is_deduct.mp_ (eq_ h1_x_u h1_x_u),
-        {
-          unfold formula.and_,
-          apply proof_imp_deduct,
-          apply prop_complete,
-          unfold formula.is_tauto_atomic,
-          simp only [eval_not, eval_imp],
-          tauto,
-        },
-        {
-          apply spec_id h1_x_u,
-          apply is_deduct.axiom_,
-          exact is_axiom.eq_1_ h1_x_u,
-        }
-      }
-    },
-    {
-      cases h1_1,
-      subst h1_1_left,
-      subst h1_1_right,
-      cases h1_2,
-      {
-        subst h1_2,
-        apply is_deduct.mp_ (eq_ h1_y_u h1_y_u),
-        {
-          unfold formula.and_,
-          apply proof_imp_deduct,
-          apply prop_complete,
-          unfold formula.is_tauto_atomic,
-          simp only [eval_not, eval_imp],
-          tauto,
-        },
-        {
-          apply spec_id h1_y_u,
-          apply is_deduct.axiom_,
-          exact is_axiom.eq_1_ h1_y_u,
-        }
-      },
-      {
-        cases h1_2,
-        subst h1_2_left,
-        subst h1_2_right,
-
-        unfold formula.and_,
-        apply proof_imp_deduct,
-        apply prop_complete,
-        unfold formula.is_tauto_atomic,
-        simp only [eval_not, eval_imp],
-        tauto,
-      }
-    },
-
     apply is_deduct.mp_ (((eq_ h1_x_u h1_x_v).and_ (eq_ h1_y_u h1_y_v)).imp_ ((eq_ h1_x_u h1_y_u).iff_ (eq_ h1_x_v h1_y_v))),
     {
       apply is_deduct.mp_ ((eq_ r s).imp_ ((eq_ h1_x_u h1_x_v).and_ (eq_ h1_y_u h1_y_v))),
@@ -1761,7 +1675,90 @@ begin
         tauto,
       },
       {
-        exact s1,
+        cases h1_1,
+        {
+          subst h1_1,
+          cases h1_2,
+          {
+            subst h1_2,
+            apply is_deduct.mp_ (eq_ h1_x_u h1_x_u),
+            {
+              apply is_deduct.mp_ (eq_ h1_y_u h1_y_u),
+              {
+                unfold formula.and_,
+                apply proof_imp_deduct,
+                apply prop_complete,
+                unfold formula.is_tauto_atomic,
+                simp only [eval_not, eval_imp],
+                tauto,
+              },
+              {
+                apply spec_id h1_y_u,
+                apply is_deduct.axiom_,
+                exact is_axiom.eq_1_ h1_y_u,
+              }
+            },
+            {
+              apply spec_id h1_x_u,
+              apply is_deduct.axiom_,
+              exact is_axiom.eq_1_ h1_x_u,
+            }
+          },
+          {
+            cases h1_2,
+            subst h1_2_left,
+            subst h1_2_right,
+            apply is_deduct.mp_ (eq_ h1_x_u h1_x_u),
+            {
+              unfold formula.and_,
+              apply proof_imp_deduct,
+              apply prop_complete,
+              unfold formula.is_tauto_atomic,
+              simp only [eval_not, eval_imp],
+              tauto,
+            },
+            {
+              apply spec_id h1_x_u,
+              apply is_deduct.axiom_,
+              exact is_axiom.eq_1_ h1_x_u,
+            }
+          }
+        },
+        {
+          cases h1_1,
+          subst h1_1_left,
+          subst h1_1_right,
+          cases h1_2,
+          {
+            subst h1_2,
+            apply is_deduct.mp_ (eq_ h1_y_u h1_y_u),
+            {
+              unfold formula.and_,
+              apply proof_imp_deduct,
+              apply prop_complete,
+              unfold formula.is_tauto_atomic,
+              simp only [eval_not, eval_imp],
+              tauto,
+            },
+            {
+              apply spec_id h1_y_u,
+              apply is_deduct.axiom_,
+              exact is_axiom.eq_1_ h1_y_u,
+            }
+          },
+          {
+            cases h1_2,
+            subst h1_2_left,
+            subst h1_2_right,
+
+            unfold formula.and_,
+            apply proof_imp_deduct,
+            apply prop_complete,
+            unfold formula.is_tauto_atomic,
+            simp only [eval_not, eval_imp],
+            tauto,
+          }
+        },
       }
     },
     {
