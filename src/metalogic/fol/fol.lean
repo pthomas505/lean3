@@ -1597,13 +1597,6 @@ begin
   },
   case is_repl_of_var_in_formula.pred_ : name n args_u args_v h1_1
   {
-    have s1 : is_proof ((And_ (list.of_fn (λ (i : fin n), eq_ (args_u i) (args_v i)))).imp_ ((pred_ name (list.of_fn args_u)).iff_ (pred_ name (list.of_fn args_v)))),
-    apply Forall_spec_id' (list.of_fn args_v),
-    apply Forall_spec_id' (list.of_fn args_u),
-    apply is_deduct.axiom_,
-    exact is_axiom.eq_2_pred_ name n args_u args_v,
-    clear s1,
-
     apply deduction_theorem,
     simp only [set.union_singleton, insert_emptyc_eq],
     apply is_deduct.mp_ ((pred_ name (list.of_fn args_u)).iff_ (pred_ name (list.of_fn args_v))),
@@ -1617,22 +1610,10 @@ begin
     {
       apply is_deduct.mp_ (And_ (list.of_fn (λ (i : fin n), eq_ (args_u i) (args_v i)))),
       {
-        apply proof_imp_deduct,
-        apply is_deduct.mp_ (Forall_ (list.of_fn args_v) ((And_ (list.of_fn (λ (i : fin n), eq_ (args_u i) (args_v i)))).imp_ ((pred_ name (list.of_fn args_u)).iff_ (pred_ name (list.of_fn args_v))))),
-        {
-          apply Forall_spec_id,
-        },
-        {
-          apply proof_imp_deduct,
-          apply is_deduct.mp_ (Forall_ (list.of_fn args_u) (Forall_ (list.of_fn args_v) ((And_ (list.of_fn (λ (i : fin n), eq_ (args_u i) (args_v i)))).imp_ ((pred_ name (list.of_fn args_u)).iff_ (pred_ name (list.of_fn args_v)))))),
-          {
-            apply Forall_spec_id,
-          },
-          {
-            apply is_deduct.axiom_,
-            exact is_axiom.eq_2_pred_ name n args_u args_v,
-          },
-        },
+        apply Forall_spec_id' (list.of_fn args_v),
+        apply Forall_spec_id' (list.of_fn args_u),
+        apply is_deduct.axiom_,
+        exact is_axiom.eq_2_pred_ name n args_u args_v,
       },
       {
         clear h2,
