@@ -1549,94 +1549,6 @@ begin
 end
 
 
-lemma T_21_8_pred
-  (name : pred_name_)
-  (n : ℕ)
-  (args_r args_s : fin n → variable_)
-  (r s : variable_)
-  (h1 : (∀ (i : fin n), (args_r i = args_s i) ∨ (args_r i = r ∧ args_s i = s))) :
-  is_proof ((eq_ r s).imp_ ((pred_ name (list.of_fn args_r)).iff_ (pred_ name (list.of_fn args_s)))) :=
-begin
-  apply deduction_theorem,
-  simp only [set.union_singleton, insert_emptyc_eq],
-  apply is_deduct.mp_ ((pred_ name (list.of_fn args_r)).iff_ (pred_ name (list.of_fn args_s))),
-  {
-    apply proof_imp_deduct,
-    apply prop_complete,
-    unfold formula.is_tauto_atomic,
-    simp only [eval_not, eval_imp],
-    tauto,
-  },
-  {
-    apply is_deduct.mp_ (And_ (list.of_fn (λ (i : fin n), eq_ (args_r i) (args_s i)))),
-    {
-      apply proof_imp_deduct,
-      apply is_deduct.mp_ (Forall_ (list.of_fn args_s) ((And_ (list.of_fn (λ (i : fin n), eq_ (args_r i) (args_s i)))).imp_ ((pred_ name (list.of_fn args_r)).iff_ (pred_ name (list.of_fn args_s))))),
-      {
-        apply Forall_spec_id,
-      },
-      {
-        apply proof_imp_deduct,
-        apply is_deduct.mp_ (Forall_ (list.of_fn args_r) (Forall_ (list.of_fn args_s) ((And_ (list.of_fn (λ (i : fin n), eq_ (args_r i) (args_s i)))).imp_ ((pred_ name (list.of_fn args_r)).iff_ (pred_ name (list.of_fn args_s)))))),
-        {
-          apply Forall_spec_id,
-        },
-        {
-          apply is_deduct.axiom_,
-          exact is_axiom.eq_2_pred_ name n args_r args_s,
-        },
-      },
-    },
-    {
-      induction n,
-      case nat.zero
-      {
-        simp only [list.of_fn_zero],
-        apply is_deduct.axiom_,
-        apply is_axiom.prop_true_,
-      },
-      case nat.succ : n ih
-      {
-        unfold And_ at ih,
-
-        unfold And_,
-        simp only [list.of_fn_succ, list.foldr_cons],
-        apply is_deduct.mp_ (list.foldr and_ true_ (list.of_fn (λ (i : fin n), eq_ (args_r i.succ) (args_s i.succ)))),
-        {
-          apply is_deduct.mp_ (eq_ (args_r 0) (args_s 0)),
-          {
-            apply and_intro,
-          },
-          {
-            specialize h1 0,
-            cases h1,
-            {
-              rewrite h1,
-              apply spec_id (args_s 0),
-              apply is_deduct.axiom_,
-              apply is_axiom.eq_1_,
-            },
-            {
-              cases h1,
-              subst h1_left,
-              subst h1_right,
-              apply is_deduct.assume_,
-              simp only [set.mem_singleton],
-            }
-          }
-        },
-        {
-          specialize ih (λ (i : fin n), (args_r i.succ)) (λ (i : fin n), (args_s i.succ)),
-          apply ih,
-          intros i,
-          apply h1,
-        },
-      },
-    },
-  },
-end
-
-
 theorem T_21_8
   (P_r P_s : formula)
   (r s : variable_)
@@ -1656,15 +1568,93 @@ begin
     simp only [eval_not, eval_imp],
     tauto,
   },
-  case is_repl_of_var_in_formula.pred_ : h1_name h1_n h1_args_u h1_args_v h1_1
+  case is_repl_of_var_in_formula.pred_ : name n args_u args_v h1_1
   {
-    exact T_21_8_pred h1_name h1_n h1_args_u h1_args_v r s h1_1,
-  },
-  case is_repl_of_var_in_formula.eq_ : h1_x_u h1_y_u h1_x_v h1_y_v h1_1 h1_2
-  {
-    apply is_deduct.mp_ (((eq_ h1_x_u h1_x_v).and_ (eq_ h1_y_u h1_y_v)).imp_ ((eq_ h1_x_u h1_y_u).iff_ (eq_ h1_x_v h1_y_v))),
+    apply deduction_theorem,
+    simp only [set.union_singleton, insert_emptyc_eq],
+    apply is_deduct.mp_ ((pred_ name (list.of_fn args_u)).iff_ (pred_ name (list.of_fn args_v))),
     {
-      apply is_deduct.mp_ ((eq_ r s).imp_ ((eq_ h1_x_u h1_x_v).and_ (eq_ h1_y_u h1_y_v))),
+      apply proof_imp_deduct,
+      apply prop_complete,
+      unfold formula.is_tauto_atomic,
+      simp only [eval_not, eval_imp],
+      tauto,
+    },
+    {
+      apply is_deduct.mp_ (And_ (list.of_fn (λ (i : fin n), eq_ (args_u i) (args_v i)))),
+      {
+        apply proof_imp_deduct,
+        apply is_deduct.mp_ (Forall_ (list.of_fn args_v) ((And_ (list.of_fn (λ (i : fin n), eq_ (args_u i) (args_v i)))).imp_ ((pred_ name (list.of_fn args_u)).iff_ (pred_ name (list.of_fn args_v))))),
+        {
+          apply Forall_spec_id,
+        },
+        {
+          apply proof_imp_deduct,
+          apply is_deduct.mp_ (Forall_ (list.of_fn args_u) (Forall_ (list.of_fn args_v) ((And_ (list.of_fn (λ (i : fin n), eq_ (args_u i) (args_v i)))).imp_ ((pred_ name (list.of_fn args_u)).iff_ (pred_ name (list.of_fn args_v)))))),
+          {
+            apply Forall_spec_id,
+          },
+          {
+            apply is_deduct.axiom_,
+            exact is_axiom.eq_2_pred_ name n args_u args_v,
+          },
+        },
+      },
+      {
+        clear h2,
+        clear h3,
+        induction n,
+        case nat.zero
+        {
+          simp only [list.of_fn_zero],
+          apply is_deduct.axiom_,
+          apply is_axiom.prop_true_,
+        },
+        case nat.succ : n ih
+        {
+          unfold And_ at ih,
+
+          unfold And_,
+          simp only [list.of_fn_succ, list.foldr_cons],
+          apply is_deduct.mp_ (list.foldr and_ true_ (list.of_fn (λ (i : fin n), eq_ (args_u i.succ) (args_v i.succ)))),
+          {
+            apply is_deduct.mp_ (eq_ (args_u 0) (args_v 0)),
+            {
+              apply and_intro,
+            },
+            {
+              specialize h1_1 0,
+              cases h1_1,
+              {
+                rewrite h1_1,
+                apply spec_id (args_v 0),
+                apply is_deduct.axiom_,
+                apply is_axiom.eq_1_,
+              },
+              {
+                cases h1_1,
+                subst h1_1_left,
+                subst h1_1_right,
+                apply is_deduct.assume_,
+                simp only [set.mem_singleton],
+              }
+            }
+          },
+          {
+            specialize ih (λ (i : fin n), (args_u i.succ)) (λ (i : fin n), (args_v i.succ)),
+            apply ih,
+            intros i,
+            apply h1_1,
+          },
+        },
+      },
+    },
+  },
+  case is_repl_of_var_in_formula.eq_ : x_u y_u x_v y_v h1_1 h1_2
+  {
+    apply is_deduct.mp_ (((eq_ x_u x_v).and_ (eq_ y_u y_v)).imp_ ((eq_ x_u y_u).iff_ (eq_ x_v y_v))),
+    {
+      apply is_deduct.mp_ ((eq_ r s).imp_ ((eq_ x_u x_v).and_ (eq_ y_u y_v))),
       {
         unfold formula.iff_,
         unfold formula.and_,
@@ -1681,9 +1671,9 @@ begin
           cases h1_2,
           {
             subst h1_2,
-            apply is_deduct.mp_ (eq_ h1_x_u h1_x_u),
+            apply is_deduct.mp_ (eq_ x_u x_u),
             {
-              apply is_deduct.mp_ (eq_ h1_y_u h1_y_u),
+              apply is_deduct.mp_ (eq_ y_u y_u),
               {
                 unfold formula.and_,
                 apply proof_imp_deduct,
@@ -1693,22 +1683,22 @@ begin
                 tauto,
               },
               {
-                apply spec_id h1_y_u,
+                apply spec_id y_u,
                 apply is_deduct.axiom_,
-                exact is_axiom.eq_1_ h1_y_u,
+                exact is_axiom.eq_1_ y_u,
               }
             },
             {
-              apply spec_id h1_x_u,
+              apply spec_id x_u,
               apply is_deduct.axiom_,
-              exact is_axiom.eq_1_ h1_x_u,
+              exact is_axiom.eq_1_ x_u,
             }
           },
           {
             cases h1_2,
             subst h1_2_left,
             subst h1_2_right,
-            apply is_deduct.mp_ (eq_ h1_x_u h1_x_u),
+            apply is_deduct.mp_ (eq_ x_u x_u),
             {
               unfold formula.and_,
               apply proof_imp_deduct,
@@ -1718,9 +1708,9 @@ begin
               tauto,
             },
             {
-              apply spec_id h1_x_u,
+              apply spec_id x_u,
               apply is_deduct.axiom_,
-              exact is_axiom.eq_1_ h1_x_u,
+              exact is_axiom.eq_1_ x_u,
             }
           }
         },
@@ -1731,7 +1721,7 @@ begin
           cases h1_2,
           {
             subst h1_2,
-            apply is_deduct.mp_ (eq_ h1_y_u h1_y_u),
+            apply is_deduct.mp_ (eq_ y_u y_u),
             {
               unfold formula.and_,
               apply proof_imp_deduct,
@@ -1741,9 +1731,9 @@ begin
               tauto,
             },
             {
-              apply spec_id h1_y_u,
+              apply spec_id y_u,
               apply is_deduct.axiom_,
-              exact is_axiom.eq_1_ h1_y_u,
+              exact is_axiom.eq_1_ y_u,
             }
           },
           {
@@ -1762,22 +1752,22 @@ begin
       }
     },
     {
-      apply spec_id h1_y_v,
-      apply spec_id h1_x_v,
-      apply spec_id h1_y_u,
-      apply spec_id h1_x_u,
+      apply spec_id y_v,
+      apply spec_id x_v,
+      apply spec_id y_u,
+      apply spec_id x_u,
       apply is_deduct.axiom_,
-      exact is_axiom.eq_2_eq_ h1_x_u h1_y_u h1_x_v h1_y_v,
+      exact is_axiom.eq_2_eq_ x_u y_u x_v y_v,
     }
   },
-  case is_repl_of_var_in_formula.not_ : h1_P_u h1_P_v h1_1 h1_ih
+  case is_repl_of_var_in_formula.not_ : P_u P_v h1_1 h1_ih
   {
     unfold is_bound_in at h2,
 
     unfold is_bound_in at h3,
 
     specialize h1_ih h2 h3,
-    apply is_deduct.mp_ ((eq_ r s).imp_ (h1_P_u.iff_ h1_P_v)),
+    apply is_deduct.mp_ ((eq_ r s).imp_ (P_u.iff_ P_v)),
     {
       unfold formula.iff_,
       unfold formula.and_,
@@ -1791,7 +1781,7 @@ begin
       exact h1_ih,
     }
   },
-  case is_repl_of_var_in_formula.imp_ : h1_P_u h1_Q_u h1_P_v h1_Q_v h1_1 h1_2 h1_ih_1 h1_ih_2
+  case is_repl_of_var_in_formula.imp_ : P_u Q_u P_v Q_v h1_1 h1_2 h1_ih_1 h1_ih_2
   {
     unfold is_bound_in at h2,
     push_neg at h2,
@@ -1803,9 +1793,9 @@ begin
 
     specialize h1_ih_1 h2_left h3_left,
     specialize h1_ih_2 h2_right h3_right,
-    apply is_deduct.mp_ ((eq_ r s).imp_ (h1_Q_u.iff_ h1_Q_v)),
+    apply is_deduct.mp_ ((eq_ r s).imp_ (Q_u.iff_ Q_v)),
     {
-      apply is_deduct.mp_ ((eq_ r s).imp_ (h1_P_u.iff_ h1_P_v)),
+      apply is_deduct.mp_ ((eq_ r s).imp_ (P_u.iff_ P_v)),
       {
         unfold formula.iff_,
         unfold formula.and_,
@@ -1823,7 +1813,7 @@ begin
       exact h1_ih_2,
     }
   },
-  case is_repl_of_var_in_formula.forall_ : h1_x h1_P_u h1_P_v h1_1 h1_ih
+  case is_repl_of_var_in_formula.forall_ : x P_u P_v h1_1 h1_ih
   {
     unfold is_bound_in at h2,
     push_neg at h2,
@@ -1835,7 +1825,7 @@ begin
 
     apply deduction_theorem,
     simp only [set.union_singleton, insert_emptyc_eq],
-    apply is_deduct.mp_ (forall_ h1_x (h1_P_u.iff_ h1_P_v)),
+    apply is_deduct.mp_ (forall_ x (P_u.iff_ P_v)),
     {
       apply proof_imp_deduct,
       apply T_18_1,
@@ -1844,7 +1834,7 @@ begin
       apply is_deduct.mp_ (eq_ r s),
       {
         apply proof_imp_deduct,
-        apply is_deduct.mp_ (forall_ h1_x ((eq_ r s).imp_ (h1_P_u.iff_ h1_P_v))),
+        apply is_deduct.mp_ (forall_ x ((eq_ r s).imp_ (P_u.iff_ P_v))),
         {
           apply T_19_TS_21_left,
           {
