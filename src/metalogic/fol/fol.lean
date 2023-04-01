@@ -601,9 +601,9 @@ theorem T_17_12
   (h4 : ¬ is_free_in v Q) :
   is_deduct Δ Q :=
 begin
-  apply is_deduct.mp_,
+  apply is_deduct.mp_ (exists_ v P),
   {
-    apply is_deduct.mp_,
+    apply is_deduct.mp_ (forall_ v (P.imp_ Q)),
     {
       apply proof_imp_deduct,
       exact T_17_11 P Q v h4,
