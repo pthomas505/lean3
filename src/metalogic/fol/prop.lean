@@ -559,6 +559,17 @@ begin
 end
 
 
+theorem T_14_10_comm
+  (Q : formula)
+  (Δ : set formula)
+  (h1 : is_deduct Δ Q) :
+  ∀ (Γ : set formula), is_deduct (Γ ∪ Δ) Q :=
+begin
+  simp only [set.union_comm],
+  exact T_14_10 Q Δ h1,
+end
+
+
 theorem deduction_theorem_converse
   (P Q : formula)
   (Δ : set formula)
@@ -576,27 +587,6 @@ begin
 end
 
 
-theorem C_14_11
-  (Q : formula)
-  (h1 : is_proof Q) :
-  ∀ (Γ : set formula), is_deduct Γ Q :=
-begin
-  unfold is_proof at h1,
-
-  intros Γ,
-  rewrite <- set.union_empty Γ,
-  rewrite set.union_comm,
-  exact T_14_10 Q ∅ h1 Γ,
-end
-
-
-example :
-  C_14_11 = proof_imp_deduct :=
-begin
-  refl,
-end
-
-
 theorem T_14_12
   (P Q : formula)
   (Δ Γ : set formula)
@@ -606,8 +596,7 @@ theorem T_14_12
 begin
   apply is_deduct.mp_ P,
   {
-    rewrite set.union_comm,
-    apply T_14_10,
+    apply T_14_10_comm,
     exact h2,
   },
   {
@@ -655,7 +644,8 @@ begin
     exact h2,
   },
   {
-    exact C_14_11 P h1 Γ,
+    apply proof_imp_deduct,
+    exact h1,
   },
 end
 
