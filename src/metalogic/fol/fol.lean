@@ -643,20 +643,6 @@ begin
 end
 
 
-lemma and_intro
-  (P Q : formula)
-  (Δ : set formula) :
-  is_deduct Δ (P.imp_ (Q.imp_ (P.and_ Q))) :=
-begin
-  unfold formula.and_,
-  apply proof_imp_deduct,
-  apply prop_complete,
-  unfold formula.is_tauto_atomic,
-  simp only [eval_not, eval_imp],
-  tauto,
-end
-
-
 lemma and_elim_left
   (P Q : formula)
   (Δ : set formula) :
@@ -702,23 +688,12 @@ begin
     {
       apply is_deduct.mp_ (exists_ v P),
       {
-        apply deduction_theorem,
-        apply deduction_theorem,
-        apply is_deduct.mp_,
-        {
-          apply is_deduct.mp_,
-          {
-            apply and_intro,
-          },
-          {
-            apply is_deduct.assume_,
-            simp only [set.union_singleton, set.mem_insert_iff, eq_self_iff_true, true_or, or_true],
-          }
-        },
-        {
-          apply is_deduct.assume_,
-          simp only [set.union_singleton, set.mem_insert_iff, eq_self_iff_true, true_or],
-        }
+        unfold formula.and_,
+        apply proof_imp_deduct,
+        apply prop_complete,
+        unfold formula.is_tauto_atomic,
+        simp only [eval_not, eval_imp],
+        tauto,
       },
       {
         apply exists_intro P v v,
