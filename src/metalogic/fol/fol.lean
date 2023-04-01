@@ -324,10 +324,7 @@ example
   (h3 : ∀ (H : formula), H ∈ Δ → ¬ is_free_in t H) :
   is_deduct Δ (forall_ v P) :=
 begin
-  have s1 : (fast_replace_free t v (fast_replace_free v t P)) = P,
-  exact fast_replace_free_inverse P v t h1,
-
-  rewrite <- s1,
+  rewrite <- fast_replace_free_inverse P v t h1,
 
   apply is_deduct.mp_ (forall_ t (fast_replace_free v t P)),
   {
