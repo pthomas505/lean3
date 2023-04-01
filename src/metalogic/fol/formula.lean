@@ -80,9 +80,9 @@ def formula.exists_ (x : variable_) (P : formula) : formula := not_ (forall_ x (
 
 
 /--
-  And_ [] = ⊤
+  And_ [] := ⊤
 
-  And_ [P] = P ∧ ⊤
+  And_ [P] := P ∧ ⊤
 
   And_ [P_0 ... P_n] := P_0 ∧ ... ∧ P_n ∧ ⊤
 -/
