@@ -339,13 +339,13 @@ begin
   unfold is_proof,
 
   apply deduction_theorem,
-  apply is_deduct.mp_,
+  apply is_deduct.mp_ (Q.not_.imp_ P.not_),
   {
     apply is_deduct.axiom_,
     exact is_axiom.prop_3_ Q P,
   },
   {
-    apply is_deduct.mp_,
+    apply is_deduct.mp_ P.not_,
     {
       apply is_deduct.axiom_,
       exact is_axiom.prop_1_ P.not_ Q.not_,
