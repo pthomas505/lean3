@@ -526,50 +526,6 @@ begin
 end
 
 
-theorem T_14_10
-  (Q : formula)
-  (Δ : set formula)
-  (h1 : is_deduct Δ Q) :
-  ∀ (Γ : set formula), is_deduct (Δ ∪ Γ) Q :=
-begin
-  intros Γ,
-  induction h1,
-  case is_deduct.axiom_ : h1_P h1_1
-  {
-    apply is_deduct.axiom_,
-    exact h1_1,
-  },
-  case is_deduct.assume_ : h1_P h1_1
-  {
-    apply is_deduct.assume_,
-    simp only [set.mem_union_eq],
-    left,
-    exact h1_1,
-  },
-  case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
-  {
-    apply is_deduct.mp_ h1_P,
-    {
-      exact h1_ih_1,
-    },
-    {
-      exact h1_ih_2,
-    }
-  },
-end
-
-
-theorem T_14_10_comm
-  (Q : formula)
-  (Δ : set formula)
-  (h1 : is_deduct Δ Q) :
-  ∀ (Γ : set formula), is_deduct (Γ ∪ Δ) Q :=
-begin
-  simp only [set.union_comm],
-  exact T_14_10 Q Δ h1,
-end
-
-
 theorem deduction_theorem_converse
   (P Q : formula)
   (Δ : set formula)
@@ -603,17 +559,6 @@ begin
     apply T_14_10,
     exact h1,
   },
-end
-
-
-theorem C_14_13
-  (P Q : formula)
-  (Δ : set formula)
-  (h1 : is_deduct Δ P)
-  (h2 : is_deduct Δ (P.imp_ Q)) :
-  is_deduct Δ Q :=
-begin
-  exact is_deduct.mp_ P Q h2 h1,
 end
 
 
@@ -655,44 +600,6 @@ begin
 end
 
 alias C_14_15 <- mp_deduct_proof
-
-
-theorem T_14_16
-  (Q : formula)
-  (Δ Γ : set formula)
-  (h1 : is_deduct Γ Q)
-  (h2 : ∀ (P : formula), P ∈ Γ → is_deduct Δ P) :
-  is_deduct Δ Q :=
-begin
-  induction h1,
-  case is_deduct.axiom_ : h1_P h1_1
-  {
-    apply is_deduct.axiom_,
-    exact h1_1,
-  },
-  case is_deduct.assume_ : h1_P h1_1
-  {
-    exact h2 h1_P h1_1,
-  },
-  case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
-  {
-    exact is_deduct.mp_ h1_P h1_Q h1_ih_1 h1_ih_2,
-  },
-end
-
-
-theorem C_14_17
-  (Q : formula)
-  (Γ : set formula)
-  (h1 : is_deduct Γ Q)
-  (h2 : ∀ (P : formula), P ∈ Γ → is_proof P) :
-  is_proof Q :=
-begin
-  unfold is_proof at h2,
-
-  unfold is_proof,
-  exact T_14_16 Q ∅ Γ h1 h2,
-end
 
 
 theorem eval_not
