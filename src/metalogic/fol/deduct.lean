@@ -118,7 +118,8 @@ inductive is_axiom : formula → Prop
       ((pred_ name (list.of_fn xs)).iff_ (pred_ name (list.of_fn ys))))))
 
 /-
-⊢ ∀ x_0 ∀ x_1 ∀ y_0 ∀ y_1 ((x_0 = y_0) ∧ (x_1 = y_1)) → ((eq_ x_0 x_1) ↔ (eq_ y_0 y_1))
+⊢ ∀ x_0 ∀ x_1 ∀ y_0 ∀ y_1 ((x_0 = y_0) ∧ (x_1 = y_1)) →
+    ((eq_ x_0 x_1) ↔ (eq_ y_0 y_1))
 -/
 | eq_2_eq_
   (x_0 x_1 y_0 y_1 : variable_) :
@@ -220,7 +221,8 @@ inductive is_proof_alt : formula → Prop
       ((pred_ name (list.of_fn xs)).iff_ (pred_ name (list.of_fn ys))))))
 
 /-
-⊢ ∀ x_0 ∀ x_1 ∀ y_0 ∀ y_1 ((x_0 = y_0) ∧ (x_1 = y_1)) → ((eq_ x_0 x_1) ↔ (eq_ y_0 y_1))
+⊢ ∀ x_0 ∀ x_1 ∀ y_0 ∀ y_1 ((x_0 = y_0) ∧ (x_1 = y_1)) →
+    ((eq_ x_0 x_1) ↔ (eq_ y_0 y_1))
 -/
 | eq_2_eq_
   (x_0 x_1 y_0 y_1 : variable_) :
