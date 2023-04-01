@@ -893,19 +893,6 @@ begin
 end
 
 
-lemma prop_iff_id
-  (P : formula) :
-  is_proof (P.iff_ P) :=
-begin
-  unfold formula.iff_,
-  unfold formula.and_,
-  apply prop_complete,
-  unfold formula.is_tauto_atomic,
-  simp only [eval_not, eval_imp],
-  simp only [imp_self, not_true, not_false_iff, forall_const],
-end
-
-
 lemma Forall_is_bound_in
   (P : formula)
   (xs : list variable_)
@@ -965,9 +952,12 @@ begin
   case is_repl_of_formula_in_formula.same_ : h1_P h1_P' h1_1
   {
     subst h1_1,
-    apply deduction_theorem,
-    apply proof_imp_deduct,
-    apply prop_iff_id,
+    unfold formula.iff_,
+    unfold formula.and_,
+    apply prop_complete,
+    unfold formula.is_tauto_atomic,
+    simp only [eval_not, eval_imp],
+    tauto,
   },
   case is_repl_of_formula_in_formula.diff_ : h1_P h1_P' h1_1 h1_2
   {
