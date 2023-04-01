@@ -279,7 +279,7 @@ begin
   induction h1,
   case is_deduct.axiom_ : h1_P h1_1
   {
-    apply is_deduct.mp_,
+    apply is_deduct.mp_ h1_P,
     {
       apply is_deduct.axiom_,
       exact is_axiom.prop_1_ h1_P P,
@@ -299,7 +299,7 @@ begin
       exact prop_id h1_P,
     },
     {
-      apply is_deduct.mp_,
+      apply is_deduct.mp_ h1_P,
       {
         apply is_deduct.axiom_,
         exact is_axiom.prop_1_ h1_P P,
@@ -312,9 +312,9 @@ begin
   },
   case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
   {
-    apply is_deduct.mp_,
+    apply is_deduct.mp_ (P.imp_ h1_P),
     {
-      apply is_deduct.mp_,
+      apply is_deduct.mp_ (P.imp_ (h1_P.imp_ h1_Q)),
       {
         apply is_deduct.axiom_,
         exact is_axiom.prop_2_ P h1_P h1_Q,
