@@ -176,17 +176,6 @@ end
 alias spec_id <- forall_elim_id
 
 
-lemma SC_1
-  (P Q : formula) :
-  is_proof ((P.imp_ Q.not_).imp_ (Q.imp_ P.not_)) :=
-begin
-  apply prop_complete,
-  unfold formula.is_tauto_atomic,
-  simp only [eval_not, eval_imp],
-  tauto,
-end
-
-
 theorem T_17_3
   (P : formula)
   (v t : variable_)
@@ -195,9 +184,12 @@ theorem T_17_3
 begin
   unfold formula.exists_,
   unfold is_proof,
-  apply is_deduct.mp_,
+  apply is_deduct.mp_ ((forall_ v P.not_).imp_ (fast_replace_free v t P).not_),
   {
-    apply SC_1,
+    apply prop_complete,
+    unfold formula.is_tauto_atomic,
+    simp only [eval_not, eval_imp],
+    tauto,
   },
   {
     unfold fast_admits at h1,
