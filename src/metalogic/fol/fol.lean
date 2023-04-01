@@ -752,13 +752,13 @@ begin
         tauto,
       },
       {
-        apply spec_id v ((P.imp_ Q).and_ (Q.imp_ P)),
+        apply spec_id v,
         apply is_deduct.assume_,
         simp only [set.mem_insert_iff, set.mem_singleton, or_true],
       }
     },
     {
-      apply spec_id v P,
+      apply spec_id v,
       apply is_deduct.assume_,
       simp only [set.mem_insert_iff, eq_self_iff_true, true_and, true_or],
     }
@@ -794,13 +794,13 @@ begin
         tauto,
       },
       {
-        apply spec_id v ((P.imp_ Q).and_ (Q.imp_ P)),
+        apply spec_id v,
         apply is_deduct.assume_,
         simp only [set.mem_insert_iff, set.mem_singleton, or_true],
       }
     },
     {
-      apply spec_id v Q,
+      apply spec_id v,
       apply is_deduct.assume_,
       simp only [set.mem_insert_iff, eq_self_iff_true, true_and, true_or],
     }
