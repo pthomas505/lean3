@@ -548,7 +548,7 @@ begin
   },
   case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
   {
-    apply is_deduct.mp_ h1_P h1_Q,
+    apply is_deduct.mp_ h1_P,
     {
       exact h1_ih_1,
     },
@@ -565,14 +565,14 @@ theorem deduction_theorem_converse
   (h1 : is_deduct Δ (P.imp_ Q)) :
   is_deduct (Δ ∪ {P}) Q :=
 begin
-  have s1 : is_deduct (Δ ∪ {P}) (P.imp_ Q),
-  exact T_14_10 (P.imp_ Q) Δ h1 {P},
-
-  have s2 : is_deduct (Δ ∪ {P}) P,
-  apply is_deduct.assume_,
-  simp only [set.union_singleton, set.mem_insert_iff, eq_self_iff_true, true_or],
-
-  exact is_deduct.mp_ P Q s1 s2,
+  apply is_deduct.mp_ P,
+  {
+    exact T_14_10 (P.imp_ Q) Δ h1 {P},
+  },
+  {
+    apply is_deduct.assume_,
+    simp only [set.union_singleton, set.mem_insert_iff, eq_self_iff_true, true_or],
+  },
 end
 
 
