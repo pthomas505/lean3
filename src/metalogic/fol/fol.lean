@@ -1139,56 +1139,6 @@ begin
   unfold similar at h1;
   cases h1, cases h1_right, cases h1_right_right, cases h1_right_right_right, cases h1_right_right_right_right,
 
-  have s1 : is_proof ((forall_ u P_u).imp_ (forall_ v P_v)),
-  apply deduction_theorem,
-  simp only [set.union_singleton, insert_emptyc_eq],
-  apply generalization,
-  {
-    subst h1_right_right_right_right_left,
-    apply spec,
-    {
-      apply is_deduct.assume_,
-      simp only [set.mem_singleton],
-    },
-    {
-      exact h1_right_right_left,
-    }
-  },
-  {
-    intros H a1,
-    simp only [set.mem_singleton_iff] at a1,
-    subst a1,
-    unfold is_free_in,
-    simp only [not_and],
-    intros a2,
-    exact h1_left,
-  },
-
-  have s2 : is_proof ((forall_ v P_v).imp_ (forall_ u P_u)),
-  apply deduction_theorem,
-  simp only [set.union_singleton, insert_emptyc_eq],
-  apply generalization,
-  {
-    subst h1_right_right_right_right_right,
-    apply spec,
-    {
-      apply is_deduct.assume_,
-      simp only [set.mem_singleton],
-    },
-    {
-      exact h1_right_right_right_left,
-    }
-  },
-  {
-    intros H a1,
-    simp only [set.mem_singleton_iff] at a1,
-    subst a1,
-    unfold is_free_in,
-    simp only [not_and],
-    intros a2,
-    exact h1_right_left,
-  },
-
   apply is_deduct.mp_ ((forall_ v P_v).imp_ (forall_ u P_u)),
   {
     apply is_deduct.mp_ ((forall_ u P_u).imp_ (forall_ v P_v)),
@@ -1202,11 +1152,55 @@ begin
       tauto,
     },
     {
-      exact s1,
+      apply deduction_theorem,
+      simp only [set.union_singleton, insert_emptyc_eq],
+      apply generalization,
+      {
+        subst h1_right_right_right_right_left,
+        apply spec,
+        {
+          apply is_deduct.assume_,
+          simp only [set.mem_singleton],
+        },
+        {
+          exact h1_right_right_left,
+        }
+      },
+      {
+        intros H a1,
+        simp only [set.mem_singleton_iff] at a1,
+        subst a1,
+        unfold is_free_in,
+        simp only [not_and],
+        intros a2,
+        exact h1_left,
+      },
     }
   },
   {
-    exact s2,
+    apply deduction_theorem,
+    simp only [set.union_singleton, insert_emptyc_eq],
+    apply generalization,
+    {
+      subst h1_right_right_right_right_right,
+      apply spec,
+      {
+        apply is_deduct.assume_,
+        simp only [set.mem_singleton],
+      },
+      {
+        exact h1_right_right_right_left,
+      }
+    },
+    {
+      intros H a1,
+      simp only [set.mem_singleton_iff] at a1,
+      subst a1,
+      unfold is_free_in,
+      simp only [not_and],
+      intros a2,
+      exact h1_right_left,
+    },
   }
 end
 
