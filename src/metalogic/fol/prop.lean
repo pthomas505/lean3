@@ -1209,51 +1209,50 @@ end
 theorem prop_complete_aux
   (P : formula)
   (Δ_U : finset formula)
-  (h1 : P.is_tauto_atomic)
-  (h2 : Δ_U ⊆ P.atomic_set)
-  (h3 : ∀ (val : valuation), is_deduct (Δ_U.image (eval_atomic_ff_to_not val)) P) :
+  (h1 : Δ_U ⊆ P.atomic_set)
+  (h2 : ∀ (val : valuation), is_deduct (Δ_U.image (eval_atomic_ff_to_not val)) P) :
   is_deduct ∅ P :=
 begin
   induction Δ_U using finset.induction_on,
   case h₁
   {
-    simp only [finset.image_empty, finset.coe_empty, forall_const] at h3,
+    simp only [finset.image_empty, finset.coe_empty, forall_const] at h2,
 
-    exact h3,
+    exact h2,
   },
   case h₂ : U Δ_U Δ_U_1 Δ_U_2
   {
     apply Δ_U_2,
     {
-      simp only [finset.insert_subset] at h2,
-      cases h2,
+      simp only [finset.insert_subset] at h1,
+      cases h1,
 
-      exact h2_right,
+      exact h1_right,
     },
     {
-      simp only [finset.insert_subset] at h2,
-      cases h2,
+      simp only [finset.insert_subset] at h1,
+      cases h1,
 
-      simp only [finset.image_insert, finset.coe_insert, finset.coe_image] at h3,
+      simp only [finset.image_insert, finset.coe_insert, finset.coe_image] at h2,
 
       simp only [finset.coe_image],
       apply prop_complete_aux_aux P U Δ_U,
       {
         intros U' a1,
         apply mem_atomic_set_is_atomic P U',
-        apply h2_right,
+        apply h1_right,
         exact a1,
       },
       {
         apply mem_atomic_set_is_atomic P U,
-        exact h2_left,
+        exact h1_left,
       },
       {
         exact Δ_U_1,
       },
       {
         simp only [set.union_singleton],
-        exact h3,
+        exact h2,
       }
     }
   },
@@ -1267,7 +1266,7 @@ theorem prop_complete
 begin
   unfold is_proof,
 
-  apply prop_complete_aux P P.atomic_set h1,
+  apply prop_complete_aux P P.atomic_set,
   {
     refl,
   },
@@ -1289,3 +1288,5 @@ begin
     }
   }
 end
+
+#lint
