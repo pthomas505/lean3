@@ -117,11 +117,13 @@ inductive is_axiom : formula → Prop
     ((And_ (list.of_fn (fun (i : fin n), eq_ (xs i) (ys i)))).imp_
       ((pred_ name (list.of_fn xs)).iff_ (pred_ name (list.of_fn ys))))))
 
+/-
+⊢ ∀ x_0 ∀ x_1 ∀ y_0 ∀ y_1 ((x_0 = y_0) ∧ (x_1 = y_1)) → ((eq_ x_0 x_1) ↔ (eq_ y_0 y_1))
+-/
 | eq_2_eq_
   (x_0 x_1 y_0 y_1 : variable_) :
   is_axiom (forall_ x_0 (forall_ x_1 (forall_ y_0 (forall_ y_1 ((and_ (eq_ x_0 y_0) (eq_ x_1 y_1)).imp_
     ((eq_ x_0 x_1).iff_ (eq_ y_0 y_1)))))))
-
 
 -- ⊢ P ⇒ ⊢ ∀ v P
 | gen_
@@ -217,11 +219,13 @@ inductive is_proof_alt : formula → Prop
     ((And_ (list.of_fn (fun (i : fin n), eq_ (xs i) (ys i)))).imp_
       ((pred_ name (list.of_fn xs)).iff_ (pred_ name (list.of_fn ys))))))
 
+/-
+⊢ ∀ x_0 ∀ x_1 ∀ y_0 ∀ y_1 ((x_0 = y_0) ∧ (x_1 = y_1)) → ((eq_ x_0 x_1) ↔ (eq_ y_0 y_1))
+-/
 | eq_2_eq_
   (x_0 x_1 y_0 y_1 : variable_) :
   is_proof_alt (forall_ x_0 (forall_ x_1 (forall_ y_0 (forall_ y_1 ((and_ (eq_ x_0 y_0) (eq_ x_1 y_1)).imp_
     ((eq_ x_0 x_1).iff_ (eq_ y_0 y_1)))))))
-
 
 -- ⊢ P ⇒ ⊢ ∀ v P
 | gen_
