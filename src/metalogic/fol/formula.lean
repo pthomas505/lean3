@@ -109,6 +109,8 @@ def formula.repr : formula → string
 instance formula.has_repr : has_repr formula := has_repr.mk formula.repr
 
 
+#eval formula.And_ [pred_ (pred_name_.mk "P") [], pred_ (pred_name_.mk "Q") []]
+
 #eval formula.Forall_ [(variable_.mk "x"), (variable_.mk "y")] (formula.pred_ (pred_name_.mk "P") [])
 
 
