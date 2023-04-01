@@ -1592,7 +1592,7 @@ begin
                   tauto,
                 },
                 {
-                  rewrite h1_1,
+                  simp only [h1_1],
                   apply spec_id (args_v 0),
                   apply is_deduct.axiom_,
                   apply is_axiom.eq_1_,
