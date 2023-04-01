@@ -236,38 +236,6 @@ end
 alias T_13_5 <- prop_id
 
 
-theorem T_13_6
-  (P Q : formula) :
-  is_proof (P.not_.imp_ (P.imp_ Q)) :=
-begin
-  unfold is_proof,
-
-  apply is_deduct.mp_ (P.not_.imp_ (Q.not_.imp_ P.not_)),
-  {
-    apply is_deduct.mp_ (P.not_.imp_ ((Q.not_.imp_ P.not_).imp_ (P.imp_ Q))),
-    {
-      apply is_deduct.axiom_,
-      exact is_axiom.prop_2_ P.not_ (Q.not_.imp_ P.not_) (P.imp_ Q),
-    },
-    {
-      apply is_deduct.mp_ ((Q.not_.imp_ P.not_).imp_ (P.imp_ Q)),
-      {
-        apply is_deduct.axiom_,
-        exact is_axiom.prop_1_ ((Q.not_.imp_ P.not_).imp_ (P.imp_ Q)) P.not_,
-      },
-      {
-        apply is_deduct.axiom_,
-        exact is_axiom.prop_3_ Q P,
-      }
-    }
-  },
-  {
-    apply is_deduct.axiom_,
-    exact is_axiom.prop_1_ P.not_ Q.not_,
-  },
-end
-
-
 -- Deduction Theorem
 
 theorem T_14_3
@@ -332,28 +300,34 @@ end
 alias T_14_3 <- deduction_theorem
 
 
-example
+theorem T_13_6
   (P Q : formula) :
   is_proof (P.not_.imp_ (P.imp_ Q)) :=
 begin
   unfold is_proof,
 
-  apply deduction_theorem,
-  apply is_deduct.mp_ (Q.not_.imp_ P.not_),
+  apply is_deduct.mp_ (P.not_.imp_ (Q.not_.imp_ P.not_)),
   {
-    apply is_deduct.axiom_,
-    exact is_axiom.prop_3_ Q P,
-  },
-  {
-    apply is_deduct.mp_ P.not_,
+    apply is_deduct.mp_ (P.not_.imp_ ((Q.not_.imp_ P.not_).imp_ (P.imp_ Q))),
     {
       apply is_deduct.axiom_,
-      exact is_axiom.prop_1_ P.not_ Q.not_,
+      exact is_axiom.prop_2_ P.not_ (Q.not_.imp_ P.not_) (P.imp_ Q),
     },
     {
-      apply is_deduct.assume_,
-      simp only [set.union_singleton, insert_emptyc_eq, set.mem_singleton],
-    },
+      apply is_deduct.mp_ ((Q.not_.imp_ P.not_).imp_ (P.imp_ Q)),
+      {
+        apply is_deduct.axiom_,
+        exact is_axiom.prop_1_ ((Q.not_.imp_ P.not_).imp_ (P.imp_ Q)) P.not_,
+      },
+      {
+        apply is_deduct.axiom_,
+        exact is_axiom.prop_3_ Q P,
+      }
+    }
+  },
+  {
+    apply is_deduct.axiom_,
+    exact is_axiom.prop_1_ P.not_ Q.not_,
   },
 end
 
