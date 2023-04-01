@@ -215,9 +215,9 @@ theorem T_13_5
 begin
   unfold is_proof,
 
-  apply is_deduct.mp_,
+  apply is_deduct.mp_ (P.imp_ (P.imp_ P)),
   {
-    apply is_deduct.mp_,
+    apply is_deduct.mp_ (P.imp_ ((P.imp_ P).imp_ P)),
     {
       apply is_deduct.axiom_,
       exact is_axiom.prop_2_ P (P.imp_ P) P,
