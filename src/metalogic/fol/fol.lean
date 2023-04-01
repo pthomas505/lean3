@@ -1618,6 +1618,7 @@ begin
       {
         clear h2,
         clear h3,
+        unfold And_,
         induction n,
         case nat.zero
         {
@@ -1627,9 +1628,6 @@ begin
         },
         case nat.succ : n ih
         {
-          unfold And_ at ih,
-
-          unfold And_,
           simp only [list.of_fn_succ, list.foldr_cons],
           apply is_deduct.mp_ (list.foldr and_ true_ (list.of_fn (λ (i : fin n), eq_ (args_u i.succ) (args_v i.succ)))),
           {
