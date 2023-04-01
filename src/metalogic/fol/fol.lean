@@ -643,34 +643,6 @@ begin
 end
 
 
-lemma and_elim_left
-  (P Q : formula)
-  (Δ : set formula) :
-  is_deduct Δ ((P.and_ Q).imp_ P) :=
-begin
-  unfold formula.and_,
-  apply proof_imp_deduct,
-  apply prop_complete,
-  unfold formula.is_tauto_atomic,
-  simp only [eval_not, eval_imp],
-  tauto,
-end
-
-
-lemma and_elim_right
-  (P Q : formula)
-  (Δ : set formula) :
-  is_deduct Δ ((P.and_ Q).imp_ Q) :=
-begin
-  unfold formula.and_,
-  apply proof_imp_deduct,
-  apply prop_complete,
-  unfold formula.is_tauto_atomic,
-  simp only [eval_not, eval_imp],
-  tauto,
-end
-
-
 theorem T_17_14
   (P Q : formula)
   (v : variable_) :
@@ -702,9 +674,14 @@ begin
         },
         {
           simp only [fast_replace_free_self],
-          apply is_deduct.mp_,
+          apply is_deduct.mp_ (P.and_ Q),
           {
-            apply and_elim_left P Q,
+            unfold formula.and_,
+            apply proof_imp_deduct,
+            apply prop_complete,
+            unfold formula.is_tauto_atomic,
+            simp only [eval_not, eval_imp],
+            tauto,
           },
           {
             apply is_deduct.assume_,
@@ -720,9 +697,14 @@ begin
       },
       {
         simp only [fast_replace_free_self],
-        apply is_deduct.mp_,
+        apply is_deduct.mp_ (P.and_ Q),
         {
-          apply and_elim_right P Q,
+          unfold formula.and_,
+          apply proof_imp_deduct,
+          apply prop_complete,
+          unfold formula.is_tauto_atomic,
+          simp only [eval_not, eval_imp],
+          tauto,
         },
         {
           apply is_deduct.assume_,
@@ -762,7 +744,12 @@ begin
     {
       apply is_deduct.mp_ ((P.imp_ Q).and_ (Q.imp_ P)),
       {
-        apply and_elim_left,
+        unfold formula.and_,
+        apply proof_imp_deduct,
+        apply prop_complete,
+        unfold formula.is_tauto_atomic,
+        simp only [eval_not, eval_imp],
+        tauto,
       },
       {
         apply spec_id v ((P.imp_ Q).and_ (Q.imp_ P)),
@@ -799,7 +786,12 @@ begin
     {
       apply is_deduct.mp_ ((P.imp_ Q).and_ (Q.imp_ P)),
       {
-        apply and_elim_right,
+        unfold formula.and_,
+        apply proof_imp_deduct,
+        apply prop_complete,
+        unfold formula.is_tauto_atomic,
+        simp only [eval_not, eval_imp],
+        tauto,
       },
       {
         apply spec_id v ((P.imp_ Q).and_ (Q.imp_ P)),
