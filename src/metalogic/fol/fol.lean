@@ -533,33 +533,6 @@ begin
 end
 
 
-lemma SC_2
-  (P Q R : formula)
-  (Δ : set formula)
-  (h1 : is_deduct Δ (Q.imp_ P))
-  (h2 : is_deduct Δ (R.not_.imp_ Q)) :
-  is_deduct Δ (P.not_.imp_ R) :=
-begin
-  apply is_deduct.mp_ (R.not_.imp_ Q),
-  {
-    apply is_deduct.mp_ (Q.imp_ P),
-    {
-      apply proof_imp_deduct,
-      apply prop_complete,
-      unfold formula.is_tauto_atomic,
-      simp only [eval_imp, eval_not],
-      tauto,
-    },
-    {
-      exact h1,
-    }
-  },
-  {
-    exact h2,
-  }
-end
-
-
 theorem T_17_11
   (P Q : formula)
   (v : variable_)
@@ -569,32 +542,42 @@ begin
   apply deduction_theorem,
   simp only [set.union_singleton, insert_emptyc_eq],
   unfold exists_,
-  apply SC_2 (forall_ v P.not_) (forall_ v Q.not_) Q,
+  apply is_deduct.mp_ (Q.not_.imp_ (forall_ v Q.not_)),
   {
-    apply is_deduct.mp_,
+    apply is_deduct.mp_ ((forall_ v Q.not_).imp_ (forall_ v P.not_)),
     {
-      apply is_deduct.axiom_,
-      apply is_axiom.pred_1_,
+      apply proof_imp_deduct,
+      apply prop_complete,
+      unfold formula.is_tauto_atomic,
+      simp only [eval_imp, eval_not],
+      tauto,
     },
     {
-      apply generalization,
+      apply is_deduct.mp_ (forall_ v (Q.not_.imp_ P.not_)),
       {
-        apply is_deduct.mp_,
-        {
-          apply proof_imp_deduct,
-          apply T_14_7,
-        },
-        {
-          apply spec_id v (P.imp_ Q),
-          apply is_deduct.assume_,
-          simp only [set.mem_singleton],
-        }
+        apply is_deduct.axiom_,
+        apply is_axiom.pred_1_,
       },
       {
-        simp only [set.mem_singleton_iff, forall_eq],
-        unfold is_free_in,
-        simp only [eq_self_iff_true, not_true, false_and, not_false_iff],
-      }
+        apply generalization,
+        {
+          apply is_deduct.mp_ (P.imp_ Q),
+          {
+            apply proof_imp_deduct,
+            apply T_14_7,
+          },
+          {
+            apply spec_id v (P.imp_ Q),
+            apply is_deduct.assume_,
+            simp only [set.mem_singleton],
+          }
+        },
+        {
+          simp only [set.mem_singleton_iff, forall_eq],
+          unfold is_free_in,
+          simp only [eq_self_iff_true, not_true, false_and, not_false_iff],
+        }
+      },
     },
   },
   {
