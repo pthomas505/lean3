@@ -1214,6 +1214,9 @@ begin
 end
 
 
+/-
+  Proof of the completeness of classical propositional logic.
+-/
 theorem prop_complete
   (P : formula)
   (h1 : P.is_tauto_prime) :
