@@ -7,6 +7,9 @@ set_option pp.parens true
 open formula
 
 
+/--
+  is_prop_axiom P := True if and only if P is a logical axiom of classical propositional logic.
+-/
 inductive is_prop_axiom : formula → Prop
 
 -- ⊢ ⊤
@@ -29,6 +32,9 @@ inductive is_prop_axiom : formula → Prop
   is_prop_axiom (((not_ P).imp_ (not_ Q)).imp_ (Q.imp_ P))
 
 
+/--
+  is_prop_deduct Δ P := True if and only if there is a deduction of P from Δ in classical propositional logic.
+-/
 inductive is_prop_deduct (Δ : set formula) : formula → Prop
 
 | axiom_
@@ -48,9 +54,15 @@ inductive is_prop_deduct (Δ : set formula) : formula → Prop
   is_prop_deduct Q
 
 
+/--
+  is_prop_proof P := True if and only if there is a proof of P in classical propositional logic.
+-/
 def is_prop_proof (P : formula) : Prop := is_prop_deduct ∅ P
 
 
+/--
+  is_axiom P := True if and only if P is a logical axiom of classical first order logic.
+-/
 inductive is_axiom : formula → Prop
 
 -- ⊢ ⊤
@@ -118,6 +130,9 @@ inductive is_axiom : formula → Prop
   is_axiom (forall_ v P)
 
 
+/--
+  is_deduct Δ P := True if and only if there is a deduction of P from Δ in classical first order logic.
+-/
 inductive is_deduct (Δ : set formula) : formula → Prop
 
 | axiom_
@@ -137,9 +152,17 @@ inductive is_deduct (Δ : set formula) : formula → Prop
   is_deduct Q
 
 
+/--
+  is_proof P := True if and only if there is a proof of P in classical first order logic.
+-/
 def is_proof (P : formula) : Prop := is_deduct ∅ P
 
 
+/--
+  is_proof_alt P := True if and only if there is a proof of P in classical first order logic.
+
+  This definition is equivalent to is_proof.
+-/
 inductive is_proof_alt : formula → Prop
 
 -- ⊢ ⊤
