@@ -11,7 +11,7 @@ def proof_equiv (P Q : formula) : Prop := is_proof (P.iff_ Q)
 
 
 /--
-is_repl_of_var_in_list u v l_u l_v = True if and only if l_v is the result of replacing one or more specified occurrences (but not necessarily all occurrences) of u in l_u by occurrences of v.
+is_repl_of_var_in_list u v l_u l_v := True if and only if l_v is the result of replacing one or more specified occurrences (but not necessarily all occurrences) of u in l_u by occurrences of v.
 -/
 def is_repl_of_var_in_list_fun (u v : variable_) : list variable_ → list variable_ → Prop
 | [] [] := true
@@ -20,7 +20,7 @@ def is_repl_of_var_in_list_fun (u v : variable_) : list variable_ → list varia
 
 
 /--
-is_repl_of_var_in_formula_fun u v P_u P_v = True if and only if P_v is the result of replacing one or more specified occurrences (but not necessarily all occurrences) of u in P_u by occurrences of v.
+is_repl_of_var_in_formula_fun u v P_u P_v := True if and only if P_v is the result of replacing one or more specified occurrences (but not necessarily all occurrences) of u in P_u by occurrences of v.
 -/
 def is_repl_of_var_in_formula_fun (u v : variable_) : formula → formula → Prop
 | true_ true_ := true
@@ -33,7 +33,7 @@ def is_repl_of_var_in_formula_fun (u v : variable_) : formula → formula → Pr
 
 
 /--
-is_repl_of_var_in_formula u v P_u P_v = True if and only if P_v is the result of replacing one or more specified occurrences (but not necessarily all occurrences) of u in P_u by occurrences of v.
+is_repl_of_var_in_formula u v P_u P_v := True if and only if P_v is the result of replacing one or more specified occurrences (but not necessarily all occurrences) of u in P_u by occurrences of v.
 -/
 inductive is_repl_of_var_in_formula (u v : variable_) : formula → formula → Prop
 | true_ :
@@ -73,7 +73,7 @@ inductive is_repl_of_var_in_formula (u v : variable_) : formula → formula → 
 
 
 /--
-is_repl_of_formula_in_formula_fun U V P_u P_v = True if and only if P_v is the result of replacing one or more specified occurrences (but not necessarily all occurrences) of U in P_u by occurrences of V.
+is_repl_of_formula_in_formula_fun U V P_u P_v := True if and only if P_v is the result of replacing one or more specified occurrences (but not necessarily all occurrences) of U in P_u by occurrences of V.
 -/
 def is_repl_of_formula_in_formula_fun (U V : formula) : formula → formula → Prop
 | (not_ P_u) (not_ P_v) := is_repl_of_formula_in_formula_fun P_u P_v
@@ -83,7 +83,7 @@ def is_repl_of_formula_in_formula_fun (U V : formula) : formula → formula → 
 
 
 /--
-is_repl_of_formula_in_formula U V P_u P_v = True if and only if P_v is the result of replacing one or more specified occurrences (but not necessarily all occurrences) of U in P_u by occurrences of V.
+is_repl_of_formula_in_formula U V P_u P_v := True if and only if P_v is the result of replacing one or more specified occurrences (but not necessarily all occurrences) of U in P_u by occurrences of V.
 -/
 inductive is_repl_of_formula_in_formula (U V : formula) : formula → formula → Prop
 -- not replacing an occurrence
