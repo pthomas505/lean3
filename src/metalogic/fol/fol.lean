@@ -182,6 +182,8 @@ theorem T_17_3
   (h1 : fast_admits v t P) :
   is_proof ((fast_replace_free v t P).imp_ (exists_ v P)) :=
 begin
+  unfold fast_admits at h1,
+
   unfold formula.exists_,
   unfold is_proof,
   apply is_deduct.mp_ ((forall_ v P.not_).imp_ (fast_replace_free v t P).not_),
@@ -192,8 +194,6 @@ begin
     tauto,
   },
   {
-    unfold fast_admits at h1,
-
     apply is_deduct.axiom_,
     apply is_axiom.pred_2_ v t,
     {
@@ -217,7 +217,7 @@ theorem T_17_4
   (h2 : is_deduct Δ (fast_replace_free v t P)) :
   is_deduct Δ (exists_ v P) :=
 begin
-  apply is_deduct.mp_ (fast_replace_free v t P) (exists_ v P),
+  apply is_deduct.mp_ (fast_replace_free v t P),
   {
     apply proof_imp_deduct,
     apply T_17_3,
