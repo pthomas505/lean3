@@ -756,6 +756,9 @@ begin
 end
 
 
+/-
+  Proof of the soundness of classical propositional logic.
+-/
 example
   (P : formula)
   (h1 : is_prop_proof P) :
