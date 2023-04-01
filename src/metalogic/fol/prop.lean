@@ -416,27 +416,27 @@ begin
   unfold is_proof,
 
   apply deduction_theorem,
-  apply is_deduct.mp_,
+  apply is_deduct.mp_ (P.not_.not_.imp_ Q.not_.not_),
   {
     apply is_deduct.axiom_,
     apply is_axiom.prop_3_,
   },
   {
     apply deduction_theorem,
-    apply is_deduct.mp_,
+    apply is_deduct.mp_ Q,
     {
       apply proof_imp_deduct,
       apply T_14_6,
     },
     {
-      apply is_deduct.mp_,
+      apply is_deduct.mp_ P,
       {
         apply is_deduct.assume_,
         simp only [set.union_singleton, insert_emptyc_eq, set.mem_insert_iff, set.mem_singleton_iff, eq_self_iff_true, and_true,
   false_or],
       },
       {
-        apply is_deduct.mp_,
+        apply is_deduct.mp_ P.not_.not_,
         {
           apply proof_imp_deduct,
           apply T_14_5,
@@ -458,14 +458,14 @@ begin
   unfold is_proof,
 
   apply deduction_theorem,
-  apply is_deduct.mp_,
+  apply is_deduct.mp_ ((Q.imp_ R).imp_ R),
   {
     apply proof_imp_deduct,
     apply T_14_7,
   },
   {
     apply deduction_theorem,
-    apply is_deduct.mp_ Q R,
+    apply is_deduct.mp_ Q,
     {
       apply is_deduct.assume_,
       simp only [set.union_singleton, set.mem_insert_iff, eq_self_iff_true, and_self, true_or],
@@ -485,22 +485,22 @@ begin
   unfold is_proof,
 
   apply deduction_theorem,
-  apply is_deduct.mp_,
+  apply is_deduct.mp_ (P.not_.imp_ (S.not_.imp_ P).not_),
   {
     apply is_deduct.axiom_,
     apply is_axiom.prop_3_,
   },
   {
     apply deduction_theorem,
-    apply is_deduct.mp_,
+    apply is_deduct.mp_ P.not_,
     {
-      apply is_deduct.mp_,
+      apply is_deduct.mp_ S.not_,
       {
         apply proof_imp_deduct,
         apply T_14_8,
       },
       {
-        apply is_deduct.mp_,
+        apply is_deduct.mp_ P.not_,
         {
           apply is_deduct.mp_ (S.imp_ P),
           {
