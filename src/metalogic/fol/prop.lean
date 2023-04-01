@@ -669,10 +669,14 @@ theorem C_14_15
   (h2 : is_proof (P.imp_ Q)) :
   is_deduct Δ Q :=
 begin
-  have s1 : is_deduct Δ (P.imp_ Q),
-  exact C_14_11 (P.imp_ Q) h2 Δ,
-
-  exact is_deduct.mp_ P Q s1 h1,
+  apply is_deduct.mp_ P,
+  {
+    apply proof_imp_deduct,
+    exact h2,
+  },
+  {
+    exact h1,
+  },
 end
 
 alias C_14_15 <- mp_deduct_proof
