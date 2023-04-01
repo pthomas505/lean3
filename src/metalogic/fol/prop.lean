@@ -543,7 +543,7 @@ begin
   {
     apply is_deduct.assume_,
     simp only [set.mem_union_eq],
-    apply or.intro_left,
+    left,
     exact h1_1,
   },
   case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
