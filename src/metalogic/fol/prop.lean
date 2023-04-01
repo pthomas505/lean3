@@ -260,6 +260,7 @@ begin
   case is_deduct.assume_ : h1_P h1_1
   {
     simp only [set.union_singleton, set.mem_insert_iff] at h1_1,
+
     cases h1_1,
     {
       subst h1_1,
