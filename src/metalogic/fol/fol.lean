@@ -313,15 +313,22 @@ end
 alias T_17_7 <- generalization
 
 
-lemma universal_introduction_aux
+-- Universal Introduction
+
+example
   (P : formula)
   (v t : variable_)
   (Δ : set formula)
   (h1 : ¬ occurs_in t P)
   (h2 : is_deduct Δ (fast_replace_free v t P))
   (h3 : ∀ (H : formula), H ∈ Δ → ¬ is_free_in t H) :
-  is_deduct Δ (forall_ v (fast_replace_free t v (fast_replace_free v t P))) :=
+  is_deduct Δ (forall_ v P) :=
 begin
+  have s1 : (fast_replace_free t v (fast_replace_free v t P)) = P,
+  exact fast_replace_free_inverse P v t h1,
+
+  rewrite <- s1,
+
   apply is_deduct.mp_ (forall_ t (fast_replace_free v t P)),
   {
     apply proof_imp_deduct,
@@ -350,25 +357,6 @@ begin
   {
     exact generalization (fast_replace_free v t P) t Δ h2 h3,
   },
-end
-
-
--- Universal Introduction
-
-example
-  (P : formula)
-  (v t : variable_)
-  (Δ : set formula)
-  (h1 : ¬ occurs_in t P)
-  (h2 : is_deduct Δ (fast_replace_free v t P))
-  (h3 : ∀ (H : formula), H ∈ Δ → ¬ is_free_in t H) :
-  is_deduct Δ (forall_ v P) :=
-begin
-  have s1 : (fast_replace_free t v (fast_replace_free v t P)) = P,
-  exact fast_replace_free_inverse P v t h1,
-
-  rewrite <- s1,
-  apply universal_introduction_aux P v t Δ h1 h2 h3,
 end
 
 
