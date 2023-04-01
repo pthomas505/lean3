@@ -323,6 +323,20 @@ example
   (h3 : ∀ (H : formula), H ∈ Δ → ¬ is_free_in t H) :
   is_deduct Δ (forall_ v P) :=
 begin
+  have s1 : is_deduct {forall_ t (fast_replace_free v t P)} (fast_replace_free t v (fast_replace_free v t P)),
+  apply spec,
+  {
+    apply is_deduct.assume_,
+    simp only [set.mem_singleton],
+  },
+  {
+    apply fast_replace_free_fast_admits,
+    exact h1,
+  },
+
+  have s2 : (fast_replace_free t v (fast_replace_free v t P)) = P,
+  exact fast_replace_free_inverse P v t h1,
+
   apply is_deduct.mp_ (forall_ t (fast_replace_free v t P)),
   {
     apply proof_imp_deduct,
@@ -330,20 +344,6 @@ begin
     simp only [set.union_singleton, insert_emptyc_eq],
     apply generalization,
     {
-      have s1 : is_deduct {forall_ t (fast_replace_free v t P)} (fast_replace_free t v (fast_replace_free v t P)),
-      apply spec,
-      {
-        apply is_deduct.assume_,
-        simp only [set.mem_singleton],
-      },
-      {
-        apply fast_replace_free_fast_admits,
-        exact h1,
-      },
-
-      have s2 : (fast_replace_free t v (fast_replace_free v t P)) = P,
-      exact fast_replace_free_inverse P v t h1,
-
       simp only [s2] at s1,
       exact s1,
     },
