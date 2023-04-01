@@ -1597,9 +1597,7 @@ begin
   },
   case is_repl_of_var_in_formula.pred_ : name n args_u args_v h1_1
   {
-    apply deduction_theorem,
-    simp only [set.union_singleton, insert_emptyc_eq],
-    apply is_deduct.mp_ ((pred_ name (list.of_fn args_u)).iff_ (pred_ name (list.of_fn args_v))),
+    apply is_deduct.mp_ ((eq_ r s).imp_ ((pred_ name (list.of_fn args_u)).iff_ (pred_ name (list.of_fn args_v)))),
     {
       apply proof_imp_deduct,
       apply prop_complete,
@@ -1608,12 +1606,24 @@ begin
       tauto,
     },
     {
-      apply is_deduct.mp_ (And_ (list.of_fn (λ (i : fin n), eq_ (args_u i) (args_v i)))),
+      apply is_deduct.mp_ ((eq_ r s).imp_ (And_ (list.of_fn (λ (i : fin n), eq_ (args_u i) (args_v i))))),
       {
-        apply Forall_spec_id' (list.of_fn args_v),
-        apply Forall_spec_id' (list.of_fn args_u),
-        apply is_deduct.axiom_,
-        exact is_axiom.eq_2_pred_ name n args_u args_v,
+        apply is_deduct.mp_ (((And_ (list.of_fn (λ (i : fin n), eq_ (args_u i) (args_v i))))).imp_ (((pred_ name (list.of_fn args_u)).iff_ (pred_ name (list.of_fn args_v))))),
+        {
+          unfold formula.iff_,
+          unfold formula.and_,
+          apply proof_imp_deduct,
+          apply prop_complete,
+          unfold formula.is_tauto_atomic,
+          simp only [eval_not, eval_imp],
+          tauto,
+        },
+        {
+          apply Forall_spec_id' (list.of_fn args_v),
+          apply Forall_spec_id' (list.of_fn args_u),
+          apply is_deduct.axiom_,
+          exact is_axiom.eq_2_pred_ name n args_u args_v,
+        },
       },
       {
         clear h2,
@@ -1622,16 +1632,19 @@ begin
         induction n,
         case nat.zero
         {
-          simp only [list.of_fn_zero],
-          apply is_deduct.axiom_,
-          apply is_axiom.prop_true_,
+          simp only [list.of_fn_zero, list.foldr_nil],
+          apply proof_imp_deduct,
+          apply prop_complete,
+          unfold formula.is_tauto_atomic,
+          simp only [eval_not, eval_imp],
+          tauto,
         },
         case nat.succ : n ih
         {
           simp only [list.of_fn_succ, list.foldr_cons],
-          apply is_deduct.mp_ (list.foldr and_ true_ (list.of_fn (λ (i : fin n), eq_ (args_u i.succ) (args_v i.succ)))),
+          apply is_deduct.mp_ ((eq_ r s).imp_ (list.foldr and_ true_ (list.of_fn (λ (i : fin n), eq_ (args_u i.succ) (args_v i.succ))))),
           {
-            apply is_deduct.mp_ (eq_ (args_u 0) (args_v 0)),
+            apply is_deduct.mp_ ((eq_ r s).imp_ (eq_ (args_u 0) (args_v 0))),
             {
               unfold formula.and_,
               apply proof_imp_deduct,
@@ -1644,17 +1657,31 @@ begin
               specialize h1_1 0,
               cases h1_1,
               {
-                rewrite h1_1,
-                apply spec_id (args_v 0),
-                apply is_deduct.axiom_,
-                apply is_axiom.eq_1_,
+                apply is_deduct.mp_ (eq_ (args_u 0) (args_v 0)),
+                {
+                  apply proof_imp_deduct,
+                  apply prop_complete,
+                  unfold formula.is_tauto_atomic,
+                  simp only [eval_not, eval_imp],
+                  tauto,
+                },
+                {
+                  rewrite h1_1,
+                  apply spec_id (args_v 0),
+                  apply is_deduct.axiom_,
+                  apply is_axiom.eq_1_,
+                },
               },
               {
                 cases h1_1,
                 subst h1_1_left,
                 subst h1_1_right,
-                apply is_deduct.assume_,
-                simp only [set.mem_singleton],
+
+                apply proof_imp_deduct,
+                apply prop_complete,
+                unfold formula.is_tauto_atomic,
+                simp only [eval_not, eval_imp],
+                tauto,
               }
             }
           },
