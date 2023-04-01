@@ -8,6 +8,11 @@ set_option pp.parens true
 open formula
 
 
+/-
+  Used for the soundness and completeness proofs of classical propositional logic.
+-/
+
+
 def formula.is_prime : formula → Prop
 | (true_) := false
 | (pred_ name args) := true
