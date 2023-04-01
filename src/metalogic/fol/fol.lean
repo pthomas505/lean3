@@ -280,7 +280,7 @@ begin
   },
   case is_deduct.assume_ : h1_P h1_1
   {
-    apply is_deduct.mp_,
+    apply is_deduct.mp_ h1_P,
     {
       apply is_deduct.axiom_,
       apply is_axiom.pred_3_,
@@ -295,7 +295,7 @@ begin
   {
     apply is_deduct.mp_ (forall_ v h1_P),
     {
-      apply is_deduct.mp_,
+      apply is_deduct.mp_ (forall_ v (h1_P.imp_ h1_Q)),
       {
         apply is_deduct.axiom_,
         apply is_axiom.pred_1_,
