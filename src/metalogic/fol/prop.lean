@@ -306,28 +306,22 @@ theorem T_13_6
 begin
   unfold is_proof,
 
-  apply is_deduct.mp_ (P.not_.imp_ (Q.not_.imp_ P.not_)),
-  {
-    apply is_deduct.mp_ (P.not_.imp_ ((Q.not_.imp_ P.not_).imp_ (P.imp_ Q))),
-    {
-      apply is_deduct.axiom_,
-      exact is_axiom.prop_2_ P.not_ (Q.not_.imp_ P.not_) (P.imp_ Q),
-    },
-    {
-      apply is_deduct.mp_ ((Q.not_.imp_ P.not_).imp_ (P.imp_ Q)),
-      {
-        apply is_deduct.axiom_,
-        exact is_axiom.prop_1_ ((Q.not_.imp_ P.not_).imp_ (P.imp_ Q)) P.not_,
-      },
-      {
-        apply is_deduct.axiom_,
-        exact is_axiom.prop_3_ Q P,
-      }
-    }
-  },
+  apply deduction_theorem,
+  apply is_deduct.mp_ (Q.not_.imp_ P.not_),
   {
     apply is_deduct.axiom_,
-    exact is_axiom.prop_1_ P.not_ Q.not_,
+    exact is_axiom.prop_3_ Q P,
+  },
+  {
+    apply is_deduct.mp_ P.not_,
+    {
+      apply is_deduct.axiom_,
+      exact is_axiom.prop_1_ P.not_ Q.not_,
+    },
+    {
+      apply is_deduct.assume_,
+      simp only [set.union_singleton, insert_emptyc_eq, set.mem_singleton],
+    },
   },
 end
 
