@@ -604,16 +604,16 @@ theorem T_14_12
   (h2 : is_deduct Γ (P.imp_ Q)) :
   is_deduct (Δ ∪ Γ) Q :=
 begin
-  have s1 : is_deduct (Δ ∪ Γ) P,
-  apply T_14_10,
-  exact h1,
-
-  have s2 : is_deduct (Δ ∪ Γ) (P.imp_ Q),
-  rewrite set.union_comm,
-  apply T_14_10,
-  exact h2,
-
-  exact is_deduct.mp_ P Q s2 s1,
+  apply is_deduct.mp_ P,
+  {
+    rewrite set.union_comm,
+    apply T_14_10,
+    exact h2,
+  },
+  {
+    apply T_14_10,
+    exact h1,
+  },
 end
 
 
