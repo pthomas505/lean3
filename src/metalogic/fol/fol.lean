@@ -1066,7 +1066,7 @@ theorem C_18_3
   (h2 : is_proof (U.iff_ V)) :
   is_proof (P_U.iff_ P_V) :=
 begin
-  apply is_deduct.mp_,
+  apply is_deduct.mp_ (Forall_ ((U.free_var_set ∪ V.free_var_set) ∩ P_U.bound_var_set).to_list (U.iff_ V)),
   {
     apply T_18_2 U V P_U P_V ((U.free_var_set ∪ V.free_var_set) ∩ P_U.bound_var_set).to_list h1,
     intros v a1,
