@@ -628,14 +628,48 @@ example
   (v t : variable_)
   (Δ : set formula)
   (h1 : is_deduct Δ (exists_ v P))
-  (h2 : is_deduct (Δ ∪ {replace_free v t P}) Q)
+  (h2 : is_deduct (Δ ∪ {fast_replace_free v t P}) Q)
   (h3 : ¬ occurs_in t P)
   (h4 : ¬ occurs_in t Q)
   (h5 : ∀ (H : formula), H ∈ Δ → ¬ is_free_in t H) :
   is_deduct Δ Q :=
 begin
-  sorry,
---  apply rule_C (replace_free v t P) Q t Δ,
+  apply is_deduct.mp_ (exists_ t (fast_replace_free v t P)),
+  {
+    apply deduction_theorem,
+    apply rule_C (fast_replace_free v t P) Q t (Δ ∪ {exists_ t (fast_replace_free v t P)}),
+    {
+      apply is_deduct.assume_,
+      squeeze_simp,
+    },
+    {
+      simp only [set.union_assoc],
+      simp only [set.union_comm],
+      rewrite <- set.union_assoc Δ {fast_replace_free v t P} {exists_ t (fast_replace_free v t P)},
+      obtain s5 := T_14_10 Q (Δ ∪ {fast_replace_free v t P}) h2 {exists_ t (fast_replace_free v t P)},
+      apply s5,
+    },
+    {
+      intros H a1,
+      squeeze_simp at a1,
+      cases a1,
+      rewrite a1,
+      unfold exists_,
+      unfold is_free_in,
+      squeeze_simp,
+      apply h5,
+      exact a1,
+    },
+    {
+      intros contra,
+      apply h4,
+      apply is_free_in_imp_occurs_in,
+      exact contra,
+    },
+  },
+  {
+    sorry,
+  }
 end
 
 
