@@ -315,7 +315,7 @@ alias T_17_7 <- generalization
 
 -- Universal Introduction
 
-example
+lemma univ_intro
   (P : formula)
   (v t : variable_)
   (Δ : set formula)
@@ -636,7 +636,32 @@ example
 begin
   refine rule_C (fast_replace_free v t P) Q t Δ _ h2 h5 _,
   {
-    sorry,
+    unfold exists_ at h1,
+
+    unfold exists_,
+
+    have s1 : is_deduct Δ ((forall_ t (fast_replace_free v t P.not_)).imp_ (forall_ v P.not_)),
+    apply deduction_theorem,
+    apply univ_intro P.not_ v t _ h3,
+    apply spec_id t,
+    apply is_deduct.assume_,
+    squeeze_simp,
+    intros H a1,
+    squeeze_simp at a1,
+    cases a1,
+    subst a1,
+    unfold is_free_in,
+    tauto,
+    exact h5 H a1,
+    apply is_deduct.mp_ (forall_ v P.not_).not_,
+    apply is_deduct.mp_ ((forall_ t (fast_replace_free v t P.not_)).imp_ (forall_ v P.not_)),
+    apply proof_imp_deduct,
+    apply prop_complete,
+    unfold formula.is_tauto_prime,
+    simp only [eval_not, eval_imp],
+    tauto,
+    exact s1,
+    exact h1,
   },
   {
     intros contra,
