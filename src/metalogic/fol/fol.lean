@@ -128,6 +128,7 @@ def similar (P_u P_v : formula) (u v : variable_) : Prop :=
 
 
 -- Universal Elimination
+
 theorem T_17_1
   (P : formula)
   (v t : variable_)
@@ -209,6 +210,7 @@ end
 
 
 -- Existential Introduction
+
 theorem T_17_4
   (P : formula)
   (v t : variable_)
@@ -623,7 +625,9 @@ end
 alias T_17_12 <- rule_C
 
 
-example
+-- Existential Elimination
+
+lemma exists_elim
   (P Q : formula)
   (v t : variable_)
   (Δ : set formula)
