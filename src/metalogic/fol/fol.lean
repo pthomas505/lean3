@@ -188,10 +188,7 @@ begin
   unfold is_proof,
   apply is_deduct.mp_ ((forall_ v P.not_).imp_ (fast_replace_free v t P).not_),
   {
-    apply prop_complete,
-    unfold formula.is_tauto_prime,
-    simp only [eval_not, eval_imp],
-    tauto,
+    SC,
   },
   {
     apply is_deduct.axiom_,
@@ -541,11 +538,7 @@ begin
   {
     apply is_deduct.mp_ ((forall_ v Q.not_).imp_ (forall_ v P.not_)),
     {
-      apply proof_imp_deduct,
-      apply prop_complete,
-      unfold formula.is_tauto_prime,
-      simp only [eval_imp, eval_not],
-      tauto,
+      SC,
     },
     {
       apply is_deduct.mp_ (forall_ v (Q.not_.imp_ P.not_)),
@@ -644,11 +637,7 @@ begin
     {
       apply is_deduct.mp_ ((forall_ t (fast_replace_free v t P.not_)).imp_ (forall_ v P.not_)),
       {
-        apply proof_imp_deduct,
-        apply prop_complete,
-        unfold formula.is_tauto_prime,
-        simp only [eval_not, eval_imp],
-        tauto,
+        SC,
       },
       {
         apply deduction_theorem,
@@ -704,11 +693,7 @@ begin
       apply is_deduct.mp_ (exists_ v P),
       {
         unfold formula.and_,
-        apply proof_imp_deduct,
-        apply prop_complete,
-        unfold formula.is_tauto_prime,
-        simp only [eval_not, eval_imp],
-        tauto,
+        SC,
       },
       {
         apply exists_intro P v v,
@@ -720,11 +705,7 @@ begin
           apply is_deduct.mp_ (P.and_ Q),
           {
             unfold formula.and_,
-            apply proof_imp_deduct,
-            apply prop_complete,
-            unfold formula.is_tauto_prime,
-            simp only [eval_not, eval_imp],
-            tauto,
+            SC,
           },
           {
             apply is_deduct.assume_,
@@ -743,11 +724,7 @@ begin
         apply is_deduct.mp_ (P.and_ Q),
         {
           unfold formula.and_,
-          apply proof_imp_deduct,
-          apply prop_complete,
-          unfold formula.is_tauto_prime,
-          simp only [eval_not, eval_imp],
-          tauto,
+          SC,
         },
         {
           apply is_deduct.assume_,
@@ -788,11 +765,7 @@ begin
       apply is_deduct.mp_ ((P.imp_ Q).and_ (Q.imp_ P)),
       {
         unfold formula.and_,
-        apply proof_imp_deduct,
-        apply prop_complete,
-        unfold formula.is_tauto_prime,
-        simp only [eval_not, eval_imp],
-        tauto,
+        SC,
       },
       {
         apply spec_id v,
@@ -830,11 +803,7 @@ begin
       apply is_deduct.mp_ ((P.imp_ Q).and_ (Q.imp_ P)),
       {
         unfold formula.and_,
-        apply proof_imp_deduct,
-        apply prop_complete,
-        unfold formula.is_tauto_prime,
-        simp only [eval_not, eval_imp],
-        tauto,
+        SC,
       },
       {
         apply spec_id v,
@@ -867,10 +836,7 @@ begin
     {
       unfold formula.iff_,
       unfold formula.and_,
-      apply prop_complete,
-      unfold formula.is_tauto_prime,
-      simp only [eval_not, eval_imp],
-      tauto,
+      SC,
     },
     {
       apply T_18_1_left,
@@ -997,10 +963,7 @@ begin
     subst h1_1,
     unfold formula.iff_,
     unfold formula.and_,
-    apply prop_complete,
-    unfold formula.is_tauto_prime,
-    simp only [eval_not, eval_imp],
-    tauto,
+    SC,
   },
   case is_repl_of_formula_in_formula.diff_ : h1_P h1_P' h1_1 h1_2
   {
@@ -1016,10 +979,7 @@ begin
     {
       unfold formula.iff_,
       unfold formula.and_,
-      apply prop_complete,
-      unfold formula.is_tauto_prime,
-      simp only [eval_not, eval_imp],
-      tauto,
+      SC,
     },
     {
       exact h1_ih h2,
@@ -1035,10 +995,7 @@ begin
       {
         unfold formula.iff_,
         unfold formula.and_,
-        apply prop_complete,
-        unfold formula.is_tauto_prime,
-        simp only [eval_not, eval_imp],
-        tauto,
+        SC,
       },
       {
         apply h1_ih_2,
@@ -1156,11 +1113,7 @@ begin
     {
       unfold formula.iff_,
       unfold formula.and_,
-      apply proof_imp_deduct,
-      apply prop_complete,
-      unfold formula.is_tauto_prime,
-      simp only [eval_not, eval_imp],
-      tauto,
+      SC,
     },
     {
       apply proof_imp_deduct,
@@ -1188,11 +1141,7 @@ begin
     {
       unfold formula.iff_,
       unfold formula.and_,
-      apply proof_imp_deduct,
-      apply prop_complete,
-      unfold formula.is_tauto_prime,
-      simp only [eval_not, eval_imp],
-      tauto,
+      SC,
     },
     {
       apply deduction_theorem,
@@ -1280,11 +1229,7 @@ begin
     {
       unfold formula.iff_,
       unfold formula.and_,
-      apply proof_imp_deduct,
-      apply prop_complete,
-      unfold formula.is_tauto_prime,
-      simp only [eval_not, eval_imp],
-      tauto,
+      SC,
     },
     {
       apply is_deduct.axiom_,
@@ -1315,11 +1260,7 @@ begin
     {
       unfold formula.iff_,
       unfold formula.and_,
-      apply proof_imp_deduct,
-      apply prop_complete,
-      unfold formula.is_tauto_prime,
-      simp only [eval_not, eval_imp],
-      tauto,
+      SC,
     },
     {
       apply T_17_10,
@@ -1423,11 +1364,7 @@ begin
     {
       unfold formula.iff_,
       unfold formula.and_,
-      apply proof_imp_deduct,
-      apply prop_complete,
-      unfold formula.is_tauto_prime,
-      simp only [eval_not, eval_imp],
-      tauto,
+      SC,
     },
     {
       exact T_19_TS_21_right P Q v h1,
@@ -1453,11 +1390,7 @@ begin
         {
           unfold formula.iff_,
           unfold formula.and_,
-          apply proof_imp_deduct,
-          apply prop_complete,
-          unfold formula.is_tauto_prime,
-          simp only [eval_not, eval_imp],
-          tauto,
+          SC,
         },
         {
           apply spec_id y,
@@ -1504,11 +1437,7 @@ begin
           {
             unfold formula.iff_,
             unfold formula.and_,
-            apply proof_imp_deduct,
-            apply prop_complete,
-            unfold formula.is_tauto_prime,
-            simp only [eval_not, eval_imp],
-            tauto,
+            SC,
           },
           {
             apply spec_id z,
@@ -1558,21 +1487,13 @@ begin
   {
     unfold formula.iff_,
     unfold formula.and_,
-    apply proof_imp_deduct,
-    apply prop_complete,
-    unfold formula.is_tauto_prime,
-    simp only [eval_not, eval_imp],
-    tauto,
+    SC,
   },
   case is_repl_of_var_in_formula.pred_ : name n args_u args_v h1_1
   {
     apply is_deduct.mp_ ((eq_ r s).imp_ ((pred_ name (list.of_fn args_u)).iff_ (pred_ name (list.of_fn args_v)))),
     {
-      apply proof_imp_deduct,
-      apply prop_complete,
-      unfold formula.is_tauto_prime,
-      simp only [eval_not, eval_imp],
-      tauto,
+      SC,
     },
     {
       apply is_deduct.mp_ ((eq_ r s).imp_ (And_ (list.of_fn (λ (i : fin n), eq_ (args_u i) (args_v i))))),
@@ -1581,11 +1502,7 @@ begin
         {
           unfold formula.iff_,
           unfold formula.and_,
-          apply proof_imp_deduct,
-          apply prop_complete,
-          unfold formula.is_tauto_prime,
-          simp only [eval_not, eval_imp],
-          tauto,
+          SC,
         },
         {
           apply Forall_spec_id' (list.of_fn args_v),
@@ -1602,11 +1519,7 @@ begin
         case nat.zero
         {
           simp only [list.of_fn_zero, list.foldr_nil],
-          apply proof_imp_deduct,
-          apply prop_complete,
-          unfold formula.is_tauto_prime,
-          simp only [eval_not, eval_imp],
-          tauto,
+          SC,
         },
         case nat.succ : n ih
         {
@@ -1616,11 +1529,7 @@ begin
             apply is_deduct.mp_ ((eq_ r s).imp_ (eq_ (args_u 0) (args_v 0))),
             {
               unfold formula.and_,
-              apply proof_imp_deduct,
-              apply prop_complete,
-              unfold formula.is_tauto_prime,
-              simp only [eval_not, eval_imp],
-              tauto,
+              SC,
             },
             {
               specialize h1_1 0,
@@ -1628,11 +1537,7 @@ begin
               {
                 apply is_deduct.mp_ (eq_ (args_u 0) (args_v 0)),
                 {
-                  apply proof_imp_deduct,
-                  apply prop_complete,
-                  unfold formula.is_tauto_prime,
-                  simp only [eval_not, eval_imp],
-                  tauto,
+                  SC,
                 },
                 {
                   simp only [h1_1],
@@ -1646,11 +1551,7 @@ begin
                 subst h1_1_left,
                 subst h1_1_right,
 
-                apply proof_imp_deduct,
-                apply prop_complete,
-                unfold formula.is_tauto_prime,
-                simp only [eval_not, eval_imp],
-                tauto,
+                SC,
               }
             }
           },
@@ -1671,11 +1572,7 @@ begin
       {
         unfold formula.iff_,
         unfold formula.and_,
-        apply proof_imp_deduct,
-        apply prop_complete,
-        unfold formula.is_tauto_prime,
-        simp only [eval_not, eval_imp],
-        tauto,
+        SC,
       },
       {
         cases h1_1,
@@ -1689,11 +1586,7 @@ begin
               apply is_deduct.mp_ (eq_ y_u y_u),
               {
                 unfold formula.and_,
-                apply proof_imp_deduct,
-                apply prop_complete,
-                unfold formula.is_tauto_prime,
-                simp only [eval_not, eval_imp],
-                tauto,
+                SC,
               },
               {
                 apply spec_id y_u,
@@ -1714,11 +1607,7 @@ begin
             apply is_deduct.mp_ (eq_ x_u x_u),
             {
               unfold formula.and_,
-              apply proof_imp_deduct,
-              apply prop_complete,
-              unfold formula.is_tauto_prime,
-              simp only [eval_not, eval_imp],
-              tauto,
+              SC,
             },
             {
               apply spec_id x_u,
@@ -1737,11 +1626,7 @@ begin
             apply is_deduct.mp_ (eq_ y_u y_u),
             {
               unfold formula.and_,
-              apply proof_imp_deduct,
-              apply prop_complete,
-              unfold formula.is_tauto_prime,
-              simp only [eval_not, eval_imp],
-              tauto,
+              SC,
             },
             {
               apply spec_id y_u,
@@ -1755,11 +1640,7 @@ begin
             subst h1_2_right,
 
             unfold formula.and_,
-            apply proof_imp_deduct,
-            apply prop_complete,
-            unfold formula.is_tauto_prime,
-            simp only [eval_not, eval_imp],
-            tauto,
+            SC,
           }
         },
       }
@@ -1784,11 +1665,7 @@ begin
     {
       unfold formula.iff_,
       unfold formula.and_,
-      apply proof_imp_deduct,
-      apply prop_complete,
-      unfold formula.is_tauto_prime,
-      simp only [eval_not, eval_imp],
-      tauto,
+      SC,
     },
     {
       exact h1_ih,
@@ -1812,11 +1689,7 @@ begin
       {
         unfold formula.iff_,
         unfold formula.and_,
-        apply proof_imp_deduct,
-        apply prop_complete,
-        unfold formula.is_tauto_prime,
-        simp only [eval_not, eval_imp],
-        tauto,
+        SC,
       },
       {
         exact h1_ih_1,

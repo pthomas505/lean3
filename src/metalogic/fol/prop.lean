@@ -1248,4 +1248,12 @@ begin
 end
 
 
+meta def SC : tactic unit :=
+`[apply proof_imp_deduct,
+  apply prop_complete,
+  unfold formula.is_tauto_prime,
+  simp only [eval_not, eval_imp],
+  tauto]
+
+
 #lint
