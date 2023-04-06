@@ -1,7 +1,4 @@
 import .admits
-import .misc_list
-
-import data.finset
 
 
 set_option pp.parens true
@@ -359,3 +356,5 @@ begin
     exact fast_admits_aux_and_fast_replace_free_imp_is_prop_sub P P' v u ∅ a1_left a1_right,
   }
 end
+
+#lint
