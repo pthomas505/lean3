@@ -106,7 +106,6 @@ begin
     unfold fast_admits_aux at h1,
 
     unfold fast_replace_free,
-
     cases h1,
     {
       split_ifs,
