@@ -7,6 +7,9 @@ set_option pp.parens true
 open formula
 
 
+/--
+  is_prop_sub P v t P' := True if and only if P' is the result of replacing in P each free occurrence of v by a free occurrence of t.
+-/
 inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
 | true_
   (v t : variable_) :
