@@ -8,43 +8,43 @@ open formula
 
 
 /--
-  is_prop_sub P v t P' := True if and only if P' is the result of replacing in P each free occurrence of v by a free occurrence of t.
+  is_free_sub P v t P' := True if and only if P' is the result of replacing in P each free occurrence of v by a free occurrence of t.
 -/
-inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
+inductive is_free_sub : formula → variable_ → variable_ → formula → Prop
 | true_
   (v t : variable_) :
-  is_prop_sub true_ v t true_
+  is_free_sub true_ v t true_
 
 | pred_
   (name : pred_name_) (args : list variable_)
   (v t : variable_) :
-    is_prop_sub (pred_ name args) v t (pred_ name (args.map (fun (x : variable_), if x = v then t else x)))
+    is_free_sub (pred_ name args) v t (pred_ name (args.map (fun (x : variable_), if x = v then t else x)))
 
 | eq_
   (x y : variable_)
   (v t : variable_) :
-    is_prop_sub (eq_ x y) v t (eq_ (if x = v then t else x) (if y = v then t else y))
+    is_free_sub (eq_ x y) v t (eq_ (if x = v then t else x) (if y = v then t else y))
 
 | not_
   (P : formula)
   (v t : variable_)
   (P' : formula) :
-  is_prop_sub P v t P' →
-  is_prop_sub P.not_ v t P'.not_
+  is_free_sub P v t P' →
+  is_free_sub P.not_ v t P'.not_
 
 | imp_
   (P Q : formula)
   (v t : variable_)
   (P' Q' : formula) :
-  is_prop_sub P v t P' →
-  is_prop_sub Q v t Q' →
-  is_prop_sub (P.imp_ Q) v t (P'.imp_ Q')
+  is_free_sub P v t P' →
+  is_free_sub Q v t Q' →
+  is_free_sub (P.imp_ Q) v t (P'.imp_ Q')
 
 | forall_not_free_in
   (x : variable_) (P : formula)
   (v t : variable_) :
   ¬ is_free_in v (forall_ x P) →
-  is_prop_sub (forall_ x P) v t (forall_ x P)
+  is_free_sub (forall_ x P) v t (forall_ x P)
 
 | forall_free_in
   (x : variable_) (P : formula)
@@ -52,40 +52,40 @@ inductive is_prop_sub : formula → variable_ → variable_ → formula → Prop
   (P' : formula) :
   is_free_in v (forall_ x P) →
   ¬ x = t →
-  is_prop_sub P v t P' →
-  is_prop_sub (forall_ x P) v t (forall_ x P')
+  is_free_sub P v t P' →
+  is_free_sub (forall_ x P) v t (forall_ x P')
 
 
-lemma fast_admits_aux_and_fast_replace_free_imp_is_prop_sub
+lemma fast_admits_aux_and_fast_replace_free_imp_is_free_sub
   (P P' : formula)
   (v u : variable_)
   (binders : finset variable_)
   (h1 : fast_admits_aux v u binders P)
   (h2 : fast_replace_free v u P = P') :
-  is_prop_sub P v u P' :=
+  is_free_sub P v u P' :=
 begin
   subst h2,
   induction P generalizing binders,
   case formula.true_ : binders h1
   {
     unfold fast_replace_free,
-    apply is_prop_sub.true_,
+    apply is_free_sub.true_,
   },
   case formula.pred_ : name args binders h1
   {
     unfold fast_replace_free,
-    apply is_prop_sub.pred_,
+    apply is_free_sub.pred_,
   },
   case formula.eq_ : x y binders h1
   {
     unfold fast_replace_free,
-    apply is_prop_sub.eq_,
+    apply is_free_sub.eq_,
   },
   case formula.not_ : P P_ih binders h1
   {
     unfold fast_admits_aux at h1,
 
-    apply is_prop_sub.not_,
+    apply is_free_sub.not_,
     exact P_ih binders h1,
   },
   case formula.imp_ : P Q P_ih Q_ih binders h1
@@ -93,7 +93,7 @@ begin
     unfold fast_admits_aux at h1,
     cases h1,
 
-    apply is_prop_sub.imp_,
+    apply is_free_sub.imp_,
     {
       exact P_ih binders h1_left,
     },
@@ -109,7 +109,7 @@ begin
     cases h1,
     {
       split_ifs,
-      apply is_prop_sub.forall_not_free_in,
+      apply is_free_sub.forall_not_free_in,
       subst h1,
       unfold is_free_in,
       simp only [eq_self_iff_true, not_true, false_and, not_false_iff],
@@ -117,7 +117,7 @@ begin
     {
       split_ifs,
       {
-        apply is_prop_sub.forall_not_free_in,
+        apply is_free_sub.forall_not_free_in,
         subst h,
         unfold is_free_in,
         simp only [eq_self_iff_true, not_true, false_and, not_false_iff],
@@ -125,7 +125,7 @@ begin
       {
         by_cases c1 : is_free_in v P,
         {
-          apply is_prop_sub.forall_free_in,
+          apply is_free_sub.forall_free_in,
           {
             unfold is_free_in,
             split,
@@ -155,7 +155,7 @@ begin
           exact c1,
 
           simp only [s1],
-          apply is_prop_sub.forall_not_free_in,
+          apply is_free_sub.forall_not_free_in,
           unfold is_free_in,
           simp only [not_and],
           intros a1,
@@ -167,11 +167,11 @@ begin
 end
 
 
-lemma is_prop_sub_imp_fast_admits_aux
+lemma is_free_sub_imp_fast_admits_aux
   (P : formula)
   (v u : variable_)
   (binders : finset variable_)
-  (h1 : ∃ (P' : formula), is_prop_sub P v u P')
+  (h1 : ∃ (P' : formula), is_free_sub P v u P')
   (h2 : u ∉ binders) :
   fast_admits_aux v u binders P :=
 begin
@@ -180,28 +180,28 @@ begin
   clear h1,
 
   induction h1_1 generalizing binders,
-  case is_prop_sub.true_ : h1_1_v h1_1_t binders h2
+  case is_free_sub.true_ : h1_1_v h1_1_t binders h2
   {
     unfold fast_admits_aux,
   },
-  case is_prop_sub.pred_ : h1_1_name h1_1_args h1_1_v h1_1_t binders h2
-  {
-    unfold fast_admits_aux,
-    intros a1,
-    exact h2,
-  },
-  case is_prop_sub.eq_ : h1_1_x h1_1_y h1_1_v h1_1_t binders h2
+  case is_free_sub.pred_ : h1_1_name h1_1_args h1_1_v h1_1_t binders h2
   {
     unfold fast_admits_aux,
     intros a1,
     exact h2,
   },
-  case is_prop_sub.not_ : h1_1_P h1_1_v h1_1_t h1_1_P' h1_1_1 h1_1_ih binders h2
+  case is_free_sub.eq_ : h1_1_x h1_1_y h1_1_v h1_1_t binders h2
+  {
+    unfold fast_admits_aux,
+    intros a1,
+    exact h2,
+  },
+  case is_free_sub.not_ : h1_1_P h1_1_v h1_1_t h1_1_P' h1_1_1 h1_1_ih binders h2
   {
     unfold fast_admits_aux,
     exact h1_1_ih binders h2,
   },
-  case is_prop_sub.imp_ : h1_1_P h1_1_Q h1_1_v h1_1_t h1_1_P' h1_1_Q' h1_1_1 h1_1_2 h1_1_ih_1 h1_1_ih_2 binders h2
+  case is_free_sub.imp_ : h1_1_P h1_1_Q h1_1_v h1_1_t h1_1_P' h1_1_Q' h1_1_1 h1_1_2 h1_1_ih_1 h1_1_ih_2 binders h2
   {
     unfold fast_admits_aux,
     split,
@@ -212,7 +212,7 @@ begin
       exact h1_1_ih_2 binders h2,
     }
   },
-  case is_prop_sub.forall_not_free_in : h1_1_x h1_1_P h1_1_v h1_1_t h1_1_1 binders h2
+  case is_free_sub.forall_not_free_in : h1_1_x h1_1_P h1_1_v h1_1_t h1_1_1 binders h2
   {
     unfold is_free_in at h1_1_1,
     simp only [not_and] at h1_1_1,
@@ -229,7 +229,7 @@ begin
       exact h1_1_1 c1,
     },
   },
-  case is_prop_sub.forall_free_in : h1_1_x h1_1_P h1_1_v h1_1_t h1_1_P' h1_1_1 h1_1_2 h1_1_3 h1_1_ih binders h2
+  case is_free_sub.forall_free_in : h1_1_x h1_1_P h1_1_v h1_1_t h1_1_P' h1_1_1 h1_1_2 h1_1_3 h1_1_ih binders h2
   {
     unfold is_free_in at h1_1_1,
     cases h1_1_1,
@@ -251,32 +251,32 @@ begin
 end
 
 
-lemma is_prop_sub_imp_fast_replace_free
+lemma is_free_sub_imp_fast_replace_free
   (P P' : formula)
   (v u : variable_)
-  (h1 : is_prop_sub P v u P') :
+  (h1 : is_free_sub P v u P') :
   fast_replace_free v u P = P' :=
 begin
   induction h1,
-  case is_prop_sub.true_ : h1_v h1_t
+  case is_free_sub.true_ : h1_v h1_t
   {
     refl,
   },
-  case is_prop_sub.pred_ : h1_name h1_args h1_v h1_t
+  case is_free_sub.pred_ : h1_name h1_args h1_v h1_t
   {
     unfold fast_replace_free,
   },
-  case is_prop_sub.eq_ : h1_x h1_y h1_v h1_t
+  case is_free_sub.eq_ : h1_x h1_y h1_v h1_t
   {
     unfold fast_replace_free,
   },
-  case is_prop_sub.not_ : h1_P h1_v h1_t h1_P' h1_1 h1_ih
+  case is_free_sub.not_ : h1_P h1_v h1_t h1_P' h1_1 h1_ih
   {
     unfold fast_replace_free,
     congr,
     exact h1_ih,
   },
-  case is_prop_sub.imp_ : h1_P h1_Q h1_v h1_t h1_P' h1_Q' h1_1 h1_2 h1_ih_1 h1_ih_2
+  case is_free_sub.imp_ : h1_P h1_Q h1_v h1_t h1_P' h1_Q' h1_1 h1_2 h1_ih_1 h1_ih_2
   {
     unfold fast_replace_free,
     congr,
@@ -287,7 +287,7 @@ begin
       exact h1_ih_2,
     }
   },
-  case is_prop_sub.forall_not_free_in : h1_x h1_P h1_v h1_t h1_1
+  case is_free_sub.forall_not_free_in : h1_x h1_P h1_v h1_t h1_1
   {
     unfold is_free_in at h1_1,
     simp only [not_and] at h1_1,
@@ -308,7 +308,7 @@ begin
       }
     }
   },
-  case is_prop_sub.forall_free_in : h1_x h1_P h1_v h1_t h1_P' h1_1 h1_2 h1_3 h1_ih
+  case is_free_sub.forall_free_in : h1_x h1_P h1_v h1_t h1_P' h1_1 h1_2 h1_3 h1_ih
   {
     unfold is_free_in at h1_1,
     cases h1_1,
@@ -329,7 +329,7 @@ end
 example
   (P P' : formula)
   (v u : variable_) :
-  is_prop_sub P v u P' ↔
+  is_free_sub P v u P' ↔
     (fast_admits v u P ∧ fast_replace_free v u P = P') :=
 begin
   unfold fast_admits,
@@ -338,7 +338,7 @@ begin
     intros a1,
     split,
     {
-      apply is_prop_sub_imp_fast_admits_aux,
+      apply is_free_sub_imp_fast_admits_aux,
       {
         apply exists.intro P',
         exact a1,
@@ -348,14 +348,14 @@ begin
       }
     },
     {
-      apply is_prop_sub_imp_fast_replace_free,
+      apply is_free_sub_imp_fast_replace_free,
       exact a1,
     }
   },
   {
     intros a1,
     cases a1,
-    exact fast_admits_aux_and_fast_replace_free_imp_is_prop_sub P P' v u ∅ a1_left a1_right,
+    exact fast_admits_aux_and_fast_replace_free_imp_is_free_sub P P' v u ∅ a1_left a1_right,
   }
 end
 
