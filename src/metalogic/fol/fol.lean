@@ -1283,6 +1283,42 @@ begin
 end
 
 
+lemma similar_not
+  (P_u P_v : formula)
+  (u v : variable_)
+  (h1 : similar P_u P_v u v) :
+  similar P_u.not_ P_v.not_ u v :=
+begin
+  unfold similar at *,
+  unfold is_free_in at *,
+  unfold fast_admits at *,
+  unfold fast_admits_aux at *,
+  unfold fast_replace_free at *,
+  tauto,
+end
+
+
+theorem T_18_8
+  (P_u P_v : formula)
+  (u v : variable_)
+  (h1 : similar P_u P_v u v) :
+  is_proof ((exists_ u P_u).iff_ (exists_ v P_v)) :=
+begin
+  unfold exists_,
+
+  apply is_deduct.mp_ ((forall_ u P_u.not_).iff_ (forall_ v P_v.not_)),
+  {
+    unfold formula.iff_,
+    unfold formula.and_,
+    SC,
+  },
+  {
+    apply T_18_6,
+    exact similar_not P_u P_v u v h1,
+  }
+end
+
+
 theorem T_19_1
   (P : formula)
   (v : variable_)
@@ -1846,42 +1882,6 @@ begin
   exact h1,
   unfold is_free_in,
   simp only [eq_self_iff_true, not_true, false_and, not_false_iff],
-end
-
-
-lemma similar_not
-  (P_u P_v : formula)
-  (u v : variable_)
-  (h1 : similar P_u P_v u v) :
-  similar P_u.not_ P_v.not_ u v :=
-begin
-  unfold similar at *,
-  unfold is_free_in at *,
-  unfold fast_admits at *,
-  unfold fast_admits_aux at *,
-  unfold fast_replace_free at *,
-  tauto,
-end
-
-
-theorem T_18_8
-  (P_u P_v : formula)
-  (u v : variable_)
-  (h1 : similar P_u P_v u v) :
-  is_proof ((exists_ u P_u).iff_ (exists_ v P_v)) :=
-begin
-  unfold exists_,
-
-  apply is_deduct.mp_ ((forall_ u P_u.not_).iff_ (forall_ v P_v.not_)),
-  {
-    unfold formula.iff_,
-    unfold formula.and_,
-    SC,
-  },
-  {
-    apply T_18_6,
-    exact similar_not P_u P_v u v h1,
-  }
 end
 
 
