@@ -1758,4 +1758,29 @@ begin
 end
 
 
+theorem gen_right
+  (P Q : formula)
+  (x : variable_)
+  (h1 : ¬ is_free_in x P) :
+  is_proof ((forall_ x (P.imp_ Q)).imp_ (P.imp_ (forall_ x Q))) :=
+begin
+  apply deduction_theorem,
+  apply deduction_theorem,
+  squeeze_simp,
+
+  apply generalization,
+  apply is_deduct.mp_ P,
+  apply spec_id x,
+  apply is_deduct.assume_,
+  squeeze_simp,
+  apply is_deduct.assume_,
+  squeeze_simp,
+  squeeze_simp,
+  split,
+  exact h1,
+  unfold is_free_in,
+  squeeze_simp,
+end
+
+
 #lint
