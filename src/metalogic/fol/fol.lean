@@ -1126,6 +1126,72 @@ begin
 end
 
 
+theorem T_18_5
+  (P : formula)
+  (v : variable_) :
+  is_proof ((forall_ v P).iff_ (exists_ v P.not_).not_) :=
+begin
+  unfold exists_,
+  apply C_18_4 P P.not_.not_ ((forall_ v P).iff_ (forall_ v P).not_.not_),
+  {
+    unfold formula.iff_,
+    unfold formula.and_,
+
+    apply is_repl_of_formula_in_formula.not_,
+    apply is_repl_of_formula_in_formula.imp_,
+    {
+      apply is_repl_of_formula_in_formula.imp_,
+      {
+        apply is_repl_of_formula_in_formula.same_,
+        refl,
+      },
+      {
+        apply is_repl_of_formula_in_formula.not_,
+        apply is_repl_of_formula_in_formula.not_,
+        apply is_repl_of_formula_in_formula.forall_,
+        apply is_repl_of_formula_in_formula.diff_,
+        {
+          refl,
+        },
+        {
+          refl,
+        }
+      },
+    },
+    {
+      apply is_repl_of_formula_in_formula.not_,
+      apply is_repl_of_formula_in_formula.imp_,
+      {
+        apply is_repl_of_formula_in_formula.not_,
+        apply is_repl_of_formula_in_formula.not_,
+        apply is_repl_of_formula_in_formula.forall_,
+        apply is_repl_of_formula_in_formula.diff_,
+        {
+          refl,
+        },
+        {
+          refl,
+        }
+      },
+      {
+        apply is_repl_of_formula_in_formula.same_,
+        refl,
+      }
+    },
+  },
+  {
+    unfold formula.iff_,
+    unfold formula.and_,
+    SC,
+  },
+  {
+    unfold formula.iff_,
+    unfold formula.and_,
+    SC,
+  }
+end
+
+
 theorem T_18_6
   (P_u P_v : formula)
   (u v : variable_)
