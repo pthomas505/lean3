@@ -2107,7 +2107,7 @@ end
 example
   (P : formula)
   (h1 : is_proof_no_sub P) :
-  is_proof_no_sub P :=
+  is_proof_alt P :=
 begin
   induction h1,
   case is_proof_no_sub.prop_true_
