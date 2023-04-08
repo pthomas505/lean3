@@ -1479,7 +1479,7 @@ begin
 end
 
 
-theorem T_19_6
+theorem T_19_6_left
   (P Q : formula)
   (v : variable_) :
   is_proof ((forall_ v (P.iff_ Q)).imp_ ((exists_ v P).imp_ (exists_ v Q))) :=
@@ -1530,6 +1530,42 @@ begin
     unfold is_free_in,
     simp only [eq_self_iff_true, not_true, false_and, not_false_iff],
   }
+end
+
+
+theorem T_19_6_right
+  (P Q : formula)
+  (v : variable_) :
+  is_proof ((forall_ v (P.iff_ Q)).imp_ ((exists_ v Q).imp_ (exists_ v P))) :=
+begin
+  apply deduction_theorem,
+  simp only [set.union_singleton, insert_emptyc_eq],
+  apply is_deduct.mp_ (forall_ v (Q.iff_ P)),
+  {
+    apply proof_imp_deduct,
+    apply T_19_6_left Q P v,
+  },
+  {
+    apply generalization,
+    {
+      apply is_deduct.mp_ (P.iff_ Q),
+      {
+        unfold iff_,
+        unfold and_,
+        SC,
+      },
+      {
+        apply spec_id v,
+        apply is_deduct.assume_,
+        simp only [set.mem_singleton],
+      },
+    },
+    {
+      simp only [set.mem_singleton_iff, forall_eq],
+      unfold is_free_in,
+      simp only [eq_self_iff_true, not_true, false_and, not_false_iff],
+    },
+  },
 end
 
 
