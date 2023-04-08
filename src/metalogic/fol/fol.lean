@@ -1569,6 +1569,30 @@ begin
 end
 
 
+theorem T_19_6
+  (P Q : formula)
+  (v : variable_) :
+  is_proof ((forall_ v (P.iff_ Q)).imp_ ((exists_ v P).iff_ (exists_ v Q))) :=
+begin
+  apply is_deduct.mp_ ((forall_ v (P.iff_ Q)).imp_ ((exists_ v P).imp_ (exists_ v Q))),
+  {
+    apply is_deduct.mp_ ((forall_ v (P.iff_ Q)).imp_ ((exists_ v Q).imp_ (exists_ v P))),
+    {
+      unfold exists_,
+      unfold iff_,
+      unfold and_,
+      SC,
+    },
+    {
+      apply T_19_6_right,
+    }
+  },
+  {
+    apply T_19_6_left,
+  }
+end
+
+
 theorem T_19_TS_21_left
   (P Q : formula)
   (v : variable_)
