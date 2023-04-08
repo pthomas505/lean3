@@ -1417,7 +1417,7 @@ begin
 
   apply generalization,
   {
-    refine rule_C (forall_ v P) (exists_ u P) u {exists_ u (forall_ v P)} _ _ _ _,
+    apply rule_C (forall_ v P) (exists_ u P) u {exists_ u (forall_ v P)},
     {
       apply is_deduct.assume_,
       simp only [set.mem_singleton],
@@ -1487,7 +1487,7 @@ begin
   apply deduction_theorem,
   apply deduction_theorem,
   simp only [set.union_singleton, insert_emptyc_eq],
-  refine rule_C P (exists_ v Q) v {exists_ v P, forall_ v (P.iff_ Q)} _ _ _ _,
+  apply rule_C P (exists_ v Q) v {exists_ v P, forall_ v (P.iff_ Q)},
   {
     apply is_deduct.assume_,
     simp only [set.mem_insert_iff, eq_self_iff_true, true_or],
