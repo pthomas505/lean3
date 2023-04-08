@@ -2104,4 +2104,37 @@ begin
 end
 
 
+example
+  (P : formula)
+  (h1 : is_proof_no_sub P) :
+  is_proof_no_sub P :=
+begin
+  induction h1,
+  case is_proof_no_sub.prop_true_
+  { admit },
+  case is_proof_no_sub.prop_1_ : h1_P h1_Q
+  { admit },
+  case is_proof_no_sub.prop_2_ : h1_P h1_Q h1_R
+  { admit },
+  case is_proof_no_sub.prop_3_ : h1_P h1_Q
+  { admit },
+  case is_proof_no_sub.pred_1_ : h1_v h1_P h1_Q
+  { admit },
+  case is_proof_no_sub.pred_2_ : h1_v h1_P h1_ᾰ
+  { admit },
+  case is_proof_no_sub.eq_1_ : h1_x h1_y h1_ᾰ
+  { admit },
+  case is_proof_no_sub.eq_2_ : h1_x h1_y h1_z
+  { admit },
+  case is_proof_no_sub.eq_3_pred_ : h1_name h1_n h1_xs h1_ys
+  { admit },
+  case is_proof_no_sub.eq_3_eq_ : h1_x_0 h1_x_1 h1_y_0 h1_y_1
+  { admit },
+  case is_proof_no_sub.gen_ : h1_v h1_P h1_ᾰ h1_ih
+  { admit },
+  case is_proof_no_sub.mp_ : h1_P h1_Q h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  { admit },
+end
+
+
 #lint
