@@ -1479,6 +1479,60 @@ begin
 end
 
 
+theorem T_19_6
+  (P Q : formula)
+  (v : variable_) :
+  is_proof ((forall_ v (P.iff_ Q)).imp_ ((exists_ v P).imp_ (exists_ v Q))) :=
+begin
+  apply deduction_theorem,
+  apply deduction_theorem,
+  simp only [set.union_singleton, insert_emptyc_eq],
+  refine rule_C P (exists_ v Q) v {exists_ v P, forall_ v (P.iff_ Q)} _ _ _ _,
+  {
+    apply is_deduct.assume_,
+    simp only [set.mem_insert_iff, eq_self_iff_true, true_or],
+  },
+  {
+    apply exists_intro Q v v,
+    {
+      apply fast_admits_self,
+    },
+    {
+      simp only [fast_replace_free_self],
+      apply is_deduct.mp_ P,
+      {
+        apply is_deduct.mp_ (P.iff_ Q),
+        {
+          unfold iff_,
+          unfold and_,
+          SC,
+        },
+        {
+          apply spec_id v,
+          apply is_deduct.assume_,
+          simp only [set.union_singleton, set.mem_insert_iff, set.mem_singleton, or_true],
+        },
+      },
+      {
+        apply is_deduct.assume_,
+        simp only [set.union_singleton, set.mem_insert_iff, eq_self_iff_true, true_or],
+      },
+    },
+  },
+  {
+    unfold exists_,
+    simp only [set.mem_insert_iff, set.mem_singleton_iff, forall_eq_or_imp, forall_eq],
+    unfold is_free_in,
+    simp only [eq_self_iff_true, not_true, false_and, not_false_iff, and_self],
+  },
+  {
+    unfold exists_,
+    unfold is_free_in,
+    simp only [eq_self_iff_true, not_true, false_and, not_false_iff],
+  }
+end
+
+
 theorem T_19_TS_21_left
   (P Q : formula)
   (v : variable_)
