@@ -1,4 +1,5 @@
 import .prop
+import .replace_free_fun
 
 
 set_option pp.parens true
@@ -1315,6 +1316,26 @@ begin
   {
     apply T_18_6,
     exact similar_not P_u P_v u v h1,
+  }
+end
+
+
+theorem T_18_9
+  (Q Q' : formula)
+  (P_u P_v : formula)
+  (u v : variable_)
+  (Δ : set formula)
+  (h1 : is_deduct Δ Q)
+  (h2 : is_repl_of_formula_in_formula (exists_ u P_u) (exists_ v P_v) Q Q')
+  (h3 : similar P_u P_v u v) :
+  is_deduct Δ Q' :=
+begin
+  apply C_18_4 (exists_ u P_u) (exists_ v P_v) Q Q' Δ h2,
+  {
+    exact T_18_8 P_u P_v u v h3,
+  },
+  {
+    exact h1,
   }
 end
 
