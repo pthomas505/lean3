@@ -1423,7 +1423,7 @@ begin
       simp only [set.mem_singleton],
     },
     {
-      apply exists_intro _ _ u,
+      apply exists_intro P u u,
       {
         apply fast_admits_self,
       },
@@ -1451,6 +1451,30 @@ begin
     unfold formula.exists_,
     unfold is_free_in,
     simp only [eq_self_iff_true, not_true, false_and, and_false, not_false_iff],
+  }
+end
+
+
+theorem T_19_5
+  (P Q : formula)
+  (v : variable_)
+  (h1 : ¬ is_free_in v P) :
+  is_proof ((forall_ v (P.iff_ Q)).imp_ (P.iff_ (forall_ v Q))) :=
+begin
+  apply is_deduct.mp_ ((forall_ v P).iff_ P),
+  {
+    apply is_deduct.mp_ ((forall_ v (P.iff_ Q)).imp_ ((forall_ v P).iff_ (forall_ v Q))),
+    {
+      unfold formula.iff_,
+      unfold formula.and_,
+      SC,
+    },
+    {
+      exact T_18_1 P Q v,
+    },
+  },
+  {
+    exact T_19_1 P v h1,
   }
 end
 
