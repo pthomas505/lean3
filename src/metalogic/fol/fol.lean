@@ -354,7 +354,7 @@ begin
 end
 
 
-example
+lemma is_proof_alt_imp_is_deduct
   (P : formula)
   (h1 : is_proof_alt P) :
   is_deduct ∅ P :=
@@ -428,7 +428,7 @@ begin
 end
 
 
-example
+lemma is_deduct_imp_is_proof_alt
   (P : formula)
   (h1 : is_deduct ∅ P) :
   is_proof_alt P :=
@@ -2120,10 +2120,25 @@ begin
   { admit },
   case is_proof_no_sub.pred_1_ : h1_v h1_P h1_Q
   { admit },
-  case is_proof_no_sub.pred_2_ : h1_v h1_P h1_ᾰ
-  { admit },
-  case is_proof_no_sub.eq_1_ : h1_x h1_y h1_ᾰ
-  { admit },
+  case is_proof_no_sub.pred_2_ : h1_v h1_P h1_1
+  {
+    exact is_proof_alt.pred_3_ h1_v h1_P h1_1,
+  },
+  case is_proof_no_sub.eq_1_ : h1_x h1_y h1_1
+  {
+    apply is_deduct_imp_is_proof_alt,
+    apply exists_intro (eq_ h1_x h1_y) h1_x h1_y ∅,
+    {
+      apply fast_admits_self (eq_ h1_x h1_y),
+    },
+    {
+      unfold fast_replace_free,
+      simp only [eq_self_iff_true, if_true, if_t_t],
+      apply spec_id h1_y,
+      apply is_deduct.axiom_,
+      apply is_axiom.eq_1_,
+    }
+  },
   case is_proof_no_sub.eq_2_ : h1_x h1_y h1_z
   { admit },
   case is_proof_no_sub.eq_3_pred_ : h1_name h1_n h1_xs h1_ys
