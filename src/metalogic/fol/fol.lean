@@ -2119,12 +2119,14 @@ begin
   case is_proof_no_sub.prop_3_ : h1_P h1_Q
   { admit },
   case is_proof_no_sub.pred_1_ : h1_v h1_P h1_Q
-  { admit },
+  {
+    exact is_proof_alt.pred_1_ h1_v h1_P h1_Q,
+  },
   case is_proof_no_sub.pred_2_ : h1_v h1_P h1_1
   {
     exact is_proof_alt.pred_3_ h1_v h1_P h1_1,
   },
-  case is_proof_no_sub.eq_1_ : h1_x h1_y h1_1
+  case is_proof_no_sub.eq_1_ : h1_x h1_y
   {
     apply is_deduct_imp_is_proof_alt,
     apply exists_intro (eq_ h1_x h1_y) h1_x h1_y ∅,
@@ -2140,11 +2142,18 @@ begin
     }
   },
   case is_proof_no_sub.eq_2_ : h1_x h1_y h1_z
-  { admit },
+  {
+    apply is_deduct_imp_is_proof_alt,
+    sorry,
+  },
   case is_proof_no_sub.eq_3_pred_ : h1_name h1_n h1_xs h1_ys
-  { admit },
+  {
+    apply is_proof_alt.eq_2_pred_,
+  },
   case is_proof_no_sub.eq_3_eq_ : h1_x_0 h1_x_1 h1_y_0 h1_y_1
-  { admit },
+  {
+
+  },
   case is_proof_no_sub.gen_ : h1_v h1_P h1_ᾰ h1_ih
   { admit },
   case is_proof_no_sub.mp_ : h1_P h1_Q h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1

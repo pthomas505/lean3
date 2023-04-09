@@ -282,7 +282,6 @@ inductive is_proof_no_sub : formula → Prop
 
 | eq_1_
   (x y : variable_) :
-  ¬ y = x →
   is_proof_no_sub (exists_ x (eq_ x y))
 
 | eq_2_
