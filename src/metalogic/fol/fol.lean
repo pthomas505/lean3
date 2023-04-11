@@ -2123,4 +2123,119 @@ begin
 end
 
 
+example
+  (P : formula)
+  (h1 : is_proof_alt P) :
+  is_proof_no_sub P :=
+begin
+  induction h1,
+  case is_proof_alt.prop_true_
+  {
+    apply is_proof_no_sub.prop_true_,
+  },
+  case is_proof_alt.prop_1_ : h1_P h1_Q
+  {
+    apply is_proof_no_sub.prop_1_,
+  },
+  case is_proof_alt.prop_2_ : h1_P h1_Q h1_R
+  {
+    apply is_proof_no_sub.prop_2_,
+  },
+  case is_proof_alt.prop_3_ : h1_P h1_Q
+  {
+    apply is_proof_no_sub.prop_3_,
+  },
+  case is_proof_alt.pred_1_ : h1_v h1_P h1_Q
+  {
+    apply is_proof_no_sub.pred_1_,
+  },
+  case is_proof_alt.pred_2_ : h1_v h1_t h1_P h1_P' h1_1 h1_2
+  {
+    sorry,
+  },
+  case is_proof_alt.pred_3_ : h1_v h1_P h1_1
+  {
+    exact is_proof_no_sub.pred_2_ h1_v h1_P h1_1,
+  },
+  case is_proof_alt.eq_1_ : h1_x
+  {
+    sorry,
+  },
+  case is_proof_alt.eq_2_pred_ : h1_name h1_n h1_xs h1_ys
+  {
+    apply is_proof_no_sub.eq_3_pred_,
+  },
+  case is_proof_alt.eq_2_eq_ : h1_x_0 h1_x_1 h1_y_0 h1_y_1
+  {
+    apply is_proof_no_sub.eq_3_eq_,
+  },
+  case is_proof_alt.gen_ : h1_v h1_P h1_ᾰ h1_ih
+  {
+    exact is_proof_no_sub.gen_ h1_v h1_P h1_ih,
+  },
+  case is_proof_alt.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
+  {
+    exact is_proof_no_sub.mp_ h1_P h1_Q h1_ih_1 h1_ih_2,
+  },
+end
+
+
+example
+  (P : formula)
+  (h1 : is_proof_no_sub P) :
+  is_proof_alt P :=
+begin
+  induction h1,
+  case is_proof_no_sub.prop_true_
+  {
+    apply is_proof_alt.prop_true_,
+  },
+  case is_proof_no_sub.prop_1_ : h1_P h1_Q
+  {
+    apply is_proof_alt.prop_1_,
+  },
+  case is_proof_no_sub.prop_2_ : h1_P h1_Q h1_R
+  {
+    apply is_proof_alt.prop_2_,
+  },
+  case is_proof_no_sub.prop_3_ : h1_P h1_Q
+  {
+    apply is_proof_alt.prop_3_,
+  },
+  case is_proof_no_sub.pred_1_ : h1_v h1_P h1_Q
+  {
+    apply is_proof_alt.pred_1_,
+  },
+  case is_proof_no_sub.pred_2_ : h1_v h1_P h1_1
+  {
+    exact is_proof_alt.pred_3_ h1_v h1_P h1_1,
+  },
+  case is_proof_no_sub.eq_1_ : h1_x h1_y
+  {
+    apply is_deduct_imp_is_proof_alt,
+    apply exists_intro _ h1_x h1_y,
+    unfold fast_admits,
+    unfold fast_admits_aux,
+    simp only [eq_self_iff_true, true_or, finset.not_mem_empty, not_false_iff, forall_true_left],
+    unfold fast_replace_free,
+    split_ifs;
+    apply spec_id h1_y;
+    apply is_deduct.axiom_;
+    apply is_axiom.eq_1_,    
+  },
+  case is_proof_no_sub.eq_2_ : h1_x h1_y h1_z
+  {
+    sorry,
+  },
+  case is_proof_no_sub.eq_3_pred_ : h1_name h1_n h1_xs h1_ys
+  { admit },
+  case is_proof_no_sub.eq_3_eq_ : h1_x_0 h1_x_1 h1_y_0 h1_y_1
+  { admit },
+  case is_proof_no_sub.gen_ : h1_v h1_P h1_ᾰ h1_ih
+  { admit },
+  case is_proof_no_sub.mp_ : h1_P h1_Q h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  { admit },
+end
+
+
 #lint
