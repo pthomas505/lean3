@@ -369,7 +369,9 @@ example
 begin
   induction P generalizing binders σ,
   case formula.true_ : binders h1
-  { admit },
+  {
+    refl,
+  },
   case formula.pred_ : name args binders σ h1
   {
     unfold fast_replace_free_fun,
@@ -385,8 +387,30 @@ begin
       refl,
     }
   },
-  case formula.eq_ : P_ᾰ P_ᾰ_1 binders σ h1
-  { admit },
+  case formula.eq_ : x y binders σ h1
+  {
+    unfold fast_replace_free_fun,
+    unfold replace_free_fun_aux,
+    congr,
+    {
+      split_ifs,
+      {
+        exact h1 x h,
+      },
+      {
+        refl,
+      },
+    },
+    {
+      split_ifs,
+      {
+        exact h1 y h,
+      },
+      {
+        refl,
+      }
+    }
+  },
   case formula.not_ : P_ᾰ P_ih binders σ h1
   { admit },
   case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders σ h1
