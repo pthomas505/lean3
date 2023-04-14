@@ -1,5 +1,4 @@
 import .prop
-import .replace_free_fun
 
 
 set_option pp.parens true

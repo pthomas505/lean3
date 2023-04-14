@@ -1,5 +1,5 @@
 import .replace_free
-import .function_update_ite
+import metalogic.fol.aux.function_update_ite
 
 import data.finset
 
@@ -422,3 +422,6 @@ begin
     }
   },
 end
+
+
+#lint

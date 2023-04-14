@@ -1,5 +1,5 @@
 import .deduct
-import .function_update_ite
+import metalogic.fol.aux.function_update_ite
 
 
 set_option pp.parens true

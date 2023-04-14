@@ -1,5 +1,5 @@
 import .binders
-import .misc_list
+import metalogic.fol.aux.misc_list
 
 import data.finset
 
