@@ -418,8 +418,18 @@ begin
     congr,
     exact P_ih binders σ h1,
   },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders σ h1
-  { admit },
+  case formula.imp_ : P Q P_ih Q_ih binders σ h1
+  {
+    unfold fast_replace_free_fun,
+    unfold replace_free_fun_aux,
+    congr,
+    {
+      exact P_ih binders σ h1,
+    },
+    {
+      exact Q_ih binders σ h1,
+    }
+  },
   case formula.forall_ : x P P_ih binders σ h1
   {
     unfold fast_replace_free_fun,
