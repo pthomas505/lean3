@@ -10,6 +10,9 @@ set_option pp.parens true
 open formula
 
 
+/--
+  Helper function for replace_free_fun.
+-/
 def replace_free_fun_aux (σ : variable_ → variable_) : finset variable_ → formula → formula
 | _ true_ := true_
 | binders (pred_ name args) :=
@@ -29,6 +32,9 @@ def replace_free_fun_aux (σ : variable_ → variable_) : finset variable_ → f
     forall_ x (replace_free_fun_aux (binders ∪ {x}) P)
 
 
+/--
+  replace_free_fun σ P := The simultaneous replacement of each free occurence of any variable v in the formula P by σ v.
+-/
 def replace_free_fun (σ : variable_ → variable_) (P : formula) : formula := replace_free_fun_aux σ ∅ P
 
 
