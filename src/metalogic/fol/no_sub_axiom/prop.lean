@@ -7,7 +7,7 @@ set_option pp.parens true
 open formula
 
 
-theorem prop_refl
+theorem imp_refl
   (P : formula) :
   is_proof (P.imp_ P) :=
 begin
