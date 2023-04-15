@@ -127,6 +127,14 @@ def similar (P_u P_v : formula) (u v : variable_) : Prop :=
   P_u = fast_replace_free v u P_v
 
 
+example
+  (v t : variable_)
+  (P : formula)
+  (h1 : fast_admits v t P) :
+  is_proof ((forall_ v P).imp_ (fast_replace_free v t P)) :=
+begin
+  sorry,
+end
 
 
 #lint
