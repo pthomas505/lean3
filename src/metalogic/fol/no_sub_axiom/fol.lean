@@ -177,6 +177,30 @@ end
 alias T_17_7 <- generalization
 
 
+theorem T_21_1
+  (x y : variable_) :
+  is_proof ((eq_ x y).imp_ (eq_ y x)) :=
+begin
+  apply is_deduct.mp_ (eq_ y y),
+  {
+    apply is_deduct.mp_ (((eq_ y y).and_ (eq_ x y)).imp_ ((eq_ y x).iff_ (eq_ y y))),
+    {
+      unfold formula.iff_,
+      unfold formula.and_,
+      SC,
+    },
+    {
+      apply is_deduct.axiom_,
+      exact is_axiom.eq_2_eq_ y x y y,
+    }
+  },
+  {
+    apply is_deduct.axiom_,
+    exact is_axiom.eq_1_ y,
+  },
+end
+
+
 example
   (v t : variable_)
   (P : formula)

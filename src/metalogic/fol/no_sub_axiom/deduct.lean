@@ -96,8 +96,8 @@ inductive is_axiom : formula → Prop
   is_axiom (P.imp_ (forall_ v P))
 
 | eq_1_
-  (x y : variable_) :
-  is_axiom (exists_ x (eq_ x y))
+  (x : variable_) :
+  is_axiom (eq_ x x)
 
 /-
 ⊢ ((x_0 = y_0) ∧ ... ∧ (x_n = y_n) ∧ ⊤) →
