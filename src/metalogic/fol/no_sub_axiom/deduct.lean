@@ -89,29 +89,25 @@ inductive is_axiom : formula → Prop
   (v : variable_) (P Q : formula) :
   is_axiom ((forall_ v (P.imp_ Q)).imp_ ((forall_ v P).imp_ (forall_ v Q)))
 
--- ⊢ (∀ v P) → P(t/v)  provided P admits t for v
-| pred_2_
-  (v t : variable_) (P P' : formula) :
-  fast_admits v t P →
-  fast_replace_free v t P = P' →
-  is_axiom ((forall_ v P).imp_ P')
-
 -- ⊢ P → (∀ v P)  provided v is not free in P
-| pred_3_
+| pred_2_
   (v : variable_) (P : formula) :
   ¬ is_free_in v P →
   is_axiom (P.imp_ (forall_ v P))
 
--- ⊢ ∀ v (v = v)
 | eq_1_
-  (v : variable_) :
-  is_axiom (forall_ v (eq_ v v))
+  (x y : variable_) :
+  is_axiom (exists_ x (eq_ x y))
+
+| eq_2_
+  (x y z : variable_) :
+  is_axiom ((eq_ x y).imp_ ((eq_ x z).imp_ (eq_ y z)))
 
 /-
 ⊢ ∀ x_0 ... ∀ x_n ∀ y_0 ... y_n ((x_0 = y_0) ∧ ... ∧ (x_n = y_n) ∧ ⊤) →
     ((pred_ name [x_0 ... x_n] ↔ pred_ name [y_0 ... y_n]))
 -/
-| eq_2_pred_
+| eq_3_pred_
   (name : pred_name_) (n : ℕ) (xs ys : fin n → variable_) :
   is_axiom (Forall_ (list.of_fn xs) (Forall_ (list.of_fn ys)
     ((And_ (list.of_fn (fun (i : fin n), eq_ (xs i) (ys i)))).imp_
@@ -121,7 +117,7 @@ inductive is_axiom : formula → Prop
 ⊢ ∀ x_0 ∀ x_1 ∀ y_0 ∀ y_1 ((x_0 = y_0) ∧ (x_1 = y_1)) →
     ((eq_ x_0 x_1) ↔ (eq_ y_0 y_1))
 -/
-| eq_2_eq_
+| eq_3_eq_
   (x_0 x_1 y_0 y_1 : variable_) :
   is_axiom (forall_ x_0 (forall_ x_1 (forall_ y_0 (forall_ y_1 ((and_ (eq_ x_0 y_0) (eq_ x_1 y_1)).imp_
     ((eq_ x_0 x_1).iff_ (eq_ y_0 y_1)))))))
@@ -192,29 +188,25 @@ inductive is_proof_alt : formula → Prop
   (v : variable_) (P Q : formula) :
   is_proof_alt ((forall_ v (P.imp_ Q)).imp_ ((forall_ v P).imp_ (forall_ v Q)))
 
--- ⊢ (∀ v P) → P(t/v)  provided P admits t for v
-| pred_2_
-  (v t : variable_) (P P' : formula) :
-  fast_admits v t P →
-  fast_replace_free v t P = P' →
-  is_proof_alt ((forall_ v P).imp_ P')
-
 -- ⊢ P → (∀ v P)  provided v is not free in P
-| pred_3_
+| pred_2_
   (v : variable_) (P : formula) :
   ¬ is_free_in v P →
   is_proof_alt (P.imp_ (forall_ v P))
 
--- ⊢ ∀ v (v = v)
 | eq_1_
-  (v : variable_) :
-  is_proof_alt (forall_ v (eq_ v v))
+  (x y : variable_) :
+  is_proof_alt (exists_ x (eq_ x y))
+
+| eq_2_
+  (x y z : variable_) :
+  is_proof_alt ((eq_ x y).imp_ ((eq_ x z).imp_ (eq_ y z)))
 
 /-
 ⊢ ∀ x_0 ... ∀ x_n ∀ y_0 ... y_n ((x_0 = y_0) ∧ ... ∧ (x_n = y_n) ∧ ⊤) →
     ((pred_ name [x_0 ... x_n] ↔ pred_ name [y_0 ... y_n]))
 -/
-| eq_2_pred_
+| eq_3_pred_
   (name : pred_name_) (n : ℕ) (xs ys : fin n → variable_) :
   is_proof_alt (Forall_ (list.of_fn xs) (Forall_ (list.of_fn ys)
     ((And_ (list.of_fn (fun (i : fin n), eq_ (xs i) (ys i)))).imp_
@@ -224,7 +216,7 @@ inductive is_proof_alt : formula → Prop
 ⊢ ∀ x_0 ∀ x_1 ∀ y_0 ∀ y_1 ((x_0 = y_0) ∧ (x_1 = y_1)) →
     ((eq_ x_0 x_1) ↔ (eq_ y_0 y_1))
 -/
-| eq_2_eq_
+| eq_3_eq_
   (x_0 x_1 y_0 y_1 : variable_) :
   is_proof_alt (forall_ x_0 (forall_ x_1 (forall_ y_0 (forall_ y_1 ((and_ (eq_ x_0 y_0) (eq_ x_1 y_1)).imp_
     ((eq_ x_0 x_1).iff_ (eq_ y_0 y_1)))))))
