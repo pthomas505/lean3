@@ -23,7 +23,7 @@ def formula.is_prime : formula → Prop
 
 
 def formula.prime_set : formula → finset formula
-| (true_) := ∅ 
+| (true_) := ∅
 | (pred_ name args) := {pred_ name args}
 | (eq_ x y) := {eq_ x y}
 | (not_ P) := P.prime_set
