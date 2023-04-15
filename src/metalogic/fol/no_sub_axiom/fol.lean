@@ -201,6 +201,30 @@ begin
 end
 
 
+theorem T_21_2
+  (x y z : variable_) :
+  is_proof (((eq_ x y).and_ (eq_ y z)).imp_ (eq_ x z)) :=
+begin
+  apply is_deduct.mp_ (eq_ z z),
+  {
+    apply is_deduct.mp_ (((eq_ x y).and_ (eq_ z z)).imp_ ((eq_ x z).iff_ (eq_ y z))),
+    {
+      unfold formula.iff_,
+      unfold formula.and_,
+      SC,
+    },
+    {
+      apply is_deduct.axiom_,
+      exact is_axiom.eq_2_eq_ x z y z,
+    },
+  },
+  {
+    apply is_deduct.axiom_,
+    exact is_axiom.eq_1_ z,
+  },
+end
+
+
 example
   (v t : variable_)
   (P : formula)
