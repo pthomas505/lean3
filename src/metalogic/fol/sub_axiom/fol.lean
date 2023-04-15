@@ -2078,48 +2078,4 @@ begin
 end
 
 
-theorem gen_right
-  (P Q : formula)
-  (x : variable_)
-  (h1 : ¬ is_free_in x P) :
-  is_proof ((forall_ x (P.imp_ Q)).imp_ (P.imp_ (forall_ x Q))) :=
-begin
-  apply deduction_theorem,
-  apply deduction_theorem,
-  simp only [set.union_singleton, insert_emptyc_eq],
-
-  apply generalization,
-  apply is_deduct.mp_ P,
-  apply spec_id x,
-  apply is_deduct.assume_,
-  simp only [set.mem_insert_iff, set.mem_singleton, or_true],
-  apply is_deduct.assume_,
-  simp only [set.mem_insert_iff, eq_self_iff_true, true_or],
-  simp only [set.mem_insert_iff, set.mem_singleton_iff, forall_eq_or_imp, forall_eq],
-  split,
-  exact h1,
-  unfold is_free_in,
-  simp only [eq_self_iff_true, not_true, false_and, not_false_iff],
-end
-
-
-lemma mm0_ax_6
-  (P : formula)
-  (h1_x h1_y : variable_) :
-  is_proof (forall_ h1_x (eq_ h1_x h1_y).not_).not_ :=
-begin
-  apply exists_intro (eq_ h1_x h1_y) h1_x h1_y ∅,
-  {
-    apply fast_admits_self (eq_ h1_x h1_y),
-  },
-  {
-    unfold fast_replace_free,
-    simp only [eq_self_iff_true, if_true, if_t_t],
-    apply spec_id h1_y,
-    apply is_deduct.axiom_,
-    apply is_axiom.eq_1_,
-  },
-end
-
-
 #lint
