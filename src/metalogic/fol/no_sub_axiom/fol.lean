@@ -456,6 +456,24 @@ begin
 end
 
 
+theorem gen_right
+  (P Q : formula)
+  (x : variable_)
+  (h1 : ¬ is_free_in x P) :
+  is_proof ((forall_ x (P.imp_ Q)).imp_ (P.imp_ (forall_ x Q))) :=
+begin
+  obtain s1 := is_axiom.pred_1_ x P Q,
+  apply is_deduct.mp_ (P.imp_ (forall_ x P)),
+  apply is_deduct.mp_ ((forall_ x (P.imp_ Q)).imp_ ((forall_ x P).imp_ (forall_ x Q))),
+  SC,
+  apply is_deduct.axiom_,
+  exact s1,
+  apply is_deduct.axiom_,
+  apply is_axiom.pred_2_,
+  exact h1,
+end
+
+
 example
   (v t : variable_)
   (P : formula)
