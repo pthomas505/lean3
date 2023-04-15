@@ -477,12 +477,16 @@ end
 theorem gen_imp
   (P Q : formula)
   (x : variable_)
-  (h1 : ¬ is_free_in x (P.imp_ Q)) :
-  is_proof ((P.imp_ Q).imp_ ((forall_ x P).imp_ (forall_ x Q))) :=
+  (h1 : ¬ is_free_in x (P.imp_ Q))
+  (h2 : is_proof (P.imp_ Q)) :
+  is_proof ((forall_ x P).imp_ (forall_ x Q)) :=
 begin
   apply is_deduct.mp_ ((forall_ x (P.imp_ Q)).imp_ ((forall_ x P).imp_ (forall_ x Q))),
   apply is_deduct.mp_ ((P.imp_ Q).imp_ (forall_ x (P.imp_ Q))),
+  apply is_deduct.mp_ (P.imp_ Q),
   SC,
+  apply proof_imp_deduct,
+  exact h2,
   apply is_deduct.axiom_,
   apply is_axiom.pred_2_,
   exact h1,
