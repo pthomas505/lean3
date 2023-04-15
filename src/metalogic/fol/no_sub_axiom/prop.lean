@@ -48,4 +48,19 @@ begin
 end
 
 
+theorem add_assum
+  (P Q : formula)
+  (h1 : is_proof Q) :
+  is_proof (P.imp_ Q) :=
+begin
+  apply is_proof.mp_ Q,
+  {
+    apply is_proof.prop_1_,
+  },
+  {
+    exact h1,
+  }
+end
+
+
 #lint
