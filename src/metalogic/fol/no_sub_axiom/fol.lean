@@ -225,6 +225,237 @@ begin
 end
 
 
+theorem T_21_8
+  (P_r P_s : formula)
+  (r s : variable_)
+  (h1 : is_repl_of_var_in_formula r s P_r P_s)
+  (h2 : ¬ is_bound_in r P_r)
+  (h3 : ¬ is_bound_in s P_r) :
+  is_proof ((eq_ r s).imp_ (P_r.iff_ P_s)) :=
+begin
+  induction h1,
+  case is_repl_of_var_in_formula.true_
+  {
+    unfold formula.iff_,
+    unfold formula.and_,
+    SC,
+  },
+  case is_repl_of_var_in_formula.pred_ : name n args_u args_v h1_1
+  {
+    apply is_deduct.mp_ ((eq_ r s).imp_ ((pred_ name (list.of_fn args_u)).iff_ (pred_ name (list.of_fn args_v)))),
+    {
+      SC,
+    },
+    {
+      apply is_deduct.mp_ ((eq_ r s).imp_ (And_ (list.of_fn (λ (i : fin n), eq_ (args_u i) (args_v i))))),
+      {
+        apply is_deduct.mp_ (((And_ (list.of_fn (λ (i : fin n), eq_ (args_u i) (args_v i))))).imp_ (((pred_ name (list.of_fn args_u)).iff_ (pred_ name (list.of_fn args_v))))),
+        {
+          unfold formula.iff_,
+          unfold formula.and_,
+          SC,
+        },
+        {
+          apply is_deduct.axiom_,
+          exact is_axiom.eq_2_pred_ name n args_u args_v,
+        },
+      },
+      {
+        clear h2,
+        clear h3,
+        unfold And_,
+        induction n,
+        case nat.zero
+        {
+          simp only [list.of_fn_zero, list.foldr_nil],
+          SC,
+        },
+        case nat.succ : n ih
+        {
+          simp only [list.of_fn_succ, list.foldr_cons],
+          apply is_deduct.mp_ ((eq_ r s).imp_ (list.foldr and_ true_ (list.of_fn (λ (i : fin n), eq_ (args_u i.succ) (args_v i.succ))))),
+          {
+            apply is_deduct.mp_ ((eq_ r s).imp_ (eq_ (args_u 0) (args_v 0))),
+            {
+              unfold formula.and_,
+              SC,
+            },
+            {
+              specialize h1_1 0,
+              cases h1_1,
+              {
+                apply is_deduct.mp_ (eq_ (args_u 0) (args_v 0)),
+                {
+                  SC,
+                },
+                {
+                  simp only [h1_1],
+                  apply is_deduct.axiom_,
+                  apply is_axiom.eq_1_,
+                },
+              },
+              {
+                cases h1_1,
+                subst h1_1_left,
+                subst h1_1_right,
+
+                SC,
+              }
+            }
+          },
+          {
+            apply ih,
+            intros i,
+            apply h1_1,
+          },
+        },
+      },
+    },
+  },
+  case is_repl_of_var_in_formula.eq_ : x_u y_u x_v y_v h1_1 h1_2
+  {
+    apply is_deduct.mp_ (((eq_ x_u x_v).and_ (eq_ y_u y_v)).imp_ ((eq_ x_u y_u).iff_ (eq_ x_v y_v))),
+    {
+      apply is_deduct.mp_ ((eq_ r s).imp_ ((eq_ x_u x_v).and_ (eq_ y_u y_v))),
+      {
+        unfold formula.iff_,
+        unfold formula.and_,
+        SC,
+      },
+      {
+        cases h1_1,
+        {
+          subst h1_1,
+          cases h1_2,
+          {
+            subst h1_2,
+            apply is_deduct.mp_ (eq_ x_u x_u),
+            {
+              apply is_deduct.mp_ (eq_ y_u y_u),
+              {
+                unfold formula.and_,
+                SC,
+              },
+              {
+                apply is_deduct.axiom_,
+                exact is_axiom.eq_1_ y_u,
+              }
+            },
+            {
+              apply is_deduct.axiom_,
+              exact is_axiom.eq_1_ x_u,
+            }
+          },
+          {
+            cases h1_2,
+            subst h1_2_left,
+            subst h1_2_right,
+            apply is_deduct.mp_ (eq_ x_u x_u),
+            {
+              unfold formula.and_,
+              SC,
+            },
+            {
+              apply is_deduct.axiom_,
+              exact is_axiom.eq_1_ x_u,
+            }
+          }
+        },
+        {
+          cases h1_1,
+          subst h1_1_left,
+          subst h1_1_right,
+          cases h1_2,
+          {
+            subst h1_2,
+            apply is_deduct.mp_ (eq_ y_u y_u),
+            {
+              unfold formula.and_,
+              SC,
+            },
+            {
+              apply is_deduct.axiom_,
+              exact is_axiom.eq_1_ y_u,
+            }
+          },
+          {
+            cases h1_2,
+            subst h1_2_left,
+            subst h1_2_right,
+
+            unfold formula.and_,
+            SC,
+          }
+        },
+      }
+    },
+    {
+      apply is_deduct.axiom_,
+      exact is_axiom.eq_2_eq_ x_u y_u x_v y_v,
+    }
+  },
+  case is_repl_of_var_in_formula.not_ : P_u P_v h1_1 h1_ih
+  {
+    unfold is_bound_in at h2,
+
+    unfold is_bound_in at h3,
+
+    specialize h1_ih h2 h3,
+    apply is_deduct.mp_ ((eq_ r s).imp_ (P_u.iff_ P_v)),
+    {
+      unfold formula.iff_,
+      unfold formula.and_,
+      SC,
+    },
+    {
+      exact h1_ih,
+    }
+  },
+  case is_repl_of_var_in_formula.imp_ : P_u Q_u P_v Q_v h1_1 h1_2 h1_ih_1 h1_ih_2
+  {
+    unfold is_bound_in at h2,
+    push_neg at h2,
+    cases h2,
+
+    unfold is_bound_in at h3,
+    push_neg at h3,
+    cases h3,
+
+    specialize h1_ih_1 h2_left h3_left,
+    specialize h1_ih_2 h2_right h3_right,
+    apply is_deduct.mp_ ((eq_ r s).imp_ (Q_u.iff_ Q_v)),
+    {
+      apply is_deduct.mp_ ((eq_ r s).imp_ (P_u.iff_ P_v)),
+      {
+        unfold formula.iff_,
+        unfold formula.and_,
+        SC,
+      },
+      {
+        exact h1_ih_1,
+      }
+    },
+    {
+      exact h1_ih_2,
+    }
+  },
+  case is_repl_of_var_in_formula.forall_ : x P_u P_v h1_1 h1_ih
+  {
+    unfold is_bound_in at h2,
+    push_neg at h2,
+    cases h2,
+
+    unfold is_bound_in at h3,
+    push_neg at h3,
+    cases h3,
+
+    specialize h1_ih h2_right h3_right,
+    apply deduction_theorem,
+    sorry,
+  },
+end
+
+
 example
   (v t : variable_)
   (P : formula)
