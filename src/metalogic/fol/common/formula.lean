@@ -80,6 +80,16 @@ def formula.exists_ (x : variable_) (P : formula) : formula := not_ (forall_ x (
 
 
 /--
+  Imp_ [] := ⊤
+
+  Imp_ [P] := P → ⊤
+
+  Imp_ [P_0 ... P_n] := P_0 → ... → P_n → ⊤
+-/
+def formula.Imp_ (l : list formula) : formula := list.foldr formula.imp_ true_ l
+
+
+/--
   And_ [] := ⊤
 
   And_ [P] := P ∧ ⊤
