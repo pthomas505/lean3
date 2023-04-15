@@ -27,4 +27,13 @@ begin
 end
 
 
+theorem imp_unduplicate
+  (P Q : formula)
+  (h1 : is_proof ((P.imp_ P).imp_ Q)) :
+  is_proof (P.imp_ Q) :=
+begin
+
+end
+
+
 #lint
