@@ -214,53 +214,6 @@ begin
 end
 
 
-def mp_def
-  (proof : formula → Prop) :=
-  ∀ (P Q : formula),
-  proof (P.imp_ Q) →
-  proof P →
-  proof Q
-
-def prop_1_def
-  (proof : formula → Prop) :=
-  ∀ (P Q : formula),
-  proof (P.imp_ (Q.imp_ P))
-
-def prop_2_def
-  (proof : formula → Prop) :=
-  ∀ (P Q R : formula),
-  proof ((P.imp_ (Q.imp_ R)).imp_ ((P.imp_ Q).imp_ (P.imp_ R)))
-
-def prop_3_def
-  (proof : formula → Prop) :=
-  ∀ (P Q : formula),
-  proof (((not_ P).imp_ (not_ Q)).imp_ (Q.imp_ P))
-
-
-theorem T_13_5'
-  (proof : formula → Prop)
-  (mp_ : mp_def proof)
-  (prop_1_ : prop_1_def proof)
-  (prop_2_ : prop_2_def proof)
-  (P : formula) :
-  proof (P.imp_ P) :=
-begin
-  apply mp_ (P.imp_ (P.imp_ P)),
-  {
-    apply mp_ (P.imp_ ((P.imp_ P).imp_ P)),
-    {
-      exact prop_2_ P (P.imp_ P) P,
-    },
-    {
-      exact prop_1_ P (P.imp_ P),
-    }
-  },
-  {
-    exact prop_1_ P P,
-  },
-end
-
-
 theorem T_13_5
   (P : formula) :
   is_proof (P.imp_ P) :=
@@ -409,37 +362,6 @@ begin
 end
 
 alias T_14_3 <- deduction_theorem
-
-
-theorem T_13_6'
-  (proof : formula → Prop)
-  (mp_ : mp_def proof)
-  (prop_1_ : prop_1_def proof)
-  (prop_2_ : prop_2_def proof)
-  (prop_3_ : prop_3_def proof)
-  (P Q : formula) :
-  proof (P.not_.imp_ (P.imp_ Q)) :=
-begin
-  apply mp_ (P.not_.imp_ (Q.not_.imp_ P.not_)),
-  {
-    apply mp_ (P.not_.imp_ ((Q.not_.imp_ P.not_).imp_ (P.imp_ Q))),
-    {
-      apply prop_2_,
-    },
-    {
-      apply mp_ ((Q.not_.imp_ P.not_).imp_ (P.imp_ Q)),
-      {
-        apply prop_1_,
-      },
-      {
-        apply prop_3_,
-      }
-    }
-  },
-  {
-    apply prop_1_,
-  }
-end
 
 
 theorem T_13_6
