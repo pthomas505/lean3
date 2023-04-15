@@ -194,15 +194,11 @@ inductive is_proof_alt : formula → Prop
   (x y : variable_) :
   is_proof_alt (exists_ x (eq_ x y))
 
-| eq_2_
-  (x y z : variable_) :
-  is_proof_alt ((eq_ x y).imp_ ((eq_ x z).imp_ (eq_ y z)))
-
 /-
 ⊢ ∀ x_0 ... ∀ x_n ∀ y_0 ... y_n ((x_0 = y_0) ∧ ... ∧ (x_n = y_n) ∧ ⊤) →
     ((pred_ name [x_0 ... x_n] ↔ pred_ name [y_0 ... y_n]))
 -/
-| eq_3_pred_
+| eq_2_pred_
   (name : pred_name_) (n : ℕ) (xs ys : fin n → variable_) :
   is_proof_alt (Forall_ (list.of_fn xs) (Forall_ (list.of_fn ys)
     ((And_ (list.of_fn (fun (i : fin n), eq_ (xs i) (ys i)))).imp_
@@ -212,7 +208,7 @@ inductive is_proof_alt : formula → Prop
 ⊢ ∀ x_0 ∀ x_1 ∀ y_0 ∀ y_1 ((x_0 = y_0) ∧ (x_1 = y_1)) →
     ((eq_ x_0 x_1) ↔ (eq_ y_0 y_1))
 -/
-| eq_3_eq_
+| eq_2_eq_
   (x_0 x_1 y_0 y_1 : variable_) :
   is_proof_alt (forall_ x_0 (forall_ x_1 (forall_ y_0 (forall_ y_1 ((and_ (eq_ x_0 y_0) (eq_ x_1 y_1)).imp_
     ((eq_ x_0 x_1).iff_ (eq_ y_0 y_1)))))))
