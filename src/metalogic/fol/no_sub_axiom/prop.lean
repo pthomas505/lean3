@@ -29,10 +29,22 @@ end
 
 theorem imp_unduplicate
   (P Q : formula)
-  (h1 : is_proof ((P.imp_ P).imp_ Q)) :
+  (h1 : is_proof (P.imp_ (P.imp_ Q))) :
   is_proof (P.imp_ Q) :=
 begin
-
+  apply is_proof.mp_ (P.imp_ P),
+  {
+    apply is_proof.mp_ (P.imp_ (P.imp_ Q)),
+    {
+      apply is_proof.prop_2_,
+    },
+    {
+      exact h1,
+    }
+  },
+  {
+    exact imp_refl P,
+  }
 end
 
 
