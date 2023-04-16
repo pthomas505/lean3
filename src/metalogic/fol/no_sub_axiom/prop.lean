@@ -63,6 +63,22 @@ begin
 end
 
 
+theorem imp_add_assum
+  (P Q R : formula)
+  (h1 : is_proof (Q.imp_ R)) :
+  is_proof ((P.imp_ Q).imp_ (P.imp_ R)) :=
+begin
+  apply is_proof.mp_ (P.imp_ (Q.imp_ R)),
+  {
+    exact is_proof.prop_2_ P Q R,
+  },
+  {
+    apply add_assum,
+    exact h1,
+  },
+end
+
+
 theorem imp_swap
   (P Q R : formula)
   (h1 : is_proof (P.imp_ (Q.imp_ R))) :
