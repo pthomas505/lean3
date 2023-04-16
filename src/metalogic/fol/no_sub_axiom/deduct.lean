@@ -12,6 +12,10 @@ open formula
 -/
 inductive is_proof : formula → Prop
 
+-- ⊢ ⊤
+| prop_true_ :
+  is_proof true_
+
 -- ⊢ P → (Q → P)
 | prop_1_
   (P Q : formula) :
@@ -22,10 +26,10 @@ inductive is_proof : formula → Prop
   (P Q R : formula) :
   is_proof ((P.imp_ (Q.imp_ R)).imp_ ((P.imp_ Q).imp_ (P.imp_ R)))
 
--- ⊢ (((P → ⊥) → ⊥) → P)
+-- ⊢ (¬ P → ¬ Q) → (Q → P)
 | prop_3_
   (P Q : formula) :
-  is_proof (((P.imp_ false_).imp_ false_).imp_ P)
+  is_proof (((not_ P).imp_ (not_ Q)).imp_ (Q.imp_ P))
 
 -- ⊢ (∀ v (P → Q)) → ((∀ v P) → (∀ v Q))
 | pred_1_
