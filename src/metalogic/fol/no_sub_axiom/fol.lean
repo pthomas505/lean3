@@ -27,4 +27,44 @@ begin
 end
 
 
+theorem gen_right
+  (P Q : formula)
+  (x : variable_)
+  (h1 : ¬ is_free_in x P) :
+  is_proof ((forall_ x (P.imp_ Q)).imp_ (P.imp_ (forall_ x Q))) :=
+begin
+  apply is_proof.mp_ (P.imp_ (forall_ x P)),
+  {
+    apply is_proof.mp_ ((forall_ x (P.imp_ Q)).imp_ ((forall_ x P).imp_ (forall_ x Q))),
+    {
+      sorry,
+    },
+    {
+      exact is_proof.pred_1_ x P Q,
+    }
+  },
+  {
+    apply is_proof.pred_2_,
+    exact h1,
+  }
+end
+
+
+theorem gen_imp
+  (P Q : formula)
+  (x : variable_)
+  (h1 : is_proof (P.imp_ Q)) :
+  is_proof ((forall_ x P).imp_ (forall_ x Q)) :=
+begin
+  apply is_proof.mp_ (forall_ x (P.imp_ Q)),
+  {
+    apply is_proof.pred_1_,
+  },
+  {
+    apply is_proof.gen_,
+    exact h1,
+  }
+end
+
+
 #lint

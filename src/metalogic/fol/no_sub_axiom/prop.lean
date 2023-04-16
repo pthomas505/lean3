@@ -63,4 +63,13 @@ begin
 end
 
 
+theorem imp_swap
+  (P Q R : formula)
+  (h1 : is_proof (P.imp_ (Q.imp_ R))) :
+  is_proof (Q.imp_ (P.imp_ R)) :=
+begin
+  sorry,
+end
+
+
 #lint
