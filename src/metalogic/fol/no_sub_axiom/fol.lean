@@ -86,6 +86,7 @@ theorem exists_left
   (h1 : ¬ is_free_in x Q) :
   is_proof ((forall_ x (P.imp_ Q)).imp_ ((exists_ x P).imp_ Q)) :=
 begin
+  apply imp_swap,
 
 end
 

@@ -95,6 +95,21 @@ begin
 end
 
 
+theorem imp_insert
+  (P Q R : formula)
+  (h1 : is_proof (P.imp_ R)) :
+  is_proof (P.imp_ (Q.imp_ R)) :=
+begin
+  apply imp_trans P R (Q.imp_ R),
+  {
+    exact h1,
+  },
+  {
+    apply is_proof.prop_1_,
+  }
+end
+
+
 theorem imp_swap
   (P Q R : formula)
   (h1 : is_proof (P.imp_ (Q.imp_ R))) :
