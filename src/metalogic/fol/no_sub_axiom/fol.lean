@@ -80,4 +80,14 @@ begin
 end
 
 
+theorem exists_left
+  (P Q : formula)
+  (x : variable_)
+  (h1 : ¬ is_free_in x Q) :
+  is_proof ((forall_ x (P.imp_ Q)).imp_ ((exists_ x P).imp_ Q)) :=
+begin
+
+end
+
+
 #lint
