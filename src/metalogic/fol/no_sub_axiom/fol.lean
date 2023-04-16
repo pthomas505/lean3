@@ -65,4 +65,19 @@ begin
 end
 
 
+theorem gen_right
+  (P Q : formula)
+  (x : variable_)
+  (h1 : ¬ is_free_in x P)
+  (h2 : is_proof (P.imp_ Q)) :
+  is_proof (P.imp_ (forall_ x Q)) :=
+begin
+  apply is_proof.mp_,
+  apply gen_right_th,
+  exact h1,
+  apply is_proof.gen_,
+  exact h2,
+end
+
+
 #lint
