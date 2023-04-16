@@ -115,7 +115,19 @@ theorem imp_swap
   (h1 : is_proof (P.imp_ (Q.imp_ R))) :
   is_proof (Q.imp_ (P.imp_ R)) :=
 begin
-  sorry,
+  apply imp_trans,
+  {
+    exact is_proof.prop_1_ Q P,
+  },
+  {
+    apply is_proof.mp_ (P.imp_ (Q.imp_ R)),
+    {
+      apply is_proof.prop_2_,
+    },
+    {
+      exact h1,
+    },
+  },
 end
 
 
