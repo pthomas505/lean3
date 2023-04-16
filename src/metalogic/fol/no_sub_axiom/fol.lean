@@ -40,7 +40,11 @@ begin
   have s2 : is_proof ((forall_ x (P.imp_ Q)).imp_ ((forall_ x P).imp_ (forall_ x Q))),
   exact is_proof.pred_1_ x P Q,
 
-  sorry,
+  apply imp_swap,
+  apply imp_trans,
+  exact s1,
+  apply imp_swap,
+  exact s2,
 end
 
 
