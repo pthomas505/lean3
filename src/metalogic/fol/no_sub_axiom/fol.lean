@@ -11,18 +11,20 @@ theorem eq_symm
   (x y : variable_) :
   is_proof ((eq_ x y).imp_ (eq_ y x)) :=
 begin
-  apply is_proof.mp_ (eq_ y y),
+  apply is_proof.mp_ (eq_ x x),
   {
-    apply is_proof.mp_ ((eq_ y y).imp_ ((eq_ x y).imp_ ((eq_ y x).imp_ (eq_ y y)))),
+    apply imp_swap,
+    apply is_proof.mp_ (eq_ x x),
     {
-      sorry,
+      apply imp_swap,
+      apply is_proof.eq_2_eq_ x x y x,
     },
     {
-      exact is_proof.eq_2_eq_ y x y y,
-    }
+      apply is_proof.eq_1_,
+    },
   },
   {
-    exact is_proof.eq_1_ y,
+    apply is_proof.eq_1_,
   },
 end
 
@@ -86,8 +88,7 @@ theorem exists_left
   (h1 : ¬ is_free_in x Q) :
   is_proof ((forall_ x (P.imp_ Q)).imp_ ((exists_ x P).imp_ Q)) :=
 begin
-  apply imp_swap,
-
+  sorry,
 end
 
 
