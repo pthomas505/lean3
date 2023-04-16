@@ -27,7 +27,7 @@ begin
 end
 
 
-theorem gen_right
+theorem gen_right_th
   (P Q : formula)
   (x : variable_)
   (h1 : ¬ is_free_in x P) :
@@ -44,7 +44,7 @@ begin
 end
 
 
-theorem gen_imp
+theorem genimp
   (P Q : formula)
   (x : variable_)
   (h1 : is_proof (P.imp_ Q)) :
