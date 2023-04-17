@@ -29,6 +29,27 @@ begin
 end
 
 
+theorem eq_trans
+  (x y z : variable_) :
+  is_proof ((eq_ x y).imp_ ((eq_ y z).imp_ (eq_ x z))) :=
+begin
+  apply imp_trans,
+  {
+    apply eq_symm x y,
+  },
+  {
+    apply is_proof.mp_,
+    {
+      apply imp_swap,
+      apply is_proof.eq_2_eq_,
+    },
+    {
+      apply is_proof.eq_1_,
+    }
+  }
+end
+
+
 theorem gen_right_th
   (P Q : formula)
   (x : variable_)
