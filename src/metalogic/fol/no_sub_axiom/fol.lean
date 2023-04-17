@@ -33,12 +33,12 @@ theorem eq_trans
   (x y z : variable_) :
   is_proof ((eq_ x y).imp_ ((eq_ y z).imp_ (eq_ x z))) :=
 begin
-  apply imp_trans,
+  apply imp_trans (eq_ x y) (eq_ y x) ((eq_ y z).imp_ (eq_ x z)),
   {
     apply eq_symm x y,
   },
   {
-    apply is_proof.mp_,
+    apply is_proof.mp_ (eq_ z z),
     {
       apply imp_swap,
       apply is_proof.eq_2_eq_,
