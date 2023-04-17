@@ -145,4 +145,20 @@ begin
 end
 
 
+theorem imp_add_concl
+  (P Q R : formula)
+  (h1 : is_proof (P.imp_ Q)) :
+  is_proof ((Q.imp_ R).imp_ (P.imp_ R)) :=
+begin
+  apply is_proof.mp_ (P.imp_ Q),
+  {
+    apply imp_swap,
+    exact imp_trans_th P Q R,
+  },
+  {
+    exact h1,
+  }
+end
+
+
 #lint
