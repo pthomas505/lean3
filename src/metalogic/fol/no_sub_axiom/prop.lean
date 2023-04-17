@@ -131,4 +131,18 @@ begin
 end
 
 
+theorem imp_trans_th
+  (P Q R : formula) :
+  is_proof ((Q.imp_ R).imp_ ((P.imp_ Q).imp_ (P.imp_ R))) :=
+begin
+  apply imp_trans (Q.imp_ R) (P.imp_ (Q.imp_ R)) ((P.imp_ Q).imp_ (P.imp_ R)),
+  {
+    exact is_proof.prop_1_ (Q.imp_ R) P,
+  },
+  {
+    exact is_proof.prop_2_ P Q R,
+  }
+end
+
+
 #lint
