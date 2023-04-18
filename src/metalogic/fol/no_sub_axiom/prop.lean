@@ -161,4 +161,19 @@ begin
 end
 
 
+theorem imp_swap_th
+  (P Q R : formula) :
+  is_proof ((P.imp_ (Q.imp_ R)).imp_ (Q.imp_ (P.imp_ R))) :=
+begin
+  apply imp_trans (P.imp_ (Q.imp_ R)) ((P.imp_ Q).imp_ (P.imp_ R)) (Q.imp_ (P.imp_ R)),
+  {
+    apply is_proof.prop_2_ P Q R,
+  },
+  {
+    apply imp_add_concl,
+    apply is_proof.prop_1_,
+  }
+end
+
+
 #lint
