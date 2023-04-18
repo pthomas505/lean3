@@ -176,4 +176,25 @@ begin
 end
 
 
+theorem imp_swap2
+  (P Q R S T U : formula)
+  (h1 : is_proof ((P.imp_ (Q.imp_ R)).imp_ (S.imp_ (T.imp_ U)))) :
+  is_proof ((Q.imp_ (P.imp_ R)).imp_ (T.imp_ (S.imp_ U))) :=
+begin
+  apply imp_trans (Q.imp_ (P.imp_ R)) (P.imp_ (Q.imp_ R)) (T.imp_ (S.imp_ U)),
+  {
+    exact imp_swap_th Q P R,
+  },
+  {
+    apply imp_trans (P.imp_ (Q.imp_ R)) (S.imp_ (T.imp_ U)) (T.imp_ (S.imp_ U)),
+    {
+      exact h1,
+    },
+    {
+      exact imp_swap_th S T U,
+    },
+  },
+end
+
+
 #lint
