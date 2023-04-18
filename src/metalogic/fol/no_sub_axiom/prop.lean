@@ -237,6 +237,22 @@ begin
 end
 
 
+theorem axiom_doubleneg
+  (P : formula) :
+  is_proof (((P.imp_ false_).imp_ false_).imp_ P) :=
+begin
+  sorry,
+end
+
+
+theorem axiom_not
+  (P : formula) :
+  is_proof (P.not_.iff_ (P.imp_ false_)) :=
+begin
+  sorry,
+end
+
+
 theorem iff_imp1
   (P Q : formula)
   (h1 : is_proof (P.iff_ Q)) :
@@ -255,14 +271,6 @@ theorem iff_imp2
 begin
   unfold formula.iff_ at h1,
   unfold formula.and_ at h1,
-  sorry,
-end
-
-
-theorem ax_not
-  (P : formula) :
-  is_proof (P.not_.iff_ (P.imp_ false_)) :=
-begin
   sorry,
 end
 
