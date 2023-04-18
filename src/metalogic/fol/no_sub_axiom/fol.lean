@@ -17,14 +17,14 @@ begin
     apply is_proof.mp_ (eq_ x x),
     {
       apply imp_swap,
-      apply is_proof.eq_2_eq_ x x y x,
+      apply is_proof.eq_3_eq_ x x y x,
     },
     {
-      apply is_proof.eq_1_,
+      apply is_proof.eq_2_,
     },
   },
   {
-    apply is_proof.eq_1_,
+    apply is_proof.eq_2_,
   },
 end
 
@@ -41,10 +41,10 @@ begin
     apply is_proof.mp_ (eq_ z z),
     {
       apply imp_swap,
-      apply is_proof.eq_2_eq_,
+      apply is_proof.eq_3_eq_,
     },
     {
-      apply is_proof.eq_1_,
+      apply is_proof.eq_2_,
     }
   }
 end
@@ -175,6 +175,34 @@ begin
   {
     apply is_proof.gen_,
     exact h2,
+  },
+end
+
+
+theorem subspec
+  (P Q : formula)
+  (x t : variable_)
+  (h1 : ¬ x = t)
+  (h2 : ¬ is_free_in x Q)
+  (h3 : is_proof ((eq_ x t).imp_ (P.imp_ Q))) :
+  is_proof ((forall_ x P).imp_ Q) :=
+begin
+  apply is_proof.mp_,
+  {
+    apply imp_swap,
+    apply imp_trans,
+    {
+      apply genimp,
+      apply imp_swap,
+      exact h3,
+    },
+    {
+      apply exists_left_th,
+      exact h2,
+    }
+  },
+  {
+    exact is_proof.eq_1_ x t h1,
   },
 end
 

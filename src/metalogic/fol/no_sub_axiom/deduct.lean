@@ -43,6 +43,11 @@ inductive is_proof : formula → Prop
   is_proof (P.imp_ (forall_ v P))
 
 | eq_1_
+  (x t : variable_) :
+  ¬ x = t →
+  is_proof (exists_ x (eq_ x t))
+
+| eq_2_
   (x : variable_) :
   is_proof (eq_ x x)
 
@@ -50,7 +55,7 @@ inductive is_proof : formula → Prop
 ⊢ (x_0 = y_0) → ... → (x_n = y_n) →
     pred_ name [x_0 ... x_n] → pred_ name [y_0 ... y_n]
 -/
-| eq_2_pred_
+| eq_3_pred_
   (name : pred_name_) (n : ℕ) (xs ys : fin n → variable_) :
   is_proof
     (list.foldr formula.imp_ ((pred_ name (list.of_fn xs)).imp_ (pred_ name (list.of_fn ys))) (list.of_fn (fun (i : fin n), eq_ (xs i) (ys i))))
@@ -59,7 +64,7 @@ inductive is_proof : formula → Prop
 ⊢ (x_0 = y_0) → (x_1 = y_1) →
     (eq_ x_0 x_1) → (eq_ y_0 y_1)
 -/
-| eq_2_eq_
+| eq_3_eq_
   (x_0 x_1 y_0 y_1 : variable_) :
   is_proof ((eq_ x_0 y_0).imp_ ((eq_ x_1 y_1).imp_
     ((eq_ x_0 x_1).imp_ (eq_ y_0 y_1))))
