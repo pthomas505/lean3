@@ -112,16 +112,5 @@ begin
   sorry,
 end
 
--- imp_trans2
-
---iff_imp2
-
--- axiom doubleneg
-
--- axiom_not
-
--- axiom_exists
-
-
 
 #lint
