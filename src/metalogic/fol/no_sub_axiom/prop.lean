@@ -214,4 +214,26 @@ begin
 end
 
 
+theorem iff_imp1
+  (P Q : formula)
+  (h1 : is_proof (P.iff_ Q)) :
+  is_proof (P.imp_ Q) :=
+begin
+  unfold formula.iff_ at h1,
+  unfold formula.and_ at h1,
+  sorry,
+end
+
+
+theorem iff_imp2
+  (P Q : formula)
+  (h1 : is_proof (P.iff_ Q)) :
+  is_proof (Q.imp_ P) :=
+begin
+  unfold formula.iff_ at h1,
+  unfold formula.and_ at h1,
+  sorry,
+end
+
+
 #lint
