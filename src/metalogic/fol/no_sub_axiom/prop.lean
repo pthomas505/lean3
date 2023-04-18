@@ -214,6 +214,29 @@ begin
 end
 
 
+theorem imp_trans2
+  (P Q R S : formula)
+  (h1 : is_proof (P.imp_ (Q.imp_ R)))
+  (h2 : is_proof (R.imp_ S)) :
+  is_proof (P.imp_ (Q.imp_ S)) :=
+begin
+  apply is_proof.mp_ (P.imp_ (Q.imp_ R)),
+  {
+    apply imp_add_assum,
+    apply is_proof.mp_ (R.imp_ S),
+    {
+      exact imp_trans_th Q R S,
+    },
+    {
+      exact h2,
+    }
+  },
+  {
+    exact h1,
+  }
+end
+
+
 theorem iff_imp1
   (P Q : formula)
   (h1 : is_proof (P.iff_ Q)) :
@@ -232,6 +255,14 @@ theorem iff_imp2
 begin
   unfold formula.iff_ at h1,
   unfold formula.and_ at h1,
+  sorry,
+end
+
+
+theorem ax_not
+  (P : formula) :
+  is_proof (P.not_.iff_ (P.imp_ false_)) :=
+begin
   sorry,
 end
 
