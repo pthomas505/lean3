@@ -207,4 +207,39 @@ begin
 end
 
 
+theorem subalpha
+  (P Q : formula)
+  (x y : variable_)
+  (h1 : ¬ is_free_in x Q)
+  (h2 : ¬ is_free_in y P)
+  (h3 : is_proof ((eq_ x y).imp_ (P.imp_ Q))) :
+  is_proof ((forall_ x P).imp_ (forall_ y Q)) :=
+begin
+  by_cases c1 : x = y,
+  {
+    subst c1,
+    apply genimp,
+    apply is_proof.mp_,
+    {
+      exact h3,
+    },
+    {
+      exact is_proof.eq_2_ x,
+    }
+  },
+  {
+    apply gen_right,
+    {
+      unfold is_free_in,
+      push_neg,
+      intros a1,
+      exact h2,
+    },
+    {
+      exact subspec P Q x y c1 h1 h3,
+    }
+  }
+end
+
+
 #lint
