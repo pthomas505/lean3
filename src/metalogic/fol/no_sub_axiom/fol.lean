@@ -107,9 +107,57 @@ theorem exists_left
   (P Q : formula)
   (x : variable_)
   (h1 : ¬ is_free_in x Q) :
-  is_proof ((forall_ x (P.imp_ Q)).imp_ ((exists_ x P).imp_ Q)) :=
+  is_proof ( (forall_ x (P.imp_ Q)).imp_ ((exists_ x P).imp_ Q) ) :=
 begin
-  sorry,
+  apply imp_swap,
+  apply imp_trans,
+  {
+    apply imp_trans,
+    {
+      apply iff_imp1,
+      apply axiom_not,
+    },
+    {
+      apply imp_add_concl,
+      {
+        apply genimp,
+        {
+          apply iff_imp2,
+          apply axiom_not,
+        },
+      },
+    }
+  },
+  {
+    apply imp_swap,
+    apply imp_trans2,
+    {
+      apply imp_trans,
+      {
+        apply imp_trans,
+        {
+          apply genimp,
+          apply imp_swap,
+          exact imp_trans_th P Q false_,
+        },
+        {
+          apply gen_right_th,
+          unfold formula.false_,
+          unfold is_free_in,
+          push_neg,
+          simp only [not_false_iff, and_true],
+          exact h1,
+        },
+      },
+      {
+        apply imp_swap,
+        exact imp_trans_th (imp_ Q false_) (forall_ x (imp_ P false_)) false_,
+      },
+    },
+    {
+      exact axiom_doubleneg Q,
+    },
+  },
 end
 
 
