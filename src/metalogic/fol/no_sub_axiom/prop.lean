@@ -197,4 +197,21 @@ begin
 end
 
 
+theorem right_mp
+  (P Q R : formula)
+  (h1 : is_proof (P.imp_ (Q.imp_ R)))
+  (h2 : is_proof (P.imp_ Q)) :
+  is_proof (P.imp_ R) :=
+begin
+  apply imp_unduplicate,
+  apply imp_trans P Q (P.imp_ R),
+  {
+    exact h2,
+  },
+  {
+    exact imp_swap P Q R h1,
+  }
+end
+
+
 #lint
