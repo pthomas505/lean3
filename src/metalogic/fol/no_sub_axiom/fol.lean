@@ -103,11 +103,11 @@ begin
 end
 
 
-theorem exists_left
+theorem exists_left_th
   (P Q : formula)
   (x : variable_)
   (h1 : ¬ is_free_in x Q) :
-  is_proof ( (forall_ x (P.imp_ Q)).imp_ ((exists_ x P).imp_ Q) ) :=
+  is_proof ((forall_ x (P.imp_ Q)).imp_ ((exists_ x P).imp_ Q)) :=
 begin
   apply imp_swap,
   apply imp_trans,
@@ -157,6 +157,24 @@ begin
     {
       exact axiom_doubleneg Q,
     },
+  },
+end
+
+
+theorem exists_left
+  (P Q : formula)
+  (x : variable_)
+  (h1 : ¬ is_free_in x Q)
+  (h2 : is_proof (P.imp_ Q)) :
+  is_proof ((exists_ x P).imp_ Q) :=
+begin
+  apply is_proof.mp_,
+  {
+    exact exists_left_th P Q x h1,
+  },
+  {
+    apply is_proof.gen_,
+    exact h2,
   },
 end
 
