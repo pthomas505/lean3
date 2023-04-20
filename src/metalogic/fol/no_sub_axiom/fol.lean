@@ -1,5 +1,7 @@
 import .prop
 
+import metalogic.fol.common.admits
+
 
 set_option pp.parens true
 
@@ -239,6 +241,137 @@ begin
       exact subspec P Q x y c1 h1 h3,
     }
   }
+end
+
+
+lemma aux_1
+  {α : Type}
+  (l : list α)
+  (f : α → α) :
+  list.map f l = list.of_fn (fun i, f (l.nth_le i i.2)) :=
+begin
+  induction l,
+  case list.nil
+  {
+    simp only [list.map_nil, list.of_fn_zero],
+  },
+  case list.cons : hd tl ih
+  {
+    simp only [list.map, list.length, list.nth_le, fin.cast_refl, order_iso.refl_apply, fin.coe_succ, list.of_fn_succ, fin.coe_zero,
+  eq_self_iff_true, true_and],
+    exact ih,
+  },
+end
+
+
+theorem aux_2
+  (A B C : formula)
+  (h1 : is_proof (A.imp_ (B.imp_ C))) :
+  is_proof ((B.imp_ A).imp_ (B.imp_ C)) :=
+begin
+  sorry,
+end
+
+
+theorem aux_2'
+  (A B C D : formula)
+  (h1 : is_proof D)
+  (h2 : is_proof (A.imp_ (B.imp_ C))) :
+  is_proof ((D.imp_ A).imp_ (B.imp_ C)) :=
+begin
+  sorry,
+end
+
+
+lemma aux_3
+  (P : formula)
+  (v t : variable_)
+  (n : ℕ)
+  (g : fin n → variable_) :
+  is_proof ((list.foldr imp_ P (list.of_fn (fun (i : fin n), eq_ (g i) (ite (g i = v) t (g i))))).imp_ ((eq_ v t).imp_ P)) :=
+begin
+  induction n,
+  case nat.zero
+  {
+    simp only [list.of_fn_zero, list.foldr_nil],
+    apply is_proof.prop_1_,
+  },
+  case nat.succ : n ih
+  {
+    specialize ih (fun (i : fin n), g i.succ),
+    simp only at ih,
+
+    simp only [list.of_fn_succ, list.foldr_cons],
+    split_ifs,
+    {
+      subst h,
+      apply aux_2,
+      exact ih,
+    },
+    {
+      apply aux_2',
+      apply is_proof.eq_2_,
+      exact ih,
+    }
+  },
+end
+
+
+lemma aux_3'
+  (P : formula)
+  (v t : variable_)
+  (n : ℕ)
+  (g : fin n → variable_)
+  (h1 : is_proof ((list.foldr imp_ P (list.of_fn (fun (i : fin n), eq_ (g i) (ite (g i = v) t (g i))))))) :
+  is_proof ((eq_ v t).imp_ P) :=
+begin
+  apply is_proof.mp_ ((list.foldr imp_ P (list.of_fn (fun (i : fin n), eq_ (g i) (ite (g i = v) t (g i)))))),
+  apply aux_3,
+  exact h1,
+end
+
+
+example
+  (P : formula)
+  (v t : variable_)
+  (h1 : fast_admits v t P)
+  (h2 : ¬ (v = t)) :
+  is_proof ((forall_ v P).imp_ (fast_replace_free v t P)) :=
+begin
+  induction P,
+  case formula.true_
+  { admit },
+  case formula.pred_ : name args
+  {
+    apply subspec (pred_ name args) (fast_replace_free v t (pred_ name args)) v t h2,
+    {
+      sorry,
+    },
+    {
+      unfold fast_replace_free,
+
+      set f := fun (x : variable_), ite (x = v) t x,
+
+      obtain s1 := is_proof.eq_3_pred_ name args.length
+        (fun (i : fin args.length), args.nth_le i i.property)
+        (fun (i : fin args.length), f (args.nth_le i i.property)),
+
+      simp only [list.map_of_fn, list.of_fn_nth_le] at s1,
+      rewrite <- aux_1 at s1,
+
+      apply aux_3' ((pred_ name args).imp_ (pred_ name (list.map f args))) v t args.length (fun (i : fin args.length), args.nth_le (↑i) i.property),
+      simp only,
+      apply s1,
+    },
+  },
+  case formula.eq_ : P_ᾰ P_ᾰ_1
+  { admit },
+  case formula.not_ : P_ᾰ P_ih
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
+  { admit },
+  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih
+  { admit },
 end
 
 
