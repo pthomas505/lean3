@@ -275,4 +275,15 @@ begin
 end
 
 
+theorem aux_2
+  (P Q R : formula)
+  (h1 : is_proof (P.imp_ (Q.imp_ R))) :
+  is_proof ((Q.imp_ P).imp_ (Q.imp_ R)) := sorry
+
+theorem aux_2'
+  (P Q R S : formula)
+  (h1 : is_proof S)
+  (h2 : is_proof (P.imp_ (Q.imp_ R))) :
+  is_proof ((S.imp_ P).imp_ (Q.imp_ R)) := sorry
+
 #lint

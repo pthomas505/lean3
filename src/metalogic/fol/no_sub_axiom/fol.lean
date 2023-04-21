@@ -209,6 +209,75 @@ begin
 end
 
 
+lemma blah
+  (P : formula)
+  (v t : variable_)
+  (args : list variable_)
+  (σ : variable_ → variable_) :
+  is_proof ((list.foldr imp_ P (list.map (fun (x : variable_), eq_ x (ite (x = v) t x)) args)).imp_ ((eq_ v t).imp_ P)) :=
+begin
+  induction args,
+  case list.nil
+  {
+    simp only [list.map_nil, list.foldr_nil],
+    apply is_proof.prop_1_,
+  },
+  case list.cons : args_hd args_tl args_ih
+  {
+    simp only [list.map, list.foldr_cons],
+    split_ifs,
+    {
+      subst h,
+      apply aux_2,
+      exact args_ih,
+    },
+    {
+      apply aux_2',
+      {
+        apply is_proof.eq_2_,
+      },
+      {
+        exact args_ih,
+      }
+    }
+  },
+end
+
+
+example
+  (v t : variable_)
+  (P : formula)
+  (h1 : ¬ v = t) :
+  is_proof ((eq_ v t).imp_ (P.imp_ (fast_replace_free v t P))) :=
+begin
+  induction P,
+  case formula.true_
+  { admit },
+  case formula.pred_ : name args
+  {
+    unfold fast_replace_free,
+
+    set σ := fun (x : variable_), ite (x = v) t x,
+
+    apply is_proof.mp_ (list.foldr imp_ ((pred_ name args).imp_ (pred_ name (list.map σ args))) (list.map (fun (x : variable_), eq_ x (σ x)) args)),
+    {
+      exact blah ((pred_ name args).imp_ (pred_ name (list.map σ args))) v t args σ,
+    },
+    {
+      exact is_proof.eq_3_pred_' name args σ,
+    }
+  },
+  case formula.eq_ : P_ᾰ P_ᾰ_1
+  { admit },
+  case formula.not_ : P_ᾰ P_ih
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
+  { admit },
+  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih
+  { admit },
+end
+
+
 theorem subalpha
   (P Q : formula)
   (x y : variable_)
@@ -261,25 +330,6 @@ begin
   eq_self_iff_true, true_and],
     exact ih,
   },
-end
-
-
-theorem aux_2
-  (A B C : formula)
-  (h1 : is_proof (A.imp_ (B.imp_ C))) :
-  is_proof ((B.imp_ A).imp_ (B.imp_ C)) :=
-begin
-  sorry,
-end
-
-
-theorem aux_2'
-  (A B C D : formula)
-  (h1 : is_proof D)
-  (h2 : is_proof (A.imp_ (B.imp_ C))) :
-  is_proof ((D.imp_ A).imp_ (B.imp_ C)) :=
-begin
-  sorry,
 end
 
 

@@ -60,6 +60,16 @@ inductive is_proof : formula → Prop
   is_proof
     (list.foldr formula.imp_ ((pred_ name (list.of_fn xs)).imp_ (pred_ name (list.of_fn ys))) (list.of_fn (fun (i : fin n), eq_ (xs i) (ys i))))
 
+| eq_3_pred_'
+  (name : pred_name_)
+  (args : list variable_)
+  (σ : variable_ → variable_) :
+  is_proof (
+    list.foldr
+      formula.imp_
+      ((pred_ name args).imp_ (pred_ name (args.map σ)))
+      (args.map (fun (x : variable_), (eq_ x (σ x)))))
+
 /-
 ⊢ (x_0 = y_0) → (x_1 = y_1) →
     (eq_ x_0 x_1) → (eq_ y_0 y_1)
