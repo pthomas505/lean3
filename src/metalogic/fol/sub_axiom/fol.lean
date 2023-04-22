@@ -25,7 +25,6 @@ is_repl_of_var_in_formula_fun u v P_u P_v := True if and only if P_v is the resu
 def is_repl_of_var_in_formula_fun (u v : variable_) : formula → formula → Prop
 | true_ true_ := true
 | (pred_ name_u args_u) (pred_ name_v args_v) := name_u = name_v ∧ is_repl_of_var_in_list_fun u v args_u args_v
-| (eq_ x_u y_u) (eq_ x_v y_v) := (x_u = x_v ∨ (x_u = u ∧ x_v = v)) ∧ (y_u = y_v ∨ (y_u = u ∧ y_v = v))
 | (not_ P_u) (not_ P_v) := is_repl_of_var_in_formula_fun P_u P_v
 | (imp_ P_u Q_u) (imp_ P_v Q_v) := is_repl_of_var_in_formula_fun P_u P_v ∧ is_repl_of_var_in_formula_fun Q_u Q_v
 | (forall_ x P_u) (forall_ x' P_v) := x = x' ∧ is_repl_of_var_in_formula_fun P_u P_v
@@ -45,13 +44,6 @@ inductive is_repl_of_var_in_formula (u v : variable_) : formula → formula → 
   (args_u args_v : fin n → variable_) :
   (∀ (i : fin n), (args_u i = args_v i) ∨ (args_u i = u ∧ args_v i = v)) →
   is_repl_of_var_in_formula (pred_ name (list.of_fn args_u)) (pred_ name (list.of_fn args_v))
-
-| eq_
-  (x_u y_u : variable_)
-  (x_v y_v : variable_) :
-  (x_u = x_v) ∨ (x_u = u ∧ x_v = v) →
-  (y_u = y_v) ∨ (y_u = u ∧ y_v = v) →
-  is_repl_of_var_in_formula (eq_ x_u y_u) (eq_ x_v y_v)
 
 | not_
   (P_u P_v : formula) :
@@ -1884,96 +1876,6 @@ begin
       },
     },
   },
-  case is_repl_of_var_in_formula.eq_ : x_u y_u x_v y_v h1_1 h1_2
-  {
-    apply is_deduct.mp_ (((eq_ x_u x_v).and_ (eq_ y_u y_v)).imp_ ((eq_ x_u y_u).iff_ (eq_ x_v y_v))),
-    {
-      apply is_deduct.mp_ ((eq_ r s).imp_ ((eq_ x_u x_v).and_ (eq_ y_u y_v))),
-      {
-        unfold formula.iff_,
-        unfold formula.and_,
-        SC,
-      },
-      {
-        cases h1_1,
-        {
-          subst h1_1,
-          cases h1_2,
-          {
-            subst h1_2,
-            apply is_deduct.mp_ (eq_ x_u x_u),
-            {
-              apply is_deduct.mp_ (eq_ y_u y_u),
-              {
-                unfold formula.and_,
-                SC,
-              },
-              {
-                apply spec_id y_u,
-                apply is_deduct.axiom_,
-                exact is_axiom.eq_1_ y_u,
-              }
-            },
-            {
-              apply spec_id x_u,
-              apply is_deduct.axiom_,
-              exact is_axiom.eq_1_ x_u,
-            }
-          },
-          {
-            cases h1_2,
-            subst h1_2_left,
-            subst h1_2_right,
-            apply is_deduct.mp_ (eq_ x_u x_u),
-            {
-              unfold formula.and_,
-              SC,
-            },
-            {
-              apply spec_id x_u,
-              apply is_deduct.axiom_,
-              exact is_axiom.eq_1_ x_u,
-            }
-          }
-        },
-        {
-          cases h1_1,
-          subst h1_1_left,
-          subst h1_1_right,
-          cases h1_2,
-          {
-            subst h1_2,
-            apply is_deduct.mp_ (eq_ y_u y_u),
-            {
-              unfold formula.and_,
-              SC,
-            },
-            {
-              apply spec_id y_u,
-              apply is_deduct.axiom_,
-              exact is_axiom.eq_1_ y_u,
-            }
-          },
-          {
-            cases h1_2,
-            subst h1_2_left,
-            subst h1_2_right,
-
-            unfold formula.and_,
-            SC,
-          }
-        },
-      }
-    },
-    {
-      apply spec_id y_v,
-      apply spec_id x_v,
-      apply spec_id y_u,
-      apply spec_id x_u,
-      apply is_deduct.axiom_,
-      exact is_axiom.eq_2_eq_ x_u y_u x_v y_v,
-    }
-  },
   case is_repl_of_var_in_formula.not_ : P_u P_v h1_1 h1_ih
   {
     unfold is_bound_in at h2,
@@ -2044,7 +1946,9 @@ begin
         {
           apply T_19_TS_21_left,
           {
+            unfold formula.eq_,
             unfold is_free_in,
+            simp only [list.to_finset_cons, list.to_finset_nil, insert_emptyc_eq, finset.mem_insert, finset.mem_singleton],
             push_neg,
             split,
             {

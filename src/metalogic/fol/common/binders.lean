@@ -23,7 +23,6 @@ An occurrence of a variable $v$ in a formula $P$ is bound if and only if it occu
 def formula.var_set : formula → finset variable_
 | (true_) := ∅
 | (pred_ name args) := args.to_finset
-| (eq_ x y) := {x, y}
 | (not_ P) := P.var_set
 | (imp_ P Q) := P.var_set ∪ Q.var_set
 | (forall_ x P) := P.var_set ∪ {x}
@@ -34,7 +33,6 @@ def formula.var_set : formula → finset variable_
 def occurs_in (v : variable_) : formula → Prop
 | (true_) := false
 | (pred_ name args) := v ∈ args.to_finset
-| (eq_ x y) := v = x ∨ v = y
 | (not_ P) := occurs_in P
 | (imp_ P Q) := occurs_in P ∨ occurs_in Q
 | (forall_ x P) := v = x ∨ occurs_in P
@@ -46,7 +44,6 @@ def occurs_in (v : variable_) : formula → Prop
 def formula.bound_var_set : formula → finset variable_
 | (true_) := ∅
 | (pred_ name args) := ∅
-| (eq_ x y) := ∅
 | (not_ P) := P.bound_var_set
 | (imp_ P Q) := P.bound_var_set ∪ Q.bound_var_set
 | (forall_ x P) := P.bound_var_set ∪ {x}
@@ -57,7 +54,6 @@ def formula.bound_var_set : formula → finset variable_
 def is_bound_in (v : variable_) : formula → Prop
 | (true_) := false
 | (pred_ name args) := false
-| (eq_ x y) := false
 | (not_ P) := is_bound_in P
 | (imp_ P Q) := is_bound_in P ∨ is_bound_in Q
 | (forall_ x P) := v = x ∨ is_bound_in P
@@ -69,7 +65,6 @@ def is_bound_in (v : variable_) : formula → Prop
 def formula.free_var_set : formula → finset variable_
 | (true_) := ∅
 | (pred_ name args) := args.to_finset
-| (eq_ x y) := {x, y}
 | (not_ P) := P.free_var_set
 | (imp_ P Q) := P.free_var_set ∪ Q.free_var_set
 | (forall_ x P) := P.free_var_set \ {x}
@@ -80,7 +75,6 @@ def formula.free_var_set : formula → finset variable_
 def is_free_in (v : variable_) : formula → Prop
 | (true_) := false
 | (pred_ name args) := v ∈ args.to_finset
-| (eq_ x y) := v = x ∨ v = y
 | (not_ P) := is_free_in P
 | (imp_ P Q) := is_free_in P ∨ is_free_in Q
 | (forall_ x P) := ¬ v = x ∧ is_free_in P
@@ -95,12 +89,6 @@ begin
   case [formula.true_, formula.pred_]
   {
     all_goals {refl},
-  },
-  case formula.eq_ : x y
-  {
-    unfold occurs_in,
-    unfold formula.var_set,
-    simp only [finset.mem_insert, finset.mem_singleton],
   },
   case formula.not_ : P P_ih
   {
@@ -129,7 +117,7 @@ lemma is_bound_in_iff_mem_bound_var_set
   is_bound_in v P ↔ v ∈ P.bound_var_set :=
 begin
   induction P,
-  case [formula.true_, formula.pred_, formula.eq_]
+  case [formula.true_, formula.pred_]
   {
     all_goals {refl},
   },
@@ -163,12 +151,6 @@ begin
   case [formula.true_, formula.pred_ : name args]
   {
     all_goals {refl},
-  },
-  case formula.eq_ : x y
-  {
-    unfold is_free_in,
-    unfold formula.free_var_set,
-    simp only [finset.mem_insert, finset.mem_singleton],
   },
   case formula.not_ : P P_ih
   {

@@ -20,11 +20,6 @@ inductive is_free_sub : formula → variable_ → variable_ → formula → Prop
   (v t : variable_) :
     is_free_sub (pred_ name args) v t (pred_ name (args.map (fun (x : variable_), if x = v then t else x)))
 
-| eq_
-  (x y : variable_)
-  (v t : variable_) :
-    is_free_sub (eq_ x y) v t (eq_ (if x = v then t else x) (if y = v then t else y))
-
 | not_
   (P : formula)
   (v t : variable_)
@@ -75,11 +70,6 @@ begin
   {
     unfold fast_replace_free,
     apply is_free_sub.pred_,
-  },
-  case formula.eq_ : x y binders h1
-  {
-    unfold fast_replace_free,
-    apply is_free_sub.eq_,
   },
   case formula.not_ : P P_ih binders h1
   {
@@ -190,12 +180,6 @@ begin
     intros a1,
     exact h2,
   },
-  case is_free_sub.eq_ : h1_1_x h1_1_y h1_1_v h1_1_t binders h2
-  {
-    unfold fast_admits_aux,
-    intros a1,
-    exact h2,
-  },
   case is_free_sub.not_ : h1_1_P h1_1_v h1_1_t h1_1_P' h1_1_1 h1_1_ih binders h2
   {
     unfold fast_admits_aux,
@@ -263,10 +247,6 @@ begin
     refl,
   },
   case is_free_sub.pred_ : h1_name h1_args h1_v h1_t
-  {
-    unfold fast_replace_free,
-  },
-  case is_free_sub.eq_ : h1_x h1_y h1_v h1_t
   {
     unfold fast_replace_free,
   },

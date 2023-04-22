@@ -267,8 +267,6 @@ begin
       exact is_proof.eq_3_pred_' name args σ,
     }
   },
-  case formula.eq_ : P_ᾰ P_ᾰ_1
-  { admit },
   case formula.not_ : P_ᾰ P_ih
   { admit },
   case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
@@ -414,8 +412,6 @@ begin
       apply s1,
     },
   },
-  case formula.eq_ : P_ᾰ P_ᾰ_1
-  { admit },
   case formula.not_ : P_ᾰ P_ih
   { admit },
   case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1

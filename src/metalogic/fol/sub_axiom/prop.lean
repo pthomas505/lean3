@@ -16,7 +16,6 @@ open formula
 def formula.is_prime : formula → Prop
 | (true_) := false
 | (pred_ name args) := true
-| (eq_ x y) := true
 | (not_ P) := false
 | (imp_ P Q) := false
 | (forall_ x P) := true
@@ -25,7 +24,6 @@ def formula.is_prime : formula → Prop
 def formula.prime_set : formula → finset formula
 | (true_) := ∅
 | (pred_ name args) := {pred_ name args}
-| (eq_ x y) := {eq_ x y}
 | (not_ P) := P.prime_set
 | (imp_ P Q) := P.prime_set ∪ Q.prime_set
 | (forall_ x P) := {forall_ x P}
@@ -34,7 +32,6 @@ def formula.prime_set : formula → finset formula
 def formula.subst_prime (σ : formula → formula) : formula → formula
 | (true_) := true_
 | (pred_ name args) := σ (pred_ name args)
-| (eq_ x y) := σ (eq_ x y)
 | (not_ P) := not_ P.subst_prime
 | (imp_ P Q) := imp_ P.subst_prime Q.subst_prime
 | (forall_ x P) := σ (forall_ x P)
@@ -46,7 +43,6 @@ def valuation : Type := formula → bool
 def formula.eval_prime (val : valuation) : formula → bool
 | (true_) := bool.tt
 | (pred_ name args) := val (pred_ name args)
-| (eq_ x y) := val (eq_ x y)
 | (not_ P) := ! P.eval_prime
 | (imp_ P Q) := (! P.eval_prime) || Q.eval_prime
 | (forall_ x P) := val (forall_ x P)
@@ -74,7 +70,7 @@ begin
       contradiction,
     }
   },
-  case [formula.pred_, formula.eq_, formula.forall_]
+  case [formula.pred_, formula.forall_]
   {
     all_goals
     {
@@ -95,7 +91,7 @@ begin
   {
     unfold formula.eval_prime,
   },
-  case [formula.pred_, formula.eq_, formula.forall_]
+  case [formula.pred_, formula.forall_]
   {
     all_goals
     {
@@ -148,7 +144,7 @@ lemma eval_prime_subst_prime_eq_eval_prime_eval_prime
     P.eval_prime (fun (Q : formula), (σ Q).eval_prime val) :=
 begin
   induction P,
-  case [formula.true_, formula.pred_, formula.eq_, formula.forall_]
+  case [formula.true_, formula.pred_, formula.forall_]
   {
     all_goals
     {
@@ -810,7 +806,7 @@ begin
 
     contradiction,
   },
-  case [formula.pred_, formula.eq_, formula.forall_]
+  case [formula.pred_, formula.forall_]
   {
     all_goals
     {
@@ -866,20 +862,6 @@ begin
   case formula.pred_ : name args
   {
     let P := pred_ name args,
-
-    unfold formula.prime_set at h1,
-    simp only [finset.coe_singleton, set.singleton_subset_iff] at h1,
-
-    unfold eval_prime_ff_to_not,
-    unfold formula.eval_prime,
-    apply is_deduct.assume_,
-    simp only [finset.coe_image, set.mem_image, finset.mem_coe],
-    apply exists.intro P,
-    tauto,
-  },
-  case formula.eq_ : x y
-  {
-    let P := eq_ x y,
 
     unfold formula.prime_set at h1,
     simp only [finset.coe_singleton, set.singleton_subset_iff] at h1,
@@ -1037,7 +1019,7 @@ begin
     unfold eval_prime_ff_to_not,
     tauto,
   },
-  case [formula.pred_, formula.eq_, formula.forall_]
+  case [formula.pred_, formula.forall_]
   {
     all_goals
     {
@@ -1074,7 +1056,7 @@ begin
     unfold eval_prime_ff_to_not,
     tauto,
   },
-  case [formula.pred_, formula.eq_, formula.forall_]
+  case [formula.pred_, formula.forall_]
   {
     all_goals
     {

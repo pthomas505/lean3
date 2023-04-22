@@ -45,7 +45,6 @@ instance pred_name_.has_repr : has_repr pred_name_ := has_repr.mk pred_name_.rep
 inductive formula : Type
 | true_ : formula
 | pred_ : pred_name_ → list variable_ → formula
-| eq_ : variable_ → variable_ → formula
 | not_ : formula → formula
 | imp_ : formula → formula → formula
 | forall_ : variable_ → formula → formula
@@ -77,6 +76,11 @@ def formula.iff_ (P Q : formula) : formula := (P.imp_ Q).and_ (Q.imp_ P)
   ∃ x P := ~ ∀ x ~ P
 -/
 def formula.exists_ (x : variable_) (P : formula) : formula := not_ (forall_ x (not_ P))
+
+
+def formula.eq_ (x y : variable_) : formula := pred_ (pred_name_.mk "=") [x, y]
+
+def formula.mem_ (x y : variable_) : formula := pred_ (pred_name_.mk "∈") [x, y]
 
 
 /--
@@ -111,7 +115,6 @@ def formula.Forall_ (xs : list variable_) (P : formula) : formula := list.foldr 
 def formula.repr : formula → string
 | true_ := "⊤"
 | (pred_ name args) := sformat!"({name.repr} {args.repr})"
-| (eq_ x y) := sformat!"({x.repr} = {y.repr})"
 | (not_ P) := sformat!"(¬ {P.repr})"
 | (imp_ P Q) := sformat!"({P.repr} → {Q.repr})"
 | (forall_ x P) := sformat!"(∀ {x.repr}. {P.repr})"

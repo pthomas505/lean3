@@ -24,9 +24,6 @@ def admits_aux (v u : variable_) : finset variable_ → formula → Prop
 | binders (pred_ name args) :=
     (v ∈ args ∧ v ∉ binders) → -- if there is a free occurrence of v in P
     u ∉ binders -- then it does not become a bound occurrence of u in P(u/v)
-| binders (eq_ x y) :=
-    ((v = x ∨ v = y) ∧ (v ∉ binders)) →
-    u ∉ binders
 | binders (not_ P) := admits_aux binders P
 | binders (imp_ P Q) := admits_aux binders P ∧ admits_aux binders Q
 | binders (forall_ x P) := admits_aux (binders ∪ {x}) P
@@ -50,9 +47,6 @@ def fast_admits_aux (v u : variable_) : finset variable_ → formula → Prop
 | binders (pred_ name args) :=
     v ∈ args → -- if there is a free occurrence of v in P
     u ∉ binders -- then it does not become a bound occurrence of u in P(u/v)
-| binders (eq_ x y) :=
-    (v = x ∨ v = y) →
-    u ∉ binders
 | binders (not_ P) := fast_admits_aux binders P
 | binders (imp_ P Q) := fast_admits_aux binders P ∧ fast_admits_aux binders Q
 | binders (forall_ x P) := v = x ∨ fast_admits_aux (binders ∪ {x}) P
@@ -77,7 +71,6 @@ def fast_admits (v u : variable_) (P : formula) : Prop :=
 inductive bool_formula : Type
 | true_ : bool_formula
 | pred_ : pred_name_ → list bool → bool_formula
-| eq_ : bool → bool → bool_formula
 | not_ : bool_formula → bool_formula
 | imp_ : bool_formula → bool_formula → bool_formula
 | forall_ : bool → bool_formula → bool_formula
@@ -89,7 +82,6 @@ inductive bool_formula : Type
 def to_is_bound_aux : finset variable_ → formula → bool_formula
 | _ true_ := bool_formula.true_
 | binders (pred_ name args) := bool_formula.pred_ name (args.map (fun (v : variable_), v ∈ binders))
-| binders (eq_ x y) := bool_formula.eq_ (x ∈ binders) (y ∈ binders)
 | binders (not_ P) := bool_formula.not_ (to_is_bound_aux binders P)
 | binders (imp_ P Q) := bool_formula.imp_ (to_is_bound_aux binders P) (to_is_bound_aux binders Q)
 | binders (forall_ x P) := bool_formula.forall_ true (to_is_bound_aux (binders ∪ {x}) P)
@@ -117,7 +109,7 @@ begin
   {
     unfold fast_admits_aux,
   },
-  case [formula.pred_, formula.eq_, formula.not_, formula.imp_]
+  case [formula.pred_, formula.not_, formula.imp_]
   {
     all_goals
     {
@@ -164,7 +156,7 @@ begin
   {
     unfold admits_aux,
   },
-  case [formula.pred_, formula.eq_, formula.not_, formula.imp_]
+  case [formula.pred_, formula.not_, formula.imp_]
   {
     all_goals
     {
@@ -195,7 +187,7 @@ begin
   {
     unfold admits_aux,
   },
-  case [formula.pred_, formula.eq_, formula.not_, formula.imp_]
+  case [formula.pred_, formula.not_, formula.imp_]
   {
     all_goals
     {
@@ -257,7 +249,7 @@ begin
   {
     unfold fast_admits_aux,
   },
-  case [formula.pred_, formula.eq_, formula.not_, formula.imp_]
+  case [formula.pred_, formula.not_, formula.imp_]
   {
     all_goals
     {
@@ -314,7 +306,7 @@ begin
     unfold fast_admits_aux,
     tauto,
   },
-  case [formula.eq_, formula.not_, formula.imp_, formula.forall_]
+  case [formula.not_, formula.imp_, formula.forall_]
   {
     all_goals
     {
@@ -354,11 +346,6 @@ begin
     unfold fast_admits_aux,
   },
   case formula.pred_ : name args binders h2
-  {
-    unfold fast_admits_aux,
-    tauto,
-  },
-  case formula.eq_ : x y binders h2
   {
     unfold fast_admits_aux,
     tauto,
@@ -428,12 +415,6 @@ begin
     unfold fast_replace_free,
   },
   case formula.pred_ : name args binders h2
-  {
-    unfold fast_replace_free,
-    unfold fast_admits_aux,
-    tauto,
-  },
-  case formula.eq_ : x y binders h2
   {
     unfold fast_replace_free,
     unfold fast_admits_aux,
@@ -532,41 +513,6 @@ begin
       contradiction,
     }
   },
-  case formula.eq_ : x y binders
-  {
-    unfold occurs_in at h1,
-    push_neg at h1,
-    cases h1,
-
-    unfold replace_free_aux,
-    unfold fast_admits_aux,
-    intros a1,
-    cases a1,
-    {
-      by_cases c1 : x = v ∧ x ∉ binders,
-      {
-        cases c1,
-        subst c1_left,
-        exact c1_right,
-      },
-      {
-        simp only [if_neg c1] at a1,
-        contradiction,
-      }
-    },
-    {
-      by_cases c1 : y = v ∧ y ∉ binders,
-      {
-        cases c1,
-        subst c1_left,
-        exact c1_right,
-      },
-      {
-        simp only [if_neg c1] at a1,
-        contradiction,
-      }
-    },
-  },
   case formula.not_ : P P_ih binders
   {
     unfold occurs_in at h1,
@@ -629,14 +575,6 @@ begin
     simp only [finset.mem_union],
     tauto,
   },
-  case formula.eq_ : x y S h1
-  {
-    unfold fast_admits_aux at h1,
-
-    unfold fast_admits_aux,
-    simp only [finset.mem_union],
-    tauto,
-  },
   case formula.not_ : P P_ih S h1
   {
     unfold fast_admits_aux at h1,
@@ -682,14 +620,6 @@ begin
     unfold fast_admits_aux,
   },
   case formula.pred_ : name args S h1
-  {
-    unfold fast_admits_aux at h1,
-    simp only [finset.mem_union] at h1,
-
-    unfold fast_admits_aux,
-    tauto,
-  },
-  case formula.eq_ : x y S h1
   {
     unfold fast_admits_aux at h1,
     simp only [finset.mem_union] at h1,
@@ -745,14 +675,6 @@ begin
 
     unfold is_free_in at h2,
     simp only [list.mem_to_finset] at h2,
-
-    tauto,
-  },
-  case formula.eq_ : x y binders h1
-  {
-    unfold fast_admits_aux at h1,
-
-    unfold is_free_in at h2,
 
     tauto,
   },
@@ -867,25 +789,6 @@ begin
       }
     },
   },
-  case formula.eq_ : x y binders h1 h2
-  {
-    unfold fast_admits_aux at h2,
-
-    unfold fast_replace_free,
-    unfold to_is_bound_aux,
-    simp only [bool.to_bool_eq],
-    split;
-    {
-      split_ifs,
-      {
-        subst h,
-        tauto,
-      },
-      {
-        refl,
-      }
-    }
-  },
   case formula.not_ : P P_ih binders h1 h2
   {
     unfold fast_admits_aux at h2,
@@ -980,27 +883,6 @@ begin
       {
         tauto,
       }
-    },
-  },
-  case formula.eq_ : x y binders h1 h2
-  {
-    unfold fast_replace_free at h2,
-    unfold to_is_bound_aux at h2,
-    simp only [bool.to_bool_eq] at h2,
-    cases h2,
-
-    unfold fast_admits_aux,
-    intros a1 contra,
-    cases a1,
-    {
-      subst a1,
-      simp only [eq_self_iff_true, if_true] at h2_left,
-      tauto,
-    },
-    {
-      subst a1,
-      simp only [eq_self_iff_true, if_true] at h2_right,
-      tauto,
     },
   },
   case formula.not_ : P P_ih binders h1 h2
@@ -1114,7 +996,7 @@ begin
     unfold admits_aux,
     tauto,
   },
-  case [formula.eq_, formula.not_, formula.imp_]
+  case [formula.not_, formula.imp_]
   {
     all_goals
     {
@@ -1169,11 +1051,6 @@ begin
     unfold admits_aux,
   },
   case formula.pred_ : name args binders h2
-  {
-    unfold admits_aux,
-    tauto,
-  },
-  case formula.eq_ : x y binders h2
   {
     unfold admits_aux,
     tauto,
@@ -1258,42 +1135,6 @@ begin
       contradiction,
     }
   },
-  case formula.eq_ : x y binders
-  {
-    unfold occurs_in at h1,
-    push_neg at h1,
-    cases h1,
-
-    unfold replace_free_aux,
-    unfold admits_aux,
-    intros a1,
-    cases a1,
-    cases a1_left,
-    {
-      by_cases c1 : x = v ∧ x ∉ binders,
-      {
-        cases c1,
-        subst c1_left,
-        exact c1_right,
-      },
-      {
-        simp only [if_neg c1] at a1_left,
-        contradiction,
-      }
-    },
-    {
-      by_cases c1 : y = v ∧ y ∉ binders,
-      {
-        cases c1,
-        subst c1_left,
-        exact c1_right,
-      },
-      {
-        simp only [if_neg c1] at a1_left,
-        contradiction,
-      }
-    },
-  },
   case formula.not_ : P P_ih binders
   {
     unfold occurs_in at h1,
@@ -1356,14 +1197,6 @@ begin
     simp only [finset.mem_union, and_imp],
     tauto,
   },
-  case formula.eq_ : x y S h1
-  {
-    unfold admits_aux at h1,
-
-    unfold admits_aux,
-    simp only [finset.mem_union, and_imp],
-    tauto,
-  },
   case formula.not_ : P P_ih S h1
   {
     unfold admits_aux at h1,
@@ -1403,14 +1236,6 @@ begin
     unfold admits_aux,
   },
   case formula.pred_ : name args S h1
-  {
-    unfold admits_aux at h1,
-    simp only [finset.mem_union, and_imp] at h1,
-
-    unfold admits_aux,
-    tauto,
-  },
-  case formula.eq_ : x y S h1
   {
     unfold admits_aux at h1,
     simp only [finset.mem_union, and_imp] at h1,
@@ -1466,14 +1291,6 @@ begin
 
     unfold is_free_in at h2,
     simp only [list.mem_to_finset] at h2,
-
-    tauto,
-  },
-  case formula.eq_ : x y binders h1
-  {
-    unfold admits_aux at h1,
-
-    unfold is_free_in at h2,
 
     tauto,
   },

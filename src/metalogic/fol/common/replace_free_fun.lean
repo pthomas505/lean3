@@ -19,10 +19,6 @@ def replace_free_fun_aux (σ : variable_ → variable_) : finset variable_ → f
     pred_
     name
     (args.map (fun (x : variable_), if x ∈ binders then x else σ x))
-| binders (eq_ x y) :=
-    eq_
-    (if x ∈ binders then x else σ x)
-    (if y ∈ binders then y else σ y)
 | binders (not_ P) := not_ (replace_free_fun_aux binders P)
 | binders (imp_ P Q) :=
     imp_
@@ -44,7 +40,6 @@ def replace_free_fun (σ : variable_ → variable_) (P : formula) : formula := r
 def fast_replace_free_fun : (variable_ → variable_) → formula → formula
 | _ true_ := true_
 | σ (pred_ name args) := pred_ name (args.map σ)
-| σ (eq_ x y) := eq_ (σ x) (σ y)
 | σ (not_ P) := not_ (fast_replace_free_fun σ P)
 | σ (imp_ P Q) := imp_ (fast_replace_free_fun σ P) (fast_replace_free_fun σ Q)
 | σ (forall_ x P) := forall_ x (fast_replace_free_fun (function.update_ite σ x x) P)
@@ -64,10 +59,6 @@ begin
   {
     unfold fast_replace_free_fun,
     simp only [list.map_id, eq_self_iff_true, and_self],
-  },
-  case formula.eq_ : x y
-  {
-    refl,
   },
   case formula.not_ : P P_ih
   {
@@ -105,10 +96,6 @@ begin
     refl,
   },
   case formula.pred_ : name args
-  {
-    refl,
-  },
-  case formula.eq_ : x y
   {
     refl,
   },
@@ -194,23 +181,6 @@ begin
     intros x a1,
     exact h1 x a1,
   },
-  case formula.eq_ : x y σ σ' h1
-  {
-    unfold is_free_in at h1,
-
-    unfold fast_replace_free_fun,
-    congr,
-    {
-      apply h1,
-      left,
-      refl,
-    },
-    {
-      apply h1,
-      right,
-      refl,
-    }
-  },
   case formula.not_ : P P_ih σ σ' h1
   {
     unfold is_free_in at h1,
@@ -293,41 +263,6 @@ begin
       exact h1 x h,
     }
   },
-  case formula.eq_ : x y binders h1
-  {
-    unfold replace_free_fun_aux,
-    split_ifs,
-    {
-      simp only [eq_self_iff_true, and_self],
-    },
-    {
-      split,
-      {
-        refl,
-      },
-      {
-        exact h1 y h_1,
-      }
-    },
-    {
-      split,
-      {
-        exact h1 x h,
-      },
-      {
-        refl,
-      }
-    },
-    {
-      split,
-      {
-        exact h1 x h,
-      },
-      {
-        exact h1 y h_1,
-      }
-    }
-  },
   case formula.not_ : P P_ih binders h1
   {
     unfold replace_free_fun_aux,
@@ -385,30 +320,6 @@ begin
     },
     {
       refl,
-    }
-  },
-  case formula.eq_ : x y binders σ h1
-  {
-    unfold fast_replace_free_fun,
-    unfold replace_free_fun_aux,
-    congr,
-    {
-      split_ifs,
-      {
-        exact h1 x h,
-      },
-      {
-        refl,
-      },
-    },
-    {
-      split_ifs,
-      {
-        exact h1 y h,
-      },
-      {
-        refl,
-      }
     }
   },
   case formula.not_ : P P_ih binders σ h1
