@@ -22,4 +22,25 @@ begin
 end
 
 
+lemma list_map₂_of_map
+  {α β γ : Type}
+  (l : list α)
+  (f : α → β)
+  (g : α → β → γ) :
+  list.map₂ g l (list.map f l) =
+    list.map (fun (x : α), g x (f x)) l :=
+begin
+  induction l,
+  case list.nil
+  {
+    simp only [list.map₂, list.map_nil],
+  },
+  case list.cons : hd tl ih
+  {
+    simp only [list.map₂, list.map, eq_self_iff_true, true_and],
+    exact ih,
+  },
+end
+
+
 #lint

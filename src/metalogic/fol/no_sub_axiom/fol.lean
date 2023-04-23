@@ -1,12 +1,23 @@
 import .prop
 
 import metalogic.fol.common.admits
+import metalogic.fol.aux.misc_list
 
 
 set_option pp.parens true
 
 
 open formula
+
+
+lemma eq_congr_eq
+  (x_0 x_1 y_0 y_1 : variable_) :
+  is_proof ((eq_ x_0 y_0).imp_ ((eq_ x_1 y_1).imp_
+    ((eq_ x_0 x_1).imp_ (eq_ y_0 y_1)))) :=
+begin
+  apply is_proof.eq_3_ (pred_name_.mk "=") [x_0, x_1] [y_0, y_1],
+  simp only [list.length],
+end
 
 
 theorem eq_symm
@@ -19,7 +30,7 @@ begin
     apply is_proof.mp_ (eq_ x x),
     {
       apply imp_swap,
-      apply is_proof.eq_3_eq_ x x y x,
+      apply eq_congr_eq x x y x,
     },
     {
       apply is_proof.eq_2_,
@@ -43,7 +54,7 @@ begin
     apply is_proof.mp_ (eq_ z z),
     {
       apply imp_swap,
-      apply is_proof.eq_3_eq_,
+      apply eq_congr_eq,
     },
     {
       apply is_proof.eq_2_,
@@ -259,13 +270,11 @@ begin
 
     set σ := fun (x : variable_), ite (x = v) t x,
 
+    obtain s1 := is_proof.eq_3_ name args (args.map σ),
+    simp only [list.length_map, eq_self_iff_true, forall_true_left] at s1,
+    simp only [list_map₂_of_map] at s1,
     apply is_proof.mp_ (list.foldr imp_ ((pred_ name args).imp_ (pred_ name (list.map σ args))) (list.map (fun (x : variable_), eq_ x (σ x)) args)),
-    {
-      exact blah ((pred_ name args).imp_ (pred_ name (list.map σ args))) v t args σ,
-    },
-    {
-      exact is_proof.eq_3_pred_' name args σ,
-    }
+    apply blah, exact σ, exact s1, 
   },
   case formula.not_ : P_ᾰ P_ih
   { admit },
