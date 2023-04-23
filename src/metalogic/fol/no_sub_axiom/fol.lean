@@ -273,15 +273,23 @@ begin
     obtain s1 := is_proof.eq_3_ name args (args.map σ),
     simp only [list.length_map, eq_self_iff_true, forall_true_left] at s1,
     simp only [list_map₂_of_map] at s1,
+
     apply is_proof.mp_ (list.foldr imp_ ((pred_ name args).imp_ (pred_ name (list.map σ args))) (list.map (fun (x : variable_), eq_ x (σ x)) args)),
-    apply blah, exact σ, exact s1, 
+    {
+      exact blah ((pred_ name args).imp_ (pred_ name (list.map σ args))) v t args σ,
+    },
+    {
+      exact s1,
+    }
   },
   case formula.not_ : P_ᾰ P_ih
   { admit },
   case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1
   { admit },
-  case formula.forall_ : P_ᾰ P_ᾰ_1 P_ih
-  { admit },
+  case formula.forall_ : x P P_ih
+  {
+
+  },
 end
 
 
