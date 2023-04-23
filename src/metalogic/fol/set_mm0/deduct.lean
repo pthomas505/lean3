@@ -49,7 +49,7 @@ inductive is_proof : formula → Prop
   (x : variable_) (P Q : formula) :
   is_proof ((forall_ x (P.imp_ Q)).imp_ ((forall_ x P).imp_ (forall_ x Q)))
 
--- ⊢ P → (∀ v P)  provided x does not occur in P
+-- ⊢ P → (∀ x P)  provided x does not occur in P
 | ax_5_
   (x : variable_) (P : formula) :
   ¬ occurs_in x P →
