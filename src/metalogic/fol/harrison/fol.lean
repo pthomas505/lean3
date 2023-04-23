@@ -254,6 +254,21 @@ begin
   }
 end
 
+example
+  (P : formula)
+  (a b c : variable_)
+  (h1 : ¬ b = c)
+  (h2 : ¬ a = c) :
+  is_proof ((forall_ b (fast_replace_free a c P)).imp_ (forall_ a (fast_replace_free b c P))) :=
+begin
+  apply subalpha,
+  apply not_is_free_in_fast_replace_free,
+  exact h1,
+  apply not_is_free_in_fast_replace_free,
+  exact h2,
+
+end
+
 
 lemma eq_imp_map
   (P : formula)
@@ -323,7 +338,28 @@ begin
   { admit },
   case formula.forall_ : x P P_ih
   {
-    sorry,
+    unfold fast_replace_free,
+    split_ifs,
+    {
+      apply add_assum,
+      apply imp_refl,
+    },
+    {
+      apply imp_trans _ (P.imp_ (fast_replace_free v t P)),
+      {
+        exact P_ih,
+      },
+      {
+        apply imp_trans _ (forall_ x (P.imp_ (fast_replace_free v t P))),
+        {
+          apply is_proof.pred_2_,
+          sorry,
+        },
+        {
+          apply is_proof.pred_1_,
+        }
+      },
+    },
   },
 end
 

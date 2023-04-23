@@ -91,9 +91,9 @@ inductive is_proof : formula → Prop
   (x y : variable_) (P : formula) :
   is_proof ((forall_ x (forall_ y P)).imp_ (forall_ y (forall_ x P)))
 
--- ⊢ (∀ y P) → ∀ x (x = y → P)
+-- ⊢ ∀ y (P → ∀ x (x = y → P))
 | ax_12_
   (x y : variable_) (P : formula) :
-  is_proof ((forall_ y P).imp_ (forall_ x ((eq_ x y).imp_ P)))
+  is_proof (forall_ y (P.imp_ (forall_ x ((eq_ x y).imp_ P))))
 
 #lint
