@@ -65,7 +65,6 @@ inductive is_proof : formula → Prop
   (x y z : variable_) :
   is_proof ((eq_ x y).imp_ ((eq_ x z).imp_ (eq_ y z)))
 
-
 /-
 ⊢ (x_0 = y_0) → ... → (x_n = y_n) →
     pred_ name [x_0 ... x_n] → pred_ name [y_0 ... y_n]
@@ -79,7 +78,6 @@ inductive is_proof : formula → Prop
       formula.imp_
       ((pred_ name xs).imp_ (pred_ name ys))
       (list.map₂ eq_ xs ys))
-
 
 -- ⊢ (¬ (∀ x P)) → ∀ x ¬ (∀ x P)
 | ax_10_
