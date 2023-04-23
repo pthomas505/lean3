@@ -220,6 +220,41 @@ begin
 end
 
 
+theorem subalpha
+  (P Q : formula)
+  (x y : variable_)
+  (h1 : ¬ is_free_in x Q)
+  (h2 : ¬ is_free_in y P)
+  (h3 : is_proof ((eq_ x y).imp_ (P.imp_ Q))) :
+  is_proof ((forall_ x P).imp_ (forall_ y Q)) :=
+begin
+  by_cases c1 : x = y,
+  {
+    subst c1,
+    apply genimp,
+    apply is_proof.mp_,
+    {
+      exact h3,
+    },
+    {
+      exact is_proof.eq_2_ x,
+    }
+  },
+  {
+    apply gen_right,
+    {
+      unfold is_free_in,
+      push_neg,
+      intros a1,
+      exact h2,
+    },
+    {
+      exact subspec P Q x y c1 h1 h3,
+    }
+  }
+end
+
+
 lemma eq_imp_map
   (P : formula)
   (v t : variable_)
@@ -290,109 +325,6 @@ begin
   {
     sorry,
   },
-end
-
-
-theorem subalpha
-  (P Q : formula)
-  (x y : variable_)
-  (h1 : ¬ is_free_in x Q)
-  (h2 : ¬ is_free_in y P)
-  (h3 : is_proof ((eq_ x y).imp_ (P.imp_ Q))) :
-  is_proof ((forall_ x P).imp_ (forall_ y Q)) :=
-begin
-  by_cases c1 : x = y,
-  {
-    subst c1,
-    apply genimp,
-    apply is_proof.mp_,
-    {
-      exact h3,
-    },
-    {
-      exact is_proof.eq_2_ x,
-    }
-  },
-  {
-    apply gen_right,
-    {
-      unfold is_free_in,
-      push_neg,
-      intros a1,
-      exact h2,
-    },
-    {
-      exact subspec P Q x y c1 h1 h3,
-    }
-  }
-end
-
-
-lemma aux_1
-  {α : Type}
-  (l : list α)
-  (f : α → α) :
-  list.map f l = list.of_fn (fun i, f (l.nth_le i i.2)) :=
-begin
-  induction l,
-  case list.nil
-  {
-    simp only [list.map_nil, list.of_fn_zero],
-  },
-  case list.cons : hd tl ih
-  {
-    simp only [list.map, list.length, list.nth_le, fin.cast_refl, order_iso.refl_apply, fin.coe_succ, list.of_fn_succ, fin.coe_zero,
-  eq_self_iff_true, true_and],
-    exact ih,
-  },
-end
-
-
-lemma aux_3
-  (P : formula)
-  (v t : variable_)
-  (n : ℕ)
-  (g : fin n → variable_) :
-  is_proof ((list.foldr imp_ P (list.of_fn (fun (i : fin n), eq_ (g i) (ite (g i = v) t (g i))))).imp_ ((eq_ v t).imp_ P)) :=
-begin
-  induction n,
-  case nat.zero
-  {
-    simp only [list.of_fn_zero, list.foldr_nil],
-    apply is_proof.prop_1_,
-  },
-  case nat.succ : n ih
-  {
-    specialize ih (fun (i : fin n), g i.succ),
-    simp only at ih,
-
-    simp only [list.of_fn_succ, list.foldr_cons],
-    split_ifs,
-    {
-      subst h,
-      apply aux_2,
-      exact ih,
-    },
-    {
-      apply aux_2',
-      apply is_proof.eq_2_,
-      exact ih,
-    }
-  },
-end
-
-
-lemma aux_3'
-  (P : formula)
-  (v t : variable_)
-  (n : ℕ)
-  (g : fin n → variable_)
-  (h1 : is_proof ((list.foldr imp_ P (list.of_fn (fun (i : fin n), eq_ (g i) (ite (g i = v) t (g i))))))) :
-  is_proof ((eq_ v t).imp_ P) :=
-begin
-  apply is_proof.mp_ ((list.foldr imp_ P (list.of_fn (fun (i : fin n), eq_ (g i) (ite (g i = v) t (g i)))))),
-  apply aux_3,
-  exact h1,
 end
 
 
