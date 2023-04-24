@@ -254,21 +254,6 @@ begin
   }
 end
 
-example
-  (P : formula)
-  (a b c : variable_)
-  (h1 : ¬ b = c)
-  (h2 : ¬ a = c) :
-  is_proof ((forall_ b (fast_replace_free a c P)).imp_ (forall_ a (fast_replace_free b c P))) :=
-begin
-  apply subalpha,
-  apply not_is_free_in_fast_replace_free,
-  exact h1,
-  apply not_is_free_in_fast_replace_free,
-  exact h2,
-
-end
-
 
 lemma eq_imp_map
   (P : formula)
@@ -305,13 +290,69 @@ begin
 end
 
 
+lemma aux_10
+  (P P' : formula)
+  (x y z : variable_)
+  (h1 : is_proof ((eq_ x y).imp_ (P.imp_ P'))) :
+  is_proof ((forall_ z (eq_ x y)).imp_ ((forall_ z P).imp_ (forall_ z P'))) :=
+begin
+  have s1 : is_proof (forall_ z ((eq_ x y).imp_ (P.imp_ P'))),
+  apply is_proof.gen_,
+  exact h1,
+
+  have s2 : is_proof ((forall_ z (eq_ x y)).imp_ (forall_ z (P.imp_ P'))),
+  apply is_proof.mp_ (forall_ z ((eq_ x y).imp_ (P.imp_ P'))),
+  apply is_proof.pred_1_,
+  exact s1,
+
+  have s3 : is_proof ((forall_ z (P.imp_ P')).imp_ ((forall_ z P).imp_ (forall_ z P'))),
+  apply is_proof.pred_1_,
+
+  apply imp_trans,
+  exact s2,
+  exact s3,
+end
+
+
+lemma aux_11
+  (P P' : formula)
+  (x y z : variable_)
+  (h1 : is_proof ((forall_ z (eq_ x y)).imp_ ((forall_ z P).imp_ (forall_ z P'))))
+  (h2 : (¬is_free_in z (eq_ x y))) :
+  is_proof ((eq_ x y).imp_ ((forall_ z P).imp_ (forall_ z P'))) :=
+begin
+  have s1 : is_proof ((eq_ x y).imp_ (forall_ z (eq_ x y))),
+  apply is_proof.pred_2_,
+  exact h2,
+  apply imp_trans,
+  apply s1,
+  exact h1,
+end
+
+
+lemma aux_12
+  (P P' : formula)
+  (x y z : variable_)
+  (h1 : is_proof ((eq_ x y).imp_ (P.imp_ P')))
+  (h2 : (¬is_free_in z (eq_ x y))) :
+  is_proof ((eq_ x y).imp_ ((forall_ z P).imp_ (forall_ z P'))) :=
+begin
+  apply aux_11,
+  apply aux_10,
+  exact h1,
+  exact h2,
+end
+
+
 example
   (v t : variable_)
   (P : formula)
-  (h1 : ¬ v = t) :
+  (binders : finset variable_)
+  (h1 : ¬ v = t)
+  (h2 : fast_admits_aux v t binders P) :
   is_proof ((eq_ v t).imp_ (P.imp_ (fast_replace_free v t P))) :=
 begin
-  induction P,
+  induction P generalizing binders,
   case formula.true_
   { admit },
   case formula.pred_ : name args
@@ -338,25 +379,50 @@ begin
   { admit },
   case formula.forall_ : x P P_ih
   {
-    unfold fast_replace_free,
-    split_ifs,
+    unfold fast_admits_aux at h2,
+
+    cases h2,
     {
+      subst h2,
+      unfold fast_replace_free,
+      squeeze_simp,
       apply add_assum,
       apply imp_refl,
     },
     {
-      apply imp_trans _ (P.imp_ (fast_replace_free v t P)),
+      by_cases c1 : t = x,
       {
-        exact P_ih,
+        obtain s1 := not_free_in_fast_replace_free_self (forall_ x P) v t,
+
+        obtain s2 := fast_admits_aux_mem_binders P v t (binders ∪ {x}) h2,
+        subst c1,
+        squeeze_simp at s2,
+        unfold is_free_in at s1,
+        squeeze_simp at s1,
+        have s3 : ((¬(v = t)) → (¬is_free_in v P)),
+        intros a1,
+        exact s2,
+        specialize s1 s3,
+        simp only [s1],
+        apply add_assum,
+        apply imp_refl,
       },
       {
-        apply imp_trans _ (forall_ x (P.imp_ (fast_replace_free v t P))),
+        unfold fast_replace_free,
+        split_ifs,
         {
-          apply is_proof.pred_2_,
-          sorry,
+          apply add_assum,
+          apply imp_refl,
         },
         {
-          apply is_proof.pred_1_,
+          apply aux_12,
+          apply P_ih (binders ∪ {x}),
+          exact h2,
+          unfold formula.eq_,
+          unfold is_free_in,
+          squeeze_simp,
+          push_neg,
+          tauto,
         }
       },
     },
