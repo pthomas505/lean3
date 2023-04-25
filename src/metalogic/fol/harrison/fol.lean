@@ -290,57 +290,34 @@ begin
 end
 
 
-lemma aux_10
-  (P P' : formula)
-  (x y z : variable_)
-  (h1 : is_proof ((eq_ x y).imp_ (P.imp_ P'))) :
-  is_proof ((forall_ z (eq_ x y)).imp_ ((forall_ z P).imp_ (forall_ z P'))) :=
-begin
-  have s1 : is_proof (forall_ z ((eq_ x y).imp_ (P.imp_ P'))),
-  apply is_proof.gen_,
-  exact h1,
-
-  have s2 : is_proof ((forall_ z (eq_ x y)).imp_ (forall_ z (P.imp_ P'))),
-  apply is_proof.mp_ (forall_ z ((eq_ x y).imp_ (P.imp_ P'))),
-  apply is_proof.pred_1_,
-  exact s1,
-
-  have s3 : is_proof ((forall_ z (P.imp_ P')).imp_ ((forall_ z P).imp_ (forall_ z P'))),
-  apply is_proof.pred_1_,
-
-  apply imp_trans,
-  exact s2,
-  exact s3,
-end
-
-
-lemma aux_11
-  (P P' : formula)
-  (x y z : variable_)
-  (h1 : is_proof ((forall_ z (eq_ x y)).imp_ ((forall_ z P).imp_ (forall_ z P'))))
-  (h2 : (¬is_free_in z (eq_ x y))) :
-  is_proof ((eq_ x y).imp_ ((forall_ z P).imp_ (forall_ z P'))) :=
-begin
-  have s1 : is_proof ((eq_ x y).imp_ (forall_ z (eq_ x y))),
-  apply is_proof.pred_2_,
-  exact h2,
-  apply imp_trans,
-  apply s1,
-  exact h1,
-end
-
-
 lemma aux_12
   (P P' : formula)
   (x y z : variable_)
-  (h1 : is_proof ((eq_ x y).imp_ (P.imp_ P')))
-  (h2 : (¬is_free_in z (eq_ x y))) :
+  (h1 : (¬is_free_in z (eq_ x y))) 
+  (h2 : is_proof ((eq_ x y).imp_ (P.imp_ P'))) :
   is_proof ((eq_ x y).imp_ ((forall_ z P).imp_ (forall_ z P'))) :=
 begin
-  apply aux_11,
-  apply aux_10,
-  exact h1,
-  exact h2,
+  apply imp_trans (eq_ x y) (forall_ z (eq_ x y)) ((forall_ z P).imp_ (forall_ z P')),
+  {
+    apply is_proof.pred_2_,
+    exact h1,
+  },
+  {
+    apply imp_trans (forall_ z (eq_ x y)) (forall_ z (P.imp_ P')) ((forall_ z P).imp_ (forall_ z P')),
+    {
+      apply is_proof.mp_ (forall_ z ((eq_ x y).imp_ (P.imp_ P'))),
+      {
+        apply is_proof.pred_1_,
+      },
+      {
+        apply is_proof.gen_,
+        exact h2,
+      }
+    },
+    {
+      apply is_proof.pred_1_,
+    },
+  }
 end
 
 
@@ -416,13 +393,13 @@ begin
         },
         {
           apply aux_12,
-          apply P_ih (binders ∪ {x}),
-          exact h2,
           unfold formula.eq_,
           unfold is_free_in,
           squeeze_simp,
           push_neg,
           tauto,
+          apply P_ih (binders ∪ {x}),
+          exact h2,
         }
       },
     },
