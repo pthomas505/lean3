@@ -372,10 +372,10 @@ begin
         have s1 : (fast_replace_free v t (forall_ x P) = forall_ x P),
         apply not_free_in_fast_replace_free_self (forall_ x P) v t,
         unfold is_free_in,
-        squeeze_simp,
+        simp only [not_and],
         intros a1,
         apply fast_admits_aux_mem_binders P v t (binders ∪ {x}) h2,
-        squeeze_simp,
+        simp only [finset.mem_union, finset.mem_singleton],
         right,
         exact c1,
 
