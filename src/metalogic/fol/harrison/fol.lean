@@ -392,13 +392,15 @@ begin
         },
         {
           apply aux_12,
-          unfold formula.eq_,
-          unfold is_free_in,
-          squeeze_simp,
-          push_neg,
-          tauto,
-          apply P_ih (binders ∪ {x}),
-          exact h2,
+          {
+            unfold formula.eq_,
+            unfold is_free_in,
+            simp only [list.to_finset_cons, list.to_finset_nil, insert_emptyc_eq, finset.mem_insert, finset.mem_singleton],
+            tauto,
+          },
+          {
+            exact P_ih (binders ∪ {x}) h2,
+          },
         }
       },
     },
