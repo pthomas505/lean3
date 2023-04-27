@@ -4,6 +4,8 @@ import .deduct
 set_option pp.parens true
 
 
+namespace fol
+
 open formula
 
 
@@ -286,4 +288,7 @@ theorem aux_2'
   (h2 : is_proof (P.imp_ (Q.imp_ R))) :
   is_proof ((S.imp_ P).imp_ (Q.imp_ R)) := sorry
 
+
 #lint
+
+end fol

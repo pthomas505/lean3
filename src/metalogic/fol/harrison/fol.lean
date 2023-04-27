@@ -7,6 +7,8 @@ import metalogic.fol.aux.misc_list
 set_option pp.parens true
 
 
+namespace fol
+
 open formula
 
 
@@ -420,3 +422,5 @@ end
 
 
 #lint
+
+end fol

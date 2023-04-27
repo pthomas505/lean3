@@ -4,6 +4,8 @@ import metalogic.fol.common.binders
 set_option pp.parens true
 
 
+namespace fol
+
 open formula
 
 
@@ -80,3 +82,5 @@ inductive is_proof : formula → Prop
 
 
 #lint
+
+end fol
