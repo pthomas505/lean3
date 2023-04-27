@@ -4,6 +4,9 @@ import tactic
 set_option pp.parens true
 
 
+namespace fol
+
+
 /--
   The type of FOL variables.
 -/
@@ -128,3 +131,5 @@ instance formula.has_repr : has_repr formula := has_repr.mk formula.repr
 
 
 #lint
+
+end fol

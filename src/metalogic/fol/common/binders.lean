@@ -6,6 +6,8 @@ import data.finset
 set_option pp.parens true
 
 
+namespace fol
+
 open formula
 
 
@@ -200,3 +202,5 @@ end
 
 
 #lint
+
+end fol

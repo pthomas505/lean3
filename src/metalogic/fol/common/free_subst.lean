@@ -3,6 +3,7 @@ import .admits
 
 set_option pp.parens true
 
+namespace fol
 
 open formula
 
@@ -340,3 +341,5 @@ begin
 end
 
 #lint
+
+end fol
