@@ -237,6 +237,36 @@ end
 alias T_13_5 <- prop_id
 
 
+theorem T_13_6_no_deduct
+  (P Q : formula) :
+  is_proof (P.not_.imp_ (P.imp_ Q)) :=
+begin
+  apply is_deduct.mp_ (P.not_.imp_ (Q.not_.imp_ P.not_)),
+  {
+    apply is_deduct.mp_ (P.not_.imp_ ((Q.not_.imp_ P.not_).imp_ (P.imp_ Q))),
+    {
+      apply is_deduct.axiom_,
+      apply is_axiom.prop_2_,
+    },
+    {
+      apply is_deduct.mp_ ((Q.not_.imp_ P.not_).imp_ (P.imp_ Q)),
+      {
+        apply is_deduct.axiom_,
+        apply is_axiom.prop_1_,
+      },
+      {
+        apply is_deduct.axiom_,
+        apply is_axiom.prop_3_,
+      }
+    }
+  },
+  {
+    apply is_deduct.axiom_,
+    apply is_axiom.prop_1_,
+  }
+end
+
+
 theorem T_14_10
   (Q : formula)
   (Δ : set formula)
