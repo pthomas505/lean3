@@ -4,6 +4,8 @@ import metalogic.fol.common.binders
 set_option pp.parens true
 
 
+namespace fol
+
 open formula
 
 
@@ -94,4 +96,7 @@ inductive is_proof : formula → Prop
   (x y : variable_) (P : formula) :
   is_proof ((forall_ y P).imp_ (forall_ x ((eq_ x y).imp_ P)))
 
+
 #lint
+
+end fol
