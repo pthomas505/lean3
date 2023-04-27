@@ -5,6 +5,8 @@ import metalogic.fol.aux.function_update_ite
 set_option pp.parens true
 
 
+namespace fol
+
 open formula
 
 
@@ -1269,3 +1271,5 @@ meta def SC : tactic unit :=
 
 
 #lint
+
+end fol
