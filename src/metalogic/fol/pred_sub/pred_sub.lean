@@ -111,6 +111,32 @@ def coincide
   (∀ (v : ind_var_), v.is_free_in φ → val_I v = val_J v)
 
 
+def fast_admits_aux (v u : ind_var_) : finset ind_var_ → formula → Prop
+| binders (pred_ name args) :=
+    v ∈ args → -- if there is a free occurrence of v in P
+    u ∉ binders -- then it does not become a bound occurrence of u in P(u/v)
+| binders (not_ P) := fast_admits_aux binders P
+| binders (imp_ P Q) := fast_admits_aux binders P ∧ fast_admits_aux binders Q
+| binders (forall_ x P) := v = x ∨ fast_admits_aux (binders ∪ {x}) P
+
+
+def fast_admits (v u : ind_var_) (P : formula) : Prop :=
+  fast_admits_aux v u ∅ P
+
+
+def fast_replace_free (v t : ind_var_) : formula → formula
+| (pred_ name args) :=
+    pred_
+    name
+    (args.map (fun (x : ind_var_), if x = v then t else x))
+| (not_ P) := not_ (fast_replace_free P)
+| (imp_ P Q) := imp_ (fast_replace_free P) (fast_replace_free Q)
+| (forall_ x P) :=
+    if v = x
+    then forall_ x P -- v is not free in P
+    else forall_ x (fast_replace_free P)
+
+
 /--
   is_free_sub φ v t φ' := True if and only if φ' is the result of replacing in φ each free occurrence of v by a free occurrence of t.
 -/
@@ -150,6 +176,35 @@ inductive is_free_sub : formula → ind_var_ → ind_var_ → formula → Prop
   ¬ x = t →
   is_free_sub P v t P' →
   is_free_sub (forall_ x P) v t (forall_ x P')
+
+
+def admits_fun_aux (σ : ind_var_ → ind_var_) : finset ind_var_ → formula → Prop
+| binders (pred_ name args) :=
+    ∀ (v : ind_var_), v ∈ args → ¬ v ∈ binders → ¬ σ v ∈ binders 
+| binders (not_ P) := admits_fun_aux binders P
+| binders (imp_ P Q) := admits_fun_aux binders P ∧ admits_fun_aux binders Q
+| binders (forall_ x P) := admits_fun_aux (binders ∪ {x}) P
+
+
+def admits_fun (σ : ind_var_ → ind_var_) (P : formula) : Prop :=
+  admits_fun_aux σ ∅ P
+
+
+def replace_free_fun_aux (σ : ind_var_ → ind_var_) : finset ind_var_ → formula → formula
+| binders (pred_ name args) :=
+    pred_
+    name
+    (args.map (fun (x : ind_var_), if x ∈ binders then x else σ x))
+| binders (not_ P) := not_ (replace_free_fun_aux binders P)
+| binders (imp_ P Q) :=
+    imp_
+    (replace_free_fun_aux binders P)
+    (replace_free_fun_aux binders Q)
+| binders (forall_ x P) :=
+    forall_ x (replace_free_fun_aux (binders ∪ {x}) P)
+
+
+def replace_free_fun (σ : ind_var_ → ind_var_) (P : formula) : formula := replace_free_fun_aux σ ∅ P
 
 
 inductive is_free_sub_fun : formula → (ind_var_ → ind_var_) → formula → Prop
@@ -340,32 +395,6 @@ begin
     exact h1_left,
   }
 end
-
-
-def fast_admits_aux (v u : ind_var_) : finset ind_var_ → formula → Prop
-| binders (pred_ name args) :=
-    v ∈ args → -- if there is a free occurrence of v in P
-    u ∉ binders -- then it does not become a bound occurrence of u in P(u/v)
-| binders (not_ P) := fast_admits_aux binders P
-| binders (imp_ P Q) := fast_admits_aux binders P ∧ fast_admits_aux binders Q
-| binders (forall_ x P) := v = x ∨ fast_admits_aux (binders ∪ {x}) P
-
-
-def fast_admits (v u : ind_var_) (P : formula) : Prop :=
-  fast_admits_aux v u ∅ P
-
-
-def fast_replace_free (v t : ind_var_) : formula → formula
-| (pred_ name args) :=
-    pred_
-    name
-    (args.map (fun (x : ind_var_), if x = v then t else x))
-| (not_ P) := not_ (fast_replace_free P)
-| (imp_ P Q) := imp_ (fast_replace_free P) (fast_replace_free Q)
-| (forall_ x P) :=
-    if v = x
-    then forall_ x P -- v is not free in P
-    else forall_ x (fast_replace_free P)
 
 
 lemma substitution_theorem_aux
