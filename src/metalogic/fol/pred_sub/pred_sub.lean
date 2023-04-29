@@ -342,7 +342,167 @@ begin
 end
 
 
+def fast_admits_aux (v u : ind_var_) : finset ind_var_ → formula → Prop
+| binders (pred_ name args) :=
+    v ∈ args → -- if there is a free occurrence of v in P
+    u ∉ binders -- then it does not become a bound occurrence of u in P(u/v)
+| binders (not_ P) := fast_admits_aux binders P
+| binders (imp_ P Q) := fast_admits_aux binders P ∧ fast_admits_aux binders Q
+| binders (forall_ x P) := v = x ∨ fast_admits_aux (binders ∪ {x}) P
+
+
+def fast_admits (v u : ind_var_) (P : formula) : Prop :=
+  fast_admits_aux v u ∅ P
+
+
+def fast_replace_free (v t : ind_var_) : formula → formula
+| (pred_ name args) :=
+    pred_
+    name
+    (args.map (fun (x : ind_var_), if x = v then t else x))
+| (not_ P) := not_ (fast_replace_free P)
+| (imp_ P Q) := imp_ (fast_replace_free P) (fast_replace_free Q)
+| (forall_ x P) :=
+    if v = x
+    then forall_ x P -- v is not free in P
+    else forall_ x (fast_replace_free P)
+
+
+lemma substitution_theorem_aux
+  {D : Type}
+  (I : interpretation D)
+  (val val' : valuation D)
+  (v t : ind_var_)
+  (binders : finset ind_var_)
+  (P : formula)
+  (h1 : fast_admits_aux v t binders P)
+  (h2 : ∀ (v : ind_var_), ¬ v ∈ binders → val' v = val v) :
+  holds D I (function.update_ite val v (val' t)) P ↔
+    holds D I val (fast_replace_free v t P) :=
+begin
+  induction P generalizing binders val val',
+  case formula.pred_ : name args binders val val' h1
+  {
+    unfold fast_admits_aux at h1,
+
+    unfold fast_replace_free,
+    unfold holds,
+    congr' 2,
+    simp only [list.map_map],
+    simp only [list.map_eq_map_iff],
+    intros x a1,
+    simp only [function.comp_app],
+    unfold function.update_ite,
+    split_ifs,
+    apply h2,
+    apply h1,
+    subst h,
+    exact a1,
+    refl,
+  },
+  case formula.not_ : P P_ih binders val val' h1
+  {
+    unfold fast_admits_aux at h1,
+
+    unfold fast_replace_free,
+    unfold holds,
+    apply not_congr,
+    apply P_ih binders,
+    exact h1,
+    exact h2,
+  },
+  case formula.imp_ : P Q P_ih Q_ih binders val val' h1
+  {
+    unfold fast_admits_aux at h1,
+    cases h1,
+
+    unfold fast_replace_free,
+    unfold holds,
+    apply imp_congr,
+    {
+      apply P_ih binders,
+      exact h1_left,
+      exact h2,
+    },
+    {
+      apply Q_ih binders,
+      exact h1_right,
+      exact h2,
+    }
+  },
+  case formula.forall_ : x P P_ih binders val val' h1
+  {
+    unfold fast_admits_aux at h1,
+
+    unfold fast_replace_free,
+    split_ifs,
+    {
+      unfold holds,
+      apply forall_congr,
+      intros d,
+      subst h,
+      congr' 2,
+      funext,
+      unfold function.update_ite,
+      split_ifs;
+      refl,
+    },
+    {
+      unfold holds,
+      apply forall_congr,
+      intros d,
+      specialize P_ih (binders ∪ {x}),
+
+      rewrite <- P_ih _ val',
+      congr' 2,
+      funext,
+      unfold function.update_ite,
+      split_ifs,
+      subst h_1,
+      subst h_2,
+      contradiction,
+      refl,
+      refl,
+      refl,
+      cases h1,
+      contradiction,
+      exact h1,
+      unfold function.update_ite,
+      intros a,
+      split_ifs,
+      cases h1,
+      contradiction,
+      subst h_1,
+      simp only [finset.mem_union, finset.mem_singleton, eq_self_iff_true, or_true, not_true, is_empty.forall_iff],
+      intros a1,
+      apply h2,
+      simp only [finset.mem_union, finset.mem_singleton] at a1,
+      push_neg at a1,
+      cases a1,
+      exact a1_left,
+    }
+  },
+end
+
+
 theorem substitution_theorem
+  {D : Type}
+  (I : interpretation D)
+  (val : valuation D)
+  (v t : ind_var_)
+  (P : formula)
+  (h1 : fast_admits v t P) :
+  holds D I (function.update_ite val v (val t)) P ↔
+    holds D I val (fast_replace_free v t P) :=
+begin
+  unfold fast_admits at h1,
+  apply substitution_theorem_aux,
+  exact h1,
+  simp only [finset.not_mem_empty, not_false_iff, eq_self_iff_true, forall_const],
+end
+
+
+example
   {D : Type}
   (I : interpretation D)
   (val : valuation D)
