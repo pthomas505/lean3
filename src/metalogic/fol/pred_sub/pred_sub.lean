@@ -380,8 +380,8 @@ lemma substitution_theorem_aux
   holds D I (function.update_ite val v (val' t)) P ↔
     holds D I val (fast_replace_free v t P) :=
 begin
-  induction P generalizing binders val val',
-  case formula.pred_ : name args binders val val' h1
+  induction P generalizing binders val,
+  case formula.pred_ : name args binders val h1
   {
     unfold fast_admits_aux at h1,
 
@@ -400,7 +400,7 @@ begin
     exact a1,
     refl,
   },
-  case formula.not_ : P P_ih binders val val' h1
+  case formula.not_ : P P_ih binders val h1
   {
     unfold fast_admits_aux at h1,
 
@@ -411,7 +411,7 @@ begin
     exact h1,
     exact h2,
   },
-  case formula.imp_ : P Q P_ih Q_ih binders val val' h1
+  case formula.imp_ : P Q P_ih Q_ih binders val h1
   {
     unfold fast_admits_aux at h1,
     cases h1,
@@ -430,7 +430,7 @@ begin
       exact h2,
     }
   },
-  case formula.forall_ : x P P_ih binders val val' h1
+  case formula.forall_ : x P P_ih binders val h1
   {
     unfold fast_admits_aux at h1,
 
@@ -453,7 +453,7 @@ begin
       intros d,
       specialize P_ih (binders ∪ {x}),
 
-      rewrite <- P_ih _ val',
+      rewrite <- P_ih,
       congr' 2,
       funext,
       unfold function.update_ite,
