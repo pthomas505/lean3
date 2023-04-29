@@ -111,6 +111,89 @@ def coincide
   (∀ (v : ind_var_), v.is_free_in φ → val_I v = val_J v)
 
 
+/--
+  is_free_sub φ v t φ' := True if and only if φ' is the result of replacing in φ each free occurrence of v by a free occurrence of t.
+-/
+inductive is_free_sub : formula → ind_var_ → ind_var_ → formula → Prop
+
+| pred_
+  (P : pred_var_) (xs : list ind_var_)
+  (v t : ind_var_) :
+    is_free_sub (pred_ P xs) v t (pred_ P (xs.map (fun (x : ind_var_), if x = v then t else x)))
+
+| not_
+  (P : formula)
+  (v t : ind_var_)
+  (P' : formula) :
+  is_free_sub P v t P' →
+  is_free_sub P.not_ v t P'.not_
+
+| imp_
+  (P Q : formula)
+  (v t : ind_var_)
+  (P' Q' : formula) :
+  is_free_sub P v t P' →
+  is_free_sub Q v t Q' →
+  is_free_sub (P.imp_ Q) v t (P'.imp_ Q')
+
+| forall_not_free_in
+  (x : ind_var_) (P : formula)
+  (v t : ind_var_) :
+  ¬ v.is_free_in (forall_ x P) →
+  is_free_sub (forall_ x P) v t (forall_ x P)
+
+| forall_free_in
+  (x : ind_var_) (P : formula)
+  (v t : ind_var_)
+  (P' : formula) :
+  v.is_free_in (forall_ x P) →
+  ¬ x = t →
+  is_free_sub P v t P' →
+  is_free_sub (forall_ x P) v t (forall_ x P')
+
+
+inductive is_free_sub_fun : formula → (ind_var_ → ind_var_) → formula → Prop
+
+| pred_
+  (P : pred_var_) (xs : list ind_var_)
+  (σ : ind_var_ → ind_var_) :
+    is_free_sub_fun (pred_ P xs) σ (pred_ P (xs.map σ))
+
+| not_
+  (P : formula)
+  (σ : ind_var_ → ind_var_)
+  (P' : formula) :
+  is_free_sub_fun P σ P' →
+  is_free_sub_fun P.not_ σ P'.not_
+
+| imp_
+  (P Q : formula)
+  (σ : ind_var_ → ind_var_)
+  (P' Q' : formula) :
+  is_free_sub_fun P σ P' →
+  is_free_sub_fun Q σ Q' →
+  is_free_sub_fun (P.imp_ Q) σ (P'.imp_ Q')
+
+| forall_not_free_in
+  (x : ind_var_) (P : formula)
+  (σ : ind_var_ → ind_var_) :
+  (∀ (v : ind_var_), v.is_free_in (forall_ x P) → σ v = v) →
+  is_free_sub_fun (forall_ x P) σ (forall_ x P)
+
+| forall_free_in
+  (x : ind_var_) (P : formula)
+  (σ : ind_var_ → ind_var_)
+  (P' : formula) :
+  ¬ (∀ (v : ind_var_), v.is_free_in (forall_ x P) → σ v = v) →
+  (∀ (v : ind_var_), v.is_free_in (forall_ x P) → ¬ σ v = x) →
+  is_free_sub_fun P σ P' →
+  is_free_sub_fun (forall_ x P) σ (forall_ x P')
+
+
+def is_free_sub_chain (l : list (formula × ind_var_ × ind_var_)) : Prop :=
+list.chain' (fun (a b : formula × ind_var_ × ind_var_), is_free_sub a.1 b.2.1 b.2.2 b.1) l
+
+
 lemma holds_congr_ind_var
   {D : Type}
   (I : interpretation D)
