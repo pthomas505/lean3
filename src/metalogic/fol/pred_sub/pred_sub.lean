@@ -236,7 +236,7 @@ begin
 end
 
 
-example
+theorem coincidence_theorem
   {D : Type}
   (I I' : interpretation D)
   (val val' : valuation D)
