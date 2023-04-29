@@ -340,3 +340,31 @@ begin
     exact h1_left,
   }
 end
+
+
+theorem substitution_theorem
+  {D : Type}
+  (I : interpretation D)
+  (val : valuation D)
+  (v t : ind_var_)
+  (P P' : formula)
+  (h1 : is_free_sub P v t P') :
+  holds D I (function.update_ite val v (val t)) P ↔
+    holds D I val P' :=
+begin
+  sorry
+end
+
+
+example
+  {D : Type}
+  (I : interpretation D)
+  (val : valuation D)
+  (σ  : ind_var_ → ind_var_)
+  (P P' : formula)
+  (h1 : is_free_sub_fun P σ P') :
+  holds D I (val ∘ σ) P ↔
+    holds D I val P' :=
+begin
+  sorry
+end
