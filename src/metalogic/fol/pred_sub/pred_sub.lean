@@ -1,0 +1,259 @@
+import metalogic.fol.aux.function_update_ite
+
+
+set_option pp.parens true
+
+
+/--
+  The type of individual variables.
+  Individual variables range over elements of the domain.
+-/
+@[derive [inhabited, decidable_eq]]
+inductive ind_var_ : Type
+| mk : string → ind_var_
+
+/--
+  The string representation of individual variables.
+-/
+def ind_var_.repr : ind_var_ → string
+| (ind_var_.mk name) := name
+
+instance ind_var_.has_repr : has_repr ind_var_ := has_repr.mk ind_var_.repr
+
+
+/--
+  The type of predicate variables.
+  Predicate variables range over predicate functions on the domain.
+-/
+@[derive [inhabited, decidable_eq]]
+inductive pred_var_ : Type
+| mk : string → pred_var_
+
+
+/--
+  The string representation of predicate variables.
+-/
+def pred_var_.repr : pred_var_ → string
+| (pred_var_.mk name) := name
+
+instance pred_var_.has_repr : has_repr pred_var_ := has_repr.mk pred_var_.repr
+
+
+/--
+  The type of formulas.
+-/
+@[derive [inhabited, decidable_eq]]
+inductive formula : Type
+| pred_ : pred_var_ → list ind_var_ → formula
+| not_ : formula → formula
+| imp_ : formula → formula → formula
+| forall_ : ind_var_ → formula → formula
+
+open formula
+
+
+-- D is a domain
+structure interpretation (D : Type) : Type :=
+-- There is at least one element in the domain.
+(nonempty : nonempty D)
+-- The assignment of predicate variables to predicate functions on the domain.
+-- Predicate functions map elements of the domain to {T, F}.
+-- list D → Prop is a predicate function.
+(pred : pred_var_ → (list D → Prop))
+
+/-
+  pred_ P [] is a propositional variable (not a propositional constant like T or F).
+-/
+
+-- The assignment of individual variables to elements of the domain.
+def valuation (D : Type) := ind_var_ → D
+
+
+def holds (D : Type) (I : interpretation D) : valuation D → formula → Prop
+| val (pred_ P xs) := I.pred P (xs.map val)
+| val (not_ φ) := ¬ holds val φ
+| val (imp_ φ ψ) := holds val φ → holds val ψ
+| val (forall_ x φ) := ∀ (d : D), holds (function.update_ite val x d) φ
+
+
+def formula.is_valid (φ : formula) : Prop :=
+  ∀ (D : Type) (I : interpretation D) (val : valuation D),
+    holds D I val φ
+
+
+/--
+  ind_var_.is_free_in v φ := True if and only if there is a free occurrence of the individual variable v in the formula φ.
+-/
+def ind_var_.is_free_in (v : ind_var_) : formula → Prop
+| (pred_ _ xs) := v ∈ xs.to_finset
+| (not_ φ) := ind_var_.is_free_in φ
+| (imp_ φ ψ) := ind_var_.is_free_in φ ∨ ind_var_.is_free_in ψ
+| (forall_ x φ) := ¬ v = x ∧ ind_var_.is_free_in φ
+
+
+/--
+  pred_var_.occurs_in Q φ := True if and only if there is an occurrence of the predicate variable Q in the formula φ.
+-/
+def pred_var_.occurs_in (Q : pred_var_) : formula → Prop
+| (pred_ P _) := P = Q
+| (not_ φ) := pred_var_.occurs_in φ
+| (imp_ φ ψ) := pred_var_.occurs_in φ ∨ pred_var_.occurs_in ψ
+| (forall_ _ φ) := pred_var_.occurs_in φ
+
+
+def coincide
+  {D : Type}
+  (I J : interpretation D)
+  (val_I val_J : valuation D)
+  (φ : formula) :
+  Prop :=
+  (∀ (P : pred_var_), P.occurs_in φ → I.pred P = J.pred P) ∧
+  (∀ (v : ind_var_), v.is_free_in φ → val_I v = val_J v)
+
+
+lemma holds_congr_ind_var
+  {D : Type}
+  (I : interpretation D)
+  (val val' : valuation D)
+  (φ : formula)
+  (h1 : ∀ (v : ind_var_), v.is_free_in φ → val v = val' v) :
+  holds D I val φ ↔ holds D I val' φ :=
+begin
+  induction φ generalizing val val',
+  case formula.pred_ : P xs val val' h1
+  {
+    unfold ind_var_.is_free_in at h1,
+    simp only [list.mem_to_finset] at h1,
+
+    unfold holds,
+    congr' 2,
+    simp only [list.map_eq_map_iff],
+    exact h1,
+  },
+  case formula.not_ : φ φ_ih val val' h1
+  {
+    apply not_congr,
+    exact φ_ih val val' h1,
+  },
+  case formula.imp_ : φ ψ φ_ih ψ_ih val val' h1
+  {
+    unfold ind_var_.is_free_in at h1,
+
+    apply imp_congr,
+    {
+      apply φ_ih val val',
+      intros x a1,
+      apply h1,
+      left,
+      exact a1,
+    },
+    {
+      apply ψ_ih val val',
+      intros x a1,
+      apply h1,
+      right,
+      exact a1,
+    }
+  },
+  case formula.forall_ : x φ φ_ih val val' h1
+  {
+    unfold ind_var_.is_free_in at h1,
+    simp only [and_imp] at h1,
+
+    unfold holds,
+    apply forall_congr,
+    intros d,
+    apply φ_ih,
+    intros a a1,
+    unfold function.update_ite,
+    split_ifs,
+    {
+      refl,
+    },
+    {
+      exact h1 a h a1,
+    }
+  },
+end
+
+
+lemma holds_congr_pred_var
+  {D : Type}
+  (I I' : interpretation D)
+  (val : valuation D)
+  (φ : formula)
+  (h1 : ∀ (P : pred_var_), P.occurs_in φ → I.pred P = I'.pred P) :
+  holds D I val φ ↔ holds D I' val φ :=
+begin
+  induction φ generalizing val,
+  case formula.pred_ : P xs val
+  {
+    unfold pred_var_.occurs_in at h1,
+    simp only [forall_eq'] at h1,
+
+    unfold holds,
+    induction h1,
+    refl,
+  },
+  case formula.not_ : φ φ_ih val
+  {
+    unfold pred_var_.occurs_in at h1,
+
+    unfold holds,
+    apply not_congr,
+    apply φ_ih h1,
+  },
+  case formula.imp_ : φ ψ φ_ih ψ_ih val
+  {
+    unfold pred_var_.occurs_in at h1,
+
+    unfold holds,
+    apply imp_congr,
+    {
+      apply φ_ih,
+      intros P a1,
+      apply h1,
+      left,
+      exact a1,
+    },
+    {
+      apply ψ_ih,
+      intros P a1,
+      apply h1,
+      right,
+      exact a1,
+    }
+  },
+  case formula.forall_ : x φ φ_ih val
+  {
+    unfold pred_var_.occurs_in at h1,
+
+    unfold holds,
+    apply forall_congr,
+    intros a,
+    apply φ_ih h1,
+  },
+end
+
+
+example
+  {D : Type}
+  (I I' : interpretation D)
+  (val val' : valuation D)
+  (φ : formula)
+  (h1 : coincide I I' val val' φ) :
+  holds D I val φ ↔ holds D I' val' φ :=
+begin
+  unfold coincide at h1,
+  cases h1,
+
+  transitivity holds D I val' φ,
+  {
+    apply holds_congr_ind_var,
+    exact h1_right,
+  },
+  {
+    apply holds_congr_pred_var,
+    exact h1_left,
+  }
+end
