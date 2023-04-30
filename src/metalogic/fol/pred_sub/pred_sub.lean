@@ -546,22 +546,31 @@ begin
   {
     unfold holds,
     congr' 2,
-    squeeze_simp,
+    simp only [list.map_map],
     simp only [list.map_eq_map_iff],
     intros x a1,
     unfold function.update_ite,
-    squeeze_simp,
+    simp only [function.comp_app],
     split_ifs;
     refl,
   },
-  case is_free_sub.not_ : h1_P h1_v h1_t h1_P' h1_ᾰ h1_ih
-  { admit },
-  case is_free_sub.imp_ : h1_P h1_Q h1_v h1_t h1_P' h1_Q' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
-  { admit },
+  case is_free_sub.not_ : h1_P h1_v h1_t h1_P' h1_1 h1_ih
+  {
+    unfold holds,
+    apply not_congr,
+    apply h1_ih,
+  },
+  case is_free_sub.imp_ : h1_P h1_Q h1_v h1_t h1_P' h1_Q' h1_1 h1_2 h1_ih_1 h1_ih_2
+  {
+    unfold holds,
+    apply imp_congr,
+    apply h1_ih_1,
+    apply h1_ih_2,
+  },
   case is_free_sub.forall_not_free_in : h1_x h1_P h1_v h1_t h1_1
   {
     unfold ind_var_.is_free_in at h1_1,
-    squeeze_simp at h1_1,
+    simp only [not_and] at h1_1,
 
     unfold holds,
     apply forall_congr,
