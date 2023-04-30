@@ -604,7 +604,7 @@ begin
 end
 
 
-example
+lemma substitution_theorem_fun_aux
   {D : Type}
   (I : interpretation D)
   (val val' : valuation D)
@@ -733,6 +733,24 @@ begin
       exact a1_left,
     }
   },
+end
+
+
+theorem substitution_theorem_fun
+  {D : Type}
+  (I : interpretation D)
+  (val : valuation D)
+  (σ : ind_var_ → ind_var_)
+  (P : formula)
+  (h1 : admits_fun σ P) :
+  holds D I (val ∘ σ)  P ↔
+    holds D I val (fast_replace_free_fun σ P) :=
+begin
+  apply substitution_theorem_fun_aux,
+  exact h1,
+  squeeze_simp,
+  squeeze_simp,
+  squeeze_simp,
 end
 
 
