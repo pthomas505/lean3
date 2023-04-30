@@ -643,10 +643,36 @@ begin
     rewrite h3,
     exact h1,
   },
-  case formula.not_ : P_ᾰ P_ih binders val h1
-  { admit },
-  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders val h1
-  { admit },
+  case formula.not_ : P P_ih binders val h1
+  {
+    unfold fast_replace_free_fun,
+    apply not_congr,
+    apply P_ih,
+    unfold admits_fun_aux at h1,
+    exact h1,
+    exact h2,
+    exact h2',
+    exact h3,
+  },
+  case formula.imp_ : P Q P_ih Q_ih binders val h1
+  {
+    unfold admits_fun_aux at h1,
+    cases h1,
+
+    unfold fast_replace_free_fun,
+    apply imp_congr,
+    apply P_ih,
+    exact h1_left,
+    exact h2,
+    exact h2',
+    exact h3,
+
+    apply Q_ih,
+    exact h1_right,
+    exact h2,
+    exact h2',
+    exact h3,
+  },
   case formula.forall_ : x P P_ih binders val val' σ σ' h1 h2 h2' h3
   {
     unfold admits_fun_aux at h1,
