@@ -541,7 +541,29 @@ example
   holds D I (function.update_ite val v (val t)) P ↔
     holds D I val P' :=
 begin
-  sorry
+  induction h1,
+  case is_free_sub.pred_ : h1_P h1_xs h1_v h1_t
+  {
+    unfold holds,
+    congr' 2,
+    squeeze_simp,
+    simp only [list.map_eq_map_iff],
+    intros x a1,
+    unfold function.update_ite,
+    squeeze_simp,
+    split_ifs;
+    refl,
+  },
+  case is_free_sub.not_ : h1_P h1_v h1_t h1_P' h1_ᾰ h1_ih
+  { admit },
+  case is_free_sub.imp_ : h1_P h1_Q h1_v h1_t h1_P' h1_Q' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  { admit },
+  case is_free_sub.forall_not_free_in : h1_x h1_P h1_v h1_t h1_ᾰ
+  { admit },
+  case is_free_sub.forall_free_in : h1_x h1_P h1_v h1_t h1_P' h1_1 h1_2 h1_3 h1_ih
+  {
+    sorry,
+  },
 end
 
 
