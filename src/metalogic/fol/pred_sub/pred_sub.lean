@@ -558,10 +558,30 @@ begin
   { admit },
   case is_free_sub.imp_ : h1_P h1_Q h1_v h1_t h1_P' h1_Q' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
   { admit },
-  case is_free_sub.forall_not_free_in : h1_x h1_P h1_v h1_t h1_ᾰ
-  { admit },
+  case is_free_sub.forall_not_free_in : h1_x h1_P h1_v h1_t h1_1
+  {
+    unfold ind_var_.is_free_in at h1_1,
+    squeeze_simp at h1_1,
+
+    unfold holds,
+    apply forall_congr,
+    intros d,
+    apply holds_congr_ind_var,
+    intros x a1,
+    unfold function.update_ite,
+    split_ifs,
+    refl,
+    subst h_1,
+    specialize h1_1 h,
+    contradiction,
+    refl,
+  },
   case is_free_sub.forall_free_in : h1_x h1_P h1_v h1_t h1_P' h1_1 h1_2 h1_3 h1_ih
   {
+    unfold holds,
+    apply forall_congr,
+    intros d,
+
     sorry,
   },
 end
