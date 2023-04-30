@@ -180,7 +180,7 @@ inductive is_free_sub : formula → ind_var_ → ind_var_ → formula → Prop
 
 def admits_fun_aux (σ : ind_var_ → ind_var_) : finset ind_var_ → formula → Prop
 | binders (pred_ name args) :=
-    ∀ (v : ind_var_), v ∈ args → ¬ v ∈ binders → ¬ σ v ∈ binders 
+    ∀ (v : ind_var_), (v ∈ args ∧ v ∉ binders) → σ v ∉ binders 
 | binders (not_ P) := admits_fun_aux binders P
 | binders (imp_ P Q) := admits_fun_aux binders P ∧ admits_fun_aux binders Q
 | binders (forall_ x P) := admits_fun_aux (binders ∪ {x}) P
@@ -190,21 +190,11 @@ def admits_fun (σ : ind_var_ → ind_var_) (P : formula) : Prop :=
   admits_fun_aux σ ∅ P
 
 
-def replace_free_fun_aux (σ : ind_var_ → ind_var_) : finset ind_var_ → formula → formula
-| binders (pred_ name args) :=
-    pred_
-    name
-    (args.map (fun (x : ind_var_), if x ∈ binders then x else σ x))
-| binders (not_ P) := not_ (replace_free_fun_aux binders P)
-| binders (imp_ P Q) :=
-    imp_
-    (replace_free_fun_aux binders P)
-    (replace_free_fun_aux binders Q)
-| binders (forall_ x P) :=
-    forall_ x (replace_free_fun_aux (binders ∪ {x}) P)
-
-
-def replace_free_fun (σ : ind_var_ → ind_var_) (P : formula) : formula := replace_free_fun_aux σ ∅ P
+def fast_replace_free_fun : (ind_var_ → ind_var_) → formula → formula
+| σ (pred_ name args) := pred_ name (args.map σ)
+| σ (not_ P) := not_ (fast_replace_free_fun σ P)
+| σ (imp_ P Q) := imp_ (fast_replace_free_fun σ P) (fast_replace_free_fun σ Q)
+| σ (forall_ x P) := forall_ x (fast_replace_free_fun (function.update_ite σ x x) P)
 
 
 inductive is_free_sub_fun : formula → (ind_var_ → ind_var_) → formula → Prop
@@ -617,6 +607,51 @@ end
 example
   {D : Type}
   (I : interpretation D)
+  (val val' : valuation D)
+  (σ : ind_var_ → ind_var_)
+  (binders : finset ind_var_)
+  (P : formula)
+  (h1 : admits_fun_aux σ binders P)
+  (h2 : ∀ (x : ind_var_), val (σ x) = val' (σ x)) :
+  holds D I (val ∘ σ) P ↔
+    holds D I val' (fast_replace_free_fun σ P) :=
+begin
+  induction P generalizing binders val val' σ,
+  case formula.pred_ : name args binders val val' σ h1
+  {
+    unfold admits_fun_aux at h1,
+    squeeze_simp at h1,
+
+    unfold fast_replace_free_fun,
+    unfold holds,
+    squeeze_simp,
+    congr' 2,
+    simp only [list.map_eq_map_iff],
+    intros x a1,
+    squeeze_simp,
+    specialize h1 x a1,
+    apply h2,
+  },
+  case formula.not_ : P_ᾰ P_ih binders val h1
+  { admit },
+  case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders val h1
+  { admit },
+  case formula.forall_ : x P P_ih binders val val' σ h1
+  {
+    unfold admits_fun_aux at h1,
+
+    unfold fast_replace_free_fun,
+    unfold holds,
+    apply forall_congr,
+    intros d,
+    sorry,
+  },
+end
+
+
+example
+  {D : Type}
+  (I : interpretation D)
   (val : valuation D)
   (σ  : ind_var_ → ind_var_)
   (P P' : formula)
@@ -624,5 +659,48 @@ example
   holds D I (val ∘ σ) P ↔
     holds D I val P' :=
 begin
-  sorry
+  induction h1 generalizing val,
+  case is_free_sub_fun.pred_ : h1_P h1_xs h1_σ val
+  {
+    unfold holds,
+    congr' 2,
+    simp only [list.map_map],
+  },
+  case is_free_sub_fun.not_ : h1_P h1_σ h1_P' h1_ᾰ h1_ih val
+  { admit },
+  case is_free_sub_fun.imp_ : h1_P h1_Q h1_σ h1_P' h1_Q' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1 val
+  { admit },
+  case is_free_sub_fun.forall_not_free_in : h1_x h1_P h1_σ h1_1 val
+  {
+    unfold ind_var_.is_free_in at h1_1,
+    squeeze_simp at h1_1,
+
+    unfold holds,
+    apply forall_congr,
+    intros d,
+
+    apply holds_congr_ind_var,
+    intros x a1,
+    unfold function.update_ite,
+    split_ifs,
+    refl,
+    squeeze_simp,
+    congr,
+    apply h1_1,
+    exact h,
+    exact a1,
+  },
+  case is_free_sub_fun.forall_free_in : h1_x h1_P h1_σ h1_P' h1_1 h1_2 h1_3 h1_ih val
+  {
+    unfold ind_var_.is_free_in at h1_1,
+    squeeze_simp at h1_1,
+
+    unfold ind_var_.is_free_in at h1_2,
+    squeeze_simp at h1_2,
+
+    unfold holds,
+    apply forall_congr,
+    intros d,
+    sorry,
+  },
 end
