@@ -541,7 +541,7 @@ example
   holds D I (function.update_ite val v (val t)) P ↔
     holds D I val P' :=
 begin
-  induction h1,
+  induction h1 generalizing val,
   case is_free_sub.pred_ : h1_P h1_xs h1_v h1_t
   {
     unfold holds,
@@ -578,11 +578,29 @@ begin
   },
   case is_free_sub.forall_free_in : h1_x h1_P h1_v h1_t h1_P' h1_1 h1_2 h1_3 h1_ih
   {
+    unfold ind_var_.is_free_in at h1_1,
+    cases h1_1,
+
     unfold holds,
     apply forall_congr,
     intros d,
 
-    sorry,
+    specialize h1_ih (function.update_ite val h1_x d),
+
+    rewrite <- h1_ih,
+    apply holds_congr_ind_var,
+    intros x a1,
+    funext,
+    unfold function.update_ite,
+    split_ifs,
+    refl,
+    subst h_1,
+    contradiction,
+    refl,
+    subst h_2,
+    contradiction,
+    refl,
+    refl,
   },
 end
 
