@@ -62,7 +62,7 @@ structure interpretation (D : Type) : Type :=
 (pred : pred_var_ → (list D → Prop))
 
 /-
-  pred_ P [] is a propositional variable (not a propositional constant like T or F).
+  pred_ _ [] is a propositional variable (not a propositional constant like T or F).
 -/
 
 -- The assignment of individual variables to elements of the domain.
@@ -70,15 +70,15 @@ def valuation (D : Type) := ind_var_ → D
 
 
 def holds (D : Type) (I : interpretation D) : valuation D → formula → Prop
-| val (pred_ P xs) := I.pred P (xs.map val)
-| val (not_ φ) := ¬ holds val φ
-| val (imp_ φ ψ) := holds val φ → holds val ψ
-| val (forall_ x φ) := ∀ (d : D), holds (function.update_ite val x d) φ
+| V (pred_ X xs) := I.pred X (xs.map V)
+| V (not_ P) := ¬ holds V P
+| V (imp_ P Q) := holds V P → holds V Q
+| V (forall_ x P) := ∀ (d : D), holds (function.update_ite V x d) P
 
 
-def formula.is_valid (φ : formula) : Prop :=
-  ∀ (D : Type) (I : interpretation D) (val : valuation D),
-    holds D I val φ
+def formula.is_valid (P : formula) : Prop :=
+  ∀ (D : Type) (I : interpretation D) (V : valuation D),
+    holds D I V P
 
 
 /--
@@ -86,8 +86,8 @@ def formula.is_valid (φ : formula) : Prop :=
 -/
 def ind_var_.is_free_in (v : ind_var_) : formula → Prop
 | (pred_ _ xs) := v ∈ xs.to_finset
-| (not_ φ) := ind_var_.is_free_in φ
-| (imp_ φ ψ) := ind_var_.is_free_in φ ∨ ind_var_.is_free_in ψ
+| (not_ P) := ind_var_.is_free_in P
+| (imp_ P Q) := ind_var_.is_free_in P ∨ ind_var_.is_free_in Q
 | (forall_ x φ) := ¬ v = x ∧ ind_var_.is_free_in φ
 
 
@@ -608,16 +608,20 @@ example
   {D : Type}
   (I : interpretation D)
   (val val' : valuation D)
-  (σ : ind_var_ → ind_var_)
+  (σ σ' : ind_var_ → ind_var_)
   (binders : finset ind_var_)
   (P : formula)
   (h1 : admits_fun_aux σ binders P)
-  (h2 : ∀ (x : ind_var_), val (σ x) = val' (σ x)) :
-  holds D I (val ∘ σ) P ↔
-    holds D I val' (fast_replace_free_fun σ P) :=
+
+  (h2 : ∀ (x : ind_var_), x ∈ binders ∨ σ' x ∉ binders → (val x = val' (σ' x)))
+  (h2' : ∀ (x : ind_var_), x ∈ binders → σ' x = x)
+
+  (h3 : ∀ (x : ind_var_), x ∉ binders -> σ' x = σ x) :
+  holds D I val P ↔
+    holds D I val' (fast_replace_free_fun σ' P) :=
 begin
-  induction P generalizing binders val val' σ,
-  case formula.pred_ : name args binders val val' σ h1
+  induction P generalizing binders val val' σ σ',
+  case formula.pred_ : name args binders val val' σ σ' h1
   {
     unfold admits_fun_aux at h1,
     squeeze_simp at h1,
@@ -627,16 +631,23 @@ begin
     squeeze_simp,
     congr' 2,
     simp only [list.map_eq_map_iff],
-    intros x a1,
+    intros v a1,
     squeeze_simp,
-    specialize h1 x a1,
     apply h2,
+    by_cases c1 : v ∈ binders,
+    left,
+    exact c1,
+    right,
+    specialize h1 v a1 c1,
+    specialize h3 v c1,
+    rewrite h3,
+    exact h1,
   },
   case formula.not_ : P_ᾰ P_ih binders val h1
   { admit },
   case formula.imp_ : P_ᾰ P_ᾰ_1 P_ih_ᾰ P_ih_ᾰ_1 binders val h1
   { admit },
-  case formula.forall_ : x P P_ih binders val val' σ h1
+  case formula.forall_ : x P P_ih binders val val' σ σ' h1 h2 h2' h3
   {
     unfold admits_fun_aux at h1,
 
@@ -644,7 +655,57 @@ begin
     unfold holds,
     apply forall_congr,
     intros d,
-    sorry,
+
+    apply P_ih (binders ∪ {x}) (function.update_ite val x d) (function.update_ite val' x d) σ (function.update_ite σ' x x) h1,
+    {
+      intros v,
+      squeeze_simp,
+      unfold function.update_ite,
+      split_ifs,
+      squeeze_simp,
+      intros a1,
+      push_neg at a1,
+      squeeze_simp at a1,
+      cases a1,
+      specialize h2' v,
+      cases a1,
+      specialize h2' a1,
+      subst h_1,
+      exfalso,
+      apply h,
+      symmetry,
+      exact h2',
+      contradiction,
+      cases a1,
+      contradiction,
+      intros a2,
+      apply h2,
+      tauto,
+    },
+    {
+      intros v a1,
+      unfold function.update_ite,
+      squeeze_simp at a1,
+      split_ifs,
+      subst h,
+      cases a1,
+      apply h2',
+      exact a1,
+      contradiction,
+    },
+    {
+      intros v a1,
+      squeeze_simp at a1,
+      unfold function.update_ite,
+      split_ifs,
+      push_neg at a1,
+      cases a1,
+      contradiction,
+      push_neg at a1,
+      cases a1,
+      apply h3,
+      exact a1_left,
+    }
   },
 end
 
