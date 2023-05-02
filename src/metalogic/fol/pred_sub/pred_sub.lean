@@ -264,8 +264,20 @@ def function.update_list
   [decidable_eq α]
   (f : α → β) :
   list α → list β → α → β
-| (x :: xs) (y :: ys) := function.update_ite (function.update_list xs ys) x y 
+| (x :: xs) (y :: ys) := function.update_ite (function.update_list_ite xs ys) x y 
 | _ _ := f
+
+
+def function.update_list_ite'
+  {α β : Type}
+  [decidable_eq α]
+  (f : α → β)
+  (xs : list α)
+  (ys : list β) :
+  α → β :=
+  list.foldr (fun (p : α × β) (g : α → β), function.update_ite f p.fst p.snd) f (list.zip xs ys) 
+
+#eval function.update_list_ite' (fun (n : ℕ), n) [0, 3, 0] [10, 2, 2] 0
 
 
 lemma admits_fun_aux_and_fast_replace_free_fun_imp_is_free_sub_fun
