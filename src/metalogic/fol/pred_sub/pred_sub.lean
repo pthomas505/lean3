@@ -259,6 +259,15 @@ def is_free_sub_chain (P : formula) (xs ys : list ind_var_) (Q : formula) : Prop
   ∃ (l : list formula), is_free_sub_chain_aux ((P :: l) ++ [Q]) xs ys
 
 
+def function.update_list
+  {α β : Type}
+  [decidable_eq α]
+  (f : α → β) :
+  list α → list β → α → β
+| (x :: xs) (y :: ys) := function.update_ite (function.update_list xs ys) x y 
+| _ _ := f
+
+
 lemma admits_fun_aux_and_fast_replace_free_fun_imp_is_free_sub_fun
   (P P' : formula)
   (σ : ind_var_ → ind_var_)
@@ -554,7 +563,7 @@ begin
 end
 
 
-example
+theorem substitution_theorem_ind
   {D : Type}
   (I : interpretation D)
   (val : valuation D)
@@ -634,6 +643,22 @@ begin
     refl,
     refl,
   },
+end
+
+
+example
+  (D : Type)
+  (I : interpretation D)
+  (V : valuation D)
+  (P Q : formula)
+  (zs ts : list ind_var_)
+  (h1 : zs.nodup)
+  (h2 : ∀ (z : ind_var_), z ∈ zs → ¬ z ∈ ts)
+  (h3 : is_free_sub_chain P zs ts Q) :
+  holds D I (function.update_list V zs (ts.map V)) P ↔
+  holds D I V Q :=
+begin
+  sorry,
 end
 
 
