@@ -269,7 +269,6 @@ begin
 end
 
 
-
 lemma holds_congr_ind_var
   {D : Type}
   (I : interpretation D)
