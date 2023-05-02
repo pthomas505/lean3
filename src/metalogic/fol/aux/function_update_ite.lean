@@ -142,7 +142,7 @@ end
 
 
 lemma function.update_ite_symm
-  {α α' β : Sort*}
+  {α β : Sort*}
   [decidable_eq α]
   (f : α → β)
   (x y : α)
@@ -163,7 +163,7 @@ begin
     },
     {
       subst c1,
-      squeeze_simp,
+      simp only [eq_self_iff_true, if_true, ite_eq_right_iff],
       intros a1,
       contradiction,
     }
@@ -172,7 +172,7 @@ begin
     by_cases c2 : a = y,
     {
       subst c2,
-      squeeze_simp,
+      simp only [eq_self_iff_true, if_true],
       simp only [if_neg c1],
     },
     {
