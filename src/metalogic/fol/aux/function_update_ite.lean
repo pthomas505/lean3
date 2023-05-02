@@ -141,4 +141,45 @@ begin
 end
 
 
+lemma function.update_ite_symm
+  {α α' β : Sort*}
+  [decidable_eq α]
+  (f : α → β)
+  (x y : α)
+  (d d' : β)
+  (h1 : ¬ x = y) :
+  function.update_ite (function.update_ite f x d) y d' =
+    function.update_ite (function.update_ite f y d') x d :=
+begin
+  funext,
+  unfold function.update_ite,
+  by_cases c1 : a = x,
+  {
+    by_cases c2 : a = y,
+    {
+      subst c1,
+      subst c2,
+      contradiction,
+    },
+    {
+      subst c1,
+      squeeze_simp,
+      intros a1,
+      contradiction,
+    }
+  },
+  {
+    by_cases c2 : a = y,
+    {
+      subst c2,
+      squeeze_simp,
+      simp only [if_neg c1],
+    },
+    {
+      simp only [if_neg c1],
+    }
+  }
+end
+
+
 #lint
