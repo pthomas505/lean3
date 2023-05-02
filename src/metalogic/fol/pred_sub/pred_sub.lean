@@ -91,6 +91,20 @@ def ind_var_.is_free_in (v : ind_var_) : formula → Prop
 | (forall_ x φ) := ¬ v = x ∧ ind_var_.is_free_in φ
 
 
+def ind_var_.occurs_in (v : ind_var_) : formula → Prop
+| (pred_ name args) := v ∈ args.to_finset
+| (not_ P) := ind_var_.occurs_in P
+| (imp_ P Q) := ind_var_.occurs_in P ∨ ind_var_.occurs_in Q
+| (forall_ x P) := v = x ∨ ind_var_.occurs_in P
+
+
+def formula.is_atomic : formula → Prop
+| (pred_ _ _) := true
+| (not_ P) := false
+| (imp_ P Q) := false
+| (forall_ x P) := false
+
+
 /--
   pred_var_.occurs_in Q φ := True if and only if there is an occurrence of the predicate variable Q in the formula φ.
 -/
@@ -235,8 +249,25 @@ inductive is_free_sub_fun : formula → (ind_var_ → ind_var_) → formula → 
   is_free_sub_fun (forall_ x P) σ (forall_ x P')
 
 
-def is_free_sub_chain (l : list (formula × ind_var_ × ind_var_)) : Prop :=
-list.chain' (fun (a b : formula × ind_var_ × ind_var_), is_free_sub a.1 b.2.1 b.2.2 b.1) l
+def is_free_sub_chain : list formula → list ind_var_ → list ind_var_ → Prop
+| (last :: list.nil) list.nil list.nil := true
+| (fst :: snd :: tl) (x :: xs) (y :: ys) :=
+    is_free_sub fst x y snd ∧ is_free_sub_chain (snd :: tl) xs ys
+| _ _ _ := false
+
+
+lemma admits_fun_aux_and_fast_replace_free_fun_imp_is_free_sub_fun
+  (P P' : formula)
+  (σ : ind_var_ → ind_var_)
+  (binders : finset ind_var_)
+  (h1 : admits_fun_aux σ binders P)
+  (h2 : fast_replace_free_fun σ P = P') :
+  is_free_sub_fun P σ P' :=
+begin
+  subst h2,
+  sorry,
+end
+
 
 
 lemma holds_congr_ind_var
@@ -624,15 +655,15 @@ begin
   case formula.pred_ : name args binders val val' σ σ' h1
   {
     unfold admits_fun_aux at h1,
-    squeeze_simp at h1,
+    simp only [and_imp] at h1,
 
     unfold fast_replace_free_fun,
     unfold holds,
-    squeeze_simp,
+    simp only [list.map_map],
     congr' 2,
     simp only [list.map_eq_map_iff],
     intros v a1,
-    squeeze_simp,
+    simp only [function.comp_app],
     apply h2,
     by_cases c1 : v ∈ binders,
     left,
@@ -685,13 +716,13 @@ begin
     apply P_ih (binders ∪ {x}) (function.update_ite val x d) (function.update_ite val' x d) σ (function.update_ite σ' x x) h1,
     {
       intros v,
-      squeeze_simp,
+      simp only [finset.mem_union, finset.mem_singleton],
       unfold function.update_ite,
       split_ifs,
-      squeeze_simp,
+      simp only [eq_self_iff_true, implies_true_iff],
       intros a1,
       push_neg at a1,
-      squeeze_simp at a1,
+      simp only [ne.def] at a1,
       cases a1,
       specialize h2' v,
       cases a1,
@@ -711,7 +742,7 @@ begin
     {
       intros v a1,
       unfold function.update_ite,
-      squeeze_simp at a1,
+      simp only [finset.mem_union, finset.mem_singleton] at a1,
       split_ifs,
       subst h,
       cases a1,
@@ -721,7 +752,7 @@ begin
     },
     {
       intros v a1,
-      squeeze_simp at a1,
+      simp only [finset.mem_union, finset.mem_singleton] at a1,
       unfold function.update_ite,
       split_ifs,
       push_neg at a1,
@@ -748,64 +779,7 @@ theorem substitution_theorem_fun
 begin
   apply substitution_theorem_fun_aux,
   exact h1,
-  squeeze_simp,
-  squeeze_simp,
-  squeeze_simp,
-end
-
-
-example
-  {D : Type}
-  (I : interpretation D)
-  (val : valuation D)
-  (σ  : ind_var_ → ind_var_)
-  (P P' : formula)
-  (h1 : is_free_sub_fun P σ P') :
-  holds D I (val ∘ σ) P ↔
-    holds D I val P' :=
-begin
-  induction h1 generalizing val,
-  case is_free_sub_fun.pred_ : h1_P h1_xs h1_σ val
-  {
-    unfold holds,
-    congr' 2,
-    simp only [list.map_map],
-  },
-  case is_free_sub_fun.not_ : h1_P h1_σ h1_P' h1_ᾰ h1_ih val
-  { admit },
-  case is_free_sub_fun.imp_ : h1_P h1_Q h1_σ h1_P' h1_Q' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1 val
-  { admit },
-  case is_free_sub_fun.forall_not_free_in : h1_x h1_P h1_σ h1_1 val
-  {
-    unfold ind_var_.is_free_in at h1_1,
-    squeeze_simp at h1_1,
-
-    unfold holds,
-    apply forall_congr,
-    intros d,
-
-    apply holds_congr_ind_var,
-    intros x a1,
-    unfold function.update_ite,
-    split_ifs,
-    refl,
-    squeeze_simp,
-    congr,
-    apply h1_1,
-    exact h,
-    exact a1,
-  },
-  case is_free_sub_fun.forall_free_in : h1_x h1_P h1_σ h1_P' h1_1 h1_2 h1_3 h1_ih val
-  {
-    unfold ind_var_.is_free_in at h1_1,
-    squeeze_simp at h1_1,
-
-    unfold ind_var_.is_free_in at h1_2,
-    squeeze_simp at h1_2,
-
-    unfold holds,
-    apply forall_congr,
-    intros d,
-    sorry,
-  },
+  simp only [finset.not_mem_empty, not_false_iff, false_or, eq_self_iff_true, forall_const],
+  simp only [finset.not_mem_empty, is_empty.forall_iff, forall_const],
+  simp only [finset.not_mem_empty, not_false_iff, eq_self_iff_true, forall_const],
 end
