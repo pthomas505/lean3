@@ -259,7 +259,7 @@ def is_free_sub_chain (P : formula) (xs ys : list ind_var_) (Q : formula) : Prop
   ∃ (l : list formula), is_free_sub_chain_aux ((P :: l) ++ [Q]) xs ys
 
 
-def function.update_list
+def function.update_list_ite
   {α β : Type}
   [decidable_eq α]
   (f : α → β) :
@@ -278,6 +278,68 @@ def function.update_list_ite'
   list.foldr (fun (p : α × β) (g : α → β), function.update_ite f p.fst p.snd) f (list.zip xs ys) 
 
 #eval function.update_list_ite' (fun (n : ℕ), n) [0, 3, 0] [10, 2, 2] 0
+
+
+inductive is_pred_sub : formula → pred_var_ → list ind_var_ → formula → formula → Prop
+
+| atom_
+  (A : formula)
+  (P : pred_var_)
+  (zs : list ind_var_)
+  (H : formula) :
+  A.is_atomic →
+  ¬ P.occurs_in A →
+  is_pred_sub A P zs H A
+
+| pred_
+  (P : pred_var_)
+  (ts : list ind_var_)
+  (zs : list ind_var_)
+  (H : formula)
+  (B : formula) :
+  is_free_sub_fun H (function.update_list_ite' id zs ts) B →
+  is_pred_sub (pred_ P ts) P zs H B
+
+| not_
+  (A : formula)
+  (P : pred_var_)
+  (zs : list ind_var_)
+  (H : formula)
+  (B : formula) :
+  is_pred_sub A P zs H B →
+  is_pred_sub A.not_ P zs H B.not_
+
+| imp_
+  (A1 A2 : formula)
+  (P : pred_var_)
+  (zs : list ind_var_)
+  (H : formula)
+  (B1 B2 : formula) :
+  is_pred_sub A1 P zs H B1 →
+  is_pred_sub A2 P zs H B2 →
+  is_pred_sub (A1.imp_ A2) P zs H (B1.imp_ B2)
+
+| forall_not_occur
+  (x : ind_var_)
+  (A : formula)
+  (P : pred_var_)
+  (zs : list ind_var_)
+  (H : formula)
+  (B : formula) :
+  ¬ P.occurs_in (forall_ x A) →
+  is_pred_sub (forall_ x A) P zs H (forall_ x A)
+
+| forall_occur
+  (x : ind_var_)
+  (A : formula)
+  (P : pred_var_)
+  (zs : list ind_var_)
+  (H : formula)
+  (B : formula) :
+  P.occurs_in (forall_ x A) →
+  ¬ x.is_free_in H →
+  is_pred_sub A P zs H B →
+  is_pred_sub (forall_ x A) P zs H (forall_ x B)
 
 
 lemma admits_fun_aux_and_fast_replace_free_fun_imp_is_free_sub_fun
@@ -667,7 +729,7 @@ example
   (h1 : zs.nodup)
   (h2 : ∀ (z : ind_var_), z ∈ zs → ¬ z ∈ ts)
   (h3 : is_free_sub_chain P zs ts Q) :
-  holds D I (function.update_list V zs (ts.map V)) P ↔
+  holds D I (function.update_list_ite V zs (ts.map V)) P ↔
   holds D I V Q :=
 begin
   sorry,
