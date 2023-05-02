@@ -249,11 +249,14 @@ inductive is_free_sub_fun : formula → (ind_var_ → ind_var_) → formula → 
   is_free_sub_fun (forall_ x P) σ (forall_ x P')
 
 
-def is_free_sub_chain : list formula → list ind_var_ → list ind_var_ → Prop
+def is_free_sub_chain_aux : list formula → list ind_var_ → list ind_var_ → Prop
 | (last :: list.nil) list.nil list.nil := true
 | (fst :: snd :: tl) (x :: xs) (y :: ys) :=
-    is_free_sub fst x y snd ∧ is_free_sub_chain (snd :: tl) xs ys
+    is_free_sub fst x y snd ∧ is_free_sub_chain_aux (snd :: tl) xs ys
 | _ _ _ := false
+
+def is_free_sub_chain (P : formula) (xs ys : list ind_var_) (Q : formula) : Prop :=
+  ∃ (l : list formula), is_free_sub_chain_aux ((P :: l) ++ [Q]) xs ys
 
 
 lemma admits_fun_aux_and_fast_replace_free_fun_imp_is_free_sub_fun
