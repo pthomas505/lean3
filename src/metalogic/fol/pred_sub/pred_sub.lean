@@ -960,8 +960,25 @@ begin
   { admit },
   case is_pred_sub.imp_ : h1_A1 h1_A2 h1_P h1_zs h1_H h1_B1 h1_B2 h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
   { admit },
-  case is_pred_sub.forall_not_occurs_in : h1_x h1_A h1_P h1_zs h1_H h1_B h1_ᾰ
-  { admit },
+  case is_pred_sub.forall_not_occurs_in : h1_x h1_A h1_P h1_zs h1_H h1_B h1_1
+  {
+    unfold pred_var_.occurs_in at h1_1,
+    apply coincidence_theorem,
+    unfold coincide,
+    split,
+    {
+      unfold pred_var_.occurs_in,
+      intros Q a1,
+      apply h2,
+      intros contra,
+      apply h1_1,
+      subst contra,
+      exact a1,
+    },
+    {
+      squeeze_simp,
+    },
+  },
   case is_pred_sub.forall_occurs_in : h1_x h1_A h1_P h1_zs h1_H h1_B h1_ᾰ h1_ᾰ_1 h1_ᾰ_2 h1_ih
   { admit },
 end
