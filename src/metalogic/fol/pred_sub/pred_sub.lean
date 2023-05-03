@@ -900,7 +900,7 @@ example
   (h3 : ∀ (ds : list D), J.pred P ds ↔ holds D I (function.update_list_ite V zs ds) H) :
   holds D I V B ↔ holds D J V A :=
 begin
-  induction h1,
+  induction h1 generalizing V,
   case is_pred_sub.pred_not_occurs_in : h1_Q h1_ts h1_P h1_zs h1_H h1_1
   {
     apply coincidence_theorem,
@@ -979,6 +979,66 @@ begin
       squeeze_simp,
     },
   },
-  case is_pred_sub.forall_occurs_in : h1_x h1_A h1_P h1_zs h1_H h1_B h1_ᾰ h1_ᾰ_1 h1_ᾰ_2 h1_ih
-  { admit },
+  case is_pred_sub.forall_occurs_in : h1_x h1_A h1_P h1_zs h1_H h1_B h1_1 h1_2 h1_3 h1_ih
+  {
+    have s1 : ∀ (d : D) (ds : list D), holds D I (function.update_list_ite (function.update_ite V h1_x d) h1_zs ds) h1_H ↔ holds D I (function.update_list_ite V h1_zs ds) h1_H,
+    {
+      intros d ds,
+      apply coincidence_theorem,
+      unfold coincide,
+      split,
+      {
+        squeeze_simp,
+      },
+      {
+        intros v a1,
+        clear h1_3, clear h3, clear h1_ih,
+        induction h1_zs generalizing ds,
+        unfold function.update_list_ite,
+        unfold function.update_ite,
+        split_ifs,
+        exfalso,
+        apply h1_2,
+        subst h,
+        exact a1,
+        refl,
+        cases ds,
+        {
+          unfold function.update_list_ite,
+          unfold function.update_ite,
+          split_ifs,
+          {
+            exfalso,
+            apply h1_2,
+            subst h,
+            exact a1,
+          },
+          {
+            refl,
+          }
+        },
+        {
+          unfold function.update_list_ite,
+          unfold function.update_ite,
+          split_ifs,
+          {
+            refl,
+          },
+          {
+            apply h1_zs_ih,
+          }
+        }
+      },
+    },
+
+    unfold holds,
+    apply forall_congr,
+    intros d,
+    apply h1_ih,
+    exact h2,
+    intros ds,
+    rewrite h3 ds,
+    symmetry,
+    exact s1 d ds,
+  },
 end
