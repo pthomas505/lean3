@@ -287,7 +287,7 @@ inductive is_pred_sub : formula → pred_var_ → list ind_var_ → formula → 
   (P : pred_var_)
   (zs : list ind_var_)
   (H : formula) :
-  ¬ P = Q ∨ ¬ zs.length = ts.length →
+  ¬ P = Q →
   is_pred_sub (pred_ Q ts) P zs H (pred_ Q ts)
 
 | pred_occurs_in
@@ -901,8 +901,22 @@ example
   holds D I V B ↔ holds D J V A :=
 begin
   induction h1,
-  case is_pred_sub.pred_not_occurs_in : h1_Q h1_ts h1_P h1_zs h1_H h1_ᾰ
-  { admit },
+  case is_pred_sub.pred_not_occurs_in : h1_Q h1_ts h1_P h1_zs h1_H h1_1
+  {
+    apply coincidence_theorem,
+    unfold coincide,
+    split,
+    {
+      unfold pred_var_.occurs_in,
+      intros Q a1,
+      apply h2,
+      subst a1,
+      exact h1_1,
+    },
+    {
+      squeeze_simp,
+    }
+  },
   case is_pred_sub.pred_occurs_in : h1_P h1_ts h1_zs h1_H h1_B h1_1 h1_2 h1_3
   {
     obtain s1 := substitution_theorem_fun I V (function.update_list_ite id h1_zs h1_ts) h1_H h1_2,
