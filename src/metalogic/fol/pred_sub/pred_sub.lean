@@ -282,22 +282,22 @@ def function.update_list_ite'
 
 inductive is_pred_sub : formula → pred_var_ → list ind_var_ → formula → formula → Prop
 
-| atom_
-  (A : formula)
+| pred_not_occurs_in
+  (Q : pred_var_) (ts : list ind_var_)
   (P : pred_var_)
   (zs : list ind_var_)
   (H : formula) :
-  A.is_atomic →
-  ¬ P.occurs_in A →
-  is_pred_sub A P zs H A
+  ¬ P = Q ∨ ¬ zs.length = ts.length →
+  is_pred_sub (pred_ Q ts) P zs H (pred_ Q ts)
 
-| pred_
-  (P : pred_var_)
-  (ts : list ind_var_)
+| pred_occurs_in
+  (P : pred_var_) (ts : list ind_var_)
   (zs : list ind_var_)
   (H : formula)
   (B : formula) :
-  is_free_sub_fun H (function.update_list_ite' id zs ts) B →
+  zs.length = ts.length →
+  admits_fun (function.update_list_ite id zs ts) H →
+  fast_replace_free_fun (function.update_list_ite id zs ts) H = B →
   is_pred_sub (pred_ P ts) P zs H B
 
 | not_
@@ -319,7 +319,7 @@ inductive is_pred_sub : formula → pred_var_ → list ind_var_ → formula → 
   is_pred_sub A2 P zs H B2 →
   is_pred_sub (A1.imp_ A2) P zs H (B1.imp_ B2)
 
-| forall_not_occur
+| forall_not_occurs_in
   (x : ind_var_)
   (A : formula)
   (P : pred_var_)
@@ -329,7 +329,7 @@ inductive is_pred_sub : formula → pred_var_ → list ind_var_ → formula → 
   ¬ P.occurs_in (forall_ x A) →
   is_pred_sub (forall_ x A) P zs H (forall_ x A)
 
-| forall_occur
+| forall_occurs_in
   (x : ind_var_)
   (A : formula)
   (P : pred_var_)
@@ -883,4 +883,71 @@ begin
   simp only [finset.not_mem_empty, not_false_iff, false_or, eq_self_iff_true, forall_const],
   simp only [finset.not_mem_empty, is_empty.forall_iff, forall_const],
   simp only [finset.not_mem_empty, not_false_iff, eq_self_iff_true, forall_const],
+end
+
+
+example
+  (D : Type)
+  (I J : interpretation D)
+  (V : valuation D)
+  (A : formula)
+  (P : pred_var_)
+  (zs : list ind_var_)
+  (H : formula)
+  (B : formula)
+  (h1 : is_pred_sub A P zs H B)
+  (h2 : ∀ (Q : pred_var_), ¬ P = Q → I.pred Q = J.pred Q)
+  (h3 : ∀ (ds : list D), J.pred P ds ↔ holds D I (function.update_list_ite V zs ds) H) :
+  holds D I V B ↔ holds D J V A :=
+begin
+  induction h1,
+  case is_pred_sub.pred_not_occurs_in : h1_Q h1_ts h1_P h1_zs h1_H h1_ᾰ
+  { admit },
+  case is_pred_sub.pred_occurs_in : h1_P h1_ts h1_zs h1_H h1_B h1_1 h1_2 h1_3
+  {
+    obtain s1 := substitution_theorem_fun I V (function.update_list_ite id h1_zs h1_ts) h1_H h1_2,
+    rewrite h1_3 at s1,
+
+    have s2 : (V ∘ function.update_list_ite id h1_zs h1_ts) = ( function.update_list_ite (V ∘ id) h1_zs (h1_ts.map V)),
+    {
+      clear h1_1, clear h1_2, clear h1_3, clear h2, clear h3, clear s1,
+      funext,
+      squeeze_simp,
+      induction h1_zs generalizing h1_ts,
+      unfold function.update_list_ite,
+      squeeze_simp,
+      cases h1_ts,
+      squeeze_simp,
+      unfold function.update_list_ite,
+      squeeze_simp,
+      unfold function.update_list_ite,
+      squeeze_simp,
+      unfold function.update_ite,
+      split_ifs,
+      unfold function.update_list_ite,
+      unfold function.update_ite,
+      split_ifs,
+      refl,
+      unfold function.update_list_ite,
+      unfold function.update_ite,
+      split_ifs,
+      apply h1_zs_ih,
+    },
+    rewrite s2 at s1,
+    clear s2,
+    squeeze_simp at s1,
+    specialize h3 (list.map V h1_ts),
+    rewrite <- h3 at s1,
+    clear h3,
+    rewrite <- s1,
+    unfold holds,
+  },
+  case is_pred_sub.not_ : h1_A h1_P h1_zs h1_H h1_B h1_ᾰ h1_ih
+  { admit },
+  case is_pred_sub.imp_ : h1_A1 h1_A2 h1_P h1_zs h1_H h1_B1 h1_B2 h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  { admit },
+  case is_pred_sub.forall_not_occurs_in : h1_x h1_A h1_P h1_zs h1_H h1_B h1_ᾰ
+  { admit },
+  case is_pred_sub.forall_occurs_in : h1_x h1_A h1_P h1_zs h1_H h1_B h1_ᾰ h1_ᾰ_1 h1_ᾰ_2 h1_ih
+  { admit },
 end
