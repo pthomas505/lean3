@@ -930,7 +930,7 @@ lemma pred_sub_aux
   (H : formula)
   (B : formula)
   (h1 : is_pred_sub A P zs H B)
-  (h2 : ∀ (Q : pred_var_), ¬ P = Q → I.pred Q = J.pred Q)
+  (h2 : ∀ (Q : pred_var_) (ds : list D), ¬ P = Q → (I.pred Q ds ↔ J.pred Q ds))
   (h3 : ∀ (ds : list D), J.pred P ds ↔ holds D I (function.update_list_ite V zs ds) H) :
   holds D I V B ↔ holds D J V A :=
 begin
@@ -943,6 +943,8 @@ begin
     {
       unfold pred_var_.occurs_in,
       intros Q a1,
+      funext ds,
+      squeeze_simp,
       apply h2,
       subst a1,
       exact h1_1,
@@ -1018,6 +1020,8 @@ begin
     {
       unfold pred_var_.occurs_in,
       intros Q a1,
+      funext ds,
+      squeeze_simp,
       apply h2,
       intros contra,
       apply h1_1,
@@ -1108,12 +1112,31 @@ begin
   unfold formula.is_valid,
   intros D I V,
 
-  obtain s1 := pred_sub_aux D I _ V A P zs H B h1 _ _,
+  let J : interpretation D := {
+    nonempty := I.nonempty,
+    pred := fun (R : pred_var_) (ds : list D), ite (¬ P = R) (I.pred R ds) (holds D I (function.update_list_ite V zs ds) H)
+  },
+
+
+  have s2 : (∀ (Q : pred_var_) (ds : list D), (¬(P = Q)) → (I.pred Q ds ↔ J.pred Q ds)),
+  {
+    squeeze_simp,
+    intros Q ds a1,
+    split,
+    split_ifs,
+    tauto,
+    split_ifs,
+    tauto,
+  },
+
+  have s3 : (∀ (ds : list D), (J.pred P ds ↔ holds D I (function.update_list_ite V zs ds) H)),
+  {
+    squeeze_simp,
+  },
+
+  obtain s1 := pred_sub_aux D I J V A P zs H B h1 s2 s3,
+
   cases s1,
   apply s1_mpr,
   apply h2,
-
-  sorry,
-  sorry,
-  sorry,
 end
