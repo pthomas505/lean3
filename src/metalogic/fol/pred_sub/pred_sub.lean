@@ -637,6 +637,23 @@ begin
 end
 
 
+example
+  (v t : ind_var_)
+  (P : formula)
+  (h1 : fast_admits v t P)
+  (h2 : P.is_valid) :
+  (fast_replace_free v t P).is_valid :=
+begin
+  unfold formula.is_valid at h2,
+
+  unfold formula.is_valid,
+  intros D I V,
+  rewrite <- substitution_theorem,
+  apply h2,
+  exact h1,
+end
+
+
 theorem substitution_theorem_ind
   {D : Type}
   (I : interpretation D)
@@ -886,6 +903,23 @@ begin
 end
 
 
+example
+  (σ : ind_var_ → ind_var_)
+  (P : formula)
+  (h1 : admits_fun σ P)
+  (h2 : P.is_valid) :
+  (fast_replace_free_fun σ P).is_valid :=
+begin
+  unfold formula.is_valid at h2,
+
+  unfold formula.is_valid,
+  intros D I V,
+  rewrite <- substitution_theorem_fun,
+  apply h2,
+  exact h1,
+end
+
+
 lemma pred_sub_aux
   (D : Type)
   (I J : interpretation D)
@@ -1078,4 +1112,8 @@ begin
   cases s1,
   apply s1_mpr,
   apply h2,
+
+  sorry,
+  sorry,
+  sorry,
 end
