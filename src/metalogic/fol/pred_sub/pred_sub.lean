@@ -886,7 +886,7 @@ begin
 end
 
 
-example
+lemma pred_sub_aux
   (D : Type)
   (I J : interpretation D)
   (V : valuation D)
@@ -956,10 +956,25 @@ begin
     rewrite <- s1,
     unfold holds,
   },
-  case is_pred_sub.not_ : h1_A h1_P h1_zs h1_H h1_B h1_ᾰ h1_ih
-  { admit },
-  case is_pred_sub.imp_ : h1_A1 h1_A2 h1_P h1_zs h1_H h1_B1 h1_B2 h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
-  { admit },
+  case is_pred_sub.not_ : h1_A h1_P h1_zs h1_H h1_B h1_1 h1_ih
+  {
+    unfold holds,
+    apply not_congr,
+    apply h1_ih,
+    exact h2,
+    exact h3,
+  },
+  case is_pred_sub.imp_ : h1_A1 h1_A2 h1_P h1_zs h1_H h1_B1 h1_B2 h1_1 h1_2 h1_ih_1 h1_ih_2
+  {
+    unfold holds,
+    apply imp_congr,
+    apply h1_ih_1,
+    exact h2,
+    exact h3,
+    apply h1_ih_2,
+    exact h2,
+    exact h3,
+  },
   case is_pred_sub.forall_not_occurs_in : h1_x h1_A h1_P h1_zs h1_H h1_B h1_1
   {
     unfold pred_var_.occurs_in at h1_1,
@@ -1041,4 +1056,26 @@ begin
     symmetry,
     exact s1 d ds,
   },
+end
+
+
+example
+  (A : formula)
+  (P : pred_var_)
+  (zs : list ind_var_)
+  (H : formula)
+  (B : formula)
+  (h1 : is_pred_sub A P zs H B)
+  (h2 : A.is_valid) :
+  B.is_valid :=
+begin
+  unfold formula.is_valid at h2,
+
+  unfold formula.is_valid,
+  intros D I V,
+
+  obtain s1 := pred_sub_aux D I _ V A P zs H B h1 _ _,
+  cases s1,
+  apply s1_mpr,
+  apply h2,
 end
