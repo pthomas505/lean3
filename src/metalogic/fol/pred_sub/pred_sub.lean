@@ -84,7 +84,8 @@ def formula.is_valid (P : formula) : Prop :=
 /--
   ind_var_.is_free_in v φ := True if and only if there is a free occurrence of the individual variable v in the formula φ.
 -/
-def ind_var_.is_free_in (v : ind_var_) : formula → Prop
+@[derive decidable]
+def ind_var_.is_free_in (v : ind_var_) : formula → bool
 | (pred_ _ xs) := v ∈ xs.to_finset
 | (not_ P) := ind_var_.is_free_in P
 | (imp_ P Q) := ind_var_.is_free_in P ∨ ind_var_.is_free_in Q
@@ -108,7 +109,8 @@ def formula.is_atomic : formula → Prop
 /--
   pred_var_.occurs_in Q φ := True if and only if there is an occurrence of the predicate variable Q in the formula φ.
 -/
-def pred_var_.occurs_in (Q : pred_var_) : formula → Prop
+@[derive decidable]
+def pred_var_.occurs_in (Q : pred_var_) : formula → bool
 | (pred_ P _) := P = Q
 | (not_ φ) := pred_var_.occurs_in φ
 | (imp_ φ ψ) := pred_var_.occurs_in φ ∨ pred_var_.occurs_in ψ
@@ -289,7 +291,7 @@ def replace_pred (P : pred_var_) (zs : list ind_var_) (H : formula) : formula �
 | (imp_ φ ψ) := imp_ (replace_pred φ) (replace_pred ψ)
 | (forall_ x φ) := forall_ x (replace_pred φ)
 
-/-
+
 @[derive decidable]
 def admits_replace_pred (P : pred_var_) (zs : list ind_var_) (H : formula) : formula → bool
 | (pred_ Q ts) :=
@@ -298,7 +300,7 @@ def admits_replace_pred (P : pred_var_) (zs : list ind_var_) (H : formula) : for
 | (imp_ φ ψ) := (admits_replace_pred φ) ∧ (admits_replace_pred ψ)
 | (forall_ x φ) := P.occurs_in (forall_ x φ) → ¬ x.is_free_in H →
   admits_replace_pred φ
--/
+
 
 /--
   is_pred_sub A P zs H B := The formula A is said to be transformed into the formula B by a substitution of H* for P z₁ ... zₙ, abbreviated: Sub A (P zⁿ / H*) B, iff B is obtained from A upon replacing in A each occurrence of a derivative of the name form P z₁ ... zₙ by the corresponding derivative of the substituend H*, provided that: (i) P does not occur in a component formula (∀ x A₁) of A if x is a parameter of H*, and (ii) the name variable zₖ, k = 1, ..., n, is not free in a component formula (∀ x H) of H* if P t₁ ... tₙ occurs in A with x occurring in tₖ. If conditions (i) and (ii) are not satisfied, then the indicated substitution for predicate variables is left undefined.
@@ -402,6 +404,7 @@ begin
   {
     unfold ind_var_.is_free_in at h1,
     simp only [list.mem_to_finset] at h1,
+    squeeze_simp at h1,
 
     unfold holds,
     congr' 2,
@@ -416,6 +419,7 @@ begin
   case formula.imp_ : φ ψ φ_ih ψ_ih val val' h1
   {
     unfold ind_var_.is_free_in at h1,
+    squeeze_simp at h1,
 
     apply imp_congr,
     {
@@ -436,7 +440,7 @@ begin
   case formula.forall_ : x φ φ_ih val val' h1
   {
     unfold ind_var_.is_free_in at h1,
-    simp only [and_imp] at h1,
+    squeeze_simp at h1,
 
     unfold holds,
     apply forall_congr,
@@ -467,7 +471,7 @@ begin
   case formula.pred_ : P xs val
   {
     unfold pred_var_.occurs_in at h1,
-    simp only [forall_eq'] at h1,
+    squeeze_simp at h1,
 
     unfold holds,
     induction h1,
@@ -484,6 +488,7 @@ begin
   case formula.imp_ : φ ψ φ_ih ψ_ih val
   {
     unfold pred_var_.occurs_in at h1,
+    squeeze_simp at h1,
 
     unfold holds,
     apply imp_congr,
@@ -727,7 +732,7 @@ begin
   case is_free_sub.forall_not_free_in : h1_x h1_P h1_v h1_t h1_1
   {
     unfold ind_var_.is_free_in at h1_1,
-    simp only [not_and] at h1_1,
+    squeeze_simp at h1_1,
 
     unfold holds,
     apply forall_congr,
@@ -739,12 +744,14 @@ begin
     refl,
     subst h_1,
     specialize h1_1 h,
+    rewrite h1_1 at a1,
     contradiction,
     refl,
   },
   case is_free_sub.forall_free_in : h1_x h1_P h1_v h1_t h1_P' h1_1 h1_2 h1_3 h1_ih
   {
     unfold ind_var_.is_free_in at h1_1,
+    squeeze_simp at h1_1,
     cases h1_1,
 
     unfold holds,
@@ -981,6 +988,7 @@ begin
       funext ds,
       squeeze_simp,
       apply h2,
+      squeeze_simp at a1,
       subst a1,
       exact h1_1,
     },
