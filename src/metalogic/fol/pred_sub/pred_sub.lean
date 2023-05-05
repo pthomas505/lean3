@@ -191,15 +191,15 @@ inductive is_free_sub : formula → ind_var_ → ind_var_ → formula → Prop
   is_free_sub P v t P' →
   is_free_sub (forall_ x P) v t (forall_ x P')
 
-
-def admits_fun_aux (σ : ind_var_ → ind_var_) : finset ind_var_ → formula → Prop
+@[derive decidable]
+def admits_fun_aux (σ : ind_var_ → ind_var_) : finset ind_var_ → formula → bool
 | binders (pred_ name args) :=
-    ∀ (v : ind_var_), (v ∈ args ∧ v ∉ binders) → σ v ∉ binders 
+    ∀ (v : ind_var_), v ∈ args → v ∉ binders → σ v ∉ binders 
 | binders (not_ P) := admits_fun_aux binders P
 | binders (imp_ P Q) := admits_fun_aux binders P ∧ admits_fun_aux binders Q
 | binders (forall_ x P) := admits_fun_aux (binders ∪ {x}) P
 
-
+@[derive decidable]
 def admits_fun (σ : ind_var_ → ind_var_) (P : formula) : Prop :=
   admits_fun_aux σ ∅ P
 
@@ -280,8 +280,36 @@ def function.update_list_ite'
 #eval function.update_list_ite' (fun (n : ℕ), n) [0, 3, 0] [10, 2, 2] 0
 
 
+def replace_pred (P : pred_var_) (zs : list ind_var_) (H : formula) : formula → formula
+| (pred_ Q ts) :=
+  if P = Q
+  then fast_replace_free_fun (function.update_list_ite id zs ts) H
+  else pred_ Q ts
+| (not_ φ) := not_ (replace_pred φ)
+| (imp_ φ ψ) := imp_ (replace_pred φ) (replace_pred ψ)
+| (forall_ x φ) := forall_ x (replace_pred φ)
+
+/-
+@[derive decidable]
+def admits_replace_pred (P : pred_var_) (zs : list ind_var_) (H : formula) : formula → bool
+| (pred_ Q ts) :=
+  P = Q ∧ admits_fun (function.update_list_ite id zs ts) H
+| (not_ φ) := (admits_replace_pred φ)
+| (imp_ φ ψ) := (admits_replace_pred φ) ∧ (admits_replace_pred ψ)
+| (forall_ x φ) := P.occurs_in (forall_ x φ) → ¬ x.is_free_in H →
+  admits_replace_pred φ
+-/
+
+/--
+  is_pred_sub A P zs H B := The formula A is said to be transformed into the formula B by a substitution of H* for P z₁ ... zₙ, abbreviated: Sub A (P zⁿ / H*) B, iff B is obtained from A upon replacing in A each occurrence of a derivative of the name form P z₁ ... zₙ by the corresponding derivative of the substituend H*, provided that: (i) P does not occur in a component formula (∀ x A₁) of A if x is a parameter of H*, and (ii) the name variable zₖ, k = 1, ..., n, is not free in a component formula (∀ x H) of H* if P t₁ ... tₙ occurs in A with x occurring in tₖ. If conditions (i) and (ii) are not satisfied, then the indicated substitution for predicate variables is left undefined.
+-/
 inductive is_pred_sub : formula → pred_var_ → list ind_var_ → formula → formula → Prop
 
+/-
+  If A is an atomic formula not containing P then Sub A (P zⁿ / H*) A.
+
+  A := pred_ Q ts
+-/
 | pred_not_occurs_in
   (Q : pred_var_) (ts : list ind_var_)
   (P : pred_var_)
@@ -290,12 +318,18 @@ inductive is_pred_sub : formula → pred_var_ → list ind_var_ → formula → 
   ¬ P = Q →
   is_pred_sub (pred_ Q ts) P zs H (pred_ Q ts)
 
+  /-
+  If A = P t₁ ... tₙ and Sf H* (zⁿ / tⁿ) B, then Sub A (P zⁿ / H*) B.
+
+  Sub A (P zⁿ / H*) B :=
+    admits_fun (function.update_list_ite id zs ts) H ∧ 
+    fast_replace_free_fun (function.update_list_ite id zs ts) H = B
+  -/
 | pred_occurs_in
   (P : pred_var_) (ts : list ind_var_)
   (zs : list ind_var_)
   (H : formula)
   (B : formula) :
-  zs.length = ts.length →
   admits_fun (function.update_list_ite id zs ts) H →
   fast_replace_free_fun (function.update_list_ite id zs ts) H = B →
   is_pred_sub (pred_ P ts) P zs H B
@@ -773,7 +807,7 @@ begin
   case formula.pred_ : name args binders val val' σ σ' h1
   {
     unfold admits_fun_aux at h1,
-    simp only [and_imp] at h1,
+    simp only [bool.of_to_bool_iff] at h1,
 
     unfold fast_replace_free_fun,
     unfold holds,
@@ -806,6 +840,7 @@ begin
   case formula.imp_ : P Q P_ih Q_ih binders val h1
   {
     unfold admits_fun_aux at h1,
+    squeeze_simp at h1,
     cases h1,
 
     unfold fast_replace_free_fun,
@@ -953,14 +988,14 @@ begin
       squeeze_simp,
     }
   },
-  case is_pred_sub.pred_occurs_in : h1_P h1_ts h1_zs h1_H h1_B h1_1 h1_2 h1_3
+  case is_pred_sub.pred_occurs_in : h1_P h1_ts h1_zs h1_H h1_B h1_1 h1_2 V h3
   {
-    obtain s1 := substitution_theorem_fun I V (function.update_list_ite id h1_zs h1_ts) h1_H h1_2,
-    rewrite h1_3 at s1,
+    obtain s1 := substitution_theorem_fun I V (function.update_list_ite id h1_zs h1_ts) h1_H h1_1,
+    rewrite h1_2 at s1,
 
     have s2 : (V ∘ function.update_list_ite id h1_zs h1_ts) = ( function.update_list_ite (V ∘ id) h1_zs (h1_ts.map V)),
     {
-      clear h1_1, clear h1_2, clear h1_3, clear h2, clear h3, clear s1,
+      clear h1_1, clear h1_2, clear h2, clear h3, clear s1,
       funext,
       squeeze_simp,
       induction h1_zs generalizing h1_ts,
