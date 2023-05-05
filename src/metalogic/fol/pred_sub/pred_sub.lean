@@ -295,7 +295,7 @@ def replace_pred (P : pred_var_) (zs : list ind_var_) (H : formula) : formula �
 @[derive decidable]
 def admits_replace_pred (P : pred_var_) (zs : list ind_var_) (H : formula) : formula → bool
 | (pred_ Q ts) :=
-  P = Q ∧ admits_fun (function.update_list_ite id zs ts) H
+  P = Q → admits_fun (function.update_list_ite id zs ts) H
 | (not_ φ) := (admits_replace_pred φ)
 | (imp_ φ ψ) := (admits_replace_pred φ) ∧ (admits_replace_pred ψ)
 | (forall_ x φ) := (¬ P.occurs_in (forall_ x φ)) ∨ (¬ x.is_free_in H ∧ admits_replace_pred φ)
