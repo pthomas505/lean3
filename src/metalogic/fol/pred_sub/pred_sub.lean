@@ -289,15 +289,18 @@ def replace_pred (P : pred_var_) (zs : list ind_var_) (H : formula) : formula �
   else pred_ Q ts
 | (not_ φ) := not_ (replace_pred φ)
 | (imp_ φ ψ) := imp_ (replace_pred φ) (replace_pred ψ)
-| (forall_ x φ) := forall_ x (replace_pred φ)
+| (forall_ x φ) :=
+  if P.occurs_in (forall_ x φ)
+  then forall_ x (replace_pred φ)
+  else forall_ x φ
 
 
 @[derive decidable]
 def admits_replace_pred (P : pred_var_) (zs : list ind_var_) (H : formula) : formula → bool
 | (pred_ Q ts) :=
   P = Q → admits_fun (function.update_list_ite id zs ts) H
-| (not_ φ) := (admits_replace_pred φ)
-| (imp_ φ ψ) := (admits_replace_pred φ) ∧ (admits_replace_pred ψ)
+| (not_ φ) := admits_replace_pred φ
+| (imp_ φ ψ) := admits_replace_pred φ ∧ admits_replace_pred ψ
 | (forall_ x φ) := (¬ P.occurs_in (forall_ x φ)) ∨ (¬ x.is_free_in H ∧ admits_replace_pred φ)
 
 
@@ -375,6 +378,64 @@ inductive is_pred_sub : formula → pred_var_ → list ind_var_ → formula → 
   ¬ x.is_free_in H →
   is_pred_sub A P zs H B →
   is_pred_sub (forall_ x A) P zs H (forall_ x B)
+
+
+example
+  (A : formula)
+  (P : pred_var_)
+  (zs : list ind_var_)
+  (H : formula)
+  (B : formula)
+  (h1 : is_pred_sub A P zs H B) :
+  replace_pred P zs H A = B :=
+begin
+  induction h1,
+  case is_pred_sub.pred_not_occurs_in : h1_Q h1_ts h1_P h1_zs h1_H h1_1
+  {
+    unfold replace_pred,
+    split_ifs,
+    squeeze_simp,
+  },
+  case is_pred_sub.pred_occurs_in : h1_P h1_ts h1_zs h1_H h1_B h1_1 h1_2
+  {
+    unfold replace_pred,
+    split_ifs,
+    {
+      exact h1_2,
+    },
+    {
+      exact h1_2,
+    }
+  },
+  case is_pred_sub.not_ : h1_A h1_P h1_zs h1_H h1_B h1_1 h1_ih
+  {
+    unfold replace_pred,
+    congr,
+    exact h1_ih,
+  },
+  case is_pred_sub.imp_ : h1_A1 h1_A2 h1_P h1_zs h1_H h1_B1 h1_B2 h1_1 h1_2 h1_ih_1 h1_ih_2
+  {
+    unfold replace_pred,
+    congr,
+    exact h1_ih_1,
+    exact h1_ih_2,
+  },
+  case is_pred_sub.forall_not_occurs_in : h1_x h1_A h1_P h1_zs h1_H h1_B h1_1
+  {
+    unfold replace_pred,
+    split_ifs,
+    squeeze_simp,
+  },
+  case is_pred_sub.forall_occurs_in : h1_x h1_A h1_P h1_zs h1_H h1_B h1_1 h1_2 h1_3 h1_ih
+  {
+    unfold replace_pred,
+    split_ifs,
+    squeeze_simp,
+    exact h1_ih,
+  },
+end
+
+
 
 
 lemma admits_fun_aux_and_fast_replace_free_fun_imp_is_free_sub_fun
