@@ -436,6 +436,52 @@ begin
 end
 
 
+example
+  (A : formula)
+  (P : pred_var_)
+  (zs : list ind_var_)
+  (H : formula)
+  (B : formula)
+  (h1 : is_pred_sub A P zs H B) :
+  admits_replace_pred P zs H A :=
+begin
+  induction h1,
+  case is_pred_sub.pred_not_occurs_in : h1_Q h1_ts h1_P h1_zs h1_H h1_1
+  {
+    unfold admits_replace_pred,
+    squeeze_simp,
+    intros a1,
+    contradiction,
+  },
+  case is_pred_sub.pred_occurs_in : h1_P h1_ts h1_zs h1_H h1_B h1_1 h1_2
+  {
+    unfold admits_replace_pred,
+    squeeze_simp,
+    exact h1_1,
+  },
+  case is_pred_sub.not_ : h1_A h1_P h1_zs h1_H h1_B h1_1 h1_ih
+  { admit },
+  case is_pred_sub.imp_ : h1_A1 h1_A2 h1_P h1_zs h1_H h1_B1 h1_B2 h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
+  { admit },
+  case is_pred_sub.forall_not_occurs_in : h1_x h1_A h1_P h1_zs h1_H h1_B h1_1
+  {
+    unfold admits_replace_pred,
+    squeeze_simp,
+    left,
+    squeeze_simp at h1_1,
+    exact h1_1,
+  },
+  case is_pred_sub.forall_occurs_in : h1_x h1_A h1_P h1_zs h1_H h1_B h1_1 h1_2 h1_3 h1_ih
+  {
+    unfold admits_replace_pred,
+    squeeze_simp,
+    right,
+    split,
+    squeeze_simp at h1_2,
+    exact h1_2,
+    exact h1_ih,
+  },
+end
 
 
 lemma admits_fun_aux_and_fast_replace_free_fun_imp_is_free_sub_fun
