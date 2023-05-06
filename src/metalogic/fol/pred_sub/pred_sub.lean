@@ -266,50 +266,6 @@ def is_free_sub_chain (F : formula) (xs ys : list ind_var) (G : formula) : Prop 
   ∃ (l : list formula), is_free_sub_chain_aux ((F :: l) ++ [G]) xs ys
 
 
-def function.update_list_ite
-  {α β : Type}
-  [decidable_eq α]
-  (f : α → β) :
-  list α → list β → α → β
-| (x :: xs) (y :: ys) := function.update_ite (function.update_list_ite xs ys) x y 
-| _ _ := f
-
-
-def function.update_list_ite'
-  {α β : Type}
-  [decidable_eq α]
-  (f : α → β)
-  (xs : list α)
-  (ys : list β) :
-  α → β :=
-  list.foldr (fun (p : α × β) (g : α → β), function.update_ite f p.fst p.snd) f (list.zip xs ys) 
-
-#eval function.update_list_ite' (fun (n : ℕ), n) [0, 3, 0] [10, 2, 2] 0
-
-
-def replace_pred (P : pred_var) (zs : vector ind_var P.arity) (H : formula) : formula → formula
-
-| (pred_ X xs) :=
-  if X = P
-  then fast_replace_free_fun (function.update_list_ite id zs.to_list xs.to_list) H
-  else pred_ X xs
-| (not_ phi) := not_ (replace_pred phi)
-| (imp_ phi psi) := imp_ (replace_pred phi) (replace_pred psi)
-| (forall_ x phi) :=
-  if P.occurs_in (forall_ x phi)
-  then forall_ x (replace_pred phi)
-  else forall_ x phi
-
-
-@[derive decidable]
-def admits_replace_pred (P : pred_var) (zs : vector ind_var P.arity) (H : formula) : formula → bool
-| (pred_ X xs) :=
-  X = P → admits_fun (function.update_list_ite id zs.to_list xs.to_list) H
-| (not_ phi) := admits_replace_pred phi
-| (imp_ phi psi) := admits_replace_pred phi ∧ admits_replace_pred psi
-| (forall_ x phi) := (¬ P.occurs_in (forall_ x phi)) ∨ (¬ x.is_free_in H ∧ admits_replace_pred phi)
-
-
 /--
   is_pred_sub A P zs H B := The formula A is said to be transformed into the formula B by a substitution of H* for P z₁ ... zₙ, abbreviated: Sub A (P zⁿ / H*) B, iff B is obtained from A upon replacing in A each occurrence of a derivative of the name form P z₁ ... zₙ by the corresponding derivative of the substituend H*, provided that: (i) P does not occur in a component formula (∀ x A₁) of A if x is a parameter of H*, and (ii) the name variable zₖ, k = 1, ..., n, is not free in a component formula (∀ x H) of H* if P t₁ ... tₙ occurs in A with x occurring in tₖ. If conditions (i) and (ii) are not satisfied, then the indicated substitution for predicate variables is left undefined.
 -/
@@ -553,16 +509,20 @@ begin
     unfold fast_replace_free,
     unfold holds,
     congr' 2,
-    simp only [list.map_map],
-    simp only [list.map_eq_map_iff],
-    intros x a1,
-    simp only [function.comp_app],
+    ext1,
+    squeeze_simp,
+    split_ifs,
+    subst h,
     unfold function.update_ite,
     split_ifs,
     apply h2,
     apply h1,
-    subst h,
-    exact a1,
+    squeeze_simp,
+    apply h2,
+    apply h1,
+    squeeze_simp,
+    unfold function.update_ite,
+    split_ifs,
     refl,
   },
   case formula.not_ : P P_ih binders val h1
@@ -699,12 +659,14 @@ begin
   {
     unfold holds,
     congr' 2,
-    simp only [list.map_map],
-    simp only [list.map_eq_map_iff],
-    intros x a1,
+    ext1,
+    squeeze_simp,
+    split_ifs,
     unfold function.update_ite,
-    simp only [function.comp_app],
-    split_ifs;
+    split_ifs,
+    refl,
+    unfold function.update_ite,
+    split_ifs,
     refl,
   },
   case is_free_sub.not_ : h1_P h1_v h1_t h1_P' h1_1 h1_ih
@@ -769,22 +731,6 @@ begin
 end
 
 
-example
-  (D : Type)
-  (I : interpretation D)
-  (V : valuation D)
-  (P Q : formula)
-  (zs ts : list ind_var)
-  (h1 : zs.nodup)
-  (h2 : ∀ (z : ind_var), z ∈ zs → ¬ z ∈ ts)
-  (h3 : is_free_sub_chain P zs ts Q) :
-  holds D I (function.update_list_ite V zs (ts.map V)) P ↔
-  holds D I V Q :=
-begin
-  sorry,
-end
-
-
 lemma substitution_theorem_fun_aux
   {D : Type}
   (I : interpretation D)
@@ -809,20 +755,19 @@ begin
 
     unfold fast_replace_free_fun,
     unfold holds,
-    simp only [list.map_map],
     congr' 2,
-    simp only [list.map_eq_map_iff],
-    intros v a1,
-    simp only [function.comp_app],
+    ext1,
+    squeeze_simp,
     apply h2,
-    by_cases c1 : v ∈ binders,
+    by_cases c1 : args.nth m ∈ binders,
     left,
     exact c1,
     right,
-    specialize h1 v a1 c1,
-    specialize h3 v c1,
     rewrite h3,
-    exact h1,
+    apply h1,
+    squeeze_simp,
+    exact c1,
+    exact c1,
   },
   case formula.not_ : P P_ih binders val h1
   {
@@ -959,93 +904,63 @@ lemma pred_sub_aux
   (V : valuation D)
   (A : formula)
   (P : pred_var)
-  (zs : list ind_var)
+  (zs : vector ind_var P.arity)
   (H : formula)
   (B : formula)
-  (h1 : is_pred_sub A P zs H B)
-  (h2 : ∀ (Q : pred_var) (ds : list D), ¬ P = Q → (I.pred Q ds ↔ J.pred Q ds))
-  (h3 : ∀ (ds : list D), J.pred P ds ↔ holds D I (function.update_list_ite V zs ds) H) :
+  (h1 : is_pred_sub P zs H A B)
+  (h2 : ∀ (Q : pred_var) (ds : vector D Q.arity), ¬ P = Q → (I.pred Q ds ↔ J.pred Q ds))
+  (h3 : ∀ (ds : vector D P.arity), J.pred P ds ↔ holds D I (function.update_list_ite V zs.to_list ds.to_list) H) :
   holds D I V B ↔ holds D J V A :=
 begin
   induction h1 generalizing V,
-  case is_pred_sub.pred_not_occurs_in : h1_Q h1_ts h1_P h1_zs h1_H h1_1
+  case is_pred_sub.pred_not_occurs_in : h1_A h1_1 h1_2 V h3
   {
     apply coincidence_theorem,
     unfold coincide,
     split,
     {
-      unfold pred_var.occurs_in,
       intros Q a1,
       funext ds,
       squeeze_simp,
       apply h2,
-      squeeze_simp at a1,
-      subst a1,
-      exact h1_1,
+      intros contra,
+      subst contra,
+      contradiction,
     },
     {
       squeeze_simp,
     }
   },
-  case is_pred_sub.pred_occurs_in : h1_P h1_ts h1_zs h1_H h1_B h1_1 h1_2 V h3
+  case is_pred_sub.pred_occurs_in : h1_A h1_ts h1_B h1_1 h1_2 h1_3 V h3
   {
-    obtain s1 := substitution_theorem_fun I V (function.update_list_ite id h1_zs h1_ts) h1_H h1_1,
-    rewrite h1_2 at s1,
+    obtain s1 := substitution_theorem_fun I V (function.update_list_ite id zs.to_list h1_ts.to_list) H h1_2,
+    rewrite h1_3 at s1,
 
-    have s2 : (V ∘ function.update_list_ite id h1_zs h1_ts) = ( function.update_list_ite (V ∘ id) h1_zs (h1_ts.map V)),
-    {
-      clear h1_1, clear h1_2, clear h2, clear h3, clear s1,
-      funext,
-      squeeze_simp,
-      induction h1_zs generalizing h1_ts,
-      unfold function.update_list_ite,
-      squeeze_simp,
-      cases h1_ts,
-      squeeze_simp,
-      unfold function.update_list_ite,
-      squeeze_simp,
-      unfold function.update_list_ite,
-      squeeze_simp,
-      unfold function.update_ite,
-      split_ifs,
-      unfold function.update_list_ite,
-      unfold function.update_ite,
-      split_ifs,
-      refl,
-      unfold function.update_list_ite,
-      unfold function.update_ite,
-      split_ifs,
-      apply h1_zs_ih,
-    },
+    have s2 : (V ∘ function.update_list_ite id zs.to_list h1_ts.to_list) = (function.update_list_ite (V ∘ id) zs.to_list (h1_ts.to_list.map V)),
+    apply function.update_list_ite_comp,
+
     rewrite s2 at s1,
     clear s2,
     squeeze_simp at s1,
-    specialize h3 (list.map V h1_ts),
-    rewrite <- h3 at s1,
-    clear h3,
-    rewrite <- s1,
-    unfold holds,
+    sorry,
   },
-  case is_pred_sub.not_ : h1_A h1_P h1_zs h1_H h1_B h1_1 h1_ih
+  case is_pred_sub.not_ : h1_A₁ h1_B₁ h1_ᾰ h1_ih V h3
   {
     unfold holds,
     apply not_congr,
     apply h1_ih,
-    exact h2,
     exact h3,
   },
-  case is_pred_sub.imp_ : h1_A1 h1_A2 h1_P h1_zs h1_H h1_B1 h1_B2 h1_1 h1_2 h1_ih_1 h1_ih_2
+  case is_pred_sub.imp_ : h1_A₁ h1_A₂ h1_B₁ h1_B₂ h1_1 h1_2 h1_ih_1 h1_ih_2 V h3
   {
     unfold holds,
     apply imp_congr,
     apply h1_ih_1,
-    exact h2,
     exact h3,
     apply h1_ih_2,
-    exact h2,
     exact h3,
   },
-  case is_pred_sub.forall_not_occurs_in : h1_x h1_A h1_P h1_zs h1_H h1_B h1_1
+  case is_pred_sub.forall_not_occurs_in : h1_x h1_A₁ h1_1 V h3
   {
     unfold pred_var.occurs_in at h1_1,
     apply coincidence_theorem,
@@ -1066,9 +981,9 @@ begin
       squeeze_simp,
     },
   },
-  case is_pred_sub.forall_occurs_in : h1_x h1_A h1_P h1_zs h1_H h1_B h1_1 h1_2 h1_3 h1_ih
+  case is_pred_sub.forall_occurs_in : h1_x h1_A₁ h1_B₁ h1_1 h1_2 h1_3 h1_ih V h3
   {
-    have s1 : ∀ (d : D) (ds : list D), holds D I (function.update_list_ite (function.update_ite V h1_x d) h1_zs ds) h1_H ↔ holds D I (function.update_list_ite V h1_zs ds) h1_H,
+    have s1 : ∀ (d : D) (ds : list D), holds D I (function.update_list_ite (function.update_ite V h1_x d) zs.to_list ds) H ↔ holds D I (function.update_list_ite V zs.to_list ds) H,
     {
       intros d ds,
       apply coincidence_theorem,
@@ -1080,7 +995,7 @@ begin
       {
         intros v a1,
         clear h1_3, clear h3, clear h1_ih,
-        induction h1_zs generalizing ds,
+        induction zs.to_list generalizing ds,
         unfold function.update_list_ite,
         unfold function.update_ite,
         split_ifs,
@@ -1112,7 +1027,7 @@ begin
             refl,
           },
           {
-            apply h1_zs_ih,
+            apply ih,
           }
         }
       },
@@ -1122,11 +1037,7 @@ begin
     apply forall_congr,
     intros d,
     apply h1_ih,
-    exact h2,
-    intros ds,
-    rewrite h3 ds,
-    symmetry,
-    exact s1 d ds,
+    sorry,
   },
 end
 
@@ -1134,10 +1045,10 @@ end
 example
   (A : formula)
   (P : pred_var)
-  (zs : list ind_var)
+  (zs : vector ind_var P.arity)
   (H : formula)
   (B : formula)
-  (h1 : is_pred_sub A P zs H B)
+  (h1 : is_pred_sub P zs H A B)
   (h2 : A.is_valid) :
   B.is_valid :=
 begin
@@ -1148,11 +1059,11 @@ begin
 
   let J : interpretation D := {
     nonempty := I.nonempty,
-    pred := fun (R : pred_var) (ds : list D), ite (¬ P = R) (I.pred R ds) (holds D I (function.update_list_ite V zs ds) H)
+    pred := fun (R : pred_var) (ds : vector D R.arity), ite (¬ P = R) (I.pred R ds) (holds D I (function.update_list_ite V zs.to_list ds.to_list) H)
   },
 
 
-  have s2 : (∀ (Q : pred_var) (ds : list D), (¬(P = Q)) → (I.pred Q ds ↔ J.pred Q ds)),
+  have s2 : (∀ (Q : pred_var) (ds : vector D Q.arity), (¬(P = Q)) → (I.pred Q ds ↔ J.pred Q ds)),
   {
     squeeze_simp,
     intros Q ds a1,
@@ -1163,7 +1074,7 @@ begin
     tauto,
   },
 
-  have s3 : (∀ (ds : list D), (J.pred P ds ↔ holds D I (function.update_list_ite V zs ds) H)),
+  have s3 : (∀ (ds : vector D P.arity), (J.pred P ds ↔ holds D I (function.update_list_ite V zs.to_list ds.to_list) H)),
   {
     squeeze_simp,
   },
@@ -1173,4 +1084,108 @@ begin
   cases s1,
   apply s1_mpr,
   apply h2,
+end
+
+
+
+
+
+
+def replace_pred_fun (τ : Π (P : pred_var), vector ind_var P.arity × formula) : formula → formula
+
+| (pred_ P ts) :=
+  fast_replace_free_fun (function.update_list_ite id (τ P).fst.to_list ts.to_list) (τ P).snd
+
+| (not_ phi) := not_ (replace_pred_fun phi)
+
+| (imp_ phi psi) := imp_ (replace_pred_fun phi) (replace_pred_fun psi)
+
+| (forall_ x phi) := forall_ x (replace_pred_fun phi)
+
+
+def admits_pred_fun_aux (τ : Π (P : pred_var), vector ind_var P.arity × formula) : finset ind_var → formula → bool
+
+| binders (pred_ P ts) :=
+  admits_fun (function.update_list_ite id (τ P).fst.to_list ts.to_list) (τ P).snd
+
+| binders (not_ phi) := admits_pred_fun_aux binders phi
+
+| binders (imp_ phi psi) := admits_pred_fun_aux binders phi ∧ admits_pred_fun_aux binders psi
+
+| binders (forall_ x phi) := admits_pred_fun_aux (binders ∪ {x}) phi
+
+
+/-
+lemma pred_sub_aux
+  (D : Type)
+  (I J : interpretation D)
+  (V : valuation D)
+  (A : formula)
+  (P : pred_var)
+  (zs : list ind_var)
+  (H : formula)
+  (B : formula)
+  (h1 : is_pred_sub A P zs H B)
+  (h2 : ∀ (Q : pred_var) (ds : list D), ¬ P = Q → (I.pred Q ds ↔ J.pred Q ds))
+  (h3 : ∀ (ds : list D), J.pred P ds ↔ holds D I (function.update_list_ite V zs ds) H) :
+  holds D I V B ↔ holds D J V A :=
+-/
+
+
+theorem substitution_theorem_fun'
+  {D : Type}
+  (I : interpretation D)
+  (val : valuation D)
+  (σ : ind_var → ind_var)
+  (P : formula)
+  (h1 : admits_fun σ P) :
+  holds D I (val ∘ σ)  P ↔
+    holds D I val (fast_replace_free_fun σ P) := sorry
+
+example
+  (D : Type)
+  (I J : interpretation D)
+  (V : valuation D)
+  (τ : Π (P : pred_var), vector ind_var P.arity × formula)
+  (binders : finset ind_var)
+  (phi : formula)
+  (h1 : admits_pred_fun_aux τ binders phi) :
+  holds D I V phi ↔ holds D J V (replace_pred_fun τ phi) :=
+begin
+  induction phi,
+  case formula.pred_ : P ts
+  {
+    by_cases c1 : replace_pred_fun τ (pred_ P ts) = pred_ P ts,
+    {
+      simp only [c1],
+    },
+    {
+    },
+
+    unfold admits_pred_fun_aux at h1,
+    squeeze_simp at h1,
+
+    unfold replace_pred_fun,
+
+    set zs := (τ P).fst,
+    set H := (τ P).snd,
+    set σ := (function.update_list_ite id zs.to_list ts.to_list),
+
+    rewrite <- substitution_theorem_fun',
+
+    have s2 : (V ∘ function.update_list_ite id zs.to_list ts.to_list) = ( function.update_list_ite (V ∘ id) zs.to_list (ts.to_list.map V)),
+    sorry,
+
+    rewrite s2,
+    clear s2,
+    unfold holds,
+    squeeze_simp,
+
+  },
+  case formula.not_ : phi_ᾰ phi_ih
+  { admit },
+  case formula.imp_ : phi_ᾰ phi_ᾰ_1 phi_ih_ᾰ phi_ih_ᾰ_1
+  { admit },
+  case formula.forall_ : phi_ᾰ phi_ᾰ_1 phi_ih
+  { admit },
 end

@@ -182,4 +182,74 @@ begin
 end
 
 
+def function.update_list_ite
+  {α β : Type}
+  [decidable_eq α]
+  (f : α → β) :
+  list α → list β → α → β
+| (x :: xs) (y :: ys) := function.update_ite (function.update_list_ite xs ys) x y 
+| _ _ := f
+
+
+def function.update_list_ite'
+  {α β : Type}
+  [decidable_eq α]
+  (f : α → β)
+  (xs : list α)
+  (ys : list β) :
+  α → β :=
+  list.foldr (fun (p : α × β) (g : α → β), function.update_ite f p.fst p.snd) f (list.zip xs ys) 
+
+#eval function.update_list_ite' (fun (n : ℕ), n) [0, 3, 0] [10, 2, 2] 0
+
+
+lemma function.update_list_ite_comp
+  {α β γ : Type}
+  [decidable_eq α]
+  [decidable_eq β]
+  (f : α → β)
+  (g : β → γ)
+  (xs : list α)
+  (ys : list β) :
+  g ∘ (function.update_list_ite f xs ys) =
+  function.update_list_ite (g ∘ f) xs (ys.map g) :=
+begin
+  induction xs generalizing ys,
+  case list.nil : ys
+  {
+    unfold function.update_list_ite,
+  },
+  case list.cons : xs_hd xs_tl xs_ih ys
+  {
+    cases ys,
+    case list.nil
+    {
+      simp only [list.map_nil],
+      unfold function.update_list_ite,
+    },
+    case list.cons : ys_hd ys_tl
+    {
+      simp only [list.map],
+      unfold function.update_list_ite,
+      rewrite <- xs_ih,
+      apply function.update_ite_comp,
+    },
+  },
+end
+
+
+def function.update_vector_ite
+  {α β : Type}
+  [decidable_eq α]
+  (f : α → β) :
+  Π (m : ℕ), vector α m → Π (n : ℕ), vector β n → α → β
+| (m + 1) ⟨x :: xs, hx⟩ (n + 1) ⟨y :: ys, hy⟩ :=
+    function.update_ite (function.update_vector_ite
+      m
+      ⟨xs, begin squeeze_simp at hx, exact hx end⟩
+      n
+      ⟨ys, begin squeeze_simp at hy, exact hy end⟩) x y 
+| _ _ _ _ := f
+
+
 #lint
