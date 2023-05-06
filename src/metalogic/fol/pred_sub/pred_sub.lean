@@ -9,34 +9,36 @@ set_option pp.parens true
   Individual variables range over elements of the domain.
 -/
 @[derive [inhabited, decidable_eq]]
-inductive ind_var_ : Type
-| mk : string → ind_var_
+structure ind_var : Type :=
+(name : string)
 
 /--
   The string representation of individual variables.
 -/
-def ind_var_.repr : ind_var_ → string
-| (ind_var_.mk name) := name
+def ind_var.repr : ind_var → string
+| x := x.name
 
-instance ind_var_.has_repr : has_repr ind_var_ := has_repr.mk ind_var_.repr
+instance ind_var.has_repr : has_repr ind_var := has_repr.mk ind_var.repr
 
 
 /--
   The type of predicate variables.
   Predicate variables range over predicate functions on the domain.
+
+  Predicate variables of arity 0 are propositional variables (not propositional constants like T or F).
 -/
 @[derive [inhabited, decidable_eq]]
-inductive pred_var_ : Type
-| mk : string → pred_var_
-
+structure pred_var : Type :=
+(name : string)
+(arity : ℕ)
 
 /--
   The string representation of predicate variables.
 -/
-def pred_var_.repr : pred_var_ → string
-| (pred_var_.mk name) := name
+def pred_var.repr : pred_var → string
+| P := P.name ++ "_{" ++ P.arity.repr ++ "}"
 
-instance pred_var_.has_repr : has_repr pred_var_ := has_repr.mk pred_var_.repr
+instance pred_var.has_repr : has_repr pred_var := has_repr.mk pred_var.repr
 
 
 /--
@@ -44,221 +46,224 @@ instance pred_var_.has_repr : has_repr pred_var_ := has_repr.mk pred_var_.repr
 -/
 @[derive [inhabited, decidable_eq]]
 inductive formula : Type
-| pred_ : pred_var_ → list ind_var_ → formula
+| pred_ (P : pred_var) : vector ind_var P.arity → formula
 | not_ : formula → formula
 | imp_ : formula → formula → formula
-| forall_ : ind_var_ → formula → formula
+| forall_ : ind_var → formula → formula
 
 open formula
 
 
--- D is a domain
-structure interpretation (D : Type) : Type :=
--- There is at least one element in the domain.
-(nonempty : nonempty D)
--- The assignment of predicate variables to predicate functions on the domain.
--- Predicate functions map elements of the domain to {T, F}.
--- list D → Prop is a predicate function.
-(pred : pred_var_ → (list D → Prop))
-
 /-
-  pred_ _ [] is a propositional variable (not a propositional constant like T or F).
+  D is a domain
 -/
+structure interpretation (D : Type) : Type :=
+/-
+  The domain is not empty.
+-/
+(nonempty : nonempty D)
+/-
+  The assignment of predicate variables to predicate functions on the domain.
+  Predicate functions map lists of elements of the domain to {T, F}.
+  (vector D P.arity → Prop) is a predicate function.
+-/
+(pred (P : pred_var) : (vector D P.arity → Prop))
+
 
 -- The assignment of individual variables to elements of the domain.
-def valuation (D : Type) := ind_var_ → D
+def valuation (D : Type) := ind_var → D
 
 
 def holds (D : Type) (I : interpretation D) : valuation D → formula → Prop
 | V (pred_ X xs) := I.pred X (xs.map V)
-| V (not_ P) := ¬ holds V P
-| V (imp_ P Q) := holds V P → holds V Q
-| V (forall_ x P) := ∀ (d : D), holds (function.update_ite V x d) P
+| V (not_ phi) := ¬ holds V phi
+| V (imp_ phi psi) := holds V phi → holds V psi
+| V (forall_ x phi) := ∀ (d : D), holds (function.update_ite V x d) phi
 
 
-def formula.is_valid (P : formula) : Prop :=
+def formula.is_valid (F : formula) : Prop :=
   ∀ (D : Type) (I : interpretation D) (V : valuation D),
-    holds D I V P
+    holds D I V F
 
 
 /--
-  ind_var_.is_free_in v φ := True if and only if there is a free occurrence of the individual variable v in the formula φ.
+  ind_var.is_free_in v φ := True if and only if there is a free occurrence of the individual variable v in the formula φ.
 -/
 @[derive decidable]
-def ind_var_.is_free_in (v : ind_var_) : formula → bool
-| (pred_ _ xs) := v ∈ xs.to_finset
-| (not_ P) := ind_var_.is_free_in P
-| (imp_ P Q) := ind_var_.is_free_in P ∨ ind_var_.is_free_in Q
-| (forall_ x φ) := ¬ v = x ∧ ind_var_.is_free_in φ
+def ind_var.is_free_in (v : ind_var) : formula → bool
+| (pred_ _ xs) := v ∈ xs.to_list.to_finset
+| (not_ phi) := ind_var.is_free_in phi
+| (imp_ phi psi) := ind_var.is_free_in phi ∨ ind_var.is_free_in psi
+| (forall_ x phi) := ¬ v = x ∧ ind_var.is_free_in phi
 
 
-def ind_var_.occurs_in (v : ind_var_) : formula → Prop
-| (pred_ name args) := v ∈ args.to_finset
-| (not_ P) := ind_var_.occurs_in P
-| (imp_ P Q) := ind_var_.occurs_in P ∨ ind_var_.occurs_in Q
-| (forall_ x P) := v = x ∨ ind_var_.occurs_in P
+def ind_var.occurs_in (v : ind_var) : formula → Prop
+| (pred_ _ xs) := v ∈ xs.to_list
+| (not_ P) := ind_var.occurs_in P
+| (imp_ P Q) := ind_var.occurs_in P ∨ ind_var.occurs_in Q
+| (forall_ x P) := v = x ∨ ind_var.occurs_in P
 
 
 def formula.is_atomic : formula → Prop
 | (pred_ _ _) := true
-| (not_ P) := false
-| (imp_ P Q) := false
-| (forall_ x P) := false
+| (not_ _) := false
+| (imp_ _ _) := false
+| (forall_ _ _) := false
 
 
 /--
-  pred_var_.occurs_in Q φ := True if and only if there is an occurrence of the predicate variable Q in the formula φ.
+  pred_var.occurs_in P  := True if and only if there is an occurrence of the predicate variable Q in the formula φ.
 -/
 @[derive decidable]
-def pred_var_.occurs_in (Q : pred_var_) : formula → bool
-| (pred_ P _) := P = Q
-| (not_ φ) := pred_var_.occurs_in φ
-| (imp_ φ ψ) := pred_var_.occurs_in φ ∨ pred_var_.occurs_in ψ
-| (forall_ _ φ) := pred_var_.occurs_in φ
+def pred_var.occurs_in (P : pred_var) : formula → bool
+| (pred_ X _) := X = P
+| (not_ φ) := pred_var.occurs_in φ
+| (imp_ φ ψ) := pred_var.occurs_in φ ∨ pred_var.occurs_in ψ
+| (forall_ _ φ) := pred_var.occurs_in φ
 
 
 def coincide
   {D : Type}
   (I J : interpretation D)
-  (val_I val_J : valuation D)
-  (φ : formula) :
+  (V_I V_J : valuation D)
+  (phi : formula) :
   Prop :=
-  (∀ (P : pred_var_), P.occurs_in φ → I.pred P = J.pred P) ∧
-  (∀ (v : ind_var_), v.is_free_in φ → val_I v = val_J v)
+  (∀ (P : pred_var), P.occurs_in phi → I.pred P = J.pred P) ∧
+  (∀ (v : ind_var), v.is_free_in phi → V_I v = V_J v)
 
 
-def fast_admits_aux (v u : ind_var_) : finset ind_var_ → formula → Prop
-| binders (pred_ name args) :=
-    v ∈ args → -- if there is a free occurrence of v in P
+def fast_admits_aux (v u : ind_var) : finset ind_var → formula → Prop
+| binders (pred_ X xs) :=
+    v ∈ xs.to_list → -- if there is a free occurrence of v in P
     u ∉ binders -- then it does not become a bound occurrence of u in P(u/v)
-| binders (not_ P) := fast_admits_aux binders P
-| binders (imp_ P Q) := fast_admits_aux binders P ∧ fast_admits_aux binders Q
-| binders (forall_ x P) := v = x ∨ fast_admits_aux (binders ∪ {x}) P
+| binders (not_ phi) := fast_admits_aux binders phi
+| binders (imp_ phi psi) := fast_admits_aux binders phi ∧ fast_admits_aux binders psi
+| binders (forall_ x phi) := v = x ∨ fast_admits_aux (binders ∪ {x}) phi
 
 
-def fast_admits (v u : ind_var_) (P : formula) : Prop :=
-  fast_admits_aux v u ∅ P
+def fast_admits (v u : ind_var) (F : formula) : Prop :=
+  fast_admits_aux v u ∅ F
 
 
-def fast_replace_free (v t : ind_var_) : formula → formula
-| (pred_ name args) :=
+def fast_replace_free (v t : ind_var) : formula → formula
+| (pred_ X xs) :=
     pred_
-    name
-    (args.map (fun (x : ind_var_), if x = v then t else x))
-| (not_ P) := not_ (fast_replace_free P)
-| (imp_ P Q) := imp_ (fast_replace_free P) (fast_replace_free Q)
-| (forall_ x P) :=
+    X
+    (xs.map (fun (x : ind_var), if x = v then t else x))
+| (not_ phi) := not_ (fast_replace_free phi)
+| (imp_ phi psi) := imp_ (fast_replace_free phi) (fast_replace_free psi)
+| (forall_ x phi) :=
     if v = x
-    then forall_ x P -- v is not free in P
-    else forall_ x (fast_replace_free P)
+    then forall_ x phi -- v is not free in phi
+    else forall_ x (fast_replace_free phi)
 
 
 /--
   is_free_sub φ v t φ' := True if and only if φ' is the result of replacing in φ each free occurrence of v by a free occurrence of t.
 -/
-inductive is_free_sub : formula → ind_var_ → ind_var_ → formula → Prop
+inductive is_free_sub : formula → ind_var → ind_var → formula → Prop
 
 | pred_
-  (P : pred_var_) (xs : list ind_var_)
-  (v t : ind_var_) :
-    is_free_sub (pred_ P xs) v t (pred_ P (xs.map (fun (x : ind_var_), if x = v then t else x)))
+  (X : pred_var) (xs : vector ind_var X.arity)
+  (v t : ind_var) :
+    is_free_sub (pred_ X xs) v t (pred_ X (xs.map (fun (x : ind_var), if x = v then t else x)))
 
 | not_
-  (P : formula)
-  (v t : ind_var_)
-  (P' : formula) :
-  is_free_sub P v t P' →
-  is_free_sub P.not_ v t P'.not_
+  (phi : formula)
+  (v t : ind_var)
+  (phi' : formula) :
+  is_free_sub phi v t phi' →
+  is_free_sub phi.not_ v t phi'.not_
 
 | imp_
-  (P Q : formula)
-  (v t : ind_var_)
-  (P' Q' : formula) :
-  is_free_sub P v t P' →
-  is_free_sub Q v t Q' →
-  is_free_sub (P.imp_ Q) v t (P'.imp_ Q')
+  (phi psi : formula)
+  (v t : ind_var)
+  (phi' psi' : formula) :
+  is_free_sub phi v t phi' →
+  is_free_sub psi v t psi' →
+  is_free_sub (phi.imp_ psi) v t (phi'.imp_ psi')
 
 | forall_not_free_in
-  (x : ind_var_) (P : formula)
-  (v t : ind_var_) :
-  ¬ v.is_free_in (forall_ x P) →
-  is_free_sub (forall_ x P) v t (forall_ x P)
+  (x : ind_var) (phi : formula)
+  (v t : ind_var) :
+  ¬ v.is_free_in (forall_ x phi) →
+  is_free_sub (forall_ x phi) v t (forall_ x phi)
 
 | forall_free_in
-  (x : ind_var_) (P : formula)
-  (v t : ind_var_)
-  (P' : formula) :
-  v.is_free_in (forall_ x P) →
+  (x : ind_var) (phi : formula)
+  (v t : ind_var)
+  (phi' : formula) :
+  v.is_free_in (forall_ x phi) →
   ¬ x = t →
-  is_free_sub P v t P' →
-  is_free_sub (forall_ x P) v t (forall_ x P')
+  is_free_sub phi v t phi' →
+  is_free_sub (forall_ x phi) v t (forall_ x phi')
 
 @[derive decidable]
-def admits_fun_aux (σ : ind_var_ → ind_var_) : finset ind_var_ → formula → bool
-| binders (pred_ name args) :=
-    ∀ (v : ind_var_), v ∈ args → v ∉ binders → σ v ∉ binders 
-| binders (not_ P) := admits_fun_aux binders P
-| binders (imp_ P Q) := admits_fun_aux binders P ∧ admits_fun_aux binders Q
-| binders (forall_ x P) := admits_fun_aux (binders ∪ {x}) P
+def admits_fun_aux (σ : ind_var → ind_var) : finset ind_var → formula → bool
+| binders (pred_ X xs) :=
+    ∀ (v : ind_var), v ∈ xs.to_list → v ∉ binders → σ v ∉ binders 
+| binders (not_ phi) := admits_fun_aux binders phi
+| binders (imp_ phi psi) := admits_fun_aux binders phi ∧ admits_fun_aux binders psi
+| binders (forall_ x phi) := admits_fun_aux (binders ∪ {x}) phi
 
 @[derive decidable]
-def admits_fun (σ : ind_var_ → ind_var_) (P : formula) : Prop :=
-  admits_fun_aux σ ∅ P
+def admits_fun (σ : ind_var → ind_var) (phi : formula) : Prop :=
+  admits_fun_aux σ ∅ phi
 
 
-def fast_replace_free_fun : (ind_var_ → ind_var_) → formula → formula
-| σ (pred_ name args) := pred_ name (args.map σ)
-| σ (not_ P) := not_ (fast_replace_free_fun σ P)
-| σ (imp_ P Q) := imp_ (fast_replace_free_fun σ P) (fast_replace_free_fun σ Q)
-| σ (forall_ x P) := forall_ x (fast_replace_free_fun (function.update_ite σ x x) P)
+def fast_replace_free_fun : (ind_var → ind_var) → formula → formula
+| σ (pred_ X xs) := pred_ X (xs.map σ)
+| σ (not_ phi) := not_ (fast_replace_free_fun σ phi)
+| σ (imp_ phi psi) := imp_ (fast_replace_free_fun σ phi) (fast_replace_free_fun σ psi)
+| σ (forall_ x phi) := forall_ x (fast_replace_free_fun (function.update_ite σ x x) phi)
 
 
-inductive is_free_sub_fun : formula → (ind_var_ → ind_var_) → formula → Prop
+inductive is_free_sub_fun : formula → (ind_var → ind_var) → formula → Prop
 
 | pred_
-  (P : pred_var_) (xs : list ind_var_)
-  (σ : ind_var_ → ind_var_) :
-    is_free_sub_fun (pred_ P xs) σ (pred_ P (xs.map σ))
+  (X : pred_var) (xs : vector ind_var X.arity)
+  (σ : ind_var → ind_var) :
+    is_free_sub_fun (pred_ X xs) σ (pred_ X (xs.map σ))
 
 | not_
-  (P : formula)
-  (σ : ind_var_ → ind_var_)
-  (P' : formula) :
-  is_free_sub_fun P σ P' →
-  is_free_sub_fun P.not_ σ P'.not_
+  (phi : formula)
+  (σ : ind_var → ind_var)
+  (phi' : formula) :
+  is_free_sub_fun phi σ phi' →
+  is_free_sub_fun phi.not_ σ phi'.not_
 
 | imp_
-  (P Q : formula)
-  (σ : ind_var_ → ind_var_)
-  (P' Q' : formula) :
-  is_free_sub_fun P σ P' →
-  is_free_sub_fun Q σ Q' →
-  is_free_sub_fun (P.imp_ Q) σ (P'.imp_ Q')
+  (phi psi : formula)
+  (σ : ind_var → ind_var)
+  (phi' psi' : formula) :
+  is_free_sub_fun phi σ phi' →
+  is_free_sub_fun psi σ psi' →
+  is_free_sub_fun (phi.imp_ psi) σ (phi'.imp_ psi')
 
 | forall_not_free_in
-  (x : ind_var_) (P : formula)
-  (σ : ind_var_ → ind_var_) :
-  (∀ (v : ind_var_), v.is_free_in (forall_ x P) → σ v = v) →
-  is_free_sub_fun (forall_ x P) σ (forall_ x P)
+  (x : ind_var) (phi : formula)
+  (σ : ind_var → ind_var) :
+  (∀ (v : ind_var), v.is_free_in (forall_ x phi) → σ v = v) →
+  is_free_sub_fun (forall_ x phi) σ (forall_ x phi)
 
 | forall_free_in
-  (x : ind_var_) (P : formula)
-  (σ : ind_var_ → ind_var_)
-  (P' : formula) :
-  ¬ (∀ (v : ind_var_), v.is_free_in (forall_ x P) → σ v = v) →
-  (∀ (v : ind_var_), v.is_free_in (forall_ x P) → ¬ σ v = x) →
-  is_free_sub_fun P σ P' →
-  is_free_sub_fun (forall_ x P) σ (forall_ x P')
+  (x : ind_var) (phi : formula)
+  (σ : ind_var → ind_var)
+  (phi' : formula) :
+  ¬ (∀ (v : ind_var), v.is_free_in (forall_ x phi) → σ v = v) →
+  (∀ (v : ind_var), v.is_free_in (forall_ x phi) → ¬ σ v = x) →
+  is_free_sub_fun phi σ phi' →
+  is_free_sub_fun (forall_ x phi) σ (forall_ x phi')
 
 
-def is_free_sub_chain_aux : list formula → list ind_var_ → list ind_var_ → Prop
+def is_free_sub_chain_aux : list formula → list ind_var → list ind_var → Prop
 | (last :: list.nil) list.nil list.nil := true
 | (fst :: snd :: tl) (x :: xs) (y :: ys) :=
     is_free_sub fst x y snd ∧ is_free_sub_chain_aux (snd :: tl) xs ys
 | _ _ _ := false
 
-def is_free_sub_chain (P : formula) (xs ys : list ind_var_) (Q : formula) : Prop :=
-  ∃ (l : list formula), is_free_sub_chain_aux ((P :: l) ++ [Q]) xs ys
+def is_free_sub_chain (F : formula) (xs ys : list ind_var) (G : formula) : Prop :=
+  ∃ (l : list formula), is_free_sub_chain_aux ((F :: l) ++ [G]) xs ys
 
 
 def function.update_list_ite
@@ -282,276 +287,156 @@ def function.update_list_ite'
 #eval function.update_list_ite' (fun (n : ℕ), n) [0, 3, 0] [10, 2, 2] 0
 
 
-def replace_pred (P : pred_var_) (zs : list ind_var_) (H : formula) : formula → formula
-| (pred_ Q ts) :=
-  if P = Q
-  then fast_replace_free_fun (function.update_list_ite id zs ts) H
-  else pred_ Q ts
-| (not_ φ) := not_ (replace_pred φ)
-| (imp_ φ ψ) := imp_ (replace_pred φ) (replace_pred ψ)
-| (forall_ x φ) :=
-  if P.occurs_in (forall_ x φ)
-  then forall_ x (replace_pred φ)
-  else forall_ x φ
+def replace_pred (P : pred_var) (zs : vector ind_var P.arity) (H : formula) : formula → formula
+
+| (pred_ X xs) :=
+  if X = P
+  then fast_replace_free_fun (function.update_list_ite id zs.to_list xs.to_list) H
+  else pred_ X xs
+| (not_ phi) := not_ (replace_pred phi)
+| (imp_ phi psi) := imp_ (replace_pred phi) (replace_pred psi)
+| (forall_ x phi) :=
+  if P.occurs_in (forall_ x phi)
+  then forall_ x (replace_pred phi)
+  else forall_ x phi
 
 
 @[derive decidable]
-def admits_replace_pred (P : pred_var_) (zs : list ind_var_) (H : formula) : formula → bool
-| (pred_ Q ts) :=
-  P = Q → admits_fun (function.update_list_ite id zs ts) H
-| (not_ φ) := admits_replace_pred φ
-| (imp_ φ ψ) := admits_replace_pred φ ∧ admits_replace_pred ψ
-| (forall_ x φ) := (¬ P.occurs_in (forall_ x φ)) ∨ (¬ x.is_free_in H ∧ admits_replace_pred φ)
+def admits_replace_pred (P : pred_var) (zs : vector ind_var P.arity) (H : formula) : formula → bool
+| (pred_ X xs) :=
+  X = P → admits_fun (function.update_list_ite id zs.to_list xs.to_list) H
+| (not_ phi) := admits_replace_pred phi
+| (imp_ phi psi) := admits_replace_pred phi ∧ admits_replace_pred psi
+| (forall_ x phi) := (¬ P.occurs_in (forall_ x phi)) ∨ (¬ x.is_free_in H ∧ admits_replace_pred phi)
 
 
 /--
   is_pred_sub A P zs H B := The formula A is said to be transformed into the formula B by a substitution of H* for P z₁ ... zₙ, abbreviated: Sub A (P zⁿ / H*) B, iff B is obtained from A upon replacing in A each occurrence of a derivative of the name form P z₁ ... zₙ by the corresponding derivative of the substituend H*, provided that: (i) P does not occur in a component formula (∀ x A₁) of A if x is a parameter of H*, and (ii) the name variable zₖ, k = 1, ..., n, is not free in a component formula (∀ x H) of H* if P t₁ ... tₙ occurs in A with x occurring in tₖ. If conditions (i) and (ii) are not satisfied, then the indicated substitution for predicate variables is left undefined.
 -/
-inductive is_pred_sub : formula → pred_var_ → list ind_var_ → formula → formula → Prop
+inductive is_pred_sub (P : pred_var) (zs : vector ind_var P.arity) (H : formula) : formula → formula → Prop
 
 /-
   If A is an atomic formula not containing P then Sub A (P zⁿ / H*) A.
-
-  A := pred_ Q ts
 -/
 | pred_not_occurs_in
-  (Q : pred_var_) (ts : list ind_var_)
-  (P : pred_var_)
-  (zs : list ind_var_)
-  (H : formula) :
-  ¬ P = Q →
-  is_pred_sub (pred_ Q ts) P zs H (pred_ Q ts)
+  (A : formula) :
+  A.is_atomic →
+  ¬ P.occurs_in A →
+  is_pred_sub A A
 
   /-
   If A = P t₁ ... tₙ and Sf H* (zⁿ / tⁿ) B, then Sub A (P zⁿ / H*) B.
 
-  Sub A (P zⁿ / H*) B :=
-    admits_fun (function.update_list_ite id zs ts) H ∧ 
-    fast_replace_free_fun (function.update_list_ite id zs ts) H = B
+  Sf H* (zⁿ / tⁿ) B :=
+    admits_fun (function.update_list_ite id zs.to_list ts.to_list) H* ∧ 
+    fast_replace_free_fun (function.update_list_ite id zs.to_list ts.to_list) H* = B
   -/
 | pred_occurs_in
-  (P : pred_var_) (ts : list ind_var_)
-  (zs : list ind_var_)
-  (H : formula)
+  (A : formula)
+  (ts : vector ind_var P.arity)
   (B : formula) :
-  admits_fun (function.update_list_ite id zs ts) H →
-  fast_replace_free_fun (function.update_list_ite id zs ts) H = B →
-  is_pred_sub (pred_ P ts) P zs H B
+  A = pred_ P ts →
+  admits_fun (function.update_list_ite id zs.to_list ts.to_list) H →
+  fast_replace_free_fun (function.update_list_ite id zs.to_list ts.to_list) H = B → 
+  is_pred_sub (pred_ P ts) B
 
+/-
+  If A = (¬ A₁) and Sub A₁ (P zⁿ / H*) B₁, then Sub A (P zⁿ / H*) (¬ B₁).
+-/
 | not_
-  (A : formula)
-  (P : pred_var_)
-  (zs : list ind_var_)
-  (H : formula)
-  (B : formula) :
-  is_pred_sub A P zs H B →
-  is_pred_sub A.not_ P zs H B.not_
+  (A₁ : formula)
+  (B₁ : formula) :
+  is_pred_sub A₁ B₁ →
+  is_pred_sub A₁.not_ B₁.not_
 
+/-
+  If A = (A₁ → A₂), Sub A₁ (P zⁿ / H*) B₁, and Sub A₂ (P zⁿ / H*) B₂, then Sub A (P zⁿ / H*) (B₁ → B₁).
+-/
 | imp_
-  (A1 A2 : formula)
-  (P : pred_var_)
-  (zs : list ind_var_)
-  (H : formula)
-  (B1 B2 : formula) :
-  is_pred_sub A1 P zs H B1 →
-  is_pred_sub A2 P zs H B2 →
-  is_pred_sub (A1.imp_ A2) P zs H (B1.imp_ B2)
+  (A₁ A₂ : formula)
+  (B₁ B₂ : formula) :
+  is_pred_sub A₁ B₁ →
+  is_pred_sub A₂ B₂ →
+  is_pred_sub (A₁.imp_ A₂) (B₁.imp_ B₂)
 
+/-
+  If A = (∀ x A₁) and P does not occur in A then Sub A (P zⁿ / H*) A.
+-/
 | forall_not_occurs_in
-  (x : ind_var_)
-  (A : formula)
-  (P : pred_var_)
-  (zs : list ind_var_)
-  (H : formula)
-  (B : formula) :
-  ¬ P.occurs_in (forall_ x A) →
-  is_pred_sub (forall_ x A) P zs H (forall_ x A)
+  (x : ind_var)
+  (A₁ : formula) :
+  ¬ P.occurs_in (forall_ x A₁) →
+  is_pred_sub (forall_ x A₁) (forall_ x A₁)
 
+/-
+  If A = (∀ x A₁), P occurs in A, x is not free in H*, and Sub A₁ (P zⁿ / H*) B₁, then Sub A (P zⁿ / H*) (∀ x B₁).
+-/
 | forall_occurs_in
-  (x : ind_var_)
-  (A : formula)
-  (P : pred_var_)
-  (zs : list ind_var_)
-  (H : formula)
-  (B : formula) :
-  P.occurs_in (forall_ x A) →
+  (x : ind_var)
+  (A₁ : formula)
+  (B₁ : formula) :
+  P.occurs_in (forall_ x A₁) →
   ¬ x.is_free_in H →
-  is_pred_sub A P zs H B →
-  is_pred_sub (forall_ x A) P zs H (forall_ x B)
-
-
-example
-  (A : formula)
-  (P : pred_var_)
-  (zs : list ind_var_)
-  (H : formula)
-  (B : formula)
-  (h1 : is_pred_sub A P zs H B) :
-  replace_pred P zs H A = B :=
-begin
-  induction h1,
-  case is_pred_sub.pred_not_occurs_in : h1_Q h1_ts h1_P h1_zs h1_H h1_1
-  {
-    unfold replace_pred,
-    split_ifs,
-    squeeze_simp,
-  },
-  case is_pred_sub.pred_occurs_in : h1_P h1_ts h1_zs h1_H h1_B h1_1 h1_2
-  {
-    unfold replace_pred,
-    split_ifs,
-    {
-      exact h1_2,
-    },
-    {
-      exact h1_2,
-    }
-  },
-  case is_pred_sub.not_ : h1_A h1_P h1_zs h1_H h1_B h1_1 h1_ih
-  {
-    unfold replace_pred,
-    congr,
-    exact h1_ih,
-  },
-  case is_pred_sub.imp_ : h1_A1 h1_A2 h1_P h1_zs h1_H h1_B1 h1_B2 h1_1 h1_2 h1_ih_1 h1_ih_2
-  {
-    unfold replace_pred,
-    congr,
-    exact h1_ih_1,
-    exact h1_ih_2,
-  },
-  case is_pred_sub.forall_not_occurs_in : h1_x h1_A h1_P h1_zs h1_H h1_B h1_1
-  {
-    unfold replace_pred,
-    split_ifs,
-    squeeze_simp,
-  },
-  case is_pred_sub.forall_occurs_in : h1_x h1_A h1_P h1_zs h1_H h1_B h1_1 h1_2 h1_3 h1_ih
-  {
-    unfold replace_pred,
-    split_ifs,
-    squeeze_simp,
-    exact h1_ih,
-  },
-end
-
-
-example
-  (A : formula)
-  (P : pred_var_)
-  (zs : list ind_var_)
-  (H : formula)
-  (B : formula)
-  (h1 : is_pred_sub A P zs H B) :
-  admits_replace_pred P zs H A :=
-begin
-  induction h1,
-  case is_pred_sub.pred_not_occurs_in : h1_Q h1_ts h1_P h1_zs h1_H h1_1
-  {
-    unfold admits_replace_pred,
-    squeeze_simp,
-    intros a1,
-    contradiction,
-  },
-  case is_pred_sub.pred_occurs_in : h1_P h1_ts h1_zs h1_H h1_B h1_1 h1_2
-  {
-    unfold admits_replace_pred,
-    squeeze_simp,
-    exact h1_1,
-  },
-  case is_pred_sub.not_ : h1_A h1_P h1_zs h1_H h1_B h1_1 h1_ih
-  { admit },
-  case is_pred_sub.imp_ : h1_A1 h1_A2 h1_P h1_zs h1_H h1_B1 h1_B2 h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1
-  { admit },
-  case is_pred_sub.forall_not_occurs_in : h1_x h1_A h1_P h1_zs h1_H h1_B h1_1
-  {
-    unfold admits_replace_pred,
-    squeeze_simp,
-    left,
-    squeeze_simp at h1_1,
-    exact h1_1,
-  },
-  case is_pred_sub.forall_occurs_in : h1_x h1_A h1_P h1_zs h1_H h1_B h1_1 h1_2 h1_3 h1_ih
-  {
-    unfold admits_replace_pred,
-    squeeze_simp,
-    right,
-    split,
-    squeeze_simp at h1_2,
-    exact h1_2,
-    exact h1_ih,
-  },
-end
-
-
-lemma admits_fun_aux_and_fast_replace_free_fun_imp_is_free_sub_fun
-  (P P' : formula)
-  (σ : ind_var_ → ind_var_)
-  (binders : finset ind_var_)
-  (h1 : admits_fun_aux σ binders P)
-  (h2 : fast_replace_free_fun σ P = P') :
-  is_free_sub_fun P σ P' :=
-begin
-  subst h2,
-  sorry,
-end
+  is_pred_sub A₁ B₁ →
+  is_pred_sub (forall_ x A₁) (forall_ x B₁)
 
 
 lemma holds_congr_ind_var
   {D : Type}
   (I : interpretation D)
-  (val val' : valuation D)
-  (φ : formula)
-  (h1 : ∀ (v : ind_var_), v.is_free_in φ → val v = val' v) :
-  holds D I val φ ↔ holds D I val' φ :=
+  (V V' : valuation D)
+  (F : formula)
+  (h1 : ∀ (v : ind_var), v.is_free_in F → V v = V' v) :
+  holds D I V F ↔ holds D I V' F :=
 begin
-  induction φ generalizing val val',
-  case formula.pred_ : P xs val val' h1
+  induction F generalizing V V',
+  case formula.pred_ : X xs V V' h1
   {
-    unfold ind_var_.is_free_in at h1,
-    simp only [list.mem_to_finset] at h1,
+    unfold ind_var.is_free_in at h1,
     squeeze_simp at h1,
 
     unfold holds,
     congr' 2,
-    simp only [list.map_eq_map_iff],
-    exact h1,
+    ext1,
+    squeeze_simp,
+    apply h1,
+    squeeze_simp,
   },
-  case formula.not_ : φ φ_ih val val' h1
+  case formula.not_ : phi phi_ih V V' h1
   {
     apply not_congr,
-    exact φ_ih val val' h1,
+    exact phi_ih V V' h1,
   },
-  case formula.imp_ : φ ψ φ_ih ψ_ih val val' h1
+  case formula.imp_ : phi psi phi_ih psi_ih V V' h1
   {
-    unfold ind_var_.is_free_in at h1,
+    unfold ind_var.is_free_in at h1,
     squeeze_simp at h1,
 
     apply imp_congr,
     {
-      apply φ_ih val val',
+      apply phi_ih V V',
       intros x a1,
       apply h1,
       left,
       exact a1,
     },
     {
-      apply ψ_ih val val',
+      apply psi_ih V V',
       intros x a1,
       apply h1,
       right,
       exact a1,
     }
   },
-  case formula.forall_ : x φ φ_ih val val' h1
+  case formula.forall_ : x phi phi_ih V V' h1
   {
-    unfold ind_var_.is_free_in at h1,
+    unfold ind_var.is_free_in at h1,
     squeeze_simp at h1,
 
     unfold holds,
     apply forall_congr,
     intros d,
-    apply φ_ih,
+    apply phi_ih,
     intros a a1,
     unfold function.update_ite,
     split_ifs,
@@ -568,59 +453,59 @@ end
 lemma holds_congr_pred_var
   {D : Type}
   (I I' : interpretation D)
-  (val : valuation D)
-  (φ : formula)
-  (h1 : ∀ (P : pred_var_), P.occurs_in φ → I.pred P = I'.pred P) :
-  holds D I val φ ↔ holds D I' val φ :=
+  (V : valuation D)
+  (F : formula)
+  (h1 : ∀ (P : pred_var), P.occurs_in F → I.pred P = I'.pred P) :
+  holds D I V F ↔ holds D I' V F :=
 begin
-  induction φ generalizing val,
-  case formula.pred_ : P xs val
+  induction F generalizing V,
+  case formula.pred_ : X xs V
   {
-    unfold pred_var_.occurs_in at h1,
+    unfold pred_var.occurs_in at h1,
     squeeze_simp at h1,
 
     unfold holds,
     induction h1,
     refl,
   },
-  case formula.not_ : φ φ_ih val
+  case formula.not_ : phi phi_ih V
   {
-    unfold pred_var_.occurs_in at h1,
+    unfold pred_var.occurs_in at h1,
 
     unfold holds,
     apply not_congr,
-    apply φ_ih h1,
+    apply phi_ih h1,
   },
-  case formula.imp_ : φ ψ φ_ih ψ_ih val
+  case formula.imp_ : phi psi phi_ih psi_ih V
   {
-    unfold pred_var_.occurs_in at h1,
+    unfold pred_var.occurs_in at h1,
     squeeze_simp at h1,
 
     unfold holds,
     apply imp_congr,
     {
-      apply φ_ih,
+      apply phi_ih,
       intros P a1,
       apply h1,
       left,
       exact a1,
     },
     {
-      apply ψ_ih,
+      apply psi_ih,
       intros P a1,
       apply h1,
       right,
       exact a1,
     }
   },
-  case formula.forall_ : x φ φ_ih val
+  case formula.forall_ : x phi phi_ih V
   {
-    unfold pred_var_.occurs_in at h1,
+    unfold pred_var.occurs_in at h1,
 
     unfold holds,
     apply forall_congr,
-    intros a,
-    apply φ_ih h1,
+    intros d,
+    apply phi_ih h1,
   },
 end
 
@@ -628,15 +513,15 @@ end
 theorem coincidence_theorem
   {D : Type}
   (I I' : interpretation D)
-  (val val' : valuation D)
-  (φ : formula)
-  (h1 : coincide I I' val val' φ) :
-  holds D I val φ ↔ holds D I' val' φ :=
+  (V V' : valuation D)
+  (F : formula)
+  (h1 : coincide I I' V V' F) :
+  holds D I V F ↔ holds D I' V' F :=
 begin
   unfold coincide at h1,
   cases h1,
 
-  transitivity holds D I val' φ,
+  transitivity holds D I V' F,
   {
     apply holds_congr_ind_var,
     exact h1_right,
@@ -652,11 +537,11 @@ lemma substitution_theorem_aux
   {D : Type}
   (I : interpretation D)
   (val val' : valuation D)
-  (v t : ind_var_)
-  (binders : finset ind_var_)
+  (v t : ind_var)
+  (binders : finset ind_var)
   (P : formula)
   (h1 : fast_admits_aux v t binders P)
-  (h2 : ∀ (v : ind_var_), ¬ v ∈ binders → val' v = val v) :
+  (h2 : ∀ (v : ind_var), ¬ v ∈ binders → val' v = val v) :
   holds D I (function.update_ite val v (val' t)) P ↔
     holds D I val (fast_replace_free v t P) :=
 begin
@@ -769,7 +654,7 @@ theorem substitution_theorem
   {D : Type}
   (I : interpretation D)
   (val : valuation D)
-  (v t : ind_var_)
+  (v t : ind_var)
   (P : formula)
   (h1 : fast_admits v t P) :
   holds D I (function.update_ite val v (val t)) P ↔
@@ -783,7 +668,7 @@ end
 
 
 example
-  (v t : ind_var_)
+  (v t : ind_var)
   (P : formula)
   (h1 : fast_admits v t P)
   (h2 : P.is_valid) :
@@ -803,7 +688,7 @@ theorem substitution_theorem_ind
   {D : Type}
   (I : interpretation D)
   (val : valuation D)
-  (v t : ind_var_)
+  (v t : ind_var)
   (P P' : formula)
   (h1 : is_free_sub P v t P') :
   holds D I (function.update_ite val v (val t)) P ↔
@@ -837,7 +722,7 @@ begin
   },
   case is_free_sub.forall_not_free_in : h1_x h1_P h1_v h1_t h1_1
   {
-    unfold ind_var_.is_free_in at h1_1,
+    unfold ind_var.is_free_in at h1_1,
     squeeze_simp at h1_1,
 
     unfold holds,
@@ -856,7 +741,7 @@ begin
   },
   case is_free_sub.forall_free_in : h1_x h1_P h1_v h1_t h1_P' h1_1 h1_2 h1_3 h1_ih
   {
-    unfold ind_var_.is_free_in at h1_1,
+    unfold ind_var.is_free_in at h1_1,
     squeeze_simp at h1_1,
     cases h1_1,
 
@@ -889,9 +774,9 @@ example
   (I : interpretation D)
   (V : valuation D)
   (P Q : formula)
-  (zs ts : list ind_var_)
+  (zs ts : list ind_var)
   (h1 : zs.nodup)
-  (h2 : ∀ (z : ind_var_), z ∈ zs → ¬ z ∈ ts)
+  (h2 : ∀ (z : ind_var), z ∈ zs → ¬ z ∈ ts)
   (h3 : is_free_sub_chain P zs ts Q) :
   holds D I (function.update_list_ite V zs (ts.map V)) P ↔
   holds D I V Q :=
@@ -904,15 +789,15 @@ lemma substitution_theorem_fun_aux
   {D : Type}
   (I : interpretation D)
   (val val' : valuation D)
-  (σ σ' : ind_var_ → ind_var_)
-  (binders : finset ind_var_)
+  (σ σ' : ind_var → ind_var)
+  (binders : finset ind_var)
   (P : formula)
   (h1 : admits_fun_aux σ binders P)
 
-  (h2 : ∀ (x : ind_var_), x ∈ binders ∨ σ' x ∉ binders → (val x = val' (σ' x)))
-  (h2' : ∀ (x : ind_var_), x ∈ binders → σ' x = x)
+  (h2 : ∀ (x : ind_var), x ∈ binders ∨ σ' x ∉ binders → (val x = val' (σ' x)))
+  (h2' : ∀ (x : ind_var), x ∈ binders → σ' x = x)
 
-  (h3 : ∀ (x : ind_var_), x ∉ binders -> σ' x = σ x) :
+  (h3 : ∀ (x : ind_var), x ∉ binders -> σ' x = σ x) :
   holds D I val P ↔
     holds D I val' (fast_replace_free_fun σ' P) :=
 begin
@@ -1037,7 +922,7 @@ theorem substitution_theorem_fun
   {D : Type}
   (I : interpretation D)
   (val : valuation D)
-  (σ : ind_var_ → ind_var_)
+  (σ : ind_var → ind_var)
   (P : formula)
   (h1 : admits_fun σ P) :
   holds D I (val ∘ σ)  P ↔
@@ -1052,7 +937,7 @@ end
 
 
 example
-  (σ : ind_var_ → ind_var_)
+  (σ : ind_var → ind_var)
   (P : formula)
   (h1 : admits_fun σ P)
   (h2 : P.is_valid) :
@@ -1073,12 +958,12 @@ lemma pred_sub_aux
   (I J : interpretation D)
   (V : valuation D)
   (A : formula)
-  (P : pred_var_)
-  (zs : list ind_var_)
+  (P : pred_var)
+  (zs : list ind_var)
   (H : formula)
   (B : formula)
   (h1 : is_pred_sub A P zs H B)
-  (h2 : ∀ (Q : pred_var_) (ds : list D), ¬ P = Q → (I.pred Q ds ↔ J.pred Q ds))
+  (h2 : ∀ (Q : pred_var) (ds : list D), ¬ P = Q → (I.pred Q ds ↔ J.pred Q ds))
   (h3 : ∀ (ds : list D), J.pred P ds ↔ holds D I (function.update_list_ite V zs ds) H) :
   holds D I V B ↔ holds D J V A :=
 begin
@@ -1089,7 +974,7 @@ begin
     unfold coincide,
     split,
     {
-      unfold pred_var_.occurs_in,
+      unfold pred_var.occurs_in,
       intros Q a1,
       funext ds,
       squeeze_simp,
@@ -1162,12 +1047,12 @@ begin
   },
   case is_pred_sub.forall_not_occurs_in : h1_x h1_A h1_P h1_zs h1_H h1_B h1_1
   {
-    unfold pred_var_.occurs_in at h1_1,
+    unfold pred_var.occurs_in at h1_1,
     apply coincidence_theorem,
     unfold coincide,
     split,
     {
-      unfold pred_var_.occurs_in,
+      unfold pred_var.occurs_in,
       intros Q a1,
       funext ds,
       squeeze_simp,
@@ -1248,8 +1133,8 @@ end
 
 example
   (A : formula)
-  (P : pred_var_)
-  (zs : list ind_var_)
+  (P : pred_var)
+  (zs : list ind_var)
   (H : formula)
   (B : formula)
   (h1 : is_pred_sub A P zs H B)
@@ -1263,11 +1148,11 @@ begin
 
   let J : interpretation D := {
     nonempty := I.nonempty,
-    pred := fun (R : pred_var_) (ds : list D), ite (¬ P = R) (I.pred R ds) (holds D I (function.update_list_ite V zs ds) H)
+    pred := fun (R : pred_var) (ds : list D), ite (¬ P = R) (I.pred R ds) (holds D I (function.update_list_ite V zs ds) H)
   },
 
 
-  have s2 : (∀ (Q : pred_var_) (ds : list D), (¬(P = Q)) → (I.pred Q ds ↔ J.pred Q ds)),
+  have s2 : (∀ (Q : pred_var) (ds : list D), (¬(P = Q)) → (I.pred Q ds ↔ J.pred Q ds)),
   {
     squeeze_simp,
     intros Q ds a1,
