@@ -210,6 +210,7 @@ begin
     apply phi_ih,
     apply h1,
     intros P ds,
+    simp only [h2 P ds],
 
     sorry,
   },
