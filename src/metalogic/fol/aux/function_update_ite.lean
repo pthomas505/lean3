@@ -241,7 +241,7 @@ end
 lemma function.update_list_ite_not_mem
   {α β : Type}
   [decidable_eq α]
-  (f f' : α → β)
+  (f : α → β)
   (v : α)
   (xs : list α)
   (ys : list β)
