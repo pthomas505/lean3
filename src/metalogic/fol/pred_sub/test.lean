@@ -136,70 +136,63 @@ end
 lemma pred_sub_aux
   (D : Type)
   (I J : interpretation D)
-  (V : valuation D)
+  (V V' : valuation D)
   (τ : string → list string × formula)
   (binders : finset string)
   (phi : formula)
   (h1 : admits_pred_fun_aux τ binders phi)
   (h2 : ∀ (P : string) (ds : list D),
     J.pred P ds ↔
-      holds D I (function.update_list_ite V (τ P).fst ds) (τ P).snd) :
-  holds D J V phi ↔ holds D I V (replace_pred_fun τ phi) :=
+      holds D I (function.update_list_ite V (τ P).fst ds) (τ P).snd)
+  (h3 : ∀ (P : string) (x : string), x ∉ binders → V x = V' x)
+  (h3' : ∀ (P : string) (x : string), x ∉ (τ P).fst → V x = V' x) :
+  holds D J V phi ↔ holds D I V' (replace_pred_fun τ phi) :=
 begin
-  induction phi generalizing V binders,
-  case formula.pred_ : P ts V binders h1 h2
+  induction phi generalizing V V' binders,
+  case formula.pred_ : P ts V V' binders h1 h2
   {
     unfold admits_pred_fun_aux at h1,
     simp only [bool.of_to_bool_iff] at h1,
     cases h1,
 
-    obtain s1 := substitution_theorem_fun I V (function.update_list_ite id (τ P).fst ts) (τ P).snd h1_left,
+    obtain s1 := substitution_theorem_fun I V' (function.update_list_ite id (τ P).fst ts) (τ P).snd h1_left,
 
-    obtain s2 := function.update_list_ite_comp id V (τ P).fst ts,
+    obtain s2 := function.update_list_ite_comp id V' (τ P).fst ts,
 
     simp only [s2] at s1,
     clear s2,
 
+    squeeze_simp at s1,
+
+
     unfold replace_pred_fun,
     rewrite <- s1,
+    unfold holds,
+    rewrite h2,
+    apply holds_congr_ind_var,
+    intros v a1,
     clear s1,
 
-    unfold holds,
-    simp only [function.comp.right_id],
-    apply h2,
-  },
-  case formula.not_ : phi phi_ih V binders h1 h2
-  {
-    unfold admits_pred_fun_aux at h1,
-
-    unfold replace_pred_fun,
-    unfold holds,
-    apply not_congr,
-    apply phi_ih,
-    apply h1,
-    apply h2,
-  },
-  case formula.imp_ : phi psi phi_ih psi_ih V binders h1 h2
-  {
-    unfold admits_pred_fun_aux at h1,
-    simp only [bool.to_bool_and, bool.to_bool_coe, band_coe_iff] at h1,
-    cases h1,
-
-    unfold replace_pred_fun,
-    unfold holds,
-    apply imp_congr,
+    by_cases c1 : v ∈ binders,
     {
-      apply phi_ih,
-      apply h1_left,
-      apply h2,
+      specialize h1_right v c1 a1,
+      specialize h3' P v h1_right,
+      rewrite function.update_list_ite_not_mem V,
+      rewrite function.update_list_ite_not_mem V',
+      exact h3',
+      exact h1_right,
+      exact h1_right,
     },
     {
-      apply psi_ih,
-      apply h1_right,
-      apply h2,
+      specialize h3 P v c1,
+      sorry,
     }
   },
-  case formula.forall_ : x phi phi_ih V binders h1 h2
+  case formula.not_ : phi_ᾰ phi_ih V V' binders h1 h2 h3 h3'
+  { admit },
+  case formula.imp_ : phi_ᾰ phi_ᾰ_1 phi_ih_ᾰ phi_ih_ᾰ_1 V V' binders h1 h2 h3 h3'
+  { admit },
+  case formula.forall_ : x phi phi_ih V V' binders h1 h2
   {
     unfold admits_pred_fun_aux at h1,
 
@@ -208,11 +201,35 @@ begin
     apply forall_congr,
     intros d,
     apply phi_ih,
-    apply h1,
-    intros P ds,
-    simp only [h2 P ds],
-
-    sorry,
+    {
+      apply h1,
+    },
+    {
+      intros P ds,
+      specialize h2 P ds,
+      rewrite h2,
+      apply holds_congr_ind_var,
+      intros,
+      sorry,
+    },
+    {
+    intros P v a1,
+    unfold function.update_ite,
+    split_ifs,
+    refl,
+    apply h3 P,
+    squeeze_simp at a1,
+    push_neg at a1,
+    cases a1,
+    exact a1_left,
+    },
+    {
+      intros P v a1,
+      unfold function.update_ite,
+      split_ifs,
+      refl,
+      apply h3' P v a1,
+    }
   },
 end
 
@@ -234,7 +251,7 @@ begin
     pred := fun (P : string) (ds : list D), holds D I (function.update_list_ite V (τ P).fst ds) (τ P).snd
   },
 
-  obtain s1 := pred_sub_aux D I J V τ ∅ phi h1,
+  obtain s1 := pred_sub_aux D I J V V τ ∅ phi h1,
   squeeze_simp at s1,
 
   rewrite <- s1,
