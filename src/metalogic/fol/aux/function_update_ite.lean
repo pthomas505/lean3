@@ -238,6 +238,50 @@ begin
 end
 
 
+lemma function.update_list_ite_not_mem
+  {α β : Type}
+  [decidable_eq α]
+  (f f' : α → β)
+  (v : α)
+  (xs : list α)
+  (ys : list β)
+  (h1 : v ∉ xs) :
+  function.update_list_ite f xs ys v = f v :=
+begin
+  induction xs generalizing ys,
+  case list.nil : ys
+  {
+    unfold function.update_list_ite,
+  },
+  case list.cons : xs_hd xs_tl xs_ih ys
+  {
+    cases ys,
+    case list.nil
+    {
+      unfold function.update_list_ite,
+    },
+    case list.cons : ys_hd ys_tl
+    {
+      unfold function.update_list_ite,
+      unfold function.update_ite,
+      split_ifs,
+      {
+        subst h,
+        simp only [list.mem_cons_iff, eq_self_iff_true, true_or, not_true] at h1,
+        contradiction,
+      },
+      {
+        simp only [list.mem_cons_iff] at h1,
+        push_neg at h1,
+        cases h1,
+        apply xs_ih,
+        exact h1_right,
+      },
+    },
+  },
+end
+
+
 def function.update_vector_ite
   {α β : Type}
   [decidable_eq α]
