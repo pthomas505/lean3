@@ -253,7 +253,7 @@ begin
   induction xs generalizing ys,
   case list.nil : ys
   {
-    squeeze_simp at h1,
+    simp only [list.not_mem_nil] at h1,
     contradiction,
   },
   case list.cons : xs_hd xs_tl xs_ih ys
@@ -261,13 +261,13 @@ begin
     cases ys,
     case list.nil
     {
-      squeeze_simp at h1,
+      simp only [list.mem_cons_iff] at h1,
       unfold function.update_list_ite,
       exact h2,
     },
     case list.cons : ys_hd ys_tl
     {
-      squeeze_simp at h1,
+      simp only [list.mem_cons_iff] at h1,
 
       unfold function.update_list_ite,
       unfold function.update_ite,
@@ -280,6 +280,7 @@ begin
     },
   },
 end
+
 
 lemma function.update_list_ite_not_mem
   {α β : Type}
@@ -333,9 +334,9 @@ def function.update_vector_ite
 | (m + 1) ⟨x :: xs, hx⟩ (n + 1) ⟨y :: ys, hy⟩ :=
     function.update_ite (function.update_vector_ite
       m
-      ⟨xs, begin squeeze_simp at hx, exact hx end⟩
+      ⟨xs, begin simp only [list.length, add_left_inj] at hx, exact hx end⟩
       n
-      ⟨ys, begin squeeze_simp at hy, exact hy end⟩) x y 
+      ⟨ys, begin simp only [list.length, add_left_inj] at hy, exact hy end⟩) x y 
 | _ _ _ _ := f
 
 
