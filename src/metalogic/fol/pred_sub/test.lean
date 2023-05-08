@@ -18,12 +18,13 @@ def is_free_in (v : string) : formula → bool
 | (imp_ phi psi) := is_free_in phi ∨ is_free_in psi
 | (forall_ x phi) := ¬ v = x ∧ is_free_in phi
 
+
 @[derive decidable]
-def pred_var.occurs_in (P : string) (n : ℕ) : formula → bool
+def pred.occurs_in (P : string) (n : ℕ) : formula → bool
 | (pred_ X xs) := X = P ∧ xs.length = n
-| (not_ phi) := pred_var.occurs_in phi
-| (imp_ phi psi) := pred_var.occurs_in phi ∨ pred_var.occurs_in psi
-| (forall_ _ phi) := pred_var.occurs_in phi
+| (not_ phi) := pred.occurs_in phi
+| (imp_ phi psi) := pred.occurs_in phi ∨ pred.occurs_in psi
+| (forall_ _ phi) := pred.occurs_in phi
 
 
 structure interpretation (D : Type) : Type :=
@@ -51,7 +52,7 @@ def coincide
   (V_I V_J : valuation D)
   (phi : formula) :
   Prop :=
-  (∀ (P : string) (n : ℕ), pred_var.occurs_in P n phi → I.pred P = J.pred P) ∧
+  (∀ (P : string) (n : ℕ), pred.occurs_in P n phi → I.pred P = J.pred P) ∧
   (∀ (v : string), is_free_in v phi → V_I v = V_J v)
 
 
@@ -78,17 +79,145 @@ def admits_fun (σ : string → string) (phi : formula) : bool :=
   admits_fun_aux σ ∅ phi
 
 
+lemma substitution_theorem_fun_aux
+  {D : Type}
+  (I : interpretation D)
+  (V V' : valuation D)
+  (σ σ' : string → string)
+  (binders : finset string)
+  (F : formula)
+  (h1 : admits_fun_aux σ binders F)
+  (h2 : ∀ (v : string), v ∈ binders ∨ σ' v ∉ binders → (V v = V' (σ' v)))
+  (h2' : ∀ (v : string), v ∈ binders → v = σ' v)
+  (h3 : ∀ (v : string), v ∉ binders → σ' v = σ v) :
+  holds D I V F ↔
+    holds D I V' (fast_replace_free_fun σ' F) :=
+begin
+  induction F generalizing binders V V' σ σ',
+  case formula.pred_ : X xs binders V V' σ σ' h1 h2 h2' h3
+  {
+    unfold admits_fun_aux at h1,
+    simp only [bool.of_to_bool_iff] at h1,
+
+    unfold fast_replace_free_fun,
+    unfold holds,
+    congr' 2,
+    simp only [list.map_map],
+    simp only [list.map_eq_map_iff],
+    intros v a1,
+    apply h2,
+    by_cases c1 : v ∈ binders,
+    {
+      left,
+      exact c1,
+    },
+    {
+      right,
+      simp only [h3 v c1],
+      exact h1 v a1 c1,
+    }
+  },
+  case formula.not_ : phi phi_ih binders V V' σ σ' h1 h2 h2' h3
+  {
+    unfold admits_fun_aux at h1,
+
+    unfold fast_replace_free_fun,
+    unfold holds,
+    apply not_congr,
+    exact phi_ih binders V V' σ σ' h1 h2 h2' h3,
+  },
+  case formula.imp_ : phi psi phi_ih psi_ih binders V V' σ σ' h1 h2 h2' h3
+  {
+    unfold admits_fun_aux at h1,
+    simp only [bool.of_to_bool_iff] at h1,
+    cases h1,
+
+    unfold holds,
+    apply imp_congr,
+    {
+      exact phi_ih binders V V' σ σ' h1_left h2 h2' h3,
+    },
+    {
+      exact psi_ih binders V V' σ σ' h1_right h2 h2' h3,
+    }
+  },
+  case formula.forall_ : x phi phi_ih binders V V' σ σ' h1 h2 h2' h3
+  {
+    unfold admits_fun_aux at h1,
+
+    unfold fast_replace_free_fun,
+    unfold holds,
+    apply forall_congr,
+    intros d,
+
+    apply phi_ih (binders ∪ {x}) (function.update_ite V x d) (function.update_ite V' x d) σ (function.update_ite σ' x x) h1,
+    {
+      intros v a1,
+      unfold function.update_ite at a1,
+      simp only [finset.mem_union, finset.mem_singleton, ite_eq_left_iff] at a1,
+      push_neg at a1,
+
+      unfold function.update_ite,
+      split_ifs,
+      {
+        refl,
+      },
+      {
+        subst h_1,
+        tauto,
+      },
+      {
+        simp only [if_neg h] at a1,
+        apply h2,
+        tauto,
+      },
+    },
+    {
+      intros v a1,
+      simp only [finset.mem_union, finset.mem_singleton] at a1,
+
+      unfold function.update_ite,
+      split_ifs,
+      {
+        exact h,
+      },
+      {
+        tauto,
+      },
+    },
+    {
+      intros v a1,
+      simp only [finset.mem_union, finset.mem_singleton] at a1,
+      push_neg at a1,
+      cases a1,
+      unfold function.update_ite,
+      simp only [if_neg a1_right],
+      exact h3 v a1_left,
+    },
+  },
+end
+
+
 theorem substitution_theorem_fun
   {D : Type}
   (I : interpretation D)
   (V : valuation D)
   (σ : string → string)
-  (phi : formula)
-  (h1 : admits_fun σ phi) :
-  holds D I (V ∘ σ) phi ↔
-    holds D I V (fast_replace_free_fun σ phi) :=
+  (F : formula)
+  (h1 : admits_fun σ F) :
+  holds D I (V ∘ σ) F ↔
+    holds D I V (fast_replace_free_fun σ F) :=
 begin
-  sorry,
+  apply substitution_theorem_fun_aux I (V ∘ σ) V σ σ ∅ F h1,
+  {
+    simp only [finset.not_mem_empty, not_false_iff, false_or, eq_self_iff_true, forall_const],
+  },
+  {
+    simp only [finset.not_mem_empty, is_empty.forall_iff, forall_const],
+  },
+  {
+    simp only [finset.not_mem_empty, not_false_iff, eq_self_iff_true, forall_const],
+  },
 end
 
 
@@ -131,6 +260,30 @@ lemma holds_congr_ind_var
 begin
   sorry,
 end
+
+
+example (D : Type) (P : string)
+  (H A B : formula)
+  (h1_x : string)
+  (h1_A₁ h1_B₁ : formula)
+  (v : string)
+  (I J : interpretation D)
+  (zs : list string)
+  (h2 : ∀ (Q : string) (ds : list D),
+          (¬(P = Q)) → (I.pred Q ds ↔ J.pred Q ds))
+--  (h1_1 : (↥(P.occurs_in (forall_ h1_x h1_A₁))))
+--  (h1_2 : (¬((h1_x.is_free_in H))))
+  (V : valuation D)
+  (d : D)
+  (ds : list D)
+--  (a1 : (↥(v.is_free_in H)))
+  (h3 : ¬ h1_x = v) :
+  (function.update_list_ite (function.update_ite V h1_x d) zs ds v =
+   function.update_list_ite V zs ds v) :=
+begin
+  sorry,
+end
+
 
 
 lemma pred_sub_aux
@@ -185,7 +338,17 @@ begin
     },
     {
       specialize h3 P v c1,
-      sorry,
+      by_cases c2 : v ∈ (τ P).fst,
+      {
+        sorry,
+      },
+      {
+        rewrite function.update_list_ite_not_mem,
+        rewrite function.update_list_ite_not_mem,
+        exact h3,
+        exact c2,
+        exact c2,
+      }
     }
   },
   case formula.not_ : phi_ᾰ phi_ih V V' binders h1 h2 h3 h3'
@@ -208,8 +371,6 @@ begin
       intros P ds,
       specialize h2 P ds,
       rewrite h2,
-      apply holds_congr_ind_var,
-      intros,
       sorry,
     },
     {
