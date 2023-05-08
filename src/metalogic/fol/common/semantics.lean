@@ -408,18 +408,6 @@ def admits_pred_fun_aux (τ : string → list string × formula) :
 | binders (forall_ x phi) := admits_pred_fun_aux (binders ∪ {x}) phi
 
 
-lemma holds_congr_ind_var
-  {D : Type}
-  (I : interpretation D)
-  (V V' : valuation D)
-  (F : formula)
-  (h1 : ∀ (v : string), is_free_in v F → V v = V' v) :
-  holds D I V F ↔ holds D I V' F :=
-begin
-  sorry,
-end
-
-
 example (D : Type) (P : string)
   (H A B : formula)
   (h1_x : string)
@@ -480,7 +468,7 @@ begin
     rewrite <- s1,
     unfold holds,
     rewrite h2,
-    apply holds_congr_ind_var,
+    apply holds_congr_var,
     intros v a1,
     clear s1,
 
