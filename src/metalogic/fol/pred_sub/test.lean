@@ -79,6 +79,157 @@ def admits_fun (σ : string → string) (phi : formula) : bool :=
   admits_fun_aux σ ∅ phi
 
 
+lemma holds_congr_var
+  {D : Type}
+  (I : interpretation D)
+  (V V' : valuation D)
+  (F : formula)
+  (h1 : ∀ (v : string), is_free_in v F → V v = V' v) :
+  holds D I V F ↔ holds D I V' F :=
+begin
+  induction F generalizing V V',
+  case formula.pred_ : X xs V V' h1
+  {
+    unfold is_free_in at h1,
+    simp only [list.mem_to_finset, bool.of_to_bool_iff] at h1,
+
+    unfold holds,
+    congr' 2,
+    simp only [list.map_eq_map_iff],
+    apply h1,
+  },
+  case formula.not_ : phi phi_ih V V' h1
+  {
+    apply not_congr,
+    exact phi_ih V V' h1,
+  },
+  case formula.imp_ : phi psi phi_ih psi_ih V V' h1
+  {
+    unfold is_free_in at h1,
+    simp only [bool.of_to_bool_iff] at h1,
+
+    apply imp_congr,
+    {
+      apply phi_ih V V',
+      intros x a1,
+      apply h1,
+      left,
+      exact a1,
+    },
+    {
+      apply psi_ih V V',
+      intros x a1,
+      apply h1,
+      right,
+      exact a1,
+    }
+  },
+  case formula.forall_ : x phi phi_ih V V' h1
+  {
+    unfold is_free_in at h1,
+    simp only [bool.of_to_bool_iff, and_imp] at h1,
+
+    unfold holds,
+    apply forall_congr,
+    intros d,
+    apply phi_ih,
+    intros v a1,
+    unfold function.update_ite,
+    split_ifs,
+    {
+      refl,
+    },
+    {
+      exact h1 v h a1,
+    }
+  },
+end
+
+
+lemma holds_congr_pred
+  {D : Type}
+  (I I' : interpretation D)
+  (V : valuation D)
+  (F : formula)
+  (h1 : ∀ (P : string) (n : ℕ), pred.occurs_in P n F → I.pred P = I'.pred P) :
+  holds D I V F ↔ holds D I' V F :=
+begin
+  induction F generalizing V,
+  case formula.pred_ : X xs V
+  {
+    unfold pred.occurs_in at h1,
+    simp only [bool.of_to_bool_iff, and_imp] at h1,
+
+    unfold holds,
+    specialize h1 X xs.length,
+    simp only [eq_self_iff_true, forall_true_left] at h1,
+    simp only [h1],
+  },
+  case formula.not_ : phi phi_ih V
+  {
+    unfold pred.occurs_in at h1,
+
+    unfold holds,
+    apply not_congr,
+    apply phi_ih h1,
+  },
+  case formula.imp_ : phi psi phi_ih psi_ih V
+  {
+    unfold pred.occurs_in at h1,
+    simp only [bool.of_to_bool_iff] at h1,
+
+    unfold holds,
+    apply imp_congr,
+    {
+      apply phi_ih,
+      intros P n a1,
+      apply h1,
+      left,
+      exact a1,
+    },
+    {
+      apply psi_ih,
+      intros P n a1,
+      apply h1,
+      right,
+      exact a1,
+    }
+  },
+  case formula.forall_ : x phi phi_ih V
+  {
+    unfold pred.occurs_in at h1,
+
+    unfold holds,
+    apply forall_congr,
+    intros d,
+    apply phi_ih h1,
+  },
+end
+
+
+theorem coincidence_theorem
+  {D : Type}
+  (I I' : interpretation D)
+  (V V' : valuation D)
+  (F : formula)
+  (h1 : coincide I I' V V' F) :
+  holds D I V F ↔ holds D I' V' F :=
+begin
+  unfold coincide at h1,
+  cases h1,
+
+  transitivity holds D I V' F,
+  {
+    apply holds_congr_var,
+    exact h1_right,
+  },
+  {
+    apply holds_congr_pred,
+    exact h1_left,
+  }
+end
+
+
 lemma substitution_theorem_fun_aux
   {D : Type}
   (I : interpretation D)
@@ -219,15 +370,6 @@ begin
     simp only [finset.not_mem_empty, not_false_iff, eq_self_iff_true, forall_const],
   },
 end
-
-
-theorem coincidence_theorem
-  {D : Type}
-  (I I' : interpretation D)
-  (V V' : valuation D)
-  (F : formula)
-  (h1 : coincide I I' V V' F) :
-  holds D I V F ↔ holds D I' V' F := sorry
 
 
 def replace_pred_fun
