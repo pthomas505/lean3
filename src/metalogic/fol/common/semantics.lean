@@ -230,6 +230,8 @@ begin
 end
 
 
+-- variable substitution
+
 lemma substitution_fun_theorem_aux
   {D : Type}
   (I : interpretation D)
@@ -387,6 +389,8 @@ begin
   exact h2 D I (V ∘ σ),
 end
 
+
+-- predicate substitution
 
 def replace_pred_fun
   (τ : string → list string × formula) : formula → formula
