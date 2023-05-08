@@ -230,7 +230,7 @@ begin
 end
 
 
-lemma substitution_theorem_fun_aux
+lemma substitution_fun_theorem_aux
   {D : Type}
   (I : interpretation D)
   (V V' : valuation D)
@@ -349,7 +349,7 @@ begin
 end
 
 
-theorem substitution_theorem_fun
+theorem substitution_fun_theorem
   {D : Type}
   (I : interpretation D)
   (V : valuation D)
@@ -359,7 +359,7 @@ theorem substitution_theorem_fun
   holds D I (V ∘ σ) F ↔
     holds D I V (fast_replace_free_fun σ F) :=
 begin
-  apply substitution_theorem_fun_aux I (V ∘ σ) V σ σ ∅ F h1,
+  apply substitution_fun_theorem_aux I (V ∘ σ) V σ σ ∅ F h1,
   {
     simp only [finset.not_mem_empty, not_false_iff, false_or, eq_self_iff_true, forall_const],
   },
@@ -369,6 +369,22 @@ begin
   {
     simp only [finset.not_mem_empty, not_false_iff, eq_self_iff_true, forall_const],
   },
+end
+
+
+theorem substitution_fun_valid
+  (σ : string → string)
+  (F : formula)
+  (h1 : admits_fun σ F)
+  (h2 : F.is_valid) :
+  (fast_replace_free_fun σ F).is_valid :=
+begin
+  unfold formula.is_valid at h2,
+
+  unfold formula.is_valid,
+  intros D I V,
+  rewrite <- substitution_fun_theorem I V σ F h1,
+  exact h2 D I (V ∘ σ),
 end
 
 
