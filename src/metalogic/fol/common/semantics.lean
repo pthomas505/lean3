@@ -466,7 +466,7 @@ begin
     simp only [bool.of_to_bool_iff] at h1,
     cases h1,
 
-    obtain s1 := substitution_theorem_fun I V' (function.update_list_ite id (τ P).fst ts) (τ P).snd h1_left,
+    obtain s1 := substitution_fun_theorem I V' (function.update_list_ite id (τ P).fst ts) (τ P).snd h1_left,
 
     obtain s2 := function.update_list_ite_comp id V' (τ P).fst ts,
 
