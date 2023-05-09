@@ -462,7 +462,7 @@ lemma pred_sub_aux
   (H : formula)
   (B : formula)
   (h1 : is_pred_sub P zs H A B)
-  (h2 : ∀ (ds : list D), J.pred P ds ↔ holds D I (function.update_list_ite V zs ds) H)
+  (h2 : ∀ (ds : list D), holds D I (function.update_list_ite V zs ds) H ↔ J.pred P ds)
   (h3 : ∀ (Q : string) (n : ℕ) (ds : list D), ds.length = n → ¬ (Q = P ∧ zs.length = n) → (I.pred Q ds ↔ J.pred Q ds)) :
   holds D I V B ↔ holds D J V A :=
 begin
@@ -491,7 +491,18 @@ begin
     }
   },
   case is_pred_sub.pred_occurs_in : h1_X h1_ts h1_1 h1_2 V h2
-  { admit },
+  {
+    obtain s1 := substitution_fun_theorem I V (function.update_list_ite id zs h1_ts) H h1_2,
+
+    obtain s2 := function.update_list_ite_comp id V zs h1_ts,
+
+    simp only [s2] at s1,
+    simp only [function.comp.right_id] at s1,
+
+    unfold holds,
+    rewrite <- s1,
+    apply h2,
+  },
   case is_pred_sub.not_ : h1_phi h1_phi' h1_1 h1_ih V h2
   { admit },
   case is_pred_sub.imp_ : h1_phi h1_psi h1_phi' h1_psi' h1_1 h1_2 h1_ih_1 h1_ih_2 V h2
