@@ -392,6 +392,65 @@ end
 
 -- predicate substitution
 
+/--
+  is_pred_sub A P zs H B := The formula A is said to be transformed into the formula B by a substitution of H* for P z₁ ... zₙ, abbreviated: Sub A (P zⁿ / H*) B, iff B is obtained from A upon replacing in A each occurrence of a derivative of the name form P z₁ ... zₙ by the corresponding derivative of the substituend H*, provided that: (i) P does not occur in a component formula (∀ x A₁) of A if x is a parameter of H*, and (ii) the name variable zₖ, k = 1, ..., n, is not free in a component formula (∀ x H) of H* if P t₁ ... tₙ occurs in A with x occurring in tₖ. If conditions (i) and (ii) are not satisfied, then the indicated substitution for predicate variables is left undefined.
+-/
+inductive is_pred_sub (P : string) (zs : list string) (H : formula) : formula → formula → Prop
+
+/-
+  If A is an atomic formula not containing P then Sub A (P zⁿ / H*) A.
+-/
+| pred_not_occurs_in
+  (X : string) (ts : list string) :
+  ¬ (X = P ∧ ts.length = zs.length) →
+  is_pred_sub (pred_ X ts) (pred_ X ts)
+
+  /-
+  If A = P t₁ ... tₙ and Sf H* (zⁿ / tⁿ) B, then Sub A (P zⁿ / H*) B.
+
+  Sf H* (zⁿ / tⁿ) B :=
+    admits_fun (function.update_list_ite id zs.to_list ts.to_list) H* ∧ 
+    fast_replace_free_fun (function.update_list_ite id zs.to_list ts.to_list) H* = B
+  -/
+| pred_occurs_in
+  (X : string) (ts : list string) :
+  X = P ∧ ts.length = zs.length →
+  admits_fun (function.update_list_ite id zs ts) H →
+  is_pred_sub (pred_ P ts) (fast_replace_free_fun (function.update_list_ite id zs ts) H)
+
+/-
+  If A = (¬ A₁) and Sub A₁ (P zⁿ / H*) B₁, then Sub A (P zⁿ / H*) (¬ B₁).
+-/
+| not_
+  (phi : formula)
+  (phi' : formula) :
+  is_pred_sub phi phi' →
+  is_pred_sub phi.not_ phi'.not_
+
+/-
+  If A = (A₁ → A₂), Sub A₁ (P zⁿ / H*) B₁, and Sub A₂ (P zⁿ / H*) B₂, then Sub A (P zⁿ / H*) (B₁ → B₁).
+-/
+| imp_
+  (phi psi : formula)
+  (phi' psi' : formula) :
+  is_pred_sub phi phi' →
+  is_pred_sub psi psi' →
+  is_pred_sub (phi.imp_ psi) (phi'.imp_ psi')
+
+/-
+  If A = (∀ x A₁) and P does not occur in A then Sub A (P zⁿ / H*) A.
+
+  If A = (∀ x A₁), P occurs in A, x is not free in H*, and Sub A₁ (P zⁿ / H*) B₁, then Sub A (P zⁿ / H*) (∀ x B₁).
+-/
+| forall_
+  (x : string)
+  (phi : formula)
+  (phi' : formula) :
+  ¬ is_free_in x H →
+  is_pred_sub phi phi' →
+  is_pred_sub (forall_ x phi) (forall_ x phi')
+
+
 def replace_pred_fun
   (τ : string → list string × formula) : formula → formula
 | (pred_ P ts) :=
