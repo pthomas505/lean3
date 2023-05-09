@@ -52,7 +52,7 @@ def coincide
   (V_I V_J : valuation D)
   (phi : formula) :
   Prop :=
-  (∀ (P : string) (n : ℕ), pred.occurs_in P n phi → I.pred P = J.pred P) ∧
+  (∀ (P : string) (n : ℕ) (ds : list D), ds.length = n → pred.occurs_in P n phi → I.pred P ds = J.pred P ds) ∧
   (∀ (v : string), is_free_in v phi → V_I v = V_J v)
 
 
@@ -151,7 +151,7 @@ lemma holds_congr_pred
   (I I' : interpretation D)
   (V : valuation D)
   (F : formula)
-  (h1 : ∀ (P : string) (n : ℕ), pred.occurs_in P n F → I.pred P = I'.pred P) :
+  (h1 : ∀ (P : string) (n : ℕ) (ds : list D), ds.length = n → pred.occurs_in P n F → I.pred P ds = I'.pred P ds) :
   holds D I V F ↔ holds D I' V F :=
 begin
   induction F generalizing V,
@@ -161,8 +161,8 @@ begin
     simp only [bool.of_to_bool_iff, and_imp] at h1,
 
     unfold holds,
-    specialize h1 X xs.length,
-    simp only [eq_self_iff_true, forall_true_left] at h1,
+    specialize h1 X xs.length (xs.map V),
+    simp only [eq_self_iff_true, list.length_map, eq_iff_iff, forall_true_left] at h1,
     simp only [h1],
   },
   case formula.not_ : phi phi_ih V
@@ -182,17 +182,17 @@ begin
     apply imp_congr,
     {
       apply phi_ih,
-      intros P n a1,
-      apply h1,
+      intros P n ds a1 a2,
+      apply h1 P n ds a1,
       left,
-      exact a1,
+      exact a2,
     },
     {
       apply psi_ih,
-      intros P n a1,
-      apply h1,
+      intros P n ds a1 a2,
+      apply h1 P n ds a1,
       right,
-      exact a1,
+      exact a2,
     }
   },
   case formula.forall_ : x phi phi_ih V
@@ -225,7 +225,8 @@ begin
   },
   {
     apply holds_congr_pred,
-    exact h1_left,
+    intros P n ds a1 a2,
+    simp only [h1_left P n ds a1 a2],
   }
 end
 
@@ -449,6 +450,69 @@ inductive is_pred_sub (P : string) (zs : list string) (H : formula) : formula �
   ¬ is_free_in x H →
   is_pred_sub phi phi' →
   is_pred_sub (forall_ x phi) (forall_ x phi')
+
+
+lemma pred_sub_aux
+  (D : Type)
+  (I J : interpretation D)
+  (V : valuation D)
+  (A : formula)
+  (P : string)
+  (zs : list string)
+  (H : formula)
+  (B : formula)
+  (h1 : is_pred_sub P zs H A B)
+  (h2 : ∀ (ds : list D), J.pred P ds ↔ holds D I (function.update_list_ite V zs ds) H)
+  (h3 : ∀ (Q : string) (n : ℕ) (ds : list D), ds.length = n → ¬ (Q = P ∧ zs.length = n) → (I.pred Q ds ↔ J.pred Q ds)) :
+  holds D I V B ↔ holds D J V A :=
+begin
+  induction h1 generalizing V,
+  case is_pred_sub.pred_not_occurs_in : h1_X h1_ts h1_1 V h2
+  {
+    simp only [not_and] at h1_1,
+
+    apply coincidence_theorem,
+    unfold coincide,
+    split,
+    {
+      unfold pred.occurs_in,
+      intros X n ds a1 a2,
+      simp only [bool.of_to_bool_iff] at a2,
+      cases a2,
+      subst a2_left,
+      subst a2_right,
+      ext xs,
+      apply h3 h1_X h1_ts.length ds a1,
+      simp only [not_and],
+      tauto,      
+    },
+    {
+      simp only [eq_self_iff_true, implies_true_iff],
+    }
+  },
+  case is_pred_sub.pred_occurs_in : h1_X h1_ts h1_1 h1_2 V h2
+  { admit },
+  case is_pred_sub.not_ : h1_phi h1_phi' h1_1 h1_ih V h2
+  { admit },
+  case is_pred_sub.imp_ : h1_phi h1_psi h1_phi' h1_psi' h1_1 h1_2 h1_ih_1 h1_ih_2 V h2
+  { admit },
+  case is_pred_sub.forall_ : h1_x h1_phi h1_phi' h1_1 h1_2 h1_ih V h2
+  { admit },
+end
+
+
+example
+  (A : formula)
+  (P : string)
+  (zs : list string)
+  (H : formula)
+  (B : formula)
+  (h1 : is_pred_sub P zs H A B)
+  (h2 : A.is_valid) :
+  B.is_valid :=
+begin
+  sorry,
+end
 
 
 def replace_pred_fun
