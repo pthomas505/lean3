@@ -500,8 +500,9 @@ begin
     simp only [function.comp.right_id] at s1,
 
     unfold holds,
-    rewrite <- s1,
-    apply h2,
+    specialize h2 (list.map V h1_ts),
+    simp only [s1] at h2,
+    exact h2,
   },
   case is_pred_sub.not_ : h1_phi h1_phi' h1_1 h1_ih V h2
   { admit },
