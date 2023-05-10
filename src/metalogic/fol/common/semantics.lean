@@ -505,9 +505,22 @@ begin
     exact h2,
   },
   case is_pred_sub.not_ : h1_phi h1_phi' h1_1 h1_ih V h2
-  { admit },
+  {
+    unfold holds,
+    apply not_congr,
+    exact h1_ih V h2,
+  },
   case is_pred_sub.imp_ : h1_phi h1_psi h1_phi' h1_psi' h1_1 h1_2 h1_ih_1 h1_ih_2 V h2
-  { admit },
+  {
+    unfold holds,
+    apply imp_congr,
+    {
+      exact h1_ih_1 V h2,
+    },
+    {
+      exact h1_ih_2 V h2,
+    },
+  },
   case is_pred_sub.forall_ : h1_x h1_phi h1_phi' h1_1 h1_2 h1_ih V h2
   {
     unfold holds,
