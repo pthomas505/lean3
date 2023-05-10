@@ -272,11 +272,19 @@ begin
       unfold function.update_list_ite,
       unfold function.update_ite,
       split_ifs,
-      refl,
-      cases h1,
-      contradiction,
-      apply xs_ih,
-      exact h1,
+      {
+        refl,
+      },
+      {
+        cases h1,
+        {
+          contradiction,
+        },
+        {
+          apply xs_ih,
+          exact h1,
+        }
+      },
     },
   },
 end
@@ -321,6 +329,50 @@ begin
         apply xs_ih,
         exact h1_right,
       },
+    },
+  },
+end
+
+
+lemma function.update_list_ite_update_ite
+  {α β : Type}
+  [decidable_eq α]
+  (f : α → β)
+  (l1 : list α)
+  (l2 : list β)
+  (x y : α)
+  (z : β)
+  (h1 : ¬ x = y) : 
+function.update_list_ite (function.update_ite f y z) l1 l2 x =
+  function.update_list_ite f l1 l2 x :=
+begin
+  induction l1 generalizing l2,
+  case list.nil : l2
+  {
+    unfold function.update_list_ite,
+    unfold function.update_ite,
+    simp only [if_neg h1],
+  },
+  case list.cons : l1_hd l1_tl l1_ih l2
+  {
+    cases l2,
+    case list.nil
+    {
+      unfold function.update_list_ite,
+      unfold function.update_ite,
+      simp only [if_neg h1],
+    },
+    case list.cons : l2_hd l2_tl
+    {
+      unfold function.update_list_ite,
+      unfold function.update_ite,
+      split_ifs,
+      {
+        refl,
+      },
+      {
+        apply l1_ih,
+      }
     },
   },
 end

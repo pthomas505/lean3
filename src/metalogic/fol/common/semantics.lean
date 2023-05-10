@@ -509,7 +509,34 @@ begin
   case is_pred_sub.imp_ : h1_phi h1_psi h1_phi' h1_psi' h1_1 h1_2 h1_ih_1 h1_ih_2 V h2
   { admit },
   case is_pred_sub.forall_ : h1_x h1_phi h1_phi' h1_1 h1_2 h1_ih V h2
-  { admit },
+  {
+    unfold holds,
+    apply forall_congr,
+    intros d,
+    apply h1_ih,
+    intros ds,
+    specialize h2 ds,
+
+    have s1 : holds D I (function.update_list_ite (function.update_ite V h1_x d) zs ds) H ↔ holds D I (function.update_list_ite V zs ds) H,
+    {
+      apply coincidence_theorem,
+      unfold coincide,
+      split,
+      {
+        simp only [eq_iff_iff, iff_self, implies_true_iff, forall_const],
+      },
+      {
+        intros v a1,
+        apply function.update_list_ite_update_ite,
+        intros contra,
+        subst contra,
+        contradiction,
+      }
+    },
+
+    simp only [h2] at s1,
+    exact s1,    
+  },
 end
 
 
