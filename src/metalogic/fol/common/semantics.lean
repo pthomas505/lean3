@@ -52,7 +52,7 @@ def coincide
   (V_I V_J : valuation D)
   (phi : formula) :
   Prop :=
-  (∀ (P : string) (n : ℕ) (ds : list D), ds.length = n → pred.occurs_in P n phi → I.pred P ds = J.pred P ds) ∧
+  (∀ (P : string) (n : ℕ) (ds : list D), ds.length = n → pred.occurs_in P n phi → (I.pred P ds ↔ J.pred P ds)) ∧
   (∀ (v : string), is_free_in v phi → V_I v = V_J v)
 
 
@@ -151,7 +151,7 @@ lemma holds_congr_pred
   (I I' : interpretation D)
   (V : valuation D)
   (F : formula)
-  (h1 : ∀ (P : string) (n : ℕ) (ds : list D), ds.length = n → pred.occurs_in P n F → I.pred P ds = I'.pred P ds) :
+  (h1 : ∀ (P : string) (n : ℕ) (ds : list D), ds.length = n → pred.occurs_in P n F → (I.pred P ds ↔ I'.pred P ds)) :
   holds D I V F ↔ holds D I' V F :=
 begin
   induction F generalizing V,
@@ -452,7 +452,7 @@ inductive is_pred_sub (P : string) (zs : list string) (H : formula) : formula �
   is_pred_sub (forall_ x phi) (forall_ x phi')
 
 
-lemma pred_sub_aux
+theorem is_pred_sub_theorem
   (D : Type)
   (I J : interpretation D)
   (V : valuation D)
@@ -481,10 +481,9 @@ begin
       cases a2,
       subst a2_left,
       subst a2_right,
-      ext xs,
       apply h3 h1_X h1_ts.length ds a1,
       simp only [not_and],
-      tauto,      
+      tauto,
     },
     {
       simp only [eq_self_iff_true, implies_true_iff],
@@ -559,7 +558,7 @@ begin
 end
 
 
-example
+theorem is_pred_sub_valid
   (phi phi' : formula)
   (P : string)
   (zs : list string)
@@ -578,7 +577,7 @@ begin
     pred := fun (Q : string) (ds : list D), ite (Q = P ∧ zs.length = ds.length) (holds D I (function.update_list_ite V zs ds) H) (I.pred Q ds)
   },
 
-  obtain s1 := pred_sub_aux D I J V phi P zs H phi' h1,
+  obtain s1 := is_pred_sub_theorem D I J V phi P zs H phi' h1,
   simp only [eq_self_iff_true, true_and] at s1,
 
   have s2 : holds D I V phi' ↔ holds D J V phi,
