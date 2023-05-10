@@ -462,7 +462,7 @@ lemma pred_sub_aux
   (H : formula)
   (B : formula)
   (h1 : is_pred_sub P zs H A B)
-  (h2 : ∀ (ds : list D), holds D I (function.update_list_ite V zs ds) H ↔ J.pred P ds)
+  (h2 : ∀ (ds : list D), ds.length = zs.length → (holds D I (function.update_list_ite V zs ds) H ↔ J.pred P ds))
   (h3 : ∀ (Q : string) (n : ℕ) (ds : list D), ds.length = n → ¬ (Q = P ∧ zs.length = n) → (I.pred Q ds ↔ J.pred Q ds)) :
   holds D I V B ↔ holds D J V A :=
 begin
@@ -502,7 +502,10 @@ begin
     unfold holds,
     specialize h2 (list.map V h1_ts),
     simp only [s1] at h2,
-    exact h2,
+    cases h1_1,
+    apply h2,
+    squeeze_simp,
+    exact h1_1_right,
   },
   case is_pred_sub.not_ : h1_phi h1_phi' h1_1 h1_ih V h2
   {
@@ -527,8 +530,8 @@ begin
     apply forall_congr,
     intros d,
     apply h1_ih,
-    intros ds,
-    specialize h2 ds,
+    intros ds a1,
+    specialize h2 ds a1,
 
     have s1 : holds D I (function.update_list_ite (function.update_ite V h1_x d) zs ds) H ↔ holds D I (function.update_list_ite V zs ds) H,
     {
@@ -548,22 +551,39 @@ begin
     },
 
     simp only [h2] at s1,
-    exact s1,    
+    exact s1,
   },
 end
 
 
 example
-  (A : formula)
+  (phi phi' : formula)
   (P : string)
   (zs : list string)
   (H : formula)
-  (B : formula)
-  (h1 : is_pred_sub P zs H A B)
-  (h2 : A.is_valid) :
-  B.is_valid :=
+  (h1 : is_pred_sub P zs H phi phi')
+  (h2 : phi.is_valid) :
+  phi'.is_valid :=
 begin
+  unfold formula.is_valid at h2,
+
+  unfold formula.is_valid,
+  intros D I V,
+
+  let J : interpretation D := {
+    nonempty := I.nonempty,
+    pred := fun (Q : string) (ds : list D), sorry
+  },
+
+  obtain s1 := pred_sub_aux D I J V phi P zs H phi' h1,
+  squeeze_simp at s1,
+  rewrite s1,
+  apply h2,
+  intros ds,
   sorry,
+  intros Q n ds a1 a2,
+  rewrite <- a1 at a2,
+
 end
 
 
