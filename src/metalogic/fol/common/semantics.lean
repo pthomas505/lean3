@@ -462,7 +462,7 @@ lemma pred_sub_aux
   (H : formula)
   (B : formula)
   (h1 : is_pred_sub P zs H A B)
-  (h2 : ∀ (ds : list D), ds.length = zs.length → (holds D I (function.update_list_ite V zs ds) H ↔ J.pred P ds))
+  (h2 : ∀ (Q : string) (n : ℕ) (ds : list D), ds.length = n → (Q = P ∧ zs.length = n) → (holds D I (function.update_list_ite V zs ds) H ↔ J.pred P ds))
   (h3 : ∀ (Q : string) (n : ℕ) (ds : list D), ds.length = n → ¬ (Q = P ∧ zs.length = n) → (I.pred Q ds ↔ J.pred Q ds)) :
   holds D I V B ↔ holds D J V A :=
 begin
@@ -500,12 +500,15 @@ begin
     simp only [function.comp.right_id] at s1,
 
     unfold holds,
-    specialize h2 (list.map V h1_ts),
+    specialize h2 h1_X h1_ts.length (list.map V h1_ts),
     simp only [s1] at h2,
-    cases h1_1,
     apply h2,
-    squeeze_simp,
-    exact h1_1_right,
+    {
+      simp only [list.length_map],
+    },
+    {
+      tauto,
+    },
   },
   case is_pred_sub.not_ : h1_phi h1_phi' h1_1 h1_ih V h2
   {
@@ -530,8 +533,8 @@ begin
     apply forall_congr,
     intros d,
     apply h1_ih,
-    intros ds a1,
-    specialize h2 ds a1,
+    intros Q n ds a1 a2,
+    specialize h2 Q n ds a1 a2,
 
     have s1 : holds D I (function.update_list_ite (function.update_ite V h1_x d) zs ds) H ↔ holds D I (function.update_list_ite V zs ds) H,
     {
@@ -572,18 +575,30 @@ begin
 
   let J : interpretation D := {
     nonempty := I.nonempty,
-    pred := fun (Q : string) (ds : list D), sorry
+    pred := fun (Q : string) (ds : list D), ite (Q = P ∧ zs.length = ds.length) (holds D I (function.update_list_ite V zs ds) H) (I.pred Q ds)
   },
 
   obtain s1 := pred_sub_aux D I J V phi P zs H phi' h1,
-  squeeze_simp at s1,
-  rewrite s1,
-  apply h2,
-  intros ds,
-  sorry,
-  intros Q n ds a1 a2,
-  rewrite <- a1 at a2,
+  simp only [eq_self_iff_true, true_and] at s1,
 
+  have s2 : holds D I V phi' ↔ holds D J V phi,
+  {
+    apply s1,
+    {
+      intros Q n ds a1 a2,
+      cases a2,
+      subst a1,
+      simp only [if_pos a2_right],
+    },
+    {
+      intros Q n ds a1 a2,
+      subst a1,
+      simp only [if_neg a2],
+    },
+  },
+
+  simp only [s2],
+  apply h2,
 end
 
 
