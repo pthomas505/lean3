@@ -621,30 +621,6 @@ def admits_pred_fun_aux (τ : string → list string × formula) :
 | binders (forall_ x phi) := admits_pred_fun_aux (binders ∪ {x}) phi
 
 
-example (D : Type) (P : string)
-  (H A B : formula)
-  (h1_x : string)
-  (h1_A₁ h1_B₁ : formula)
-  (v : string)
-  (I J : interpretation D)
-  (zs : list string)
-  (h2 : ∀ (Q : string) (ds : list D),
-          (¬(P = Q)) → (I.pred Q ds ↔ J.pred Q ds))
---  (h1_1 : (↥(P.occurs_in (forall_ h1_x h1_A₁))))
---  (h1_2 : (¬((h1_x.is_free_in H))))
-  (V : valuation D)
-  (d : D)
-  (ds : list D)
---  (a1 : (↥(v.is_free_in H)))
-  (h3 : ¬ h1_x = v) :
-  (function.update_list_ite (function.update_ite V h1_x d) zs ds v =
-   function.update_list_ite V zs ds v) :=
-begin
-  sorry,
-end
-
-
-
 lemma pred_sub_aux
   (D : Type)
   (I J : interpretation D)
