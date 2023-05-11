@@ -52,7 +52,7 @@ def coincide
   (V_I V_J : valuation D)
   (phi : formula) :
   Prop :=
-  (∀ (P : string) (n : ℕ) (ds : list D), ds.length = n → pred.occurs_in P n phi → (I.pred P ds ↔ J.pred P ds)) ∧
+  (∀ (P : string) (ds : list D), pred.occurs_in P ds.length phi → (I.pred P ds ↔ J.pred P ds)) ∧
   (∀ (v : string), is_free_in v phi → V_I v = V_J v)
 
 
@@ -151,7 +151,7 @@ lemma holds_congr_pred
   (I I' : interpretation D)
   (V : valuation D)
   (F : formula)
-  (h1 : ∀ (P : string) (n : ℕ) (ds : list D), ds.length = n → pred.occurs_in P n F → (I.pred P ds ↔ I'.pred P ds)) :
+  (h1 : ∀ (P : string) (ds : list D), pred.occurs_in P ds.length F → (I.pred P ds ↔ I'.pred P ds)) :
   holds D I V F ↔ holds D I' V F :=
 begin
   induction F generalizing V,
@@ -161,7 +161,7 @@ begin
     simp only [bool.of_to_bool_iff, and_imp] at h1,
 
     unfold holds,
-    specialize h1 X xs.length (xs.map V),
+    specialize h1 X (xs.map V),
     simp only [eq_self_iff_true, list.length_map, eq_iff_iff, forall_true_left] at h1,
     simp only [h1],
   },
@@ -182,17 +182,17 @@ begin
     apply imp_congr,
     {
       apply phi_ih,
-      intros P n ds a1 a2,
-      apply h1 P n ds a1,
+      intros P ds a1,
+      apply h1 P ds,
       left,
-      exact a2,
+      exact a1,
     },
     {
       apply psi_ih,
-      intros P n ds a1 a2,
-      apply h1 P n ds a1,
+      intros P ds a1,
+      apply h1 P ds,
       right,
-      exact a2,
+      exact a1,
     }
   },
   case formula.forall_ : x phi phi_ih V
@@ -225,8 +225,8 @@ begin
   },
   {
     apply holds_congr_pred,
-    intros P n ds a1 a2,
-    simp only [h1_left P n ds a1 a2],
+    intros P ds a1,
+    simp only [h1_left P ds a1],
   }
 end
 
@@ -462,8 +462,8 @@ theorem is_pred_sub_theorem
   (H : formula)
   (B : formula)
   (h1 : is_pred_sub P zs H A B)
-  (h2 : ∀ (Q : string) (n : ℕ) (ds : list D), ds.length = n → (Q = P ∧ zs.length = n) → (holds D I (function.update_list_ite V zs ds) H ↔ J.pred P ds))
-  (h3 : ∀ (Q : string) (n : ℕ) (ds : list D), ds.length = n → ¬ (Q = P ∧ zs.length = n) → (I.pred Q ds ↔ J.pred Q ds)) :
+  (h2 : ∀ (Q : string) (ds : list D), (Q = P ∧ ds.length = zs.length) → (holds D I (function.update_list_ite V zs ds) H ↔ J.pred P ds))
+  (h3 : ∀ (Q : string) (ds : list D), ¬ (Q = P ∧ ds.length = zs.length) → (I.pred Q ds ↔ J.pred Q ds)) :
   holds D I V B ↔ holds D J V A :=
 begin
   induction h1 generalizing V,
@@ -476,14 +476,18 @@ begin
     split,
     {
       unfold pred.occurs_in,
-      intros X n ds a1 a2,
-      simp only [bool.of_to_bool_iff] at a2,
-      cases a2,
-      subst a2_left,
-      subst a2_right,
-      apply h3 h1_X h1_ts.length ds a1,
+      intros X ds a1,
+      simp only [bool.of_to_bool_iff] at a1,
+      cases a1,
+      subst a1_left,
+      apply h3,
       simp only [not_and],
-      tauto,
+      intros a2,
+      subst a2,
+      simp only [eq_self_iff_true, forall_true_left] at h1_1,
+      intros contra,
+      apply h1_1,
+      exact eq.trans a1_right contra,
     },
     {
       simp only [eq_self_iff_true, implies_true_iff],
@@ -499,14 +503,12 @@ begin
     simp only [function.comp.right_id] at s1,
 
     unfold holds,
-    specialize h2 h1_X h1_ts.length (list.map V h1_ts),
+    specialize h2 h1_X (list.map V h1_ts),
     simp only [s1] at h2,
     apply h2,
     {
       simp only [list.length_map],
-    },
-    {
-      tauto,
+      exact h1_1,
     },
   },
   case is_pred_sub.not_ : h1_phi h1_phi' h1_1 h1_ih V h2
@@ -532,8 +534,8 @@ begin
     apply forall_congr,
     intros d,
     apply h1_ih,
-    intros Q n ds a1 a2,
-    specialize h2 Q n ds a1 a2,
+    intros Q ds a1,
+    specialize h2 Q ds a1,
 
     have s1 : holds D I (function.update_list_ite (function.update_ite V h1_x d) zs ds) H ↔ holds D I (function.update_list_ite V zs ds) H,
     {
@@ -574,7 +576,7 @@ begin
 
   let J : interpretation D := {
     nonempty := I.nonempty,
-    pred := fun (Q : string) (ds : list D), ite (Q = P ∧ zs.length = ds.length) (holds D I (function.update_list_ite V zs ds) H) (I.pred Q ds)
+    pred := fun (Q : string) (ds : list D), ite (Q = P ∧ ds.length = zs.length) (holds D I (function.update_list_ite V zs ds) H) (I.pred Q ds)
   },
 
   obtain s1 := is_pred_sub_theorem D I J V phi P zs H phi' h1,
@@ -584,15 +586,13 @@ begin
   {
     apply s1,
     {
-      intros Q n ds a1 a2,
-      cases a2,
-      subst a1,
-      simp only [if_pos a2_right],
+      intros Q ds a1,
+      cases a1,
+      simp only [if_pos a1_right],
     },
     {
-      intros Q n ds a1 a2,
-      subst a1,
-      simp only [if_neg a2],
+      intros Q ds a1,
+      simp only [if_neg a1],
     },
   },
 
