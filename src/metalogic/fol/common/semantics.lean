@@ -633,7 +633,8 @@ lemma pred_sub_aux
   (h2 : ∀ (Q : string) (ds : list D),
     (holds D I (function.update_list_ite V (τ Q).fst ds) (τ Q).snd) ↔
       J.pred Q ds)
-  (h3 : ∀ (x : string), x ∉ binders → V x = V' x) :
+  (h3 : ∀ (x : string), x ∉ binders → V x = V' x)
+  (h3' : ∀ (x : string), x ∈ binders → V x = V' x) :
   holds D J V F ↔ holds D I V' (replace_pred_fun τ F) :=
 begin
   induction F generalizing V V' binders,
@@ -667,7 +668,7 @@ begin
 
       by_cases c1 : v ∈ binders,
       {
-        sorry,
+        exact h3' v c1,
       },
       {
         exact h3 v c1,
@@ -695,7 +696,31 @@ begin
     },
     {
       intros Q ds,
-      sorry,
+      have s1 : (holds D I (function.update_list_ite V (τ Q).fst ds) (τ Q).snd) ↔ (holds D I (function.update_list_ite (function.update_ite V x d) (τ Q).fst ds) (τ Q).snd),
+      {
+        apply holds_congr_var,
+        intros v a1,
+        induction (τ Q).fst generalizing ds,
+        unfold function.update_list_ite,
+        unfold function.update_ite,
+        split_ifs,
+        sorry,
+        refl,
+        cases ds,
+        unfold function.update_list_ite,
+        unfold function.update_ite,
+        split_ifs,
+        sorry,
+        refl,
+        unfold function.update_list_ite,
+        unfold function.update_ite,
+        split_ifs,
+        refl,
+        apply ih,
+      },
+      simp only [h2 Q ds] at s1,
+      symmetry,
+      exact s1,
     },
     {
       intros v a1,
@@ -706,6 +731,21 @@ begin
       unfold function.update_ite,
       simp only [if_neg a1_right],
       exact h3 v a1_left,
+    },
+    {
+      intros v a1,
+      squeeze_simp at a1,
+      unfold function.update_ite,
+      split_ifs,
+      {
+        refl,
+      },
+      {
+        cases a1,
+        apply h3',
+        exact a1,
+        contradiction,
+      }
     }
   },
 end
