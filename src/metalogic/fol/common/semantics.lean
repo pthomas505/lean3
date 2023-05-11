@@ -615,7 +615,7 @@ def replace_pred_fun
 def admits_pred_fun_aux (τ : string → list string × formula) :
   finset string → formula → bool
 | binders (pred_ P ts) :=
-  admits_fun (function.update_list_ite id (τ P).fst ts) (τ P).snd ∧
+  (admits_fun (function.update_list_ite id (τ P).fst ts) (τ P).snd) ∧
  ∀ (x : string), x ∈ binders → is_free_in x (τ P).snd → ¬ x ∈ (τ P).fst
 | binders (not_ phi) := admits_pred_fun_aux binders phi
 | binders (imp_ phi psi) := admits_pred_fun_aux binders phi ∧ admits_pred_fun_aux binders psi
@@ -630,11 +630,10 @@ lemma pred_sub_aux
   (binders : finset string)
   (F : formula)
   (h1 : admits_pred_fun_aux τ binders F)
-  (h2 : ∀ (P : string) (ds : list D),
-    J.pred P ds ↔
-      holds D I (function.update_list_ite V (τ P).fst ds) (τ P).snd)
-  (h3 : ∀ (P : string) (x : string), x ∉ binders → V x = V' x)
-  (h3' : ∀ (P : string) (x : string), x ∉ (τ P).fst → V x = V' x) :
+  (h2 : ∀ (Q : string) (ds : list D),
+    (holds D I (function.update_list_ite V (τ Q).fst ds) (τ Q).snd) ↔
+      J.pred Q ds)
+  (h3 : ∀ (x : string), x ∉ binders → V x = V' x) :
   holds D J V F ↔ holds D I V' (replace_pred_fun τ F) :=
 begin
   induction F generalizing V V' binders,
@@ -643,53 +642,44 @@ begin
     unfold admits_pred_fun_aux at h1,
     simp only [bool.of_to_bool_iff] at h1,
     cases h1,
+    unfold admits_fun at h1_left,
 
-    obtain s1 := substitution_fun_theorem I V' (function.update_list_ite id (τ P).fst ts) (τ P).snd h1_left,
+    unfold replace_pred_fun,
 
-    obtain s2 := function.update_list_ite_comp id V' (τ P).fst ts,
+    obtain s1 := substitution_fun_theorem I V (function.update_list_ite id (τ P).fst ts) (τ P).snd h1_left,
 
+    obtain s2 := function.update_list_ite_comp id V (τ P).fst ts,
     simp only [s2] at s1,
     clear s2,
 
     squeeze_simp at s1,
 
+    specialize h2 P (list.map V ts),
+    simp only [h2] at s1,
+    clear h2,
 
-    unfold replace_pred_fun,
-    rewrite <- s1,
     unfold holds,
-    rewrite h2,
-    apply holds_congr_var,
-    intros v a1,
-    clear s1,
 
-    by_cases c1 : v ∈ binders,
+    have s2 : holds D I V (fast_replace_free_fun (function.update_list_ite id (τ P).fst ts) (τ P).snd) ↔ holds D I V' (fast_replace_free_fun (function.update_list_ite id (τ P).fst ts) (τ P).snd),
+    apply holds_congr_var,
     {
-      specialize h1_right v c1 a1,
-      specialize h3' P v h1_right,
-      rewrite function.update_list_ite_not_mem V,
-      rewrite function.update_list_ite_not_mem V',
-      exact h3',
-      exact h1_right,
-      exact h1_right,
-    },
-    {
-      specialize h3 P v c1,
-      by_cases c2 : v ∈ (τ P).fst,
+      intros v a1,
+
+      by_cases c1 : v ∈ binders,
       {
         sorry,
       },
       {
-        rewrite function.update_list_ite_not_mem,
-        rewrite function.update_list_ite_not_mem,
-        exact h3,
-        exact c2,
-        exact c2,
-      }
-    }
+        exact h3 v c1,
+      },
+    },
+
+    simp only [s2] at s1,
+    exact s1,
   },
-  case formula.not_ : phi_ᾰ phi_ih V V' binders h1 h2 h3 h3'
+  case formula.not_ : phi_ᾰ phi_ih V V' binders h1 h2
   { admit },
-  case formula.imp_ : phi_ᾰ phi_ᾰ_1 phi_ih_ᾰ phi_ih_ᾰ_1 V V' binders h1 h2 h3 h3'
+  case formula.imp_ : phi_ᾰ phi_ᾰ_1 phi_ih_ᾰ phi_ih_ᾰ_1 V V' binders h1 h2
   { admit },
   case formula.forall_ : x phi phi_ih V V' binders h1 h2
   {
@@ -701,31 +691,21 @@ begin
     intros d,
     apply phi_ih,
     {
-      apply h1,
+      exact h1,
     },
     {
-      intros P ds,
-      specialize h2 P ds,
-      rewrite h2,
+      intros Q ds,
       sorry,
     },
     {
-    intros P v a1,
-    unfold function.update_ite,
-    split_ifs,
-    refl,
-    apply h3 P,
-    squeeze_simp at a1,
-    push_neg at a1,
-    cases a1,
-    exact a1_left,
-    },
-    {
-      intros P v a1,
+      intros v a1,
+      squeeze_simp at a1,
+      push_neg at a1,
+      squeeze_simp at a1,
+      cases a1,
       unfold function.update_ite,
-      split_ifs,
-      refl,
-      apply h3' P v a1,
+      simp only [if_neg a1_right],
+      exact h3 v a1_left,
     }
   },
 end
