@@ -611,6 +611,7 @@ def replace_pred_fun
 | (forall_ x phi) := forall_ x (replace_pred_fun phi)
 
 
+@[derive decidable]
 def admits_pred_fun_aux (τ : string → list string × formula) :
   finset string → formula → bool
 | binders (pred_ P ts) :=
