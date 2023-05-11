@@ -206,7 +206,6 @@ def function.update_list_ite'
 lemma function.update_list_ite_comp
   {α β γ : Type}
   [decidable_eq α]
-  [decidable_eq β]
   (f : α → β)
   (g : β → γ)
   (xs : list α)
