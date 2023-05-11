@@ -627,16 +627,16 @@ lemma pred_sub_aux
   (V V' : valuation D)
   (τ : string → list string × formula)
   (binders : finset string)
-  (phi : formula)
-  (h1 : admits_pred_fun_aux τ binders phi)
+  (F : formula)
+  (h1 : admits_pred_fun_aux τ binders F)
   (h2 : ∀ (P : string) (ds : list D),
     J.pred P ds ↔
       holds D I (function.update_list_ite V (τ P).fst ds) (τ P).snd)
   (h3 : ∀ (P : string) (x : string), x ∉ binders → V x = V' x)
   (h3' : ∀ (P : string) (x : string), x ∉ (τ P).fst → V x = V' x) :
-  holds D J V phi ↔ holds D I V' (replace_pred_fun τ phi) :=
+  holds D J V F ↔ holds D I V' (replace_pred_fun τ F) :=
 begin
-  induction phi generalizing V V' binders,
+  induction F generalizing V V' binders,
   case formula.pred_ : P ts V V' binders h1 h2
   {
     unfold admits_pred_fun_aux at h1,
