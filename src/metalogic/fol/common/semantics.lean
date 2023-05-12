@@ -56,29 +56,6 @@ def coincide
   (∀ (v : string), is_free_in v phi → V_I v = V_J v)
 
 
-def fast_replace_free_fun : (string → string) → formula → formula
-| σ (pred_ X xs) := pred_ X (xs.map σ)
-| σ (not_ phi) := not_ (fast_replace_free_fun σ phi)
-| σ (imp_ phi psi) :=
-  imp_ (fast_replace_free_fun σ phi) (fast_replace_free_fun σ psi)
-| σ (forall_ x phi) :=
-  forall_ x (fast_replace_free_fun (function.update_ite σ x x) phi)
-
-
-@[derive decidable]
-def admits_fun_aux (σ : string → string) :
-  finset string → formula → bool
-| binders (pred_ X xs) :=
-    ∀ (v : string), v ∈ xs → v ∉ binders → σ v ∉ binders 
-| binders (not_ phi) := admits_fun_aux binders phi
-| binders (imp_ phi psi) := admits_fun_aux binders phi ∧ admits_fun_aux binders psi
-| binders (forall_ x phi) := admits_fun_aux (binders ∪ {x}) phi
-
-@[derive decidable]
-def admits_fun (σ : string → string) (phi : formula) : bool :=
-  admits_fun_aux σ ∅ phi
-
-
 lemma holds_congr_var
   {D : Type}
   (I : interpretation D)
@@ -232,6 +209,29 @@ end
 
 
 -- variable substitution
+
+def fast_replace_free_fun : (string → string) → formula → formula
+| σ (pred_ X xs) := pred_ X (xs.map σ)
+| σ (not_ phi) := not_ (fast_replace_free_fun σ phi)
+| σ (imp_ phi psi) :=
+  imp_ (fast_replace_free_fun σ phi) (fast_replace_free_fun σ psi)
+| σ (forall_ x phi) :=
+  forall_ x (fast_replace_free_fun (function.update_ite σ x x) phi)
+
+
+@[derive decidable]
+def admits_fun_aux (σ : string → string) :
+  finset string → formula → bool
+| binders (pred_ X xs) :=
+    ∀ (v : string), v ∈ xs → v ∉ binders → σ v ∉ binders 
+| binders (not_ phi) := admits_fun_aux binders phi
+| binders (imp_ phi psi) := admits_fun_aux binders phi ∧ admits_fun_aux binders psi
+| binders (forall_ x phi) := admits_fun_aux (binders ∪ {x}) phi
+
+@[derive decidable]
+def admits_fun (σ : string → string) (phi : formula) : bool :=
+  admits_fun_aux σ ∅ phi
+
 
 lemma substitution_fun_theorem_aux
   {D : Type}
