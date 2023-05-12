@@ -401,9 +401,8 @@ def replace_prop_fun
 | (forall_ x phi) := forall_ x (replace_prop_fun phi)
 
 
-example
+lemma prop_sub_aux
   (D : Type)
-  [decidable_eq D]
   (I : interpretation D)
   (V : valuation D)
   (τ : string → string)
@@ -413,7 +412,7 @@ example
     ⟨
       I.nonempty,
       fun (P : string) (xs : list D),
-        if xs = list.nil
+        if (xs = list.nil) = tt
         then holds D I V (pred_ (τ P) list.nil)
         else I.pred P xs
     ⟩
@@ -427,11 +426,13 @@ begin
     {
       unfold holds,
       simp only [list.map_nil, list.map_eq_nil],
+      simp only [coe_sort_tt, eq_iff_iff, iff_true],
       simp only [if_pos h],
     },
     {
       unfold holds,
       simp only [list.map_eq_nil, list.map_nil],
+      simp only [coe_sort_tt, eq_iff_iff, iff_true],
       simp only [if_neg h],
     }
   },
@@ -462,6 +463,21 @@ begin
     intros d,
     apply phi_ih,
   },
+end
+
+
+theorem prop_sub_is_valid
+  (phi : formula)
+  (h1 : phi.is_valid)
+  (τ : string → string) :
+  (replace_prop_fun τ phi).is_valid :=
+begin
+  unfold formula.is_valid at h1,
+
+  unfold formula.is_valid,
+  intros D I V,
+  simp only [prop_sub_aux D I V τ phi],
+  apply h1,
 end
 
 
