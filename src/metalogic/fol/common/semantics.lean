@@ -391,6 +391,80 @@ begin
 end
 
 
+-- proposition substitution
+
+def replace_prop_fun
+  (τ : string → string) : formula → formula
+| (pred_ P ts) := ite (ts = list.nil) (pred_ (τ P) list.nil) (pred_ P ts)
+| (not_ phi) := not_ (replace_prop_fun phi)
+| (imp_ phi psi) := imp_ (replace_prop_fun phi) (replace_prop_fun psi)
+| (forall_ x phi) := forall_ x (replace_prop_fun phi)
+
+
+example
+  (D : Type)
+  [decidable_eq D]
+  (I : interpretation D)
+  (V : valuation D)
+  (τ : string → string)
+  (F : formula) :
+  holds D I V (replace_prop_fun τ F) ↔
+    holds D
+    ⟨
+      I.nonempty,
+      fun (P : string) (xs : list D),
+        if xs = list.nil
+        then holds D I V (pred_ (τ P) list.nil)
+        else I.pred P xs
+    ⟩
+    V F :=
+begin
+  induction F generalizing V,
+  case formula.pred_ : X xs V
+  {
+    unfold replace_prop_fun,
+    split_ifs,
+    {
+      unfold holds,
+      simp only [list.map_nil, list.map_eq_nil],
+      simp only [if_pos h],
+    },
+    {
+      unfold holds,
+      simp only [list.map_eq_nil, list.map_nil],
+      simp only [if_neg h],
+    }
+  },
+  case formula.not_ : phi phi_ih V
+  {
+    unfold replace_prop_fun,
+    unfold holds,
+    apply not_congr,
+    apply phi_ih,
+  },
+  case formula.imp_ : phi psi phi_ih psi_ih V
+  {
+    unfold replace_prop_fun,
+    unfold holds,
+    apply imp_congr,
+    {
+      apply phi_ih,
+    },
+    {
+      apply psi_ih,
+    }
+  },
+  case formula.forall_ : x phi phi_ih V
+  {
+    unfold replace_prop_fun,
+    unfold holds,
+    apply forall_congr,
+    intros d,
+    apply phi_ih,
+  },
+end
+
+
 -- predicate substitution
 
 /--
@@ -637,8 +711,8 @@ lemma pred_sub_aux
   (h3' : ∀ (x : string), x ∈ binders → V x = V' x) :
   holds D J V F ↔ holds D I V' (replace_pred_fun τ F) :=
 begin
-  induction F generalizing V V' binders,
-  case formula.pred_ : P ts V V' binders h1 h2
+  induction F generalizing V binders,
+  case formula.pred_ : P ts V binders h1 h2 h3 h3'
   {
     unfold admits_pred_fun_aux at h1,
     simp only [bool.of_to_bool_iff] at h1,
@@ -678,11 +752,11 @@ begin
     simp only [s2] at s1,
     exact s1,
   },
-  case formula.not_ : phi_ᾰ phi_ih V V' binders h1 h2
+  case formula.not_ : F_ᾰ F_ih V binders h1 h2 h3 h3'
   { admit },
-  case formula.imp_ : phi_ᾰ phi_ᾰ_1 phi_ih_ᾰ phi_ih_ᾰ_1 V V' binders h1 h2
+  case formula.imp_ : F_ᾰ F_ᾰ_1 F_ih_ᾰ F_ih_ᾰ_1 V binders h1 h2 h3 h3'
   { admit },
-  case formula.forall_ : x phi phi_ih V V' binders h1 h2
+  case formula.forall_ : x phi phi_ih V binders h1 h2 h3 h3'
   {
     unfold admits_pred_fun_aux at h1,
 
@@ -690,63 +764,7 @@ begin
     unfold holds,
     apply forall_congr,
     intros d,
-    apply phi_ih,
-    {
-      exact h1,
-    },
-    {
-      intros Q ds,
-      have s1 : (holds D I (function.update_list_ite V (τ Q).fst ds) (τ Q).snd) ↔ (holds D I (function.update_list_ite (function.update_ite V x d) (τ Q).fst ds) (τ Q).snd),
-      {
-        apply holds_congr_var,
-        intros v a1,
-        induction (τ Q).fst generalizing ds,
-        unfold function.update_list_ite,
-        unfold function.update_ite,
-        split_ifs,
-        sorry,
-        refl,
-        cases ds,
-        unfold function.update_list_ite,
-        unfold function.update_ite,
-        split_ifs,
-        sorry,
-        refl,
-        unfold function.update_list_ite,
-        unfold function.update_ite,
-        split_ifs,
-        refl,
-        apply ih,
-      },
-      simp only [h2 Q ds] at s1,
-      symmetry,
-      exact s1,
-    },
-    {
-      intros v a1,
-      squeeze_simp at a1,
-      push_neg at a1,
-      squeeze_simp at a1,
-      cases a1,
-      unfold function.update_ite,
-      simp only [if_neg a1_right],
-      exact h3 v a1_left,
-    },
-    {
-      intros v a1,
-      squeeze_simp at a1,
-      unfold function.update_ite,
-      split_ifs,
-      {
-        refl,
-      },
-      {
-        cases a1,
-        apply h3',
-        exact a1,
-        contradiction,
-      }
-    }
+    sorry,
   },
 end
 
