@@ -280,6 +280,58 @@ begin
 end
 
 
+lemma function.update_list_ite_mem_eq_len
+  {α β : Type}
+  [decidable_eq α]
+  (f g : α → β)
+  (v : α)
+  (xs : list α)
+  (ys : list β)
+  (h1 : v ∈ xs)
+  (h2 : xs.length = ys.length) :
+  function.update_list_ite f xs ys v =
+  function.update_list_ite g xs ys v :=
+begin
+  induction xs generalizing ys,
+  case list.nil
+  {
+    simp only [list.not_mem_nil] at h1,
+    contradiction,
+  },
+  case list.cons : xs_hd xs_tl xs_ih
+  {
+    simp only [list.mem_cons_iff] at h1,
+
+    cases ys,
+    case list.nil
+    {
+      simp only [list.length, nat.succ_ne_zero] at h2,
+      contradiction,
+    },
+    case list.cons : ys_hd ys_tl
+    {
+      unfold function.update_list_ite,
+      unfold function.update_ite,
+      cases h1,
+      {
+        simp only [if_pos h1],
+      },
+      {
+        split_ifs,
+        {
+          refl,
+        },
+        {
+          apply xs_ih h1,
+          simp only [list.length, add_left_inj] at h2,
+          exact h2,
+        },
+      }
+    },
+  },
+end
+
+
 lemma function.update_list_ite_mem
   {α β : Type}
   [decidable_eq α]

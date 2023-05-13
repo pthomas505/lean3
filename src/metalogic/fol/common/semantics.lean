@@ -528,6 +528,8 @@ example
   (binders : finset string)
   (h1 : admits_pred_aux P zs H binders F)
 
+  (h2 : ∀ (x : string), x ∉ binders → V x = V' x)
+
   :
   holds
     D
@@ -562,11 +564,18 @@ begin
       simp only [function.update_list_ite_comp] at s1,
       squeeze_simp at s1,
 
-      have s2 : (function.update_list_ite V zs (list.map V xs)) = (function.update_list_ite V' zs (list.map V xs)),
+      have s2 : holds D I (function.update_list_ite V zs (list.map V xs)) H ↔ holds D I (function.update_list_ite V' zs (list.map V xs)) H,
       {
-        funext,
-        apply function.update_list_ite_mem',
-        sorry,
+        apply holds_congr_var,
+        intros v a1,
+        by_cases c1 : v ∈ zs,
+        {
+          specialize h2 v,
+          sorry,
+        },
+        {
+          sorry,
+        },
       },
 
       simp only [s2] at s1,
@@ -592,6 +601,7 @@ begin
 
     specialize phi_ih h1 (function.update_ite V x d),
     apply phi_ih,
+    sorry,
   },
 end
 
