@@ -571,10 +571,23 @@ begin
         by_cases c1 : v ∈ zs,
         {
           specialize h2 v,
-          sorry,
+          apply function.update_list_ite_mem_eq_len V V' v zs (list.map V xs) c1,
+          cases h,
+          squeeze_simp,
+          symmetry,
+          exact h_right,
         },
         {
-          sorry,
+          by_cases c2 : v ∈ binders,
+          {
+            specialize h1_right v c2 a1,
+            contradiction,
+          },
+          {
+            specialize h2 v c2,
+            apply function.update_list_ite_mem',
+            exact h2,
+          },
         },
       },
 
