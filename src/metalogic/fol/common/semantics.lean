@@ -891,7 +891,8 @@ def admits_pred_fun_aux (τ : string → list string × formula) :
   finset string → formula → bool
 | binders (pred_ P ts) :=
   (admits_fun (function.update_list_ite id (τ P).fst ts) (τ P).snd) ∧
- (∀ (x : string), x ∈ binders → ¬ (is_free_in x (τ P).snd ∧ x ∉ (τ P).fst))
+ (∀ (x : string), x ∈ binders → ¬ (is_free_in x (τ P).snd ∧ x ∉ (τ P).fst)) ∧
+  (τ P).fst.length = ts.length
 | binders (not_ phi) := admits_pred_fun_aux binders phi
 | binders (imp_ phi psi) := admits_pred_fun_aux binders phi ∧ admits_pred_fun_aux binders psi
 | binders (forall_ x phi) := admits_pred_fun_aux (binders ∪ {x}) phi
@@ -920,8 +921,9 @@ begin
   case formula.pred_ : X xs binders V h1 h2
   {
     unfold admits_pred_fun_aux at h1,
-    simp only [not_and, not_not, bool.of_to_bool_iff] at h1,
+    squeeze_simp at h1,
     cases h1,
+    cases h1_right,
 
     obtain s1 := substitution_fun_theorem I V (function.update_list_ite id (τ X).fst xs) (τ X).snd h1_left,
     simp only [function.update_list_ite_comp] at s1,
@@ -935,12 +937,13 @@ begin
       by_cases c1 : v ∈ (τ X).fst,
       {
         apply function.update_list_ite_mem_eq_len V V' v (τ X).fst (list.map V xs) c1,
-        sorry,
+        simp only [list.length_map],
+        exact h1_right_right,
       },
       {
         by_cases c2 : v ∈ binders,
         {
-          specialize h1_right v c2 a1,
+          specialize h1_right_left v c2 a1,
           contradiction,
         },
         {
