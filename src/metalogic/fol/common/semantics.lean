@@ -514,7 +514,7 @@ def admits_pred_aux (P : string) (zs : list string) (H : formula) : finset strin
   else true
 | binders (not_ phi) := admits_pred_aux binders phi
 | binders (imp_ phi psi) := admits_pred_aux binders phi ∧ admits_pred_aux binders psi
-| binders (forall_ x phi) := admits_pred_aux binders phi
+| binders (forall_ x phi) := admits_pred_aux (binders ∪ {x}) phi
 
 
 example
@@ -543,8 +543,8 @@ example
     V F ↔
     holds D I V (replace_pred P zs H F) :=
 begin
-  induction F generalizing V,
-  case formula.pred_ : X xs
+  induction F generalizing binders V,
+  case formula.pred_ : X xs binders V h1 h2
   {
     unfold admits_pred_aux at h1,
 
@@ -599,11 +599,11 @@ begin
       unfold holds,
     }
   },
-  case formula.not_ : F_ᾰ F_ih
+  case formula.not_ : F_ᾰ F_ih binders V h1 h2
   { admit },
-  case formula.imp_ : F_ᾰ F_ᾰ_1 F_ih_ᾰ F_ih_ᾰ_1
+  case formula.imp_ : F_ᾰ F_ᾰ_1 F_ih_ᾰ F_ih_ᾰ_1 binders V h1 h2
   { admit },
-  case formula.forall_ : x phi phi_ih V
+  case formula.forall_ : x phi phi_ih binders V h1 h2
   {
     unfold admits_pred_aux at h1,
 
@@ -611,9 +611,6 @@ begin
     unfold holds,
     apply forall_congr,
     intros d,
-
-    specialize phi_ih h1 (function.update_ite V x d),
-    apply phi_ih,
     sorry,
   },
 end
