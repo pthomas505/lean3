@@ -611,7 +611,14 @@ begin
     unfold holds,
     apply forall_congr,
     intros d,
-    sorry,
+    apply phi_ih (binders ∪ {x}) (function.update_ite V x d) h1,
+    intros v a1,
+    unfold function.update_ite,
+    squeeze_simp at a1,
+    push_neg at a1,
+    cases a1,
+    simp only [if_neg a1_right],
+    exact h2 v a1_left,
   },
 end
 
