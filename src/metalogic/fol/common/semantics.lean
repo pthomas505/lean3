@@ -597,10 +597,31 @@ begin
       unfold holds,
     }
   },
-  case formula.not_ : F_ᾰ F_ih binders V h1 h2
-  { admit },
-  case formula.imp_ : F_ᾰ F_ᾰ_1 F_ih_ᾰ F_ih_ᾰ_1 binders V h1 h2
-  { admit },
+  case formula.not_ : phi phi_ih binders V h1 h2
+  {
+    unfold admits_pred_aux at h1,
+
+    unfold replace_pred,
+    unfold holds,
+    apply not_congr,
+    exact phi_ih binders V h1 h2,
+  },
+  case formula.imp_ : phi psi phi_ih psi_ih binders V h1 h2
+  {
+    unfold admits_pred_aux at h1,
+    simp only [bool.of_to_bool_iff] at h1,
+    cases h1,
+
+    unfold replace_pred,
+    unfold holds,
+    apply imp_congr,
+    {
+      exact phi_ih binders V h1_left h2,
+    },
+    {
+      exact psi_ih binders V h1_right h2,
+    },
+  },
   case formula.forall_ : x phi phi_ih binders V h1 h2
   {
     unfold admits_pred_aux at h1,
