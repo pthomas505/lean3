@@ -496,6 +496,7 @@ def replace_pred
 | (imp_ phi psi) := imp_ (replace_pred phi) (replace_pred psi)
 | (forall_ x phi) := forall_ x (replace_pred phi)
 
+
 @[derive decidable]
 def admits_pred_aux (P : string) (zs : list string) (H : formula) : finset string → formula → bool
 | binders (pred_ X ts) :=
@@ -505,7 +506,7 @@ def admits_pred_aux (P : string) (zs : list string) (H : formula) : finset strin
 
   /-
     Ensures that the free variables in H that are not being replaced by a variable in ts do not become bound variables in F. The bound variables in F are in the 'binders' set.
-   (is_free_in x H ∧ x ∉ zs) : x is a free variable in H that is not being replaced.
+   (is_free_in x H ∧ x ∉ zs) := x is a free variable in H that is not being replaced by a variable in ts.
   -/
   (∀ (x : string), x ∈ binders → ¬ (is_free_in x H ∧ x ∉ zs))
   else true
@@ -530,7 +531,10 @@ example
     D
     ⟨
       I.nonempty,
-      fun (Q : string) (ds : list D), ite (Q = P ∧ ds.length = zs.length) (holds D I (function.update_list_ite V' zs ds) H) (I.pred Q ds)
+      fun (Q : string) (ds : list D),
+      if Q = P ∧ ds.length = zs.length
+      then holds D I (function.update_list_ite V' zs ds) H
+      else I.pred Q ds
     ⟩
     V F ↔
     holds D I V (replace_pred P zs H F) :=
@@ -927,7 +931,7 @@ begin
     pred := fun (P : string) (ds : list D), holds D I (function.update_list_ite V (τ P).fst ds) (τ P).snd
   },
 
-  obtain s1 := pred_sub_aux D I J V V τ ∅ phi h1,
+  obtain s1 := pred_sub_aux D I J V τ ∅ phi h1,
   squeeze_simp at s1,
 
   rewrite <- s1,
