@@ -644,7 +644,7 @@ begin
 end
 
 
-lemma pred_sub_single_valid
+theorem pred_sub_single_valid
   (phi : formula)
   (P : string)
   (zs : list string)
@@ -899,78 +899,66 @@ def admits_pred_fun_aux (τ : string → list string × formula) :
 
 lemma pred_sub_aux
   (D : Type)
-  (I J : interpretation D)
-  (V : valuation D)
+  (I : interpretation D)
+  (V V' : valuation D)
   (τ : string → list string × formula)
   (binders : finset string)
-  (phi : formula)
-  (h1 : admits_pred_fun_aux τ binders phi)
-
-  (h2 : ∀ (P : string) (ds : list D),
-    (∀ (x : string), x ∈ binders → ¬ (is_free_in x (τ P).snd ∧ x ∉ (τ P).fst)) →
-    (J.pred P ds ↔
-      holds D I (function.update_list_ite V (τ P).fst ds) (τ P).snd)) :
-
-  holds D J V phi ↔ holds D I V (replace_pred_fun τ phi) :=
+  (F : formula)
+  (h1 : admits_pred_fun_aux τ binders F)
+  (h2 : ∀ (x : string), x ∉ binders → V x = V' x) :
+  holds
+    D
+    ⟨
+      I.nonempty,
+      fun (P : string) (ds : list D),
+      holds D I (function.update_list_ite V' (τ P).fst ds) (τ P).snd
+    ⟩
+    V F ↔
+    holds D I V (replace_pred_fun τ F) :=
 begin
-  induction phi generalizing V binders,
-  case formula.pred_ : P ts V binders h1 h2
+  induction F generalizing binders V,
+  case formula.pred_ : X xs binders V h1 h2
   {
     unfold admits_pred_fun_aux at h1,
-    simp only [bool.of_to_bool_iff] at h1,
+    simp only [not_and, not_not, bool.of_to_bool_iff] at h1,
     cases h1,
-    unfold admits_fun at h1_left,
 
-    obtain s1 := substitution_fun_theorem I V (function.update_list_ite id (τ P).fst ts) (τ P).snd h1_left,
+    obtain s1 := substitution_fun_theorem I V (function.update_list_ite id (τ X).fst xs) (τ X).snd h1_left,
+    simp only [function.update_list_ite_comp] at s1,
+    simp only [function.comp.right_id] at s1,
 
-    obtain s2 := function.update_list_ite_comp id V (τ P).fst ts,
+    have s2 : holds D I (function.update_list_ite V (τ X).fst (list.map V xs)) (τ X).snd ↔ holds D I (function.update_list_ite V' (τ X).fst (list.map V xs)) (τ X).snd,
+    {
+      apply holds_congr_var,
+
+      intros v a1,
+      by_cases c1 : v ∈ (τ X).fst,
+      {
+        apply function.update_list_ite_mem_eq_len V V' v (τ X).fst (list.map V xs) c1,
+        sorry,
+      },
+      {
+        by_cases c2 : v ∈ binders,
+        {
+          specialize h1_right v c2 a1,
+          contradiction,
+        },
+        {
+          specialize h2 v c2,
+          apply function.update_list_ite_mem',
+          exact h2,
+        },
+      },
+    },
 
     simp only [s2] at s1,
-    clear s2,
-
-    unfold replace_pred_fun,
-    rewrite <- s1,
-    clear s1,
-
-    unfold holds,
-    squeeze_simp,
-    apply h2,
-    intros x a1 a2,
-
-    sorry,
+    exact s1,
   },
-  case formula.not_ : phi phi_ih V binders h1 h2
-  {
-    unfold admits_pred_fun_aux at h1,
-
-    unfold replace_pred_fun,
-    unfold holds,
-    apply not_congr,
-    apply phi_ih,
-    apply h1,
-    apply h2,
-  },
-  case formula.imp_ : phi psi phi_ih psi_ih V binders h1 h2
-  {
-    unfold admits_pred_fun_aux at h1,
-    squeeze_simp at h1,
-    cases h1,
-
-    unfold replace_pred_fun,
-    unfold holds,
-    apply imp_congr,
-    {
-      apply phi_ih,
-      apply h1_left,
-      apply h2,
-    },
-    {
-      apply psi_ih,
-      apply h1_right,
-      apply h2,
-    }
-  },
-  case formula.forall_ : x phi phi_ih V binders h1 h2
+  case formula.not_ : F_ᾰ F_ih binders V h1 h2
+  { admit },
+  case formula.imp_ : F_ᾰ F_ᾰ_1 F_ih_ᾰ F_ih_ᾰ_1 binders V h1 h2
+  { admit },
+  case formula.forall_ : x phi phi_ih binders V h1 h2
   {
     unfold admits_pred_fun_aux at h1,
 
@@ -978,17 +966,19 @@ begin
     unfold holds,
     apply forall_congr,
     intros d,
-
-    apply phi_ih,
-    apply h1,
-    intros P ds a1,
-
-    sorry,
+    apply phi_ih (binders ∪ {x}) (function.update_ite V x d) h1,
+    intros v a1,
+    unfold function.update_ite,
+    simp only [finset.mem_union, finset.mem_singleton] at a1,
+    push_neg at a1,
+    cases a1,
+    simp only [if_neg a1_right],
+    exact h2 v a1_left,
   },
 end
 
 
-example
+theorem pred_sub_valid
   (phi : formula)
   (τ : string → list string × formula)
   (h1 : admits_pred_fun_aux τ ∅ phi)
@@ -1000,12 +990,7 @@ begin
   unfold formula.is_valid,
   intros D I V,
 
-  let J : interpretation D := {
-    nonempty := I.nonempty,
-    pred := fun (P : string) (ds : list D), holds D I (function.update_list_ite V (τ P).fst ds) (τ P).snd
-  },
-
-  obtain s1 := pred_sub_aux D I J V τ ∅ phi h1,
+  obtain s1 := pred_sub_aux D I V V τ ∅ phi h1,
   squeeze_simp at s1,
 
   rewrite <- s1,
