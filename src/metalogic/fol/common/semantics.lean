@@ -877,22 +877,26 @@ end
 -- multiple
 
 def replace_pred_fun
-  (τ : string → list string × formula) : formula → formula
+  (τ : string → ℕ → list string × formula) : formula → formula
 | (pred_ P ts) :=
+  if ts.length = (τ P ts.length).fst.length
+  then
   fast_replace_free_fun
-    (function.update_list_ite id (τ P).fst ts) (τ P).snd
+    (function.update_list_ite id (τ P ts.length).fst ts) (τ P ts.length).snd
+  else
+  pred_ P ts
 | (not_ phi) := not_ (replace_pred_fun phi)
 | (imp_ phi psi) := imp_ (replace_pred_fun phi) (replace_pred_fun psi)
 | (forall_ x phi) := forall_ x (replace_pred_fun phi)
 
 
 @[derive decidable]
-def admits_pred_fun_aux (τ : string → list string × formula) :
+def admits_pred_fun_aux (τ : string → ℕ → list string × formula) :
   finset string → formula → bool
 | binders (pred_ P ts) :=
-  (admits_fun (function.update_list_ite id (τ P).fst ts) (τ P).snd) ∧
- (∀ (x : string), x ∈ binders → ¬ (is_free_in x (τ P).snd ∧ x ∉ (τ P).fst)) ∧
-  (τ P).fst.length = ts.length
+  (admits_fun (function.update_list_ite id (τ P ts.length).fst ts) (τ P ts.length).snd) ∧
+ (∀ (x : string), x ∈ binders → ¬ (is_free_in x (τ P ts.length).snd ∧ x ∉ (τ P ts.length).fst)) ∧
+  ts.length = (τ P ts.length).fst.length
 | binders (not_ phi) := admits_pred_fun_aux binders phi
 | binders (imp_ phi psi) := admits_pred_fun_aux binders phi ∧ admits_pred_fun_aux binders psi
 | binders (forall_ x phi) := admits_pred_fun_aux (binders ∪ {x}) phi
@@ -902,7 +906,7 @@ lemma pred_sub_aux
   (D : Type)
   (I : interpretation D)
   (V V' : valuation D)
-  (τ : string → list string × formula)
+  (τ : string → ℕ → list string × formula)
   (binders : finset string)
   (F : formula)
   (h1 : admits_pred_fun_aux τ binders F)
@@ -912,7 +916,9 @@ lemma pred_sub_aux
     ⟨
       I.nonempty,
       fun (P : string) (ds : list D),
-      holds D I (function.update_list_ite V' (τ P).fst ds) (τ P).snd
+      if ds.length = (τ P ds.length).fst.length
+      then holds D I (function.update_list_ite V' (τ P ds.length).fst ds) (τ P ds.length).snd
+      else I.pred P ds
     ⟩
     V F ↔
     holds D I V (replace_pred_fun τ F) :=
@@ -925,19 +931,20 @@ begin
     cases h1,
     cases h1_right,
 
-    obtain s1 := substitution_fun_theorem I V (function.update_list_ite id (τ X).fst xs) (τ X).snd h1_left,
+    obtain s1 := substitution_fun_theorem I V (function.update_list_ite id (τ X xs.length).fst xs) (τ X xs.length).snd h1_left,
     simp only [function.update_list_ite_comp] at s1,
     simp only [function.comp.right_id] at s1,
 
-    have s2 : holds D I (function.update_list_ite V (τ X).fst (list.map V xs)) (τ X).snd ↔ holds D I (function.update_list_ite V' (τ X).fst (list.map V xs)) (τ X).snd,
+    have s2 : holds D I (function.update_list_ite V (τ X xs.length).fst (list.map V xs)) (τ X xs.length).snd ↔ holds D I (function.update_list_ite V' (τ X xs.length).fst (list.map V xs)) (τ X xs.length).snd,
     {
       apply holds_congr_var,
 
       intros v a1,
-      by_cases c1 : v ∈ (τ X).fst,
+      by_cases c1 : v ∈ (τ X xs.length).fst,
       {
-        apply function.update_list_ite_mem_eq_len V V' v (τ X).fst (list.map V xs) c1,
+        apply function.update_list_ite_mem_eq_len V V' v (τ X xs.length).fst (list.map V xs) c1,
         simp only [list.length_map],
+        symmetry,
         exact h1_right_right,
       },
       {
@@ -955,6 +962,12 @@ begin
     },
 
     simp only [s2] at s1,
+    clear s2,
+
+    unfold holds,
+    unfold replace_pred_fun,
+    simp only [list.length_map],
+    split_ifs,
     exact s1,
   },
   case formula.not_ : phi phi_ih binders V h1 h2
@@ -1004,7 +1017,7 @@ end
 
 theorem pred_sub_valid
   (phi : formula)
-  (τ : string → list string × formula)
+  (τ : string → ℕ → list string × formula)
   (h1 : admits_pred_fun_aux τ ∅ phi)
   (h2 : phi.is_valid) :
   (replace_pred_fun τ phi).is_valid :=
