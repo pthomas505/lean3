@@ -1,8 +1,9 @@
 import metalogic.fol.aux.function_update_ite
 
 
-@[derive [decidable_eq]]
+@[derive [inhabited, decidable_eq]]
 inductive formula : Type
+| true_ : formula
 | pred_ : string → list string → formula
 | not_ : formula → formula
 | imp_ : formula → formula → formula
@@ -13,6 +14,7 @@ open formula
 
 @[derive decidable]
 def is_free_in (v : string) : formula → bool
+| true_ := ff
 | (pred_ _ xs) := v ∈ xs.to_finset
 | (not_ phi) := is_free_in phi
 | (imp_ phi psi) := is_free_in phi ∨ is_free_in psi
@@ -21,6 +23,7 @@ def is_free_in (v : string) : formula → bool
 
 @[derive decidable]
 def pred.occurs_in (P : string) (n : ℕ) : formula → bool
+| true_ := ff
 | (pred_ X xs) := X = P ∧ xs.length = n
 | (not_ phi) := pred.occurs_in phi
 | (imp_ phi psi) := pred.occurs_in phi ∨ pred.occurs_in psi
@@ -35,6 +38,7 @@ def valuation (D : Type) := string → D
 
 
 def holds (D : Type) (I : interpretation D) : valuation D → formula → Prop
+| _ true_ := true
 | V (pred_ X xs) := I.pred X (xs.map V)
 | V (not_ phi) := ¬ holds V phi
 | V (imp_ phi psi) := holds V phi → holds V psi
@@ -65,6 +69,10 @@ lemma holds_congr_var
   holds D I V F ↔ holds D I V' F :=
 begin
   induction F generalizing V V',
+  case formula.true_ : V V' h1
+  {
+    unfold holds,
+  },
   case formula.pred_ : X xs V V' h1
   {
     unfold is_free_in at h1,
@@ -132,6 +140,10 @@ lemma holds_congr_pred
   holds D I V F ↔ holds D I' V F :=
 begin
   induction F generalizing V,
+  case formula.true_ : V
+  {
+    unfold holds,
+  },
   case formula.pred_ : X xs V
   {
     unfold pred.occurs_in at h1,
@@ -211,6 +223,7 @@ end
 -- variable substitution
 
 def fast_replace_free_fun : (string → string) → formula → formula
+| _ true_ := true_
 | σ (pred_ X xs) := pred_ X (xs.map σ)
 | σ (not_ phi) := not_ (fast_replace_free_fun σ phi)
 | σ (imp_ phi psi) :=
@@ -222,6 +235,7 @@ def fast_replace_free_fun : (string → string) → formula → formula
 @[derive decidable]
 def admits_fun_aux (σ : string → string) :
   finset string → formula → bool
+| _ true_ := tt
 | binders (pred_ X xs) :=
     ∀ (v : string), v ∈ xs → v ∉ binders → σ v ∉ binders 
 | binders (not_ phi) := admits_fun_aux binders phi
@@ -248,6 +262,11 @@ lemma substitution_fun_theorem_aux
     holds D I V' (fast_replace_free_fun σ' F) :=
 begin
   induction F generalizing binders V V' σ σ',
+  case formula.true_ : binders V V' σ σ' h1 h2 h2' h3
+  {
+    unfold fast_replace_free_fun,
+    unfold holds,
+  },
   case formula.pred_ : X xs binders V V' σ σ' h1 h2 h2' h3
   {
     unfold admits_fun_aux at h1,
@@ -395,6 +414,7 @@ end
 
 def replace_prop_fun
   (τ : string → string) : formula → formula
+| true_ := true_
 | (pred_ P ts) := ite (ts = list.nil) (pred_ (τ P) list.nil) (pred_ P ts)
 | (not_ phi) := not_ (replace_prop_fun phi)
 | (imp_ phi psi) := imp_ (replace_prop_fun phi) (replace_prop_fun psi)
@@ -419,6 +439,11 @@ lemma prop_sub_aux
     V F :=
 begin
   induction F generalizing V,
+  case formula.true_ : V
+  {
+    unfold replace_prop_fun,
+    unfold holds,
+  },
   case formula.pred_ : X xs V
   {
     unfold replace_prop_fun,
@@ -489,6 +514,7 @@ end
 
 def replace_pred
   (P : string) (zs : list string) (H : formula) : formula → formula
+| true_ := true_
 | (pred_ X ts) :=
   if X = P ∧ ts.length = zs.length
   then
@@ -502,6 +528,7 @@ def replace_pred
 
 @[derive decidable]
 def admits_pred_aux (P : string) (zs : list string) (H : formula) : finset string → formula → bool
+| _ true_ := tt
 | binders (pred_ X ts) :=
   if X = P ∧ ts.length = zs.length
   then
@@ -544,6 +571,11 @@ lemma pred_sub_single_aux
     holds D I V (replace_pred P zs H F) :=
 begin
   induction F generalizing binders V,
+  case formula.true_ : binders V h1 h2
+  {
+    unfold replace_pred,
+    unfold holds,
+  },
   case formula.pred_ : X xs binders V h1 h2
   {
     unfold admits_pred_aux at h1,
@@ -671,6 +703,9 @@ end
 -/
 inductive is_pred_sub (P : string) (zs : list string) (H : formula) : formula → formula → Prop
 
+| true_ :
+  is_pred_sub true_ true_
+
 /-
   If A is an atomic formula not containing P then Sub A (P zⁿ / H*) A.
 -/
@@ -740,6 +775,10 @@ theorem is_pred_sub_theorem
   holds D I V B ↔ holds D J V A :=
 begin
   induction h1 generalizing V,
+  case is_pred_sub.true_ : V h2
+  {
+    unfold holds,
+  },
   case is_pred_sub.pred_not_occurs_in : h1_X h1_ts h1_1 V h2
   {
     simp only [not_and] at h1_1,
@@ -878,6 +917,7 @@ end
 
 def replace_pred_fun
   (τ : string → ℕ → list string × formula) : formula → formula
+| true_ := true_
 | (pred_ P ts) :=
   if ts.length = (τ P ts.length).fst.length
   then
@@ -893,6 +933,7 @@ def replace_pred_fun
 @[derive decidable]
 def admits_pred_fun_aux (τ : string → ℕ → list string × formula) :
   finset string → formula → bool
+| _ true_ := tt
 | binders (pred_ P ts) :=
   (admits_fun (function.update_list_ite id (τ P ts.length).fst ts) (τ P ts.length).snd) ∧
  (∀ (x : string), x ∈ binders → ¬ (is_free_in x (τ P ts.length).snd ∧ x ∉ (τ P ts.length).fst)) ∧
@@ -924,6 +965,11 @@ lemma pred_sub_aux
     holds D I V (replace_pred_fun τ F) :=
 begin
   induction F generalizing binders V,
+  case formula.true_ : binders V h1 h2
+  {
+    unfold replace_pred_fun,
+    unfold holds,
+  },
   case formula.pred_ : X xs binders V h1 h2
   {
     unfold admits_pred_fun_aux at h1,
