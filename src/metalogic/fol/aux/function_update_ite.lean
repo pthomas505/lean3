@@ -237,6 +237,49 @@ begin
 end
 
 
+lemma function.update_list_ite_mem'
+  {α β : Type}
+  [decidable_eq α]
+  (f g : α → β)
+  (xs ys : list α)
+  (x : α)
+  (h1 : f x = g x)
+  :
+  function.update_list_ite f xs (list.map f ys) x =
+    function.update_list_ite g xs (list.map f ys) x :=
+begin
+  induction xs generalizing ys,
+  case list.nil : ys
+  {
+    unfold function.update_list_ite,
+    exact h1,
+  },
+  case list.cons : xs_hd xs_tl xs_ih ys
+  {
+    cases ys,
+    case list.nil
+    {
+      squeeze_simp,
+      unfold function.update_list_ite,
+      exact h1,
+    },
+    case list.cons : ys_hd ys_tl
+    {
+      squeeze_simp,
+      unfold function.update_list_ite,
+      unfold function.update_ite,
+      split_ifs,
+      {
+        refl,
+      },
+      {
+        apply xs_ih,
+      }
+    },
+  },
+end
+
+
 lemma function.update_list_ite_mem
   {α β : Type}
   [decidable_eq α]

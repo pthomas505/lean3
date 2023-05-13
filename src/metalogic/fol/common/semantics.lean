@@ -483,6 +483,113 @@ end
 
 -- predicate substitution
 
+
+def replace_pred
+  (P : string) (zs : list string) (H : formula) : formula → formula
+| (pred_ X ts) :=
+  if X = P ∧ ts.length = zs.length
+  then
+  fast_replace_free_fun
+    (function.update_list_ite id zs ts) H
+  else pred_ X ts
+| (not_ phi) := not_ (replace_pred phi)
+| (imp_ phi psi) := imp_ (replace_pred phi) (replace_pred psi)
+| (forall_ x phi) := forall_ x (replace_pred phi)
+
+@[derive decidable]
+def admits_pred_aux (P : string) (zs : list string) (H : formula) : finset string → formula → bool
+| binders (pred_ X ts) :=
+  if X = P ∧ ts.length = zs.length
+  then
+  (admits_fun (function.update_list_ite id zs ts) H) ∧
+
+  /-
+    Ensures that the free variables in H that are not being replaced by a variable in ts do not become bound variables in F. The bound variables in F are in the 'binders' set.
+   (is_free_in x H ∧ x ∉ zs) : x is a free variable in H that is not being replaced.
+  -/
+  (∀ (x : string), x ∈ binders → ¬ (is_free_in x H ∧ x ∉ zs))
+  else true
+| binders (not_ phi) := admits_pred_aux binders phi
+| binders (imp_ phi psi) := admits_pred_aux binders phi ∧ admits_pred_aux binders psi
+| binders (forall_ x phi) := admits_pred_aux binders phi
+
+
+example
+  (D : Type)
+  (I : interpretation D)
+  (V V' : valuation D)
+  (F : formula)
+  (P : string)
+  (zs : list string)
+  (H : formula)
+  (binders : finset string)
+  (h1 : admits_pred_aux P zs H binders F)
+
+  :
+  holds
+    D
+    ⟨
+      I.nonempty,
+      fun (Q : string) (ds : list D), ite (Q = P ∧ ds.length = zs.length) (holds D I (function.update_list_ite V' zs ds) H) (I.pred Q ds)
+    ⟩
+    V F ↔
+    holds D I V (replace_pred P zs H F) :=
+begin
+  induction F generalizing V,
+  case formula.pred_ : X xs
+  {
+    unfold admits_pred_aux at h1,
+
+    unfold replace_pred,
+    unfold holds,
+    squeeze_simp,
+
+    split_ifs at h1,
+    {
+      squeeze_simp at h1,
+      cases h1,
+      unfold admits_fun at h1_left,
+
+      split_ifs,
+
+      obtain s1 := substitution_fun_theorem I V (function.update_list_ite id zs xs) H h1_left,
+      simp only [function.update_list_ite_comp] at s1,
+      squeeze_simp at s1,
+
+      have s2 : (function.update_list_ite V zs (list.map V xs)) = (function.update_list_ite V' zs (list.map V xs)),
+      {
+        funext,
+        apply function.update_list_ite_mem',
+        sorry,
+      },
+
+      simp only [s2] at s1,
+      exact s1,
+    },
+    {
+      split_ifs,
+      unfold holds,
+    }
+  },
+  case formula.not_ : F_ᾰ F_ih
+  { admit },
+  case formula.imp_ : F_ᾰ F_ᾰ_1 F_ih_ᾰ F_ih_ᾰ_1
+  { admit },
+  case formula.forall_ : x phi phi_ih V
+  {
+    unfold admits_pred_aux at h1,
+
+    unfold replace_pred,
+    unfold holds,
+    apply forall_congr,
+    intros d,
+
+    specialize phi_ih h1 (function.update_ite V x d),
+    apply phi_ih,
+  },
+end
+
+
 /--
   is_pred_sub A P zs H B := The formula A is said to be transformed into the formula B by a substitution of H* for P z₁ ... zₙ, abbreviated: Sub A (P zⁿ / H*) B, iff B is obtained from A upon replacing in A each occurrence of a derivative of the name form P z₁ ... zₙ by the corresponding derivative of the substituend H*, provided that: (i) P does not occur in a component formula (∀ x A₁) of A if x is a parameter of H*, and (ii) the name variable zₖ, k = 1, ..., n, is not free in a component formula (∀ x H) of H* if P t₁ ... tₙ occurs in A with x occurring in tₖ. If conditions (i) and (ii) are not satisfied, then the indicated substitution for predicate variables is left undefined.
 -/
@@ -706,7 +813,7 @@ def admits_pred_fun_aux (τ : string → list string × formula) :
   finset string → formula → bool
 | binders (pred_ P ts) :=
   (admits_fun (function.update_list_ite id (τ P).fst ts) (τ P).snd) ∧
- ∀ (x : string), x ∈ binders → is_free_in x (τ P).snd → ¬ x ∈ (τ P).fst
+ (∀ (x : string), x ∈ binders → ¬ (is_free_in x (τ P).snd ∧ x ∉ (τ P).fst))
 | binders (not_ phi) := admits_pred_fun_aux binders phi
 | binders (imp_ phi psi) := admits_pred_fun_aux binders phi ∧ admits_pred_fun_aux binders psi
 | binders (forall_ x phi) := admits_pred_fun_aux (binders ∪ {x}) phi
@@ -715,64 +822,77 @@ def admits_pred_fun_aux (τ : string → list string × formula) :
 lemma pred_sub_aux
   (D : Type)
   (I J : interpretation D)
-  (V V' : valuation D)
+  (V : valuation D)
   (τ : string → list string × formula)
   (binders : finset string)
-  (F : formula)
-  (h1 : admits_pred_fun_aux τ binders F)
-  (h2 : ∀ (Q : string) (ds : list D),
-    (holds D I (function.update_list_ite V (τ Q).fst ds) (τ Q).snd) ↔
-      J.pred Q ds)
-  (h3 : ∀ (x : string), x ∉ binders → V x = V' x)
-  (h3' : ∀ (x : string), x ∈ binders → V x = V' x) :
-  holds D J V F ↔ holds D I V' (replace_pred_fun τ F) :=
+  (phi : formula)
+  (h1 : admits_pred_fun_aux τ binders phi)
+
+  (h2 : ∀ (P : string) (ds : list D),
+    (∀ (x : string), x ∈ binders → ¬ (is_free_in x (τ P).snd ∧ x ∉ (τ P).fst)) →
+    (J.pred P ds ↔
+      holds D I (function.update_list_ite V (τ P).fst ds) (τ P).snd)) :
+
+  holds D J V phi ↔ holds D I V (replace_pred_fun τ phi) :=
 begin
-  induction F generalizing V binders,
-  case formula.pred_ : P ts V binders h1 h2 h3 h3'
+  induction phi generalizing V binders,
+  case formula.pred_ : P ts V binders h1 h2
   {
     unfold admits_pred_fun_aux at h1,
     simp only [bool.of_to_bool_iff] at h1,
     cases h1,
     unfold admits_fun at h1_left,
 
-    unfold replace_pred_fun,
-
     obtain s1 := substitution_fun_theorem I V (function.update_list_ite id (τ P).fst ts) (τ P).snd h1_left,
 
     obtain s2 := function.update_list_ite_comp id V (τ P).fst ts,
+
     simp only [s2] at s1,
     clear s2,
 
-    squeeze_simp at s1,
-
-    specialize h2 P (list.map V ts),
-    simp only [h2] at s1,
-    clear h2,
+    unfold replace_pred_fun,
+    rewrite <- s1,
+    clear s1,
 
     unfold holds,
+    squeeze_simp,
+    apply h2,
+    intros x a1 a2,
 
-    have s2 : holds D I V (fast_replace_free_fun (function.update_list_ite id (τ P).fst ts) (τ P).snd) ↔ holds D I V' (fast_replace_free_fun (function.update_list_ite id (τ P).fst ts) (τ P).snd),
-    apply holds_congr_var,
-    {
-      intros v a1,
-
-      by_cases c1 : v ∈ binders,
-      {
-        exact h3' v c1,
-      },
-      {
-        exact h3 v c1,
-      },
-    },
-
-    simp only [s2] at s1,
-    exact s1,
+    sorry,
   },
-  case formula.not_ : F_ᾰ F_ih V binders h1 h2 h3 h3'
-  { admit },
-  case formula.imp_ : F_ᾰ F_ᾰ_1 F_ih_ᾰ F_ih_ᾰ_1 V binders h1 h2 h3 h3'
-  { admit },
-  case formula.forall_ : x phi phi_ih V binders h1 h2 h3 h3'
+  case formula.not_ : phi phi_ih V binders h1 h2
+  {
+    unfold admits_pred_fun_aux at h1,
+
+    unfold replace_pred_fun,
+    unfold holds,
+    apply not_congr,
+    apply phi_ih,
+    apply h1,
+    apply h2,
+  },
+  case formula.imp_ : phi psi phi_ih psi_ih V binders h1 h2
+  {
+    unfold admits_pred_fun_aux at h1,
+    squeeze_simp at h1,
+    cases h1,
+
+    unfold replace_pred_fun,
+    unfold holds,
+    apply imp_congr,
+    {
+      apply phi_ih,
+      apply h1_left,
+      apply h2,
+    },
+    {
+      apply psi_ih,
+      apply h1_right,
+      apply h2,
+    }
+  },
+  case formula.forall_ : x phi phi_ih V binders h1 h2
   {
     unfold admits_pred_fun_aux at h1,
 
@@ -780,6 +900,11 @@ begin
     unfold holds,
     apply forall_congr,
     intros d,
+
+    apply phi_ih,
+    apply h1,
+    intros P ds a1,
+
     sorry,
   },
 end
