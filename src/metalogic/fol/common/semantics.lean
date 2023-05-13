@@ -485,6 +485,8 @@ end
 
 -- single
 
+-- https://math.stackexchange.com/a/1374989
+
 def replace_pred
   (P : string) (zs : list string) (H : formula) : formula → formula
 | (pred_ X ts) :=
