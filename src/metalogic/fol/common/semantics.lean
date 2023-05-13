@@ -527,9 +527,7 @@ example
   (H : formula)
   (binders : finset string)
   (h1 : admits_pred_aux P zs H binders F)
-
   (h2 : ∀ (x : string), x ∉ binders → V x = V' x)
-
   :
   holds
     D
@@ -550,7 +548,7 @@ begin
 
     unfold replace_pred,
     unfold holds,
-    squeeze_simp,
+    simp only [list.length_map],
 
     split_ifs at h1,
     {
@@ -562,7 +560,7 @@ begin
 
       obtain s1 := substitution_fun_theorem I V (function.update_list_ite id zs xs) H h1_left,
       simp only [function.update_list_ite_comp] at s1,
-      squeeze_simp at s1,
+      simp only [function.comp.right_id] at s1,
 
       have s2 : holds D I (function.update_list_ite V zs (list.map V xs)) H ↔ holds D I (function.update_list_ite V' zs (list.map V xs)) H,
       {
@@ -573,7 +571,7 @@ begin
           specialize h2 v,
           apply function.update_list_ite_mem_eq_len V V' v zs (list.map V xs) c1,
           cases h,
-          squeeze_simp,
+          simp only [list.length_map],
           symmetry,
           exact h_right,
         },
@@ -614,7 +612,7 @@ begin
     apply phi_ih (binders ∪ {x}) (function.update_ite V x d) h1,
     intros v a1,
     unfold function.update_ite,
-    squeeze_simp at a1,
+    simp only [finset.mem_union, finset.mem_singleton] at a1,
     push_neg at a1,
     cases a1,
     simp only [if_neg a1_right],
