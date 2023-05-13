@@ -552,7 +552,7 @@ begin
 
     split_ifs at h1,
     {
-      squeeze_simp at h1,
+      simp only [not_and, not_not, bool.of_to_bool_iff] at h1,
       cases h1,
       unfold admits_fun at h1_left,
 
