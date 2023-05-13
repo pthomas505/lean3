@@ -921,7 +921,7 @@ begin
   case formula.pred_ : X xs binders V h1 h2
   {
     unfold admits_pred_fun_aux at h1,
-    squeeze_simp at h1,
+    simp only [not_and, not_not, bool.of_to_bool_iff] at h1,
     cases h1,
     cases h1_right,
 
@@ -994,7 +994,7 @@ begin
   intros D I V,
 
   obtain s1 := pred_sub_aux D I V V τ ∅ phi h1,
-  squeeze_simp at s1,
+  simp only [eq_self_iff_true, forall_const] at s1,
 
   rewrite <- s1,
   apply h2,
