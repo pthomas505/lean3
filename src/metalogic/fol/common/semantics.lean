@@ -505,7 +505,9 @@ def admits_pred_aux (P : string) (zs : list string) (H : formula) : finset strin
   (admits_fun (function.update_list_ite id zs ts) H) ∧
 
   /-
+    Suppose F is the formula that the predicate X ts occurs in.
     Ensures that the free variables in H that are not being replaced by a variable in ts do not become bound variables in F. The bound variables in F are in the 'binders' set.
+    The zs are the free variables in H that are being replaced by the variables in ts.
    (is_free_in x H ∧ x ∉ zs) := x is a free variable in H that is not being replaced by a variable in ts.
   -/
   (∀ (x : string), x ∈ binders → ¬ (is_free_in x H ∧ x ∉ zs))
