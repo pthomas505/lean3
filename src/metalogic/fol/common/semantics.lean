@@ -518,7 +518,7 @@ def admits_pred_aux (P : string) (zs : list string) (H : formula) : finset strin
 | binders (forall_ x phi) := admits_pred_aux (binders ∪ {x}) phi
 
 
-example
+lemma pred_sub_single_aux
   (D : Type)
   (I : interpretation D)
   (V V' : valuation D)
@@ -528,8 +528,7 @@ example
   (H : formula)
   (binders : finset string)
   (h1 : admits_pred_aux P zs H binders F)
-  (h2 : ∀ (x : string), x ∉ binders → V x = V' x)
-  :
+  (h2 : ∀ (x : string), x ∉ binders → V x = V' x) :
   holds
     D
     ⟨
@@ -640,6 +639,28 @@ begin
     simp only [if_neg a1_right],
     exact h2 v a1_left,
   },
+end
+
+
+lemma pred_sub_single_valid
+  (phi : formula)
+  (P : string)
+  (zs : list string)
+  (H : formula)
+  (h1 : admits_pred_aux P zs H ∅ phi)
+  (h2 : phi.is_valid) :
+  (replace_pred P zs H phi).is_valid :=
+begin
+  unfold formula.is_valid at h2,
+
+  unfold formula.is_valid,
+  intros D I V,
+
+  obtain s1 := pred_sub_single_aux D I V V phi P zs H ∅ h1,
+  simp only [eq_self_iff_true, forall_const] at s1,
+
+  rewrite <- s1,
+  apply h2,
 end
 
 
