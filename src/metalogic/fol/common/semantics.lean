@@ -483,6 +483,7 @@ end
 
 -- predicate substitution
 
+-- single
 
 def replace_pred
   (P : string) (zs : list string) (H : formula) : formula → formula
@@ -849,6 +850,8 @@ begin
   apply h2,
 end
 
+
+-- multiple
 
 def replace_pred_fun
   (τ : string → list string × formula) : formula → formula
