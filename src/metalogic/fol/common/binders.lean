@@ -84,11 +84,13 @@ def is_free_in (v : var_name) : formula → bool
 | (imp_ phi psi) := is_free_in phi ∨ is_free_in psi
 | (forall_ x phi) := ¬ v = x ∧ is_free_in phi
 
-
+/--
+  pred.occurs_in P n := True if and only if there is an occurrence of the predicate named P of arity n in the formula phi.
+-/
 @[derive decidable]
-def pred.occurs_in (phi : pred_name) (n : ℕ) : formula → bool
+def pred.occurs_in (P : pred_name) (n : ℕ) : formula → bool
 | true_ := ff
-| (pred_ X xs) := X = phi ∧ xs.length = n
+| (pred_ X xs) := X = P ∧ xs.length = n
 | (not_ phi) := pred.occurs_in phi
 | (imp_ phi psi) := pred.occurs_in phi ∨ pred.occurs_in psi
 | (forall_ _ phi) := pred.occurs_in phi
