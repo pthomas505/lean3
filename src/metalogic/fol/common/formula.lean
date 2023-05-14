@@ -62,22 +62,22 @@ def formula.false_ : formula :=
   not_ true_
 
 /--
-  phi ∨ Q := ~ phi → Q
+  phi ∨ psi := ~ phi → psi
 -/
-def formula.or_ (phi Q : formula) : formula :=
-  (not_ phi).imp_ Q
+def formula.or_ (phi psi : formula) : formula :=
+  (not_ phi).imp_ psi
 
 /--
-phi ∧ Q := ~ ( phi → ~ Q )
+phi ∧ psi := ~ ( phi → ~ psi )
 -/
-def formula.and_ (phi Q : formula) : formula :=
-  not_ (phi.imp_ (not_ Q))
+def formula.and_ (phi psi : formula) : formula :=
+  not_ (phi.imp_ (not_ psi))
 
 /--
-  phi ↔ Q := ( phi → Q ) ∧ ( Q → phi )
+  phi ↔ psi := ( phi → psi ) ∧ ( psi → phi )
 -/
-def formula.iff_ (phi Q : formula) : formula :=
-  (phi.imp_ Q).and_ (Q.imp_ phi)
+def formula.iff_ (phi psi : formula) : formula :=
+  (phi.imp_ psi).and_ (psi.imp_ phi)
 
 /--
   ∃ x phi := ~ ∀ x ~ phi
