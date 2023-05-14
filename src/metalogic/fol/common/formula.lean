@@ -8,49 +8,49 @@ namespace fol
 
 
 /--
-  The type of FOL variables.
+  The type of variables.
 -/
 @[derive [inhabited, decidable_eq]]
-inductive variable_ : Type
-| mk : string → variable_
+inductive var_name : Type
+| mk : string → var_name
 
 
 /--
-  The string representation of FOL variables.
+  The string representation of variables.
 -/
-def variable_.repr : variable_ → string
-| (variable_.mk name) := name
+def var_name.repr : var_name → string
+| (var_name.mk name) := name
 
-instance variable_.has_repr : has_repr variable_ := has_repr.mk variable_.repr
+instance var_name.has_repr : has_repr var_name := has_repr.mk var_name.repr
 
 
 /--
-  The type of FOL predicate names.
+  The type of predicate names.
 -/
 @[derive [inhabited, decidable_eq]]
-inductive pred_name_ : Type
-| mk : string → pred_name_
+inductive pred_name : Type
+| mk : string → pred_name
 
 
 /--
-  The string representation of FOL predicate names.
+  The string representation of predicate names.
 -/
-def pred_name_.repr : pred_name_ → string
-| (pred_name_.mk name) := name
+def pred_name.repr : pred_name → string
+| (pred_name.mk name) := name
 
-instance pred_name_.has_repr : has_repr pred_name_ := has_repr.mk pred_name_.repr
+instance pred_name.has_repr : has_repr pred_name := has_repr.mk pred_name.repr
 
 
 /--
-  The type of FOL formulas.
+  The type of formulas.
 -/
 @[derive [inhabited, decidable_eq]]
 inductive formula : Type
 | true_ : formula
-| pred_ : pred_name_ → list variable_ → formula
+| pred_ : pred_name → list var_name → formula
 | not_ : formula → formula
 | imp_ : formula → formula → formula
-| forall_ : variable_ → formula → formula
+| forall_ : var_name → formula → formula
 
 open formula
 
@@ -78,12 +78,12 @@ def formula.iff_ (P Q : formula) : formula := (P.imp_ Q).and_ (Q.imp_ P)
 /--
   ∃ x P := ~ ∀ x ~ P
 -/
-def formula.exists_ (x : variable_) (P : formula) : formula := not_ (forall_ x (not_ P))
+def formula.exists_ (x : var_name) (P : formula) : formula := not_ (forall_ x (not_ P))
 
 
-def formula.eq_ (x y : variable_) : formula := pred_ (pred_name_.mk "=") [x, y]
+def formula.eq_ (x y : var_name) : formula := pred_ (pred_name.mk "=") [x, y]
 
-def formula.mem_ (x y : variable_) : formula := pred_ (pred_name_.mk "∈") [x, y]
+def formula.mem_ (x y : var_name) : formula := pred_ (pred_name.mk "∈") [x, y]
 
 
 /--
@@ -109,11 +109,11 @@ def formula.And_ (l : list formula) : formula := list.foldr formula.and_ true_ l
 /--
   Forall_ [x_0 ... x_n] P := ∀ x_0 ... ∀ x_n P
 -/
-def formula.Forall_ (xs : list variable_) (P : formula) : formula := list.foldr formula.forall_ P xs
+def formula.Forall_ (xs : list var_name) (P : formula) : formula := list.foldr formula.forall_ P xs
 
 
 /--
-  The string representation of FOL formulas.
+  The string representation of formulas.
 -/
 def formula.repr : formula → string
 | true_ := "⊤"
@@ -125,9 +125,9 @@ def formula.repr : formula → string
 instance formula.has_repr : has_repr formula := has_repr.mk formula.repr
 
 
-#eval formula.And_ [pred_ (pred_name_.mk "P") [], pred_ (pred_name_.mk "Q") []]
+#eval formula.And_ [pred_ (pred_name.mk "P") [], pred_ (pred_name.mk "Q") []]
 
-#eval formula.Forall_ [(variable_.mk "x"), (variable_.mk "y")] (formula.pred_ (pred_name_.mk "P") [])
+#eval formula.Forall_ [(var_name.mk "x"), (var_name.mk "y")] (formula.pred_ (pred_name.mk "P") [])
 
 
 #lint

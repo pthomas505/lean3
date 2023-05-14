@@ -22,7 +22,7 @@ An occurrence of a variable $v$ in a formula $P$ is bound if and only if it occu
 /--
   formula.var_set P := The set of all of the variables that have an occurrence in the formula P.
 -/
-def formula.var_set : formula → finset variable_
+def formula.var_set : formula → finset var_name
 | (true_) := ∅
 | (pred_ name args) := args.to_finset
 | (not_ P) := P.var_set
@@ -32,7 +32,7 @@ def formula.var_set : formula → finset variable_
 /--
   occurs_in v P := True if and only if there is an occurrence of the variable v in the formula P.
 -/
-def occurs_in (v : variable_) : formula → Prop
+def occurs_in (v : var_name) : formula → Prop
 | (true_) := false
 | (pred_ name args) := v ∈ args.to_finset
 | (not_ P) := occurs_in P
@@ -43,7 +43,7 @@ def occurs_in (v : variable_) : formula → Prop
 /--
   formula.bound_var_set P := The set of all of the variables that have a bound occurrence in the formula P.
 -/
-def formula.bound_var_set : formula → finset variable_
+def formula.bound_var_set : formula → finset var_name
 | (true_) := ∅
 | (pred_ name args) := ∅
 | (not_ P) := P.bound_var_set
@@ -53,7 +53,7 @@ def formula.bound_var_set : formula → finset variable_
 /--
   is_bound_in v P := True if and only if there is a bound occurrence of the variable v in the formula P.
 -/
-def is_bound_in (v : variable_) : formula → Prop
+def is_bound_in (v : var_name) : formula → Prop
 | (true_) := false
 | (pred_ name args) := false
 | (not_ P) := is_bound_in P
@@ -64,7 +64,7 @@ def is_bound_in (v : variable_) : formula → Prop
 /--
   formula.free_var_set P := The set of all of the variables that have a free occurrence in the formula P.
 -/
-def formula.free_var_set : formula → finset variable_
+def formula.free_var_set : formula → finset var_name
 | (true_) := ∅
 | (pred_ name args) := args.to_finset
 | (not_ P) := P.free_var_set
@@ -74,7 +74,7 @@ def formula.free_var_set : formula → finset variable_
 /--
   is_free_in v P := True if and only if there is a free occurrence of the variable v in the formula P.
 -/
-def is_free_in (v : variable_) : formula → Prop
+def is_free_in (v : var_name) : formula → Prop
 | (true_) := false
 | (pred_ name args) := v ∈ args.to_finset
 | (not_ P) := is_free_in P
@@ -83,7 +83,7 @@ def is_free_in (v : variable_) : formula → Prop
 
 
 lemma occurs_in_iff_mem_var_set
-  (v : variable_)
+  (v : var_name)
   (P : formula) :
   occurs_in v P ↔ v ∈ P.var_set :=
 begin
@@ -114,7 +114,7 @@ end
 
 
 lemma is_bound_in_iff_mem_bound_var_set
-  (v : variable_)
+  (v : var_name)
   (P : formula) :
   is_bound_in v P ↔ v ∈ P.bound_var_set :=
 begin
@@ -145,7 +145,7 @@ end
 
 
 lemma is_free_in_iff_mem_free_var_set
-  (v : variable_)
+  (v : var_name)
   (P : formula) :
   is_free_in v P ↔ v ∈ P.free_var_set :=
 begin
@@ -177,7 +177,7 @@ end
 
 theorem is_bound_in_imp_occurs_in
   (P : formula)
-  (v : variable_)
+  (v : var_name)
   (h1 : is_bound_in v P) :
   occurs_in v P :=
 begin
@@ -190,7 +190,7 @@ end
 
 theorem is_free_in_imp_occurs_in
   (P : formula)
-  (v : variable_)
+  (v : var_name)
   (h1 : is_free_in v P) :
   occurs_in v P :=
 begin

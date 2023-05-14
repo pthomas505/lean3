@@ -35,22 +35,22 @@ inductive is_proof : formula → Prop
 
 -- ⊢ (∀ v (P → Q)) → ((∀ v P) → (∀ v Q))
 | pred_1_
-  (v : variable_) (P Q : formula) :
+  (v : var_name) (P Q : formula) :
   is_proof ((forall_ v (P.imp_ Q)).imp_ ((forall_ v P).imp_ (forall_ v Q)))
 
 -- ⊢ P → (∀ v P)  provided v is not free in P
 | pred_2_
-  (v : variable_) (P : formula) :
+  (v : var_name) (P : formula) :
   ¬ is_free_in v P →
   is_proof (P.imp_ (forall_ v P))
 
 | eq_1_
-  (x t : variable_) :
+  (x t : var_name) :
   ¬ x = t →
   is_proof (exists_ x (eq_ x t))
 
 | eq_2_
-  (x : variable_) :
+  (x : var_name) :
   is_proof (eq_ x x)
 
 /-
@@ -58,8 +58,8 @@ inductive is_proof : formula → Prop
     pred_ name [x_0 ... x_n] → pred_ name [y_0 ... y_n]
 -/
 | eq_3_
-  (name : pred_name_)
-  (xs ys : list variable_) :
+  (name : pred_name)
+  (xs ys : list var_name) :
   xs.length = ys.length → 
   is_proof (
     list.foldr
@@ -69,7 +69,7 @@ inductive is_proof : formula → Prop
 
 -- ⊢ P ⇒ ⊢ ∀ v P
 | gen_
-  (v : variable_) (P : formula) :
+  (v : var_name) (P : formula) :
   is_proof P →
   is_proof (forall_ v P)
 

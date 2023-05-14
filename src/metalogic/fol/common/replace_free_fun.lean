@@ -15,12 +15,12 @@ open formula
 /--
   Helper function for replace_free_fun.
 -/
-def replace_free_fun_aux (σ : variable_ → variable_) : finset variable_ → formula → formula
+def replace_free_fun_aux (σ : var_name → var_name) : finset var_name → formula → formula
 | _ true_ := true_
 | binders (pred_ name args) :=
     pred_
     name
-    (args.map (fun (x : variable_), if x ∈ binders then x else σ x))
+    (args.map (fun (x : var_name), if x ∈ binders then x else σ x))
 | binders (not_ P) := not_ (replace_free_fun_aux binders P)
 | binders (imp_ P Q) :=
     imp_
@@ -33,13 +33,13 @@ def replace_free_fun_aux (σ : variable_ → variable_) : finset variable_ → f
 /--
   replace_free_fun σ P := The simultaneous replacement of each free occurence of any variable v in the formula P by σ v.
 -/
-def replace_free_fun (σ : variable_ → variable_) (P : formula) : formula := replace_free_fun_aux σ ∅ P
+def replace_free_fun (σ : var_name → var_name) (P : formula) : formula := replace_free_fun_aux σ ∅ P
 
 
 /--
   fast_replace_free_fun σ P := The simultaneous replacement of each free occurence of any variable v in the formula P by σ v.
 -/
-def fast_replace_free_fun : (variable_ → variable_) → formula → formula
+def fast_replace_free_fun : (var_name → var_name) → formula → formula
 | _ true_ := true_
 | σ (pred_ name args) := pred_ name (args.map σ)
 | σ (not_ P) := not_ (fast_replace_free_fun σ P)
@@ -89,7 +89,7 @@ end
 
 example
   (P : formula)
-  (v t : variable_) :
+  (v t : var_name) :
   fast_replace_free_fun (function.update_ite id v t) P = fast_replace_free v t P :=
 begin
   induction P,
@@ -133,7 +133,7 @@ begin
       apply fast_replace_free_fun_id,
     },
     {
-      have s1 : (function.update_ite (function.update_ite (id : variable_ → variable_) v t) x x) = function.update_ite id v t,
+      have s1 : (function.update_ite (function.update_ite (id : var_name → var_name) v t) x x) = function.update_ite id v t,
       funext,
       unfold function.update_ite,
       split_ifs,
@@ -162,8 +162,8 @@ end
 
 lemma fast_replace_free_fun_same_on_free
   (P : formula)
-  (σ σ' : variable_ → variable_)
-  (h1 : ∀ (v : variable_), is_free_in v P → σ v = σ' v) :
+  (σ σ' : var_name → var_name)
+  (h1 : ∀ (v : var_name), is_free_in v P → σ v = σ' v) :
   fast_replace_free_fun σ P =
     fast_replace_free_fun σ' P :=
 begin
@@ -240,9 +240,9 @@ end
 
 lemma replace_free_fun_aux_same_on_free
   (P : formula)
-  (σ σ' : variable_ → variable_)
-  (binders : finset variable_)
-  (h1 : ∀ (v : variable_), v ∉ binders → σ v = σ' v) :
+  (σ σ' : var_name → var_name)
+  (binders : finset var_name)
+  (h1 : ∀ (v : var_name), v ∉ binders → σ v = σ' v) :
   replace_free_fun_aux σ binders P =
     replace_free_fun_aux σ' binders P :=
 begin
@@ -298,9 +298,9 @@ end
 
 example
   (P : formula)
-  (σ : variable_ → variable_)
-  (binders : finset variable_)
-  (h1 : ∀ (v : variable_), v ∈ binders → v = σ v) :
+  (σ : var_name → var_name)
+  (binders : finset var_name)
+  (h1 : ∀ (v : var_name), v ∈ binders → v = σ v) :
   replace_free_fun_aux σ binders P =
     fast_replace_free_fun σ P :=
 begin

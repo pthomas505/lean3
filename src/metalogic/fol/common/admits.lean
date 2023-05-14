@@ -21,7 +21,7 @@ If $v$ and $u$ are variables and $P$ is a formula, then $P$ admits $u$ for $v$ i
 /--
   Helper function for admits.
 -/
-def admits_aux (v u : variable_) : finset variable_ → formula → Prop
+def admits_aux (v u : var_name) : finset var_name → formula → Prop
 | _ true_ := true
 | binders (pred_ name args) :=
     (v ∈ args ∧ v ∉ binders) → -- if there is a free occurrence of v in P
@@ -37,14 +37,14 @@ def admits_aux (v u : variable_) : finset variable_ → formula → Prop
 
   v → u in P
 -/
-def admits (v u : variable_) (P : formula) : Prop :=
+def admits (v u : var_name) (P : formula) : Prop :=
   admits_aux v u ∅ P
 
 
 /--
   Helper function for fast_admits.
 -/
-def fast_admits_aux (v u : variable_) : finset variable_ → formula → Prop
+def fast_admits_aux (v u : var_name) : finset var_name → formula → Prop
 | _ true_ := true
 | binders (pred_ name args) :=
     v ∈ args → -- if there is a free occurrence of v in P
@@ -62,7 +62,7 @@ def fast_admits_aux (v u : variable_) : finset variable_ → formula → Prop
 
   This is a more efficient version of admits.
 -/
-def fast_admits (v u : variable_) (P : formula) : Prop :=
+def fast_admits (v u : var_name) (P : formula) : Prop :=
   fast_admits_aux v u ∅ P
 
 
@@ -72,7 +72,7 @@ def fast_admits (v u : variable_) (P : formula) : Prop :=
 @[derive [inhabited, decidable_eq]]
 inductive bool_formula : Type
 | true_ : bool_formula
-| pred_ : pred_name_ → list bool → bool_formula
+| pred_ : pred_name → list bool → bool_formula
 | not_ : bool_formula → bool_formula
 | imp_ : bool_formula → bool_formula → bool_formula
 | forall_ : bool → bool_formula → bool_formula
@@ -81,9 +81,9 @@ inductive bool_formula : Type
 /--
   Helper function for to_is_bound.
 -/
-def to_is_bound_aux : finset variable_ → formula → bool_formula
+def to_is_bound_aux : finset var_name → formula → bool_formula
 | _ true_ := bool_formula.true_
-| binders (pred_ name args) := bool_formula.pred_ name (args.map (fun (v : variable_), v ∈ binders))
+| binders (pred_ name args) := bool_formula.pred_ name (args.map (fun (v : var_name), v ∈ binders))
 | binders (not_ P) := bool_formula.not_ (to_is_bound_aux binders P)
 | binders (imp_ P Q) := bool_formula.imp_ (to_is_bound_aux binders P) (to_is_bound_aux binders Q)
 | binders (forall_ x P) := bool_formula.forall_ true (to_is_bound_aux (binders ∪ {x}) P)
@@ -100,8 +100,8 @@ def to_is_bound (P : formula) : bool_formula :=
 
 lemma admits_aux_imp_fast_admits_aux
   (P : formula)
-  (v u : variable_)
-  (binders : finset variable_)
+  (v u : var_name)
+  (binders : finset var_name)
   (h1 : v ∉ binders)
   (h2 : admits_aux v u binders P) :
   fast_admits_aux v u binders P :=
@@ -148,8 +148,8 @@ end
 
 lemma mem_binders_imp_admits_aux
   (P : formula)
-  (v u : variable_)
-  (binders : finset variable_)
+  (v u : var_name)
+  (binders : finset var_name)
   (h1 : v ∈ binders) :
   admits_aux v u binders P :=
 begin
@@ -179,8 +179,8 @@ end
 
 lemma fast_admits_aux_imp_admits_aux
   (P : formula)
-  (v u : variable_)
-  (binders : finset variable_)
+  (v u : var_name)
+  (binders : finset var_name)
   (h1 : fast_admits_aux v u binders P) :
   admits_aux v u binders P :=
 begin
@@ -220,7 +220,7 @@ end
 
 theorem admits_iff_fast_admits
   (P : formula)
-  (v u : variable_) :
+  (v u : var_name) :
   admits v u P ↔ fast_admits v u P :=
 begin
   unfold admits,
@@ -241,8 +241,8 @@ end
 
 lemma fast_admits_aux_self
   (P : formula)
-  (v : variable_)
-  (binders : finset variable_)
+  (v : var_name)
+  (binders : finset var_name)
   (h1 : v ∉ binders) :
   fast_admits_aux v v binders P :=
 begin
@@ -278,7 +278,7 @@ end
 
 theorem fast_admits_self
   (P : formula)
-  (v : variable_) :
+  (v : var_name) :
   fast_admits v v P :=
 begin
   unfold fast_admits,
@@ -290,8 +290,8 @@ end
 
 lemma not_is_free_in_imp_fast_admits_aux
   (P : formula)
-  (v u : variable_)
-  (binders : finset variable_)
+  (v u : var_name)
+  (binders : finset var_name)
   (h1 : ¬ is_free_in v P) :
   fast_admits_aux v u binders P :=
 begin
@@ -323,7 +323,7 @@ end
 
 theorem not_is_free_in_imp_fast_admits
   (P : formula)
-  (v u : variable_)
+  (v u : var_name)
   (h1 : ¬ is_free_in v P) :
   fast_admits v u P :=
 begin
@@ -336,8 +336,8 @@ end
 
 lemma not_is_bound_in_imp_fast_admits_aux
   (P : formula)
-  (v u : variable_)
-  (binders : finset variable_)
+  (v u : var_name)
+  (binders : finset var_name)
   (h1 : ¬ is_bound_in u P)
   (h2 : u ∉ binders) :
   fast_admits_aux v u binders P :=
@@ -387,7 +387,7 @@ end
 
 theorem not_is_bound_in_imp_fast_admits
   (P : formula)
-  (v u : variable_)
+  (v u : var_name)
   (h1 : ¬ is_bound_in u P) :
   fast_admits v u P :=
 begin
@@ -405,8 +405,8 @@ end
 
 lemma fast_replace_free_aux_fast_admits_aux
   (P : formula)
-  (v t : variable_)
-  (binders : finset variable_)
+  (v t : var_name)
+  (binders : finset var_name)
   (h1 : ¬ occurs_in t P)
   (h2 : v ∉ binders) :
   fast_admits_aux t v binders (fast_replace_free v t P) :=
@@ -469,7 +469,7 @@ end
 
 lemma fast_replace_free_fast_admits
   (P : formula)
-  (v t : variable_)
+  (v t : var_name)
   (h1 : ¬ occurs_in t P) :
   fast_admits t v (fast_replace_free v t P) :=
 begin
@@ -482,8 +482,8 @@ end
 
 lemma replace_free_aux_fast_admits_aux
   (P : formula)
-  (v t : variable_)
-  (binders : finset variable_)
+  (v t : var_name)
+  (binders : finset var_name)
   (h1 : ¬ occurs_in t P) :
   fast_admits_aux t v binders (replace_free_aux v t binders P) :=
 begin
@@ -544,7 +544,7 @@ end
 
 lemma replace_free_fast_admits
   (P : formula)
-  (v t : variable_)
+  (v t : var_name)
   (h1 : ¬ occurs_in t P) :
   fast_admits t v (replace_free v t P) :=
 begin
@@ -558,8 +558,8 @@ end
 
 lemma fast_admits_aux_add_binders
   (P : formula)
-  (v u : variable_)
-  (S T : finset variable_)
+  (v u : var_name)
+  (S T : finset var_name)
   (h1 : fast_admits_aux v u S P)
   (h2 : u ∉ T) :
   fast_admits_aux v u (S ∪ T) P :=
@@ -611,8 +611,8 @@ end
 
 lemma fast_admits_aux_del_binders
   (P : formula)
-  (v u : variable_)
-  (S T : finset variable_)
+  (v u : var_name)
+  (S T : finset var_name)
   (h1 : fast_admits_aux v u (S ∪ T) P) :
   fast_admits_aux v u S P :=
 begin
@@ -658,8 +658,8 @@ end
 
 lemma fast_admits_aux_is_free_in
   (P : formula)
-  (v u : variable_)
-  (binders : finset variable_)
+  (v u : var_name)
+  (binders : finset var_name)
   (h1 : fast_admits_aux v u binders P)
   (h2 : is_free_in v P) :
   u ∉ binders :=
@@ -726,8 +726,8 @@ end
 
 lemma fast_admits_aux_mem_binders
   (P : formula)
-  (v u : variable_)
-  (binders : finset variable_)
+  (v u : var_name)
+  (binders : finset var_name)
   (h1 : fast_admits_aux v u binders P)
   (h2 : u ∈ binders) :
   ¬ is_free_in v P :=
@@ -742,8 +742,8 @@ end
 
 lemma fast_admits_aux_imp_free_and_bound_unchanged
   (P : formula)
-  (v u : variable_)
-  (binders : finset variable_)
+  (v u : var_name)
+  (binders : finset var_name)
   (h1 : v ∉ binders)
   (h2 : fast_admits_aux v u binders P) :
   to_is_bound_aux binders P = to_is_bound_aux binders (fast_replace_free v u P) :=
@@ -842,8 +842,8 @@ end
 
 lemma free_and_bound_unchanged_imp_fast_admits_aux
   (P : formula)
-  (v u : variable_)
-  (binders : finset variable_)
+  (v u : var_name)
+  (binders : finset var_name)
   (h1 : v ∉ binders)
   (h2 : to_is_bound_aux binders P = to_is_bound_aux binders (fast_replace_free v u P)) :
   fast_admits_aux v u binders P :=
@@ -935,7 +935,7 @@ end
 
 example
   (P : formula)
-  (v u : variable_) :
+  (v u : var_name) :
   fast_admits v u P ↔ to_is_bound P = to_is_bound (fast_replace_free v u P) :=
 begin
   unfold fast_admits,
@@ -957,8 +957,8 @@ end
 
 lemma admits_aux_self
   (P : formula)
-  (v : variable_)
-  (binders : finset variable_) :
+  (v : var_name)
+  (binders : finset var_name) :
   admits_aux v v binders P :=
 begin
   induction P generalizing binders;
@@ -969,7 +969,7 @@ end
 
 theorem admits_self
   (P : formula)
-  (v : variable_) :
+  (v : var_name) :
   admits v v P :=
 begin
   unfold admits,
@@ -980,8 +980,8 @@ end
 
 lemma not_is_free_in_imp_admits_aux
   (P : formula)
-  (v u : variable_)
-  (binders : finset variable_)
+  (v u : var_name)
+  (binders : finset var_name)
   (h1 : ¬ is_free_in v P) :
   admits_aux v u binders P :=
 begin
@@ -1028,7 +1028,7 @@ end
 
 theorem not_is_free_in_imp_admits
   (P : formula)
-  (v u : variable_)
+  (v u : var_name)
   (h1 : ¬ is_free_in v P) :
   admits v u P :=
 begin
@@ -1041,8 +1041,8 @@ end
 
 lemma not_is_bound_in_imp_admits_aux
   (P : formula)
-  (v u : variable_)
-  (binders : finset variable_)
+  (v u : var_name)
+  (binders : finset var_name)
   (h1 : ¬ is_bound_in u P)
   (h2 : u ∉ binders) :
   admits_aux v u binders P :=
@@ -1087,7 +1087,7 @@ end
 
 theorem not_is_bound_in_imp_admits
   (P : formula)
-  (v u : variable_)
+  (v u : var_name)
   (h1 : ¬ is_bound_in u P) :
   admits v u P :=
 begin
@@ -1105,8 +1105,8 @@ end
 
 lemma replace_free_aux_admits_aux
   (P : formula)
-  (v t : variable_)
-  (binders : finset variable_)
+  (v t : var_name)
+  (binders : finset var_name)
   (h1 : ¬ occurs_in t P) :
   admits_aux t v binders (replace_free_aux v t binders P) :=
 begin
@@ -1166,7 +1166,7 @@ end
 
 theorem replace_free_admits
   (P : formula)
-  (v t : variable_)
+  (v t : var_name)
   (h1 : ¬ occurs_in t P) :
   admits t v (replace_free v t P) :=
 begin
@@ -1180,8 +1180,8 @@ end
 
 lemma admits_aux_add_binders
   (P : formula)
-  (v u : variable_)
-  (S T : finset variable_)
+  (v u : var_name)
+  (S T : finset var_name)
   (h1 : admits_aux v u S P)
   (h2 : u ∉ T) :
   admits_aux v u (S ∪ T) P :=
@@ -1226,8 +1226,8 @@ end
 
 lemma admits_aux_del_binders
   (P : formula)
-  (v u : variable_)
-  (S T : finset variable_)
+  (v u : var_name)
+  (S T : finset var_name)
   (h1 : admits_aux v u (S ∪ T) P)
   (h2 : v ∉ T) :
   admits_aux v u S P :=
@@ -1273,8 +1273,8 @@ end
 
 lemma admits_aux_is_free_in
   (P : formula)
-  (v u : variable_)
-  (binders : finset variable_)
+  (v u : var_name)
+  (binders : finset var_name)
   (h1 : admits_aux v u binders P)
   (h2 : is_free_in v P)
   (h3 : v ∉ binders) :

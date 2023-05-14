@@ -42,29 +42,29 @@ inductive is_proof : formula → Prop
 
 -- ⊢ P ⇒ ⊢ ∀ x P
 | ax_gen_
-  (x : variable_) (P : formula) :
+  (x : var_name) (P : formula) :
   is_proof P →
   is_proof (forall_ x P)
 
 -- ⊢ (∀ x (P → Q)) → ((∀ x P) → (∀ x Q))
 | ax_4_
-  (x : variable_) (P Q : formula) :
+  (x : var_name) (P Q : formula) :
   is_proof ((forall_ x (P.imp_ Q)).imp_ ((forall_ x P).imp_ (forall_ x Q)))
 
 -- ⊢ P → (∀ x P)  provided x does not occur in P
 | ax_5_
-  (x : variable_) (P : formula) :
+  (x : var_name) (P : formula) :
   ¬ occurs_in x P →
   is_proof (P.imp_ (forall_ x P))
 
 -- ⊢ ∃ x (x = y)
 | ax_6_
-  (x y : variable_) :
+  (x y : var_name) :
   is_proof (exists_ x (eq_ x y))
 
 -- ⊢ (x = y) → ((x = z) → (y = z))
 | ax_7_
-  (x y z : variable_) :
+  (x y z : var_name) :
   is_proof ((eq_ x y).imp_ ((eq_ x z).imp_ (eq_ y z)))
 
 /-
@@ -72,8 +72,8 @@ inductive is_proof : formula → Prop
     pred_ name [x_0 ... x_n] → pred_ name [y_0 ... y_n]
 -/
 | ax_8_
-  (name : pred_name_)
-  (xs ys : list variable_) :
+  (name : pred_name)
+  (xs ys : list var_name) :
   xs.length = ys.length → 
   is_proof (
     list.foldr
@@ -83,17 +83,17 @@ inductive is_proof : formula → Prop
 
 -- ⊢ (¬ (∀ x P)) → ∀ x ¬ (∀ x P)
 | ax_10_
-  (x : variable_) (P : formula) :
+  (x : var_name) (P : formula) :
   is_proof ((not_ (forall_ x P)).imp_ (forall_ x (not_ (forall_ x P))))
 
 -- ⊢ (∀ x ∀ y P) → (∀ y ∀ x P)
 | ax_11_
-  (x y : variable_) (P : formula) :
+  (x y : var_name) (P : formula) :
   is_proof ((forall_ x (forall_ y P)).imp_ (forall_ y (forall_ x P)))
 
 -- ⊢ (∀ y P) → ∀ x (x = y → P))
 | ax_12_
-  (x y : variable_) (P : formula) :
+  (x y : var_name) (P : formula) :
   is_proof ((forall_ y P).imp_ (forall_ x ((eq_ x y).imp_ P)))
 
 

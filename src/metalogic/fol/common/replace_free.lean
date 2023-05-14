@@ -22,12 +22,12 @@ If $P$ is a formula, $v$ is a variable, and $t$ is a term, then $P(t/v)$ is the 
 /--
   Helper function for replace_free.
 -/
-def replace_free_aux (v t : variable_) : finset variable_ → formula → formula
+def replace_free_aux (v t : var_name) : finset var_name → formula → formula
 | _ (true_) := true_
 | binders (pred_ name args) :=
     pred_
     name
-    (args.map (fun (x : variable_), if x = v ∧ x ∉ binders then t else x))
+    (args.map (fun (x : var_name), if x = v ∧ x ∉ binders then t else x))
 | binders (not_ P) := not_ (replace_free_aux binders P)
 | binders (imp_ P Q) :=
     imp_
@@ -44,7 +44,7 @@ def replace_free_aux (v t : variable_) : finset variable_ → formula → formul
 
   The result of replacing each free occurrence of v in P by an occurrence of t.
 -/
-def replace_free (v t : variable_) (P : formula) : formula :=
+def replace_free (v t : var_name) (P : formula) : formula :=
   replace_free_aux v t ∅ P
 
 
@@ -59,12 +59,12 @@ def replace_free (v t : variable_) (P : formula) : formula :=
 
   This is a more efficient version of replace_free.
 -/
-def fast_replace_free (v t : variable_) : formula → formula
+def fast_replace_free (v t : var_name) : formula → formula
 | (true_) := true_
 | (pred_ name args) :=
     pred_
     name
-    (args.map (fun (x : variable_), if x = v then t else x))
+    (args.map (fun (x : var_name), if x = v then t else x))
 | (not_ P) := not_ (fast_replace_free P)
 | (imp_ P Q) := imp_ (fast_replace_free P) (fast_replace_free Q)
 | (forall_ x P) :=
@@ -77,8 +77,8 @@ def fast_replace_free (v t : variable_) : formula → formula
 
 lemma replace_free_aux_mem_binders
   (P : formula)
-  (v t : variable_)
-  (binders : finset variable_)
+  (v t : var_name)
+  (binders : finset var_name)
   (h1 : v ∈ binders) :
   replace_free_aux v t binders P = P :=
 begin
@@ -123,8 +123,8 @@ end
 
 lemma replace_free_aux_eq_fast_replace_free
   (P : formula)
-  (v t : variable_)
-  (binders : finset variable_)
+  (v t : var_name)
+  (binders : finset var_name)
   (h1 : v ∉ binders) :
   replace_free_aux v t binders P = fast_replace_free v t P :=
 begin
@@ -203,7 +203,7 @@ end
 
 theorem replace_free_eq_fast_replace_free
   (P : formula)
-  (v t : variable_) :
+  (v t : var_name) :
   replace_free v t P = fast_replace_free v t P :=
 begin
   unfold replace_free,
@@ -215,7 +215,7 @@ end
 
 theorem fast_replace_free_self
   (P : formula)
-  (v : variable_) :
+  (v : var_name) :
   fast_replace_free v v P = P :=
 begin
   induction P,
@@ -250,7 +250,7 @@ end
 
 theorem not_free_in_fast_replace_free_self
   (P : formula)
-  (v t : variable_)
+  (v t : var_name)
   (h1 : ¬ is_free_in v P) :
   fast_replace_free v t P = P :=
 begin
@@ -304,7 +304,7 @@ end
 
 theorem fast_replace_free_inverse
   (P : formula)
-  (v t : variable_)
+  (v t : var_name)
   (h1 : ¬ occurs_in t P) :
   fast_replace_free t v (fast_replace_free v t P) = P :=
 begin
@@ -381,7 +381,7 @@ end
 
 theorem not_is_free_in_fast_replace_free
   (P : formula)
-  (v t : variable_)
+  (v t : var_name)
   (h1 : ¬ v = t) :
   ¬ is_free_in v (fast_replace_free v t P) :=
 begin

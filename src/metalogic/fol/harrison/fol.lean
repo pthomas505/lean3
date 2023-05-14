@@ -13,17 +13,17 @@ open formula
 
 
 lemma eq_congr_eq
-  (x_0 x_1 y_0 y_1 : variable_) :
+  (x_0 x_1 y_0 y_1 : var_name) :
   is_proof ((eq_ x_0 y_0).imp_ ((eq_ x_1 y_1).imp_
     ((eq_ x_0 x_1).imp_ (eq_ y_0 y_1)))) :=
 begin
-  apply is_proof.eq_3_ (pred_name_.mk "=") [x_0, x_1] [y_0, y_1],
+  apply is_proof.eq_3_ (pred_name.mk "=") [x_0, x_1] [y_0, y_1],
   simp only [list.length],
 end
 
 
 theorem eq_symm
-  (x y : variable_) :
+  (x y : var_name) :
   is_proof ((eq_ x y).imp_ (eq_ y x)) :=
 begin
   apply is_proof.mp_ (eq_ x x),
@@ -45,7 +45,7 @@ end
 
 
 theorem eq_trans
-  (x y z : variable_) :
+  (x y z : var_name) :
   is_proof ((eq_ x y).imp_ ((eq_ y z).imp_ (eq_ x z))) :=
 begin
   apply imp_trans (eq_ x y) (eq_ y x) ((eq_ y z).imp_ (eq_ x z)),
@@ -67,7 +67,7 @@ end
 
 theorem gen_right_th
   (P Q : formula)
-  (x : variable_)
+  (x : var_name)
   (h1 : ¬ is_free_in x P) :
   is_proof ((forall_ x (P.imp_ Q)).imp_ (P.imp_ (forall_ x Q))) :=
 begin
@@ -88,7 +88,7 @@ end
 
 theorem genimp
   (P Q : formula)
-  (x : variable_)
+  (x : var_name)
   (h1 : is_proof (P.imp_ Q)) :
   is_proof ((forall_ x P).imp_ (forall_ x Q)) :=
 begin
@@ -105,7 +105,7 @@ end
 
 theorem gen_right
   (P Q : formula)
-  (x : variable_)
+  (x : var_name)
   (h1 : ¬ is_free_in x P)
   (h2 : is_proof (P.imp_ Q)) :
   is_proof (P.imp_ (forall_ x Q)) :=
@@ -120,7 +120,7 @@ end
 
 theorem exists_left_th
   (P Q : formula)
-  (x : variable_)
+  (x : var_name)
   (h1 : ¬ is_free_in x Q) :
   is_proof ((forall_ x (P.imp_ Q)).imp_ ((exists_ x P).imp_ Q)) :=
 begin
@@ -178,7 +178,7 @@ end
 
 theorem exists_left
   (P Q : formula)
-  (x : variable_)
+  (x : var_name)
   (h1 : ¬ is_free_in x Q)
   (h2 : is_proof (P.imp_ Q)) :
   is_proof ((exists_ x P).imp_ Q) :=
@@ -196,7 +196,7 @@ end
 
 theorem subspec
   (P Q : formula)
-  (x t : variable_)
+  (x t : var_name)
   (h1 : ¬ x = t)
   (h2 : ¬ is_free_in x Q)
   (h3 : is_proof ((eq_ x t).imp_ (P.imp_ Q))) :
@@ -224,7 +224,7 @@ end
 
 theorem subalpha
   (P Q : formula)
-  (x y : variable_)
+  (x y : var_name)
   (h1 : ¬ is_free_in x Q)
   (h2 : ¬ is_free_in y P)
   (h3 : is_proof ((eq_ x y).imp_ (P.imp_ Q))) :
@@ -259,10 +259,10 @@ end
 
 lemma eq_imp_map
   (P : formula)
-  (v t : variable_)
-  (args : list variable_)
-  (σ : variable_ → variable_) :
-  is_proof ((list.foldr imp_ P (list.map (fun (x : variable_), eq_ x (ite (x = v) t x)) args)).imp_ ((eq_ v t).imp_ P)) :=
+  (v t : var_name)
+  (args : list var_name)
+  (σ : var_name → var_name) :
+  is_proof ((list.foldr imp_ P (list.map (fun (x : var_name), eq_ x (ite (x = v) t x)) args)).imp_ ((eq_ v t).imp_ P)) :=
 begin
   induction args,
   case list.nil
@@ -294,7 +294,7 @@ end
 
 lemma aux_12
   (P P' : formula)
-  (x y z : variable_)
+  (x y z : var_name)
   (h1 : (¬is_free_in z (eq_ x y))) 
   (h2 : is_proof ((eq_ x y).imp_ (P.imp_ P'))) :
   is_proof ((eq_ x y).imp_ ((forall_ z P).imp_ (forall_ z P'))) :=
@@ -324,9 +324,9 @@ end
 
 
 example
-  (v t : variable_)
+  (v t : var_name)
   (P : formula)
-  (binders : finset variable_)
+  (binders : finset var_name)
   (h1 : ¬ v = t)
   (h2 : fast_admits_aux v t binders P) :
   is_proof ((eq_ v t).imp_ (P.imp_ (fast_replace_free v t P))) :=
@@ -338,13 +338,13 @@ begin
   {
     unfold fast_replace_free,
 
-    set σ := fun (x : variable_), ite (x = v) t x,
+    set σ := fun (x : var_name), ite (x = v) t x,
 
     obtain s1 := is_proof.eq_3_ name args (args.map σ),
     simp only [list.length_map, eq_self_iff_true, forall_true_left] at s1,
     simp only [list_map₂_of_map] at s1,
 
-    apply is_proof.mp_ (list.foldr imp_ ((pred_ name args).imp_ (pred_ name (list.map σ args))) (list.map (fun (x : variable_), eq_ x (σ x)) args)),
+    apply is_proof.mp_ (list.foldr imp_ ((pred_ name args).imp_ (pred_ name (list.map σ args))) (list.map (fun (x : var_name), eq_ x (σ x)) args)),
     {
       exact eq_imp_map ((pred_ name args).imp_ (pred_ name (list.map σ args))) v t args σ,
     },
@@ -412,7 +412,7 @@ end
 
 example
   (P : formula)
-  (v t : variable_)
+  (v t : var_name)
   (h1 : fast_admits v t P)
   (h2 : ¬ (v = t)) :
   is_proof ((forall_ v P).imp_ (fast_replace_free v t P)) :=

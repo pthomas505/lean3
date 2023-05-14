@@ -11,40 +11,40 @@ open formula
 /--
   is_free_sub P v t P' := True if and only if P' is the result of replacing in P each free occurrence of v by a free occurrence of t.
 -/
-inductive is_free_sub : formula → variable_ → variable_ → formula → Prop
+inductive is_free_sub : formula → var_name → var_name → formula → Prop
 | true_
-  (v t : variable_) :
+  (v t : var_name) :
   is_free_sub true_ v t true_
 
 | pred_
-  (name : pred_name_) (args : list variable_)
-  (v t : variable_) :
-    is_free_sub (pred_ name args) v t (pred_ name (args.map (fun (x : variable_), if x = v then t else x)))
+  (name : pred_name) (args : list var_name)
+  (v t : var_name) :
+    is_free_sub (pred_ name args) v t (pred_ name (args.map (fun (x : var_name), if x = v then t else x)))
 
 | not_
   (P : formula)
-  (v t : variable_)
+  (v t : var_name)
   (P' : formula) :
   is_free_sub P v t P' →
   is_free_sub P.not_ v t P'.not_
 
 | imp_
   (P Q : formula)
-  (v t : variable_)
+  (v t : var_name)
   (P' Q' : formula) :
   is_free_sub P v t P' →
   is_free_sub Q v t Q' →
   is_free_sub (P.imp_ Q) v t (P'.imp_ Q')
 
 | forall_not_free_in
-  (x : variable_) (P : formula)
-  (v t : variable_) :
+  (x : var_name) (P : formula)
+  (v t : var_name) :
   ¬ is_free_in v (forall_ x P) →
   is_free_sub (forall_ x P) v t (forall_ x P)
 
 | forall_free_in
-  (x : variable_) (P : formula)
-  (v t : variable_)
+  (x : var_name) (P : formula)
+  (v t : var_name)
   (P' : formula) :
   is_free_in v (forall_ x P) →
   ¬ x = t →
@@ -54,8 +54,8 @@ inductive is_free_sub : formula → variable_ → variable_ → formula → Prop
 
 lemma fast_admits_aux_and_fast_replace_free_imp_is_free_sub
   (P P' : formula)
-  (v u : variable_)
-  (binders : finset variable_)
+  (v u : var_name)
+  (binders : finset var_name)
   (h1 : fast_admits_aux v u binders P)
   (h2 : fast_replace_free v u P = P') :
   is_free_sub P v u P' :=
@@ -160,8 +160,8 @@ end
 
 lemma is_free_sub_imp_fast_admits_aux
   (P : formula)
-  (v u : variable_)
-  (binders : finset variable_)
+  (v u : var_name)
+  (binders : finset var_name)
   (h1 : ∃ (P' : formula), is_free_sub P v u P')
   (h2 : u ∉ binders) :
   fast_admits_aux v u binders P :=
@@ -238,7 +238,7 @@ end
 
 lemma is_free_sub_imp_fast_replace_free
   (P P' : formula)
-  (v u : variable_)
+  (v u : var_name)
   (h1 : is_free_sub P v u P') :
   fast_replace_free v u P = P' :=
 begin
@@ -309,7 +309,7 @@ end
 
 example
   (P P' : formula)
-  (v u : variable_) :
+  (v u : var_name) :
   is_free_sub P v u P' ↔
     (fast_admits v u P ∧ fast_replace_free v u P = P') :=
 begin
