@@ -215,8 +215,8 @@ end
 
 
 theorem is_bound_in_imp_occurs_in
-  (F : formula)
   (v : var_name)
+  (F : formula)
   (h1 : is_bound_in v F) :
   occurs_in v F :=
 begin
@@ -280,8 +280,8 @@ end
 
 
 theorem is_free_in_imp_occurs_in
-  (F : formula)
   (v : var_name)
+  (F : formula)
   (h1 : is_free_in v F) :
   occurs_in v F :=
 begin
