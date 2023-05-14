@@ -153,6 +153,7 @@ begin
     unfold admits_aux at h2,
 
     unfold fast_admits_aux,
+    squeeze_simp,
     by_cases c1 : v = x,
     {
       left,
@@ -184,13 +185,30 @@ begin
   case formula.true_ : binders h1
   {
     unfold admits_aux,
+    squeeze_simp,
   },
-  case [formula.pred_, formula.not_, formula.imp_]
+  case fol.formula.pred_ : X xs binders h1
   {
-    all_goals
+    unfold admits_aux,
+    squeeze_simp,
+    intros a1 a2,
+    contradiction,
+  },
+  case fol.formula.not_ : P P_ih binders h1
+  {
+    unfold admits_aux,
+    exact P_ih binders h1,
+  },
+  case fol.formula.imp_ : P Q P_ih Q_ih binders h1
+  {
+    unfold admits_aux,
+    squeeze_simp,
+    split,
     {
-      unfold admits_aux,
-      tauto,
+      exact P_ih binders h1,
+    },
+    {
+      exact Q_ih binders h1,
     }
   },
   case formula.forall_ : x P P_ih binders h1
