@@ -32,7 +32,8 @@ def formula.var_set : formula → finset var_name
 /--
   occurs_in v P := True if and only if there is an occurrence of the variable v in the formula P.
 -/
-def occurs_in (v : var_name) : formula → Prop
+@[derive decidable]
+def occurs_in (v : var_name) : formula → bool
 | (true_) := false
 | (pred_ name args) := v ∈ args.to_finset
 | (not_ P) := occurs_in P
@@ -53,7 +54,8 @@ def formula.bound_var_set : formula → finset var_name
 /--
   is_bound_in v P := True if and only if there is a bound occurrence of the variable v in the formula P.
 -/
-def is_bound_in (v : var_name) : formula → Prop
+@[derive decidable]
+def is_bound_in (v : var_name) : formula → bool
 | (true_) := false
 | (pred_ name args) := false
 | (not_ P) := is_bound_in P
@@ -74,12 +76,22 @@ def formula.free_var_set : formula → finset var_name
 /--
   is_free_in v P := True if and only if there is a free occurrence of the variable v in the formula P.
 -/
-def is_free_in (v : var_name) : formula → Prop
+@[derive decidable]
+def is_free_in (v : var_name) : formula → bool
 | (true_) := false
 | (pred_ name args) := v ∈ args.to_finset
 | (not_ P) := is_free_in P
 | (imp_ P Q) := is_free_in P ∨ is_free_in Q
 | (forall_ x P) := ¬ v = x ∧ is_free_in P
+
+
+@[derive decidable]
+def pred.occurs_in (P : pred_name) (n : ℕ) : formula → bool
+| true_ := ff
+| (pred_ X xs) := X = P ∧ xs.length = n
+| (not_ phi) := pred.occurs_in phi
+| (imp_ phi psi) := pred.occurs_in phi ∨ pred.occurs_in psi
+| (forall_ _ phi) := pred.occurs_in phi
 
 
 lemma occurs_in_iff_mem_var_set
@@ -88,9 +100,17 @@ lemma occurs_in_iff_mem_var_set
   occurs_in v P ↔ v ∈ P.var_set :=
 begin
   induction P,
-  case [formula.true_, formula.pred_]
+  case fol.formula.true_
   {
-    all_goals {refl},
+    unfold occurs_in,
+    unfold formula.var_set,
+    simp only [to_bool_false_eq_ff, coe_sort_ff, finset.not_mem_empty],
+  },
+  case fol.formula.pred_ : X xs
+  {
+    unfold occurs_in,
+    unfold formula.var_set,
+    simp only [bool.of_to_bool_iff],
   },
   case formula.not_ : P P_ih
   {
@@ -101,13 +121,14 @@ begin
     unfold occurs_in,
     unfold formula.var_set,
     simp only [finset.mem_union],
+    simp only [bool.of_to_bool_iff],
     tauto,
   },
   case formula.forall_ : x P P_ih
   {
     unfold occurs_in,
     unfold formula.var_set,
-    simp only [finset.mem_union, finset.mem_singleton],
+    simp only [bool.of_to_bool_iff, finset.mem_union, finset.mem_singleton],
     tauto,
   },
 end
@@ -119,9 +140,17 @@ lemma is_bound_in_iff_mem_bound_var_set
   is_bound_in v P ↔ v ∈ P.bound_var_set :=
 begin
   induction P,
-  case [formula.true_, formula.pred_]
+  case fol.formula.true_
   {
-    all_goals {refl},
+    unfold is_bound_in,
+    unfold formula.bound_var_set,
+    simp only [to_bool_false_eq_ff, coe_sort_ff, finset.not_mem_empty],
+  },
+  case fol.formula.pred_ : X xs
+  {
+    unfold is_bound_in,
+    unfold formula.bound_var_set,
+    simp only [to_bool_false_eq_ff, coe_sort_ff, finset.not_mem_empty],
   },
   case formula.not_ : P P_ih
   {
@@ -131,14 +160,14 @@ begin
   {
     unfold is_bound_in,
     unfold formula.bound_var_set,
-    simp only [finset.mem_union],
+    simp only [bool.of_to_bool_iff, finset.mem_union],
     tauto,
   },
   case formula.forall_ : x P P_ih
   {
     unfold is_bound_in,
     unfold formula.bound_var_set,
-    simp only [finset.mem_union, finset.mem_singleton],
+    simp only [bool.of_to_bool_iff, finset.mem_union, finset.mem_singleton],
     tauto,
   },
 end
@@ -150,9 +179,17 @@ lemma is_free_in_iff_mem_free_var_set
   is_free_in v P ↔ v ∈ P.free_var_set :=
 begin
   induction P,
-  case [formula.true_, formula.pred_ : name args]
+  case fol.formula.true_
   {
-    all_goals {refl},
+    unfold is_free_in,
+    unfold formula.free_var_set,
+    simp only [to_bool_false_eq_ff, coe_sort_ff, finset.not_mem_empty],
+  },
+  case fol.formula.pred_ : X xs
+  {
+    unfold is_free_in,
+    unfold formula.free_var_set,
+    simp only [bool.of_to_bool_iff],
   },
   case formula.not_ : P P_ih
   {
@@ -162,14 +199,14 @@ begin
   {
     unfold is_free_in,
     unfold formula.free_var_set,
-    simp only [finset.mem_union],
+    simp only [bool.of_to_bool_iff, finset.mem_union],
     tauto,
   },
   case formula.forall_ : x P P_ih
   {
     unfold is_free_in,
     unfold formula.free_var_set,
-    simp only [finset.mem_sdiff, finset.mem_singleton],
+    simp only [bool.of_to_bool_iff, finset.mem_sdiff, finset.mem_singleton],
     tauto,
   },
 end
@@ -181,10 +218,62 @@ theorem is_bound_in_imp_occurs_in
   (h1 : is_bound_in v P) :
   occurs_in v P :=
 begin
-  induction P;
-  unfold is_bound_in at h1;
-  unfold occurs_in;
-  tauto,
+  induction P,
+  case fol.formula.true_
+  {
+    unfold is_bound_in at h1,
+    squeeze_simp at h1,
+
+    contradiction,
+  },
+  case fol.formula.pred_ : X xs
+  {
+    unfold is_bound_in at h1,
+    squeeze_simp at h1,
+
+    contradiction,
+  },
+  case fol.formula.not_ : phi phi_ih
+  {
+    unfold is_bound_in at h1,
+
+    unfold occurs_in,
+    exact phi_ih h1,
+  },
+  case fol.formula.imp_ : phi psi phi_ih psi_ih
+  {
+    unfold is_bound_in at h1,
+    squeeze_simp at h1,
+
+    unfold occurs_in,
+    squeeze_simp,
+    cases h1,
+    {
+      left,
+      exact phi_ih h1,
+    },
+    {
+      right,
+      exact psi_ih h1,
+    }
+  },
+  case fol.formula.forall_ : x phi phi_ih
+  {
+    unfold is_bound_in at h1,
+    squeeze_simp at h1,
+
+    unfold occurs_in,
+    squeeze_simp,
+    cases h1,
+    {
+      left,
+      exact h1,
+    },
+    {
+      right,
+      exact phi_ih h1,
+    }
+  },
 end
 
 
@@ -194,10 +283,58 @@ theorem is_free_in_imp_occurs_in
   (h1 : is_free_in v P) :
   occurs_in v P :=
 begin
-  induction P;
-  unfold is_free_in at h1;
-  unfold occurs_in;
-  tauto,
+  induction P,
+  case fol.formula.true_
+  {
+    unfold is_free_in at h1,
+    squeeze_simp at h1,
+
+    contradiction,
+  },
+  case fol.formula.pred_ : X xs
+  {
+    unfold is_free_in at h1,
+    squeeze_simp at h1,
+
+    unfold occurs_in,
+    squeeze_simp,
+    exact h1,
+  },
+  case fol.formula.not_ : phi phi_ih
+  {
+    unfold is_free_in at h1,
+
+    unfold occurs_in,
+    exact phi_ih h1,
+  },
+  case fol.formula.imp_ : phi psi phi_ih psi_ih
+  {
+    unfold is_free_in at h1,
+    squeeze_simp at h1,
+
+    unfold occurs_in,
+    squeeze_simp,
+    cases h1,
+    {
+      left,
+      exact phi_ih h1,
+    },
+    {
+      right,
+      exact psi_ih h1,
+    }
+  },
+  case fol.formula.forall_ : x phi phi_ih
+  {
+    unfold is_free_in at h1,
+    squeeze_simp at h1,
+    cases h1,
+
+    unfold occurs_in,
+    squeeze_simp,
+    right,
+    exact phi_ih h1_right,
+  },
 end
 
 
