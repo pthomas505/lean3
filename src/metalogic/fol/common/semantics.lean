@@ -34,7 +34,18 @@ structure interpretation (D : Type) : Type :=
 (nonempty : nonempty D)
 (pred : string → (list D → Prop))
 
+instance (D : Type) [nonempty D] : inhabited (interpretation D) :=
+inhabited.mk
+⟨
+  by apply_instance,
+  fun (P : string) (ds : list D), prop.inhabited.default
+⟩
+
+
+--@[derive inhabited]
 def valuation (D : Type) := string → D
+
+instance (D : Type) [inhabited D] : inhabited (valuation D) := by unfold valuation; apply_instance
 
 
 def holds (D : Type) (I : interpretation D) : valuation D → formula → Prop
