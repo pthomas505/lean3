@@ -23,7 +23,7 @@ An occurrence of a variable $v$ in a formula $P$ is bound if and only if it occu
   formula.var_set P := The set of all of the variables that have an occurrence in the formula P.
 -/
 def formula.var_set : formula → finset var_name
-| (true_) := ∅
+| true_ := ∅
 | (pred_ name args) := args.to_finset
 | (not_ P) := P.var_set
 | (imp_ P Q) := P.var_set ∪ Q.var_set
@@ -34,7 +34,7 @@ def formula.var_set : formula → finset var_name
 -/
 @[derive decidable]
 def occurs_in (v : var_name) : formula → bool
-| (true_) := false
+| true_ := false
 | (pred_ name args) := v ∈ args.to_finset
 | (not_ P) := occurs_in P
 | (imp_ P Q) := occurs_in P ∨ occurs_in Q
@@ -45,7 +45,7 @@ def occurs_in (v : var_name) : formula → bool
   formula.bound_var_set P := The set of all of the variables that have a bound occurrence in the formula P.
 -/
 def formula.bound_var_set : formula → finset var_name
-| (true_) := ∅
+| true_ := ∅
 | (pred_ name args) := ∅
 | (not_ P) := P.bound_var_set
 | (imp_ P Q) := P.bound_var_set ∪ Q.bound_var_set
@@ -56,7 +56,7 @@ def formula.bound_var_set : formula → finset var_name
 -/
 @[derive decidable]
 def is_bound_in (v : var_name) : formula → bool
-| (true_) := false
+| true_ := false
 | (pred_ name args) := false
 | (not_ P) := is_bound_in P
 | (imp_ P Q) := is_bound_in P ∨ is_bound_in Q
@@ -67,7 +67,7 @@ def is_bound_in (v : var_name) : formula → bool
   formula.free_var_set P := The set of all of the variables that have a free occurrence in the formula P.
 -/
 def formula.free_var_set : formula → finset var_name
-| (true_) := ∅
+| true_ := ∅
 | (pred_ name args) := args.to_finset
 | (not_ P) := P.free_var_set
 | (imp_ P Q) := P.free_var_set ∪ Q.free_var_set
@@ -78,7 +78,7 @@ def formula.free_var_set : formula → finset var_name
 -/
 @[derive decidable]
 def is_free_in (v : var_name) : formula → bool
-| (true_) := false
+| true_ := false
 | (pred_ name args) := v ∈ args.to_finset
 | (not_ P) := is_free_in P
 | (imp_ P Q) := is_free_in P ∨ is_free_in Q
