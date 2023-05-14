@@ -224,14 +224,14 @@ begin
   case fol.formula.true_
   {
     unfold is_bound_in at h1,
-    squeeze_simp at h1,
+    simp only [to_bool_false_eq_ff, coe_sort_ff] at h1,
 
     contradiction,
   },
   case fol.formula.pred_ : X xs
   {
     unfold is_bound_in at h1,
-    squeeze_simp at h1,
+    simp only [to_bool_false_eq_ff, coe_sort_ff] at h1,
 
     contradiction,
   },
@@ -245,10 +245,10 @@ begin
   case fol.formula.imp_ : phi psi phi_ih psi_ih
   {
     unfold is_bound_in at h1,
-    squeeze_simp at h1,
+    simp only [bool.of_to_bool_iff] at h1,
 
     unfold occurs_in,
-    squeeze_simp,
+    simp only [bool.of_to_bool_iff],
     cases h1,
     {
       left,
@@ -262,10 +262,10 @@ begin
   case fol.formula.forall_ : x phi phi_ih
   {
     unfold is_bound_in at h1,
-    squeeze_simp at h1,
+    simp only [bool.of_to_bool_iff] at h1,
 
     unfold occurs_in,
-    squeeze_simp,
+    simp only [bool.of_to_bool_iff],
     cases h1,
     {
       left,
@@ -289,17 +289,17 @@ begin
   case fol.formula.true_
   {
     unfold is_free_in at h1,
-    squeeze_simp at h1,
+    simp only [to_bool_false_eq_ff, coe_sort_ff] at h1,
 
     contradiction,
   },
   case fol.formula.pred_ : X xs
   {
     unfold is_free_in at h1,
-    squeeze_simp at h1,
+    simp only [list.mem_to_finset, bool.of_to_bool_iff] at h1,
 
     unfold occurs_in,
-    squeeze_simp,
+    simp only [list.mem_to_finset, bool.of_to_bool_iff],
     exact h1,
   },
   case fol.formula.not_ : phi phi_ih
@@ -312,10 +312,10 @@ begin
   case fol.formula.imp_ : phi psi phi_ih psi_ih
   {
     unfold is_free_in at h1,
-    squeeze_simp at h1,
+    simp only [bool.of_to_bool_iff] at h1,
 
     unfold occurs_in,
-    squeeze_simp,
+    simp only [bool.of_to_bool_iff],
     cases h1,
     {
       left,
@@ -329,11 +329,11 @@ begin
   case fol.formula.forall_ : x phi phi_ih
   {
     unfold is_free_in at h1,
-    squeeze_simp at h1,
+    simp only [bool.of_to_bool_iff] at h1,
     cases h1,
 
     unfold occurs_in,
-    squeeze_simp,
+    simp only [bool.of_to_bool_iff],
     right,
     exact phi_ih h1_right,
   },
