@@ -62,28 +62,28 @@ def formula.false_ : formula :=
   not_ true_
 
 /--
-  P ∨ Q := ~ P → Q
+  phi ∨ Q := ~ phi → Q
 -/
-def formula.or_ (P Q : formula) : formula :=
-  (not_ P).imp_ Q
+def formula.or_ (phi Q : formula) : formula :=
+  (not_ phi).imp_ Q
 
 /--
-P ∧ Q := ~ ( P → ~ Q )
+phi ∧ Q := ~ ( phi → ~ Q )
 -/
-def formula.and_ (P Q : formula) : formula :=
-  not_ (P.imp_ (not_ Q))
+def formula.and_ (phi Q : formula) : formula :=
+  not_ (phi.imp_ (not_ Q))
 
 /--
-  P ↔ Q := ( P → Q ) ∧ ( Q → P )
+  phi ↔ Q := ( phi → Q ) ∧ ( Q → phi )
 -/
-def formula.iff_ (P Q : formula) : formula :=
-  (P.imp_ Q).and_ (Q.imp_ P)
+def formula.iff_ (phi Q : formula) : formula :=
+  (phi.imp_ Q).and_ (Q.imp_ phi)
 
 /--
-  ∃ x P := ~ ∀ x ~ P
+  ∃ x phi := ~ ∀ x ~ phi
 -/
-def formula.exists_ (x : var_name) (P : formula) : formula :=
-  not_ (forall_ x (not_ P))
+def formula.exists_ (x : var_name) (phi : formula) : formula :=
+  not_ (forall_ x (not_ phi))
 
 
 /--
@@ -103,9 +103,9 @@ def formula.mem_ (x y : var_name) : formula :=
 /--
   Imp_ [] := ⊤
 
-  Imp_ [P] := P → ⊤
+  Imp_ [phi] := phi → ⊤
 
-  Imp_ [P_0 ... P_n] := P_0 → ... → P_n → ⊤
+  Imp_ [phi_0 ... phi_n] := phi_0 → ... → phi_n → ⊤
 -/
 def formula.Imp_ (l : list formula) : formula :=
   list.foldr formula.imp_ true_ l
@@ -114,9 +114,9 @@ def formula.Imp_ (l : list formula) : formula :=
 /--
   And_ [] := ⊤
 
-  And_ [P] := P ∧ ⊤
+  And_ [phi] := phi ∧ ⊤
 
-  And_ [P_0 ... P_n] := P_0 ∧ ... ∧ P_n ∧ ⊤
+  And_ [phi_0 ... phi_n] := phi_0 ∧ ... ∧ phi_n ∧ ⊤
 -/
 def formula.And_ (l : list formula) : formula :=
   list.foldr formula.and_ true_ l
@@ -125,26 +125,26 @@ def formula.And_ (l : list formula) : formula :=
 /--
   Or_ [] := ⊥
 
-  Or_ [P] := P ∨ ⊥
+  Or_ [phi] := phi ∨ ⊥
 
-  Or_ [P_0 ... P_n] := P_0 ∧ ... ∧ P_n ∧ ⊥
+  Or_ [phi_0 ... phi_n] := phi_0 ∧ ... ∧ phi_n ∧ ⊥
 -/
 def formula.Or_ (l : list formula) : formula :=
   list.foldr formula.or_ formula.false_ l
 
 
 /--
-  Forall_ [x_0 ... x_n] P := ∀ x_0 ... ∀ x_n P
+  Forall_ [x_0 ... x_n] phi := ∀ x_0 ... ∀ x_n phi
 -/
-def formula.Forall_ (xs : list var_name) (P : formula) : formula :=
-  list.foldr formula.forall_ P xs
+def formula.Forall_ (xs : list var_name) (phi : formula) : formula :=
+  list.foldr formula.forall_ phi xs
 
 
 /--
-  Exists_ [x_0 ... x_n] P := ∃ x_0 ... ∃ x_n P
+  Exists_ [x_0 ... x_n] phi := ∃ x_0 ... ∃ x_n phi
 -/
-def formula.Exists_ (xs : list var_name) (P : formula) : formula :=
-  list.foldr formula.exists_ P xs
+def formula.Exists_ (xs : list var_name) (phi : formula) : formula :=
+  list.foldr formula.exists_ phi xs
 
 
 /--
@@ -161,9 +161,9 @@ instance formula.has_repr : has_repr formula :=
   has_repr.mk formula.repr
 
 
-#eval formula.And_ [pred_ (pred_name.mk "P") [], pred_ (pred_name.mk "Q") []]
+#eval formula.And_ [pred_ (pred_name.mk "X") [], pred_ (pred_name.mk "Y") []]
 
-#eval formula.Forall_ [(var_name.mk "x"), (var_name.mk "y")] (formula.pred_ (pred_name.mk "P") [])
+#eval formula.Forall_ [(var_name.mk "x"), (var_name.mk "y")] (formula.pred_ (pred_name.mk "phi") [])
 
 
 #lint
