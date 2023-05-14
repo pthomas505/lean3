@@ -20,75 +20,75 @@ An occurrence of a variable $v$ in a formula $P$ is bound if and only if it occu
 
 
 /--
-  formula.var_set P := The set of all of the variables that have an occurrence in the formula P.
+  formula.var_set phi := The set of all of the variables that have an occurrence in the formula phi.
 -/
 def formula.var_set : formula → finset var_name
 | true_ := ∅
 | (pred_ _ xs) := xs.to_finset
-| (not_ P) := P.var_set
-| (imp_ P Q) := P.var_set ∪ Q.var_set
-| (forall_ x P) := P.var_set ∪ {x}
+| (not_ phi) := phi.var_set
+| (imp_ phi psi) := phi.var_set ∪ psi.var_set
+| (forall_ x phi) := phi.var_set ∪ {x}
 
 /--
-  occurs_in v P := True if and only if there is an occurrence of the variable v in the formula P.
+  occurs_in v phi := True if and only if there is an occurrence of the variable v in the formula phi.
 -/
 @[derive decidable]
 def occurs_in (v : var_name) : formula → bool
 | true_ := false
 | (pred_ _ xs) := v ∈ xs.to_finset
-| (not_ P) := occurs_in P
-| (imp_ P Q) := occurs_in P ∨ occurs_in Q
-| (forall_ x P) := v = x ∨ occurs_in P
+| (not_ phi) := occurs_in phi
+| (imp_ phi psi) := occurs_in phi ∨ occurs_in psi
+| (forall_ x phi) := v = x ∨ occurs_in phi
 
 
 /--
-  formula.bound_var_set P := The set of all of the variables that have a bound occurrence in the formula P.
+  formula.bound_var_set phi := The set of all of the variables that have a bound occurrence in the formula phi.
 -/
 def formula.bound_var_set : formula → finset var_name
 | true_ := ∅
 | (pred_ _ _) := ∅
-| (not_ P) := P.bound_var_set
-| (imp_ P Q) := P.bound_var_set ∪ Q.bound_var_set
-| (forall_ x P) := P.bound_var_set ∪ {x}
+| (not_ phi) := phi.bound_var_set
+| (imp_ phi psi) := phi.bound_var_set ∪ psi.bound_var_set
+| (forall_ x phi) := phi.bound_var_set ∪ {x}
 
 /--
-  is_bound_in v P := True if and only if there is a bound occurrence of the variable v in the formula P.
+  is_bound_in v phi := True if and only if there is a bound occurrence of the variable v in the formula phi.
 -/
 @[derive decidable]
 def is_bound_in (v : var_name) : formula → bool
 | true_ := false
 | (pred_ _ _) := false
-| (not_ P) := is_bound_in P
-| (imp_ P Q) := is_bound_in P ∨ is_bound_in Q
-| (forall_ x P) := v = x ∨ is_bound_in P
+| (not_ phi) := is_bound_in phi
+| (imp_ phi psi) := is_bound_in phi ∨ is_bound_in psi
+| (forall_ x phi) := v = x ∨ is_bound_in phi
 
 
 /--
-  formula.free_var_set P := The set of all of the variables that have a free occurrence in the formula P.
+  formula.free_var_set phi := The set of all of the variables that have a free occurrence in the formula phi.
 -/
 def formula.free_var_set : formula → finset var_name
 | true_ := ∅
 | (pred_ _ xs) := xs.to_finset
-| (not_ P) := P.free_var_set
-| (imp_ P Q) := P.free_var_set ∪ Q.free_var_set
-| (forall_ x P) := P.free_var_set \ {x}
+| (not_ phi) := phi.free_var_set
+| (imp_ phi psi) := phi.free_var_set ∪ psi.free_var_set
+| (forall_ x phi) := phi.free_var_set \ {x}
 
 /--
-  is_free_in v P := True if and only if there is a free occurrence of the variable v in the formula P.
+  is_free_in v phi := True if and only if there is a free occurrence of the variable v in the formula phi.
 -/
 @[derive decidable]
 def is_free_in (v : var_name) : formula → bool
 | true_ := false
 | (pred_ _ xs) := v ∈ xs.to_finset
-| (not_ P) := is_free_in P
-| (imp_ P Q) := is_free_in P ∨ is_free_in Q
-| (forall_ x P) := ¬ v = x ∧ is_free_in P
+| (not_ phi) := is_free_in phi
+| (imp_ phi psi) := is_free_in phi ∨ is_free_in psi
+| (forall_ x phi) := ¬ v = x ∧ is_free_in phi
 
 
 @[derive decidable]
-def pred.occurs_in (P : pred_name) (n : ℕ) : formula → bool
+def pred.occurs_in (phi : pred_name) (n : ℕ) : formula → bool
 | true_ := ff
-| (pred_ X xs) := X = P ∧ xs.length = n
+| (pred_ X xs) := X = phi ∧ xs.length = n
 | (not_ phi) := pred.occurs_in phi
 | (imp_ phi psi) := pred.occurs_in phi ∨ pred.occurs_in psi
 | (forall_ _ phi) := pred.occurs_in phi
@@ -96,10 +96,10 @@ def pred.occurs_in (P : pred_name) (n : ℕ) : formula → bool
 
 lemma occurs_in_iff_mem_var_set
   (v : var_name)
-  (P : formula) :
-  occurs_in v P ↔ v ∈ P.var_set :=
+  (phi : formula) :
+  occurs_in v phi ↔ v ∈ phi.var_set :=
 begin
-  induction P,
+  induction phi,
   case fol.formula.true_
   {
     unfold occurs_in,
@@ -112,11 +112,11 @@ begin
     unfold formula.var_set,
     simp only [bool.of_to_bool_iff],
   },
-  case formula.not_ : P P_ih
+  case formula.not_ : phi phi_ih
   {
     assumption,
   },
-  case formula.imp_ : P Q P_ih Q_ih
+  case formula.imp_ : phi psi phi_ih psi_ih
   {
     unfold occurs_in,
     unfold formula.var_set,
@@ -124,7 +124,7 @@ begin
     simp only [bool.of_to_bool_iff],
     tauto,
   },
-  case formula.forall_ : x P P_ih
+  case formula.forall_ : x phi phi_ih
   {
     unfold occurs_in,
     unfold formula.var_set,
@@ -136,10 +136,10 @@ end
 
 lemma is_bound_in_iff_mem_bound_var_set
   (v : var_name)
-  (P : formula) :
-  is_bound_in v P ↔ v ∈ P.bound_var_set :=
+  (phi : formula) :
+  is_bound_in v phi ↔ v ∈ phi.bound_var_set :=
 begin
-  induction P,
+  induction phi,
   case fol.formula.true_
   {
     unfold is_bound_in,
@@ -152,18 +152,18 @@ begin
     unfold formula.bound_var_set,
     simp only [to_bool_false_eq_ff, coe_sort_ff, finset.not_mem_empty],
   },
-  case formula.not_ : P P_ih
+  case formula.not_ : phi phi_ih
   {
     assumption,
   },
-  case formula.imp_ : P Q P_ih Q_ih
+  case formula.imp_ : phi psi phi_ih psi_ih
   {
     unfold is_bound_in,
     unfold formula.bound_var_set,
     simp only [bool.of_to_bool_iff, finset.mem_union],
     tauto,
   },
-  case formula.forall_ : x P P_ih
+  case formula.forall_ : x phi phi_ih
   {
     unfold is_bound_in,
     unfold formula.bound_var_set,
@@ -175,10 +175,10 @@ end
 
 lemma is_free_in_iff_mem_free_var_set
   (v : var_name)
-  (P : formula) :
-  is_free_in v P ↔ v ∈ P.free_var_set :=
+  (phi : formula) :
+  is_free_in v phi ↔ v ∈ phi.free_var_set :=
 begin
-  induction P,
+  induction phi,
   case fol.formula.true_
   {
     unfold is_free_in,
@@ -191,18 +191,18 @@ begin
     unfold formula.free_var_set,
     simp only [bool.of_to_bool_iff],
   },
-  case formula.not_ : P P_ih
+  case formula.not_ : phi phi_ih
   {
     assumption,
   },
-  case formula.imp_ : P Q P_ih Q_ih
+  case formula.imp_ : phi psi phi_ih psi_ih
   {
     unfold is_free_in,
     unfold formula.free_var_set,
     simp only [bool.of_to_bool_iff, finset.mem_union],
     tauto,
   },
-  case formula.forall_ : x P P_ih
+  case formula.forall_ : x phi phi_ih
   {
     unfold is_free_in,
     unfold formula.free_var_set,
@@ -213,12 +213,12 @@ end
 
 
 theorem is_bound_in_imp_occurs_in
-  (P : formula)
+  (phi : formula)
   (v : var_name)
-  (h1 : is_bound_in v P) :
-  occurs_in v P :=
+  (h1 : is_bound_in v phi) :
+  occurs_in v phi :=
 begin
-  induction P,
+  induction phi,
   case fol.formula.true_
   {
     unfold is_bound_in at h1,
@@ -278,12 +278,12 @@ end
 
 
 theorem is_free_in_imp_occurs_in
-  (P : formula)
+  (phi : formula)
   (v : var_name)
-  (h1 : is_free_in v P) :
-  occurs_in v P :=
+  (h1 : is_free_in v phi) :
+  occurs_in v phi :=
 begin
-  induction P,
+  induction phi,
   case fol.formula.true_
   {
     unfold is_free_in at h1,
