@@ -42,7 +42,6 @@ inhabited.mk
 ⟩
 
 
---@[derive inhabited]
 def valuation (D : Type) := string → D
 
 instance (D : Type) [inhabited D] : inhabited (valuation D) := by unfold valuation; apply_instance
