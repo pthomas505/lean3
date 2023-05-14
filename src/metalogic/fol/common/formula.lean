@@ -62,13 +62,13 @@ def formula.false_ : formula :=
   not_ true_
 
 /--
-  phi ∨ psi := ~ phi → psi
+  phi ∨ psi := ¬ phi → psi
 -/
 def formula.or_ (phi psi : formula) : formula :=
   (not_ phi).imp_ psi
 
 /--
-phi ∧ psi := ~ ( phi → ~ psi )
+phi ∧ psi := ¬ ( phi → ¬ psi )
 -/
 def formula.and_ (phi psi : formula) : formula :=
   not_ (phi.imp_ (not_ psi))
@@ -80,7 +80,7 @@ def formula.iff_ (phi psi : formula) : formula :=
   (phi.imp_ psi).and_ (psi.imp_ phi)
 
 /--
-  ∃ x phi := ~ ∀ x ~ phi
+  ∃ x phi := ¬ ∀ x ¬ phi
 -/
 def formula.exists_ (x : var_name) (phi : formula) : formula :=
   not_ (forall_ x (not_ phi))
