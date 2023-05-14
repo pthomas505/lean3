@@ -152,10 +152,10 @@ def formula.Exists_ (xs : list var_name) (P : formula) : formula :=
 -/
 def formula.repr : formula → string
 | true_ := "⊤"
-| (pred_ name args) := sformat!"({name.repr} {args.repr})"
-| (not_ P) := sformat!"(¬ {P.repr})"
-| (imp_ P Q) := sformat!"({P.repr} → {Q.repr})"
-| (forall_ x P) := sformat!"(∀ {x.repr}. {P.repr})"
+| (pred_ X xs) := sformat!"({X.repr} {xs.repr})"
+| (not_ phi) := sformat!"(¬ {phi.repr})"
+| (imp_ phi psi) := sformat!"({phi.repr} → {psi.repr})"
+| (forall_ x phi) := sformat!"(∀ {x.repr}. {phi.repr})"
 
 instance formula.has_repr : has_repr formula :=
   has_repr.mk formula.repr
