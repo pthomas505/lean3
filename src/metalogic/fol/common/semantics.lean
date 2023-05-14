@@ -232,6 +232,10 @@ end
 
 -- variable substitution
 
+
+/--
+  The recursive simultaneous uniform substitution of all of the individual variables in a formula.
+-/
 def fast_replace_free_fun : (string → string) → formula → formula
 | _ true_ := true_
 | σ (pred_ X xs) := pred_ X (xs.map σ)
@@ -422,6 +426,9 @@ end
 
 -- proposition substitution
 
+/--
+  The recursive simultaneous uniform substitution of all of the propositional variables in a formula.
+-/
 def replace_prop_fun
   (τ : string → string) : formula → formula
 | true_ := true_
@@ -522,6 +529,9 @@ end
 
 -- https://math.stackexchange.com/a/1374989
 
+/--
+  The recursive simultaneous uniform substitution of a single predicate variable in a formula.
+-/
 def replace_pred
   (P : string) (zs : list string) (H : formula) : formula → formula
 | true_ := true_
@@ -709,6 +719,8 @@ end
 
 
 /--
+  The inductive simultaneous uniform substitution of a single predicate variable in a formula.
+
   is_pred_sub A P zs H B := The formula A is said to be transformed into the formula B by a substitution of H* for P z₁ ... zₙ, abbreviated: Sub A (P zⁿ / H*) B, iff B is obtained from A upon replacing in A each occurrence of a derivative of the name form P z₁ ... zₙ by the corresponding derivative of the substituend H*, provided that: (i) P does not occur in a component formula (∀ x A₁) of A if x is a parameter of H*, and (ii) the name variable zₖ, k = 1, ..., n, is not free in a component formula (∀ x H) of H* if P t₁ ... tₙ occurs in A with x occurring in tₖ. If conditions (i) and (ii) are not satisfied, then the indicated substitution for predicate variables is left undefined.
 -/
 inductive is_pred_sub (P : string) (zs : list string) (H : formula) : formula → formula → Prop
@@ -925,6 +937,9 @@ end
 
 -- multiple
 
+/--
+  The recursive simultaneous uniform substitution of all of the predicate variables in a formula.
+-/
 def replace_pred_fun
   (τ : string → ℕ → list string × formula) : formula → formula
 | true_ := true_
