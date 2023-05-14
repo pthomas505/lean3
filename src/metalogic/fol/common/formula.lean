@@ -8,7 +8,7 @@ namespace fol
 
 
 /--
-  The type of variables.
+  The type of variable names.
 -/
 @[derive [inhabited, decidable_eq]]
 inductive var_name : Type
@@ -16,7 +16,7 @@ inductive var_name : Type
 
 
 /--
-  The string representation of variables.
+  The string representation of variable names.
 -/
 def var_name.repr : var_name → string
 | (var_name.mk name) := name
@@ -53,6 +53,20 @@ inductive formula : Type
 | forall_ : var_name → formula → formula
 
 open formula
+
+
+/--
+  The string representation of formulas.
+-/
+def formula.repr : formula → string
+| true_ := "⊤"
+| (pred_ X xs) := sformat!"({X.repr} {xs.repr})"
+| (not_ phi) := sformat!"(¬ {phi.repr})"
+| (imp_ phi psi) := sformat!"({phi.repr} → {psi.repr})"
+| (forall_ x phi) := sformat!"(∀ {x.repr}. {phi.repr})"
+
+instance formula.has_repr : has_repr formula :=
+  has_repr.mk formula.repr
 
 
 /--
@@ -145,20 +159,6 @@ def formula.Forall_ (xs : list var_name) (phi : formula) : formula :=
 -/
 def formula.Exists_ (xs : list var_name) (phi : formula) : formula :=
   list.foldr formula.exists_ phi xs
-
-
-/--
-  The string representation of formulas.
--/
-def formula.repr : formula → string
-| true_ := "⊤"
-| (pred_ X xs) := sformat!"({X.repr} {xs.repr})"
-| (not_ phi) := sformat!"(¬ {phi.repr})"
-| (imp_ phi psi) := sformat!"({phi.repr} → {psi.repr})"
-| (forall_ x phi) := sformat!"(∀ {x.repr}. {phi.repr})"
-
-instance formula.has_repr : has_repr formula :=
-  has_repr.mk formula.repr
 
 
 #eval formula.And_ [pred_ (pred_name.mk "X") [], pred_ (pred_name.mk "Y") []]
