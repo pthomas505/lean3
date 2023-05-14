@@ -21,7 +21,8 @@ If $v$ and $u$ are variables and $P$ is a formula, then $P$ admits $u$ for $v$ i
 /--
   Helper function for admits.
 -/
-def admits_aux (v u : var_name) : finset var_name → formula → Prop
+@[derive decidable]
+def admits_aux (v u : var_name) : finset var_name → formula → bool
 | _ true_ := true
 | binders (pred_ name args) :=
     (v ∈ args ∧ v ∉ binders) → -- if there is a free occurrence of v in P
@@ -44,7 +45,8 @@ def admits (v u : var_name) (P : formula) : Prop :=
 /--
   Helper function for fast_admits.
 -/
-def fast_admits_aux (v u : var_name) : finset var_name → formula → Prop
+@[derive decidable]
+def fast_admits_aux (v u : var_name) : finset var_name → formula → bool
 | _ true_ := true
 | binders (pred_ name args) :=
     v ∈ args → -- if there is a free occurrence of v in P
@@ -62,7 +64,8 @@ def fast_admits_aux (v u : var_name) : finset var_name → formula → Prop
 
   This is a more efficient version of admits.
 -/
-def fast_admits (v u : var_name) (P : formula) : Prop :=
+@[derive decidable]
+def fast_admits (v u : var_name) (P : formula) : bool :=
   fast_admits_aux v u ∅ P
 
 
@@ -110,16 +113,40 @@ begin
   case formula.true_ : binders h1 h2
   {
     unfold fast_admits_aux,
+    simp only [to_bool_true_eq_tt, coe_sort_tt],
   },
-  case [formula.pred_, formula.not_, formula.imp_]
+  case fol.formula.pred_ : X xs binders h1 h2
   {
-    all_goals
-    {
-      unfold admits_aux at h2,
+    unfold admits_aux at h2,
+    squeeze_simp at h2,
 
-      unfold fast_admits_aux,
-      tauto,
+    unfold fast_admits_aux,
+    squeeze_simp,
+    intros a1,
+    exact h2 a1 h1,
+  },
+  case fol.formula.not_ : P P_ih binders h1 h2
+  {
+    unfold admits_aux at h2,
+
+    unfold fast_admits_aux,
+    exact P_ih binders h1 h2,
+  },
+  case fol.formula.imp_ : P Q P_ih Q_ih binders h1 h2
+  {
+    unfold admits_aux at h2,
+    squeeze_simp at h2,
+    cases h2,
+
+    unfold fast_admits_aux,
+    squeeze_simp,
+    split,
+    {
+      exact P_ih binders h1 h2_left,
     },
+    {
+      exact Q_ih binders h1 h2_right,
+    }
   },
   case formula.forall_ : x P P_ih binders h1 h2
   {

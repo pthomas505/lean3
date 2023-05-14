@@ -262,7 +262,7 @@ begin
   case formula.pred_ : name args
   {
     unfold is_free_in at h1,
-    simp only [list.mem_to_finset] at h1,
+    simp only [list.mem_to_finset, bool.of_to_bool_iff] at h1,
 
     unfold fast_replace_free,
     congr,
@@ -278,6 +278,7 @@ begin
   case formula.imp_ : P Q P_ih Q_ih
   {
     unfold is_free_in at h1,
+    simp only [bool.of_to_bool_iff] at h1,
     push_neg at h1,
     cases h1,
 
@@ -293,11 +294,13 @@ begin
   case formula.forall_ : x P P_ih
   {
     unfold is_free_in at h1,
-    push_neg at h1,
+    simp only [bool.of_to_bool_iff, not_and] at h1,
 
     unfold fast_replace_free,
     simp only [ite_eq_left_iff, eq_self_iff_true, true_and],
-    tauto,
+    intros a1,
+    apply P_ih,
+    exact h1 a1,
   },
 end
 
@@ -316,7 +319,7 @@ begin
   case formula.pred_ : name args
   {
     unfold occurs_in at h1,
-    simp only [list.mem_to_finset] at h1,
+    simp only [list.mem_to_finset, bool.of_to_bool_iff] at h1,
 
     unfold fast_replace_free,
     congr,
@@ -343,6 +346,7 @@ begin
   case formula.imp_ : P Q P_ih Q_ih
   {
     unfold occurs_in at h1,
+    simp only [bool.of_to_bool_iff] at h1,
     push_neg at h1,
     cases h1,
 
@@ -358,6 +362,7 @@ begin
   case formula.forall_ : x P P_ih
   {
     unfold occurs_in at h1,
+    simp only [bool.of_to_bool_iff] at h1,
     push_neg at h1,
     cases h1,
 
@@ -368,7 +373,7 @@ begin
       simp [if_neg h1_left],
       apply not_free_in_fast_replace_free_self,
       contrapose! h1_right,
-      exact is_free_in_imp_occurs_in P t h1_right,
+      exact is_free_in_imp_occurs_in t P h1_right,
     },
     {
       unfold fast_replace_free,
@@ -388,14 +393,15 @@ begin
   induction P,
   case formula.true_
   {
-    intros a1,
-    assumption,
+    unfold fast_replace_free,
+    unfold is_free_in,
+    simp only [to_bool_false_eq_ff, coe_sort_ff, not_false_iff],
   },
   case formula.pred_ : name args
   {
     unfold fast_replace_free,
     unfold is_free_in,
-    simp only [list.mem_to_finset, list.mem_map, not_exists, not_and],
+    simp only [bool.of_to_bool_iff, list.mem_to_finset, list.mem_map, not_exists, not_and],
     intros x a1,
     split_ifs,
     {
@@ -413,6 +419,7 @@ begin
   {
     unfold fast_replace_free,
     unfold is_free_in,
+    simp only [bool.of_to_bool_iff],
     push_neg,
     split,
     {
@@ -428,10 +435,12 @@ begin
     split_ifs,
     {
       unfold is_free_in,
+      simp only [bool.of_to_bool_iff, not_and, eq_ff_eq_not_eq_tt],
       tauto,
     },
     {
       unfold is_free_in,
+      simp only [bool.of_to_bool_iff, not_and],
       tauto,
     }
   },
