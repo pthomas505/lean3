@@ -233,20 +233,44 @@ begin
   case formula.true_ : binders h1
   {
     unfold admits_aux,
+    simp only [to_bool_true_eq_tt, coe_sort_tt],
   },
-  case [formula.pred_, formula.not_, formula.imp_]
+  case fol.formula.pred_ : X xs binders h1
   {
-    all_goals
-    {
-      unfold fast_admits_aux at h1,
+    unfold fast_admits_aux at h1,
+    squeeze_simp at h1,
 
-      unfold admits_aux,
-      tauto,
+    unfold admits_aux,
+    squeeze_simp,
+    tauto,
+  },
+  case fol.formula.not_ : P P_ih binders h1
+  {
+    unfold fast_admits_aux at h1,
+
+    unfold admits_aux,
+    exact P_ih binders h1,
+  },
+  case fol.formula.imp_ : P Q P_ih Q_ih binders h1
+  {
+    unfold fast_admits_aux at h1,
+    squeeze_simp at h1,
+    cases h1,
+
+    unfold admits_aux,
+    squeeze_simp,
+    split,
+    {
+      exact P_ih binders h1_left,
+    },
+    {
+      exact Q_ih binders h1_right,
     }
   },
   case formula.forall_ : x P P_ih binders h1
   {
     unfold fast_admits_aux at h1,
+    squeeze_simp at h1,
 
     unfold admits_aux,
     cases h1,
@@ -295,23 +319,42 @@ begin
   case formula.true_ : binders h1
   {
     unfold fast_admits_aux,
+    simp only [to_bool_true_eq_tt, coe_sort_tt],
   },
-  case [formula.pred_, formula.not_, formula.imp_]
+  case fol.formula.pred_ : X xs binders h1
   {
-    all_goals
+    unfold fast_admits_aux,
+    simp only [bool.of_to_bool_iff],
+    intros a1,
+    exact h1,
+  },
+  case fol.formula.not_ : P P_ih binders h1
+  {
+    unfold fast_admits_aux,
+    exact P_ih binders h1,
+  },
+  case fol.formula.imp_ : P Q P_ih Q_ih binders h1
+  {
+    unfold fast_admits_aux,
+    squeeze_simp,
+    split,
     {
-      unfold fast_admits_aux,
-      tauto,
-    }
+      exact P_ih binders h1,
+    },
+    {
+      exact Q_ih binders h1,
+    },
   },
   case formula.forall_ : x P P_ih binders h1
   {
     unfold fast_admits_aux,
     by_cases c1 : v = x,
     {
+      squeeze_simp,
       tauto,
     },
     {
+      squeeze_simp,
       right,
       apply P_ih,
       simp only [finset.mem_union, finset.mem_singleton],
