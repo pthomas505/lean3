@@ -1179,28 +1179,45 @@ begin
   case formula.true_ : binders
   {
     unfold admits_aux,
+    squeeze_simp,
   },
   case formula.pred_ : name args binders
   {
     unfold is_free_in at h1,
-    simp only [list.mem_to_finset] at h1,
+    squeeze_simp at h1,
 
     unfold admits_aux,
+    squeeze_simp,
     tauto,
   },
-  case [formula.not_, formula.imp_]
+  case fol.formula.not_ : P P_ih binders
   {
-    all_goals
-    {
-      unfold is_free_in at h1,
+    unfold is_free_in at h1,
 
-      unfold admits_aux,
-      tauto,
+    unfold admits_aux,
+    exact P_ih h1 binders,
+  },
+  case fol.formula.imp_ : P Q P_ih Q_ih binders
+  {
+    unfold is_free_in at h1,
+    squeeze_simp at h1,
+    push_neg at h1,
+    cases h1,
+
+    unfold admits_aux,
+    squeeze_simp,
+    split,
+    {
+      exact P_ih h1_left binders,
+    },
+    {
+      exact Q_ih h1_right binders,
     }
   },
   case formula.forall_ : x P P_ih binders
   {
     unfold is_free_in at h1,
+    simp only [bool.of_to_bool_iff, not_and] at h1,
 
     unfold admits_aux,
     by_cases c1 : v = x,
@@ -1241,10 +1258,12 @@ begin
   case formula.true_ : binders h2
   {
     unfold admits_aux,
+    squeeze_simp,
   },
   case formula.pred_ : name args binders h2
   {
     unfold admits_aux,
+    squeeze_simp,
     tauto,
   },
   case formula.not_ : P P_ih binders h2
@@ -1257,13 +1276,16 @@ begin
   case formula.imp_ : P Q P_ih Q_ih binders h2
   {
     unfold is_bound_in at h1,
+    squeeze_simp at h1,
 
     unfold admits_aux,
+    squeeze_simp,
     tauto,
   },
   case formula.forall_ : x P P_ih binders h2
   {
     unfold is_bound_in at h1,
+    squeeze_simp at h1,
     push_neg at h1,
     cases h1,
 
@@ -1304,15 +1326,19 @@ begin
   case formula.true_ : binders
   {
     unfold replace_free_aux,
+    unfold admits_aux,
+    squeeze_simp,
   },
   case formula.pred_ : name args binders
   {
     unfold occurs_in at h1,
     simp only [list.mem_to_finset] at h1,
+    squeeze_simp at h1,
 
     unfold replace_free_aux,
     unfold admits_aux,
     simp only [list.mem_map, not_and, not_not, and_imp, forall_exists_index],
+    simp only [bool.of_to_bool_iff],
     intros x a1 a2 a3,
 
     by_cases c1 : x = v ∧ x ∉ binders,
@@ -1338,14 +1364,17 @@ begin
   case formula.imp_ : P Q P_ih Q_ih binders
   {
     unfold occurs_in at h1,
+    squeeze_simp at h1,
 
     unfold replace_free_aux,
     unfold admits_aux,
+    squeeze_simp,
     tauto,
   },
   case formula.forall_ : x P P_ih binders
   {
     unfold occurs_in at h1,
+    squeeze_simp at h1,
 
     unfold replace_free_aux,
     unfold admits_aux,
@@ -1380,13 +1409,15 @@ begin
   case formula.true_ : S h1
   {
     unfold admits_aux,
+    squeeze_simp,
   },
   case formula.pred_ : name args S h1
   {
     unfold admits_aux at h1,
+    squeeze_simp at h1,
 
     unfold admits_aux,
-    simp only [finset.mem_union, and_imp],
+    squeeze_simp,
     tauto,
   },
   case formula.not_ : P P_ih S h1
@@ -1399,8 +1430,10 @@ begin
   case formula.imp_ : P Q P_ih Q_ih S h1
   {
     unfold admits_aux at h1,
+    squeeze_simp at h1,
 
     unfold admits_aux,
+    squeeze_simp,
     tauto,
   },
   case formula.forall_ : x P P_ih S h1
@@ -1426,13 +1459,15 @@ begin
   case formula.true_ : S h1
   {
     unfold admits_aux,
+    squeeze_simp,
   },
   case formula.pred_ : name args S h1
   {
     unfold admits_aux at h1,
-    simp only [finset.mem_union, and_imp] at h1,
+    squeeze_simp at h1,
 
     unfold admits_aux,
+    squeeze_simp,
     tauto,
   },
   case formula.not_ : P P_ih S h1
@@ -1445,9 +1480,11 @@ begin
   case formula.imp_ : P Q P_ih Q_ih S h1
   {
     unfold admits_aux at h1,
+    squeeze_simp at h1,
     cases h1,
 
     unfold admits_aux,
+    squeeze_simp,
     tauto,
   },
   case formula.forall_ : x P P_ih S h1
@@ -1480,9 +1517,10 @@ begin
   case formula.pred_ : name args binders h1
   {
     unfold admits_aux at h1,
+    squeeze_simp at h1,
 
     unfold is_free_in at h2,
-    simp only [list.mem_to_finset] at h2,
+    squeeze_simp at h2,
 
     tauto,
   },
@@ -1497,9 +1535,11 @@ begin
   case formula.imp_ : P Q P_ih Q_ih binders h1
   {
     unfold admits_aux at h1,
+    squeeze_simp at h1,
     cases h1,
 
     unfold is_free_in at h2,
+    squeeze_simp at h2,
 
     cases h2,
     {
@@ -1514,6 +1554,7 @@ begin
     unfold admits_aux at h1,
 
     unfold is_free_in at h2,
+    squeeze_simp at h2,
     cases h2,
 
     apply P_ih h2_right,
