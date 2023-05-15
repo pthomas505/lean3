@@ -387,24 +387,59 @@ begin
   case formula.true_ : binders
   {
     unfold fast_admits_aux,
+    squeeze_simp,
   },
   case formula.pred_ : name args
   {
     unfold is_free_in at h1,
-    simp only [list.mem_to_finset] at h1,
+    squeeze_simp at h1,
 
     unfold fast_admits_aux,
-    tauto,
+    squeeze_simp,
+    intros a1,
+    contradiction,
   },
-  case [formula.not_, formula.imp_, formula.forall_]
+  case fol.formula.not_ : P P_ih binders
   {
-    all_goals
-    {
-      unfold is_free_in at h1,
+    unfold is_free_in at h1,
 
-      unfold fast_admits_aux,
-      tauto,
-    }
+    unfold fast_admits_aux,
+    exact P_ih h1 binders,
+  },
+  case fol.formula.imp_ : P Q P_ih Q_ih binders
+  {
+    unfold is_free_in at h1,
+    squeeze_simp at h1,
+    push_neg at h1,
+    cases h1,
+
+    unfold fast_admits_aux,
+    squeeze_simp,
+    split,
+    {
+      exact P_ih h1_left binders,
+    },
+    {
+      exact Q_ih h1_right binders,
+    },
+  },
+  case fol.formula.forall_ : x P P_ih binders
+  {
+    unfold is_free_in at h1,
+    simp only [bool.of_to_bool_iff, not_and] at h1,
+
+    unfold fast_admits_aux,
+    squeeze_simp,
+    by_cases c1 : v = x,
+    {
+      left,
+      exact c1,
+    },
+    {
+      right,
+      apply P_ih,
+      exact h1 c1,
+    },
   },
 end
 
