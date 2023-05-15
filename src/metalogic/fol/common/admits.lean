@@ -469,10 +469,12 @@ begin
   case formula.true_ : binders h2
   {
     unfold fast_admits_aux,
+    simp only [to_bool_true_eq_tt, coe_sort_tt],
   },
   case formula.pred_ : name args binders h2
   {
     unfold fast_admits_aux,
+    squeeze_simp,
     tauto,
   },
   case formula.not_ : P P_ih binders h2
@@ -485,17 +487,21 @@ begin
   case formula.imp_ : P Q P_ih Q_ih binders h2
   {
     unfold is_bound_in at h1,
+    squeeze_simp at h1,
 
     unfold fast_admits_aux,
+    squeeze_simp,
     tauto,
   },
   case formula.forall_ : x P P_ih binders h2
   {
     unfold is_bound_in at h1,
+    squeeze_simp at h1,
     push_neg at h1,
     cases h1,
 
     unfold fast_admits_aux,
+    squeeze_simp,
     right,
     apply P_ih,
     {
@@ -538,11 +544,14 @@ begin
   case formula.true_ : binders h2
   {
     unfold fast_replace_free,
+    unfold fast_admits_aux,
+    squeeze_simp,
   },
   case formula.pred_ : name args binders h2
   {
     unfold fast_replace_free,
     unfold fast_admits_aux,
+    squeeze_simp,
     tauto,
   },
   case formula.not_ : P P_ih binders h2
@@ -556,14 +565,17 @@ begin
   case formula.imp_ : P Q P_ih Q_ih binders h2
   {
     unfold occurs_in at h1,
+    squeeze_simp at h1,
 
     unfold fast_replace_free,
     unfold fast_admits_aux,
+    squeeze_simp,
     tauto,
   },
   case formula.forall_ : x P P_ih binders h2
   {
     unfold occurs_in at h1,
+    squeeze_simp at h1,
     push_neg at h1,
     cases h1,
 
@@ -572,6 +584,7 @@ begin
     {
       unfold fast_admits_aux,
       subst h,
+      squeeze_simp,
       right,
       apply not_is_free_in_imp_fast_admits_aux,
       intros contra,
@@ -581,6 +594,7 @@ begin
     },
     {
       unfold fast_admits_aux,
+      squeeze_simp,
       right,
       apply P_ih h1_right,
       simp only [finset.mem_union, finset.mem_singleton],
