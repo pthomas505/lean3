@@ -175,7 +175,7 @@ begin
   case formula.pred_ : name args σ σ' h1
   {
     unfold is_free_in at h1,
-    simp only [list.mem_to_finset] at h1,
+    squeeze_simp at h1,
 
     unfold fast_replace_free_fun,
     congr' 1,
@@ -194,6 +194,7 @@ begin
   case formula.imp_ : P Q P_ih Q_ih σ σ' h1
   {
     unfold is_free_in at h1,
+    squeeze_simp at h1,
 
     unfold fast_replace_free_fun,
     congr' 1,
@@ -226,6 +227,7 @@ begin
     {
       apply h1,
       unfold is_free_in,
+      squeeze_simp,
       split,
       {
         exact h,
