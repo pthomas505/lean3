@@ -1127,9 +1127,33 @@ lemma admits_aux_self
   (binders : finset var_name) :
   admits_aux v v binders P :=
 begin
-  induction P generalizing binders;
-  unfold admits_aux;
-  tauto,
+  induction P generalizing binders,
+  case fol.formula.true_ : binders
+  {
+    unfold admits_aux,
+    squeeze_simp,
+  },
+  case fol.formula.pred_ : X xs binders
+  {
+    unfold admits_aux,
+    squeeze_simp,
+  },
+  case fol.formula.not_ : P P_ih binders
+  {
+    unfold admits_aux,
+    exact P_ih binders,
+  },
+  case fol.formula.imp_ : P Q P_ih Q_ih binders
+  {
+    unfold admits_aux,
+    squeeze_simp,
+    tauto,
+  },
+  case fol.formula.forall_ : x P P_ih binders
+  {
+    unfold admits_aux,
+    tauto,
+  },
 end
 
 
