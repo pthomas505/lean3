@@ -628,17 +628,18 @@ begin
   case formula.true_ : binders
   {
     unfold replace_free_aux,
+    unfold fast_admits_aux,
+    squeeze_simp,
   },
   case formula.pred_ : name args binders
   {
     unfold occurs_in at h1,
-    simp only [list.mem_to_finset] at h1,
+    squeeze_simp at h1,
 
     unfold replace_free_aux,
     unfold fast_admits_aux,
-    simp only [list.mem_map, forall_exists_index],
-    intros x a1,
-    cases a1,
+    squeeze_simp,
+    intros x a1 a2,
 
     by_cases c1 : x = v ∧ x ∉ binders,
     {
@@ -647,8 +648,9 @@ begin
       exact c1_right,
     },
     {
-      simp only [if_neg c1] at a1_right,
-      subst a1_right,
+      push_neg at c1,
+      specialize a2 c1,
+      subst a2,
       contradiction,
     }
   },
@@ -663,17 +665,21 @@ begin
   case formula.imp_ : P Q P_ih Q_ih binders
   {
     unfold occurs_in at h1,
+    squeeze_simp at h1,
 
     unfold replace_free_aux,
     unfold fast_admits_aux,
+    squeeze_simp,
     tauto,
   },
   case formula.forall_ : x P P_ih binders
   {
     unfold occurs_in at h1,
+    squeeze_simp at h1,
 
     unfold replace_free_aux,
     unfold fast_admits_aux,
+    squeeze_simp,
     tauto,
   },
 end
