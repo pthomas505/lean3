@@ -336,7 +336,7 @@ begin
     {
       simp only [set.mem_singleton_iff, forall_eq],
       unfold is_free_in,
-      simp only [not_and],
+      simp only [bool.of_to_bool_iff, not_and],
       intros a1 contra,
       exact not_is_free_in_fast_replace_free P v t a1 contra,
     }
@@ -508,13 +508,13 @@ begin
     {
       simp only [set.mem_singleton_iff, forall_eq],
       unfold is_free_in,
-      simp only [eq_self_iff_true, not_true, false_and, not_false_iff],
+      squeeze_simp,
     }
   },
   {
     simp only [set.mem_singleton_iff, forall_eq],
     unfold is_free_in,
-    simp only [eq_self_iff_true, not_true, false_and, and_false, not_false_iff],
+    squeeze_simp,
   }
 end
 
@@ -557,7 +557,7 @@ begin
         {
           simp only [set.mem_singleton_iff, forall_eq],
           unfold is_free_in,
-          simp only [eq_self_iff_true, not_true, false_and, not_false_iff],
+          squeeze_simp,
         }
       },
     },
@@ -648,7 +648,7 @@ begin
           {
             subst a1,
             unfold is_free_in,
-            tauto,
+            squeeze_simp,
           },
           {
             exact h5 H a1,
@@ -732,13 +732,13 @@ begin
     unfold exists_,
     simp only [set.mem_singleton_iff, forall_eq],
     unfold is_free_in,
-    simp only [eq_self_iff_true, not_true, false_and, not_false_iff],
+    squeeze_simp,
   },
   {
     unfold and_,
     unfold exists_,
     unfold is_free_in,
-    simp only [eq_self_iff_true, not_true, false_and, or_self, not_false_iff],
+    squeeze_simp,
   }
 end
 
@@ -776,7 +776,7 @@ begin
   {
     simp only [set.mem_insert_iff, set.mem_singleton_iff, forall_eq_or_imp, forall_eq],
     unfold is_free_in,
-    simp only [eq_self_iff_true, not_true, false_and, not_false_iff, and_self],
+    squeeze_simp,
   }
 end
 
@@ -814,7 +814,7 @@ begin
   {
     simp only [set.mem_insert_iff, set.mem_singleton_iff, forall_eq_or_imp, forall_eq],
     unfold is_free_in,
-    simp only [eq_self_iff_true, not_true, false_and, not_false_iff, and_self],
+    squeeze_simp,
   }
 end
 
@@ -914,6 +914,7 @@ begin
     simp only [list.foldr_cons, list.mem_cons_iff],
     unfold is_bound_in,
     simp only [xs_ih],
+    squeeze_simp,
     tauto,
   },
 end
@@ -937,6 +938,7 @@ begin
     simp only [list.foldr_cons, list.mem_cons_iff],
     unfold is_free_in,
     simp only [xs_ih],
+    squeeze_simp,
     tauto,
   },
 end
@@ -995,6 +997,7 @@ begin
         apply h1_ih_2,
         intros v a2,
         apply h2 v,
+        squeeze_simp,
         tauto,
       }
     },
@@ -1002,12 +1005,14 @@ begin
       apply h1_ih_1,
       intros v a1,
       apply h2 v,
+      squeeze_simp,
       tauto,
     },
   },
   case is_repl_of_formula_in_formula.forall_ : h1_x h1_P h1_P' h1_1 h1_ih
   {
     unfold is_bound_in at h2,
+    squeeze_simp at h2,
 
     apply deduction_theorem,
     simp only [set.union_singleton, insert_emptyc_eq],
@@ -1025,7 +1030,7 @@ begin
           apply h1_ih,
           intros v a1,
           cases a1,
-          apply h2 v,
+          apply h2 v a1_left,
           tauto,
         },
         {
@@ -1041,12 +1046,17 @@ begin
         unfold formula.iff_,
         unfold formula.and_,
         unfold is_free_in,
-        simp only [not_and],
+        squeeze_simp,
         contrapose,
         push_neg,
         intros a2,
         apply h2,
-        tauto,
+        {
+          tauto,
+        },
+        {
+          tauto,
+        },
       }
     }
   },
@@ -1223,7 +1233,7 @@ begin
         simp only [set.mem_singleton_iff] at a1,
         subst a1,
         unfold is_free_in,
-        simp only [not_and],
+        simp only [bool.of_to_bool_iff, not_and],
         intros a2,
         exact h1_left,
       },
@@ -1249,7 +1259,7 @@ begin
       simp only [set.mem_singleton_iff] at a1,
       subst a1,
       unfold is_free_in,
-      simp only [not_and],
+      simp only [bool.of_to_bool_iff, not_and],
       intros a2,
       exact h1_right_left,
     },
@@ -1431,19 +1441,19 @@ begin
       simp only [set.mem_singleton_iff, forall_eq],
       unfold formula.exists_,
       unfold is_free_in,
-      simp only [eq_self_iff_true, not_true, false_and, not_false_iff],
+      squeeze_simp,
     },
     {
       unfold exists_,
       unfold is_free_in,
-      simp only [eq_self_iff_true, not_true, false_and, not_false_iff],
+      squeeze_simp,
     },
   },
   {
     simp only [set.mem_singleton_iff, forall_eq],
     unfold formula.exists_,
     unfold is_free_in,
-    simp only [eq_self_iff_true, not_true, false_and, and_false, not_false_iff],
+    squeeze_simp,
   }
 end
 
@@ -1516,12 +1526,12 @@ begin
     unfold exists_,
     simp only [set.mem_insert_iff, set.mem_singleton_iff, forall_eq_or_imp, forall_eq],
     unfold is_free_in,
-    simp only [eq_self_iff_true, not_true, false_and, not_false_iff, and_self],
+    squeeze_simp,
   },
   {
     unfold exists_,
     unfold is_free_in,
-    simp only [eq_self_iff_true, not_true, false_and, not_false_iff],
+    squeeze_simp,
   }
 end
 
@@ -1556,7 +1566,7 @@ begin
     {
       simp only [set.mem_singleton_iff, forall_eq],
       unfold is_free_in,
-      simp only [eq_self_iff_true, not_true, false_and, not_false_iff],
+      squeeze_simp,
     },
   },
 end
@@ -1653,15 +1663,8 @@ begin
     simp only [set.mem_singleton_iff] at a1,
     subst a1,
     unfold is_free_in,
-    push_neg,
-    split,
-    {
-      exact h1,
-    },
-    {
-      intros a1,
-      contradiction,
-    }
+    simp only [eq_self_iff_true, not_true, false_and, to_bool_false_eq_ff, coe_sort_ff, or_false, bool.to_bool_coe],
+    exact h1,
   },
 end
 
@@ -1898,10 +1901,12 @@ begin
   case is_repl_of_var_in_formula.imp_ : P_u Q_u P_v Q_v h1_1 h1_2 h1_ih_1 h1_ih_2
   {
     unfold is_bound_in at h2,
+    squeeze_simp at h2,
     push_neg at h2,
     cases h2,
 
     unfold is_bound_in at h3,
+    squeeze_simp at h3,
     push_neg at h3,
     cases h3,
 
@@ -1926,10 +1931,12 @@ begin
   case is_repl_of_var_in_formula.forall_ : x P_u P_v h1_1 h1_ih
   {
     unfold is_bound_in at h2,
+    squeeze_simp at h2,
     push_neg at h2,
     cases h2,
 
     unfold is_bound_in at h3,
+    squeeze_simp at h3,
     push_neg at h3,
     cases h3,
 
@@ -1951,6 +1958,7 @@ begin
             unfold formula.eq_,
             unfold is_free_in,
             simp only [list.to_finset_cons, list.to_finset_nil, insert_emptyc_eq, finset.mem_insert, finset.mem_singleton],
+            squeeze_simp,
             push_neg,
             split,
             {

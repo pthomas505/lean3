@@ -124,6 +124,8 @@ theorem exists_left_th
   (h1 : ¬ is_free_in x Q) :
   is_proof ((forall_ x (P.imp_ Q)).imp_ ((exists_ x P).imp_ Q)) :=
 begin
+  squeeze_simp at h1,
+
   apply imp_swap,
   apply imp_trans,
   {
@@ -159,8 +161,7 @@ begin
           apply gen_right_th,
           unfold formula.false_,
           unfold is_free_in,
-          push_neg,
-          simp only [not_false_iff, and_true],
+          squeeze_simp,
           exact h1,
         },
       },
@@ -246,7 +247,7 @@ begin
     apply gen_right,
     {
       unfold is_free_in,
-      push_neg,
+      simp only [bool.of_to_bool_iff, not_and],
       intros a1,
       exact h2,
     },
@@ -359,6 +360,7 @@ begin
   case formula.forall_ : x P P_ih
   {
     unfold fast_admits_aux at h2,
+    squeeze_simp at h2,
 
     cases h2,
     {
@@ -374,7 +376,7 @@ begin
         have s1 : (fast_replace_free v t (forall_ x P) = forall_ x P),
         apply not_free_in_fast_replace_free_self (forall_ x P) v t,
         unfold is_free_in,
-        simp only [not_and],
+        simp only [bool.of_to_bool_iff, not_and],
         intros a1,
         apply fast_admits_aux_mem_binders P v t (binders ∪ {x}) h2,
         simp only [finset.mem_union, finset.mem_singleton],
@@ -397,7 +399,7 @@ begin
           {
             unfold formula.eq_,
             unfold is_free_in,
-            simp only [list.to_finset_cons, list.to_finset_nil, insert_emptyc_eq, finset.mem_insert, finset.mem_singleton],
+            squeeze_simp,
             tauto,
           },
           {
