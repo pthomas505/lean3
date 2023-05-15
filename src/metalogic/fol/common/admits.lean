@@ -38,7 +38,8 @@ def admits_aux (v u : var_name) : finset var_name → formula → bool
 
   v → u in P
 -/
-def admits (v u : var_name) (P : formula) : Prop :=
+@[derive decidable]
+def admits (v u : var_name) (P : formula) : bool :=
   admits_aux v u ∅ P
 
 
