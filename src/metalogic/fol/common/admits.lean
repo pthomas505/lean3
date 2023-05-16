@@ -24,8 +24,8 @@ If $v$ and $u$ are variables and $P$ is a formula, then $P$ admits $u$ for $v$ i
 @[derive decidable]
 def admits_aux (v u : var_name) : finset var_name → formula → bool
 | _ true_ := true
-| binders (pred_ name args) :=
-    (v ∈ args ∧ v ∉ binders) → -- if there is a free occurrence of v in P
+| binders (pred_ X xs) :=
+    (v ∈ xs ∧ v ∉ binders) → -- if there is a free occurrence of v in P
     u ∉ binders -- then it does not become a bound occurrence of u in P(u/v)
 | binders (not_ phi) := admits_aux binders phi
 | binders (imp_ phi psi) := admits_aux binders phi ∧ admits_aux binders psi
@@ -49,8 +49,8 @@ def admits (v u : var_name) (F : formula) : bool :=
 @[derive decidable]
 def fast_admits_aux (v u : var_name) : finset var_name → formula → bool
 | _ true_ := true
-| binders (pred_ name args) :=
-    v ∈ args → -- if there is a free occurrence of v in P
+| binders (pred_ X xs) :=
+    v ∈ xs → -- if there is a free occurrence of v in P
     u ∉ binders -- then it does not become a bound occurrence of u in P(u/v)
 | binders (not_ phi) := fast_admits_aux binders phi
 | binders (imp_ phi psi) := fast_admits_aux binders phi ∧ fast_admits_aux binders psi
@@ -87,7 +87,7 @@ inductive bool_formula : Type
 -/
 def to_is_bound_aux : finset var_name → formula → bool_formula
 | _ true_ := bool_formula.true_
-| binders (pred_ name args) := bool_formula.pred_ name (args.map (fun (v : var_name), v ∈ binders))
+| binders (pred_ X xs) := bool_formula.pred_ X (xs.map (fun (v : var_name), v ∈ binders))
 | binders (not_ phi) := bool_formula.not_ (to_is_bound_aux binders phi)
 | binders (imp_ phi psi) := bool_formula.imp_ (to_is_bound_aux binders phi) (to_is_bound_aux binders psi)
 | binders (forall_ x phi) := bool_formula.forall_ true (to_is_bound_aux (binders ∪ {x}) phi)
@@ -390,7 +390,7 @@ begin
     unfold fast_admits_aux,
     simp,
   },
-  case formula.pred_ : name args
+  case formula.pred_ : X xs
   {
     unfold is_free_in at h1,
     simp at h1,
@@ -472,7 +472,7 @@ begin
     unfold fast_admits_aux,
     simp only [to_bool_true_eq_tt, coe_sort_tt],
   },
-  case formula.pred_ : name args binders h2
+  case formula.pred_ : X xs binders h2
   {
     unfold fast_admits_aux,
     simp,
@@ -548,7 +548,7 @@ begin
     unfold fast_admits_aux,
     simp,
   },
-  case formula.pred_ : name args binders h2
+  case formula.pred_ : X xs binders h2
   {
     unfold fast_replace_free,
     unfold fast_admits_aux,
@@ -632,7 +632,7 @@ begin
     unfold fast_admits_aux,
     simp,
   },
-  case formula.pred_ : name args binders
+  case formula.pred_ : X xs binders
   {
     unfold occurs_in at h1,
     simp at h1,
@@ -714,7 +714,7 @@ begin
     unfold fast_admits_aux,
     simp,
   },
-  case formula.pred_ : name args S h1
+  case formula.pred_ : X xs S h1
   {
     unfold fast_admits_aux at h1,
     simp at h1,
@@ -772,7 +772,7 @@ begin
     unfold fast_admits_aux,
     simp,
   },
-  case formula.pred_ : name args S h1
+  case formula.pred_ : X xs S h1
   {
     unfold fast_admits_aux at h1,
     simp at h1,
@@ -827,7 +827,7 @@ begin
 
     contradiction,
   },
-  case formula.pred_ : name args binders h1
+  case formula.pred_ : X xs binders h1
   {
     unfold fast_admits_aux at h1,
     simp at h1,
@@ -914,9 +914,9 @@ begin
   {
     refl,
   },
-  case formula.pred_ : name args binders h1 h2
+  case formula.pred_ : X xs binders h1 h2
   {
-    induction args,
+    induction xs,
     case list.nil
     {
       unfold fast_replace_free,
@@ -1018,9 +1018,9 @@ begin
     unfold fast_admits_aux,
     simp,
   },
-  case formula.pred_ : name args binders h1 h2
+  case formula.pred_ : X xs binders h1 h2
   {
-    induction args,
+    induction xs,
     case list.nil
     {
       unfold fast_admits_aux,
@@ -1182,7 +1182,7 @@ begin
     unfold admits_aux,
     simp,
   },
-  case formula.pred_ : name args binders
+  case formula.pred_ : X xs binders
   {
     unfold is_free_in at h1,
     simp at h1,
@@ -1261,7 +1261,7 @@ begin
     unfold admits_aux,
     simp,
   },
-  case formula.pred_ : name args binders h2
+  case formula.pred_ : X xs binders h2
   {
     unfold admits_aux,
     simp,
@@ -1330,7 +1330,7 @@ begin
     unfold admits_aux,
     simp,
   },
-  case formula.pred_ : name args binders
+  case formula.pred_ : X xs binders
   {
     unfold occurs_in at h1,
     simp only [list.mem_to_finset] at h1,
@@ -1412,7 +1412,7 @@ begin
     unfold admits_aux,
     simp,
   },
-  case formula.pred_ : name args S h1
+  case formula.pred_ : X xs S h1
   {
     unfold admits_aux at h1,
     simp at h1,
@@ -1462,7 +1462,7 @@ begin
     unfold admits_aux,
     simp,
   },
-  case formula.pred_ : name args S h1
+  case formula.pred_ : X xs S h1
   {
     unfold admits_aux at h1,
     simp at h1,
@@ -1515,7 +1515,7 @@ begin
 
     contradiction,
   },
-  case formula.pred_ : name args binders h1
+  case formula.pred_ : X xs binders h1
   {
     unfold admits_aux at h1,
     simp at h1,
