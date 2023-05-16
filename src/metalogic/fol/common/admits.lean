@@ -27,9 +27,9 @@ def admits_aux (v u : var_name) : finset var_name → formula → bool
 | binders (pred_ name args) :=
     (v ∈ args ∧ v ∉ binders) → -- if there is a free occurrence of v in P
     u ∉ binders -- then it does not become a bound occurrence of u in P(u/v)
-| binders (not_ P) := admits_aux binders P
-| binders (imp_ P Q) := admits_aux binders P ∧ admits_aux binders Q
-| binders (forall_ x P) := admits_aux (binders ∪ {x}) P
+| binders (not_ phi) := admits_aux binders phi
+| binders (imp_ phi Q) := admits_aux binders phi ∧ admits_aux binders Q
+| binders (forall_ x phi) := admits_aux (binders ∪ {x}) phi
 
 /--
   admits v u P := True if and only if there is no free occurrence of the variable v in the formula P that becomes a bound occurrence of the variable u in P(u/v).
@@ -52,9 +52,9 @@ def fast_admits_aux (v u : var_name) : finset var_name → formula → bool
 | binders (pred_ name args) :=
     v ∈ args → -- if there is a free occurrence of v in P
     u ∉ binders -- then it does not become a bound occurrence of u in P(u/v)
-| binders (not_ P) := fast_admits_aux binders P
-| binders (imp_ P Q) := fast_admits_aux binders P ∧ fast_admits_aux binders Q
-| binders (forall_ x P) := v = x ∨ fast_admits_aux (binders ∪ {x}) P
+| binders (not_ phi) := fast_admits_aux binders phi
+| binders (imp_ phi Q) := fast_admits_aux binders phi ∧ fast_admits_aux binders Q
+| binders (forall_ x phi) := v = x ∨ fast_admits_aux (binders ∪ {x}) phi
 
 /--
   fast_admits v u P := True if and only if there is no free occurrence of the variable v in the formula P that becomes a bound occurrence of the variable u in P(u/v).
@@ -88,9 +88,9 @@ inductive bool_formula : Type
 def to_is_bound_aux : finset var_name → formula → bool_formula
 | _ true_ := bool_formula.true_
 | binders (pred_ name args) := bool_formula.pred_ name (args.map (fun (v : var_name), v ∈ binders))
-| binders (not_ P) := bool_formula.not_ (to_is_bound_aux binders P)
-| binders (imp_ P Q) := bool_formula.imp_ (to_is_bound_aux binders P) (to_is_bound_aux binders Q)
-| binders (forall_ x P) := bool_formula.forall_ true (to_is_bound_aux (binders ∪ {x}) P)
+| binders (not_ phi) := bool_formula.not_ (to_is_bound_aux binders phi)
+| binders (imp_ phi Q) := bool_formula.imp_ (to_is_bound_aux binders phi) (to_is_bound_aux binders Q)
+| binders (forall_ x phi) := bool_formula.forall_ true (to_is_bound_aux (binders ∪ {x}) phi)
 
 
 /--
@@ -126,14 +126,14 @@ begin
     intros a1,
     exact h2 a1 h1,
   },
-  case fol.formula.not_ : P P_ih binders h1 h2
+  case fol.formula.not_ : phi phi_ih binders h1 h2
   {
     unfold admits_aux at h2,
 
     unfold fast_admits_aux,
-    exact P_ih binders h1 h2,
+    exact phi_ih binders h1 h2,
   },
-  case fol.formula.imp_ : P Q P_ih Q_ih binders h1 h2
+  case fol.formula.imp_ : phi Q phi_ih Q_ih binders h1 h2
   {
     unfold admits_aux at h2,
     simp at h2,
@@ -143,13 +143,13 @@ begin
     simp,
     split,
     {
-      exact P_ih binders h1 h2_left,
+      exact phi_ih binders h1 h2_left,
     },
     {
       exact Q_ih binders h1 h2_right,
     }
   },
-  case formula.forall_ : x P P_ih binders h1 h2
+  case formula.forall_ : x phi phi_ih binders h1 h2
   {
     unfold admits_aux at h2,
 
@@ -162,7 +162,7 @@ begin
     },
     {
       right,
-      apply P_ih,
+      apply phi_ih,
       {
         simp only [finset.mem_union, finset.mem_singleton],
         tauto,
@@ -195,27 +195,27 @@ begin
     intros a1 a2,
     contradiction,
   },
-  case fol.formula.not_ : P P_ih binders h1
+  case fol.formula.not_ : phi phi_ih binders h1
   {
     unfold admits_aux,
-    exact P_ih binders h1,
+    exact phi_ih binders h1,
   },
-  case fol.formula.imp_ : P Q P_ih Q_ih binders h1
+  case fol.formula.imp_ : phi Q phi_ih Q_ih binders h1
   {
     unfold admits_aux,
     simp,
     split,
     {
-      exact P_ih binders h1,
+      exact phi_ih binders h1,
     },
     {
       exact Q_ih binders h1,
     }
   },
-  case formula.forall_ : x P P_ih binders h1
+  case formula.forall_ : x phi phi_ih binders h1
   {
     unfold admits_aux,
-    apply P_ih,
+    apply phi_ih,
     simp only [finset.mem_union, finset.mem_singleton],
     left,
     exact h1,
@@ -245,14 +245,14 @@ begin
     simp,
     tauto,
   },
-  case fol.formula.not_ : P P_ih binders h1
+  case fol.formula.not_ : phi phi_ih binders h1
   {
     unfold fast_admits_aux at h1,
 
     unfold admits_aux,
-    exact P_ih binders h1,
+    exact phi_ih binders h1,
   },
-  case fol.formula.imp_ : P Q P_ih Q_ih binders h1
+  case fol.formula.imp_ : phi Q phi_ih Q_ih binders h1
   {
     unfold fast_admits_aux at h1,
     simp at h1,
@@ -262,13 +262,13 @@ begin
     simp,
     split,
     {
-      exact P_ih binders h1_left,
+      exact phi_ih binders h1_left,
     },
     {
       exact Q_ih binders h1_right,
     }
   },
-  case formula.forall_ : x P P_ih binders h1
+  case formula.forall_ : x phi phi_ih binders h1
   {
     unfold fast_admits_aux at h1,
     simp at h1,
@@ -281,7 +281,7 @@ begin
       simp only [finset.mem_union, finset.mem_singleton, eq_self_iff_true, or_true],
     },
     {
-      apply P_ih,
+      apply phi_ih,
       exact h1,
     }
   },
@@ -329,24 +329,24 @@ begin
     intros a1,
     exact h1,
   },
-  case fol.formula.not_ : P P_ih binders h1
+  case fol.formula.not_ : phi phi_ih binders h1
   {
     unfold fast_admits_aux,
-    exact P_ih binders h1,
+    exact phi_ih binders h1,
   },
-  case fol.formula.imp_ : P Q P_ih Q_ih binders h1
+  case fol.formula.imp_ : phi Q phi_ih Q_ih binders h1
   {
     unfold fast_admits_aux,
     simp,
     split,
     {
-      exact P_ih binders h1,
+      exact phi_ih binders h1,
     },
     {
       exact Q_ih binders h1,
     },
   },
-  case formula.forall_ : x P P_ih binders h1
+  case formula.forall_ : x phi phi_ih binders h1
   {
     unfold fast_admits_aux,
     by_cases c1 : v = x,
@@ -357,7 +357,7 @@ begin
     {
       simp,
       right,
-      apply P_ih,
+      apply phi_ih,
       simp only [finset.mem_union, finset.mem_singleton],
       tauto,
     }
@@ -400,14 +400,14 @@ begin
     intros a1,
     contradiction,
   },
-  case fol.formula.not_ : P P_ih binders
+  case fol.formula.not_ : phi phi_ih binders
   {
     unfold is_free_in at h1,
 
     unfold fast_admits_aux,
-    exact P_ih h1 binders,
+    exact phi_ih h1 binders,
   },
-  case fol.formula.imp_ : P Q P_ih Q_ih binders
+  case fol.formula.imp_ : phi Q phi_ih Q_ih binders
   {
     unfold is_free_in at h1,
     simp at h1,
@@ -418,13 +418,13 @@ begin
     simp,
     split,
     {
-      exact P_ih h1_left binders,
+      exact phi_ih h1_left binders,
     },
     {
       exact Q_ih h1_right binders,
     },
   },
-  case fol.formula.forall_ : x P P_ih binders
+  case fol.formula.forall_ : x phi phi_ih binders
   {
     unfold is_free_in at h1,
     simp only [bool.of_to_bool_iff, not_and] at h1,
@@ -438,7 +438,7 @@ begin
     },
     {
       right,
-      apply P_ih,
+      apply phi_ih,
       exact h1 c1,
     },
   },
@@ -478,14 +478,14 @@ begin
     simp,
     tauto,
   },
-  case formula.not_ : P P_ih binders h2
+  case formula.not_ : phi phi_ih binders h2
   {
     unfold is_bound_in at h1,
 
     unfold fast_admits_aux,
     tauto,
   },
-  case formula.imp_ : P Q P_ih Q_ih binders h2
+  case formula.imp_ : phi Q phi_ih Q_ih binders h2
   {
     unfold is_bound_in at h1,
     simp at h1,
@@ -494,7 +494,7 @@ begin
     simp,
     tauto,
   },
-  case formula.forall_ : x P P_ih binders h2
+  case formula.forall_ : x phi phi_ih binders h2
   {
     unfold is_bound_in at h1,
     simp at h1,
@@ -504,7 +504,7 @@ begin
     unfold fast_admits_aux,
     simp,
     right,
-    apply P_ih,
+    apply phi_ih,
     {
       exact h1_right,
     },
@@ -555,7 +555,7 @@ begin
     simp,
     tauto,
   },
-  case formula.not_ : P P_ih binders h2
+  case formula.not_ : phi phi_ih binders h2
   {
     unfold occurs_in at h1,
 
@@ -563,7 +563,7 @@ begin
     unfold fast_admits_aux,
     tauto,
   },
-  case formula.imp_ : P Q P_ih Q_ih binders h2
+  case formula.imp_ : phi Q phi_ih Q_ih binders h2
   {
     unfold occurs_in at h1,
     simp at h1,
@@ -573,7 +573,7 @@ begin
     simp,
     tauto,
   },
-  case formula.forall_ : x P P_ih binders h2
+  case formula.forall_ : x phi phi_ih binders h2
   {
     unfold occurs_in at h1,
     simp at h1,
@@ -597,7 +597,7 @@ begin
       unfold fast_admits_aux,
       simp,
       right,
-      apply P_ih h1_right,
+      apply phi_ih h1_right,
       simp only [finset.mem_union, finset.mem_singleton],
       tauto,
     },
@@ -655,7 +655,7 @@ begin
       contradiction,
     }
   },
-  case formula.not_ : P P_ih binders
+  case formula.not_ : phi phi_ih binders
   {
     unfold occurs_in at h1,
 
@@ -663,7 +663,7 @@ begin
     unfold fast_admits_aux,
     tauto,
   },
-  case formula.imp_ : P Q P_ih Q_ih binders
+  case formula.imp_ : phi Q phi_ih Q_ih binders
   {
     unfold occurs_in at h1,
     simp at h1,
@@ -673,7 +673,7 @@ begin
     simp,
     tauto,
   },
-  case formula.forall_ : x P P_ih binders
+  case formula.forall_ : x phi phi_ih binders
   {
     unfold occurs_in at h1,
     simp at h1,
@@ -723,14 +723,14 @@ begin
     simp,
     tauto,
   },
-  case formula.not_ : P P_ih S h1
+  case formula.not_ : phi phi_ih S h1
   {
     unfold fast_admits_aux at h1,
 
     unfold fast_admits_aux,
     tauto,
   },
-  case formula.imp_ : P Q P_ih Q_ih S h1
+  case formula.imp_ : phi Q phi_ih Q_ih S h1
   {
     unfold fast_admits_aux at h1,
     simp at h1,
@@ -739,7 +739,7 @@ begin
     simp,
     tauto,
   },
-  case formula.forall_ : x P P_ih S h1
+  case formula.forall_ : x phi phi_ih S h1
   {
     unfold fast_admits_aux at h1,
     simp at h1,
@@ -781,14 +781,14 @@ begin
     simp,
     tauto,
   },
-  case formula.not_ : P P_ih S h1
+  case formula.not_ : phi phi_ih S h1
   {
     unfold fast_admits_aux at h1,
 
     unfold fast_admits_aux,
     tauto,
   },
-  case formula.imp_ : P Q P_ih Q_ih S h1
+  case formula.imp_ : phi Q phi_ih Q_ih S h1
   {
     unfold fast_admits_aux at h1,
     simp at h1,
@@ -798,7 +798,7 @@ begin
     simp,
     tauto,
   },
-  case formula.forall_ : x P P_ih S h1
+  case formula.forall_ : x phi phi_ih S h1
   {
     unfold fast_admits_aux at h1,
     simp only [finset.union_right_comm S T {x}] at h1,
@@ -837,15 +837,15 @@ begin
 
     tauto,
   },
-  case formula.not_ : P P_ih binders h1
+  case formula.not_ : phi phi_ih binders h1
   {
     unfold fast_admits_aux at h1,
 
     unfold is_free_in at h2,
 
-    exact P_ih h2 binders h1,
+    exact phi_ih h2 binders h1,
   },
-  case formula.imp_ : P Q P_ih Q_ih binders h1
+  case formula.imp_ : phi Q phi_ih Q_ih binders h1
   {
     unfold fast_admits_aux at h1,
     simp at h1,
@@ -856,13 +856,13 @@ begin
 
     cases h2,
     {
-      exact P_ih h2 binders h1_left,
+      exact phi_ih h2 binders h1_left,
     },
     {
       exact Q_ih h2 binders h1_right,
     }
   },
-  case formula.forall_ : x P P_ih binders h1
+  case formula.forall_ : x phi phi_ih binders h1
   {
     unfold fast_admits_aux at h1,
     simp at h1,
@@ -871,14 +871,14 @@ begin
     simp at h2,
     cases h2,
 
-    apply P_ih h2_right,
+    apply phi_ih h2_right,
     {
       cases h1,
       {
         contradiction,
       },
       {
-        apply fast_admits_aux_del_binders P v u binders {x} h1,
+        apply fast_admits_aux_del_binders phi v u binders {x} h1,
       }
     }
   },
@@ -953,16 +953,16 @@ begin
       }
     },
   },
-  case formula.not_ : P P_ih binders h1 h2
+  case formula.not_ : phi phi_ih binders h1 h2
   {
     unfold fast_admits_aux at h2,
 
     unfold fast_replace_free,
     unfold to_is_bound_aux,
     congr' 1,
-    exact P_ih binders h1 h2,
+    exact phi_ih binders h1 h2,
   },
-  case formula.imp_ : P Q P_ih Q_ih binders h1 h2
+  case formula.imp_ : phi Q phi_ih Q_ih binders h1 h2
   {
     unfold fast_admits_aux at h2,
     simp at h2,
@@ -972,13 +972,13 @@ begin
     unfold to_is_bound_aux,
     congr' 1,
     {
-      exact P_ih binders h1 h2_left,
+      exact phi_ih binders h1 h2_left,
     },
     {
       exact Q_ih binders h1 h2_right,
     }
   },
-  case formula.forall_ : x P P_ih binders h1 h2
+  case formula.forall_ : x phi phi_ih binders h1 h2
   {
     unfold fast_admits_aux at h2,
     simp at h2,
@@ -991,7 +991,7 @@ begin
     {
       unfold to_is_bound_aux,
       simp only [eq_self_iff_true, true_and],
-      apply P_ih,
+      apply phi_ih,
       {
         simp only [finset.mem_union, finset.mem_singleton],
         tauto,
@@ -1052,16 +1052,16 @@ begin
       }
     },
   },
-  case formula.not_ : P P_ih binders h1 h2
+  case formula.not_ : phi phi_ih binders h1 h2
   {
     unfold fast_replace_free at h2,
     unfold to_is_bound_aux at h2,
     simp only at h2,
 
     unfold fast_admits_aux,
-    exact P_ih binders h1 h2,
+    exact phi_ih binders h1 h2,
   },
-  case formula.imp_ : P Q P_ih Q_ih binders h1 h2
+  case formula.imp_ : phi Q phi_ih Q_ih binders h1 h2
   {
     unfold fast_replace_free at h2,
     unfold to_is_bound_aux at h2,
@@ -1072,7 +1072,7 @@ begin
     simp,
     tauto,
   },
-  case formula.forall_ : x P P_ih binders h1 h2
+  case formula.forall_ : x phi phi_ih binders h1 h2
   {
     unfold fast_replace_free at h2,
 
@@ -1085,7 +1085,7 @@ begin
     },
     {
       right,
-      apply P_ih,
+      apply phi_ih,
       {
         simp only [finset.mem_union, finset.mem_singleton],
         tauto,
@@ -1139,18 +1139,18 @@ begin
     unfold admits_aux,
     simp,
   },
-  case fol.formula.not_ : P P_ih binders
+  case fol.formula.not_ : phi phi_ih binders
   {
     unfold admits_aux,
-    exact P_ih binders,
+    exact phi_ih binders,
   },
-  case fol.formula.imp_ : P Q P_ih Q_ih binders
+  case fol.formula.imp_ : phi Q phi_ih Q_ih binders
   {
     unfold admits_aux,
     simp,
     tauto,
   },
-  case fol.formula.forall_ : x P P_ih binders
+  case fol.formula.forall_ : x phi phi_ih binders
   {
     unfold admits_aux,
     tauto,
@@ -1191,14 +1191,14 @@ begin
     simp,
     tauto,
   },
-  case fol.formula.not_ : P P_ih binders
+  case fol.formula.not_ : phi phi_ih binders
   {
     unfold is_free_in at h1,
 
     unfold admits_aux,
-    exact P_ih h1 binders,
+    exact phi_ih h1 binders,
   },
-  case fol.formula.imp_ : P Q P_ih Q_ih binders
+  case fol.formula.imp_ : phi Q phi_ih Q_ih binders
   {
     unfold is_free_in at h1,
     simp at h1,
@@ -1209,13 +1209,13 @@ begin
     simp,
     split,
     {
-      exact P_ih h1_left binders,
+      exact phi_ih h1_left binders,
     },
     {
       exact Q_ih h1_right binders,
     }
   },
-  case formula.forall_ : x P P_ih binders
+  case formula.forall_ : x phi phi_ih binders
   {
     unfold is_free_in at h1,
     simp only [bool.of_to_bool_iff, not_and] at h1,
@@ -1267,14 +1267,14 @@ begin
     simp,
     tauto,
   },
-  case formula.not_ : P P_ih binders h2
+  case formula.not_ : phi phi_ih binders h2
   {
     unfold is_bound_in at h1,
 
     unfold admits_aux,
     tauto,
   },
-  case formula.imp_ : P Q P_ih Q_ih binders h2
+  case formula.imp_ : phi Q phi_ih Q_ih binders h2
   {
     unfold is_bound_in at h1,
     simp at h1,
@@ -1283,7 +1283,7 @@ begin
     simp,
     tauto,
   },
-  case formula.forall_ : x P P_ih binders h2
+  case formula.forall_ : x phi phi_ih binders h2
   {
     unfold is_bound_in at h1,
     simp at h1,
@@ -1291,7 +1291,7 @@ begin
     cases h1,
 
     unfold admits_aux,
-    apply P_ih h1_right,
+    apply phi_ih h1_right,
     simp only [finset.mem_union, finset.mem_singleton],
     tauto,
   },
@@ -1354,7 +1354,7 @@ begin
       contradiction,
     }
   },
-  case formula.not_ : P P_ih binders
+  case formula.not_ : phi phi_ih binders
   {
     unfold occurs_in at h1,
 
@@ -1362,7 +1362,7 @@ begin
     unfold admits_aux,
     tauto,
   },
-  case formula.imp_ : P Q P_ih Q_ih binders
+  case formula.imp_ : phi Q phi_ih Q_ih binders
   {
     unfold occurs_in at h1,
     simp at h1,
@@ -1372,7 +1372,7 @@ begin
     simp,
     tauto,
   },
-  case formula.forall_ : x P P_ih binders
+  case formula.forall_ : x phi phi_ih binders
   {
     unfold occurs_in at h1,
     simp at h1,
@@ -1421,14 +1421,14 @@ begin
     simp,
     tauto,
   },
-  case formula.not_ : P P_ih S h1
+  case formula.not_ : phi phi_ih S h1
   {
     unfold admits_aux at h1,
 
     unfold admits_aux,
     tauto,
   },
-  case formula.imp_ : P Q P_ih Q_ih S h1
+  case formula.imp_ : phi Q phi_ih Q_ih S h1
   {
     unfold admits_aux at h1,
     simp at h1,
@@ -1437,7 +1437,7 @@ begin
     simp,
     tauto,
   },
-  case formula.forall_ : x P P_ih S h1
+  case formula.forall_ : x phi phi_ih S h1
   {
     unfold admits_aux at h1,
 
@@ -1471,14 +1471,14 @@ begin
     simp,
     tauto,
   },
-  case formula.not_ : P P_ih S h1
+  case formula.not_ : phi phi_ih S h1
   {
     unfold admits_aux at h1,
 
     unfold admits_aux,
     tauto,
   },
-  case formula.imp_ : P Q P_ih Q_ih S h1
+  case formula.imp_ : phi Q phi_ih Q_ih S h1
   {
     unfold admits_aux at h1,
     simp at h1,
@@ -1488,7 +1488,7 @@ begin
     simp,
     tauto,
   },
-  case formula.forall_ : x P P_ih S h1
+  case formula.forall_ : x phi phi_ih S h1
   {
     unfold admits_aux at h1,
     simp only [finset.union_right_comm S T {x}] at h1,
@@ -1525,15 +1525,15 @@ begin
 
     tauto,
   },
-  case formula.not_ : P P_ih binders h1
+  case formula.not_ : phi phi_ih binders h1
   {
     unfold admits_aux at h1,
 
     unfold is_free_in at h2,
 
-    exact P_ih h2 binders h1 h3,
+    exact phi_ih h2 binders h1 h3,
   },
-  case formula.imp_ : P Q P_ih Q_ih binders h1
+  case formula.imp_ : phi Q phi_ih Q_ih binders h1
   {
     unfold admits_aux at h1,
     simp at h1,
@@ -1544,13 +1544,13 @@ begin
 
     cases h2,
     {
-      exact P_ih h2 binders h1_left h3,
+      exact phi_ih h2 binders h1_left h3,
     },
     {
       exact Q_ih h2 binders h1_right h3,
     }
   },
-  case formula.forall_ : x P P_ih binders h1
+  case formula.forall_ : x phi phi_ih binders h1
   {
     unfold admits_aux at h1,
 
@@ -1558,9 +1558,9 @@ begin
     simp at h2,
     cases h2,
 
-    apply P_ih h2_right,
+    apply phi_ih h2_right,
     {
-      apply admits_aux_del_binders P v u binders {x},
+      apply admits_aux_del_binders phi v u binders {x},
       {
         exact h1,
       },
