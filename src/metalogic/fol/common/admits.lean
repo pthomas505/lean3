@@ -28,7 +28,7 @@ def admits_aux (v u : var_name) : finset var_name → formula → bool
     (v ∈ args ∧ v ∉ binders) → -- if there is a free occurrence of v in P
     u ∉ binders -- then it does not become a bound occurrence of u in P(u/v)
 | binders (not_ phi) := admits_aux binders phi
-| binders (imp_ phi Q) := admits_aux binders phi ∧ admits_aux binders Q
+| binders (imp_ phi psi) := admits_aux binders phi ∧ admits_aux binders psi
 | binders (forall_ x phi) := admits_aux (binders ∪ {x}) phi
 
 /--
@@ -53,7 +53,7 @@ def fast_admits_aux (v u : var_name) : finset var_name → formula → bool
     v ∈ args → -- if there is a free occurrence of v in P
     u ∉ binders -- then it does not become a bound occurrence of u in P(u/v)
 | binders (not_ phi) := fast_admits_aux binders phi
-| binders (imp_ phi Q) := fast_admits_aux binders phi ∧ fast_admits_aux binders Q
+| binders (imp_ phi psi) := fast_admits_aux binders phi ∧ fast_admits_aux binders psi
 | binders (forall_ x phi) := v = x ∨ fast_admits_aux (binders ∪ {x}) phi
 
 /--
@@ -89,7 +89,7 @@ def to_is_bound_aux : finset var_name → formula → bool_formula
 | _ true_ := bool_formula.true_
 | binders (pred_ name args) := bool_formula.pred_ name (args.map (fun (v : var_name), v ∈ binders))
 | binders (not_ phi) := bool_formula.not_ (to_is_bound_aux binders phi)
-| binders (imp_ phi Q) := bool_formula.imp_ (to_is_bound_aux binders phi) (to_is_bound_aux binders Q)
+| binders (imp_ phi psi) := bool_formula.imp_ (to_is_bound_aux binders phi) (to_is_bound_aux binders psi)
 | binders (forall_ x phi) := bool_formula.forall_ true (to_is_bound_aux (binders ∪ {x}) phi)
 
 
@@ -133,7 +133,7 @@ begin
     unfold fast_admits_aux,
     exact phi_ih binders h1 h2,
   },
-  case fol.formula.imp_ : phi Q phi_ih Q_ih binders h1 h2
+  case fol.formula.imp_ : phi psi phi_ih psi_ih binders h1 h2
   {
     unfold admits_aux at h2,
     simp at h2,
@@ -146,7 +146,7 @@ begin
       exact phi_ih binders h1 h2_left,
     },
     {
-      exact Q_ih binders h1 h2_right,
+      exact psi_ih binders h1 h2_right,
     }
   },
   case formula.forall_ : x phi phi_ih binders h1 h2
@@ -200,7 +200,7 @@ begin
     unfold admits_aux,
     exact phi_ih binders h1,
   },
-  case fol.formula.imp_ : phi Q phi_ih Q_ih binders h1
+  case fol.formula.imp_ : phi psi phi_ih psi_ih binders h1
   {
     unfold admits_aux,
     simp,
@@ -209,7 +209,7 @@ begin
       exact phi_ih binders h1,
     },
     {
-      exact Q_ih binders h1,
+      exact psi_ih binders h1,
     }
   },
   case formula.forall_ : x phi phi_ih binders h1
@@ -252,7 +252,7 @@ begin
     unfold admits_aux,
     exact phi_ih binders h1,
   },
-  case fol.formula.imp_ : phi Q phi_ih Q_ih binders h1
+  case fol.formula.imp_ : phi psi phi_ih psi_ih binders h1
   {
     unfold fast_admits_aux at h1,
     simp at h1,
@@ -265,7 +265,7 @@ begin
       exact phi_ih binders h1_left,
     },
     {
-      exact Q_ih binders h1_right,
+      exact psi_ih binders h1_right,
     }
   },
   case formula.forall_ : x phi phi_ih binders h1
@@ -334,7 +334,7 @@ begin
     unfold fast_admits_aux,
     exact phi_ih binders h1,
   },
-  case fol.formula.imp_ : phi Q phi_ih Q_ih binders h1
+  case fol.formula.imp_ : phi psi phi_ih psi_ih binders h1
   {
     unfold fast_admits_aux,
     simp,
@@ -343,7 +343,7 @@ begin
       exact phi_ih binders h1,
     },
     {
-      exact Q_ih binders h1,
+      exact psi_ih binders h1,
     },
   },
   case formula.forall_ : x phi phi_ih binders h1
@@ -407,7 +407,7 @@ begin
     unfold fast_admits_aux,
     exact phi_ih h1 binders,
   },
-  case fol.formula.imp_ : phi Q phi_ih Q_ih binders
+  case fol.formula.imp_ : phi psi phi_ih psi_ih binders
   {
     unfold is_free_in at h1,
     simp at h1,
@@ -421,7 +421,7 @@ begin
       exact phi_ih h1_left binders,
     },
     {
-      exact Q_ih h1_right binders,
+      exact psi_ih h1_right binders,
     },
   },
   case fol.formula.forall_ : x phi phi_ih binders
@@ -485,7 +485,7 @@ begin
     unfold fast_admits_aux,
     tauto,
   },
-  case formula.imp_ : phi Q phi_ih Q_ih binders h2
+  case formula.imp_ : phi psi phi_ih psi_ih binders h2
   {
     unfold is_bound_in at h1,
     simp at h1,
@@ -563,7 +563,7 @@ begin
     unfold fast_admits_aux,
     tauto,
   },
-  case formula.imp_ : phi Q phi_ih Q_ih binders h2
+  case formula.imp_ : phi psi phi_ih psi_ih binders h2
   {
     unfold occurs_in at h1,
     simp at h1,
@@ -663,7 +663,7 @@ begin
     unfold fast_admits_aux,
     tauto,
   },
-  case formula.imp_ : phi Q phi_ih Q_ih binders
+  case formula.imp_ : phi psi phi_ih psi_ih binders
   {
     unfold occurs_in at h1,
     simp at h1,
@@ -730,7 +730,7 @@ begin
     unfold fast_admits_aux,
     tauto,
   },
-  case formula.imp_ : phi Q phi_ih Q_ih S h1
+  case formula.imp_ : phi psi phi_ih psi_ih S h1
   {
     unfold fast_admits_aux at h1,
     simp at h1,
@@ -788,7 +788,7 @@ begin
     unfold fast_admits_aux,
     tauto,
   },
-  case formula.imp_ : phi Q phi_ih Q_ih S h1
+  case formula.imp_ : phi psi phi_ih psi_ih S h1
   {
     unfold fast_admits_aux at h1,
     simp at h1,
@@ -845,7 +845,7 @@ begin
 
     exact phi_ih h2 binders h1,
   },
-  case formula.imp_ : phi Q phi_ih Q_ih binders h1
+  case formula.imp_ : phi psi phi_ih psi_ih binders h1
   {
     unfold fast_admits_aux at h1,
     simp at h1,
@@ -859,7 +859,7 @@ begin
       exact phi_ih h2 binders h1_left,
     },
     {
-      exact Q_ih h2 binders h1_right,
+      exact psi_ih h2 binders h1_right,
     }
   },
   case formula.forall_ : x phi phi_ih binders h1
@@ -962,7 +962,7 @@ begin
     congr' 1,
     exact phi_ih binders h1 h2,
   },
-  case formula.imp_ : phi Q phi_ih Q_ih binders h1 h2
+  case formula.imp_ : phi psi phi_ih psi_ih binders h1 h2
   {
     unfold fast_admits_aux at h2,
     simp at h2,
@@ -975,7 +975,7 @@ begin
       exact phi_ih binders h1 h2_left,
     },
     {
-      exact Q_ih binders h1 h2_right,
+      exact psi_ih binders h1 h2_right,
     }
   },
   case formula.forall_ : x phi phi_ih binders h1 h2
@@ -1061,7 +1061,7 @@ begin
     unfold fast_admits_aux,
     exact phi_ih binders h1 h2,
   },
-  case formula.imp_ : phi Q phi_ih Q_ih binders h1 h2
+  case formula.imp_ : phi psi phi_ih psi_ih binders h1 h2
   {
     unfold fast_replace_free at h2,
     unfold to_is_bound_aux at h2,
@@ -1144,7 +1144,7 @@ begin
     unfold admits_aux,
     exact phi_ih binders,
   },
-  case fol.formula.imp_ : phi Q phi_ih Q_ih binders
+  case fol.formula.imp_ : phi psi phi_ih psi_ih binders
   {
     unfold admits_aux,
     simp,
@@ -1198,7 +1198,7 @@ begin
     unfold admits_aux,
     exact phi_ih h1 binders,
   },
-  case fol.formula.imp_ : phi Q phi_ih Q_ih binders
+  case fol.formula.imp_ : phi psi phi_ih psi_ih binders
   {
     unfold is_free_in at h1,
     simp at h1,
@@ -1212,7 +1212,7 @@ begin
       exact phi_ih h1_left binders,
     },
     {
-      exact Q_ih h1_right binders,
+      exact psi_ih h1_right binders,
     }
   },
   case formula.forall_ : x phi phi_ih binders
@@ -1274,7 +1274,7 @@ begin
     unfold admits_aux,
     tauto,
   },
-  case formula.imp_ : phi Q phi_ih Q_ih binders h2
+  case formula.imp_ : phi psi phi_ih psi_ih binders h2
   {
     unfold is_bound_in at h1,
     simp at h1,
@@ -1362,7 +1362,7 @@ begin
     unfold admits_aux,
     tauto,
   },
-  case formula.imp_ : phi Q phi_ih Q_ih binders
+  case formula.imp_ : phi psi phi_ih psi_ih binders
   {
     unfold occurs_in at h1,
     simp at h1,
@@ -1428,7 +1428,7 @@ begin
     unfold admits_aux,
     tauto,
   },
-  case formula.imp_ : phi Q phi_ih Q_ih S h1
+  case formula.imp_ : phi psi phi_ih psi_ih S h1
   {
     unfold admits_aux at h1,
     simp at h1,
@@ -1478,7 +1478,7 @@ begin
     unfold admits_aux,
     tauto,
   },
-  case formula.imp_ : phi Q phi_ih Q_ih S h1
+  case formula.imp_ : phi psi phi_ih psi_ih S h1
   {
     unfold admits_aux at h1,
     simp at h1,
@@ -1533,7 +1533,7 @@ begin
 
     exact phi_ih h2 binders h1 h3,
   },
-  case formula.imp_ : phi Q phi_ih Q_ih binders h1
+  case formula.imp_ : phi psi phi_ih psi_ih binders h1
   {
     unfold admits_aux at h1,
     simp at h1,
@@ -1547,7 +1547,7 @@ begin
       exact phi_ih h2 binders h1_left h3,
     },
     {
-      exact Q_ih h2 binders h1_right h3,
+      exact psi_ih h2 binders h1_right h3,
     }
   },
   case formula.forall_ : x phi phi_ih binders h1
