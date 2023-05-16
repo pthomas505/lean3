@@ -39,8 +39,8 @@ def admits_aux (v u : var_name) : finset var_name → formula → bool
   v → u in P
 -/
 @[derive decidable]
-def admits (v u : var_name) (P : formula) : bool :=
-  admits_aux v u ∅ P
+def admits (v u : var_name) (F : formula) : bool :=
+  admits_aux v u ∅ F
 
 
 /--
@@ -66,8 +66,8 @@ def fast_admits_aux (v u : var_name) : finset var_name → formula → bool
   This is a more efficient version of admits.
 -/
 @[derive decidable]
-def fast_admits (v u : var_name) (P : formula) : bool :=
-  fast_admits_aux v u ∅ P
+def fast_admits (v u : var_name) (F : formula) : bool :=
+  fast_admits_aux v u ∅ F
 
 
 /--
@@ -96,21 +96,21 @@ def to_is_bound_aux : finset var_name → formula → bool_formula
 /--
   Creates a bool_formula from a formula. Each bound occurence of a variable in the formula is mapped to true in the bool formula. Each free occurence of a variable in the formula is mapped to false in the bool formula.
 -/
-def to_is_bound (P : formula) : bool_formula :=
-  to_is_bound_aux ∅ P
+def to_is_bound (F : formula) : bool_formula :=
+  to_is_bound_aux ∅ F
 
 
 -- admits ↔ fast_admits
 
 lemma admits_aux_imp_fast_admits_aux
-  (P : formula)
+  (F : formula)
   (v u : var_name)
   (binders : finset var_name)
   (h1 : v ∉ binders)
-  (h2 : admits_aux v u binders P) :
-  fast_admits_aux v u binders P :=
+  (h2 : admits_aux v u binders F) :
+  fast_admits_aux v u binders F :=
 begin
-  induction P generalizing binders,
+  induction F generalizing binders,
   case formula.true_ : binders h1 h2
   {
     unfold fast_admits_aux,
@@ -176,13 +176,13 @@ end
 
 
 lemma mem_binders_imp_admits_aux
-  (P : formula)
+  (F : formula)
   (v u : var_name)
   (binders : finset var_name)
   (h1 : v ∈ binders) :
-  admits_aux v u binders P :=
+  admits_aux v u binders F :=
 begin
-  induction P generalizing binders,
+  induction F generalizing binders,
   case formula.true_ : binders h1
   {
     unfold admits_aux,
@@ -224,13 +224,13 @@ end
 
 
 lemma fast_admits_aux_imp_admits_aux
-  (P : formula)
+  (F : formula)
   (v u : var_name)
   (binders : finset var_name)
-  (h1 : fast_admits_aux v u binders P) :
-  admits_aux v u binders P :=
+  (h1 : fast_admits_aux v u binders F) :
+  admits_aux v u binders F :=
 begin
-  induction P generalizing binders,
+  induction F generalizing binders,
   case formula.true_ : binders h1
   {
     unfold admits_aux,
@@ -289,9 +289,9 @@ end
 
 
 theorem admits_iff_fast_admits
-  (P : formula)
+  (F : formula)
   (v u : var_name) :
-  admits v u P ↔ fast_admits v u P :=
+  admits v u F ↔ fast_admits v u F :=
 begin
   unfold admits,
   unfold fast_admits,
@@ -310,13 +310,13 @@ end
 
 
 lemma fast_admits_aux_self
-  (P : formula)
+  (F : formula)
   (v : var_name)
   (binders : finset var_name)
   (h1 : v ∉ binders) :
-  fast_admits_aux v v binders P :=
+  fast_admits_aux v v binders F :=
 begin
-  induction P generalizing binders,
+  induction F generalizing binders,
   case formula.true_ : binders h1
   {
     unfold fast_admits_aux,
@@ -366,9 +366,9 @@ end
 
 
 theorem fast_admits_self
-  (P : formula)
+  (F : formula)
   (v : var_name) :
-  fast_admits v v P :=
+  fast_admits v v F :=
 begin
   unfold fast_admits,
   apply fast_admits_aux_self,
@@ -378,13 +378,13 @@ end
 --
 
 lemma not_is_free_in_imp_fast_admits_aux
-  (P : formula)
+  (F : formula)
   (v u : var_name)
   (binders : finset var_name)
-  (h1 : ¬ is_free_in v P) :
-  fast_admits_aux v u binders P :=
+  (h1 : ¬ is_free_in v F) :
+  fast_admits_aux v u binders F :=
 begin
-  induction P generalizing binders,
+  induction F generalizing binders,
   case formula.true_ : binders
   {
     unfold fast_admits_aux,
@@ -446,10 +446,10 @@ end
 
 
 theorem not_is_free_in_imp_fast_admits
-  (P : formula)
+  (F : formula)
   (v u : var_name)
-  (h1 : ¬ is_free_in v P) :
-  fast_admits v u P :=
+  (h1 : ¬ is_free_in v F) :
+  fast_admits v u F :=
 begin
   unfold fast_admits,
   apply not_is_free_in_imp_fast_admits_aux,
@@ -459,14 +459,14 @@ end
 --
 
 lemma not_is_bound_in_imp_fast_admits_aux
-  (P : formula)
+  (F : formula)
   (v u : var_name)
   (binders : finset var_name)
-  (h1 : ¬ is_bound_in u P)
+  (h1 : ¬ is_bound_in u F)
   (h2 : u ∉ binders) :
-  fast_admits_aux v u binders P :=
+  fast_admits_aux v u binders F :=
 begin
-  induction P generalizing binders,
+  induction F generalizing binders,
   case formula.true_ : binders h2
   {
     unfold fast_admits_aux,
@@ -516,10 +516,10 @@ begin
 end
 
 theorem not_is_bound_in_imp_fast_admits
-  (P : formula)
+  (F : formula)
   (v u : var_name)
-  (h1 : ¬ is_bound_in u P) :
-  fast_admits v u P :=
+  (h1 : ¬ is_bound_in u F) :
+  fast_admits v u F :=
 begin
   unfold fast_admits,
   apply not_is_bound_in_imp_fast_admits_aux,
@@ -534,14 +534,14 @@ end
 --
 
 lemma fast_replace_free_aux_fast_admits_aux
-  (P : formula)
+  (F : formula)
   (v t : var_name)
   (binders : finset var_name)
-  (h1 : ¬ occurs_in t P)
+  (h1 : ¬ occurs_in t F)
   (h2 : v ∉ binders) :
-  fast_admits_aux t v binders (fast_replace_free v t P) :=
+  fast_admits_aux t v binders (fast_replace_free v t F) :=
 begin
-  induction P generalizing binders,
+  induction F generalizing binders,
   case formula.true_ : binders h2
   {
     unfold fast_replace_free,
@@ -606,26 +606,26 @@ end
 
 
 lemma fast_replace_free_fast_admits
-  (P : formula)
+  (F : formula)
   (v t : var_name)
-  (h1 : ¬ occurs_in t P) :
-  fast_admits t v (fast_replace_free v t P) :=
+  (h1 : ¬ occurs_in t F) :
+  fast_admits t v (fast_replace_free v t F) :=
 begin
   unfold fast_admits,
-  apply fast_replace_free_aux_fast_admits_aux P v t ∅ h1,
+  apply fast_replace_free_aux_fast_admits_aux F v t ∅ h1,
   simp only [finset.not_mem_empty, not_false_iff],
 end
 
 --
 
 lemma replace_free_aux_fast_admits_aux
-  (P : formula)
+  (F : formula)
   (v t : var_name)
   (binders : finset var_name)
-  (h1 : ¬ occurs_in t P) :
-  fast_admits_aux t v binders (replace_free_aux v t binders P) :=
+  (h1 : ¬ occurs_in t F) :
+  fast_admits_aux t v binders (replace_free_aux v t binders F) :=
 begin
-  induction P generalizing binders,
+  induction F generalizing binders,
   case formula.true_ : binders
   {
     unfold replace_free_aux,
@@ -687,10 +687,10 @@ end
 
 
 lemma replace_free_fast_admits
-  (P : formula)
+  (F : formula)
   (v t : var_name)
-  (h1 : ¬ occurs_in t P) :
-  fast_admits t v (replace_free v t P) :=
+  (h1 : ¬ occurs_in t F) :
+  fast_admits t v (replace_free v t F) :=
 begin
   unfold replace_free,
   unfold fast_admits,
@@ -701,14 +701,14 @@ end
 --
 
 lemma fast_admits_aux_add_binders
-  (P : formula)
+  (F : formula)
   (v u : var_name)
   (S T : finset var_name)
-  (h1 : fast_admits_aux v u S P)
+  (h1 : fast_admits_aux v u S F)
   (h2 : u ∉ T) :
-  fast_admits_aux v u (S ∪ T) P :=
+  fast_admits_aux v u (S ∪ T) F :=
 begin
-  induction P generalizing S,
+  induction F generalizing S,
   case formula.true_ : S h1
   {
     unfold fast_admits_aux,
@@ -760,13 +760,13 @@ end
 
 
 lemma fast_admits_aux_del_binders
-  (P : formula)
+  (F : formula)
   (v u : var_name)
   (S T : finset var_name)
-  (h1 : fast_admits_aux v u (S ∪ T) P) :
-  fast_admits_aux v u S P :=
+  (h1 : fast_admits_aux v u (S ∪ T) F) :
+  fast_admits_aux v u S F :=
 begin
-  induction P generalizing S,
+  induction F generalizing S,
   case formula.true_ : S h1
   {
     unfold fast_admits_aux,
@@ -813,14 +813,14 @@ end
 --
 
 lemma fast_admits_aux_is_free_in
-  (P : formula)
+  (F : formula)
   (v u : var_name)
   (binders : finset var_name)
-  (h1 : fast_admits_aux v u binders P)
-  (h2 : is_free_in v P) :
+  (h1 : fast_admits_aux v u binders F)
+  (h2 : is_free_in v F) :
   u ∉ binders :=
 begin
-  induction P generalizing binders,
+  induction F generalizing binders,
   case formula.true_ : binders h1
   {
     unfold is_free_in at h2,
@@ -886,15 +886,15 @@ end
 
 
 lemma fast_admits_aux_mem_binders
-  (P : formula)
+  (F : formula)
   (v u : var_name)
   (binders : finset var_name)
-  (h1 : fast_admits_aux v u binders P)
+  (h1 : fast_admits_aux v u binders F)
   (h2 : u ∈ binders) :
-  ¬ is_free_in v P :=
+  ¬ is_free_in v F :=
 begin
   contrapose! h2,
-  exact fast_admits_aux_is_free_in P v u binders h1 h2,
+  exact fast_admits_aux_is_free_in F v u binders h1 h2,
 end
 
 
@@ -902,14 +902,14 @@ end
 
 
 lemma fast_admits_aux_imp_free_and_bound_unchanged
-  (P : formula)
+  (F : formula)
   (v u : var_name)
   (binders : finset var_name)
   (h1 : v ∉ binders)
-  (h2 : fast_admits_aux v u binders P) :
-  to_is_bound_aux binders P = to_is_bound_aux binders (fast_replace_free v u P) :=
+  (h2 : fast_admits_aux v u binders F) :
+  to_is_bound_aux binders F = to_is_bound_aux binders (fast_replace_free v u F) :=
 begin
-  induction P generalizing binders,
+  induction F generalizing binders,
   case formula.true_ : binders h1 h2
   {
     refl,
@@ -1005,14 +1005,14 @@ end
 
 
 lemma free_and_bound_unchanged_imp_fast_admits_aux
-  (P : formula)
+  (F : formula)
   (v u : var_name)
   (binders : finset var_name)
   (h1 : v ∉ binders)
-  (h2 : to_is_bound_aux binders P = to_is_bound_aux binders (fast_replace_free v u P)) :
-  fast_admits_aux v u binders P :=
+  (h2 : to_is_bound_aux binders F = to_is_bound_aux binders (fast_replace_free v u F)) :
+  fast_admits_aux v u binders F :=
 begin
-  induction P generalizing binders,
+  induction F generalizing binders,
   case formula.true_ : binders h1 h2
   {
     unfold fast_admits_aux,
@@ -1101,9 +1101,9 @@ end
 
 
 example
-  (P : formula)
+  (F : formula)
   (v u : var_name) :
-  fast_admits v u P ↔ to_is_bound P = to_is_bound (fast_replace_free v u P) :=
+  fast_admits v u F ↔ to_is_bound F = to_is_bound (fast_replace_free v u F) :=
 begin
   unfold fast_admits,
   unfold to_is_bound,
@@ -1123,12 +1123,12 @@ end
 
 
 lemma admits_aux_self
-  (P : formula)
+  (F : formula)
   (v : var_name)
   (binders : finset var_name) :
-  admits_aux v v binders P :=
+  admits_aux v v binders F :=
 begin
-  induction P generalizing binders,
+  induction F generalizing binders,
   case fol.formula.true_ : binders
   {
     unfold admits_aux,
@@ -1159,9 +1159,9 @@ end
 
 
 theorem admits_self
-  (P : formula)
+  (F : formula)
   (v : var_name) :
-  admits v v P :=
+  admits v v F :=
 begin
   unfold admits,
   apply admits_aux_self,
@@ -1170,13 +1170,13 @@ end
 --
 
 lemma not_is_free_in_imp_admits_aux
-  (P : formula)
+  (F : formula)
   (v u : var_name)
   (binders : finset var_name)
-  (h1 : ¬ is_free_in v P) :
-  admits_aux v u binders P :=
+  (h1 : ¬ is_free_in v F) :
+  admits_aux v u binders F :=
 begin
-  induction P generalizing binders,
+  induction F generalizing binders,
   case formula.true_ : binders
   {
     unfold admits_aux,
@@ -1235,10 +1235,10 @@ end
 
 
 theorem not_is_free_in_imp_admits
-  (P : formula)
+  (F : formula)
   (v u : var_name)
-  (h1 : ¬ is_free_in v P) :
-  admits v u P :=
+  (h1 : ¬ is_free_in v F) :
+  admits v u F :=
 begin
   unfold admits,
   apply not_is_free_in_imp_admits_aux,
@@ -1248,14 +1248,14 @@ end
 --
 
 lemma not_is_bound_in_imp_admits_aux
-  (P : formula)
+  (F : formula)
   (v u : var_name)
   (binders : finset var_name)
-  (h1 : ¬ is_bound_in u P)
+  (h1 : ¬ is_bound_in u F)
   (h2 : u ∉ binders) :
-  admits_aux v u binders P :=
+  admits_aux v u binders F :=
 begin
-  induction P generalizing binders,
+  induction F generalizing binders,
   case formula.true_ : binders h2
   {
     unfold admits_aux,
@@ -1299,10 +1299,10 @@ end
 
 
 theorem not_is_bound_in_imp_admits
-  (P : formula)
+  (F : formula)
   (v u : var_name)
-  (h1 : ¬ is_bound_in u P) :
-  admits v u P :=
+  (h1 : ¬ is_bound_in u F) :
+  admits v u F :=
 begin
   unfold admits,
   apply not_is_bound_in_imp_admits_aux,
@@ -1317,13 +1317,13 @@ end
 --
 
 lemma replace_free_aux_admits_aux
-  (P : formula)
+  (F : formula)
   (v t : var_name)
   (binders : finset var_name)
-  (h1 : ¬ occurs_in t P) :
-  admits_aux t v binders (replace_free_aux v t binders P) :=
+  (h1 : ¬ occurs_in t F) :
+  admits_aux t v binders (replace_free_aux v t binders F) :=
 begin
-  induction P generalizing binders,
+  induction F generalizing binders,
   case formula.true_ : binders
   {
     unfold replace_free_aux,
@@ -1385,10 +1385,10 @@ end
 
 
 theorem replace_free_admits
-  (P : formula)
+  (F : formula)
   (v t : var_name)
-  (h1 : ¬ occurs_in t P) :
-  admits t v (replace_free v t P) :=
+  (h1 : ¬ occurs_in t F) :
+  admits t v (replace_free v t F) :=
 begin
   unfold replace_free,
   unfold admits,
@@ -1399,14 +1399,14 @@ end
 --
 
 lemma admits_aux_add_binders
-  (P : formula)
+  (F : formula)
   (v u : var_name)
   (S T : finset var_name)
-  (h1 : admits_aux v u S P)
+  (h1 : admits_aux v u S F)
   (h2 : u ∉ T) :
-  admits_aux v u (S ∪ T) P :=
+  admits_aux v u (S ∪ T) F :=
 begin
-  induction P generalizing S,
+  induction F generalizing S,
   case formula.true_ : S h1
   {
     unfold admits_aux,
@@ -1449,14 +1449,14 @@ end
 
 
 lemma admits_aux_del_binders
-  (P : formula)
+  (F : formula)
   (v u : var_name)
   (S T : finset var_name)
-  (h1 : admits_aux v u (S ∪ T) P)
+  (h1 : admits_aux v u (S ∪ T) F)
   (h2 : v ∉ T) :
-  admits_aux v u S P :=
+  admits_aux v u S F :=
 begin
-  induction P generalizing S,
+  induction F generalizing S,
   case formula.true_ : S h1
   {
     unfold admits_aux,
@@ -1500,15 +1500,15 @@ end
 
 
 lemma admits_aux_is_free_in
-  (P : formula)
+  (F : formula)
   (v u : var_name)
   (binders : finset var_name)
-  (h1 : admits_aux v u binders P)
-  (h2 : is_free_in v P)
+  (h1 : admits_aux v u binders F)
+  (h2 : is_free_in v F)
   (h3 : v ∉ binders) :
   u ∉ binders :=
 begin
-  induction P generalizing binders,
+  induction F generalizing binders,
   case formula.true_ : binders h1
   {
     unfold is_free_in at h2,
