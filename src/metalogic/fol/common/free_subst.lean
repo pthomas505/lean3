@@ -17,9 +17,9 @@ inductive is_free_sub : formula → var_name → var_name → formula → Prop
   is_free_sub true_ v t true_
 
 | pred_
-  (name : pred_name) (args : list var_name)
+  (X : pred_name) (xs : list var_name)
   (v t : var_name) :
-    is_free_sub (pred_ name args) v t (pred_ name (args.map (fun (x : var_name), if x = v then t else x)))
+    is_free_sub (pred_ X xs) v t (pred_ X (xs.map (fun (x : var_name), if x = v then t else x)))
 
 | not_
   (phi : formula)
@@ -67,7 +67,7 @@ begin
     unfold fast_replace_free,
     apply is_free_sub.true_,
   },
-  case formula.pred_ : name args binders h1
+  case formula.pred_ : X xs binders h1
   {
     unfold fast_replace_free,
     apply is_free_sub.pred_,
@@ -180,7 +180,7 @@ begin
     unfold fast_admits_aux,
     squeeze_simp,
   },
-  case is_free_sub.pred_ : h1_1_name h1_1_args h1_1_v h1_1_t binders h2
+  case is_free_sub.pred_ : h1_1_X h1_1_xs h1_1_v h1_1_t binders h2
   {
     unfold fast_admits_aux,
     squeeze_simp,
@@ -257,7 +257,7 @@ begin
   {
     refl,
   },
-  case is_free_sub.pred_ : h1_name h1_args h1_v h1_t
+  case is_free_sub.pred_ : h1_X h1_xs h1_v h1_t
   {
     unfold fast_replace_free,
   },
