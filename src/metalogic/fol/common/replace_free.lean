@@ -60,7 +60,7 @@ def replace_free (v t : var_name) (F : formula) : formula :=
   This is a more efficient version of replace_free.
 -/
 def fast_replace_free (v t : var_name) : formula → formula
-| (true_) := true_
+| true_ := true_
 | (pred_ X xs) :=
     pred_
     X
