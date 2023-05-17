@@ -17,110 +17,110 @@ open formula
 -/
 def replace_free_fun_aux (σ : var_name → var_name) : finset var_name → formula → formula
 | _ true_ := true_
-| binders (pred_ name args) :=
+| binders (pred_ X xs) :=
     pred_
-    name
-    (args.map (fun (x : var_name), if x ∈ binders then x else σ x))
-| binders (not_ P) := not_ (replace_free_fun_aux binders P)
-| binders (imp_ P Q) :=
+    X
+    (xs.map (fun (x : var_name), if x ∈ binders then x else σ x))
+| binders (not_ phi) := not_ (replace_free_fun_aux binders phi)
+| binders (imp_ phi psi) :=
     imp_
-    (replace_free_fun_aux binders P)
-    (replace_free_fun_aux binders Q)
-| binders (forall_ x P) :=
-    forall_ x (replace_free_fun_aux (binders ∪ {x}) P)
+    (replace_free_fun_aux binders phi)
+    (replace_free_fun_aux binders psi)
+| binders (forall_ x phi) :=
+    forall_ x (replace_free_fun_aux (binders ∪ {x}) phi)
 
 
 /--
-  replace_free_fun σ P := The simultaneous replacement of each free occurence of any variable v in the formula P by σ v.
+  replace_free_fun σ F := The simultaneous replacement of each free occurence of any variable v in the formula F by σ v.
 -/
-def replace_free_fun (σ : var_name → var_name) (P : formula) : formula := replace_free_fun_aux σ ∅ P
+def replace_free_fun (σ : var_name → var_name) (F : formula) : formula := replace_free_fun_aux σ ∅ F
 
 
 /--
-  fast_replace_free_fun σ P := The simultaneous replacement of each free occurence of any variable v in the formula P by σ v.
+  fast_replace_free_fun σ F := The simultaneous replacement of each free occurence of any variable v in the formula F by σ v.
 -/
 def fast_replace_free_fun : (var_name → var_name) → formula → formula
 | _ true_ := true_
-| σ (pred_ name args) := pred_ name (args.map σ)
-| σ (not_ P) := not_ (fast_replace_free_fun σ P)
-| σ (imp_ P Q) := imp_ (fast_replace_free_fun σ P) (fast_replace_free_fun σ Q)
-| σ (forall_ x P) := forall_ x (fast_replace_free_fun (function.update_ite σ x x) P)
+| σ (pred_ X xs) := pred_ X (xs.map σ)
+| σ (not_ phi) := not_ (fast_replace_free_fun σ phi)
+| σ (imp_ phi psi) := imp_ (fast_replace_free_fun σ phi) (fast_replace_free_fun σ psi)
+| σ (forall_ x phi) := forall_ x (fast_replace_free_fun (function.update_ite σ x x) phi)
 
 
 
 lemma fast_replace_free_fun_id
-  (P : formula) :
-  fast_replace_free_fun id P = P :=
+  (F : formula) :
+  fast_replace_free_fun id F = F :=
 begin
-  induction P,
+  induction F,
   case formula.true_
   {
     refl,
   },
-  case formula.pred_ : name args
+  case formula.pred_ : X xs
   {
     unfold fast_replace_free_fun,
     simp only [list.map_id, eq_self_iff_true, and_self],
   },
-  case formula.not_ : P P_ih
+  case formula.not_ : phi phi_ih
   {
     solve_by_elim,
   },
-  case formula.imp_ : P Q P_ih Q_ih
+  case formula.imp_ : phi psi phi_ih psi_ih
   {
     unfold fast_replace_free_fun,
     congr,
     {
-      exact P_ih,
+      exact phi_ih,
     },
     {
-      exact Q_ih,
+      exact psi_ih,
     }
   },
-  case formula.forall_ : x P P_ih
+  case formula.forall_ : x phi phi_ih
   {
     unfold fast_replace_free_fun,
     simp only [eq_self_iff_true, true_and],
     simp only [function.update_ite_id],
-    exact P_ih,
+    exact phi_ih,
   },
 end
 
 
 example
-  (P : formula)
+  (F : formula)
   (v t : var_name) :
-  fast_replace_free_fun (function.update_ite id v t) P = fast_replace_free v t P :=
+  fast_replace_free_fun (function.update_ite id v t) F = fast_replace_free v t F :=
 begin
-  induction P,
+  induction F,
   case formula.true_
   {
     refl,
   },
-  case formula.pred_ : name args
+  case formula.pred_ : X xs
   {
     refl,
   },
-  case formula.not_ : P P_ih
+  case formula.not_ : phi phi_ih
   {
     unfold fast_replace_free_fun,
     unfold fast_replace_free,
     congr,
-    exact P_ih,
+    exact phi_ih,
   },
-  case formula.imp_ : P Q P_ih Q_ih
+  case formula.imp_ : phi psi phi_ih psi_ih
   {
     unfold fast_replace_free_fun,
     unfold fast_replace_free,
     congr,
     {
-      exact P_ih,
+      exact phi_ih,
     },
     {
-      exact Q_ih,
+      exact psi_ih,
     }
   },
-  case formula.forall_ : x P P_ih
+  case formula.forall_ : x phi phi_ih
   {
     unfold fast_replace_free_fun,
     unfold fast_replace_free,
@@ -154,25 +154,25 @@ begin
 
       simp only [eq_self_iff_true, true_and],
       simp only [s1],
-      exact P_ih,
+      exact phi_ih,
     }
   },
 end
 
 
 lemma fast_replace_free_fun_same_on_free
-  (P : formula)
+  (F : formula)
   (σ σ' : var_name → var_name)
-  (h1 : ∀ (v : var_name), is_free_in v P → σ v = σ' v) :
-  fast_replace_free_fun σ P =
-    fast_replace_free_fun σ' P :=
+  (h1 : ∀ (v : var_name), is_free_in v F → σ v = σ' v) :
+  fast_replace_free_fun σ F =
+    fast_replace_free_fun σ' F :=
 begin
-  induction P generalizing σ σ',
+  induction F generalizing σ σ',
   case formula.true_ : σ σ' h1
   {
     unfold fast_replace_free_fun,
   },
-  case formula.pred_ : name args σ σ' h1
+  case formula.pred_ : X xs σ σ' h1
   {
     unfold is_free_in at h1,
     squeeze_simp at h1,
@@ -183,15 +183,15 @@ begin
     intros x a1,
     exact h1 x a1,
   },
-  case formula.not_ : P P_ih σ σ' h1
+  case formula.not_ : phi phi_ih σ σ' h1
   {
     unfold is_free_in at h1,
 
     unfold fast_replace_free_fun,
     congr' 1,
-    exact P_ih σ σ' h1,
+    exact phi_ih σ σ' h1,
   },
-  case formula.imp_ : P Q P_ih Q_ih σ σ' h1
+  case formula.imp_ : phi psi phi_ih psi_ih σ σ' h1
   {
     unfold is_free_in at h1,
     squeeze_simp at h1,
@@ -199,25 +199,25 @@ begin
     unfold fast_replace_free_fun,
     congr' 1,
     {
-      apply P_ih,
+      apply phi_ih,
       intros v a1,
       apply h1,
       left,
       exact a1,
     },
     {
-      apply Q_ih,
+      apply psi_ih,
       intros v a1,
       apply h1,
       right,
       exact a1,
     },
   },
-  case formula.forall_ : x P P_ih σ σ' h1
+  case formula.forall_ : x phi phi_ih σ σ' h1
   {
     unfold fast_replace_free_fun,
     congr' 1,
-    apply P_ih,
+    apply phi_ih,
     intros v a1,
     unfold function.update_ite,
     split_ifs,
@@ -241,19 +241,19 @@ end
 
 
 lemma replace_free_fun_aux_same_on_free
-  (P : formula)
+  (F : formula)
   (σ σ' : var_name → var_name)
   (binders : finset var_name)
   (h1 : ∀ (v : var_name), v ∉ binders → σ v = σ' v) :
-  replace_free_fun_aux σ binders P =
-    replace_free_fun_aux σ' binders P :=
+  replace_free_fun_aux σ binders F =
+    replace_free_fun_aux σ' binders F :=
 begin
-  induction P generalizing binders,
+  induction F generalizing binders,
   case formula.true_ : binders h1
   {
     refl,
   },
-  case formula.pred_ : name args binders h1
+  case formula.pred_ : X xs binders h1
   {
     unfold replace_free_fun_aux,
     congr' 1,
@@ -267,28 +267,28 @@ begin
       exact h1 x h,
     }
   },
-  case formula.not_ : P P_ih binders h1
+  case formula.not_ : phi phi_ih binders h1
   {
     unfold replace_free_fun_aux,
     congr' 1,
-    exact P_ih binders h1,
+    exact phi_ih binders h1,
   },
-  case formula.imp_ : P Q P_ih Q_ih binders h1
+  case formula.imp_ : phi psi phi_ih psi_ih binders h1
   {
     unfold replace_free_fun_aux,
     congr' 1,
     {
-      exact P_ih binders h1,
+      exact phi_ih binders h1,
     },
     {
-      exact Q_ih binders h1,
+      exact psi_ih binders h1,
     }
   },
-  case formula.forall_ : x P P_ih binders h1
+  case formula.forall_ : x phi phi_ih binders h1
   {
     unfold replace_free_fun_aux,
     congr' 1,
-    apply P_ih,
+    apply phi_ih,
     intros v a1,
     simp only [finset.mem_union, finset.mem_singleton] at a1,
     push_neg at a1,
@@ -299,19 +299,19 @@ end
 
 
 example
-  (P : formula)
+  (F : formula)
   (σ : var_name → var_name)
   (binders : finset var_name)
   (h1 : ∀ (v : var_name), v ∈ binders → v = σ v) :
-  replace_free_fun_aux σ binders P =
-    fast_replace_free_fun σ P :=
+  replace_free_fun_aux σ binders F =
+    fast_replace_free_fun σ F :=
 begin
-  induction P generalizing binders σ,
+  induction F generalizing binders σ,
   case formula.true_ : binders h1
   {
     refl,
   },
-  case formula.pred_ : name args binders σ h1
+  case formula.pred_ : X xs binders σ h1
   {
     unfold fast_replace_free_fun,
     unfold replace_free_fun_aux,
@@ -326,34 +326,34 @@ begin
       refl,
     }
   },
-  case formula.not_ : P P_ih binders σ h1
+  case formula.not_ : phi phi_ih binders σ h1
   {
     unfold fast_replace_free_fun,
     unfold replace_free_fun_aux,
     congr,
-    exact P_ih binders σ h1,
+    exact phi_ih binders σ h1,
   },
-  case formula.imp_ : P Q P_ih Q_ih binders σ h1
+  case formula.imp_ : phi psi phi_ih psi_ih binders σ h1
   {
     unfold fast_replace_free_fun,
     unfold replace_free_fun_aux,
     congr,
     {
-      exact P_ih binders σ h1,
+      exact phi_ih binders σ h1,
     },
     {
-      exact Q_ih binders σ h1,
+      exact psi_ih binders σ h1,
     }
   },
-  case formula.forall_ : x P P_ih binders σ h1
+  case formula.forall_ : x phi phi_ih binders σ h1
   {
     unfold fast_replace_free_fun,
     unfold replace_free_fun_aux,
     congr,
 
-    rewrite replace_free_fun_aux_same_on_free P σ (function.update_ite σ x x),
+    rewrite replace_free_fun_aux_same_on_free phi σ (function.update_ite σ x x),
 
-    apply P_ih,
+    apply phi_ih,
     {
       intros v a1,
       unfold function.update_ite,
