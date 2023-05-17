@@ -69,7 +69,7 @@ def fast_replace_free (v t : var_name) : formula → formula
 | (imp_ phi psi) := imp_ (fast_replace_free phi) (fast_replace_free psi)
 | (forall_ x phi) :=
     if v = x
-    then forall_ x phi -- v is not free in P
+    then forall_ x phi -- v is not free in (forall_ x phi)
     else forall_ x (fast_replace_free phi)
 
 
