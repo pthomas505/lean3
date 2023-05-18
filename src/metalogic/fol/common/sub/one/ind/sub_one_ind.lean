@@ -1,9 +1,9 @@
 import metalogic.fol.aux.misc_list
 import metalogic.fol.aux.function_update_ite
-import metalogic.fol.common.semantics
-import metalogic.fol.common.binders
 
-import .admits_single
+import metalogic.fol.common.semantics
+
+import metalogic.fol.common.sub.one.rec.sub_one_rec_admits
 
 import data.finset
 

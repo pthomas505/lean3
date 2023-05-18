@@ -3,7 +3,7 @@ import metalogic.fol.aux.function_update_ite
 import metalogic.fol.common.semantics
 import metalogic.fol.common.binders
 
-import metalogic.fol.common.subst_fun.admits_multiple
+import metalogic.fol.common.sub.all.rec.sub_all_rec_admits
 
 import data.finset
 

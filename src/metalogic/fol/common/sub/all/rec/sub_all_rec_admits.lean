@@ -3,7 +3,7 @@ import metalogic.fol.aux.function_update_ite
 import metalogic.fol.common.semantics
 import metalogic.fol.common.binders
 
-import .replace_free_multiple
+import .sub_all_rec_replace_free
 
 import data.finset
 

@@ -1,9 +1,8 @@
 import metalogic.fol.aux.misc_list
 import metalogic.fol.aux.function_update_ite
 import metalogic.fol.common.semantics
-import metalogic.fol.common.binders
 
-import .replace_free_single
+import .sub_one_rec_replace_free
 
 import data.finset
 
