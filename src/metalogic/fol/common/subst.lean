@@ -2087,7 +2087,7 @@ begin
   case formula.imp_ : phi psi phi_ih psi_ih binders h1
   {
     unfold fast_admits_aux at h1,
-    squeeze_simp at h1,
+    simp at h1,
     cases h1,
 
     apply is_free_sub.imp_,
@@ -2101,7 +2101,7 @@ begin
   case formula.forall_ : x phi phi_ih binders h1
   {
     unfold fast_admits_aux at h1,
-    squeeze_simp at h1,
+    simp at h1,
 
     unfold fast_replace_free,
     cases h1,
@@ -2110,7 +2110,7 @@ begin
       apply is_free_sub.forall_not_free_in,
       subst h1,
       unfold is_free_in,
-      squeeze_simp,
+      simp,
     },
     {
       split_ifs,
@@ -2118,7 +2118,7 @@ begin
         apply is_free_sub.forall_not_free_in,
         subst h,
         unfold is_free_in,
-        squeeze_simp,
+        simp,
       },
       {
         by_cases c1 : ↥(is_free_in v phi),
@@ -2126,7 +2126,7 @@ begin
           apply is_free_sub.forall_free_in,
           {
             unfold is_free_in,
-            squeeze_simp,
+            simp,
             split,
             {
               exact h,
@@ -2156,9 +2156,9 @@ begin
           simp only [s1],
           apply is_free_sub.forall_not_free_in,
           unfold is_free_in,
-          squeeze_simp,
+          simp,
           intros a1,
-          squeeze_simp at c1,
+          simp at c1,
           exact c1,
         },
       },
@@ -2183,12 +2183,12 @@ begin
   case is_free_sub.true_ : h1_1_v h1_1_t binders h2
   {
     unfold fast_admits_aux,
-    squeeze_simp,
+    simp,
   },
   case is_free_sub.pred_ : h1_1_X h1_1_xs h1_1_v h1_1_t binders h2
   {
     unfold fast_admits_aux,
-    squeeze_simp,
+    simp,
     intros a1,
     exact h2,
   },
@@ -2200,7 +2200,7 @@ begin
   case is_free_sub.imp_ : h1_1_phi h1_1_psi h1_1_v h1_1_t h1_1_phi' h1_1_psi' h1_1_1 h1_1_2 h1_1_ih_1 h1_1_ih_2 binders h2
   {
     unfold fast_admits_aux,
-    squeeze_simp,
+    simp,
     split,
     {
       exact h1_1_ih_1 binders h2,
@@ -2215,7 +2215,7 @@ begin
     simp only [bool.of_to_bool_iff, not_and] at h1_1_1,
 
     unfold fast_admits_aux,
-    squeeze_simp,
+    simp,
     by_cases c1 : h1_1_v = h1_1_x,
     {
       left,
@@ -2230,11 +2230,11 @@ begin
   case is_free_sub.forall_free_in : h1_1_x h1_1_phi h1_1_v h1_1_t h1_1_phi' h1_1_1 h1_1_2 h1_1_3 h1_1_ih binders h2
   {
     unfold is_free_in at h1_1_1,
-    squeeze_simp at h1_1_1,
+    simp at h1_1_1,
     cases h1_1_1,
 
     unfold fast_admits_aux,
-    squeeze_simp,
+    simp,
     right,
     apply h1_1_ih,
     simp only [finset.mem_union, finset.mem_singleton],
@@ -2307,7 +2307,7 @@ begin
   case is_free_sub.forall_free_in : h1_x h1_phi h1_v h1_t h1_phi' h1_1 h1_2 h1_3 h1_ih
   {
     unfold is_free_in at h1_1,
-    squeeze_simp at h1_1,
+    simp at h1_1,
     cases h1_1,
 
     unfold fast_replace_free,
@@ -2520,7 +2520,7 @@ begin
   case formula.pred_ : X xs σ σ' h1
   {
     unfold is_free_in at h1,
-    squeeze_simp at h1,
+    simp at h1,
 
     unfold fast_replace_free_fun,
     congr' 1,
@@ -2539,7 +2539,7 @@ begin
   case formula.imp_ : phi psi phi_ih psi_ih σ σ' h1
   {
     unfold is_free_in at h1,
-    squeeze_simp at h1,
+    simp at h1,
 
     unfold fast_replace_free_fun,
     congr' 1,
@@ -2572,7 +2572,7 @@ begin
     {
       apply h1,
       unfold is_free_in,
-      squeeze_simp,
+      simp,
       split,
       {
         exact h,
