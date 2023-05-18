@@ -2361,72 +2361,79 @@ end
 lemma substitution_theorem_aux
   {D : Type}
   (I : interpretation D)
-  (val val' : valuation D)
-  (v t : ind_var)
-  (binders : finset ind_var)
-  (P : formula)
-  (h1 : fast_admits_aux v t binders P)
-  (h2 : ∀ (v : ind_var), ¬ v ∈ binders → val' v = val v) :
-  holds D I (function.update_ite val v (val' t)) P ↔
-    holds D I val (fast_replace_free v t P) :=
+  (V V' : valuation D)
+  (v t : var_name)
+  (binders : finset var_name)
+  (F : formula)
+  (h1 : fast_admits_aux v t binders F)
+  (h2 : ∀ (v : var_name), ¬ v ∈ binders → V' v = V v) :
+  holds D I (function.update_ite V v (V' t)) F ↔
+    holds D I V (fast_replace_free v t F) :=
 begin
-  induction P generalizing binders val,
-  case formula.pred_ : name args binders val h1
+  induction F generalizing binders V,
+  case fol.formula.true_ : binders V h1 h2
+  {
+    unfold fast_replace_free,
+    unfold holds,
+  },
+  case formula.pred_ : X xs binders V h1
   {
     unfold fast_admits_aux at h1,
+    squeeze_simp at h1,
 
     unfold fast_replace_free,
     unfold holds,
     congr' 2,
-    ext1,
     squeeze_simp,
-    split_ifs,
-    subst h,
+    simp only [list.map_eq_map_iff],
+    intros x a1,
     unfold function.update_ite,
-    split_ifs,
-    apply h2,
-    apply h1,
     squeeze_simp,
-    apply h2,
-    apply h1,
-    squeeze_simp,
-    unfold function.update_ite,
     split_ifs,
-    refl,
+    {
+      subst h,
+      apply h2,
+      exact h1 a1,
+    },
+    {
+      refl,
+    }
   },
-  case formula.not_ : P P_ih binders val h1
+  case formula.not_ : phi phi_ih binders V h1
   {
     unfold fast_admits_aux at h1,
 
     unfold fast_replace_free,
     unfold holds,
     apply not_congr,
-    apply P_ih binders,
+    apply phi_ih binders,
     exact h1,
     exact h2,
   },
-  case formula.imp_ : P Q P_ih Q_ih binders val h1
+  case formula.imp_ : phi psi phi_ih psi_ih binders V h1
   {
     unfold fast_admits_aux at h1,
+    squeeze_simp at h1,
     cases h1,
 
     unfold fast_replace_free,
     unfold holds,
     apply imp_congr,
     {
-      apply P_ih binders,
+      apply phi_ih binders,
       exact h1_left,
       exact h2,
     },
     {
-      apply Q_ih binders,
+      apply psi_ih binders,
       exact h1_right,
       exact h2,
     }
   },
-  case formula.forall_ : x P P_ih binders val h1
+  case formula.forall_ : x phi phi_ih binders V h1
   {
     unfold fast_admits_aux at h1,
+    squeeze_simp at h1,
 
     unfold fast_replace_free,
     split_ifs,
@@ -2445,9 +2452,9 @@ begin
       unfold holds,
       apply forall_congr,
       intros d,
-      specialize P_ih (binders ∪ {x}),
+      specialize phi_ih (binders ∪ {x}),
 
-      rewrite <- P_ih,
+      rewrite <- phi_ih,
       congr' 2,
       funext,
       unfold function.update_ite,
@@ -2482,12 +2489,12 @@ end
 theorem substitution_theorem
   {D : Type}
   (I : interpretation D)
-  (val : valuation D)
-  (v t : ind_var)
-  (P : formula)
-  (h1 : fast_admits v t P) :
-  holds D I (function.update_ite val v (val t)) P ↔
-    holds D I val (fast_replace_free v t P) :=
+  (V : valuation D)
+  (v t : var_name)
+  (F : formula)
+  (h1 : fast_admits v t F) :
+  holds D I (function.update_ite V v (V t)) F ↔
+    holds D I V (fast_replace_free v t F) :=
 begin
   unfold fast_admits at h1,
   apply substitution_theorem_aux,
@@ -2497,11 +2504,11 @@ end
 
 
 example
-  (v t : ind_var)
-  (P : formula)
-  (h1 : fast_admits v t P)
-  (h2 : P.is_valid) :
-  (fast_replace_free v t P).is_valid :=
+  (v t : var_name)
+  (F : formula)
+  (h1 : fast_admits v t F)
+  (h2 : F.is_valid) :
+  (fast_replace_free v t F).is_valid :=
 begin
   unfold formula.is_valid at h2,
 
@@ -2516,50 +2523,58 @@ end
 theorem substitution_theorem_ind
   {D : Type}
   (I : interpretation D)
-  (val : valuation D)
-  (v t : ind_var)
-  (P P' : formula)
-  (h1 : is_free_sub P v t P') :
-  holds D I (function.update_ite val v (val t)) P ↔
-    holds D I val P' :=
+  (V : valuation D)
+  (v t : var_name)
+  (F F' : formula)
+  (h1 : is_free_sub F v t F') :
+  holds D I (function.update_ite V v (V t)) F ↔
+    holds D I V F' :=
 begin
-  induction h1 generalizing val,
-  case is_free_sub.pred_ : h1_P h1_xs h1_v h1_t
+  induction h1 generalizing V,
+  case fol.is_free_sub.true_ : h1_v h1_t V
+  {
+    unfold holds,
+  },
+  case is_free_sub.pred_ : h1_X h1_xs h1_v h1_t
   {
     unfold holds,
     congr' 2,
-    ext1,
-    squeeze_simp,
-    split_ifs,
+    simp only [list.map_map],
+    simp only [list.map_eq_map_iff],
+    intros x a1,
     unfold function.update_ite,
     split_ifs,
-    refl,
-    unfold function.update_ite,
-    split_ifs,
-    refl,
+    {
+      squeeze_simp,
+      simp only [if_pos h],
+    },
+    {
+      squeeze_simp,
+      simp only [if_neg h],
+    }
   },
-  case is_free_sub.not_ : h1_P h1_v h1_t h1_P' h1_1 h1_ih
+  case is_free_sub.not_ : h1_phi h1_v h1_t h1_phi' h1_1 h1_ih
   {
     unfold holds,
     apply not_congr,
     apply h1_ih,
   },
-  case is_free_sub.imp_ : h1_P h1_Q h1_v h1_t h1_P' h1_Q' h1_1 h1_2 h1_ih_1 h1_ih_2
+  case is_free_sub.imp_ : h1_phi h1_psi h1_v h1_t h1_phi' h1_psi' h1_1 h1_2 h1_ih_1 h1_ih_2
   {
     unfold holds,
     apply imp_congr,
     apply h1_ih_1,
     apply h1_ih_2,
   },
-  case is_free_sub.forall_not_free_in : h1_x h1_P h1_v h1_t h1_1
+  case is_free_sub.forall_not_free_in : h1_x h1_phi h1_v h1_t h1_1
   {
-    unfold ind_var.is_free_in at h1_1,
+    unfold is_free_in at h1_1,
     squeeze_simp at h1_1,
 
     unfold holds,
     apply forall_congr,
     intros d,
-    apply holds_congr_ind_var,
+    apply holds_congr_var,
     intros x a1,
     unfold function.update_ite,
     split_ifs,
@@ -2570,9 +2585,9 @@ begin
     contradiction,
     refl,
   },
-  case is_free_sub.forall_free_in : h1_x h1_P h1_v h1_t h1_P' h1_1 h1_2 h1_3 h1_ih
+  case is_free_sub.forall_free_in : h1_x h1_phi h1_v h1_t h1_phi' h1_1 h1_2 h1_3 h1_ih
   {
-    unfold ind_var.is_free_in at h1_1,
+    unfold is_free_in at h1_1,
     squeeze_simp at h1_1,
     cases h1_1,
 
@@ -2580,10 +2595,10 @@ begin
     apply forall_congr,
     intros d,
 
-    specialize h1_ih (function.update_ite val h1_x d),
+    specialize h1_ih (function.update_ite V h1_x d),
 
     rewrite <- h1_ih,
-    apply holds_congr_ind_var,
+    apply holds_congr_var,
     intros x a1,
     funext,
     unfold function.update_ite,
@@ -3148,45 +3163,6 @@ begin
   rewrite <- substitution_fun_theorem I V σ F h1,
   exact h2 D I (V ∘ σ),
 end
-
-
-
-inductive is_free_sub_fun : formula → (ind_var → ind_var) → formula → Prop
-
-| pred_
-  (X : pred_var) (xs : vector ind_var X.arity)
-  (σ : ind_var → ind_var) :
-    is_free_sub_fun (pred_ X xs) σ (pred_ X (xs.map σ))
-
-| not_
-  (phi : formula)
-  (σ : ind_var → ind_var)
-  (phi' : formula) :
-  is_free_sub_fun phi σ phi' →
-  is_free_sub_fun phi.not_ σ phi'.not_
-
-| imp_
-  (phi psi : formula)
-  (σ : ind_var → ind_var)
-  (phi' psi' : formula) :
-  is_free_sub_fun phi σ phi' →
-  is_free_sub_fun psi σ psi' →
-  is_free_sub_fun (phi.imp_ psi) σ (phi'.imp_ psi')
-
-| forall_not_free_in
-  (x : ind_var) (phi : formula)
-  (σ : ind_var → ind_var) :
-  (∀ (v : ind_var), v.is_free_in (forall_ x phi) → σ v = v) →
-  is_free_sub_fun (forall_ x phi) σ (forall_ x phi)
-
-| forall_free_in
-  (x : ind_var) (phi : formula)
-  (σ : ind_var → ind_var)
-  (phi' : formula) :
-  ¬ (∀ (v : ind_var), v.is_free_in (forall_ x phi) → σ v = v) →
-  (∀ (v : ind_var), v.is_free_in (forall_ x phi) → ¬ σ v = x) →
-  is_free_sub_fun phi σ phi' →
-  is_free_sub_fun (forall_ x phi) σ (forall_ x phi')
 
 
 -- proposition substitution
