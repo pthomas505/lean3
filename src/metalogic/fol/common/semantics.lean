@@ -6,8 +6,23 @@ namespace fol
 open formula
 
 
+/-
+  D is a domain
+-/
 structure interpretation (D : Type) : Type :=
+
+/-
+  The domain is not empty.
+-/
 (nonempty : nonempty D)
+
+/-
+  The assignment of predicate variables to predicate functions on the domain.
+  Predicate functions map lists of elements of the domain to {T, F}.
+  (list D → Prop) is a predicate function.
+
+  Predicate variables of arity 0 are propositional variables (not propositional constants like T or F).
+-/
 (pred : pred_name → (list D → Prop))
 
 instance (D : Type) [nonempty D] : inhabited (interpretation D) :=
@@ -18,6 +33,7 @@ inhabited.mk
 ⟩
 
 
+-- The assignment of variables to elements of the domain.
 def valuation (D : Type) := var_name → D
 
 instance (D : Type) [inhabited D] : inhabited (valuation D) := by unfold valuation; apply_instance
