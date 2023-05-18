@@ -1,5 +1,6 @@
 import .binders
 import metalogic.fol.aux.misc_list
+import metalogic.fol.aux.function_update_ite
 
 import data.finset
 
@@ -445,22 +446,6 @@ begin
     }
   },
 end
-
-
-#lint
-
-end fol
-import .replace_free
-
-import data.finset
-
-
-set_option pp.parens true
-
-
-namespace fol
-
-open formula
 
 
 /-
@@ -2028,19 +2013,6 @@ begin
 end
 
 
-#lint
-
-end fol
-import .admits
-
-
-set_option pp.parens true
-
-namespace fol
-
-open formula
-
-
 /--
   is_free_sub F v t F' := True if and only if F' is the result of replacing in F each free occurrence of v by a free occurrence of t.
 -/
@@ -2383,23 +2355,6 @@ begin
     exact fast_admits_aux_and_fast_replace_free_imp_is_free_sub F F' v u ∅ a1_left a1_right,
   }
 end
-
-
-#lint
-
-end fol
-import .replace_free
-import metalogic.fol.aux.function_update_ite
-
-import data.finset
-
-
-set_option pp.parens true
-
-
-namespace fol
-
-open formula
 
 
 /--
