@@ -2379,16 +2379,16 @@ begin
   case formula.pred_ : X xs binders V h1
   {
     unfold fast_admits_aux at h1,
-    squeeze_simp at h1,
+    simp only [bool.of_to_bool_iff] at h1,
 
     unfold fast_replace_free,
     unfold holds,
     congr' 2,
-    squeeze_simp,
+    simp only [list.map_map],
     simp only [list.map_eq_map_iff],
     intros x a1,
     unfold function.update_ite,
-    squeeze_simp,
+    simp only [function.comp_app],
     split_ifs,
     {
       subst h,
@@ -2413,7 +2413,7 @@ begin
   case formula.imp_ : phi psi phi_ih psi_ih binders V h1
   {
     unfold fast_admits_aux at h1,
-    squeeze_simp at h1,
+    simp only [bool.of_to_bool_iff] at h1,
     cases h1,
 
     unfold fast_replace_free,
@@ -2433,7 +2433,7 @@ begin
   case formula.forall_ : x phi phi_ih binders V h1
   {
     unfold fast_admits_aux at h1,
-    squeeze_simp at h1,
+    simp only [bool.of_to_bool_iff] at h1,
 
     unfold fast_replace_free,
     split_ifs,
@@ -2545,11 +2545,11 @@ begin
     unfold function.update_ite,
     split_ifs,
     {
-      squeeze_simp,
+      simp only [function.comp_app],
       simp only [if_pos h],
     },
     {
-      squeeze_simp,
+      simp only [function.comp_app],
       simp only [if_neg h],
     }
   },
@@ -2569,7 +2569,7 @@ begin
   case is_free_sub.forall_not_free_in : h1_x h1_phi h1_v h1_t h1_1
   {
     unfold is_free_in at h1_1,
-    squeeze_simp at h1_1,
+    simp only [bool.of_to_bool_iff, not_and, eq_ff_eq_not_eq_tt] at h1_1,
 
     unfold holds,
     apply forall_congr,
@@ -2588,7 +2588,7 @@ begin
   case is_free_sub.forall_free_in : h1_x h1_phi h1_v h1_t h1_phi' h1_1 h1_2 h1_3 h1_ih
   {
     unfold is_free_in at h1_1,
-    squeeze_simp at h1_1,
+    simp only [bool.of_to_bool_iff] at h1_1,
     cases h1_1,
 
     unfold holds,
