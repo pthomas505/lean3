@@ -1,9 +1,4 @@
-import metalogic.fol.aux.misc_list
-import metalogic.fol.aux.function_update_ite
 import metalogic.fol.common.semantics
-import metalogic.fol.common.binders
-
-import data.finset
 
 
 set_option pp.parens true
@@ -12,7 +7,6 @@ set_option pp.parens true
 namespace fol
 
 open formula
-
 
 
 -- proposition substitution
@@ -113,5 +107,7 @@ begin
   apply h1,
 end
 
+
+#lint
 
 end fol
