@@ -1,10 +1,5 @@
-import metalogic.fol.aux.misc_list
-import metalogic.fol.aux.function_update_ite
-import metalogic.fol.common.semantics
-
 import .sub_one_rec_replace_free
-
-import data.finset
+import metalogic.fol.common.semantics
 
 
 set_option pp.parens true
@@ -13,7 +8,6 @@ set_option pp.parens true
 namespace fol
 
 open formula
-
 
 
 /-
@@ -1743,5 +1737,7 @@ begin
   exact h1,
 end
 
+
+#lint
 
 end fol

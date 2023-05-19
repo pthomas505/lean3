@@ -1,9 +1,5 @@
 import metalogic.fol.aux.misc_list
-import metalogic.fol.aux.function_update_ite
-import metalogic.fol.common.semantics
 import metalogic.fol.common.binders
-
-import data.finset
 
 
 set_option pp.parens true
@@ -447,5 +443,8 @@ begin
     }
   },
 end
+
+
+#lint
 
 end fol
