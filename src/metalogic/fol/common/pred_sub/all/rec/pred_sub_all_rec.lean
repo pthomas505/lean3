@@ -1,8 +1,4 @@
-import metalogic.fol.aux.misc_list
-import metalogic.fol.aux.function_update_ite
 import metalogic.fol.common.sub.all.rec.sub_all_rec_admits
-
-import data.finset
 
 
 set_option pp.parens true
