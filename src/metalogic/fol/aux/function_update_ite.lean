@@ -1,6 +1,9 @@
 import tactic
 
 
+set_option pp.parens true
+
+
 /--
   Specialized version of function.update.
 -/
@@ -26,6 +29,36 @@ begin
   simp only [function.comp_app],
   unfold function.update_ite,
   split_ifs; refl,
+end
+
+
+lemma function.update_ite_comm
+  {α β : Type}
+  [decidable_eq α]
+  (f : α → β)
+  (a b : α)
+  (u v : β)
+  (h1 : ¬ a = b) :
+  function.update_ite (function.update_ite f a v) b u =
+    function.update_ite (function.update_ite f b u) a v :=
+begin
+  funext x,
+  unfold function.update_ite,
+  split_ifs,
+  {
+    subst h,
+    subst h_1,
+    contradiction,
+  },
+  {
+    refl,
+  },
+  {
+    refl,
+  },
+  {
+    refl,
+  }
 end
 
 
