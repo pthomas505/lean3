@@ -1,4 +1,4 @@
-import metalogic.fol.common.admits
+import metalogic.fol.common.sub.one.rec.sub_one_rec_admits
 
 
 set_option pp.parens true

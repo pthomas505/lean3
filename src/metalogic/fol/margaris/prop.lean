@@ -40,9 +40,9 @@ def formula.subst_prime (σ : formula → formula) : formula → formula
 
 
 @[derive inhabited]
-def valuation : Type := formula → bool
+def prop_valuation : Type := formula → bool
 
-def formula.eval_prime (val : valuation) : formula → bool
+def formula.eval_prime (val : prop_valuation) : formula → bool
 | (true_) := bool.tt
 | (pred_ name args) := val (pred_ name args)
 | (not_ P) := ! P.eval_prime
@@ -50,15 +50,15 @@ def formula.eval_prime (val : valuation) : formula → bool
 | (forall_ x P) := val (forall_ x P)
 
 def formula.is_tauto_prime (P : formula) : Prop :=
-  ∀ (val : valuation), P.eval_prime val = bool.tt
+  ∀ (val : prop_valuation), P.eval_prime val = bool.tt
 
-def eval_prime_ff_to_not (val : valuation) (P : formula) : formula :=
+def eval_prime_ff_to_not (val : prop_valuation) (P : formula) : formula :=
 if formula.eval_prime val P = bool.tt then P else P.not_
 
 
 lemma eval_prime_prime
   (P : formula)
-  (val : valuation)
+  (val : prop_valuation)
   (h1 : P.is_prime) :
   P.eval_prime val = val P :=
 begin
@@ -84,7 +84,7 @@ end
 
 example
   (P : formula)
-  (val val' : valuation)
+  (val val' : prop_valuation)
   (h1 : ∀ (Q : formula), Q ∈ P.prime_set → val Q = val' Q) :
   P.eval_prime val = P.eval_prime val' :=
 begin
@@ -141,7 +141,7 @@ end
 lemma eval_prime_subst_prime_eq_eval_prime_eval_prime
   (P : formula)
   (σ : formula → formula)
-  (val : valuation) :
+  (val : prop_valuation) :
   (P.subst_prime σ).eval_prime val =
     P.eval_prime (fun (Q : formula), (σ Q).eval_prime val) :=
 begin
@@ -192,7 +192,7 @@ end
 
 example
   (P Q R S : formula)
-  (val : valuation)
+  (val : prop_valuation)
   (σ : formula → formula)
   (h1 : P.eval_prime val = Q.eval_prime val) :
   (S.subst_prime (function.update_ite σ R P)).eval_prime val =
@@ -702,7 +702,7 @@ end
 
 theorem eval_not
   (P : formula)
-  (val : valuation) :
+  (val : prop_valuation) :
   formula.eval_prime val (not_ P) = bool.tt ↔
     ¬ (formula.eval_prime val P = bool.tt) :=
 begin
@@ -714,7 +714,7 @@ end
 
 theorem eval_imp
   (P Q : formula)
-  (val : valuation) :
+  (val : prop_valuation) :
   formula.eval_prime val (imp_ P Q) = bool.tt ↔
     ((formula.eval_prime val P = bool.tt) → (formula.eval_prime val Q = bool.tt)) :=
 begin
@@ -876,7 +876,7 @@ end
 lemma L_15_7
   (P P' : formula)
   (Δ_U : set formula)
-  (val : valuation)
+  (val : prop_valuation)
   (Δ_U' : set formula)
   (h1 : coe P.prime_set ⊆ Δ_U)
   (h2 : Δ_U' = Δ_U.image (eval_prime_ff_to_not val))
@@ -1039,7 +1039,7 @@ end
 
 lemma eval_prime_ff_to_not_of_function_update_ite_tt
   (P P' : formula)
-  (val : valuation)
+  (val : prop_valuation)
   (h1 : P.is_prime) :
   eval_prime_ff_to_not (function.update_ite val P' bool.tt) P =
     function.update_ite (eval_prime_ff_to_not val) P' P P :=
@@ -1076,7 +1076,7 @@ end
 
 lemma eval_prime_ff_to_not_of_function_update_ite_ff
   (P P' : formula)
-  (val : valuation)
+  (val : prop_valuation)
   (h1 : P.is_prime) :
   eval_prime_ff_to_not (function.update_ite val P' bool.ff) P =
     function.update_ite (eval_prime_ff_to_not val) P' P.not_ P :=
@@ -1114,7 +1114,7 @@ end
 lemma image_of_eval_prime_ff_to_not_of_function_update_ite
   (U : formula)
   (Δ : set formula)
-  (val : valuation)
+  (val : prop_valuation)
   (b : bool)
   (h1_Δ: ∀ (U' : formula), (U' ∈ Δ) → U'.is_prime)
   (h1_U: U.is_prime)
@@ -1151,8 +1151,8 @@ lemma prop_complete_aux_aux
   (h1_Δ : ∀ (U' : formula), U' ∈ Δ → U'.is_prime)
   (h1_U : U.is_prime)
   (h2 : U ∉ Δ)
-  (h3 : ∀ (val : valuation), is_deduct ((Δ.image (eval_prime_ff_to_not val)) ∪ {eval_prime_ff_to_not val U}) P) :
-  ∀ (val : valuation), is_deduct (Δ.image (eval_prime_ff_to_not val)) P :=
+  (h3 : ∀ (val : prop_valuation), is_deduct ((Δ.image (eval_prime_ff_to_not val)) ∪ {eval_prime_ff_to_not val U}) P) :
+  ∀ (val : prop_valuation), is_deduct (Δ.image (eval_prime_ff_to_not val)) P :=
 begin
   intros val,
   apply T_14_9_deduct P U (Δ.image (eval_prime_ff_to_not val)),
@@ -1179,7 +1179,7 @@ theorem prop_complete_aux
   (P : formula)
   (Δ_U : finset formula)
   (h1 : Δ_U ⊆ P.prime_set)
-  (h2 : ∀ (val : valuation), is_deduct (Δ_U.image (eval_prime_ff_to_not val)) P) :
+  (h2 : ∀ (val : prop_valuation), is_deduct (Δ_U.image (eval_prime_ff_to_not val)) P) :
   is_deduct ∅ P :=
 begin
   induction Δ_U using finset.induction_on,
