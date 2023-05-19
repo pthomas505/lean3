@@ -1,6 +1,6 @@
 import .prop
 
-import metalogic.fol.common.admits
+import metalogic.fol.common.sub.one.rec.sub_one_rec_admits
 import metalogic.fol.aux.misc_list
 
 
