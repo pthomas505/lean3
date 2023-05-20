@@ -265,8 +265,6 @@ begin
   case fol.formula.pred_ : X xs F' V h1
   {
     cases F',
-    case fol.formula.true_
-    { admit },
     case fol.formula.pred_ : Y ys
     {
       unfold is_alpha_eqv at h1,
@@ -313,15 +311,36 @@ begin
         },
       },
     },
-    case fol.formula.not_ : F'
-    { admit },
-    case fol.formula.imp_ : F'_ᾰ F'_ᾰ_1
-    { admit },
-    case fol.formula.forall_ : F'_ᾰ F'_ᾰ_1
-    { admit },
+    case [true_, not_, imp_, forall_]
+    {
+      all_goals
+      {
+        unfold is_alpha_eqv at h1,
+        contradiction,
+      },
+    },
   },
-  case fol.formula.not_ : F_ᾰ F_ih F' V h1
-  { admit },
+  case fol.formula.not_ : phi phi_ih F' V h1
+  {
+    cases F',
+    case fol.formula.not_ : phi'
+    {
+      unfold is_alpha_eqv at h1,
+
+      unfold holds,
+      apply not_congr,
+      apply phi_ih,
+      exact h1,
+    },
+    case [true_, pred_, imp_, forall_]
+    {
+      all_goals
+      {
+        unfold is_alpha_eqv at h1,
+        contradiction,
+      },
+    },
+  },
   case fol.formula.imp_ : F_ᾰ F_ᾰ_1 F_ih_ᾰ F_ih_ᾰ_1 F' V h1
   { admit },
   case fol.formula.forall_ : F_ᾰ F_ᾰ_1 F_ih F' V h1
