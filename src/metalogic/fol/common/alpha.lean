@@ -202,6 +202,7 @@ begin
 end
 
 
+@[derive decidable]
 def is_alpha_eqv_var : list (var_name × var_name) → var_name → var_name → bool
 | [] x y := x = y
 | ((a, b) :: tl) x y :=
@@ -211,6 +212,7 @@ def is_alpha_eqv_var : list (var_name × var_name) → var_name → var_name →
 -- (x = a ∧ y = b) ∨ (¬ (x = a ∧ y = b) ∧ is_alpha_eqv_var tl x y
 
 
+@[derive decidable]
 def is_alpha_eqv_var_list (σ : list (var_name × var_name)) : list var_name → list var_name → bool
 
 | [] [] := tt
@@ -220,6 +222,7 @@ def is_alpha_eqv_var_list (σ : list (var_name × var_name)) : list var_name →
 | _ _ := ff
 
 
+@[derive decidable]
 def is_alpha_eqv :
   list (var_name × var_name) → formula → formula → bool
 
@@ -299,7 +302,7 @@ begin
         case list.cons : ys_hd ys_tl
         {
           unfold is_alpha_eqv_var_list at h1_right,
-          simp only [bool.to_bool_and, bool.to_bool_coe, band_coe_iff] at h1_right,
+          squeeze_simp at h1_right,
           cases h1_right,
           unfold is_alpha_eqv_var at h1_right_left,
           simp only [bool.of_to_bool_iff] at h1_right_left,
@@ -341,8 +344,35 @@ begin
       },
     },
   },
-  case fol.formula.imp_ : F_ᾰ F_ᾰ_1 F_ih_ᾰ F_ih_ᾰ_1 F' V h1
-  { admit },
+  case fol.formula.imp_ : phi psi phi_ih psi_ih F' V h1
+  {
+    induction F',
+    case fol.formula.imp_ : phi' psi' phi'_ih psi'_ih
+    {
+      unfold is_alpha_eqv at h1,
+      squeeze_simp at h1,
+      cases h1,
+
+      unfold holds,
+      apply imp_congr,
+      {
+        apply phi_ih,
+        exact h1_left,
+      },
+      {
+        apply psi_ih,
+        exact h1_right,
+      }
+    },
+    case [true_, pred_, not_, forall_]
+    {
+      all_goals
+      {
+        unfold is_alpha_eqv at h1,
+        contradiction,
+      },
+    },
+  },
   case fol.formula.forall_ : F_ᾰ F_ᾰ_1 F_ih F' V h1
   { admit },
 end
