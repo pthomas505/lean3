@@ -248,7 +248,6 @@ example
   (D : Type)
   (I : interpretation D)
   (V : valuation D)
-  (l : list (var_name × var_name))
   (F F' : formula)
   (h1 : is_alpha_eqv list.nil F F') :
   holds D I V F ↔ holds D I V F' :=
