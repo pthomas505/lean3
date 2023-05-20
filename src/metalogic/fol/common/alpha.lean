@@ -205,11 +205,15 @@ end
 @[derive decidable]
 def is_alpha_eqv_var : list (var_name × var_name) → var_name → var_name → bool
 | [] x y := x = y
-| ((a, b) :: tl) x y :=
-    if x = a
-    then y = b
-    else ¬ y = b ∧ is_alpha_eqv_var tl x y
--- (x = a ∧ y = b) ∨ (¬ (x = a ∧ y = b) ∧ is_alpha_eqv_var tl x y
+| (hd :: tl) x y :=
+  (x = hd.fst ∧ y = hd.snd) ∨
+    ((¬ x = hd.fst ∧ ¬ y = hd.snd) ∧ is_alpha_eqv_var tl x y)
+
+/-
+    if x = hd.fst
+    then y = hd.snd
+    else ¬ y = hd.snd ∧ is_alpha_eqv_var tl x y
+-/
 
 
 @[derive decidable]
@@ -244,137 +248,12 @@ example
   (D : Type)
   (I : interpretation D)
   (V : valuation D)
+  (l : list (var_name × var_name))
   (F F' : formula)
-  (h1 : is_alpha_eqv [] F F') :
+  (h1 : is_alpha_eqv list.nil F F') :
   holds D I V F ↔ holds D I V F' :=
 begin
-  induction F generalizing F' V,
-  case fol.formula.true_ : F' V h1
-  {
-    cases F',
-    case fol.formula.true_
-    {
-      unfold holds,
-    },
-    case [pred_, not_, imp_, forall_]
-    {
-      all_goals
-      {
-        unfold is_alpha_eqv at h1,
-        contradiction,
-      },
-    },
-  },
-  case fol.formula.pred_ : X xs F' V h1
-  {
-    cases F',
-    case fol.formula.pred_ : Y ys
-    {
-      unfold is_alpha_eqv at h1,
-      simp only [bool.of_to_bool_iff] at h1,
-      cases h1,
-
-      subst h1_left,
-      unfold holds,
-      congr' 2,
-      induction xs generalizing ys,
-      case list.nil : ys h1_right
-      {
-        cases ys,
-        case list.nil
-        {
-          refl,
-        },
-        case list.cons : ys_hd ys_tl
-        {
-          unfold is_alpha_eqv_var_list at h1_right,
-          contradiction,
-        },
-      },
-      case list.cons : xs_hd xs_tl xs_ih ys h1_right
-      {
-        cases ys,
-        case list.nil
-        {
-          unfold is_alpha_eqv_var_list at h1_right,
-          contradiction,
-        },
-        case list.cons : ys_hd ys_tl
-        {
-          unfold is_alpha_eqv_var_list at h1_right,
-          squeeze_simp at h1_right,
-          cases h1_right,
-          unfold is_alpha_eqv_var at h1_right_left,
-          simp only [bool.of_to_bool_iff] at h1_right_left,
-          subst h1_right_left,
-
-          simp only [list.map, eq_self_iff_true, true_and],
-          apply xs_ih,
-          exact h1_right_right,
-        },
-      },
-    },
-    case [true_, not_, imp_, forall_]
-    {
-      all_goals
-      {
-        unfold is_alpha_eqv at h1,
-        contradiction,
-      },
-    },
-  },
-  case fol.formula.not_ : phi phi_ih F' V h1
-  {
-    cases F',
-    case fol.formula.not_ : phi'
-    {
-      unfold is_alpha_eqv at h1,
-
-      unfold holds,
-      apply not_congr,
-      apply phi_ih,
-      exact h1,
-    },
-    case [true_, pred_, imp_, forall_]
-    {
-      all_goals
-      {
-        unfold is_alpha_eqv at h1,
-        contradiction,
-      },
-    },
-  },
-  case fol.formula.imp_ : phi psi phi_ih psi_ih F' V h1
-  {
-    induction F',
-    case fol.formula.imp_ : phi' psi' phi'_ih psi'_ih
-    {
-      unfold is_alpha_eqv at h1,
-      squeeze_simp at h1,
-      cases h1,
-
-      unfold holds,
-      apply imp_congr,
-      {
-        apply phi_ih,
-        exact h1_left,
-      },
-      {
-        apply psi_ih,
-        exact h1_right,
-      }
-    },
-    case [true_, pred_, not_, forall_]
-    {
-      all_goals
-      {
-        unfold is_alpha_eqv at h1,
-        contradiction,
-      },
-    },
-  },
-  case fol.formula.forall_ : F_ᾰ F_ᾰ_1 F_ih F' V h1
-  { admit },
+  sorry,
 end
 
 
