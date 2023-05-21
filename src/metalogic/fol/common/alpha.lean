@@ -204,7 +204,9 @@ end
 
 @[derive decidable]
 def is_alpha_eqv_var : list (var_name × var_name) → var_name → var_name → bool
+
 | [] x y := x = y
+
 | (hd :: tl) x y :=
   (x = hd.fst ∧ y = hd.snd) ∨
     ((¬ x = hd.fst ∧ ¬ y = hd.snd) ∧ is_alpha_eqv_var tl x y)
@@ -280,6 +282,7 @@ begin
       apply forall_congr,
       intros d,
 
+      sorry
     },
   },
 end
