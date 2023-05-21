@@ -188,17 +188,48 @@ begin
     exact replace_empty_holds D I V h1_x h1_y h1_phi d h1_1 h1_2,
   },
   case fol.alpha_eqv.compat_not_ : h1_phi h1_phi' h1_1 h1_ih V
-  { admit },
-  case fol.alpha_eqv.compat_imp_ : h1_phi h1_phi' h1_psi h1_psi' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1 V
-  { admit },
-  case fol.alpha_eqv.compat_forall_ : h1_phi h1_psi h1_x h1_ᾰ h1_ih V
-  { admit },
+  {
+    unfold holds,
+    apply not_congr,
+    apply h1_ih,
+  },
+  case fol.alpha_eqv.compat_imp_ : h1_phi h1_phi' h1_psi h1_psi' h1_1 h1_2 h1_ih_1 h1_ih_2 V
+  {
+    unfold holds,
+    apply imp_congr,
+    {
+      apply h1_ih_1,
+    },
+    {
+      apply h1_ih_2,
+    }
+  },
+  case fol.alpha_eqv.compat_forall_ : h1_phi h1_psi h1_x h1_1 h1_ih V
+  {
+    unfold holds,
+    apply forall_congr,
+    intros d,
+    apply h1_ih,
+  },
   case fol.alpha_eqv.refl_ : h1 V
-  { admit },
-  case fol.alpha_eqv.symm_ : h1_phi h1_phi' h1_ᾰ h1_ih V
-  { admit },
-  case fol.alpha_eqv.trans_ : h1_phi h1_phi' h1_phi'' h1_ᾰ h1_ᾰ_1 h1_ih_ᾰ h1_ih_ᾰ_1 V
-  { admit },
+  {
+    refl,
+  },
+  case fol.alpha_eqv.symm_ : h1_phi h1_phi' h1_1 h1_ih V
+  {
+    symmetry,
+    apply h1_ih,
+  },
+  case fol.alpha_eqv.trans_ : h1_phi h1_phi' h1_phi'' h1_1 h1_2 h1_ih_1 h1_ih_2 V
+  {
+    transitivity (holds D I V h1_phi'),
+    {
+      apply h1_ih_1,
+    },
+    {
+      apply h1_ih_2,
+    }
+  },
 end
 
 
