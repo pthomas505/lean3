@@ -246,24 +246,34 @@ def is_alpha_eqv :
 | _ _ _ := ff
 
 
+inductive alpha_eqv_valuation (D : Type) :
+  list (var_name × var_name) → valuation D → valuation D → Prop
+| nil {V} : alpha_eqv_valuation [] V V
+| cons {l x x' V V' d} :
+  alpha_eqv_valuation l V V' →
+  alpha_eqv_valuation ((x, x') :: l) (function.update_ite V x d) (function.update_ite V' x' d)
+
+
 example
   (D : Type)
   (I : interpretation D)
-  (V : valuation D)
+  (V V' : valuation D)
   (F F' : formula)
-  (h1 : is_alpha_eqv list.nil F F') :
-  holds D I V F ↔ holds D I V F' :=
+  (l : list (var_name × var_name))
+  (h1 : is_alpha_eqv l F F')
+  (h2 : alpha_eqv_valuation D l V V') :
+  holds D I V F ↔ holds D I V' F' :=
 begin
-  induction F generalizing F',
-  case fol.formula.true_ : F' h1
+  induction F generalizing F' l V V',
+  case fol.formula.true_ : F' l V V' h1 h2
   { admit },
-  case fol.formula.pred_ : F_ᾰ F_ᾰ_1 F' h1
+  case fol.formula.pred_ : F_ᾰ F_ᾰ_1 F' l V V' h1 h2
   { admit },
-  case fol.formula.not_ : F_ᾰ F_ih F' h1
+  case fol.formula.not_ : F_ᾰ F_ih F' l V V' h1 h2
   { admit },
-  case fol.formula.imp_ : F_ᾰ F_ᾰ_1 F_ih_ᾰ F_ih_ᾰ_1 F' h1
+  case fol.formula.imp_ : F_ᾰ F_ᾰ_1 F_ih_ᾰ F_ih_ᾰ_1 F' l V V' h1 h2
   { admit },
-  case fol.formula.forall_ : x phi phi_ih F' h1
+  case fol.formula.forall_ : x phi phi_ih F' l V V' h1 h2
   {
     cases F',
     case fol.formula.true_
@@ -282,7 +292,22 @@ begin
       apply forall_congr,
       intros d,
 
-      sorry
+      induction h2,
+      case fol.alpha_eqv_valuation.nil : h2_V
+      {
+        apply phi_ih,
+        exact h1,
+        apply alpha_eqv_valuation.cons,
+        apply alpha_eqv_valuation.nil,
+      },
+      case fol.alpha_eqv_valuation.cons : h2_l h2_x h2_x' h2_V h2_V' h2_d h2_1 h2_ih
+      {
+        apply phi_ih,
+        exact h1,
+        apply alpha_eqv_valuation.cons,
+        apply alpha_eqv_valuation.cons,
+        exact h2_1,
+      },
     },
   },
 end
