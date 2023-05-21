@@ -451,7 +451,7 @@ begin
     case fol.formula.imp_ : phi' psi'
     {
       unfold is_alpha_eqv at h1,
-      squeeze_simp at h1,
+      simp only [bool.of_to_bool_iff] at h1,
       cases h1,
 
       unfold holds,
