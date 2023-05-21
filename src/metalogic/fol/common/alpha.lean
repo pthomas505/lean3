@@ -254,6 +254,104 @@ inductive alpha_eqv_valuation (D : Type) :
   alpha_eqv_valuation ((x, x') :: l) (function.update_ite V x d) (function.update_ite V' x' d)
 
 
+lemma aux_1
+  (D : Type)
+  (l : list (var_name × var_name))
+  (xs_hd ys_hd : var_name)
+  (V V' : valuation D)
+  (h1 : alpha_eqv_valuation D l V V')
+  (h2 : is_alpha_eqv_var l xs_hd ys_hd) :
+  V xs_hd = V' ys_hd :=
+begin
+  induction h1,
+  case fol.alpha_eqv_valuation.nil : h1_V
+  {
+    unfold is_alpha_eqv_var at h2,
+    squeeze_simp at h2,
+    subst h2,
+  },
+  case fol.alpha_eqv_valuation.cons : h1_l h1_x h1_x' h1_V h1_V' h1_d h1_1 h1_ih
+  {
+    unfold is_alpha_eqv_var at h2,
+    squeeze_simp at h2,
+
+    unfold function.update_ite,
+    cases h2,
+    {
+      cases h2,
+      simp only [if_pos h2_left, if_pos h2_right],
+    },
+    {
+      cases h2,
+      cases h2_left,
+      simp only [if_neg h2_left_left, if_neg h2_left_right],
+      apply h1_ih,
+      exact h2_right,
+    },
+  },
+end
+
+
+lemma aux_2
+  (D : Type)
+  (l : list (var_name × var_name))
+  (xs_hd : var_name)
+  (xs_tl : list var_name)
+  (ys_hd : var_name)
+  (ys_tl : list var_name)
+  (V V' : valuation D)
+  (h1 : alpha_eqv_valuation D l V V')
+  (xs_ih : ∀ (ys : list var_name),
+             is_alpha_eqv_var_list l xs_tl ys →
+             list.map V xs_tl = list.map V' ys)
+  (h2 : is_alpha_eqv_var_list l (xs_hd :: xs_tl) (ys_hd :: ys_tl)) :
+  list.map V (xs_hd :: xs_tl) = list.map V' (ys_hd :: ys_tl) :=
+begin
+  squeeze_simp,
+  split,
+  {
+    unfold is_alpha_eqv_var_list at h2,
+    squeeze_simp at h2,
+    cases h2,
+    clear xs_ih,
+    clear h2_right,
+    exact aux_1 D l xs_hd ys_hd V V' h1 h2_left,
+  },
+  {
+    apply xs_ih,
+    unfold is_alpha_eqv_var_list at h2,
+    squeeze_simp at h2,
+    cases h2,
+    exact h2_right,
+  }
+end
+
+
+lemma aux_3
+  (D : Type)
+  (xs ys : list var_name)
+  (l : list (var_name × var_name))
+  (V V' : valuation D)
+  (h1 : alpha_eqv_valuation D l V V')
+  (h2 : is_alpha_eqv_var_list l xs ys) :
+  list.map V xs = list.map V' ys :=
+begin
+  induction xs generalizing ys,
+  case list.nil : ys h2
+  { admit },
+  case list.cons : xs_hd xs_tl xs_ih ys h2
+  {
+    cases ys,
+    case list.nil
+    { admit },
+    case list.cons : ys_hd ys_tl
+    {
+      exact aux_2 D l xs_hd xs_tl ys_hd ys_tl V V' h1 xs_ih h2,
+    },
+  },
+end
+
+
 example
   (D : Type)
   (I : interpretation D)
@@ -267,8 +365,30 @@ begin
   induction F generalizing F' l V V',
   case fol.formula.true_ : F' l V V' h1 h2
   { admit },
-  case fol.formula.pred_ : F_ᾰ F_ᾰ_1 F' l V V' h1 h2
-  { admit },
+  case fol.formula.pred_ : X xs F' l V V' h1 h2
+  {
+    cases F',
+    case fol.formula.true_
+    { admit },
+    case fol.formula.pred_ : Y ys
+    {
+      unfold is_alpha_eqv at h1,
+      squeeze_simp at h1,
+      cases h1,
+
+      unfold holds,
+      subst h1_left,
+      congr' 2,
+
+      exact aux_3 D xs ys l V V' h2 h1_right,
+    },
+    case fol.formula.not_ : F'
+    { admit },
+    case fol.formula.imp_ : F'_ᾰ F'_ᾰ_1
+    { admit },
+    case fol.formula.forall_ : F'_ᾰ F'_ᾰ_1
+    { admit },
+  },
   case fol.formula.not_ : F_ᾰ F_ih F' l V V' h1 h2
   { admit },
   case fol.formula.imp_ : F_ᾰ F_ᾰ_1 F_ih_ᾰ F_ih_ᾰ_1 F' l V V' h1 h2
