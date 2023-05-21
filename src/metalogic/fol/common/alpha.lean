@@ -267,13 +267,13 @@ begin
   case fol.alpha_eqv_valuation.nil : h1_V
   {
     unfold is_alpha_eqv_var at h2,
-    squeeze_simp at h2,
+    simp only [bool.of_to_bool_iff] at h2,
     subst h2,
   },
   case fol.alpha_eqv_valuation.cons : h1_l h1_x h1_x' h1_V h1_V' h1_d h1_1 h1_ih
   {
     unfold is_alpha_eqv_var at h2,
-    squeeze_simp at h2,
+    simp only [bool.of_to_bool_iff] at h2,
 
     unfold function.update_ite,
     cases h2,
@@ -307,11 +307,11 @@ lemma aux_2
   (h2 : is_alpha_eqv_var_list l (xs_hd :: xs_tl) (ys_hd :: ys_tl)) :
   list.map V (xs_hd :: xs_tl) = list.map V' (ys_hd :: ys_tl) :=
 begin
-  squeeze_simp,
+  simp only [list.map],
   split,
   {
     unfold is_alpha_eqv_var_list at h2,
-    squeeze_simp at h2,
+    simp only [bool.of_to_bool_iff] at h2,
     cases h2,
     clear xs_ih,
     clear h2_right,
@@ -320,7 +320,7 @@ begin
   {
     apply xs_ih,
     unfold is_alpha_eqv_var_list at h2,
-    squeeze_simp at h2,
+    simp only [bool.of_to_bool_iff] at h2,
     cases h2,
     exact h2_right,
   }
@@ -338,12 +338,26 @@ lemma aux_3
 begin
   induction xs generalizing ys,
   case list.nil : ys h2
-  { admit },
+  {
+    cases ys,
+    case list.nil
+    {
+      simp only [list.map_nil],
+    },
+    case list.cons : ys_hd ys_tl
+    {
+      unfold is_alpha_eqv_var_list at h2,
+      contradiction,
+    },
+  },
   case list.cons : xs_hd xs_tl xs_ih ys h2
   {
     cases ys,
     case list.nil
-    { admit },
+    {
+      unfold is_alpha_eqv_var_list at h2,
+      contradiction,
+    },
     case list.cons : ys_hd ys_tl
     {
       exact aux_2 D l xs_hd xs_tl ys_hd ys_tl V V' h1 xs_ih h2,
@@ -373,7 +387,7 @@ begin
     case fol.formula.pred_ : Y ys
     {
       unfold is_alpha_eqv at h1,
-      squeeze_simp at h1,
+      simp only [bool.of_to_bool_iff] at h1,
       cases h1,
 
       unfold holds,
