@@ -255,38 +255,38 @@ end
 
 
 theorem T_17_7
-  (Q : formula)
+  (F : formula)
   (v : var_name)
   (Δ : set formula)
-  (h1 : is_deduct Δ Q)
+  (h1 : is_deduct Δ F)
   (h2 : ∀ (H : formula), H ∈ Δ → ¬ is_free_in v H) :
-  is_deduct Δ (forall_ v Q) :=
+  is_deduct Δ (forall_ v F) :=
 begin
   induction h1,
-  case is_deduct.axiom_ : h1_P h1_1
+  case is_deduct.axiom_ : h1_phi h1_1
   {
     apply is_deduct.axiom_,
     apply is_axiom.gen_,
     exact h1_1,
   },
-  case is_deduct.assume_ : h1_P h1_1
+  case is_deduct.assume_ : h1_phi h1_1
   {
-    apply is_deduct.mp_ h1_P,
+    apply is_deduct.mp_ h1_phi,
     {
       apply is_deduct.axiom_,
       apply is_axiom.pred_3_,
-      exact h2 h1_P h1_1,
+      exact h2 h1_phi h1_1,
     },
     {
       apply is_deduct.assume_,
       exact h1_1,
     },
   },
-  case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
+  case is_deduct.mp_ : h1_phi h1_psi h1_1 h1_2 h1_ih_1 h1_ih_2
   {
-    apply is_deduct.mp_ (forall_ v h1_P),
+    apply is_deduct.mp_ (forall_ v h1_phi),
     {
-      apply is_deduct.mp_ (forall_ v (h1_P.imp_ h1_Q)),
+      apply is_deduct.mp_ (forall_ v (h1_phi.imp_ h1_psi)),
       {
         apply is_deduct.axiom_,
         apply is_axiom.pred_1_,
@@ -348,9 +348,9 @@ end
 
 
 lemma is_proof_alt_imp_is_deduct
-  (P : formula)
-  (h1 : is_proof_alt P) :
-  is_deduct ∅ P :=
+  (F : formula)
+  (h1 : is_proof_alt F) :
+  is_deduct ∅ F :=
 begin
   induction h1,
   case is_proof_alt.prop_true_ :
@@ -358,32 +358,32 @@ begin
     apply is_deduct.axiom_,
     apply is_axiom.prop_true_,
   },
-  case is_proof_alt.prop_1_ : h1_P h1_Q
+  case is_proof_alt.prop_1_ : h1_phi h1_psi
   {
     apply is_deduct.axiom_,
     apply is_axiom.prop_1_,
   },
-  case is_proof_alt.prop_2_ : h1_P h1_Q h1_R
+  case is_proof_alt.prop_2_ : h1_phi h1_psi h1_chi
   {
     apply is_deduct.axiom_,
     apply is_axiom.prop_2_,
   },
-  case is_proof_alt.prop_3_ : h1_P h1_Q
+  case is_proof_alt.prop_3_ : h1_phi h1_psi
   {
     apply is_deduct.axiom_,
     apply is_axiom.prop_3_,
   },
-  case is_proof_alt.pred_1_ : h1_v h1_P h1_Q
+  case is_proof_alt.pred_1_ : h1_v h1_phi h1_psi
   {
     apply is_deduct.axiom_,
     apply is_axiom.pred_1_,
   },
-  case is_proof_alt.pred_2_ : h1_v h1_t h1_P h1_P' h1_1 h1_ih_1
+  case is_proof_alt.pred_2_ : h1_v h1_t h1_phi h1_phi' h1_1 h1_ih_1
   {
     apply is_deduct.axiom_,
-    exact is_axiom.pred_2_ h1_v h1_t h1_P h1_P' h1_1 h1_ih_1,    
+    exact is_axiom.pred_2_ h1_v h1_t h1_phi h1_phi' h1_1 h1_ih_1,    
   },
-  case is_proof_alt.pred_3_ : h1_v h1_P h1_1
+  case is_proof_alt.pred_3_ : h1_v h1_phi h1_1
   {
     apply is_deduct.axiom_,
     apply is_axiom.pred_3_,
@@ -404,7 +404,7 @@ begin
     apply is_deduct.axiom_,
     apply is_axiom.eq_2_eq_,
   },
-  case is_proof_alt.gen_ : h1_v h1_P h1_1 h1_ih
+  case is_proof_alt.gen_ : h1_v h1_phi h1_1 h1_ih
   {
     apply generalization,
     {
@@ -414,47 +414,47 @@ begin
       simp only [set.mem_empty_eq, is_empty.forall_iff, forall_const],
     }
   },
-  case is_proof_alt.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
+  case is_proof_alt.mp_ : h1_phi h1_psi h1_1 h1_2 h1_ih_1 h1_ih_2
   {
-    exact is_deduct.mp_ h1_P h1_Q h1_ih_1 h1_ih_2,
+    exact is_deduct.mp_ h1_phi h1_psi h1_ih_1 h1_ih_2,
   },
 end
 
 
 lemma is_deduct_imp_is_proof_alt
-  (P : formula)
-  (h1 : is_deduct ∅ P) :
-  is_proof_alt P :=
+  (F : formula)
+  (h1 : is_deduct ∅ F) :
+  is_proof_alt F :=
 begin
   induction h1,
-  case is_deduct.axiom_ : h1_P h1_1
+  case is_deduct.axiom_ : h1_phi h1_1
   {
     induction h1_1,
     case is_axiom.prop_true_ :
     {
       apply is_proof_alt.prop_true_,
     },
-    case is_axiom.prop_1_ : h1_1_P h1_1_Q
+    case is_axiom.prop_1_ : h1_1_phi h1_1_psi
     {
       apply is_proof_alt.prop_1_,
     },
-    case is_axiom.prop_2_ : h1_1_P h1_1_Q h1_1_R
+    case is_axiom.prop_2_ : h1_1_phi h1_1_psi h1_1_chi
     {
       apply is_proof_alt.prop_2_,
     },
-    case is_axiom.prop_3_ : h1_1_P h1_1_Q
+    case is_axiom.prop_3_ : h1_1_phi h1_1_psi
     {
       apply is_proof_alt.prop_3_,
     },
-    case is_axiom.pred_1_ : h1_1_v h1_1_P h1_1_Q
+    case is_axiom.pred_1_ : h1_1_v h1_1_phi h1_1_psi
     {
       apply is_proof_alt.pred_1_,
     },
-    case is_axiom.pred_2_ : h1_1_v h1_1_t h1_1_P h1_1_1 h1_1_ih_1 h1_1_ih_2
+    case is_axiom.pred_2_ : h1_1_v h1_1_t h1_1_phi h1_1_1 h1_1_ih_1 h1_1_ih_2
     {
-      apply is_proof_alt.pred_2_ h1_1_v h1_1_t h1_1_P h1_1_1 h1_1_ih_1 h1_1_ih_2,
+      apply is_proof_alt.pred_2_ h1_1_v h1_1_t h1_1_phi h1_1_1 h1_1_ih_1 h1_1_ih_2,
     },
-    case is_axiom.pred_3_ : h1_1_v h1_1_P h1_1_1
+    case is_axiom.pred_3_ : h1_1_v h1_1_phi h1_1_1
     {
       apply is_proof_alt.pred_3_,
       exact h1_1_1,
@@ -471,20 +471,20 @@ begin
     {
       apply is_proof_alt.eq_2_eq_,
     },
-    case is_axiom.gen_ : h1_1_v h1_1_P h1_1_1 h1_1_ih
+    case is_axiom.gen_ : h1_1_v h1_1_phi h1_1_1 h1_1_ih
     {
       apply is_proof_alt.gen_,
       exact h1_1_ih,
     },
   },
-  case is_deduct.assume_ : h1_P h1_1
+  case is_deduct.assume_ : h1_phi h1_1
   {
     simp only [set.mem_empty_eq] at h1_1,
     contradiction,
   },
-  case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
+  case is_deduct.mp_ : h1_phi h1_psi h1_1 h1_2 h1_ih_1 h1_ih_2
   {
-    exact is_proof_alt.mp_ h1_P h1_Q h1_ih_1 h1_ih_2,
+    exact is_proof_alt.mp_ h1_phi h1_psi h1_ih_1 h1_ih_2,
   },
 end
 
