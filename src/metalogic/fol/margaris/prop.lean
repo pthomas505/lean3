@@ -270,28 +270,28 @@ end
 
 
 theorem T_14_10
-  (Q : formula)
+  (F : formula)
   (Δ : set formula)
-  (h1 : is_deduct Δ Q) :
-  ∀ (Γ : set formula), is_deduct (Δ ∪ Γ) Q :=
+  (h1 : is_deduct Δ F) :
+  ∀ (Γ : set formula), is_deduct (Δ ∪ Γ) F :=
 begin
   intros Γ,
   induction h1,
-  case is_deduct.axiom_ : h1_P h1_1
+  case is_deduct.axiom_ : h1_phi h1_1
   {
     apply is_deduct.axiom_,
     exact h1_1,
   },
-  case is_deduct.assume_ : h1_P h1_1
+  case is_deduct.assume_ : h1_phi h1_1
   {
     apply is_deduct.assume_,
     simp only [set.mem_union_eq],
     left,
     exact h1_1,
   },
-  case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
+  case is_deduct.mp_ : h1_phi h1_psi h1_1 h1_2 h1_ih_1 h1_ih_2
   {
-    apply is_deduct.mp_ h1_P,
+    apply is_deduct.mp_ h1_phi,
     {
       exact h1_ih_1,
     },
@@ -663,25 +663,25 @@ alias C_14_15 <- mp_deduct_proof
 
 
 theorem T_14_16
-  (Q : formula)
+  (F : formula)
   (Δ Γ : set formula)
-  (h1 : is_deduct Γ Q)
-  (h2 : ∀ (P : formula), P ∈ Γ → is_deduct Δ P) :
-  is_deduct Δ Q :=
+  (h1 : is_deduct Γ F)
+  (h2 : ∀ (H : formula), H ∈ Γ → is_deduct Δ H) :
+  is_deduct Δ F :=
 begin
   induction h1,
-  case is_deduct.axiom_ : h1_P h1_1
+  case is_deduct.axiom_ : h1_phi h1_1
   {
     apply is_deduct.axiom_,
     exact h1_1,
   },
-  case is_deduct.assume_ : h1_P h1_1
+  case is_deduct.assume_ : h1_phi h1_1
   {
-    exact h2 h1_P h1_1,
+    exact h2 h1_phi h1_1,
   },
-  case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
+  case is_deduct.mp_ : h1_phi h1_psi h1_1 h1_2 h1_ih_1 h1_ih_2
   {
-    exact is_deduct.mp_ h1_P h1_Q h1_ih_1 h1_ih_2,
+    exact is_deduct.mp_ h1_phi h1_psi h1_ih_1 h1_ih_2,
   },
 end
 
@@ -793,34 +793,34 @@ example
   F.is_tauto_prime :=
 begin
   induction h1,
-  case is_prop_deduct.axiom_ : h1_P h1_1
+  case is_prop_deduct.axiom_ : h1_phi h1_1
   {
     induction h1_1,
     case is_prop_axiom.prop_true_ :
     {
       exact is_tauto_prop_true,
     },
-    case is_prop_axiom.prop_1_ : h1_1_P h1_1_Q
+    case is_prop_axiom.prop_1_ : h1_1_phi h1_1_psi
     {
-      exact is_tauto_prop_1 h1_1_P h1_1_Q,
+      exact is_tauto_prop_1 h1_1_phi h1_1_psi,
     },
-    case is_prop_axiom.prop_2_ : h1_1_P h1_1_Q h1_1_R
+    case is_prop_axiom.prop_2_ : h1_1_phi h1_1_psi h1_1_chi
     {
-      exact is_tauto_prop_2 h1_1_P h1_1_Q h1_1_R,
+      exact is_tauto_prop_2 h1_1_phi h1_1_psi h1_1_chi,
     },
-    case is_prop_axiom.prop_3_ : h1_1_P h1_1_Q
+    case is_prop_axiom.prop_3_ : h1_1_phi h1_1_psi
     {
-      exact is_tauto_prop_3 h1_1_P h1_1_Q,
+      exact is_tauto_prop_3 h1_1_phi h1_1_psi,
     },
   },
-  case is_prop_deduct.assume_ : h1_P h1_1
+  case is_prop_deduct.assume_ : h1_phi h1_1
   {
     simp only [set.mem_empty_eq] at h1_1,
     contradiction,
   },
-  case is_prop_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
+  case is_prop_deduct.mp_ : h1_phi h1_psi h1_1 h1_2 h1_ih_1 h1_ih_2
   {
-    exact is_tauto_mp h1_P h1_Q h1_ih_1 h1_ih_2,
+    exact is_tauto_mp h1_phi h1_psi h1_ih_1 h1_ih_2,
   },
 end
 
