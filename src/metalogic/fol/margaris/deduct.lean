@@ -10,7 +10,7 @@ open formula
 
 
 /--
-  is_prop_axiom P := True if and only if P is a logical axiom of classical propositional logic.
+  is_prop_axiom phi := True if and only if phi is a logical axiom of classical propositional logic.
 -/
 inductive is_prop_axiom : formula → Prop
 
@@ -18,52 +18,52 @@ inductive is_prop_axiom : formula → Prop
 | prop_true_ :
   is_prop_axiom true_
 
--- ⊢ P → (Q → P)
+-- ⊢ phi → (psi → phi)
 | prop_1_
-  (P Q : formula) :
-  is_prop_axiom (P.imp_ (Q.imp_ P))
+  (phi psi : formula) :
+  is_prop_axiom (phi.imp_ (psi.imp_ phi))
 
--- ⊢ (P → (Q → R)) → ((P → Q) → (P → R))
+-- ⊢ (phi → (psi → chi)) → ((phi → psi) → (phi → chi))
 | prop_2_
-  (P Q R : formula) :
-  is_prop_axiom ((P.imp_ (Q.imp_ R)).imp_ ((P.imp_ Q).imp_ (P.imp_ R)))
+  (phi psi chi : formula) :
+  is_prop_axiom ((phi.imp_ (psi.imp_ chi)).imp_ ((phi.imp_ psi).imp_ (phi.imp_ chi)))
 
--- ⊢ (¬ P → ¬ Q) → (Q → P)
+-- ⊢ (¬ phi → ¬ psi) → (psi → phi)
 | prop_3_
-  (P Q : formula) :
-  is_prop_axiom (((not_ P).imp_ (not_ Q)).imp_ (Q.imp_ P))
+  (phi psi : formula) :
+  is_prop_axiom (((not_ phi).imp_ (not_ psi)).imp_ (psi.imp_ phi))
 
 
 /--
-  is_prop_deduct Δ P := True if and only if there is a deduction of P from Δ in classical propositional logic.
+  is_prop_deduct Δ phi := True if and only if there is a deduction of phi from Δ in classical propositional logic.
 -/
 inductive is_prop_deduct (Δ : set formula) : formula → Prop
 
 | axiom_
-  (P : formula) :
-  is_prop_axiom P →
-  is_prop_deduct P
+  (phi : formula) :
+  is_prop_axiom phi →
+  is_prop_deduct phi
 
 | assume_
-  (P : formula) :
-  P ∈ Δ →
-  is_prop_deduct P
+  (phi : formula) :
+  phi ∈ Δ →
+  is_prop_deduct phi
 
 | mp_
-  (P Q : formula) :
-  is_prop_deduct (P.imp_ Q) →
-  is_prop_deduct P →
-  is_prop_deduct Q
+  (phi psi : formula) :
+  is_prop_deduct (phi.imp_ psi) →
+  is_prop_deduct phi →
+  is_prop_deduct psi
 
 
 /--
-  is_prop_proof P := True if and only if there is a proof of P in classical propositional logic.
+  is_prop_proof phi := True if and only if there is a proof of phi in classical propositional logic.
 -/
-def is_prop_proof (P : formula) : Prop := is_prop_deduct ∅ P
+def is_prop_proof (phi : formula) : Prop := is_prop_deduct ∅ phi
 
 
 /--
-  is_axiom P := True if and only if P is a logical axiom of classical first order logic.
+  is_axiom phi := True if and only if phi is a logical axiom of classical first order logic.
 -/
 inductive is_axiom : formula → Prop
 
@@ -71,38 +71,38 @@ inductive is_axiom : formula → Prop
 | prop_true_ :
   is_axiom true_
 
--- ⊢ P → (Q → P)
+-- ⊢ phi → (psi → phi)
 | prop_1_
-  (P Q : formula) :
-  is_axiom (P.imp_ (Q.imp_ P))
+  (phi psi : formula) :
+  is_axiom (phi.imp_ (psi.imp_ phi))
 
--- ⊢ (P → (Q → R)) → ((P → Q) → (P → R))
+-- ⊢ (phi → (psi → chi)) → ((phi → psi) → (phi → chi))
 | prop_2_
-  (P Q R : formula) :
-  is_axiom ((P.imp_ (Q.imp_ R)).imp_ ((P.imp_ Q).imp_ (P.imp_ R)))
+  (phi psi chi : formula) :
+  is_axiom ((phi.imp_ (psi.imp_ chi)).imp_ ((phi.imp_ psi).imp_ (phi.imp_ chi)))
 
--- ⊢ (¬ P → ¬ Q) → (Q → P)
+-- ⊢ (¬ phi → ¬ psi) → (psi → phi)
 | prop_3_
-  (P Q : formula) :
-  is_axiom (((not_ P).imp_ (not_ Q)).imp_ (Q.imp_ P))
+  (phi psi : formula) :
+  is_axiom (((not_ phi).imp_ (not_ psi)).imp_ (psi.imp_ phi))
 
--- ⊢ (∀ v (P → Q)) → ((∀ v P) → (∀ v Q))
+-- ⊢ (∀ v (phi → psi)) → ((∀ v phi) → (∀ v psi))
 | pred_1_
-  (v : var_name) (P Q : formula) :
-  is_axiom ((forall_ v (P.imp_ Q)).imp_ ((forall_ v P).imp_ (forall_ v Q)))
+  (v : var_name) (phi psi : formula) :
+  is_axiom ((forall_ v (phi.imp_ psi)).imp_ ((forall_ v phi).imp_ (forall_ v psi)))
 
--- ⊢ (∀ v P) → P(t/v)  provided P admits t for v
+-- ⊢ (∀ v phi) → phi(t/v)  provided phi admits t for v
 | pred_2_
-  (v t : var_name) (P P' : formula) :
-  fast_admits v t P →
-  fast_replace_free v t P = P' →
-  is_axiom ((forall_ v P).imp_ P')
+  (v t : var_name) (phi phi' : formula) :
+  fast_admits v t phi →
+  fast_replace_free v t phi = phi' →
+  is_axiom ((forall_ v phi).imp_ phi')
 
--- ⊢ P → (∀ v P)  provided v is not free in P
+-- ⊢ phi → (∀ v phi)  provided v is not free in phi
 | pred_3_
-  (v : var_name) (P : formula) :
-  ¬ is_free_in v P →
-  is_axiom (P.imp_ (forall_ v P))
+  (v : var_name) (phi : formula) :
+  ¬ is_free_in v phi →
+  is_axiom (phi.imp_ (forall_ v phi))
 
 -- ⊢ ∀ v (v = v)
 | eq_1_
@@ -128,43 +128,43 @@ inductive is_axiom : formula → Prop
   is_axiom (forall_ x_0 (forall_ x_1 (forall_ y_0 (forall_ y_1 ((and_ (eq_ x_0 y_0) (eq_ x_1 y_1)).imp_
     ((eq_ x_0 x_1).iff_ (eq_ y_0 y_1)))))))
 
--- ⊢ P ⇒ ⊢ ∀ v P
+-- ⊢ phi ⇒ ⊢ ∀ v phi
 | gen_
-  (v : var_name) (P : formula) :
-  is_axiom P →
-  is_axiom (forall_ v P)
+  (v : var_name) (phi : formula) :
+  is_axiom phi →
+  is_axiom (forall_ v phi)
 
 
 /--
-  is_deduct Δ P := True if and only if there is a deduction of P from Δ in classical first order logic.
+  is_deduct Δ phi := True if and only if there is a deduction of phi from Δ in classical first order logic.
 -/
 inductive is_deduct (Δ : set formula) : formula → Prop
 
 | axiom_
-  (P : formula) :
-  is_axiom P →
-  is_deduct P
+  (phi : formula) :
+  is_axiom phi →
+  is_deduct phi
 
 | assume_
-  (P : formula) :
-  P ∈ Δ →
-  is_deduct P
+  (phi : formula) :
+  phi ∈ Δ →
+  is_deduct phi
 
 | mp_
-  (P Q : formula) :
-  is_deduct (P.imp_ Q) →
-  is_deduct P →
-  is_deduct Q
+  (phi psi : formula) :
+  is_deduct (phi.imp_ psi) →
+  is_deduct phi →
+  is_deduct psi
 
 
 /--
-  is_proof P := True if and only if there is a proof of P in classical first order logic.
+  is_proof phi := True if and only if there is a proof of phi in classical first order logic.
 -/
-def is_proof (P : formula) : Prop := is_deduct ∅ P
+def is_proof (phi : formula) : Prop := is_deduct ∅ phi
 
 
 /--
-  is_proof_alt P := True if and only if there is a proof of P in classical first order logic.
+  is_proof_alt phi := True if and only if there is a proof of phi in classical first order logic.
 
   This definition is equivalent to is_proof.
 -/
@@ -174,38 +174,38 @@ inductive is_proof_alt : formula → Prop
 | prop_true_ :
   is_proof_alt true_
 
--- ⊢ P → (Q → P)
+-- ⊢ phi → (psi → phi)
 | prop_1_
-  (P Q : formula) :
-  is_proof_alt (P.imp_ (Q.imp_ P))
+  (phi psi : formula) :
+  is_proof_alt (phi.imp_ (psi.imp_ phi))
 
--- ⊢ (P → (Q → R)) → ((P → Q) → (P → R))
+-- ⊢ (phi → (psi → chi)) → ((phi → psi) → (phi → chi))
 | prop_2_
-  (P Q R : formula) :
-  is_proof_alt ((P.imp_ (Q.imp_ R)).imp_ ((P.imp_ Q).imp_ (P.imp_ R)))
+  (phi psi chi : formula) :
+  is_proof_alt ((phi.imp_ (psi.imp_ chi)).imp_ ((phi.imp_ psi).imp_ (phi.imp_ chi)))
 
--- ⊢ (¬ P → ¬ Q) → (Q → P)
+-- ⊢ (¬ phi → ¬ psi) → (psi → phi)
 | prop_3_
-  (P Q : formula) :
-  is_proof_alt (((not_ P).imp_ (not_ Q)).imp_ (Q.imp_ P))
+  (phi psi : formula) :
+  is_proof_alt (((not_ phi).imp_ (not_ psi)).imp_ (psi.imp_ phi))
 
--- ⊢ (∀ v (P → Q)) → ((∀ v P) → (∀ v Q))
+-- ⊢ (∀ v (phi → psi)) → ((∀ v phi) → (∀ v psi))
 | pred_1_
-  (v : var_name) (P Q : formula) :
-  is_proof_alt ((forall_ v (P.imp_ Q)).imp_ ((forall_ v P).imp_ (forall_ v Q)))
+  (v : var_name) (phi psi : formula) :
+  is_proof_alt ((forall_ v (phi.imp_ psi)).imp_ ((forall_ v phi).imp_ (forall_ v psi)))
 
--- ⊢ (∀ v P) → P(t/v)  provided P admits t for v
+-- ⊢ (∀ v phi) → phi(t/v)  provided phi admits t for v
 | pred_2_
-  (v t : var_name) (P P' : formula) :
-  fast_admits v t P →
-  fast_replace_free v t P = P' →
-  is_proof_alt ((forall_ v P).imp_ P')
+  (v t : var_name) (phi phi' : formula) :
+  fast_admits v t phi →
+  fast_replace_free v t phi = phi' →
+  is_proof_alt ((forall_ v phi).imp_ phi')
 
--- ⊢ P → (∀ v P)  provided v is not free in P
+-- ⊢ phi → (∀ v phi)  provided v is not free in phi
 | pred_3_
-  (v : var_name) (P : formula) :
-  ¬ is_free_in v P →
-  is_proof_alt (P.imp_ (forall_ v P))
+  (v : var_name) (phi : formula) :
+  ¬ is_free_in v phi →
+  is_proof_alt (phi.imp_ (forall_ v phi))
 
 -- ⊢ ∀ v (v = v)
 | eq_1_
@@ -231,18 +231,18 @@ inductive is_proof_alt : formula → Prop
   is_proof_alt (forall_ x_0 (forall_ x_1 (forall_ y_0 (forall_ y_1 ((and_ (eq_ x_0 y_0) (eq_ x_1 y_1)).imp_
     ((eq_ x_0 x_1).iff_ (eq_ y_0 y_1)))))))
 
--- ⊢ P ⇒ ⊢ ∀ v P
+-- ⊢ phi ⇒ ⊢ ∀ v phi
 | gen_
-  (v : var_name) (P : formula) :
-  is_proof_alt P →
-  is_proof_alt (forall_ v P)
+  (v : var_name) (phi : formula) :
+  is_proof_alt phi →
+  is_proof_alt (forall_ v phi)
 
--- ⊢ P → Q ⇒ ⊢ P ⇒ ⊢ Q
+-- ⊢ phi → psi ⇒ ⊢ phi ⇒ ⊢ psi
 | mp_
-  (P Q : formula) :
-  is_proof_alt (P.imp_ Q) →
-  is_proof_alt P →
-  is_proof_alt Q
+  (phi psi : formula) :
+  is_proof_alt (phi.imp_ psi) →
+  is_proof_alt phi →
+  is_proof_alt psi
 
 
 #lint
