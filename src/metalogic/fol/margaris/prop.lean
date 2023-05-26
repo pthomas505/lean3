@@ -16,7 +16,7 @@ open formula
 
 
 def formula.is_prime : formula → Prop
-| (true_) := false
+| true_ := false
 | (pred_ X xs) := true
 | (not_ phi) := false
 | (imp_ phi psi) := false
@@ -24,7 +24,7 @@ def formula.is_prime : formula → Prop
 
 
 def formula.prime_set : formula → finset formula
-| (true_) := ∅
+| true_ := ∅
 | (pred_ X xs) := {pred_ X xs}
 | (not_ phi) := phi.prime_set
 | (imp_ phi psi) := phi.prime_set ∪ psi.prime_set
@@ -32,7 +32,7 @@ def formula.prime_set : formula → finset formula
 
 
 def formula.subst_prime (σ : formula → formula) : formula → formula
-| (true_) := true_
+| true_ := true_
 | (pred_ X xs) := σ (pred_ X xs)
 | (not_ phi) := not_ phi.subst_prime
 | (imp_ phi psi) := imp_ phi.subst_prime psi.subst_prime
@@ -42,25 +42,25 @@ def formula.subst_prime (σ : formula → formula) : formula → formula
 @[derive inhabited]
 def prop_valuation : Type := formula → bool
 
-def formula.eval_prime (val : prop_valuation) : formula → bool
-| (true_) := bool.tt
-| (pred_ X xs) := val (pred_ X xs)
+def formula.eval_prime (V : prop_valuation) : formula → bool
+| true_ := bool.tt
+| (pred_ X xs) := V (pred_ X xs)
 | (not_ phi) := ! phi.eval_prime
 | (imp_ phi psi) := (! phi.eval_prime) || psi.eval_prime
-| (forall_ x phi) := val (forall_ x phi)
+| (forall_ x phi) := V (forall_ x phi)
 
 def formula.is_tauto_prime (P : formula) : Prop :=
-  ∀ (val : prop_valuation), P.eval_prime val = bool.tt
+  ∀ (V : prop_valuation), P.eval_prime V = bool.tt
 
-def eval_prime_ff_to_not (val : prop_valuation) (P : formula) : formula :=
-if formula.eval_prime val P = bool.tt then P else P.not_
+def eval_prime_ff_to_not (V : prop_valuation) (P : formula) : formula :=
+if formula.eval_prime V P = bool.tt then P else P.not_
 
 
 lemma eval_prime_prime
   (P : formula)
-  (val : prop_valuation)
+  (V : prop_valuation)
   (h1 : P.is_prime) :
-  P.eval_prime val = val P :=
+  P.eval_prime V = V P :=
 begin
   induction P,
   case [formula.true_, formula.not_, formula.imp_]
@@ -84,9 +84,9 @@ end
 
 example
   (P : formula)
-  (val val' : prop_valuation)
-  (h1 : ∀ (Q : formula), Q ∈ P.prime_set → val Q = val' Q) :
-  P.eval_prime val = P.eval_prime val' :=
+  (V V' : prop_valuation)
+  (h1 : ∀ (Q : formula), Q ∈ P.prime_set → V Q = V' Q) :
+  P.eval_prime V = P.eval_prime V' :=
 begin
   induction P,
   case formula.true_
@@ -141,9 +141,9 @@ end
 lemma eval_prime_subst_prime_eq_eval_prime_eval_prime
   (P : formula)
   (σ : formula → formula)
-  (val : prop_valuation) :
-  (P.subst_prime σ).eval_prime val =
-    P.eval_prime (fun (Q : formula), (σ Q).eval_prime val) :=
+  (V : prop_valuation) :
+  (P.subst_prime σ).eval_prime V =
+    P.eval_prime (fun (Q : formula), (σ Q).eval_prime V) :=
 begin
   induction P,
   case [formula.true_, formula.pred_, formula.forall_]
@@ -184,19 +184,19 @@ begin
   unfold formula.is_tauto_prime at h1,
 
   unfold formula.is_tauto_prime,
-  intros val,
-  simp only [eval_prime_subst_prime_eq_eval_prime_eval_prime P σ val],
+  intros V,
+  simp only [eval_prime_subst_prime_eq_eval_prime_eval_prime P σ V],
   apply h1,
 end
 
 
 example
   (P Q R S : formula)
-  (val : prop_valuation)
+  (V : prop_valuation)
   (σ : formula → formula)
-  (h1 : P.eval_prime val = Q.eval_prime val) :
-  (S.subst_prime (function.update_ite σ R P)).eval_prime val =
-    (S.subst_prime (function.update_ite σ R Q)).eval_prime val :=
+  (h1 : P.eval_prime V = Q.eval_prime V) :
+  (S.subst_prime (function.update_ite σ R P)).eval_prime V =
+    (S.subst_prime (function.update_ite σ R Q)).eval_prime V :=
 begin
   simp only [eval_prime_subst_prime_eq_eval_prime_eval_prime],
   congr' 1,
@@ -702,25 +702,25 @@ end
 
 theorem eval_not
   (P : formula)
-  (val : prop_valuation) :
-  formula.eval_prime val (not_ P) = bool.tt ↔
-    ¬ (formula.eval_prime val P = bool.tt) :=
+  (V : prop_valuation) :
+  formula.eval_prime V (not_ P) = bool.tt ↔
+    ¬ (formula.eval_prime V P = bool.tt) :=
 begin
   unfold formula.eval_prime,
-  cases formula.eval_prime val P;
+  cases formula.eval_prime V P;
   exact dec_trivial,
 end
 
 
 theorem eval_imp
   (P Q : formula)
-  (val : prop_valuation) :
-  formula.eval_prime val (imp_ P Q) = bool.tt ↔
-    ((formula.eval_prime val P = bool.tt) → (formula.eval_prime val Q = bool.tt)) :=
+  (V : prop_valuation) :
+  formula.eval_prime V (imp_ P Q) = bool.tt ↔
+    ((formula.eval_prime V P = bool.tt) → (formula.eval_prime V Q = bool.tt)) :=
 begin
   unfold formula.eval_prime,
-  cases formula.eval_prime val P;
-  cases formula.eval_prime val Q;
+  cases formula.eval_prime V P;
+  cases formula.eval_prime V Q;
   exact dec_trivial,
 end
 
@@ -729,7 +729,7 @@ theorem is_tauto_prop_true :
   true_.is_tauto_prime :=
 begin
   unfold formula.is_tauto_prime,
-  intro val,
+  intro V,
   unfold formula.eval_prime,
 end
 
@@ -739,7 +739,7 @@ theorem is_tauto_prop_1
   (P.imp_ (Q.imp_ P)).is_tauto_prime :=
 begin
   unfold formula.is_tauto_prime,
-  intro val,
+  intro V,
   simp only [eval_imp],
   tauto,
 end
@@ -750,7 +750,7 @@ theorem is_tauto_prop_2
   ((P.imp_ (Q.imp_ R)).imp_ ((P.imp_ Q).imp_ (P.imp_ R))).is_tauto_prime :=
 begin
   unfold formula.is_tauto_prime,
-  intro val,
+  intro V,
   simp only [eval_imp],
   tauto,
 end
@@ -761,7 +761,7 @@ theorem is_tauto_prop_3
   (((not_ P).imp_ (not_ Q)).imp_ (Q.imp_ P)).is_tauto_prime :=
 begin
   unfold formula.is_tauto_prime,
-  intro val,
+  intro V,
   simp only [eval_not, eval_imp],
   tauto,
 end
@@ -777,10 +777,10 @@ begin
   unfold formula.is_tauto_prime at h2,
 
   unfold formula.is_tauto_prime,
-  intro val,
+  intro V,
   simp only [eval_imp] at h1,
   apply h1,
-  exact h2 val,
+  exact h2 V,
 end
 
 
@@ -876,11 +876,11 @@ end
 lemma L_15_7
   (P P' : formula)
   (Δ_U : set formula)
-  (val : prop_valuation)
+  (V : prop_valuation)
   (Δ_U' : set formula)
   (h1 : coe P.prime_set ⊆ Δ_U)
-  (h2 : Δ_U' = Δ_U.image (eval_prime_ff_to_not val))
-  (h3 : P' = eval_prime_ff_to_not val P) :
+  (h2 : Δ_U' = Δ_U.image (eval_prime_ff_to_not V))
+  (h3 : P' = eval_prime_ff_to_not V P) :
   is_deduct Δ_U' P' :=
 begin
   subst h2,
@@ -1039,10 +1039,10 @@ end
 
 lemma eval_prime_ff_to_not_of_function_update_ite_tt
   (P P' : formula)
-  (val : prop_valuation)
+  (V : prop_valuation)
   (h1 : P.is_prime) :
-  eval_prime_ff_to_not (function.update_ite val P' bool.tt) P =
-    function.update_ite (eval_prime_ff_to_not val) P' P P :=
+  eval_prime_ff_to_not (function.update_ite V P' bool.tt) P =
+    function.update_ite (eval_prime_ff_to_not V) P' P P :=
 begin
   induction P,
   case formula.true_
@@ -1076,10 +1076,10 @@ end
 
 lemma eval_prime_ff_to_not_of_function_update_ite_ff
   (P P' : formula)
-  (val : prop_valuation)
+  (V : prop_valuation)
   (h1 : P.is_prime) :
-  eval_prime_ff_to_not (function.update_ite val P' bool.ff) P =
-    function.update_ite (eval_prime_ff_to_not val) P' P.not_ P :=
+  eval_prime_ff_to_not (function.update_ite V P' bool.ff) P =
+    function.update_ite (eval_prime_ff_to_not V) P' P.not_ P :=
 begin
   induction P,
   case formula.true_
@@ -1114,20 +1114,20 @@ end
 lemma image_of_eval_prime_ff_to_not_of_function_update_ite
   (U : formula)
   (Δ : set formula)
-  (val : prop_valuation)
+  (V : prop_valuation)
   (b : bool)
   (h1_Δ: ∀ (U' : formula), (U' ∈ Δ) → U'.is_prime)
   (h1_U: U.is_prime)
   (h2: U ∉ Δ) :
-  Δ.image (eval_prime_ff_to_not (function.update_ite val U b)) =
-    Δ.image (eval_prime_ff_to_not val) :=
+  Δ.image (eval_prime_ff_to_not (function.update_ite V U b)) =
+    Δ.image (eval_prime_ff_to_not V) :=
 begin
   apply set.image_congr,
   intros U' a1,
   specialize h1_Δ U' a1,
   cases b,
   {
-    simp only [eval_prime_ff_to_not_of_function_update_ite_ff U' U val h1_Δ],
+    simp only [eval_prime_ff_to_not_of_function_update_ite_ff U' U V h1_Δ],
     unfold function.update_ite,
     simp only [ite_eq_right_iff],
     intros a2,
@@ -1135,7 +1135,7 @@ begin
     contradiction,
   },
   {
-    simp only [eval_prime_ff_to_not_of_function_update_ite_tt U' U val h1_Δ],
+    simp only [eval_prime_ff_to_not_of_function_update_ite_tt U' U V h1_Δ],
     unfold function.update_ite,
     simp only [ite_eq_right_iff],
     intros a2,
@@ -1151,23 +1151,23 @@ lemma prop_complete_aux_aux
   (h1_Δ : ∀ (U' : formula), U' ∈ Δ → U'.is_prime)
   (h1_U : U.is_prime)
   (h2 : U ∉ Δ)
-  (h3 : ∀ (val : prop_valuation), is_deduct ((Δ.image (eval_prime_ff_to_not val)) ∪ {eval_prime_ff_to_not val U}) P) :
-  ∀ (val : prop_valuation), is_deduct (Δ.image (eval_prime_ff_to_not val)) P :=
+  (h3 : ∀ (V : prop_valuation), is_deduct ((Δ.image (eval_prime_ff_to_not V)) ∪ {eval_prime_ff_to_not V U}) P) :
+  ∀ (V : prop_valuation), is_deduct (Δ.image (eval_prime_ff_to_not V)) P :=
 begin
-  intros val,
-  apply T_14_9_deduct P U (Δ.image (eval_prime_ff_to_not val)),
+  intros V,
+  apply T_14_9_deduct P U (Δ.image (eval_prime_ff_to_not V)),
   {
-    specialize h3 (function.update_ite val U bool.tt),
-    simp only [image_of_eval_prime_ff_to_not_of_function_update_ite U Δ val bool.tt h1_Δ h1_U h2] at h3,
-    simp only [eval_prime_ff_to_not_of_function_update_ite_tt U U val h1_U] at h3,
+    specialize h3 (function.update_ite V U bool.tt),
+    simp only [image_of_eval_prime_ff_to_not_of_function_update_ite U Δ V bool.tt h1_Δ h1_U h2] at h3,
+    simp only [eval_prime_ff_to_not_of_function_update_ite_tt U U V h1_U] at h3,
     unfold function.update_ite at h3,
     simp only [eq_self_iff_true, if_true] at h3,
     exact h3,
   },
   {
-    specialize h3 (function.update_ite val U bool.ff),
-    simp only [image_of_eval_prime_ff_to_not_of_function_update_ite U Δ val bool.ff h1_Δ h1_U h2] at h3,
-    simp only [eval_prime_ff_to_not_of_function_update_ite_ff U U val h1_U] at h3,
+    specialize h3 (function.update_ite V U bool.ff),
+    simp only [image_of_eval_prime_ff_to_not_of_function_update_ite U Δ V bool.ff h1_Δ h1_U h2] at h3,
+    simp only [eval_prime_ff_to_not_of_function_update_ite_ff U U V h1_U] at h3,
     unfold function.update_ite at h3,
     simp only [eq_self_iff_true, if_true] at h3,
     exact h3,
@@ -1179,7 +1179,7 @@ theorem prop_complete_aux
   (P : formula)
   (Δ_U : finset formula)
   (h1 : Δ_U ⊆ P.prime_set)
-  (h2 : ∀ (val : prop_valuation), is_deduct (Δ_U.image (eval_prime_ff_to_not val)) P) :
+  (h2 : ∀ (V : prop_valuation), is_deduct (Δ_U.image (eval_prime_ff_to_not V)) P) :
   is_deduct ∅ P :=
 begin
   induction Δ_U using finset.induction_on,
@@ -1243,8 +1243,8 @@ begin
     refl,
   },
   {
-    intros val,
-    apply L_15_7 P P P.prime_set val (P.prime_set.image (eval_prime_ff_to_not val)),
+    intros V,
+    apply L_15_7 P P P.prime_set V (P.prime_set.image (eval_prime_ff_to_not V)),
     {
       refl,
     },
@@ -1255,7 +1255,7 @@ begin
       unfold formula.is_tauto_prime at h1,
 
       unfold eval_prime_ff_to_not,
-      specialize h1 val,
+      specialize h1 V,
       simp only [if_pos h1],
     }
   }
