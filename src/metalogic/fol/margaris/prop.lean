@@ -16,8 +16,8 @@ open formula
 
 
 def formula.is_prime : formula → Prop
-| (true_) := false
-| (pred_ name args) := true
+| true_ := false
+| (pred_ X xs) := true
 | (not_ phi) := false
 | (imp_ phi psi) := false
 | (forall_ x phi) := true
@@ -25,7 +25,7 @@ def formula.is_prime : formula → Prop
 
 def formula.prime_set : formula → finset formula
 | (true_) := ∅
-| (pred_ name args) := {pred_ name args}
+| (pred_ X xs) := {pred_ X xs}
 | (not_ phi) := phi.prime_set
 | (imp_ phi psi) := phi.prime_set ∪ psi.prime_set
 | (forall_ x phi) := {forall_ x phi}
@@ -33,7 +33,7 @@ def formula.prime_set : formula → finset formula
 
 def formula.subst_prime (σ : formula → formula) : formula → formula
 | (true_) := true_
-| (pred_ name args) := σ (pred_ name args)
+| (pred_ X xs) := σ (pred_ X xs)
 | (not_ phi) := not_ phi.subst_prime
 | (imp_ phi psi) := imp_ phi.subst_prime psi.subst_prime
 | (forall_ x phi) := σ (forall_ x phi)
@@ -44,7 +44,7 @@ def prop_valuation : Type := formula → bool
 
 def formula.eval_prime (val : prop_valuation) : formula → bool
 | (true_) := bool.tt
-| (pred_ name args) := val (pred_ name args)
+| (pred_ X xs) := val (pred_ X xs)
 | (not_ phi) := ! phi.eval_prime
 | (imp_ phi psi) := (! phi.eval_prime) || psi.eval_prime
 | (forall_ x phi) := val (forall_ x phi)
@@ -891,9 +891,9 @@ begin
     apply is_deduct.axiom_,
     apply is_axiom.prop_true_,
   },
-  case formula.pred_ : name args
+  case formula.pred_ : X xs
   {
-    let phi := pred_ name args,
+    let phi := pred_ X xs,
 
     unfold formula.prime_set at h1,
     simp only [finset.coe_singleton, set.singleton_subset_iff] at h1,
