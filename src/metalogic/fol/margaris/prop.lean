@@ -57,12 +57,12 @@ if formula.eval_prime V P = bool.tt then P else P.not_
 
 
 lemma eval_prime_prime
-  (P : formula)
+  (F : formula)
   (V : prop_valuation)
-  (h1 : P.is_prime) :
-  P.eval_prime V = V P :=
+  (h1 : F.is_prime) :
+  F.eval_prime V = V F :=
 begin
-  induction P,
+  induction F,
   case [formula.true_, formula.not_, formula.imp_]
   {
     all_goals
@@ -83,12 +83,12 @@ end
 
 
 example
-  (P : formula)
+  (F : formula)
   (V V' : prop_valuation)
-  (h1 : ∀ (Q : formula), Q ∈ P.prime_set → V Q = V' Q) :
-  P.eval_prime V = P.eval_prime V' :=
+  (h1 : ∀ (H : formula), H ∈ F.prime_set → V H = V' H) :
+  F.eval_prime V = F.eval_prime V' :=
 begin
-  induction P,
+  induction F,
   case formula.true_
   {
     unfold formula.eval_prime,
@@ -104,15 +104,15 @@ begin
       simp only [finset.mem_singleton, eq_self_iff_true, and_self],
     },
   },
-  case formula.not_ : P P_ih
+  case formula.not_ : phi phi_ih
   {
     unfold formula.prime_set at h1,
 
     unfold formula.eval_prime,
     congr' 1,
-    exact P_ih h1,
+    exact phi_ih h1,
   },
-  case formula.imp_ : P Q P_ih Q_ih
+  case formula.imp_ : phi psi phi_ih psi_ih
   {
     unfold formula.prime_set at h1,
     simp only [finset.mem_union] at h1,
@@ -121,15 +121,15 @@ begin
     congr' 1,
     {
       congr' 1,
-      apply P_ih,
-      intros Q' a1,
+      apply phi_ih,
+      intros H' a1,
       apply h1,
       left,
       exact a1,
     },
     {
-      apply Q_ih,
-      intros Q' a1,
+      apply psi_ih,
+      intros H' a1,
       apply h1,
       right,
       exact a1,
@@ -139,13 +139,13 @@ end
 
 
 lemma eval_prime_subst_prime_eq_eval_prime_eval_prime
-  (P : formula)
+  (F : formula)
   (σ : formula → formula)
   (V : prop_valuation) :
-  (P.subst_prime σ).eval_prime V =
-    P.eval_prime (fun (Q : formula), (σ Q).eval_prime V) :=
+  (F.subst_prime σ).eval_prime V =
+    F.eval_prime (fun (H : formula), (σ H).eval_prime V) :=
 begin
-  induction P,
+  induction F,
   case [formula.true_, formula.pred_, formula.forall_]
   {
     all_goals
@@ -153,23 +153,23 @@ begin
       refl,
     }
   },
-  case formula.not_ : P P_ih
+  case formula.not_ : phi phi_ih
   {
     unfold formula.subst_prime,
     unfold formula.eval_prime,
     congr,
-    exact P_ih,
+    exact phi_ih,
   },
-  case formula.imp_ : P Q P_ih Q_ih
+  case formula.imp_ : phi psi phi_ih psi_ih
   {
     unfold formula.subst_prime,
     unfold formula.eval_prime,
     congr,
     {
-      exact P_ih,
+      exact phi_ih,
     },
     {
-      exact Q_ih,
+      exact psi_ih,
     }
   },
 end
