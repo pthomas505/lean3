@@ -10,7 +10,7 @@ open formula
 
 
 /--
-  is_prop_axiom phi := True if and only if phi is a logical axiom of classical propositional logic.
+  is_prop_axiom F := True if and only if F is a logical axiom of classical propositional logic.
 -/
 inductive is_prop_axiom : formula → Prop
 
@@ -35,7 +35,7 @@ inductive is_prop_axiom : formula → Prop
 
 
 /--
-  is_prop_deduct Δ phi := True if and only if there is a deduction of phi from Δ in classical propositional logic.
+  is_prop_deduct Δ F := True if and only if there is a deduction of F from Δ in classical propositional logic.
 -/
 inductive is_prop_deduct (Δ : set formula) : formula → Prop
 
@@ -57,13 +57,13 @@ inductive is_prop_deduct (Δ : set formula) : formula → Prop
 
 
 /--
-  is_prop_proof phi := True if and only if there is a proof of phi in classical propositional logic.
+  is_prop_proof F := True if and only if there is a proof of F in classical propositional logic.
 -/
 def is_prop_proof (phi : formula) : Prop := is_prop_deduct ∅ phi
 
 
 /--
-  is_axiom phi := True if and only if phi is a logical axiom of classical first order logic.
+  is_axiom F := True if and only if F is a logical axiom of classical first order logic.
 -/
 inductive is_axiom : formula → Prop
 
@@ -136,7 +136,7 @@ inductive is_axiom : formula → Prop
 
 
 /--
-  is_deduct Δ phi := True if and only if there is a deduction of phi from Δ in classical first order logic.
+  is_deduct Δ F := True if and only if there is a deduction of F from Δ in classical first order logic.
 -/
 inductive is_deduct (Δ : set formula) : formula → Prop
 
@@ -158,13 +158,13 @@ inductive is_deduct (Δ : set formula) : formula → Prop
 
 
 /--
-  is_proof phi := True if and only if there is a proof of phi in classical first order logic.
+  is_proof F := True if and only if there is a proof of F in classical first order logic.
 -/
-def is_proof (phi : formula) : Prop := is_deduct ∅ phi
+def is_proof (F : formula) : Prop := is_deduct ∅ F
 
 
 /--
-  is_proof_alt phi := True if and only if there is a proof of phi in classical first order logic.
+  is_proof_alt F := True if and only if there is a proof of F in classical first order logic.
 
   This definition is equivalent to is_proof.
 -/
