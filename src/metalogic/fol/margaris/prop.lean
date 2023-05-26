@@ -336,19 +336,19 @@ theorem T_14_3
   is_deduct Δ (P.imp_ Q) :=
 begin
   induction h1,
-  case is_deduct.axiom_ : h1_P h1_1
+  case is_deduct.axiom_ : h1_phi h1_1
   {
-    apply is_deduct.mp_ h1_P,
+    apply is_deduct.mp_ h1_phi,
     {
       apply is_deduct.axiom_,
-      exact is_axiom.prop_1_ h1_P P,
+      exact is_axiom.prop_1_ h1_phi P,
     },
     {
       apply is_deduct.axiom_,
       exact h1_1,
     },
   },
-  case is_deduct.assume_ : h1_P h1_1
+  case is_deduct.assume_ : h1_phi h1_1
   {
     simp only [set.union_singleton, set.mem_insert_iff] at h1_1,
 
@@ -356,13 +356,13 @@ begin
     {
       subst h1_1,
       apply proof_imp_deduct,
-      exact prop_id h1_P,
+      exact prop_id h1_phi,
     },
     {
-      apply is_deduct.mp_ h1_P,
+      apply is_deduct.mp_ h1_phi,
       {
         apply is_deduct.axiom_,
-        exact is_axiom.prop_1_ h1_P P,
+        exact is_axiom.prop_1_ h1_phi P,
       },
       {
         apply is_deduct.assume_,
@@ -370,14 +370,14 @@ begin
       },
     }
   },
-  case is_deduct.mp_ : h1_P h1_Q h1_1 h1_2 h1_ih_1 h1_ih_2
+  case is_deduct.mp_ : h1_phi h1_psi h1_1 h1_2 h1_ih_1 h1_ih_2
   {
-    apply is_deduct.mp_ (P.imp_ h1_P),
+    apply is_deduct.mp_ (P.imp_ h1_phi),
     {
-      apply is_deduct.mp_ (P.imp_ (h1_P.imp_ h1_Q)),
+      apply is_deduct.mp_ (P.imp_ (h1_phi.imp_ h1_psi)),
       {
         apply is_deduct.axiom_,
-        exact is_axiom.prop_2_ P h1_P h1_Q,
+        exact is_axiom.prop_2_ P h1_phi h1_psi,
       },
       {
         exact h1_ih_1,
