@@ -788,9 +788,9 @@ end
   Proof of the soundness of classical propositional logic.
 -/
 example
-  (P : formula)
-  (h1 : is_prop_proof P) :
-  P.is_tauto_prime :=
+  (F : formula)
+  (h1 : is_prop_proof F) :
+  F.is_tauto_prime :=
 begin
   induction h1,
   case is_prop_deduct.axiom_ : h1_P h1_1
@@ -826,11 +826,11 @@ end
 
 
 lemma mem_prime_set_is_prime
-  (P P' : formula)
-  (h1 : P' ∈ P.prime_set) :
-  P'.is_prime :=
+  (F F' : formula)
+  (h1 : F' ∈ F.prime_set) :
+  F'.is_prime :=
 begin
-  induction P,
+  induction F,
   case formula.true_
   {
     unfold formula.prime_set at h1,
@@ -849,13 +849,13 @@ begin
       unfold formula.is_prime,
     }
   },
-  case formula.not_ : P P_ih
+  case formula.not_ : phi phi_ih
   {
     unfold formula.prime_set at h1,
 
-    exact P_ih h1,
+    exact phi_ih h1,
   },
-  case formula.imp_ : P Q P_ih Q_ih
+  case formula.imp_ : phi psi phi_ih psi_ih
   {
     unfold formula.prime_set at h1,
     simp only [finset.mem_union] at h1,
@@ -874,18 +874,18 @@ end
 
 
 lemma L_15_7
-  (P P' : formula)
+  (F F' : formula)
   (Δ_U : set formula)
   (V : prop_valuation)
   (Δ_U' : set formula)
-  (h1 : coe P.prime_set ⊆ Δ_U)
+  (h1 : coe F.prime_set ⊆ Δ_U)
   (h2 : Δ_U' = Δ_U.image (eval_prime_ff_to_not V))
-  (h3 : P' = eval_prime_ff_to_not V P) :
-  is_deduct Δ_U' P' :=
+  (h3 : F' = eval_prime_ff_to_not V F) :
+  is_deduct Δ_U' F' :=
 begin
   subst h2,
   subst h3,
-  induction P,
+  induction F,
   case formula.true_
   {
     apply is_deduct.axiom_,
@@ -893,7 +893,7 @@ begin
   },
   case formula.pred_ : X xs
   {
-    let P := pred_ X xs,
+    let F := pred_ X xs,
 
     unfold formula.prime_set at h1,
     simp only [finset.coe_singleton, set.singleton_subset_iff] at h1,
@@ -902,14 +902,14 @@ begin
     unfold formula.eval_prime,
     apply is_deduct.assume_,
     simp only [finset.coe_image, set.mem_image, finset.mem_coe],
-    apply exists.intro P,
+    apply exists.intro F,
     tauto,
   },
-  case formula.not_ : P P_ih
+  case formula.not_ : phi phi_ih
   {
     unfold formula.prime_set at h1,
 
-    unfold eval_prime_ff_to_not at P_ih,
+    unfold eval_prime_ff_to_not at phi_ih,
 
     unfold eval_prime_ff_to_not,
     unfold formula.eval_prime,
@@ -917,29 +917,29 @@ begin
     simp only [bnot_eq_tt_iff_not_eq_tt],
     split_ifs,
     {
-      simp only [if_pos h] at P_ih,
-      apply is_deduct.mp_ P,
+      simp only [if_pos h] at phi_ih,
+      apply is_deduct.mp_ phi,
       {
         apply proof_imp_deduct,
         apply T_14_6,
       },
       {
-        exact P_ih h1,
+        exact phi_ih h1,
       },
     },
     {
-      simp only [if_neg h] at P_ih,
-      exact P_ih h1,
+      simp only [if_neg h] at phi_ih,
+      exact phi_ih h1,
     },
   },
-  case formula.imp_ : P Q P_ih Q_ih
+  case formula.imp_ : phi psi phi_ih psi_ih
   {
     unfold formula.prime_set at h1,
     simp only [finset.coe_union, set.union_subset_iff] at h1,
     cases h1,
 
-    unfold eval_prime_ff_to_not at P_ih,
-    unfold eval_prime_ff_to_not at Q_ih,
+    unfold eval_prime_ff_to_not at phi_ih,
+    unfold eval_prime_ff_to_not at psi_ih,
 
     unfold eval_prime_ff_to_not,
     unfold formula.eval_prime,
@@ -949,26 +949,26 @@ begin
     {
       cases h,
       {
-        simp only [if_neg h] at P_ih,
-        apply is_deduct.mp_ P.not_,
+        simp only [if_neg h] at phi_ih,
+        apply is_deduct.mp_ phi.not_,
         {
           apply proof_imp_deduct,
           apply T_13_6,
         },
         {
-          exact P_ih h1_left,
+          exact phi_ih h1_left,
         },
       },
       {
-        simp only [if_pos h] at Q_ih,
+        simp only [if_pos h] at psi_ih,
 
-        apply is_deduct.mp_ Q,
+        apply is_deduct.mp_ psi,
         {
           apply is_deduct.axiom_,
           apply is_axiom.prop_1_,
         },
         {
-          exact Q_ih h1_right,
+          exact psi_ih h1_right,
         },
       }
     },
@@ -976,27 +976,27 @@ begin
       push_neg at h,
       dsimp at h,
       cases h,
-      simp only [if_pos h_left] at P_ih,
-      simp only [if_neg h_right] at Q_ih,
-      apply is_deduct.mp_ Q.not_,
+      simp only [if_pos h_left] at phi_ih,
+      simp only [if_neg h_right] at psi_ih,
+      apply is_deduct.mp_ psi.not_,
       {
-        apply is_deduct.mp_ P,
+        apply is_deduct.mp_ phi,
         {
           apply proof_imp_deduct,
           apply T_14_8,
         },
         {
-          exact P_ih h1_left,
+          exact phi_ih h1_left,
         }
       },
       {
-        exact Q_ih h1_right,
+        exact psi_ih h1_right,
       },
     }
   },
-  case formula.forall_ : x P P_ih
+  case formula.forall_ : x phi phi_ih
   {
-    let P := forall_ x P,
+    let F := forall_ x phi,
 
     unfold formula.prime_set at h1,
     simp only [finset.coe_singleton, set.singleton_subset_iff] at h1,
@@ -1005,7 +1005,7 @@ begin
     unfold formula.eval_prime,
     apply is_deduct.assume_,
     simp only [finset.coe_image, set.mem_image, finset.mem_coe],
-    apply exists.intro P,
+    apply exists.intro F,
     tauto,
   },
 end
@@ -1038,13 +1038,13 @@ end
 
 
 lemma eval_prime_ff_to_not_of_function_update_ite_tt
-  (P P' : formula)
+  (F F' : formula)
   (V : prop_valuation)
-  (h1 : P.is_prime) :
-  eval_prime_ff_to_not (function.update_ite V P' bool.tt) P =
-    function.update_ite (eval_prime_ff_to_not V) P' P P :=
+  (h1 : F.is_prime) :
+  eval_prime_ff_to_not (function.update_ite V F' bool.tt) F =
+    function.update_ite (eval_prime_ff_to_not V) F' F F :=
 begin
-  induction P,
+  induction F,
   case formula.true_
   {
     unfold function.update_ite,
@@ -1075,13 +1075,13 @@ end
 
 
 lemma eval_prime_ff_to_not_of_function_update_ite_ff
-  (P P' : formula)
+  (F F' : formula)
   (V : prop_valuation)
-  (h1 : P.is_prime) :
-  eval_prime_ff_to_not (function.update_ite V P' bool.ff) P =
-    function.update_ite (eval_prime_ff_to_not V) P' P.not_ P :=
+  (h1 : F.is_prime) :
+  eval_prime_ff_to_not (function.update_ite V F' bool.ff) F =
+    function.update_ite (eval_prime_ff_to_not V) F' F.not_ F :=
 begin
-  induction P,
+  induction F,
   case formula.true_
   {
     unfold function.update_ite,
