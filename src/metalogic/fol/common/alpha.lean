@@ -52,7 +52,7 @@ inductive alpha_eqv : formula → formula → Prop
 
 lemma replace_empty_holds
   (D : Type)
-  (I : interpretation D)
+  (I : interpretation' D)
   (V : valuation D)
   (u v : var_name)
   (F : formula)
@@ -173,7 +173,7 @@ end
 
 theorem holds_iff_alpha_eqv_holds
   (D : Type)
-  (I : interpretation D)
+  (I : interpretation' D)
   (V : valuation D)
   (F F' : formula)
   (h1 : alpha_eqv F F') :
@@ -399,7 +399,7 @@ end
 
 example
   (D : Type)
-  (I : interpretation D)
+  (I : interpretation' D)
   (V V' : valuation D)
   (F F' : formula)
   (l : list (var_name × var_name))
