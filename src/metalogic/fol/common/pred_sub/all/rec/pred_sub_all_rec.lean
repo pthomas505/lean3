@@ -15,25 +15,27 @@ open formula
   The recursive simultaneous uniform substitution of all of the predicate variables in a formula.
 -/
 def replace_pred_fun
-  (τ : pred_name → ℕ → list var_name × formula) : formula → formula
+  (τ : string → ℕ → list var_name × formula) : formula → formula
 | true_ := true_
-| (pred_ P ts) :=
+| (pred_ (pred_name.const P) ts) := (pred_ (pred_name.const P) ts)
+| (pred_ (pred_name.var P) ts) :=
   if ts.length = (τ P ts.length).fst.length
   then
   fast_replace_free_fun
     (function.update_list_ite id (τ P ts.length).fst ts) (τ P ts.length).snd
   else
-  pred_ P ts
+  pred_ (pred_name.var P) ts
 | (not_ phi) := not_ (replace_pred_fun phi)
 | (imp_ phi psi) := imp_ (replace_pred_fun phi) (replace_pred_fun psi)
 | (forall_ x phi) := forall_ x (replace_pred_fun phi)
 
 
 @[derive decidable]
-def admits_pred_fun_aux (τ : pred_name → ℕ → list var_name × formula) :
+def admits_pred_fun_aux (τ : string → ℕ → list var_name × formula) :
   finset var_name → formula → bool
 | _ true_ := tt
-| binders (pred_ P ts) :=
+| binders (pred_ (pred_name.const _) _) := tt
+| binders (pred_ (pred_name.var P) ts) :=
   (admits_fun (function.update_list_ite id (τ P ts.length).fst ts) (τ P ts.length).snd) ∧
  (∀ (x : var_name), x ∈ binders → ¬ (is_free_in x (τ P ts.length).snd ∧ x ∉ (τ P ts.length).fst)) ∧
   ts.length = (τ P ts.length).fst.length
@@ -42,11 +44,23 @@ def admits_pred_fun_aux (τ : pred_name → ℕ → list var_name × formula) :
 | binders (forall_ x phi) := admits_pred_fun_aux (binders ∪ {x}) phi
 
 
+def blah
+  (D : Type)
+  (I : interpretation D)
+  (V' : valuation D)
+  (τ : string → ℕ → list var_name × formula) :
+  pred_name → list D → Prop
+| (pred_name.const P) ds := I.pred (pred_name.const P) ds
+| (pred_name.var P) ds :=
+      if ds.length = (τ P ds.length).fst.length
+      then holds D I (function.update_list_ite V' (τ P ds.length).fst ds) (τ P ds.length).snd
+      else I.pred (pred_name.var P) ds
+
 lemma pred_sub_aux
   (D : Type)
   (I : interpretation D)
   (V V' : valuation D)
-  (τ : pred_name → ℕ → list var_name × formula)
+  (τ : string → ℕ → list var_name × formula)
   (binders : finset var_name)
   (F : formula)
   (h1 : admits_pred_fun_aux τ binders F)
@@ -55,10 +69,8 @@ lemma pred_sub_aux
     D
     ⟨
       I.nonempty,
-      fun (P : pred_name) (ds : list D),
-      if ds.length = (τ P ds.length).fst.length
-      then holds D I (function.update_list_ite V' (τ P ds.length).fst ds) (τ P ds.length).snd
-      else I.pred P ds
+      blah D I V' τ,
+      begin intros x y, unfold blah, apply I.eq, end
     ⟩
     V F ↔
     holds D I V (replace_pred_fun τ F) :=
@@ -71,6 +83,14 @@ begin
   },
   case formula.pred_ : X xs binders V h1 h2
   {
+    cases X,
+    {
+      unfold replace_pred_fun,
+      unfold holds,
+      squeeze_simp,
+      unfold blah,
+    },
+
     unfold admits_pred_fun_aux at h1,
     simp only [not_and, not_not, bool.of_to_bool_iff] at h1,
     cases h1,
@@ -111,6 +131,8 @@ begin
 
     unfold holds,
     unfold replace_pred_fun,
+    simp only [list.length_map],
+    unfold blah,
     simp only [list.length_map],
     split_ifs,
     exact s1,
@@ -162,7 +184,7 @@ end
 
 theorem pred_sub_valid
   (phi : formula)
-  (τ : pred_name → ℕ → list var_name × formula)
+  (τ : string → ℕ → list var_name × formula)
   (h1 : admits_pred_fun_aux τ ∅ phi)
   (h2 : phi.is_valid) :
   (replace_pred_fun τ phi).is_valid :=

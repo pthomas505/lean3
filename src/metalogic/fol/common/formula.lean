@@ -29,14 +29,15 @@ instance var_name.has_repr : has_repr var_name := has_repr.mk var_name.repr
 -/
 @[derive [inhabited, decidable_eq]]
 inductive pred_name : Type
-| mk : string → pred_name
-
+| const : string → pred_name
+| var : string → pred_name
 
 /--
   The string representation of predicate names.
 -/
 def pred_name.repr : pred_name → string
-| (pred_name.mk name) := name
+| (pred_name.const name) := name
+| (pred_name.var name) := name
 
 instance pred_name.has_repr : has_repr pred_name := has_repr.mk pred_name.repr
 
@@ -104,14 +105,14 @@ def formula.exists_ (x : var_name) (phi : formula) : formula :=
   eq_ x y := x = y
 -/
 def formula.eq_ (x y : var_name) : formula :=
-  pred_ (pred_name.mk "=") [x, y]
+  pred_ (pred_name.const "=") [x, y]
 
 
 /--
   mem_ x y := x ∈ y
 -/
 def formula.mem_ (x y : var_name) : formula :=
-  pred_ (pred_name.mk "∈") [x, y]
+  pred_ (pred_name.const "∈") [x, y]
 
 
 /--
@@ -161,9 +162,9 @@ def formula.Exists_ (xs : list var_name) (phi : formula) : formula :=
   list.foldr formula.exists_ phi xs
 
 
-#eval formula.And_ [pred_ (pred_name.mk "X") [], pred_ (pred_name.mk "Y") []]
+#eval formula.And_ [pred_ (pred_name.var "X") [], pred_ (pred_name.var "Y") []]
 
-#eval formula.Forall_ [(var_name.mk "x"), (var_name.mk "y")] (formula.pred_ (pred_name.mk "phi") [])
+#eval formula.Forall_ [(var_name.mk "x"), (var_name.mk "y")] (formula.pred_ (pred_name.var "phi") [])
 
 
 #lint

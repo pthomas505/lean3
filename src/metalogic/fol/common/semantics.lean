@@ -29,11 +29,19 @@ structure interpretation (D : Type) : Type :=
 -/
 (pred : pred_name → (list D → Prop))
 
+(eq (x y : D) : pred (pred_name.const "=") [x, y] ↔ x = y)
+
+
+def default_valuation {D : Type} : pred_name → list D → Prop
+| (pred_name.const "=") [x, y] := x = y
+| _ _ := prop.inhabited.default
+
 instance (D : Type) [nonempty D] : inhabited (interpretation D) :=
 inhabited.mk
 ⟨
   by apply_instance,
-  fun (P : pred_name) (ds : list D), prop.inhabited.default
+  default_valuation,
+  by { intros x y, unfold default_valuation, }
 ⟩
 
 
