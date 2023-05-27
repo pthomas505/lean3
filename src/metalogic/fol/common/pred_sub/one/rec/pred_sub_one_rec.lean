@@ -55,24 +55,9 @@ def admits_pred_aux (P : string) (zs : list var_name) (H : formula) : finset var
 | binders (forall_ x phi) := admits_pred_aux (binders ∪ {x}) phi
 
 
-def blah
-  (D : Type)
-  (I : interpretation D)
-  (V' : valuation D)
-  (X : string)
-  (zs : list var_name)
-  (H : formula) :
-  pred_name → list D → Prop
-| (pred_name.const P) ds := I.pred (pred_name.const P) ds
-| (pred_name.var P) ds :=
-      if P = X ∧ ds.length = zs.length
-      then holds D I (function.update_list_ite V' zs ds) H
-      else I.pred (pred_name.var P) ds
-
-
 lemma pred_sub_single_aux
   (D : Type)
-  (I : interpretation D)
+  (I : interpretation' D)
   (V V' : valuation D)
   (F : formula)
   (P : string)
@@ -84,9 +69,11 @@ lemma pred_sub_single_aux
   holds
     D
     ⟨
-      I.nonempty,
-      blah D I V' P zs H,
-      begin intros x y, unfold blah, apply I.eq, end
+      I.i,
+      fun (Q : string) (ds : list D),
+      if Q = P ∧ ds.length = zs.length
+      then holds D I (function.update_list_ite V' zs ds) H
+      else I.pred (pred_name.var Q) ds
     ⟩
     V F ↔
     holds D I V (replace_pred P zs H F) :=
@@ -101,70 +88,63 @@ begin
   {
     cases X,
     {
+      refl,
+    },
+    {
+      unfold admits_pred_aux at h1,
+
       unfold replace_pred,
       unfold holds,
-      squeeze_simp,
-      unfold blah,
-    },
-    unfold admits_pred_aux at h1,
+      unfold interpretation'.pred,
+      simp only [list.length_map],
 
-    unfold replace_pred,
-    unfold holds,
-    simp only [list.length_map],
-
-    split_ifs at h1,
-    {
-      simp only [not_and, not_not, bool.of_to_bool_iff] at h1,
-      cases h1,
-      unfold admits_fun at h1_left,
-
-      split_ifs,
-
-      obtain s1 := substitution_fun_theorem I V (function.update_list_ite id zs xs) H h1_left,
-      simp only [function.update_list_ite_comp] at s1,
-      simp only [function.comp.right_id] at s1,
-
-      have s2 : holds D I (function.update_list_ite V zs (list.map V xs)) H ↔ holds D I (function.update_list_ite V' zs (list.map V xs)) H,
+      split_ifs at h1,
       {
-        apply holds_congr_var,
-        intros v a1,
-        by_cases c1 : v ∈ zs,
-        {
-          specialize h2 v,
-          apply function.update_list_ite_mem_eq_len V V' v zs (list.map V xs) c1,
-          cases h,
-          simp only [list.length_map],
-          symmetry,
-          exact h_right,
-        },
-        {
-          by_cases c2 : v ∈ binders,
-          {
-            specialize h1_right v c2 a1,
-            contradiction,
-          },
-          {
-            specialize h2 v c2,
-            apply function.update_list_ite_mem',
-            exact h2,
-          },
-        },
-      },
+        simp only [not_and, not_not, bool.of_to_bool_iff] at h1,
+        cases h1,
+        unfold admits_fun at h1_left,
 
-      simp only [s2] at s1,
-      unfold blah,
-      squeeze_simp,
-      split_ifs,
-      exact s1,
+        split_ifs,
+
+        obtain s1 := substitution_fun_theorem I V (function.update_list_ite id zs xs) H h1_left,
+        simp only [function.update_list_ite_comp] at s1,
+        simp only [function.comp.right_id] at s1,
+
+        have s2 : holds D I (function.update_list_ite V zs (list.map V xs)) H ↔ holds D I (function.update_list_ite V' zs (list.map V xs)) H,
+        {
+          apply holds_congr_var,
+          intros v a1,
+          by_cases c1 : v ∈ zs,
+          {
+            specialize h2 v,
+            apply function.update_list_ite_mem_eq_len V V' v zs (list.map V xs) c1,
+            cases h,
+            simp only [list.length_map],
+            symmetry,
+            exact h_right,
+          },
+          {
+            by_cases c2 : v ∈ binders,
+            {
+              specialize h1_right v c2 a1,
+              contradiction,
+            },
+            {
+              specialize h2 v c2,
+              apply function.update_list_ite_mem',
+              exact h2,
+            },
+          },
+        },
+
+        simp only [s2] at s1,
+        exact s1,
+      },
+      {
+        split_ifs,
+        refl,
+      }
     },
-    {
-      split_ifs,
-      unfold holds,
-      unfold blah,
-      squeeze_simp,
-      split_ifs,
-      refl,
-    }
   },
   case formula.not_ : phi phi_ih binders V h1 h2
   {
