@@ -17,7 +17,7 @@ lemma eq_congr_eq
   is_proof ((eq_ x_0 y_0).imp_ ((eq_ x_1 y_1).imp_
     ((eq_ x_0 x_1).imp_ (eq_ y_0 y_1)))) :=
 begin
-  apply is_proof.eq_3_ (pred_name.mk "=") [x_0, x_1] [y_0, y_1],
+  apply is_proof.eq_3_ (pred_name.const "=") [x_0, x_1] [y_0, y_1],
   simp only [list.length],
 end
 
