@@ -14,7 +14,7 @@ open formula
 
   is_pred_sub A P zs H B := The formula A is said to be transformed into the formula B by a substitution of H* for P z₁ ... zₙ, abbreviated: Sub A (P zⁿ / H*) B, iff B is obtained from A upon replacing in A each occurrence of a derivative of the name form P z₁ ... zₙ by the corresponding derivative of the substituend H*, provided that: (i) P does not occur in a component formula (∀ x A₁) of A if x is a parameter of H*, and (ii) the name variable zₖ, k = 1, ..., n, is not free in a component formula (∀ x H) of H* if P t₁ ... tₙ occurs in A with x occurring in tₖ. If conditions (i) and (ii) are not satisfied, then the indicated substitution for predicate variables is left undefined.
 -/
-inductive is_pred_sub (P : pred_name) (zs : list var_name) (H : formula) : formula → formula → Prop
+inductive is_pred_sub (P : string) (zs : list var_name) (H : formula) : formula → formula → Prop
 
 | true_ :
   is_pred_sub true_ true_
@@ -23,9 +23,9 @@ inductive is_pred_sub (P : pred_name) (zs : list var_name) (H : formula) : formu
   If A is an atomic formula not containing P then Sub A (P zⁿ / H*) A.
 -/
 | pred_not_occurs_in
-  (X : pred_name) (ts : list var_name) :
+  (X : string) (ts : list var_name) :
   ¬ (X = P ∧ ts.length = zs.length) →
-  is_pred_sub (pred_ X ts) (pred_ X ts)
+  is_pred_sub (pred_ (pred_name.var X) ts) (pred_ (pred_name.var X) ts)
 
   /-
   If A = P t₁ ... tₙ and Sf H* (zⁿ / tⁿ) B, then Sub A (P zⁿ / H*) B.
@@ -35,10 +35,10 @@ inductive is_pred_sub (P : pred_name) (zs : list var_name) (H : formula) : formu
     fast_replace_free_fun (function.update_list_ite id zs.to_list ts.to_list) H* = B
   -/
 | pred_occurs_in
-  (X : pred_name) (ts : list var_name) :
+  (X : string) (ts : list var_name) :
   X = P ∧ ts.length = zs.length →
   admits_fun (function.update_list_ite id zs ts) H →
-  is_pred_sub (pred_ P ts) (fast_replace_free_fun (function.update_list_ite id zs ts) H)
+  is_pred_sub (pred_ (pred_name.var P) ts) (fast_replace_free_fun (function.update_list_ite id zs ts) H)
 
 /-
   If A = (¬ A₁) and Sub A₁ (P zⁿ / H*) B₁, then Sub A (P zⁿ / H*) (¬ B₁).
@@ -75,16 +75,16 @@ inductive is_pred_sub (P : pred_name) (zs : list var_name) (H : formula) : formu
 
 theorem is_pred_sub_theorem
   (D : Type)
-  (I J : interpretation D)
+  (I J : interpretation' D)
   (V : valuation D)
   (A : formula)
-  (P : pred_name)
+  (P : string)
   (zs : list var_name)
   (H : formula)
   (B : formula)
   (h1 : is_pred_sub P zs H A B)
-  (h2 : ∀ (Q : pred_name) (ds : list D), (Q = P ∧ ds.length = zs.length) → (holds D I (function.update_list_ite V zs ds) H ↔ J.pred P ds))
-  (h3 : ∀ (Q : pred_name) (ds : list D), ¬ (Q = P ∧ ds.length = zs.length) → (I.pred Q ds ↔ J.pred Q ds)) :
+  (h2 : ∀ (Q : string) (ds : list D), (Q = P ∧ ds.length = zs.length) → (holds D I (function.update_list_ite V zs ds) H ↔ J.pred (pred_name.var P) ds))
+  (h3 : ∀ (Q : string) (ds : list D), ¬ (Q = P ∧ ds.length = zs.length) → (I.pred (pred_name.var Q) ds ↔ J.pred (pred_name.var Q) ds)) :
   holds D I V B ↔ holds D J V A :=
 begin
   induction h1 generalizing V,
@@ -187,7 +187,7 @@ end
 
 theorem is_pred_sub_valid
   (phi phi' : formula)
-  (P : pred_name)
+  (P : string)
   (zs : list var_name)
   (H : formula)
   (h1 : is_pred_sub P zs H phi phi')
@@ -199,12 +199,16 @@ begin
   unfold formula.is_valid,
   intros D I V,
 
-  let J : interpretation D := {
-    nonempty := I.nonempty,
-    pred := fun (Q : pred_name) (ds : list D), ite (Q = P ∧ ds.length = zs.length) (holds D I (function.update_list_ite V zs ds) H) (I.pred Q ds)
+  let J : interpretation' D := {
+    i := I.i,
+    var := fun (Q : string) (ds : list D),
+    if (Q = P ∧ ds.length = zs.length)
+    then (holds D I (function.update_list_ite V zs ds) H)
+    else (I.pred (pred_name.var Q) ds)
   },
 
   obtain s1 := is_pred_sub_theorem D I J V phi P zs H phi' h1,
+  unfold interpretation'.pred at s1,
   simp only [eq_self_iff_true, true_and] at s1,
 
   have s2 : holds D I V phi' ↔ holds D J V phi,
@@ -217,6 +221,7 @@ begin
     },
     {
       intros Q ds a1,
+      unfold interpretation'.pred,
       simp only [if_neg a1],
     },
   },
