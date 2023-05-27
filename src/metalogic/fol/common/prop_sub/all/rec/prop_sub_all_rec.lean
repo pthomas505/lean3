@@ -15,9 +15,10 @@ open formula
   The recursive simultaneous uniform substitution of all of the propositional variables in a formula.
 -/
 def replace_prop_fun
-  (τ : pred_name → pred_name) : formula → formula
+  (τ : string → pred_name) : formula → formula
 | true_ := true_
-| (pred_ P ts) := ite (ts = list.nil) (pred_ (τ P) list.nil) (pred_ P ts)
+| (pred_ (pred_name.const P) ts) := (pred_ (pred_name.const P) ts) 
+| (pred_ (pred_name.var P) ts) := ite (ts = list.nil) (pred_ (τ P) list.nil) (pred_ (pred_name.var P) ts)
 | (not_ phi) := not_ (replace_prop_fun phi)
 | (imp_ phi psi) := imp_ (replace_prop_fun phi) (replace_prop_fun psi)
 | (forall_ x phi) := forall_ x (replace_prop_fun phi)
@@ -25,18 +26,18 @@ def replace_prop_fun
 
 lemma prop_sub_aux
   (D : Type)
-  (I : interpretation D)
+  (I : interpretation' D)
   (V : valuation D)
-  (τ : pred_name → pred_name)
+  (τ : string → pred_name)
   (F : formula) :
   holds D I V (replace_prop_fun τ F) ↔
     holds D
     ⟨
-      I.nonempty,
-      fun (P : pred_name) (xs : list D),
-        if (xs = list.nil) = tt
+      I.i,
+      fun (P : string) (ds : list D),
+        if (ds = list.nil) = tt
         then holds D I V (pred_ (τ P) list.nil)
-        else I.pred P xs
+        else I.pred (pred_name.var P) ds
     ⟩
     V F :=
 begin
@@ -48,20 +49,28 @@ begin
   },
   case formula.pred_ : X xs V
   {
-    unfold replace_prop_fun,
-    split_ifs,
+    cases X,
     {
-      unfold holds,
-      simp only [list.map_nil, list.map_eq_nil],
-      simp only [coe_sort_tt, eq_iff_iff, iff_true],
-      simp only [if_pos h],
+      refl,
     },
     {
-      unfold holds,
-      simp only [list.map_eq_nil, list.map_nil],
-      simp only [coe_sort_tt, eq_iff_iff, iff_true],
-      simp only [if_neg h],
-    }
+      unfold replace_prop_fun,
+      split_ifs,
+      {
+        unfold holds,
+        unfold interpretation'.pred,
+        simp only [list.map_nil, list.map_eq_nil],
+        simp only [coe_sort_tt, eq_iff_iff, iff_true],
+        simp only [if_pos h],
+      },
+      {
+        unfold holds,
+        unfold interpretation'.pred,
+        simp only [list.map_eq_nil, list.map_nil],
+        simp only [coe_sort_tt, eq_iff_iff, iff_true],
+        simp only [if_neg h],
+      }
+    },
   },
   case formula.not_ : phi phi_ih V
   {
@@ -96,7 +105,7 @@ end
 theorem prop_sub_is_valid
   (phi : formula)
   (h1 : phi.is_valid)
-  (τ : pred_name → pred_name) :
+  (τ : string → pred_name) :
   (replace_prop_fun τ phi).is_valid :=
 begin
   unfold formula.is_valid at h1,

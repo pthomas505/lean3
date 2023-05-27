@@ -57,12 +57,10 @@ lemma pred_sub_aux
     D
     ⟨
       I.i,
-
       fun (P : string) (ds : list D),
       if ds.length = (τ P ds.length).fst.length
       then holds D I (function.update_list_ite V' (τ P ds.length).fst ds) (τ P ds.length).snd
       else I.pred (pred_name.var P) ds
-
     ⟩
     V F ↔
     holds D I V (replace_pred_fun τ F) :=
@@ -77,55 +75,54 @@ begin
   {
     cases X,
     {
-      unfold replace_pred_fun,
-      unfold holds,
       refl,
     },
-
-    unfold admits_pred_fun_aux at h1,
-    simp only [not_and, not_not, bool.of_to_bool_iff] at h1,
-    cases h1,
-    cases h1_right,
-
-    obtain s1 := substitution_fun_theorem I V (function.update_list_ite id (τ X xs.length).fst xs) (τ X xs.length).snd h1_left,
-    simp only [function.update_list_ite_comp] at s1,
-    simp only [function.comp.right_id] at s1,
-
-    have s2 : holds D I (function.update_list_ite V (τ X xs.length).fst (list.map V xs)) (τ X xs.length).snd ↔ holds D I (function.update_list_ite V' (τ X xs.length).fst (list.map V xs)) (τ X xs.length).snd,
     {
-      apply holds_congr_var,
+      unfold admits_pred_fun_aux at h1,
+      simp only [not_and, not_not, bool.of_to_bool_iff] at h1,
+      cases h1,
+      cases h1_right,
 
-      intros v a1,
-      by_cases c1 : v ∈ (τ X xs.length).fst,
+      obtain s1 := substitution_fun_theorem I V (function.update_list_ite id (τ X xs.length).fst xs) (τ X xs.length).snd h1_left,
+      simp only [function.update_list_ite_comp] at s1,
+      simp only [function.comp.right_id] at s1,
+
+      have s2 : holds D I (function.update_list_ite V (τ X xs.length).fst (list.map V xs)) (τ X xs.length).snd ↔ holds D I (function.update_list_ite V' (τ X xs.length).fst (list.map V xs)) (τ X xs.length).snd,
       {
-        apply function.update_list_ite_mem_eq_len V V' v (τ X xs.length).fst (list.map V xs) c1,
-        simp only [list.length_map],
-        symmetry,
-        exact h1_right_right,
-      },
-      {
-        by_cases c2 : v ∈ binders,
+        apply holds_congr_var,
+
+        intros v a1,
+        by_cases c1 : v ∈ (τ X xs.length).fst,
         {
-          specialize h1_right_left v c2 a1,
-          contradiction,
+          apply function.update_list_ite_mem_eq_len V V' v (τ X xs.length).fst (list.map V xs) c1,
+          simp only [list.length_map],
+          symmetry,
+          exact h1_right_right,
         },
         {
-          specialize h2 v c2,
-          apply function.update_list_ite_mem',
-          exact h2,
+          by_cases c2 : v ∈ binders,
+          {
+            specialize h1_right_left v c2 a1,
+            contradiction,
+          },
+          {
+            specialize h2 v c2,
+            apply function.update_list_ite_mem',
+            exact h2,
+          },
         },
       },
+
+      simp only [s2] at s1,
+      clear s2,
+
+      unfold holds,
+      unfold replace_pred_fun,
+      unfold interpretation'.pred,
+      simp only [list.length_map],
+      split_ifs,
+      exact s1,
     },
-
-    simp only [s2] at s1,
-    clear s2,
-
-    unfold holds,
-    unfold replace_pred_fun,
-    unfold interpretation'.pred,
-    simp only [list.length_map],
-    split_ifs,
-    exact s1,
   },
   case formula.not_ : phi phi_ih binders V h1 h2
   {
