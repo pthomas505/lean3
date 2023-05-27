@@ -19,23 +19,25 @@ open formula
   The recursive simultaneous uniform substitution of a single predicate variable in a formula.
 -/
 def replace_pred
-  (P : pred_name) (zs : list var_name) (H : formula) : formula → formula
+  (P : string) (zs : list var_name) (H : formula) : formula → formula
 | true_ := true_
-| (pred_ X ts) :=
+| (pred_ (pred_name.const X) ts) := (pred_ (pred_name.const X) ts)
+| (pred_ (pred_name.var X) ts) :=
   if X = P ∧ ts.length = zs.length
   then
   fast_replace_free_fun
     (function.update_list_ite id zs ts) H
-  else pred_ X ts
+  else pred_ (pred_name.var X) ts
 | (not_ phi) := not_ (replace_pred phi)
 | (imp_ phi psi) := imp_ (replace_pred phi) (replace_pred psi)
 | (forall_ x phi) := forall_ x (replace_pred phi)
 
 
 @[derive decidable]
-def admits_pred_aux (P : pred_name) (zs : list var_name) (H : formula) : finset var_name → formula → bool
+def admits_pred_aux (P : string) (zs : list var_name) (H : formula) : finset var_name → formula → bool
 | _ true_ := tt
-| binders (pred_ X ts) :=
+| _ (pred_ (pred_name.const X) ts) := tt
+| binders (pred_ (pred_name.var X) ts) :=
   if X = P ∧ ts.length = zs.length
   then
   (admits_fun (function.update_list_ite id zs ts) H) ∧
@@ -53,12 +55,27 @@ def admits_pred_aux (P : pred_name) (zs : list var_name) (H : formula) : finset 
 | binders (forall_ x phi) := admits_pred_aux (binders ∪ {x}) phi
 
 
+def blah
+  (D : Type)
+  (I : interpretation D)
+  (V' : valuation D)
+  (X : string)
+  (zs : list var_name)
+  (H : formula) :
+  pred_name → list D → Prop
+| (pred_name.const P) ds := I.pred (pred_name.const P) ds
+| (pred_name.var P) ds :=
+      if P = X ∧ ds.length = zs.length
+      then holds D I (function.update_list_ite V' zs ds) H
+      else I.pred (pred_name.var P) ds
+
+
 lemma pred_sub_single_aux
   (D : Type)
   (I : interpretation D)
   (V V' : valuation D)
   (F : formula)
-  (P : pred_name)
+  (P : string)
   (zs : list var_name)
   (H : formula)
   (binders : finset var_name)
@@ -68,10 +85,8 @@ lemma pred_sub_single_aux
     D
     ⟨
       I.nonempty,
-      fun (Q : pred_name) (ds : list D),
-      if Q = P ∧ ds.length = zs.length
-      then holds D I (function.update_list_ite V' zs ds) H
-      else I.pred Q ds
+      blah D I V' P zs H,
+      begin intros x y, unfold blah, apply I.eq, end
     ⟩
     V F ↔
     holds D I V (replace_pred P zs H F) :=
@@ -84,6 +99,13 @@ begin
   },
   case formula.pred_ : X xs binders V h1 h2
   {
+    cases X,
+    {
+      unfold replace_pred,
+      unfold holds,
+      squeeze_simp,
+      unfold blah,
+    },
     unfold admits_pred_aux at h1,
 
     unfold replace_pred,
@@ -130,11 +152,18 @@ begin
       },
 
       simp only [s2] at s1,
+      unfold blah,
+      squeeze_simp,
+      split_ifs,
       exact s1,
     },
     {
       split_ifs,
       unfold holds,
+      unfold blah,
+      squeeze_simp,
+      split_ifs,
+      refl,
     }
   },
   case formula.not_ : phi phi_ih binders V h1 h2
@@ -184,7 +213,7 @@ end
 
 theorem pred_sub_single_valid
   (phi : formula)
-  (P : pred_name)
+  (P : string)
   (zs : list var_name)
   (H : formula)
   (h1 : admits_pred_aux P zs H ∅ phi)
