@@ -356,7 +356,7 @@ end
 
 theorem substitution_theorem_ind
   {D : Type}
-  (I : interpretation D)
+  (I : interpretation' D)
   (V : valuation D)
   (v t : var_name)
   (F F' : formula)

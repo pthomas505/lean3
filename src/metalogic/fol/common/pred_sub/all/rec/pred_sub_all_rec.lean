@@ -44,21 +44,9 @@ def admits_pred_fun_aux (τ : string → ℕ → list var_name × formula) :
 | binders (forall_ x phi) := admits_pred_fun_aux (binders ∪ {x}) phi
 
 
-def blah
-  (D : Type)
-  (I : interpretation D)
-  (V' : valuation D)
-  (τ : string → ℕ → list var_name × formula) :
-  pred_name → list D → Prop
-| (pred_name.const P) ds := I.pred (pred_name.const P) ds
-| (pred_name.var P) ds :=
-      if ds.length = (τ P ds.length).fst.length
-      then holds D I (function.update_list_ite V' (τ P ds.length).fst ds) (τ P ds.length).snd
-      else I.pred (pred_name.var P) ds
-
 lemma pred_sub_aux
   (D : Type)
-  (I : interpretation D)
+  (I : interpretation' D)
   (V V' : valuation D)
   (τ : string → ℕ → list var_name × formula)
   (binders : finset var_name)
@@ -68,9 +56,13 @@ lemma pred_sub_aux
   holds
     D
     ⟨
-      I.nonempty,
-      blah D I V' τ,
-      begin intros x y, unfold blah, apply I.eq, end
+      I.i,
+
+      fun (P : string) (ds : list D),
+      if ds.length = (τ P ds.length).fst.length
+      then holds D I (function.update_list_ite V' (τ P ds.length).fst ds) (τ P ds.length).snd
+      else I.pred (pred_name.var P) ds
+
     ⟩
     V F ↔
     holds D I V (replace_pred_fun τ F) :=
@@ -87,8 +79,7 @@ begin
     {
       unfold replace_pred_fun,
       unfold holds,
-      squeeze_simp,
-      unfold blah,
+      refl,
     },
 
     unfold admits_pred_fun_aux at h1,
@@ -131,8 +122,7 @@ begin
 
     unfold holds,
     unfold replace_pred_fun,
-    simp only [list.length_map],
-    unfold blah,
+    unfold interpretation'.pred,
     simp only [list.length_map],
     split_ifs,
     exact s1,

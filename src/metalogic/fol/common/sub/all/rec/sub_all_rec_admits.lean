@@ -27,7 +27,7 @@ def admits_fun (σ : var_name → var_name) (phi : formula) : bool :=
 
 lemma substitution_fun_theorem_aux
   {D : Type}
-  (I : interpretation D)
+  (I : interpretation' D)
   (V V' : valuation D)
   (σ σ' : var_name → var_name)
   (binders : finset var_name)
@@ -151,7 +151,7 @@ end
 
 theorem substitution_fun_theorem
   {D : Type}
-  (I : interpretation D)
+  (I : interpretation' D)
   (V : valuation D)
   (σ : var_name → var_name)
   (F : formula)

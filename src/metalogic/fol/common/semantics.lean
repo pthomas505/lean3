@@ -20,20 +20,30 @@ structure interpretation (D : Type) : Type :=
 -/
 (nonempty : nonempty D)
 
+(pred_const_valuation : string → (list D → Prop))
+
+(eq (x y : D) : pred_const_valuation "=" [x, y] ↔ x = y)
+
+
+structure interpretation' (D : Type) :=
+(i : interpretation D)
+
 /-
-  The assignment of predicate variables to predicate functions on the domain.
+  The assignment of predicate variable names to predicate functions on the domain.
   Predicate functions map lists of elements of the domain to {T, F}.
   (list D → Prop) is a predicate function.
 
   Predicate variables of arity 0 are propositional variables (not propositional constants like T or F).
 -/
-(pred : pred_name → (list D → Prop))
+(var : string → (list D → Prop))
 
-(eq (x y : D) : pred (pred_name.const "=") [x, y] ↔ x = y)
+def interpretation'.pred {D : Type} (I : interpretation' D) : pred_name → list D → Prop
+| (pred_name.const X) := I.i.pred_const_valuation X
+| (pred_name.var X) := I.var X
 
 
-def default_valuation {D : Type} : pred_name → list D → Prop
-| (pred_name.const "=") [x, y] := x = y
+def default_valuation {D : Type} : string → list D → Prop
+| ("=") [x, y] := x = y
 | _ _ := prop.inhabited.default
 
 instance (D : Type) [nonempty D] : inhabited (interpretation D) :=
@@ -41,7 +51,7 @@ inhabited.mk
 ⟨
   by apply_instance,
   default_valuation,
-  by { intros x y, unfold default_valuation, }
+  by { intros x y, unfold default_valuation }
 ⟩
 
 
@@ -51,7 +61,7 @@ def valuation (D : Type) := var_name → D
 instance (D : Type) [inhabited D] : inhabited (valuation D) := by unfold valuation; apply_instance
 
 
-def holds (D : Type) (I : interpretation D) : valuation D → formula → Prop
+def holds (D : Type) (I : interpretation' D) : valuation D → formula → Prop
 | _ true_ := true
 | V (pred_ X xs) := I.pred X (xs.map V)
 | V (not_ phi) := ¬ holds V phi
@@ -60,13 +70,13 @@ def holds (D : Type) (I : interpretation D) : valuation D → formula → Prop
 
 
 def formula.is_valid (F : formula) : Prop :=
-  ∀ (D : Type) (I : interpretation D) (V : valuation D),
+  ∀ (D : Type) (I : interpretation' D) (V : valuation D),
     holds D I V F
 
 
 def coincide
   {D : Type}
-  (I J : interpretation D)
+  (I J : interpretation' D)
   (V_I V_J : valuation D)
   (phi : formula) :
   Prop :=
@@ -76,7 +86,7 @@ def coincide
 
 lemma holds_congr_var
   {D : Type}
-  (I : interpretation D)
+  (I : interpretation' D)
   (V V' : valuation D)
   (F : formula)
   (h1 : ∀ (v : var_name), is_free_in v F → V v = V' v) :
@@ -147,7 +157,7 @@ end
 
 lemma holds_congr_pred
   {D : Type}
-  (I I' : interpretation D)
+  (I I' : interpretation' D)
   (V : valuation D)
   (F : formula)
   (h1 : ∀ (P : pred_name) (ds : list D), pred.occurs_in P ds.length F → (I.pred P ds ↔ I'.pred P ds)) :
@@ -212,7 +222,7 @@ end
 
 theorem coincidence_theorem
   {D : Type}
-  (I I' : interpretation D)
+  (I I' : interpretation' D)
   (V V' : valuation D)
   (F : formula)
   (h1 : coincide I I' V V' F) :

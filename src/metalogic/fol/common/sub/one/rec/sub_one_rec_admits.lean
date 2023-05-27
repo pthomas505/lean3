@@ -1578,7 +1578,7 @@ end
 
 lemma substitution_theorem_aux
   {D : Type}
-  (I : interpretation D)
+  (I : interpretation' D)
   (V V' : valuation D)
   (v t : var_name)
   (binders : finset var_name)
@@ -1706,7 +1706,7 @@ end
 
 theorem substitution_theorem
   {D : Type}
-  (I : interpretation D)
+  (I : interpretation' D)
   (V : valuation D)
   (v t : var_name)
   (F : formula)
