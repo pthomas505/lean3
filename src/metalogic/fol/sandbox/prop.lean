@@ -9,7 +9,7 @@ Cambridge: Cambridge University Press.
 doi:10.1017/CBO9780511576430
 -/
 
-import data.set.basic
+import data.set.finite
 
 /-
 Formula schemes.
@@ -90,22 +90,22 @@ begin
     have s1 : eval p v = eval p v', apply ih, exact h1,
     rewrite s1 },
   case and : p q ih_p ih_q {
-    unfold eval, unfold atoms at h1, simp only [set.mem_union_eq] at h1,
+    unfold eval, unfold atoms at h1, squeeze_simp at h1,
     have s1 : eval p v = eval p v', apply ih_p, intros x h2, apply h1, left, exact h2,
     have s2 : eval q v = eval q v', apply ih_q, intros x h2, apply h1, right, exact h2,
     rewrite s1, rewrite s2 },
   case or : p q ih_p ih_q {
-    unfold eval, unfold atoms at h1, simp only [set.mem_union_eq] at h1,
+    unfold eval, unfold atoms at h1, squeeze_simp at h1,
     have s1 : eval p v = eval p v', apply ih_p, intros x h2, apply h1, left, exact h2,
     have s2 : eval q v = eval q v', apply ih_q, intros x h2, apply h1, right, exact h2,
     rewrite s1, rewrite s2 },
   case imp : p q ih_p ih_q {
-    unfold eval, unfold atoms at h1, simp only [set.mem_union_eq] at h1,
+    unfold eval, unfold atoms at h1, squeeze_simp at h1,
     have s1 : eval p v = eval p v', apply ih_p, intros x h2, apply h1, left, exact h2,
     have s2 : eval q v = eval q v', apply ih_q, intros x h2, apply h1, right, exact h2,
     rewrite s1, rewrite s2 },
   case iff : p q ih_p ih_q {
-    unfold eval, unfold atoms at h1, simp only [set.mem_union_eq] at h1,
+    unfold eval, unfold atoms at h1, squeeze_simp at h1,
     have s1 : eval p v = eval p v', apply ih_p, intros x h2, apply h1, left, exact h2,
     have s2 : eval q v = eval q v', apply ih_q, intros x h2, apply h1, right, exact h2,
     rewrite s1, rewrite s2 }
