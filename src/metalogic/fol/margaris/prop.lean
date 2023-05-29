@@ -285,7 +285,7 @@ begin
   case is_deduct.assume_ : h1_phi h1_1
   {
     apply is_deduct.assume_,
-    simp only [set.mem_union_eq],
+    squeeze_simp,
     left,
     exact h1_1,
   },
@@ -815,7 +815,7 @@ begin
   },
   case is_prop_deduct.assume_ : h1_phi h1_1
   {
-    simp only [set.mem_empty_eq] at h1_1,
+    squeeze_simp at h1_1,
     contradiction,
   },
   case is_prop_deduct.mp_ : h1_phi h1_psi h1_1 h1_2 h1_ih_1 h1_ih_2

@@ -1,6 +1,6 @@
 import .formula
 
-import data.finset
+import data.finset.basic
 
 
 set_option pp.parens true

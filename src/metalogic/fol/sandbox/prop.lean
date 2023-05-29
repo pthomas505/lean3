@@ -9,7 +9,7 @@ Cambridge: Cambridge University Press.
 doi:10.1017/CBO9780511576430
 -/
 
-import data.set
+import data.set.basic
 
 /-
 Formula schemes.

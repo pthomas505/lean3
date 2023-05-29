@@ -411,7 +411,7 @@ begin
       exact h1_ih,
     },
     {
-      simp only [set.mem_empty_eq, is_empty.forall_iff, forall_const],
+      squeeze_simp,
     }
   },
   case is_proof_alt.mp_ : h1_phi h1_psi h1_1 h1_2 h1_ih_1 h1_ih_2
@@ -479,7 +479,7 @@ begin
   },
   case is_deduct.assume_ : h1_phi h1_1
   {
-    simp only [set.mem_empty_eq] at h1_1,
+    squeeze_simp at h1_1,
     contradiction,
   },
   case is_deduct.mp_ : h1_phi h1_psi h1_1 h1_2 h1_ih_1 h1_ih_2
@@ -1094,7 +1094,7 @@ begin
         exact ih,
       },
       {
-        simp only [set.mem_empty_eq, is_empty.forall_iff, forall_const],
+        squeeze_simp,
       }
     },
   }
@@ -1726,13 +1726,13 @@ begin
     },
     {
       intros H a1,
-      simp only [set.mem_empty_eq] at a1,
+      squeeze_simp at a1,
       contradiction,
     }
   },
   {
     intros H a1,
-    simp only [set.mem_empty_eq] at a1,
+    squeeze_simp at a1,
     contradiction,
   }
 end
@@ -1773,19 +1773,19 @@ begin
       },
       {
         intros H a1,
-        simp only [set.mem_empty_eq] at a1,
+        squeeze_simp at a1,
         contradiction,
       },
     },
     {
       intros H a1,
-      simp only [set.mem_empty_eq] at a1,
+      squeeze_simp at a1,
       contradiction,
     },
   },
   {
     intros H a1,
-    simp only [set.mem_empty_eq] at a1,
+    squeeze_simp at a1,
     contradiction,
   },
 end
@@ -1978,7 +1978,7 @@ begin
           },
           {
             intros H a1,
-            simp only [set.mem_empty_eq] at a1,
+            squeeze_simp at a1,
             contradiction,
           },
         },
