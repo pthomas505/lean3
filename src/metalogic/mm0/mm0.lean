@@ -2518,6 +2518,8 @@ begin
     unfold formula.is_meta_var_or_all_def_in_env,
     simp only [and_self],
   },
+  case mm0.is_proof.eq_3 : h1_Γ h1_Δ h1_n h1_name h1_xs h1_ys
+  { admit },
   case is_proof.thm : h1_Γ h1_Γ' h1_Δ h1_Δ' h1_φ h1_σ h1_τ h1_1 h1_2 h1_3 h1_4 h1_ih_1 h1_ih_2
   {
     exact lem_2_a E h1_σ h1_τ h1_φ h1_ih_2 h1_1,
@@ -2785,6 +2787,8 @@ begin
       exact a2,
     }
   },
+  case mm0.is_proof.eq_3 : h1_Γ h1_Δ h1_n h1_name h1_xs h1_ys M nf hyp
+  { admit },
   case is_proof.thm : h1_Γ h1_Γ' h1_Δ h1_Δ' h1_φ h1_σ h1_τ h1_1 h1_2 h1_3 h1_4 h1_ih_1 h1_ih_2 M nf hyp
   {
     obtain ⟨σ', a1⟩ := h1_σ.2,
