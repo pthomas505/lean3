@@ -10,7 +10,7 @@ doi:10.1017/CBO9780511576430
 -/
 
 
-import data.finset data.fin.vec_notation
+import data.finset.basic data.fin.vec_notation
 
 set_option pp.parens true
 

@@ -7,7 +7,7 @@ https://www.cl.cam.ac.uk/~jrh13/papers/holhol.pdf
 -/
 
 
-import data.finset
+import data.finset.basic
 
 
 abbreviation type_name_symbols := ℕ -- ν

@@ -1,4 +1,4 @@
-import data.finset
+import data.finset.basic
 import data.fin.vec_notation
 
 
@@ -547,17 +547,12 @@ begin
     apply is_proof.pred_2,
     exact not_free_subst σ h1_φ h1_x h1_1,
   },
-  case fol.is_proof.eq_1 : h1_x h1_y h1_1
-  {
-    apply is_proof.eq_1,
-    intros contra,
-    apply h1_1,
-    exact s2 contra,
-  },
-  case fol.is_proof.eq_2 : h1_x h1_y h1_z
-  {
-    apply is_proof.eq_2,
-  },
+  case fol.is_proof.pred_3 : h1_x h1_φ h1_y h1_φ' h1_ᾰ
+  { admit },
+  case fol.is_proof.eq_1 : h1
+  { admit },
+  case fol.is_proof.eq_2 : h1_n h1_name h1_xs h1_ys
+  { admit },
 end
 
 

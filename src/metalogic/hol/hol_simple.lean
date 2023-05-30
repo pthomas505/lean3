@@ -1,4 +1,4 @@
-import data.finset
+import data.finset.basic
 
 
 @[derive decidable_eq]

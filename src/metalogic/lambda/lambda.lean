@@ -39,7 +39,7 @@ lemma simp_term_app
 x ∈ FV (term.app P Q) ↔ x ∈ FV P ∨ x ∈ FV Q :=
 begin
 unfold FV,
-simp only [set.mem_union_eq]
+squeeze_simp,
 end
 
 lemma simp_term_app_not
@@ -47,7 +47,7 @@ lemma simp_term_app_not
 x ∉ FV (term.app P Q) ↔ x ∉ FV P ∧ x ∉ FV Q :=
 begin
 unfold FV,
-simp only [set.mem_union_eq],
+squeeze_simp,
 push_neg,
 exact iff.rfl
 end

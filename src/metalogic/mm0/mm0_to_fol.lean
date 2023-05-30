@@ -1515,14 +1515,15 @@ begin
   {
     unfold mm0.exists_,
     simp only [not_to_fol_formula, forall_to_fol_formula, eq_to_fol_formula],
-    apply fol.is_proof.eq_1,
-    exact h1_1,
+    sorry,
   },
   case is_proof.eq_2 : h1_Γ h1_Δ h1_x h1_y h1_z
   {
     simp only [imp_to_fol_formula, eq_to_fol_formula],
-    apply fol.is_proof.eq_2,
+    sorry,
   },
+  case mm0.is_proof.eq_3 : h1_Γ h1_Δ h1_n h1_name h1_xs h1_ys M h2 h3
+  { admit },
   case is_proof.thm : h1_Γ h1_Γ' h1_Δ h1_Δ' h1_φ h1_σ h1_τ h1_1 h1_2 h1_3 h1_4 h1_ih_1 h1_ih_2
   {
     obtain ⟨h1_σ', a1⟩ := h1_σ.2,
